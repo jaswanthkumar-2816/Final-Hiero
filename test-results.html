@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hiero - Enhanced Analysis Results</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="screen">
+    <div class="card" style="max-width: 1000px; width: 90vw;">
+      <h2>🎯 Enhanced Analysis Results</h2>
+      <div id="result-content"></div>
+      <div style="text-align: center; margin-top: 20px;">
+        <button id="back-btn">Back to Test</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Enhanced results display
+    const resultContent = document.getElementById('result-content');
+    const backBtn = document.getElementById('back-btn');
+    const result = JSON.parse(localStorage.getItem('analysisResult') || '{}');
+    
+    if (!result || Object.keys(result).length === 0) {
+      resultContent.innerHTML = '<p>No analysis results available. Please try again.</p>';
+    } else {
+      console.log('Analysis result:', result);
+      
+      // Handle both old and new result formats
+      const domain = result.domain || 'Unknown';
+      const score = result.score || 0;
+      const presentSkills = result.presentSkills || [];
+      const missingSkills = result.missingSkills || [];
+      const suggestions = result.suggestions || result.projectSuggestions || [];
+      const jdSkills = result.jdSkills || [];
+      const resumeSkills = result.resumeSkills || [];
+      
+      // Enhanced results display
+      resultContent.innerHTML = `
+        <div class="analysis-header">
+          <div class="domain-badge ${domain.toLowerCase()}">
+            <strong>Domain:</strong> ${domain.toUpperCase()}
+          </div>
+          <div class="score-display">
+            <h2>${score}%</h2>
+            <p>Resume Match Score</p>
+          </div>
+        </div>
+        
+        <div class="skills-section">
+          <div class="skills-present">
+            <h3>✅ Present Skills (${presentSkills.length})</h3>
+            <div class="skills-list">
+              ${presentSkills.length > 0 ? 
+                presentSkills.map(skill => `<span class="skill-tag present">${skill}</span>`).join('') :
+                '<p class="no-skills">No matching skills found</p>'
+              }
+            </div>
+          </div>
+          
+          <div class="skills-missing">
+            <h3>❌ Skills to Develop (${missingSkills.length})</h3>
+            <div class="skills-list">
+              ${missingSkills.length > 0 ? 
+                missingSkills.map(skill => `<span class="skill-tag missing">${skill}</span>`).join('') :
+                '<p class="no-skills">All required skills are present!</p>'
+              }
+            </div>
+          </div>
+        </div>
+        
+        <div class="suggestions-section">
+          <h3>💡 ${domain === 'tech' ? 'Coding Projects' : 'Professional Development'} Suggestions</h3>
+          <ul class="suggestions-list">
+            ${suggestions.length > 0 ? 
+              suggestions.map(suggestion => `<li>${suggestion}</li>`).join('') :
+              '<li>Great! Your skills align well with the job requirements.</li>'
+            }
+          </ul>
+        </div>
+        
+        <div class="skills-breakdown">
+          <div class="breakdown-item">
+            <strong>Job Requirements:</strong> ${jdSkills.length} skills detected
+            <div class="skill-tags-small">
+              ${jdSkills.map(skill => `<span class="skill-tag-small jd">${skill}</span>`).join('')}
+            </div>
+          </div>
+          <div class="breakdown-item">
+            <strong>Your Skills:</strong> ${resumeSkills.length} skills detected
+            <div class="skill-tags-small">
+              ${resumeSkills.map(skill => `<span class="skill-tag-small resume">${skill}</span>`).join('')}
+            </div>
+          </div>
+        </div>
+        
+        <div class="action-buttons">
+          <button id="improve-btn" class="primary-btn">Get Learning Resources</button>
+          <button id="reanalyze-btn" class="secondary-btn">Analyze Another</button>
+        </div>
+      `;
+      
+      // Add event listeners for action buttons
+      document.getElementById('improve-btn')?.addEventListener('click', () => {
+        if (missingSkills.length > 0) {
+          alert(`Priority skills to learn: ${missingSkills.slice(0, 3).join(', ')}`);
+        } else {
+          alert('Excellent! Your skills are well-aligned with the job requirements.');
+        }
+      });
+      
+      document.getElementById('reanalyze-btn')?.addEventListener('click', () => {
+        window.location.href = 'test-upload.html';
+      });
+    }
+    
+    backBtn.addEventListener('click', () => {
+      window.location.href = 'test-upload.html';
+    });
+  </script>
+</body>
+</html>

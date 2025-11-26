@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hiero - Enhanced Domain-Aware Analysis Test</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="screen">
+    <div class="card">
+      <h2>🚀 Enhanced Analysis Test</h2>
+      <p style="color: #39ff14; text-align: center; margin-bottom: 20px;">
+        Test both IT and Non-IT resume analysis
+      </p>
+      <p id="upload-error" class="error"></p>
+      
+      <!-- Option 1: Upload files -->
+      <div style="margin-bottom: 30px;">
+        <h3>Option 1: Upload Files</h3>
+        <form id="upload-form">
+          <label for="resume-file">Resume (PDF)</label>
+          <input type="file" id="resume-file" accept=".pdf">
+          <label for="jd-file">Job Description (PDF or Text)</label>
+          <input type="file" id="jd-file" accept=".pdf,.txt">
+          <button type="submit" id="analyze-btn">Analyze Files</button>
+        </form>
+      </div>
+      
+      <!-- Option 2: Text input -->
+      <div>
+        <h3>Option 2: Text Input</h3>
+        <form id="text-form">
+          <label for="resume-text">Resume Text</label>
+          <textarea id="resume-text" rows="4" placeholder="Enter resume skills and experience..."></textarea>
+          
+          <label for="jd-text">Job Description Text</label>
+          <textarea id="jd-text" rows="4" placeholder="Enter job requirements and skills..."></textarea>
+          
+          <div style="display: flex; gap: 10px; margin-top: 15px;">
+            <button type="button" id="test-nontech-btn" style="flex: 1;">Test Non-Tech (ASM)</button>
+            <button type="button" id="test-tech-btn" style="flex: 1;">Test Tech (Dev)</button>
+            <button type="submit" id="analyze-text-btn" style="flex: 1;">Analyze Text</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const ANALYSIS_BASE = 'http://localhost:5001';
+    
+    // Pre-fill test data
+    document.getElementById('test-nontech-btn').addEventListener('click', () => {
+      document.getElementById('resume-text').value = 'Customer Service Sales Excel Tally Communication Teamwork Leadership Time Management Store Operations';
+      document.getElementById('jd-text').value = 'Assistant Store Manager responsibilities include Inventory Management, People Management, Visual Merchandising, Shift Scheduling, SOP Compliance, Customer Service, Sales Target Achievement, Store Operations.';
+    });
+    
+    document.getElementById('test-tech-btn').addEventListener('click', () => {
+      document.getElementById('resume-text').value = 'Python JavaScript React Node.js SQL Git MongoDB Express.js HTML CSS Data Analysis';
+      document.getElementById('jd-text').value = 'Software Developer position requires Python, React, Node.js, Docker, AWS, PostgreSQL, Machine Learning experience, REST API development, Database design.';
+    });
+    
+    // Handle text form submission
+    document.getElementById('text-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const resumeText = document.getElementById('resume-text').value.trim();
+      const jdText = document.getElementById('jd-text').value.trim();
+      
+      if (!resumeText || !jdText) {
+        document.getElementById('upload-error').textContent = 'Please enter both resume and job description text';
+        return;
+      }
+      
+      await analyzeWithText(resumeText, jdText);
+    });
+    
+    // Handle file form submission
+    document.getElementById('upload-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const resumeFile = document.getElementById('resume-file').files[0];
+      const jdFile = document.getElementById('jd-file').files[0];
+      
+      if (!resumeFile || !jdFile) {
+        document.getElementById('upload-error').textContent = 'Please select both files';
+        return;
+      }
+      
+      await analyzeWithFiles(resumeFile, jdFile);
+    });
+    
+    async function analyzeWithText(resumeText, jdText) {
+      const btn = document.getElementById('analyze-text-btn');
+      btn.disabled = true;
+      btn.textContent = 'Analyzing...';
+      
+      try {
+        const response = await fetch(`${ANALYSIS_BASE}/api/analyze`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ resumeText, jdText })
+        });
+        
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.error || 'Analysis failed');
+        }
+        
+        localStorage.setItem('analysisResult', JSON.stringify(data));
+        window.location.href = 'test-results.html';
+        
+      } catch (err) {
+        document.getElementById('upload-error').textContent = err.message;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Analyze Text';
+      }
+    }
+    
+    async function analyzeWithFiles(resumeFile, jdFile) {
+      const btn = document.getElementById('analyze-btn');
+      btn.disabled = true;
+      btn.textContent = 'Analyzing...';
+      
+      try {
+        const formData = new FormData();
+        formData.append('resume', resumeFile);
+        formData.append('jd', jdFile);
+        
+        const response = await fetch(`${ANALYSIS_BASE}/api/analyze`, {
+          method: 'POST',
+          body: formData
+        });
+        
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.error || 'Analysis failed');
+        }
+        
+        localStorage.setItem('analysisResult', JSON.stringify(data));
+        window.location.href = 'test-results.html';
+        
+      } catch (err) {
+        document.getElementById('upload-error').textContent = err.message;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Analyze Files';
+      }
+    }
+  </script>
+</body>
+</html>

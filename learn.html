@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learning Hub - Hiero</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Poppins', sans-serif; background: #0a0a0a; color: #fff; line-height: 1.6; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .title { color: #0dff00; font-size: 2.5rem; margin-bottom: 10px; }
+        .subtitle { color: #666; font-size: 1.1rem; }
+        
+        .section { margin-bottom: 40px; }
+        .section-title { color: #0dff00; font-size: 1.8rem; margin-bottom: 20px; border-bottom: 2px solid #0dff00; padding-bottom: 10px; }
+        
+        .language-tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .language-tab { background: #1a1a1a; border: 2px solid #333; padding: 10px 20px; border-radius: 25px; cursor: pointer; transition: all 0.3s; }
+        .language-tab.active { background: #0dff00; color: #000; border-color: #0dff00; }
+        .language-tab:hover { border-color: #0dff00; }
+        
+        .video-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .video-card { background: #1a1a1a; border-radius: 10px; padding: 20px; border: 1px solid #333; transition: all 0.3s; }
+        .video-card:hover { border-color: #0dff00; transform: translateY(-5px); }
+        .video-title { color: #0dff00; font-size: 1.1rem; margin-bottom: 10px; }
+        .video-channel { color: #666; font-size: 0.9rem; margin-bottom: 5px; }
+        .video-views { color: #888; font-size: 0.8rem; margin-bottom: 15px; }
+        .video-link { background: #0dff00; color: #000; padding: 10px 20px; border-radius: 5px; text-decoration: none; font-weight: 600; display: inline-block; }
+        
+        .problems-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; }
+        .problem-card { background: #1a1a1a; border-radius: 10px; padding: 20px; border: 1px solid #333; }
+        .problem-title { color: #0dff00; font-size: 1.2rem; margin-bottom: 10px; }
+        .problem-difficulty { background: #333; color: #0dff00; padding: 5px 10px; border-radius: 15px; font-size: 0.8rem; display: inline-block; margin-bottom: 10px; }
+        .problem-link { background: #0dff00; color: #000; padding: 8px 16px; border-radius: 5px; text-decoration: none; font-weight: 600; }
+        
+        .chat-section { position: fixed; bottom: 20px; right: 20px; width: 300px; }
+        .chat-toggle { background: #0dff00; color: #000; padding: 15px; border-radius: 50%; cursor: pointer; text-align: center; font-weight: 600; margin-bottom: 10px; }
+        .chat-box { background: #1a1a1a; border-radius: 10px; border: 1px solid #333; display: none; height: 400px; flex-direction: column; }
+        .chat-box.active { display: flex; }
+        .chat-header { background: #0dff00; color: #000; padding: 15px; border-radius: 10px 10px 0 0; font-weight: 600; }
+        .chat-messages { flex: 1; padding: 15px; overflow-y: auto; }
+        .chat-input-area { padding: 15px; border-top: 1px solid #333; }
+        .chat-input { width: 100%; background: #000; border: 1px solid #333; color: #fff; padding: 10px; border-radius: 5px; }
+        .chat-send { background: #0dff00; color: #000; border: none; padding: 10px 15px; border-radius: 5px; margin-left: 10px; cursor: pointer; }
+        
+        .message { margin-bottom: 15px; }
+        .message.user { text-align: right; }
+        .message.bot { text-align: left; }
+        .message-content { background: #333; padding: 10px; border-radius: 10px; display: inline-block; max-width: 80%; }
+        .message.user .message-content { background: #0dff00; color: #000; }
+        
+        .loading { text-align: center; color: #666; margin: 20px 0; }
+        .skill-header { color: #0dff00; font-size: 1.5rem; margin: 30px 0 20px 0; }
+        
+        @media (max-width: 768px) {
+            .chat-section { position: relative; width: 100%; bottom: auto; right: auto; }
+            .container { padding: 10px; }
+            .title { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">Learning Hub</h1>
+            <p class="subtitle">Master your missing skills with curated content</p>
+        </div>
+        
+        <div id="loading" class="loading">Loading your personalized learning content...</div>
+        
+        <div id="content" style="display: none;">
+            <div class="section" id="videos-section">
+                <h2 class="section-title">📺 Learning Videos</h2>
+                <div id="videos-content"></div>
+            </div>
+            
+            <div class="section" id="problems-section">
+                <h2 class="section-title">💻 Practice Problems</h2>
+                <div id="problems-content"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="chat-section">
+        <div class="chat-toggle" onclick="toggleChat()">💬</div>
+        <div class="chat-box" id="chatBox">
+            <div class="chat-header">AI Learning Assistant</div>
+            <div class="chat-messages" id="chatMessages">
+                <div class="message bot">
+                    <div class="message-content">Hi! I'm here to help you with your learning journey. Ask me anything about the skills you need to improve!</div>
+                </div>
+            </div>
+            <div class="chat-input-area">
+                <input type="text" class="chat-input" id="chatInput" placeholder="Ask me anything..." onkeypress="handleChatKeyPress(event)">
+                <button class="chat-send" onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let sessionData = null;
+        let currentLanguage = 'en';
+        const API_BASE = 'http://localhost:5001';
+        
+        // Get session ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const sessionId = urlParams.get('session');
+        
+        async function loadLearningContent() {
+            if (!sessionId) {
+                document.getElementById('loading').innerHTML = 'No session found. Please go back to analysis page.';
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/learn/${sessionId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    sessionData = data.session;
+                    renderContent();
+                } else {
+                    throw new Error('Session not found');
+                }
+            } catch (error) {
+                document.getElementById('loading').innerHTML = 'Failed to load learning content. Please try again.';
+                console.error('Error loading session:', error);
+            }
+        }
+        
+        function renderContent() {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('content').style.display = 'block';
+            
+            renderVideos();
+            renderProblems();
+        }
+        
+        function renderVideos() {
+            const videosContent = document.getElementById('videos-content');
+            const videosBySkill = sessionData.videosBySkill;
+            
+            let html = '';
+            
+            for (const [skill, languages] of Object.entries(videosBySkill)) {
+                html += `<div class="skill-header">🎯 ${skill}</div>`;
+                
+                // Language tabs
+                html += `<div class="language-tabs">`;
+                Object.keys(languages).forEach(lang => {
+                    const langNames = { en: 'English', hi: 'Hindi', te: 'Telugu', kn: 'Kannada', ta: 'Tamil' };
+                    html += `<div class="language-tab ${lang === currentLanguage ? 'active' : ''}" onclick="switchLanguage('${lang}', '${skill}')">${langNames[lang]}</div>`;
+                });
+                html += `</div>`;
+                
+                // Videos
+                html += `<div class="video-grid" id="videos-${skill}-${currentLanguage}">`;
+                if (languages[currentLanguage]) {
+                    languages[currentLanguage].forEach(video => {
+                        html += `
+                            <div class="video-card">
+                                <div class="video-title">${video.title}</div>
+                                <div class="video-channel">📺 ${video.channel}</div>
+                                <div class="video-views">👁 ${formatViews(video.views)} views</div>
+                                <a href="${video.url}" target="_blank" class="video-link">Watch Video</a>
+                            </div>
+                        `;
+                    });
+                }
+                html += `</div>`;
+            }
+            
+            videosContent.innerHTML = html;
+        }
+        
+        function renderProblems() {
+            const problemsContent = document.getElementById('problems-content');
+            const problemsBySkill = sessionData.problemsBySkill;
+            
+            let html = '';
+            
+            for (const [skill, problems] of Object.entries(problemsBySkill)) {
+                html += `<div class="skill-header">🧩 ${skill} Practice</div>`;
+                html += `<div class="problems-grid">`;
+                
+                if (problems.easy) {
+                    problems.easy.forEach(problem => {
+                        html += `
+                            <div class="problem-card">
+                                <div class="problem-title">${problem.title}</div>
+                                <div class="problem-difficulty">Easy</div>
+                                <p>Platform: ${problem.platform}</p>
+                                <a href="${problem.url}" target="_blank" class="problem-link">Solve Problem</a>
+                            </div>
+                        `;
+                    });
+                }
+                
+                if (problems.medium) {
+                    problems.medium.forEach(problem => {
+                        html += `
+                            <div class="problem-card">
+                                <div class="problem-title">${problem.title}</div>
+                                <div class="problem-difficulty">Medium</div>
+                                <p>Platform: ${problem.platform}</p>
+                                <a href="${problem.url}" target="_blank" class="problem-link">Solve Problem</a>
+                            </div>
+                        `;
+                    });
+                }
+                
+                if (problems.scenarios) {
+                    problems.scenarios.forEach(scenario => {
+                        html += `
+                            <div class="problem-card">
+                                <div class="problem-title">${scenario.title}</div>
+                                <div class="problem-difficulty">Scenario</div>
+                                <p>${scenario.description}</p>
+                            </div>
+                        `;
+                    });
+                }
+                
+                html += `</div>`;
+            }
+            
+            problemsContent.innerHTML = html;
+        }
+        
+        function switchLanguage(lang, skill) {
+            currentLanguage = lang;
+            renderVideos();
+        }
+        
+        function formatViews(views) {
+            if (views >= 1000000) return (views / 1000000).toFixed(1) + 'M';
+            if (views >= 1000) return (views / 1000).toFixed(1) + 'K';
+            return views.toString();
+        }
+        
+        function toggleChat() {
+            const chatBox = document.getElementById('chatBox');
+            chatBox.classList.toggle('active');
+        }
+        
+        function handleChatKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+        
+        async function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (!message) return;
+            
+            input.value = '';
+            addMessage(message, 'user');
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/chat`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sessionId, message })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    addMessage(data.answer, 'bot');
+                } else {
+                    addMessage('Sorry, I had trouble processing your request.', 'bot');
+                }
+            } catch (error) {
+                addMessage('Sorry, I\'m having connection issues. Please try again.', 'bot');
+            }
+        }
+        
+        function addMessage(content, type) {
+            const messagesDiv = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            messageDiv.innerHTML = `<div class="message-content">${content}</div>`;
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+        
+        // Load content when page loads
+        window.addEventListener('load', loadLearningContent);
+    </script>
+</body>
+</html>
