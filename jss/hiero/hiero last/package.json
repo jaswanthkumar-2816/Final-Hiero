@@ -1,8 +1,9 @@
 {
   "name": "hiero-last",
   "version": "1.0.0",
-  "main": "script.js",
+  "main": "gateway.js",
   "scripts": {
+    "start": "node gateway.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -10,6 +11,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "compression": "^1.8.1",
     "express": "^4.21.2",
     "http-proxy-middleware": "^3.0.5"
   }
