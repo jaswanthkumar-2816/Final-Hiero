@@ -27,6 +27,7 @@ const PROXY_DEBUG = /^(1|true)$/i.test(process.env.PROXY_DEBUG || '');
 
 // Backend service base URLs (Render uses env, local uses localhost)
 const AUTH_BASE = process.env.AUTH_BASE || 'http://localhost:3000';
+const DASHBOARD_BASE = process.env.DASHBOARD_BASE || 'http://localhost:8082';
 
 // Common proxy that rewrites redirect Location headers to the public base URL
 function gwProxy(opts) {
@@ -158,7 +159,7 @@ app.all('/auth/verify-email', gwProxy({ target: AUTH_BASE, changeOrigin: true })
 // Support shortened callback paths (if backend initiated with '/callback' or '/github/callback')
 // Frontend callback → proxy to dashboard (avoid 404 if a client lands on /callback)
 app.use('/callback', createProxyMiddleware({
-  target: 'http://localhost:8082',
+  target: DASHBOARD_BASE,
   changeOrigin: true,
   logLevel: 'warn'
 }));
@@ -170,7 +171,7 @@ app.use('/github/callback', gwProxy({ target: AUTH_BASE, pathRewrite: { '^/githu
 
 // DASHBOARD UI (port 8082) → /
 app.use('/dashboard', createProxyMiddleware({
-  target: 'http://localhost:8082',
+  target: DASHBOARD_BASE,
   changeOrigin: true,
   pathRewrite: { '^/dashboard': '' },
   logLevel: 'warn'
