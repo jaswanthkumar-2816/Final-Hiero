@@ -24,28 +24,9 @@ app.use((req, res, next) => {
 const PUBLIC_BASE_URL = process.env.PUBLIC_BASE_URL;
 const PROXY_LOG_LEVEL = process.env.PROXY_LOG_LEVEL || 'warn';
 const PROXY_DEBUG = /^(1|true)$/i.test(process.env.PROXY_DEBUG || '');
-function computeBaseUrl(req) {
-  if (PUBLIC_BASE_URL) return PUBLIC_BASE_URL;
 
-  // Try RFC 7239 Forwarded header: e.g., "for=...;proto=https;host=example.com"
-  const fwd = req.headers['forwarded'];
-  if (fwd && typeof fwd === 'string') {
-    try {
-      const parts = fwd.split(';').map(s => s.trim());
-      const kv = Object.fromEntries(parts.map(p => {
-        const i = p.indexOf('=');
-        return i > -1 ? [p.slice(0, i).toLowerCase(), p.slice(i + 1).replace(/^"|"$/g, '')] : [p.toLowerCase(), true];
-      }));
-      const proto = kv.proto || kv.scheme || req.protocol || 'http';
-      const host = kv.host || req.get('host');
-      if (host) return `${proto}://${host}`;
-    } catch {}
-  }
-
-  const proto = (req.headers['x-forwarded-proto'] || req.headers['x-original-proto'] || req.protocol || 'http');
-  const host = (req.headers['x-forwarded-host'] || req.headers['x-original-host'] || req.headers['x-forwarded-server'] || req.get('host'));
-  return `${proto}://${host}`;
-}
+// Backend service base URLs (Render uses env, local uses localhost)
+const AUTH_BASE = process.env.AUTH_BASE || 'http://localhost:3000';
 
 // Common proxy that rewrites redirect Location headers to the public base URL
 function gwProxy(opts) {
@@ -157,22 +138,22 @@ const authApiRoutes = [
   '/me', '/generate-resume', '/download-resume', '/preview-resume'
 ];
 authApiRoutes.forEach(route => {
-  app.all(route, gwProxy({ target: 'http://localhost:3000', ws: true }));
+  app.all(route, gwProxy({ target: AUTH_BASE, ws: true }));
 });
 
 // Google OAuth endpoints → preserve /auth prefix (no pathRewrite)
-app.all('/auth/google', gwProxy({ target: 'http://localhost:3000' }));
-app.all('/auth/google/callback', gwProxy({ target: 'http://localhost:3000' }));
+app.all('/auth/google', gwProxy({ target: AUTH_BASE }));
+app.all('/auth/google/callback', gwProxy({ target: AUTH_BASE }));
 
 // GitHub OAuth endpoints → preserve /auth prefix (no pathRewrite)
-app.all('/auth/github', gwProxy({ target: 'http://localhost:3000' }));
-app.all('/auth/github/callback', gwProxy({ target: 'http://localhost:3000' }));
+app.all('/auth/github', gwProxy({ target: AUTH_BASE }));
+app.all('/auth/github/callback', gwProxy({ target: AUTH_BASE }));
 
 // General Auth endpoints → login/signup/verify etc.
-app.all('/auth/login', gwProxy({ target: 'http://localhost:3000', changeOrigin: true }));
-app.all('/auth/signup', gwProxy({ target: 'http://localhost:3000', changeOrigin: true }));
-app.all('/auth/verify', gwProxy({ target: 'http://localhost:3000', changeOrigin: true }));
-app.all('/auth/verify-email', gwProxy({ target: 'http://localhost:3000', changeOrigin: true }));
+app.all('/auth/login', gwProxy({ target: AUTH_BASE, changeOrigin: true }));
+app.all('/auth/signup', gwProxy({ target: AUTH_BASE, changeOrigin: true }));
+app.all('/auth/verify', gwProxy({ target: AUTH_BASE, changeOrigin: true }));
+app.all('/auth/verify-email', gwProxy({ target: AUTH_BASE, changeOrigin: true }));
 
 // Support shortened callback paths (if backend initiated with '/callback' or '/github/callback')
 // Frontend callback → proxy to dashboard (avoid 404 if a client lands on /callback)
@@ -181,8 +162,8 @@ app.use('/callback', createProxyMiddleware({
   changeOrigin: true,
   logLevel: 'warn'
 }));
-app.use('/auth/callback', gwProxy({ target: 'http://localhost:3000', pathRewrite: { '^/auth/callback$': '/auth/google/callback' } }));
-app.use('/github/callback', gwProxy({ target: 'http://localhost:3000', pathRewrite: { '^/github/callback$': '/auth/github/callback' } }));
+app.use('/auth/callback', gwProxy({ target: AUTH_BASE, pathRewrite: { '^/auth/callback$': '/auth/google/callback' } }));
+app.use('/github/callback', gwProxy({ target: AUTH_BASE, pathRewrite: { '^/github/callback$': '/auth/github/callback' } }));
 
 // REMOVED: Catch-all /auth proxy was interfering with OAuth routes
 // Static auth pages will be served from landing directory instead
