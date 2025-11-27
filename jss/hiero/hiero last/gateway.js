@@ -142,8 +142,8 @@ function gwProxy(opts) {
 // ------------------------------------------------------------------
 // 1. PATHS
 // ------------------------------------------------------------------
-// Use the absolute directory containing started.html as the landing root
-const landingDir = "/Users/jaswanthkumar/Desktop/shared folder/hiero last prtotype/jss/hiero/hiero last";
+// Use the directory containing gateway.js (and started.html) as the landing root
+const landingDir = __dirname;
 const STARTED_HTML = path.join(landingDir, 'started.html');
 const dashboardDir = path.join(__dirname, 'dashboard-build'); // <- Put your 8082 build here
 
