@@ -616,6 +616,28 @@
             </button>
           </div>
         </div>
+
+        <!-- Priya Analytics Single-Column Template (matches Priya Sharma PDF) -->
+        <div class="template-card" data-category="analytics" data-template="priya-analytics" data-type="free">
+          <div class="template-preview" onclick="previewTemplate('priya-analytics')">
+            <i class="fas fa-chart-line"></i>
+            <div class="preview-overlay">
+              <button class="preview-btn">Preview Template</button>
+            </div>
+          </div>
+          <div class="template-info">
+            <h3>Priya Analytics Template</h3>
+            <p>Single-column layout with a grey top bar and bold section headings. Ideal for data-driven professionals.</p>
+            <div class="template-tags">
+              <span class="tag">Analytics</span>
+              <span class="tag">Single Column</span>
+              <span class="tag">Data Science</span>
+            </div>
+            <button class="start-building-btn" onclick="startBuilding('priya-analytics')">
+              <i class="fas fa-arrow-right"></i> Start Building
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -1304,6 +1326,11 @@
           name: 'Priya Elegant',
           description: 'Classic serif design with elegant typography and traditional layout',
           style: 'Georgia serif fonts, centered header, elegant spacing, academic style'
+        },
+        'priya-analytics': {
+          name: 'Priya Analytics',
+          description: 'Single-column layout with a grey top bar and bold section headings. Ideal for data-driven professionals.',
+          style: 'Single-column, grey top bar, bold section headings with horizontal rules, matching the Priya Sharma data analyst resume style'
         }
       };
 
@@ -1663,7 +1690,8 @@
         'elegant-gradient': 'Elegant Gradient',
         'minimalist-mono': 'Minimalist Mono',
         'rishi': 'Rishi Tech Modern',
-        'priya': 'Priya Elegant'
+        'priya': 'Priya Elegant',
+        'priya-analytics': 'Priya Analytics (Single Column)'
       };
       return names[templateId] || 'Selected';
     }
@@ -2799,7 +2827,6 @@
         
         const blob = await response.blob();
         console.log('✅ PDF blob received, size:', blob.size, 'bytes');
-        console.log('✅ Blob type:', blob.type);
         
         // Verify blob is actually PDF
         if (blob.size === 0) {
