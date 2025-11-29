@@ -595,23 +595,23 @@
           </div>
         </div>
 
-        <!-- Priya Template -->
-        <div class="template-card" data-category="elegant" data-template="priya" data-type="free">
-          <div class="template-preview" onclick="previewTemplate('priya')">
-            <i class="fas fa-file-alt"></i>
+        <!-- Priya Analytics Single-Column Template (matches Priya Sharma PDF) -->
+        <div class="template-card" data-category="analytics" data-template="priya-analytics" data-type="free">
+          <div class="template-preview" onclick="previewTemplate('priya-analytics')">
+            <i class="fas fa-chart-line"></i>
             <div class="preview-overlay">
               <button class="preview-btn">Preview Template</button>
             </div>
           </div>
           <div class="template-info">
-            <h3>Priya Elegant Template</h3>
-            <p>Classic serif design with elegant typography and traditional layout. Perfect for academic, research, and professional roles.</p>
+            <h3>Priya Analytics Template</h3>
+            <p>Single-column layout with a grey top bar and bold section headings. Ideal for data-driven professionals.</p>
             <div class="template-tags">
-              <span class="tag">Elegant</span>
-              <span class="tag">Classic</span>
-              <span class="tag">Academic</span>
+              <span class="tag">Analytics</span>
+              <span class="tag">Single Column</span>
+              <span class="tag">Data Science</span>
             </div>
-            <button class="start-building-btn" onclick="startBuilding('priya')">
+            <button class="start-building-btn" onclick="startBuilding('priya-analytics')">
               <i class="fas fa-arrow-right"></i> Start Building
             </button>
           </div>
@@ -1162,8 +1162,8 @@
             }
           }
         }
-      } // <-- Added missing closing brace for handleGesture
-
+      }
+      
       // Prevent mouse-based back navigation (two-finger swipe on trackpad)
       let gestureStarted = false;
       
@@ -1304,6 +1304,11 @@
           name: 'Priya Elegant',
           description: 'Classic serif design with elegant typography and traditional layout',
           style: 'Georgia serif fonts, centered header, elegant spacing, academic style'
+        },
+        'priya-analytics': {
+          name: 'Priya Analytics',
+          description: 'Single-column layout with a grey top bar and bold section headings. Ideal for data-driven professionals.',
+          style: 'Single-column, grey top bar, bold section headings with horizontal rules, matching the Priya Sharma data analyst resume style'
         }
       };
 
@@ -1663,7 +1668,8 @@
         'elegant-gradient': 'Elegant Gradient',
         'minimalist-mono': 'Minimalist Mono',
         'rishi': 'Rishi Tech Modern',
-        'priya': 'Priya Elegant'
+        'priya': 'Priya Elegant',
+        'priya-analytics': 'Priya Analytics (Single Column)'
       };
       return names[templateId] || 'Selected';
     }
@@ -1769,13 +1775,22 @@
           if (result.success && result.data) {
             statusDiv.innerHTML = '<i class="fas fa-check-circle"></i> Resume imported successfully!';
             
-            // Auto-fill form with extracted data
-            fillFormWithImportedData(result.data);
+            // Store the imported data temporarily
+            localStorage.setItem('importedResumeData', JSON.stringify(result.data));
             
             // Close modal and show form after a short delay
             setTimeout(() => {
               closeImportModal();
               proceedToForm();
+              
+              // Fill form after a short delay to ensure form fields are created
+              setTimeout(() => {
+                const importedData = JSON.parse(localStorage.getItem('importedResumeData'));
+                if (importedData) {
+                  fillFormWithImportedData(importedData);
+                  localStorage.removeItem('importedResumeData');
+                }
+              }, 500);
             }, 1000);
           } else {
             throw new Error('Invalid response from server');
@@ -1784,7 +1799,43 @@
           console.error('Import error:', error);
           statusDiv.style.background = 'rgba(239,68,68,0.1)';
           statusDiv.style.color = '#ef4444';
-          statusDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${error.message}`;
+          
+          // Show detailed error message with helpful tips
+          let errorMessage = error.message;
+          
+          // Check if it's a text extraction error
+          if (errorMessage.includes('Unable to extract text') || errorMessage.includes('Could not extract text')) {
+            statusDiv.innerHTML = `
+              <div style="text-align: left;">
+                <div style="margin-bottom: 10px;">
+                  <i class="fas fa-exclamation-circle"></i> <strong>Cannot read this resume file</strong>
+                </div>
+                <div style="font-size: 13px; line-height: 1.5; margin-bottom: 15px;">
+                  This resume may be:
+                  <ul style="margin: 5px 0 0 20px; padding: 0;">
+                    <li>A scanned image PDF (no selectable text)</li>
+                    <li>Password-protected or corrupted</li>
+                    <li>In an unsupported format</li>
+                  </ul>
+                </div>
+                <button onclick="proceedToFormWithoutImport()" style="
+                  background: linear-gradient(135deg, #2ae023 0%, #1a8b17 100%);
+                  color: white;
+                  border: none;
+                  padding: 10px 20px;
+                  border-radius: 8px;
+                  cursor: pointer;
+                  font-weight: 600;
+                  width: 100%;
+                  font-size: 14px;
+                ">
+                  <i class="fas fa-edit"></i> Fill Form Manually Instead
+                </button>
+              </div>
+            `;
+          } else {
+            statusDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${errorMessage}`;
+          }
         }
       });
     }
@@ -1903,96 +1954,143 @@
     function fillFormWithImportedData(data) {
       console.log('📝 Auto-filling form with imported data:', data);
       
-      // Personal Info
-      if (data.personalInfo) {
-        const pi = data.personalInfo;
-        if (pi.fullName) document.getElementById('fullName').value = pi.fullName;
-        if (pi.email) document.getElementById('email').value = pi.email;
-        if (pi.phone) document.getElementById('phone').value = pi.phone;
-        if (pi.address) document.getElementById('address').value = pi.address;
-        if (pi.linkedin) document.getElementById('linkedin').value = pi.linkedin;
-        if (pi.github) document.getElementById('github').value = pi.github;
-      }
-      
-      // Skills (convert array to comma-separated string)
-      if (data.skills && Array.isArray(data.skills)) {
-        document.getElementById('skills').value = data.skills.join(', ');
-      }
-      
-      // Experience
-      if (data.experience && Array.isArray(data.experience)) {
-        data.experience.forEach((exp, index) => {
-          if (index > 0) addMoreExperience();
-          const container = document.querySelectorAll('.experience-item')[index];
-          if (container) {
-            if (exp.jobTitle) container.querySelector('[placeholder*="Job Title"]').value = exp.jobTitle;
-            if (exp.company) container.querySelector('[placeholder*="Company"]').value = exp.company;
-            if (exp.location) container.querySelector('[placeholder*="Location"]').value = exp.location;
-            if (exp.startDate) container.querySelector('[placeholder*="Start Date"]').value = exp.startDate;
-            if (exp.endDate) container.querySelector('[placeholder*="End Date"]').value = exp.endDate;
-            if (exp.description) container.querySelector('textarea').value = exp.description;
+      try {
+        // Personal Info
+        if (data.personalInfo) {
+          const pi = data.personalInfo;
+          const setFieldValue = (id, value) => {
+            const field = document.getElementById(id);
+            if (field && value) field.value = value;
+          };
+          
+          setFieldValue('fullName', pi.fullName);
+          setFieldValue('email', pi.email);
+          setFieldValue('phone', pi.phone);
+          setFieldValue('address', pi.address);
+          setFieldValue('linkedin', pi.linkedin);
+          setFieldValue('github', pi.github);
+        }
+        
+        // Skills (convert array to comma-separated string)
+        if (data.skills && Array.isArray(data.skills) && data.skills.length > 0) {
+          const skillsField = document.getElementById('skills') || document.getElementById('technicalSkills');
+          if (skillsField) {
+            skillsField.value = data.skills.join(', ');
           }
-        });
-      }
-      
-      // Education
-      if (data.education && Array.isArray(data.education)) {
-        data.education.forEach((edu, index) => {
-          if (index > 0) addMoreEducation();
-          const container = document.querySelectorAll('.education-item')[index];
-          if (container) {
-            if (edu.degree) container.querySelector('[placeholder*="Degree"]').value = edu.degree;
-            if (edu.institution) container.querySelector('[placeholder*="Institution"]').value = edu.institution;
-            if (edu.location) container.querySelector('[placeholder*="Location"]').value = edu.location;
-            if (edu.startDate) container.querySelector('[placeholder*="Start Year"]').value = edu.startDate;
-            if (edu.endDate) container.querySelector('[placeholder*="End Year"]').value = edu.endDate;
-            if (edu.grade) container.querySelector('[placeholder*="Grade"]').value = edu.grade;
-          }
-        });
-      }
-      
-      // Projects
-      if (data.projects && Array.isArray(data.projects)) {
-        data.projects.forEach((proj, index) => {
-          if (index > 0) addMoreProject();
-          const container = document.querySelectorAll('.project-item')[index];
-          if (container) {
-            if (proj.title) container.querySelector('[placeholder*="Project Title"]').value = proj.title;
-            if (proj.description) container.querySelector('textarea').value = proj.description;
-            if (proj.technologies && Array.isArray(proj.technologies)) {
-              container.querySelector('[placeholder*="Technologies"]').value = proj.technologies.join(', ');
+        }
+        
+        // Experience
+        if (data.experience && Array.isArray(data.experience)) {
+          data.experience.forEach((exp, index) => {
+            if (index > 0) addExperience();
+            const containers = document.querySelectorAll('.experience-item');
+            const container = containers[index];
+            if (container) {
+              const jobTitleField = container.querySelector('input[name="jobTitle[]"]');
+              const companyField = container.querySelector('input[name="company[]"]');
+              const locationField = container.querySelector('input[name="jobLocation[]"]');
+              const startDateField = container.querySelector('input[name="jobStartDate[]"]');
+              const endDateField = container.querySelector('input[name="jobEndDate[]"]');
+              const descriptionField = container.querySelector('textarea[name="jobDescription[]"]');
+              
+              if (jobTitleField && exp.jobTitle) jobTitleField.value = exp.jobTitle;
+              if (companyField && exp.company) companyField.value = exp.company;
+              if (locationField && exp.location) locationField.value = exp.location;
+              if (startDateField && exp.startDate) startDateField.value = exp.startDate;
+              if (endDateField && exp.endDate) endDateField.value = exp.endDate;
+              if (descriptionField && exp.description) descriptionField.value = exp.description;
             }
+          });
+        }
+        
+        // Education
+        if (data.education && Array.isArray(data.education)) {
+          data.education.forEach((edu, index) => {
+            if (index > 0) addEducation();
+            const containers = document.querySelectorAll('.education-item');
+            const container = containers[index];
+            if (container) {
+              const degreeField = container.querySelector('input[name="degree[]"]');
+              const institutionField = container.querySelector('input[name="institution[]"]');
+              const locationField = container.querySelector('input[name="eduLocation[]"]');
+              const startDateField = container.querySelector('input[name="eduStartDate[]"]');
+              const endDateField = container.querySelector('input[name="eduEndDate[]"]');
+              const gradeField = container.querySelector('input[name="grade[]"]');
+              
+              if (degreeField && edu.degree) degreeField.value = edu.degree;
+              if (institutionField && edu.institution) institutionField.value = edu.institution;
+              if (locationField && edu.location) locationField.value = edu.location;
+              if (startDateField && edu.startDate) startDateField.value = edu.startDate;
+              if (endDateField && edu.endDate) endDateField.value = edu.endDate;
+              if (gradeField && edu.grade) gradeField.value = edu.grade;
+            }
+          });
+        }
+        
+        // Projects
+        if (data.projects && Array.isArray(data.projects)) {
+          // First, un-skip projects section if it's skipped
+          const projectsSection = document.getElementById('section-projects');
+          if (projectsSection && projectsSection.classList.contains('skipped')) {
+            toggleSection('projects');
           }
-        });
+          
+          setTimeout(() => {
+            data.projects.forEach((proj, index) => {
+              if (index > 0) addProject();
+              const containers = document.querySelectorAll('.project-item');
+              const container = containers[index];
+              if (container) {
+                const titleField = container.querySelector('input[name="projectName[]"]');
+                const descriptionField = container.querySelector('textarea[name="projectDescription[]"]');
+                const techField = container.querySelector('input[name="projectTechnologies[]"]');
+                
+                if (titleField && proj.title) titleField.value = proj.title;
+                if (descriptionField && proj.description) descriptionField.value = proj.description;
+                if (techField && proj.technologies && Array.isArray(proj.technologies)) {
+                  techField.value = proj.technologies.join(', ');
+                }
+              }
+            });
+          }, 200);
+        }
+        
+        // Certifications (convert array of objects to textarea)
+        if (data.certifications && Array.isArray(data.certifications) && data.certifications.length > 0) {
+          const certText = data.certifications.map(cert => {
+            let line = cert.title || '';
+            if (cert.issuer) line += ` - ${cert.issuer}`;
+            if (cert.date) line += ` (${cert.date})`;
+            return line;
+          }).join('\n');
+          const certField = document.getElementById('certifications');
+          if (certField) certField.value = certText;
+        }
+        
+        // Languages
+        if (data.languages && Array.isArray(data.languages) && data.languages.length > 0) {
+          const langField = document.getElementById('languages');
+          if (langField) langField.value = data.languages.join(', ');
+        }
+        
+        // Achievements
+        if (data.achievements && Array.isArray(data.achievements) && data.achievements.length > 0) {
+          const achievField = document.getElementById('achievements');
+          if (achievField) achievField.value = data.achievements.join('\n');
+        }
+        
+        // Hobbies
+        if (data.hobbies && Array.isArray(data.hobbies) && data.hobbies.length > 0) {
+          const hobbiesField = document.getElementById('hobbies');
+          if (hobbiesField) hobbiesField.value = data.hobbies.join(', ');
+        }
+        
+        console.log('✅ Form auto-filled successfully');
+        
+      } catch (error) {
+        console.error('❌ Error filling form with imported data:', error);
+        alert('Resume imported but some fields could not be auto-filled. Please review and complete the form manually.');
       }
-      
-      // Certifications (convert array of objects to textarea)
-      if (data.certifications && Array.isArray(data.certifications)) {
-        const certText = data.certifications.map(cert => {
-          let line = cert.title || '';
-          if (cert.issuer) line += ` - ${cert.issuer}`;
-          if (cert.date) line += ` (${cert.date})`;
-          return line;
-        }).join('\n');
-        document.getElementById('certifications').value = certText;
-      }
-      
-      // Languages
-      if (data.languages && Array.isArray(data.languages)) {
-        document.getElementById('languages').value = data.languages.join(', ');
-      }
-      
-      // Achievements
-      if (data.achievements && Array.isArray(data.achievements)) {
-        document.getElementById('achievements').value = data.achievements.join('\n');
-      }
-      
-      // Hobbies
-      if (data.hobbies && Array.isArray(data.hobbies)) {
-        document.getElementById('hobbies').value = data.hobbies.join(', ');
-      }
-      
-      console.log('✅ Form auto-filled successfully');
     }
 
     // Add back button to return to template selection
@@ -2694,7 +2792,7 @@
           console.error('Server error:', errorText);
           throw new Error('Server error: ' + response.statusText);
         }
-        
+
         // Check if response is actually PDF
         const contentType = response.headers.get('content-type');
         console.log('📄 Response Content-Type:', contentType);
@@ -2707,7 +2805,6 @@
         
         const blob = await response.blob();
         console.log('✅ PDF blob received, size:', blob.size, 'bytes');
-        console.log('✅ Blob type:', blob.type);
         
         // Verify blob is actually PDF
         if (blob.size === 0) {
@@ -3031,6 +3128,7 @@
         const url = window.URL.createObjectURL(blob);
         window.open(url, '_blank');
         
+        // Clean up after a delay
         setTimeout(() => window.URL.revokeObjectURL(url), 1000);
 
       } catch (error) {
