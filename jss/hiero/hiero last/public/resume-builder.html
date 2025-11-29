@@ -1214,7 +1214,7 @@
       });
     });
 
-    // Template preview functionality with fallback static preview
+    // Template preview functionality with backend-powered preview
     async function previewTemplate(templateId) {
       // Template metadata
       const templateDetails = {
@@ -1335,11 +1335,12 @@
 
       // Try to fetch preview from backend, with fallback to static preview
       let previewLoaded = false;
-      
+      const previewContainer = modal.querySelector('#preview-content');
+
       try {
-        console.log('🔍 Fetching preview for template:', templateId);
-        
-        // Sample data tailored for different templates
+        console.log('🔍 Fetching preview for template via backend:', templateId, '→', BACKEND_URL + '/preview-resume');
+
+        // Build sample data for backend preview
         let sampleData = {
           template: templateId,
           personalInfo: {
@@ -1415,8 +1416,356 @@
           };
         }
 
-        // Create a structured data object for the backend
-        sampleData = {
+        const response = await fetch(`${BACKEND_URL}/preview-resume`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(sampleData)
+        });
+
+        if (!response.ok) {
+          const errText = await response.text().catch(() => '');
+          console.warn('⚠️ Backend preview failed:', response.status, errText.slice(0, 200));
+          throw new Error('Backend preview failed');
+        }
+
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+
+        // Clear loading
+        previewContainer.innerHTML = '';
+
+        // Try to embed PDF in an <iframe>
+        const iframe = document.createElement('iframe');
+        iframe.src = url;
+        iframe.style.width = '100%';
+        iframe.style.height = '600px';
+        iframe.style.border = 'none';
+        previewContainer.appendChild(iframe);
+
+        previewLoaded = true;
+
+        // Revoke URL when modal is closed
+        modal.addEventListener('click', e => {
+          if (e.target === modal) {
+            URL.revokeObjectURL(url);
+          }
+        });
+
+      } catch (error) {
+        console.error('❌ Error fetching backend preview, falling back to static preview:', error);
+
+        // Fallback static preview: simple template info & sample layout text
+        if (!previewLoaded && previewContainer) {
+          previewContainer.innerHTML = `
+            <div style="max-width: 800px; width: 100%; background: white; padding: 32px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.08);">
+              <h2 style="margin-bottom: 8px; color: #2c3e50;">${template.name}</h2>
+              <p style="margin-bottom: 16px; color: #7f8c8d;">${template.description}</p>
+              <p style="margin-bottom: 6px; font-size: 13px; color: #95a5a6;"><strong>Design style:</strong> ${template.style}</p>
+              <hr style="margin: 18px 0; border: none; border-top: 1px solid #ecf0f1;" />
+              <p style="font-size: 14px; color: #34495e; line-height: 1.6;">
+                This is a static preview because the live backend preview is currently unavailable.<br/>
+                You can still use this template and see the full rendered resume via the normal Preview / Download buttons after filling your information.
+              </p>
+            </div>
+          `;
+        }
+      }
+    }
+
+    // Logout function
+    function logout() {
+      if (confirm('Are you sure you want to logout?')) {
+        // Clear authentication
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        
+        // Clear any resume builder data
+        localStorage.removeItem('selectedTemplate');
+        
+        // Redirect to login
+        window.location.href = '/dashboard/login.html';
+      }
+    }
+
+    // Check authentication on page load
+    function checkAuthentication() {
+      const token = localStorage.getItem('token');
+      const user = localStorage.getItem('user');
+      
+      if (!token || !user) {
+        // Not logged in - redirect to login
+        alert('Please login to access the resume builder');
+        window.location.href = '/dashboard/login.html';
+        return false;
+      }
+      return true;
+    }
+
+    // Initialize page - always start at Step 1 (template selection)
+    function initializePage() {
+      // Always show template selection first
+      document.getElementById('templateSelection').style.display = 'block';
+      document.getElementById('formStepIndicator').style.display = 'none';
+      document.querySelector('.main-layout').style.display = 'none';
+      document.querySelector('.bottom-actions').style.display = 'none';
+      
+      // Remove the back button if it exists
+      const existingBackBtn = document.getElementById('backToTemplatesBtn');
+      if (existingBackBtn) {
+        existingBackBtn.remove();
+      }
+      
+      // Clear any previous template selection when returning to Step 1
+      // (User can select a different template)
+      selectedTemplate = null;
+      
+      console.log('Page initialized - showing Step 1 (template selection)');
+      
+      // Ensure history state is set to Step 1
+      if (history.state === null || history.state.step !== 1) {
+        history.replaceState({ step: 1 }, '', '');
+      }
+    }
+
+    // Template selection functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      // Check if user is logged in
+      if (!checkAuthentication()) {
+        return; // Stop execution if not authenticated
+      }
+      
+      // Initialize page to Step 1
+      initializePage();
+      
+      // ==================== BROWSER BACK BUTTON HANDLING ====================
+      // Push initial state to prevent direct back to index.html
+      history.pushState({ step: 1 }, '', '');
+      
+      // Handle browser back/forward button
+      window.addEventListener('popstate', function(event) {
+        // Prevent going back to index.html
+        event.preventDefault();
+        
+        // Check which step we're currently on
+        const formVisible = document.querySelector('.main-layout').style.display !== 'none';
+        const templateVisible = document.getElementById('templateSelection').style.display !== 'none';
+        
+        if (formVisible) {
+          history.pushState({ step: 1 }, '', '');
+        } else {
+          initializePage();
+        }
+      });
+      
+      // Prevent accidental back navigation from touch gestures (mobile/trackpad)
+      let touchStartX = 0;
+      let touchStartY = 0;
+      let touchEndX = 0;
+      let touchEndY = 0;
+      
+      document.addEventListener('touchstart', function(e) {
+        touchStartX = e.changedTouches[0].screenX;
+        touchStartY = e.changedTouches[0].screenY;
+      }, { passive: true });
+      
+      document.addEventListener('touchend', function(e) {
+        touchEndX = e.changedTouches[0].screenX;
+        touchEndY = e.changedTouches[0].screenY;
+        
+        const diffX = touchEndX - touchStartX;
+        const diffY = touchEndY - touchStartY;
+        
+        // Detect horizontal swipe (typical back gesture)
+        if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+          // If user swipes from left to right, keep them on this page
+          if (diffX > 0) {
+            history.pushState({ step: 1 }, '', '');
+          }
+        }
+      }, { passive: true });
+      
+      // ==================== END BACK BUTTON HANDLING ====================
+      
+      // Category filtering (if category buttons exist)
+      document.querySelectorAll('.category-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+          
+          const category = this.getAttribute('data-category');
+          document.querySelectorAll('.template-card').forEach(card => {
+            const cat = card.getAttribute('data-category');
+            if (!category || category === 'all' || cat === category) {
+              card.style.display = 'block';
+            } else {
+              card.style.display = 'none';
+            }
+          });
+        });
+      });
+      
+      // Load saved skip states for sections
+      ['summary','experience','education','skills','projects','additional','references','custom'].forEach(sec => {
+        if (localStorage.getItem('skip_section_' + sec) === 'true') {
+          const el = document.getElementById('section-' + sec);
+          const link = el ? el.querySelector('.skip-link') : null;
+          if (el && link) {
+            el.classList.add('skipped');
+            link.textContent = 'Show section';
+          }
+        }
+      });
+      
+      // Load saved skip states and values for individual fields
+      ['address','linkedin','website','certifications','languages','projects','achievements','hobbies'].forEach(field => {
+        const group = document.getElementById('group-' + field);
+        const input = document.getElementById(field);
+        const skip = localStorage.getItem('skip_field_' + field) === 'true';
+        const savedValue = localStorage.getItem('field_value_' + field);
+        
+        if (group && input) {
+          const label = group.querySelector('label');
+          const skipSpan = label ? label.querySelector('.field-skip') : null;
+          
+          if (skip) {
+            group.classList.add('skipped');
+            if (skipSpan) skipSpan.textContent = 'Show';
+            if (savedValue !== null) input.value = '';
+          } else if (savedValue !== null) {
+            input.value = savedValue;
+          }
+        }
+      });
+    });
+
+    // Template preview functionality with backend-powered preview
+    async function previewTemplate(templateId) {
+      // Template metadata
+      const templateDetails = {
+        'classic': {
+          name: 'Classic Professional',
+          description: 'Clean, traditional layout perfect for any industry',
+          style: 'Traditional serif fonts, centered header, clean sections'
+        },
+        'minimal': {
+          name: 'Minimal',
+          description: 'Ultra-clean design with excellent readability',
+          style: 'Minimalist design, sans-serif fonts, lots of whitespace'
+        },
+        'modern-pro': {
+          name: 'Modern Professional',
+          description: 'Contemporary design with subtle colors',
+          style: 'Modern layout, accent colors, professional styling'
+        },
+        'tech-focus': {
+          name: 'Tech Focus',
+          description: 'Designed specifically for developers',
+          style: 'Code-friendly layout, technical sections, modern fonts'
+        },
+        'creative-bold': {
+          name: 'Creative Bold',
+          description: 'Eye-catching design for creative professionals',
+          style: 'Bold typography, creative layout, vibrant colors'
+        },
+        'portfolio-style': {
+          name: 'Portfolio Style',
+          description: 'Showcase your work with visual elements',
+          style: 'Visual-first design, project showcase, modern layout'
+        },
+        'ats-optimized': {
+          name: 'ATS Optimized',
+          description: 'Designed to pass Applicant Tracking Systems',
+          style: 'Simple structure, ATS-friendly format, clear sections'
+        },
+        'corporate-ats': {
+          name: 'Corporate ATS',
+          description: 'Professional corporate design that\'s ATS-compatible',
+          style: 'Corporate styling, ATS-compatible, professional look'
+        },
+        'elegant-gradient': {
+          name: 'Elegant Gradient',
+          description: 'Beautiful gradient design with elegant typography',
+          style: 'Gradient accents, elegant fonts, sophisticated design'
+        },
+        'minimalist-mono': {
+          name: 'Minimalist Mono',
+          description: 'Ultra-minimalist monochrome design',
+          style: 'Black and white, minimal elements, clean typography'
+        },
+        'rishi': {
+          name: 'Rishi Tech Modern',
+          description: 'Modern tech layout with purple gradient sidebar',
+          style: 'Two-column design, purple gradient, blue accents, Inter font'
+        },
+        'priya': {
+          name: 'Priya Elegant',
+          description: 'Classic serif design with elegant typography and traditional layout',
+          style: 'Georgia serif fonts, centered header, elegant spacing, academic style'
+        },
+        'hiero-elite': {
+          name: 'Hiero Elite',
+          description: 'Exclusive template with advanced design and layout options. Ideal for executives and professionals seeking a premium look.',
+          style: 'Sophisticated layout, premium accents, executive styling'
+        }
+      };
+
+      const template = templateDetails[templateId];
+      if (!template) return;
+
+      // Create modal with loading state
+      const modal = document.createElement('div');
+      modal.className = 'preview-modal-overlay';
+      modal.style.cssText = `
+        position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
+        background: rgba(0,0,0,0.85); display: flex; align-items: center; 
+        justify-content: center; z-index: 10000; padding: 20px;
+      `;
+
+      modal.innerHTML = `
+        <div style="background: white; border-radius: 16px; max-width: 900px; width: 100%; 
+                    max-height: 90vh; display: flex; flex-direction: column; position: relative; box-shadow: 0 25px 50px rgba(0,0,0,0.5);">
+          <div style="padding: 25px 30px; border-bottom: 1px solid #eee; flex-shrink: 0;">
+            <button onclick="this.closest('.preview-modal-overlay').remove()" 
+                    style="position: absolute; top: 15px; right: 15px; background: none; 
+                           border: none; font-size: 28px; cursor: pointer; color: #999; line-height: 1; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 4px; transition: all 0.2s;"
+                    onmouseover="this.style.background='#f0f0f0'; this.style.color='#333';"
+                    onmouseout="this.style.background='none'; this.style.color='#999';">×</button>
+            <h2 style="margin: 0 0 8px 0; color: #2c3e50; font-size: 24px;">${template.name}</h2>
+            <p style="margin: 0; color: #7f8c8d; font-size: 14px;">${template.description}</p>
+          </div>
+          <div id="preview-content" style="flex: 1; overflow-y: auto; padding: 30px; display: flex; justify-content: center; align-items: flex-start; background: #f8f9fa; min-height: 400px;">
+            <div style="text-align: center; color: #666; padding: 60px 20px;">
+              <i class="fas fa-spinner fa-spin" style="font-size: 42px; margin-bottom: 15px; color: #2ae023;"></i>
+              <p style="font-size: 16px; margin: 0;">Loading preview...</p>
+            </div>
+          </div>
+          <div style="padding: 20px 30px; background: #f8f9fa; border-top: 1px solid #e0e0e0; flex-shrink: 0;">
+            <button onclick="startBuilding('${templateId}'); this.closest('.preview-modal-overlay').remove();" 
+                    style="background: #2ae023; color: white; border: none; padding: 14px 28px; 
+                           border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%; font-size: 16px; transition: all 0.3s; box-shadow: 0 2px 8px rgba(42,224,35,0.3);"
+                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(42,224,35,0.4)';"
+                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(42,224,35,0.3)';">
+              Use This Template
+            </button>
+          </div>
+        </div>
+      `;
+
+      modal.addEventListener('click', function(e) {
+        if (e.target === modal) modal.remove();
+      });
+
+      document.body.appendChild(modal);
+
+      // Try to fetch preview from backend, with fallback to static preview
+      let previewLoaded = false;
+      const previewContainer = modal.querySelector('#preview-content');
+
+      try {
+        console.log('🔍 Fetching preview for template via backend:', templateId, '→', BACKEND_URL + '/preview-resume');
+
+        // Build sample data for backend preview
+        let sampleData = {
           template: templateId,
           personalInfo: {
             fullName: 'Rahul Mehta',
@@ -1457,11 +1806,93 @@
           certifications: 'AWS Certified Solutions Architect, Google Cloud Professional'
         };
 
-        // Note: Template preview is now fetched from backend via /preview-resume API
-        // The previewTemplate() function above handles fetching and rendering
+        // Customize sample data for Priya template (elegant academic style)
+        if (templateId === 'priya') {
+          sampleData = {
+            template: 'priya',
+            personalInfo: {
+              fullName: 'Priya Sharma',
+              rollNo: '191401001',
+              program: 'Computer Science',
+              course: 'B.Tech',
+              institute: 'Indian Institute of Information Technology, Vadodara',
+              phone: '+91-9876543210',
+              email: 'priya.sharma@iitvadodara.ac.in',
+              officialEmail: '191401001@iitvadodara.ac.in',
+              github: 'github.com/priyasharma',
+              linkedin: 'linkedin.com/in/priyasharma',
+              languages: 'C, C++, Python, Java, JavaScript',
+              developerTools: 'Git, VS Code, IntelliJ IDEA, Eclipse',
+              frameworks: 'React, Node.js, Django, Spring Boot',
+              cloudDatabases: 'AWS, Firebase, MySQL, MongoDB',
+              softSkills: 'Communication, Leadership, Problem-solving, Teamwork'
+            },
+            education: [
+              {
+                degree: 'B.Tech in Computer Science and Engineering',
+                school: 'IIIT Vadodara',
+                gradYear: '2023',
+                gpa: '8.9/10.0'
+              }
+            ],
+            projects: 'Placement Portal: Developed full-stack portal for college placements\nResearch Project: Worked on ML-based traffic prediction',
+            certifications: 'GATE CS 2023 Qualified, Data Structures & Algorithms certifications'
+          };
+        }
+
+        const response = await fetch(`${BACKEND_URL}/preview-resume`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(sampleData)
+        });
+
+        if (!response.ok) {
+          const errText = await response.text().catch(() => '');
+          console.warn('⚠️ Backend preview failed:', response.status, errText.slice(0, 200));
+          throw new Error('Backend preview failed');
+        }
+
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+
+        // Clear loading
+        previewContainer.innerHTML = '';
+
+        // Try to embed PDF in an <iframe>
+        const iframe = document.createElement('iframe');
+        iframe.src = url;
+        iframe.style.width = '100%';
+        iframe.style.height = '600px';
+        iframe.style.border = 'none';
+        previewContainer.appendChild(iframe);
+
+        previewLoaded = true;
+
+        // Revoke URL when modal is closed
+        modal.addEventListener('click', e => {
+          if (e.target === modal) {
+            URL.revokeObjectURL(url);
+          }
+        });
 
       } catch (error) {
-        console.error('❌ Error preparing sample data for preview:', error);
+        console.error('❌ Error fetching backend preview, falling back to static preview:', error);
+
+        // Fallback static preview: simple template info & sample layout text
+        if (!previewLoaded && previewContainer) {
+          previewContainer.innerHTML = `
+            <div style="max-width: 800px; width: 100%; background: white; padding: 32px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.08);">
+              <h2 style="margin-bottom: 8px; color: #2c3e50;">${template.name}</h2>
+              <p style="margin-bottom: 16px; color: #7f8c8d;">${template.description}</p>
+              <p style="margin-bottom: 6px; font-size: 13px; color: #95a5a6;"><strong>Design style:</strong> ${template.style}</p>
+              <hr style="margin: 18px 0; border: none; border-top: 1px solid #ecf0f1;" />
+              <p style="font-size: 14px; color: #34495e; line-height: 1.6;">
+                This is a static preview because the live backend preview is currently unavailable.<br/>
+                You can still use this template and see the full rendered resume via the normal Preview / Download buttons after filling your information.
+              </p>
+            </div>
+          `;
+        }
       }
     }
 
