@@ -616,6 +616,28 @@
             </button>
           </div>
         </div>
+
+        <!-- Hiero Elite Template (third template) -->
+        <div class="template-card" data-category="elite" data-template="hiero-elite" data-type="free">
+          <div class="template-preview" onclick="previewTemplate('hiero-elite')">
+            <i class="fas fa-star"></i>
+            <div class="preview-overlay">
+              <button class="preview-btn">Preview Template</button>
+            </div>
+          </div>
+          <div class="template-info">
+            <h3>Hiero Elite Template</h3>
+            <p>Exclusive template with advanced design and layout options. Ideal for executives and professionals seeking a premium look.</p>
+            <div class="template-tags">
+              <span class="tag">Elite</span>
+              <span class="tag">Premium</span>
+              <span class="tag">Executive</span>
+            </div>
+            <button class="start-building-btn" onclick="startBuilding('hiero-elite')">
+              <i class="fas fa-arrow-right"></i> Start Building
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -1105,25 +1127,9 @@
         const templateVisible = document.getElementById('templateSelection').style.display !== 'none';
         
         if (formVisible) {
-          // User is on Step 2 (form), go back to Step 1 (template selection)
-          console.log('Browser back button pressed - returning to Step 1');
-          initializePage();
-          
-          // Push state again to maintain control
           history.pushState({ step: 1 }, '', '');
         } else {
-          // User is on Step 1, prevent going back to index.html
-          console.log('Already on Step 1 - preventing further back navigation');
-          
-          // Ask user for confirmation before leaving
-          const confirmLeave = confirm('Do you want to leave the resume builder? Your progress will be saved.');
-          if (confirmLeave) {
-            // Clear localStorage if needed and redirect to dashboard/index
-            window.location.href = 'index.html';
-          } else {
-            // Stay on current page
-            history.pushState({ step: 1 }, '', '');
-          }
+          initializePage();
         }
       });
       
@@ -1141,62 +1147,31 @@
       document.addEventListener('touchend', function(e) {
         touchEndX = e.changedTouches[0].screenX;
         touchEndY = e.changedTouches[0].screenY;
-        handleGesture();
-      }, { passive: true });
-      
-      function handleGesture() {
+        
         const diffX = touchEndX - touchStartX;
         const diffY = touchEndY - touchStartY;
         
         // Detect horizontal swipe (typical back gesture)
         if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
-          // Right swipe detected (potential back gesture)
+          // If user swipes from left to right, keep them on this page
           if (diffX > 0) {
-            // Check if we should allow this
-            const formVisible = document.querySelector('.main-layout').style.display !== 'none';
-            if (formVisible) {
-              // On Step 2, swipe should go to Step 1
-              console.log('Swipe detected on Step 2 - returning to Step 1');
-              initializePage();
-              history.pushState({ step: 1 }, '', '');
+            history.pushState({ step: 1 }, '', '');
           }
         }
-      }
-      
-      // Prevent mouse-based back navigation (two-finger swipe on trackpad)
-      let gestureStarted = false;
-      
-      document.addEventListener('gesturestart', function(e) {
-        e.preventDefault();
-        gestureStarted = true;
-      });
-      
-      document.addEventListener('gesturechange', function(e) {
-        if (gestureStarted) {
-          e.preventDefault();
-        }
-      });
-      
-      document.addEventListener('gestureend', function(e) {
-        e.preventDefault();
-        gestureStarted = false;
-      });
+      }, { passive: true });
       
       // ==================== END BACK BUTTON HANDLING ====================
       
-      // Category filtering
+      // Category filtering (if category buttons exist)
       document.querySelectorAll('.category-btn').forEach(btn => {
         btn.addEventListener('click', function() {
-          // Update active category
           document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
           this.classList.add('active');
-
-          // Filter templates
-          const category = this.dataset.category;
-          const cards = document.querySelectorAll('.template-card');
           
-          cards.forEach(card => {
-            if (category === 'all' || card.dataset.category === category) {
+          const category = this.getAttribute('data-category');
+          document.querySelectorAll('.template-card').forEach(card => {
+            const cat = card.getAttribute('data-category');
+            if (!category || category === 'all' || cat === category) {
               card.style.display = 'block';
             } else {
               card.style.display = 'none';
@@ -1204,12 +1179,12 @@
           });
         });
       });
-
-      // Load saved skip states
+      
+      // Load saved skip states for sections
       ['summary','experience','education','skills','projects','additional','references','custom'].forEach(sec => {
         if (localStorage.getItem('skip_section_' + sec) === 'true') {
           const el = document.getElementById('section-' + sec);
-          const link = el?.querySelector('.skip-link');
+          const link = el ? el.querySelector('.skip-link') : null;
           if (el && link) {
             el.classList.add('skipped');
             link.textContent = 'Show section';
@@ -1217,23 +1192,22 @@
         }
       });
       
+      // Load saved skip states and values for individual fields
       ['address','linkedin','website','certifications','languages','projects','achievements','hobbies'].forEach(field => {
-        if (localStorage.getItem('skip_field_' + field) === 'true') {
-          const group = document.getElementById('group-' + field);
-          const input = document.getElementById(field);
-          const label = group?.querySelector('label');
-          const skipSpan = label?.querySelector('.field-skip');
+        const group = document.getElementById('group-' + field);
+        const input = document.getElementById(field);
+        const skip = localStorage.getItem('skip_field_' + field) === 'true';
+        const savedValue = localStorage.getItem('field_value_' + field);
+        
+        if (group && input) {
+          const label = group.querySelector('label');
+          const skipSpan = label ? label.querySelector('.field-skip') : null;
           
-          if (group && input && skipSpan) {
+          if (skip) {
             group.classList.add('skipped');
-            skipSpan.textContent = 'Show';
-            // Note: Field value will be restored when user clicks "Show" using the improved skipField function
-          }
-        } else {
-          // Restore field value if not skipped
-          const input = document.getElementById(field);
-          const savedValue = localStorage.getItem('field_value_' + field);
-          if (input && savedValue !== null) {
+            if (skipSpan) skipSpan.textContent = 'Show';
+            if (savedValue !== null) input.value = '';
+          } else if (savedValue !== null) {
             input.value = savedValue;
           }
         }
@@ -1303,6 +1277,11 @@
           name: 'Priya Elegant',
           description: 'Classic serif design with elegant typography and traditional layout',
           style: 'Georgia serif fonts, centered header, elegant spacing, academic style'
+        },
+        'hiero-elite': {
+          name: 'Hiero Elite',
+          description: 'Exclusive template with advanced design and layout options. Ideal for executives and professionals seeking a premium look.',
+          style: 'Sophisticated layout, premium accents, executive styling'
         }
       };
 
@@ -1393,6 +1372,10 @@
               school: 'University of Technology',
               gradYear: '2020',
               gpa: '3.8/4.0'
+            }
+          ],
+          technicalSkills: 'JavaScript, React, Node.js, Python, AWS, Docker, MongoDB, PostgreSQL, Git, CI/CD (Jenkins, GitHub Actions), RESTful APIs, GraphQL, Microservices Architecture',
+          softSkills: 'Leadership, Communication, Problem-solving, Team collaboration, Project management',
             }
           ],
           technicalSkills: 'JavaScript, React, Node.js, Python, AWS, Docker, MongoDB, PostgreSQL, Git, CI/CD (Jenkins, GitHub Actions), RESTful APIs, GraphQL, Microservices Architecture',
@@ -1662,7 +1645,8 @@
         'elegant-gradient': 'Elegant Gradient',
         'minimalist-mono': 'Minimalist Mono',
         'rishi': 'Rishi Tech Modern',
-        'priya': 'Priya Elegant'
+        'priya': 'Priya Elegant',
+        'hiero-elite': 'Hiero Elite'
       };
       return names[templateId] || 'Selected';
     }
@@ -2693,7 +2677,7 @@
           console.error('Server error:', errorText);
           throw new Error('Server error: ' + response.statusText);
         }
-        
+
         // Check if response is actually PDF
         const contentType = response.headers.get('content-type');
         console.log('📄 Response Content-Type:', contentType);
