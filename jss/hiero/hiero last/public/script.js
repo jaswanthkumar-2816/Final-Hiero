@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
   // Use the main backend which now includes analysis server
-  const BACKEND_URL = "https://hiero-analysis-part.onrender.com";
+  const BACKEND_URL = "http://localhost:5001";
   console.log("🔍 Using backend:", BACKEND_URL);
   const form = document.getElementById("analyze-form");
   const loadingOverlay = document.getElementById("loading-overlay");
@@ -121,14 +121,14 @@ document.addEventListener("DOMContentLoaded", () => {
         // Transform backend response to match result.html expectations
         const transformedData = {
           score: Math.min(Math.max(parseInt(result.score) || 0, 0), 100),
-            domain: result.domain || 'it',
-            jdSkills: Array.isArray(result.jdSkills) ? result.jdSkills : [],
-            resumeSkills: Array.isArray(result.resumeSkills) ? result.resumeSkills : [],
-            matchedSkills: Array.isArray(result.matched) ? result.matched : [],
-            missingSkills: Array.isArray(result.missing) ? result.missing : [],
-            extraSkills: Array.isArray(result.extraSkills) ? result.extraSkills : [],
-            skillToLearnFirst: (result.missing && Array.isArray(result.missing) && result.missing.length > 0) ? result.missing[0] : 'JavaScript',
-            projectSuggestions: generateProjectSuggestions(result)
+          domain: result.domain || 'it',
+          jdSkills: Array.isArray(result.jdSkills) ? result.jdSkills : [],
+          resumeSkills: Array.isArray(result.resumeSkills) ? result.resumeSkills : [],
+          matchedSkills: Array.isArray(result.matched) ? result.matched : [],
+          missingSkills: Array.isArray(result.missing) ? result.missing : [],
+          extraSkills: Array.isArray(result.extraSkills) ? result.extraSkills : [],
+          skillToLearnFirst: (result.missing && Array.isArray(result.missing) && result.missing.length > 0) ? result.missing[0] : 'JavaScript',
+          projectSuggestions: generateProjectSuggestions(result)
         };
 
         // Store in localStorage with transformed data + full learning plan
@@ -147,7 +147,7 @@ document.addEventListener("DOMContentLoaded", () => {
   } else {
     console.warn('⚠️ analyze-form not found on this page');
   }
-  
+
   function showValidationErrors(err) {
     if (!validationBox || !validationText) return;
     const messages = [];
@@ -176,26 +176,51 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Helper function to generate project suggestions based on missing skills
   function generateProjectSuggestions(result) {
-    const domain = result.domain || 'it';
-    const missingSkills = result.missing || [];
-    
-    const suggestions = {
-      it: [
-        { title: 'Build a REST API', desc: 'Create a backend service using Node.js/Python' },
-        { title: 'Full-Stack App', desc: 'Build a complete web app with React & Node.js' },
-        { title: 'Data Dashboard', desc: 'Create a data visualization dashboard' },
-        { title: 'Mobile App', desc: 'Build an iOS/Android app with Flutter/React Native' }
-      ],
-      hr: [
-        { title: 'HR Analytics Project', desc: 'Analyze employee data and create reports' },
-        { title: 'Recruitment Portal', desc: 'Build a job application tracking system' }
-      ],
-      finance: [
-        { title: 'Accounting System', desc: 'Create an expense tracking application' },
-        { title: 'Budget Analyzer', desc: 'Build financial planning tools' }
-      ]
-    };
-    
-    return (suggestions[domain] || suggestions.it).slice(0, 3);
+    const projects = [];
+
+    // 1. Prioritize projects directly from backend (enhanced rule-based engine)
+    if (result.projectSuggestions && Array.isArray(result.projectSuggestions)) {
+      result.projectSuggestions.forEach(p => {
+        if (typeof p === 'string' && p.trim()) projects.push(p);
+        else if (typeof p === 'object' && p.title) projects.push(p.title);
+        else if (typeof p === 'object' && p.name) projects.push(p.name);
+      });
+    }
+
+    // 2. Fallback to learning plan projects if backend list was empty
+    if (projects.length === 0 && result.learningPlan && Array.isArray(result.learningPlan)) {
+      result.learningPlan.forEach(plan => {
+        if (plan.miniProjects && Array.isArray(plan.miniProjects)) {
+          plan.miniProjects.forEach(proj => {
+            if (typeof proj === 'string' && proj.trim()) projects.push(proj);
+          });
+        }
+      });
+    }
+
+    // 3. Final fallback (hardcoded) if still empty
+    if (projects.length === 0) {
+      const domain = result.domain || 'it';
+      const suggestions = {
+        it: [
+          'Build a REST API service',
+          'Create a Full-Stack Web App',
+          'Develop a Data Visualization Dashboard'
+        ],
+        hr: [
+          'HR Analytics Dashboard',
+          'Recruitment Tracker System',
+          'Employee Engagement Portal'
+        ],
+        finance: [
+          'Personal Expense Tracker',
+          'Investment Portfolio Manager',
+          'Budget Planning Tool'
+        ]
+      };
+      return (suggestions[domain] || suggestions.it).slice(0, 3);
+    }
+
+    return projects.slice(0, 6);
   }
 });
