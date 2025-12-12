@@ -4,261 +4,763 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Select Your Role | Hiero – AI Career Assistant</title>
-
-  <!-- Meta Tags -->
+  <title>Hiero – AI Career Assistant | Resume Analysis, Job Matching, Skills Learning</title>
   <meta name="description"
     content="Hiero is an AI-powered career platform that helps you build modern resumes, analyze job descriptions, and learn missing skills with curated projects, videos, and mock interviews.">
   <meta name="keywords"
     content="Hiero, AI career assistant, resume builder, resume analysis, job matching, interview preparation, skills learning" />
   <meta name="robots" content="index, follow" />
-
-  <!-- ===========================
-       HIER0 BRAND & LOGO SCHEMA
-       =========================== -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    "name": "Hiero",
-    "url": "https://hiero.in",
-    "logo": "https://hiero.in/logohiero.png",
-    "image": "https://hiero.in/logohiero.png",
-    "description": "Hiero is an AI-powered resume builder and career assistant for students and job seekers.",
-    "brand": "Hiero"
-  }
-  </script>
-
-  <!-- WebSite Schema with SearchAction (Rich Result) -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    "name": "Hiero",
-    "url": "https://hiero.in",
-    "potentialAction": {
-      "@type": "SearchAction",
-      "target": {
-        "@type": "EntryPoint",
-        "urlTemplate": "https://hiero.in/search?q={search_term_string}"
-      },
-      "query-input": "required name=search_term_string"
-    }
-  }
-  </script>
-
-  <!-- Open Graph for Google & Social -->
-  <meta property="og:title" content="Hiero – AI Career Assistant">
-  <meta property="og:description" content="Analyze resumes, match jobs, learn missing skills.">
-  <meta property="og:image" content="https://hiero.in/logohiero.png">
-  <meta property="og:url" content="https://hiero.in">
-  <meta property="og:site_name" content="Hiero">
-
-  <!-- Favicon & Logo -->
-  <link rel="icon" href="/logohiero.png">
-  <link rel="apple-touch-icon" href="/logohiero.png">
-
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <meta property="og:title" content="Hiero – AI Career Assistant" />
+  <meta property="og:description"
+    content="Build better resumes, get job-matched insights, and close your skill gaps with Hiero’s AI-powered career tools." />
+  <meta property="og:url" content="https://hiero.in/" />
+  <link rel="stylesheet" href="/dashboard/styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
-    body {
-      margin: 0;
-      font-family: 'Inter', sans-serif;
-      background: #111;
-      color: #fff;
-      min-height: 100vh;
-    }
-
-    /* Splash screen */
-    .splash-screen {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: #000;
+    /* User Profile Styles */
+    .user-profile {
+      position: absolute;
+      top: 20px;
+      right: 20px;
       display: flex;
-      justify-content: center;
       align-items: center;
-      animation: fadeOut 1s ease-in-out 2.5s forwards;
-      z-index: 9999;
-    }
-
-    .logo-animated {
-      width: 180px;
-      animation: glow 2s infinite alternate;
-    }
-
-    @keyframes glow {
-      from {
-        filter: drop-shadow(0 0 8px #00ff00);
-      }
-
-      to {
-        filter: drop-shadow(0 0 20px #00ff00);
-      }
-    }
-
-    @keyframes fadeOut {
-      to {
-        opacity: 0;
-        visibility: hidden;
-      }
-    }
-
-    .main-container {
-      display: none;
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 40px;
-      text-align: center;
-    }
-
-    .app-title {
-      font-size: 48px;
-      font-weight: 700;
-      margin-bottom: 60px;
-      background: linear-gradient(45deg, #fff, #00ff00);
-      -webkit-background-clip: text;
-      background-clip: text;
-      background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-      letter-spacing: -1px;
-    }
-
-    .content-section {
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 40px;
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 16px;
+      gap: 12px;
+      background: rgba(255, 255, 255, 0.1);
       backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 25px;
+      padding: 8px 16px;
+      color: white;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     }
 
-    .content-section h2 {
-      font-size: 32px;
-      font-weight: 600;
-      margin-bottom: 20px;
-      background: linear-gradient(45deg, #fff, #00ff00);
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid rgba(255, 255, 255, 0.3);
     }
 
-    .content-section p {
-      font-size: 18px;
-      line-height: 1.6;
-      color: #ccc;
-      margin-bottom: 30px;
-    }
-
-    .button-group {
+    .avatar-initials {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #3a4433 0%, #07e219 100%);
       display: flex;
-      gap: 20px;
+      align-items: center;
       justify-content: center;
-      margin-top: 40px;
+      color: white;
+      font-weight: 600;
+      font-size: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
     }
 
-    .button-group button {
-      background: #00ff00a7;
-      color: #000;
-      border: none;
-      padding: 14px 32px;
-      font-size: 16px;
+    .user-info h3 {
+      margin: 0;
+      font-size: 14px;
       font-weight: 600;
-      border-radius: 8px;
+    }
+
+    .user-info p {
+      margin: 0;
+      font-size: 12px;
+      opacity: 0.8;
+    }
+
+    .logout-btn {
+      background: rgba(255, 59, 59, 0.8);
+      border: none;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 15px;
+      font-size: 12px;
       cursor: pointer;
       transition: all 0.3s ease;
     }
 
-    .button-group button:hover {
-      background: #00ff00;
-      transform: scale(1.05);
+    .logout-btn:hover {
+      background: rgba(255, 59, 59, 1);
+      transform: translateY(-1px);
     }
 
-    .button-group .white-button {
-      background: rgba(255, 255, 255, 0.1);
-      color: #fff;
-      border: 1px solid rgba(255, 255, 255, 0.2);
+    /* Review Section Styles */
+    .review-section {
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 20px 20px 16px;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(7, 226, 25, 0.3);
+      border-radius: 16px;
+      text-align: center;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      max-height: 340px;
+      /* prevent whole frame growing */
+      overflow: hidden;
+      /* contain inner scroll areas */
     }
 
-    .button-group .white-button:hover {
-      background: rgba(255, 255, 255, 0.2);
+    .review-section-inner {
+      max-height: 280px;
+      /* scrollable area inside card */
+      overflow-y: auto;
+      padding-right: 4px;
+      /* space for scrollbar */
     }
 
-    .signup-link {
-      margin-top: 20px;
-      font-size: 14px;
-      color: #888;
-    }
-
-    .signup-link a {
-      color: #00ff00a7;
+    .review-section h3 {
+      color: #07e219;
+      margin-bottom: 8px;
+      font-size: 20px;
       font-weight: 600;
+    }
+
+    .star-rating {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin: 10px 0 14px;
+      font-size: 30px;
+      /* slightly smaller on all */
+    }
+
+    .star {
+      cursor: pointer;
+      color: #666;
+      transition: all 0.3s ease;
+      user-select: none;
+    }
+
+    .star:hover,
+    .star.active {
+      color: #ffd700;
+      text-shadow: 0 0 10px #ffd700;
+      transform: scale(1.2);
+    }
+
+    .review-input {
+      width: 100%;
+      min-height: 80px;
+      max-height: 140px;
+      /* don't let textarea grow too big */
+      padding: 10px 12px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(7, 226, 25, 0.3);
+      border-radius: 10px;
+      color: white;
+      font-family: 'Poppins', sans-serif;
+      font-size: 13px;
+      resize: vertical;
+      margin: 10px 0 6px;
+      overflow-y: auto;
+    }
+
+    .review-input:focus {
+      outline: none;
+      border-color: #07e219;
+      box-shadow: 0 0 15px rgba(7, 226, 25, 0.3);
+    }
+
+    .submit-review-btn {
+      background: linear-gradient(135deg, #07e219 0%, #05a313 100%);
+      color: white;
+      border: none;
+      padding: 10px 26px;
+      border-radius: 25px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(7, 226, 25, 0.3);
+      margin-top: 8px;
+    }
+
+    .submit-review-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(7, 226, 25, 0.5);
+    }
+
+    .submit-review-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .review-status {
+      margin-top: 8px;
+      padding: 8px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .review-status.success {
+      background: rgba(7, 226, 25, 0.2);
+      color: #07e219;
+      border: 1px solid #07e219;
+    }
+
+    .review-status.error {
+      background: rgba(255, 59, 59, 0.2);
+      color: #ff3b3b;
+      border: 1px solid #ff3b3b;
+    }
+
+    .existing-review {
+      margin-top: 10px;
+      padding: 12px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 10px;
+      border: 1px solid rgba(7, 226, 25, 0.2);
+      max-height: 140px;
+      /* scroll only this box if long */
+      overflow-y: auto;
+    }
+
+    .existing-review p {
+      color: white;
+      margin: 6px 0;
+      text-align: left;
+      font-size: 13px;
+    }
+
+    .existing-review strong {
+      color: #07e219;
+    }
+
+    .edit-review-btn {
+      background: rgba(7, 226, 25, 0.2);
+      color: #07e219;
+      border: 1px solid #07e219;
+      padding: 8px 24px;
+      border-radius: 20px;
+      font-size: 14px;
+      cursor: pointer;
+      margin-top: 15px;
+      transition: all 0.3s ease;
+    }
+
+    .edit-review-btn:hover {
+      background: rgba(7, 226, 25, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .admin-link {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 25px;
       text-decoration: none;
-      transition: color 0.3s ease;
+      font-weight: 600;
+      box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+      transition: all 0.3s ease;
+      display: none;
     }
 
-    .signup-link a:hover {
-      color: #00cc00;
+    .admin-link:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 107, 107, 0.6);
     }
 
+    /* Responsive adjustments */
     @media (max-width: 768px) {
-      .app-title {
-        font-size: 36px;
-        margin-bottom: 40px;
+      .user-profile {
+        position: relative;
+        top: 0;
+        right: 0;
+        margin: 0 auto 20px;
+        width: fit-content;
       }
 
-      .content-section {
-        padding: 30px 20px;
+      .user-info {
+        display: none;
       }
 
-      .button-group {
-        flex-direction: column;
-        gap: 15px;
+      .review-section {
+        margin: 24px 16px;
+        padding: 16px 16px 12px;
+        max-height: 300px;
       }
 
-      .button-group button {
-        width: 100%;
+      .review-section-inner {
+        max-height: 240px;
+      }
+
+      .star-rating {
+        font-size: 26px;
+        gap: 6px;
+      }
+
+      .review-input {
+        font-size: 12px;
       }
     }
   </style>
 </head>
 
 <body>
-  <!-- Splash Screen -->
-  <div class="splash-screen" id="splash-screen">
-    <img src="logohiero.png" alt="Hiero Logo" class="logo-animated" />
-  </div>
+  <div class="dashboard-wrapper">
 
-  <!-- Main Content -->
-  <div class="main-container" id="main-content">
-    <h1 class="app-title">HIERO</h1>
-    <div class="content-section">
-      <h2>Welcome to Your Career Journey</h2>
-      <p>Build your resume, analyze job descriptions, learn missing skills, and launch your career with AI-powered tools
-        designed to help you succeed.</p>
-      <div class="button-group" style="justify-content: center;">
-        <button style="margin: 0 auto; display: block;" onclick="window.location.href='dashboard.html'">Get
-          Started</button>
+    <!-- User Profile Section -->
+    <div class="user-profile" id="userProfile" style="display: none;">
+      <img id="userAvatar" src="" alt="Profile" class="user-avatar" />
+      <div class="user-info">
+        <h3 id="userName">Loading...</h3>
+        <p id="userEmail">Loading...</p>
+      </div>
+      <button id="logoutBtn" class="logout-btn">Logout</button>
+    </div>
+
+    <!-- Logo & Greeting -->
+    <div class="dashboard-header">
+      <img src="/dashboard/logohiero copy.png" alt="Hiero Logo" class="logo-glow" />
+      <h1> <span class="brand" id="welcomeMessage">Welcome to Hiero</span></h1>
+      <p class="subtext">Your Career Assistant</p>
+    </div>
+
+    <!-- Buttons -->
+    <div class="dashboard-actions">
+      <a href="/dashboard/resume-builder.html" class="glow-button">Create Resume</a>
+      <a href="/dashboard/analysis.html" class="glow-button">Analyze Resume</a>
+    </div>
+
+    <!-- Admin Link (only visible to admin users) -->
+    <a href="/admin-dashboard.html" class="admin-link" id="adminLink">
+      🎛️ Admin Dashboard
+    </a>
+
+    <!-- Review Section (appears below user profile) -->
+    <div class="review-section" id="reviewSection" style="display: none;">
+      <h3>⭐ Rate Your Experience</h3>
+      <div class="review-section-inner">
+        <!-- Star Rating -->
+        <div class="star-rating" id="starRating">
+          <span class="star" data-rating="1">★</span>
+          <span class="star" data-rating="2">★</span>
+          <span class="star" data-rating="3">★</span>
+          <span class="star" data-rating="4">★</span>
+          <span class="star" data-rating="5">★</span>
+        </div>
+
+        <!-- Review Input -->
+        <textarea id="reviewText" class="review-input"
+          placeholder="Share your feedback or suggestions for improvement..." maxlength="1000"></textarea>
+        <div style="text-align: right; color: #999; font-size: 12px; margin-top: -4px;">
+          <span id="charCount">0</span>/1000
+        </div>
+
+        <!-- Submit Button -->
+        <button id="submitReviewBtn" class="submit-review-btn">Submit Review</button>
+
+        <!-- Status Message -->
+        <div id="reviewStatus" class="review-status" style="display: none;"></div>
+
+        <!-- Existing Review Display -->
+        <div id="existingReview" class="existing-review" style="display: none;">
+          <p><strong>Your Rating:</strong> <span id="userRatingDisplay"></span></p>
+          <p><strong>Your Review:</strong> <span id="userReviewDisplay"></span></p>
+          <button id="editReviewBtn" class="edit-review-btn">Edit Review</button>
+        </div>
       </div>
     </div>
+
   </div>
 
   <script>
-    // Splash screen logic
-    window.addEventListener("DOMContentLoaded", () => {
-      setTimeout(() => {
-        document.getElementById("splash-screen").style.display = "none";
-        document.getElementById("main-content").style.display = "block";
-      }, 3000);
+    let selectedRating = 0;
+    let hasExistingReview = false;
+
+    // ✅ Enhanced authentication and user profile loading
+    async function initializeDashboard() {
+      const params = new URLSearchParams(window.location.search);
+      const tokenFromUrl = params.get("token");
+      const userFromUrl = params.get("user");
+
+      if (tokenFromUrl) {
+        localStorage.setItem("token", tokenFromUrl);
+        // Also save user data from URL if provided
+        if (userFromUrl) {
+          try {
+            const userData = JSON.parse(decodeURIComponent(userFromUrl));
+            localStorage.setItem('user', JSON.stringify(userData));
+          } catch (e) {
+            console.error('Error parsing user data from URL:', e);
+          }
+        }
+        // Clean URL after saving token
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+
+      const token = localStorage.getItem('token');
+
+      if (!token) {
+        window.location.href = '/login';
+        return;
+      }
+
+      // JWT expiry check
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        if (payload.exp && Date.now() > payload.exp * 1000) {
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          window.location.href = '/login';
+          return;
+        }
+      } catch (e) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+        return;
+      }
+
+      // Try to load user from localStorage first (saved from OAuth redirect)
+      const savedUser = localStorage.getItem('user');
+      if (savedUser) {
+        try {
+          const userData = JSON.parse(savedUser);
+          displayUserProfile(userData);
+          await loadUserReview(); // Load existing review
+          await trackLogin(); // Track login
+          await checkAdminAccess(); // Check if user is admin
+          return; // Successfully loaded from localStorage, no need to fetch
+        } catch (e) {
+          console.error('Error parsing saved user data:', e);
+        }
+      }
+
+      // Fetch user profile from backend (fallback if not in localStorage)
+      try {
+        const response = await fetch('/dashboard', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.ok) {
+          const userData = await response.json();
+          displayUserProfile(userData);
+          localStorage.setItem('user', JSON.stringify(userData));
+          await loadUserReview(); // Load existing review
+          await trackLogin(); // Track login
+          await checkAdminAccess(); // Check if user is admin
+        } else {
+          throw new Error('Failed to fetch user data');
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+      }
+    }
+
+    function displayUserProfile(userData) {
+      const userProfile = document.getElementById('userProfile');
+      const userName = document.getElementById('userName');
+      const userEmail = document.getElementById('userEmail');
+      const userAvatar = document.getElementById('userAvatar');
+      const welcomeMessage = document.getElementById('welcomeMessage');
+      const reviewSection = document.getElementById('reviewSection');
+
+      // Show user profile section
+      userProfile.style.display = 'flex';
+      // Review section visibility is controlled by loadUserReview based on whether
+      // the user has already submitted a review.
+      // reviewSection.style.display = 'block';
+
+      // Update user info
+      userName.textContent = userData.name || 'User';
+      userEmail.textContent = userData.email || '';
+
+      // Set avatar (use profile picture if available, otherwise use initials)
+      if (userData.picture) {
+        userAvatar.src = userData.picture;
+        userAvatar.style.display = 'block';
+      } else {
+        // Create initials avatar
+        const initials = userData.name ? userData.name.split(' ').map(n => n[0]).join('').toUpperCase() : 'U';
+        userAvatar.style.display = 'none';
+        // We'll create a text-based avatar instead
+        const avatarText = document.createElement('div');
+        avatarText.className = 'avatar-initials';
+        avatarText.textContent = initials;
+        userAvatar.parentNode.replaceChild(avatarText, userAvatar);
+      }
+
+      // Personalize welcome message
+      const firstName = userData.name ? userData.name.split(' ')[0] : 'there';
+      welcomeMessage.textContent = `Welcome back, ${firstName}!`;
+    }
+
+    // ⭐ Track user login
+    async function trackLogin() {
+      try {
+        const token = localStorage.getItem('token');
+        await fetch('https://hiero-resume-backend.onrender.com/api/login-track', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+      } catch (error) {
+        console.error('Error tracking login:', error);
+      }
+    }
+
+    // 🎛️ Check if user has admin access
+    async function checkAdminAccess() {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('https://hiero-resume-backend.onrender.com/api/admin/check', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.isAdmin) {
+            document.getElementById('adminLink').style.display = 'block';
+          }
+        }
+      } catch (error) {
+        console.error('Error checking admin access:', error);
+      }
+    }
+
+    // ⭐ Load user's existing review
+    async function loadUserReview() {
+      const reviewSection = document.getElementById('reviewSection');
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('https://hiero-resume-backend.onrender.com/api/review', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.hasReview && data.review) {
+            // User already submitted a review → hide the box completely
+            hasExistingReview = true;
+            reviewSection.style.display = 'none';
+          } else {
+            // New user without review → show the box
+            hasExistingReview = false;
+            reviewSection.style.display = 'block';
+          }
+        } else {
+          // On non-OK response, treat as no review yet
+          hasExistingReview = false;
+          reviewSection.style.display = 'block';
+        }
+      } catch (error) {
+        console.error('Error loading review:', error);
+        // On error, still show review box so user can submit
+        hasExistingReview = false;
+        reviewSection.style.display = 'block';
+      }
+    }
+
+    // Display existing review
+    function displayExistingReview(review) {
+      const existingReview = document.getElementById('existingReview');
+      const userRatingDisplay = document.getElementById('userRatingDisplay');
+      const userReviewDisplay = document.getElementById('userReviewDisplay');
+      const starRating = document.getElementById('starRating');
+      const reviewText = document.getElementById('reviewText');
+      const submitBtn = document.getElementById('submitReviewBtn');
+
+      // Show existing review
+      existingReview.style.display = 'block';
+
+      // Display rating as stars
+      const stars = '⭐'.repeat(review.rating);
+      userRatingDisplay.textContent = stars + ` (${review.rating}/5)`;
+      userReviewDisplay.textContent = review.reviewText;
+
+      // Disable editing initially
+      starRating.style.pointerEvents = 'none';
+      starRating.style.opacity = '0.5';
+      reviewText.disabled = true;
+      reviewText.style.opacity = '0.5';
+      submitBtn.disabled = true;
+      submitBtn.style.display = 'none';
+    }
+
+    // ⭐ Star rating functionality
+    document.addEventListener('DOMContentLoaded', function () {
+      const stars = document.querySelectorAll('.star');
+      const reviewText = document.getElementById('reviewText');
+      const submitBtn = document.getElementById('submitReviewBtn');
+      const reviewStatus = document.getElementById('reviewStatus');
+      const charCount = document.getElementById('charCount');
+      const editReviewBtn = document.getElementById('editReviewBtn');
+
+      // Star rating interaction
+      stars.forEach(star => {
+        star.addEventListener('click', function () {
+          if (hasExistingReview && reviewText.disabled) return;
+
+          selectedRating = parseInt(this.dataset.rating);
+          updateStars();
+        });
+
+        star.addEventListener('mouseenter', function () {
+          if (hasExistingReview && reviewText.disabled) return;
+
+          const rating = parseInt(this.dataset.rating);
+          highlightStars(rating);
+        });
+      });
+
+      document.getElementById('starRating').addEventListener('mouseleave', function () {
+        updateStars();
+      });
+
+      function updateStars() {
+        stars.forEach((star, index) => {
+          if (index < selectedRating) {
+            star.classList.add('active');
+          } else {
+            star.classList.remove('active');
+          }
+        });
+      }
+
+      function highlightStars(rating) {
+        stars.forEach((star, index) => {
+          if (index < rating) {
+            star.classList.add('active');
+          } else {
+            star.classList.remove('active');
+          }
+        });
+      }
+
+      // Character counter
+      reviewText.addEventListener('input', function () {
+        charCount.textContent = this.value.length;
+      });
+
+      // Edit review button
+      editReviewBtn.addEventListener('click', function () {
+        const starRating = document.getElementById('starRating');
+        const existingReview = document.getElementById('existingReview');
+
+        // Enable editing
+        starRating.style.pointerEvents = 'auto';
+        starRating.style.opacity = '1';
+        reviewText.disabled = false;
+        reviewText.style.opacity = '1';
+        submitBtn.disabled = false;
+        submitBtn.style.display = 'block';
+        submitBtn.textContent = 'Update Review';
+
+        // Hide existing review display
+        existingReview.style.display = 'none';
+      });
+
+      // Submit review
+      submitBtn.addEventListener('click', async function () {
+        if (selectedRating === 0) {
+          showStatus('Please select a rating', 'error');
+          return;
+        }
+
+        if (!reviewText.value.trim()) {
+          showStatus('Please write a review', 'error');
+          return;
+        }
+
+        try {
+          submitBtn.disabled = true;
+          submitBtn.textContent = 'Submitting...';
+
+          const token = localStorage.getItem('token');
+          const response = await fetch('https://hiero-resume-backend.onrender.com/api/review', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              rating: selectedRating,
+              reviewText: reviewText.value.trim()
+            })
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            showStatus(hasExistingReview ? 'Review updated successfully! 🎉' : 'Thank you for your review! 🎉', 'success');
+            hasExistingReview = true;
+
+            // Reload review after short delay
+            setTimeout(() => {
+              loadUserReview();
+            }, 1500);
+          } else {
+            showStatus(data.error || 'Failed to submit review', 'error');
+            submitBtn.disabled = false;
+            submitBtn.textContent = hasExistingReview ? 'Update Review' : 'Submit Review';
+          }
+        } catch (error) {
+          console.error('Error submitting review:', error);
+          showStatus('Network error. Please try again.', 'error');
+          submitBtn.disabled = false;
+          submitBtn.textContent = hasExistingReview ? 'Update Review' : 'Submit Review';
+        }
+      });
+
+      function showStatus(message, type) {
+        reviewStatus.textContent = message;
+        reviewStatus.className = `review-status ${type}`;
+        reviewStatus.style.display = 'block';
+
+        setTimeout(() => {
+          reviewStatus.style.display = 'none';
+        }, 5000);
+      }
+
+      // Logout functionality
+      const logoutBtn = document.getElementById('logoutBtn');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', async function () {
+          try {
+            const token = localStorage.getItem('token');
+
+            // Call backend logout endpoint
+            await fetch('/logout', {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              }
+            });
+          } catch (error) {
+            console.error('Logout error:', error);
+          } finally {
+            // Clear local storage and redirect
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/login';
+          }
+        });
+      }
     });
 
-    function selectRole(role) {
-      localStorage.setItem("role", role);
-      window.location.href = `.login.html?type=${role}`;
-    }
+    // Initialize dashboard when page loads
+    window.addEventListener('load', initializeDashboard);
   </script>
 </body>
 
