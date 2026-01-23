@@ -19,7 +19,7 @@ const PORT = process.env.PORT || 2816;
 // CONFIG & PATHS
 // ======================
 const fs = require('fs');
-const landingDirPath = path.join(__dirname, 'hiero last prtotype', 'jss', 'hiero', 'hiero last');
+const landingDirPath = path.join(__dirname, 'hiero-prototype', 'jss', 'hiero', 'hiero last');
 const resumeBuilderPath = path.join(landingDirPath, 'public');
 const STARTED_HTML = path.join(landingDirPath, 'started.html');
 
@@ -176,7 +176,7 @@ app.get(['/solve', '/solve.html'], (req, res) => res.sendFile(path.join(resumeBu
 app.use(express.static(landingDirPath, { index: false }));
 app.use(express.static(resumeBuilderPath, { index: false }));
 app.use('/public', express.static(resumeBuilderPath));
-app.use(express.static(path.join(__dirname, 'login system'), { index: false }));
+app.use(express.static(path.join(__dirname, 'login-system'), { index: false }));
 
 // ======================
 // SPA FALLBACK & FINAL ANALYSIS FALLBACK
