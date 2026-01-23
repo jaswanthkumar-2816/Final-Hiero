@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Parser Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .upload-area {
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .upload-area:hover {
+            border-color: #007bff;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            white-space: pre-wrap;
+        }
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .info {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        #fileInput {
+            margin: 10px 0;
+        }
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #007bff;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-left: 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <h1>PDF Parser Test</h1>
+    <p>This tool tests the improved PDF parsing functionality. Upload a PDF file to see how well the text extraction works.</p>
+    
+    <div class="upload-area">
+        <input type="file" id="fileInput" accept=".pdf" />
+        <br><br>
+        <button id="testBtn" onclick="testPdf()">Test PDF Parsing</button>
+        <span id="spinner" class="spinner" style="display: none;"></span>
+    </div>
+    
+    <div id="result"></div>
+
+    <script>
+        async function testPdf() {
+            const fileInput = document.getElementById('fileInput');
+            const result = document.getElementById('result');
+            const testBtn = document.getElementById('testBtn');
+            const spinner = document.getElementById('spinner');
+            
+            if (!fileInput.files[0]) {
+                result.innerHTML = '<div class="error">Please select a PDF file first.</div>';
+                return;
+            }
+            
+            const file = fileInput.files[0];
+            if (!file.type.includes('pdf')) {
+                result.innerHTML = '<div class="error">Please select a valid PDF file.</div>';
+                return;
+            }
+            
+            testBtn.disabled = true;
+            spinner.style.display = 'inline-block';
+            result.innerHTML = '<div class="info">Processing PDF...</div>';
+            
+            try {
+                const formData = new FormData();
+                formData.append('pdf', file);
+                
+                const response = await fetch('/api/debug-pdf', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    result.innerHTML = `
+                        <div class="success">
+                            <h3>✅ PDF Parsing Successful!</h3>
+                            <p><strong>Filename:</strong> ${data.data.filename}</p>
+                            <p><strong>File Size:</strong> ${data.data.fileSize} bytes</p>
+                            <p><strong>Extracted Text Length:</strong> ${data.data.extractedLength} characters</p>
+                            <h4>Preview (first 500 characters):</h4>
+                            <div style="background: #f8f9fa; padding: 10px; border-radius: 3px; font-family: monospace; max-height: 200px; overflow-y: auto;">
+                                ${data.data.preview}
+                            </div>
+                            <h4>Full Text:</h4>
+                            <div style="background: #f8f9fa; padding: 10px; border-radius: 3px; font-family: monospace; max-height: 300px; overflow-y: auto;">
+                                ${data.data.fullText}
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    result.innerHTML = `
+                        <div class="error">
+                            <h3>❌ PDF Parsing Failed</h3>
+                            <p><strong>Error:</strong> ${data.error}</p>
+                            <p><strong>Details:</strong> ${data.details || 'No additional details'}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                result.innerHTML = `
+                    <div class="error">
+                        <h3>❌ Request Failed</h3>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                    </div>
+                `;
+            } finally {
+                testBtn.disabled = false;
+                spinner.style.display = 'none';
+            }
+        }
+        
+        // Enable drag and drop
+        const uploadArea = document.querySelector('.upload-area');
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#007bff';
+        });
+        
+        uploadArea.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#ccc';
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#ccc';
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0 && files[0].type.includes('pdf')) {
+                document.getElementById('fileInput').files = files;
+            }
+        });
+    </script>
+</body>
+</html>

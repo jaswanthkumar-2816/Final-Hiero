@@ -1,0 +1,11 @@
+We are seeking a Full Stack / Backend Engineer.
+Requirements:
+- Strong JavaScript / TypeScript
+- React & Node.js
+- AWS cloud services (EC2, Lambda, S3)
+- Docker & Kubernetes
+- CI/CD (GitHub Actions / Jenkins)
+- SQL and database optimization
+- API development (REST, GraphQL a plus)
+- Problem solving, system design fundamentals
+Nice to have: Python, Machine Learning basics, Monitoring.

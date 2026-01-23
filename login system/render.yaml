@@ -1,0 +1,31 @@
+services:
+  - type: web
+    name: hiero-login
+    env: node
+    region: oregon
+    plan: free
+    branch: main
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PUPPETEER_SKIP_CHROMIUM_DOWNLOAD
+        value: true
+      - key: PUPPETEER_EXECUTABLE_PATH
+        value: /usr/bin/chromium-browser
+      # Add your other environment variables in Render Dashboard
+      # - PORT (auto-provided by Render)
+      # - JWT_SECRET
+      # - GOOGLE_CLIENT_ID
+      # - GOOGLE_CLIENT_SECRET
+      # - GITHUB_CLIENT_ID
+      # - GITHUB_CLIENT_SECRET
+      # - EMAIL_USER
+      # - EMAIL_PASS
+      # - PUBLIC_URL
+      # - GOOGLE_CALLBACK_URL
+      # - GITHUB_CALLBACK_URL
+      # - ALLOWED_ORIGINS
+      # - ADDITIONAL_ORIGINS
+      # - APP_BASE_URL

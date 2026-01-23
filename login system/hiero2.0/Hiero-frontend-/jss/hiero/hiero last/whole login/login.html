@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login | Hiero</title>
+  <link rel="stylesheet" href="login-style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <!-- Font Awesome for icons -->
+  <script src="https://kit.fontawesome.com/4e56cb0e6d.js" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div class="login-wrapper">
+    <!-- Left: Logo Splash -->
+    <div class="login-left">
+      <img src="logohiero.png" alt="Hiero Logo" class="glow-logo">
+    </div>
+
+    <!-- Right: Login Form -->
+    <div class="login-right">
+      <div class="login-box">
+        <h2>Log into your account</h2>
+        
+        <form id="login-form">
+          <input type="text" id="name" name="name" placeholder="Enter username" required>
+          <input type="password" id="password" name="password" placeholder="Enter password" required>
+          <button type="submit" class="btn email-btn">
+            <i class="fas fa-envelope"></i> Login with Email
+          </button>
+        </form>
+
+        <div class="divider">or</div>
+
+        <a href="http://localhost:3000/auth/google" class="btn google-btn">
+          <i class="fab fa-google"></i> Login with Google
+        </a>
+        <a href="http://localhost:3000/auth/github" class="btn github-btn">
+          <i class="fab fa-github"></i> Login with GitHub
+        </a>
+
+        <p class="signup-text">Don’t have an account? <a href="signup.html">Sign up</a></p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  document.getElementById("login-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const name = document.getElementById("name").value.trim();
+    const password = document.getElementById("password").value.trim();
+
+    try {
+      const res = await fetch("http://localhost:3000/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, password })
+      });
+      const result = await res.json();
+      if (res.ok) {
+        alert("Login successful!");
+        localStorage.setItem("token", result.token);
+        console.log("Token saved:", result.token);
+        window.location.href = "dashboard_index.html"; // ✅ Go to dashboard after login
+      } else {
+        alert(result.error || "Login failed");
+      }
+    } catch (err) {
+      alert("Error logging in.");
+      console.error(err);
+    }
+  });
+</script>
+</body>
+</html>

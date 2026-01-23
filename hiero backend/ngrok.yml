@@ -1,0 +1,21 @@
+version: "2"
+authtoken: YOUR_AUTHTOKEN
+
+tunnels:
+  frontend:
+    proto: http
+    addr: 5502
+
+  auth:
+    proto: http
+    addr: 3000
+    host_header: rewrite
+    routes:
+      - path: /auth
+
+  app:
+    proto: http
+    addr: 8082
+    host_header: rewrite
+    routes:
+      - path: /app

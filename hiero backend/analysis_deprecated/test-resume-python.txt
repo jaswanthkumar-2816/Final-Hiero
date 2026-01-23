@@ -1,0 +1,22 @@
+Alex Chen
+Python Developer
+
+Skills:
+- Python (5+ years)
+- Django & Flask
+- Machine Learning (TensorFlow, PyTorch)
+- Data Analysis (Pandas, NumPy)
+- SQL databases (PostgreSQL, MySQL)
+- AWS cloud services
+- Docker & Kubernetes
+- Git version control
+
+Experience:
+- 4 years Python development
+- Built ML models for production
+- Data pipeline development
+- Cloud deployment experience
+
+Education:
+- MS in Computer Science
+- Machine Learning Specialization

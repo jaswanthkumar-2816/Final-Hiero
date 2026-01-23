@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Frontend Issue</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-result { margin: 10px 0; padding: 10px; border: 1px solid #ccc; }
+        .success { background-color: #d4edda; }
+        .error { background-color: #f8d7da; }
+        pre { background-color: #f8f9fa; padding: 10px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>Frontend Debug Tool</h1>
+    
+    <button onclick="testBackend()">Test Backend Response</button>
+    <button onclick="testWithFiles()">Test with Files</button>
+    
+    <div id="results"></div>
+
+    <script>
+        function log(message, isError = false) {
+            const div = document.createElement('div');
+            div.className = `test-result ${isError ? 'error' : 'success'}`;
+            div.innerHTML = message;
+            document.getElementById('results').appendChild(div);
+        }
+
+        async function testBackend() {
+            try {
+                log('Testing backend health...');
+                const healthResponse = await fetch('http://localhost:5001/health');
+                const healthData = await healthResponse.json();
+                log(`Health check: ${JSON.stringify(healthData)}`);
+
+                log('Testing test endpoint...');
+                const testResponse = await fetch('http://localhost:5001/api/test-response');
+                const testData = await testResponse.json();
+                log(`Test response score: ${testData.score}`);
+                log(`Test response data.score: ${testData.data.score}`);
+                log(`<pre>${JSON.stringify(testData, null, 2).substring(0, 500)}...</pre>`);
+
+            } catch (error) {
+                log(`Error: ${error.message}`, true);
+            }
+        }
+
+        async function testWithFiles() {
+            try {
+                log('Testing with actual file upload...');
+                
+                // Create a simple form data with text files
+                const formData = new FormData();
+                
+                // Create blob files (simulating PDF upload)
+                const resumeBlob = new Blob(['Sample resume with Python, JavaScript, React skills'], 
+                    { type: 'application/pdf' });
+                const jdBlob = new Blob(['Job requires Python, Machine Learning, TensorFlow'], 
+                    { type: 'application/pdf' });
+                
+                formData.append('resume', resumeBlob, 'test-resume.pdf');
+                formData.append('jd', jdBlob, 'test-jd.pdf');
+
+                const response = await fetch('http://localhost:5001/api/analyze', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                log(`Response status: ${response.status}`);
+                log(`Response headers: ${JSON.stringify([...response.headers.entries()])}`);
+
+                const data = await response.json();
+                
+                log(`SUCCESS: Analysis completed!`);
+                log(`Score from response.score: ${data.score}`);
+                log(`Score from response.data.score: ${data.data ? data.data.score : 'NO DATA OBJECT'}`);
+                log(`Success flag: ${data.success}`);
+                log(`Missing skills: ${data.missingSkills ? data.missingSkills.join(', ') : 'NO MISSING SKILLS'}`);
+                
+                // Show the structure your frontend should expect
+                log(`<h3>Expected Frontend Code:</h3>
+                <pre>
+fetch('/api/analyze', { method: 'POST', body: formData })
+  .then(response => response.json())
+  .then(data => {
+    console.log('Score:', data.score);  // Should be: ${data.score}
+    console.log('Or score:', data.data.score);  // Should be: ${data.data ? data.data.score : 'undefined'}
+    // Update your UI here
+    document.getElementById('score').textContent = data.score + '%';
+  });
+                </pre>`);
+
+            } catch (error) {
+                log(`Error during file test: ${error.message}`, true);
+                console.error('Full error:', error);
+            }
+        }
+    </script>
+</body>
+</html>

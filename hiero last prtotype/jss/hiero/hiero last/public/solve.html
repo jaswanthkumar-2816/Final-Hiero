@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Solve Problem | Hiero</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --primary: #04ab07;
+      --primary-hover: #06c719;
+      --primary-glow: rgba(4, 171, 7, 0.4);
+      --bg-deep: #020402;
+      --bg-card: rgba(13, 15, 13, 0.85);
+      --bg-editor: #0a0c0a;
+      --text-main: #e6edf3;
+      --text-muted: #94a3b8;
+      --border: rgba(4, 171, 7, 0.25);
+      --accent: #58a6ff;
+      --easy: #3fb950;
+      --medium: #d29922;
+      --hard: #f85149;
+      --card-radius: 20px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-deep);
+      background-image:
+        radial-gradient(at 0% 0%, rgba(4, 171, 7, 0.15) 0, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(4, 150, 7, 0.1) 0, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(10, 100, 10, 0.1) 0, transparent 50%),
+        radial-gradient(at 0% 100%, rgba(4, 171, 7, 0.15) 0, transparent 50%);
+      background-attachment: fixed;
+      color: var(--text-main);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+      opacity: 0.03;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    @keyframes gradientFlow {
+      0% {
+        background-position: 0% 50%;
+      }
+
+      100% {
+        background-position: 50% 50%;
+      }
+    }
+
+    /* Premium Loading Overlay */
+    #loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--bg-deep);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .loading-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 32px;
+    }
+
+    .huge-logo {
+      height: 120px;
+      width: 120px;
+      filter: drop-shadow(0 0 30px var(--primary-glow));
+      animation: breathe 3s ease-in-out infinite;
+    }
+
+    @keyframes breathe {
+
+      0%,
+      100% {
+        transform: scale(1);
+        filter: drop-shadow(0 0 20px var(--primary-glow));
+      }
+
+      50% {
+        transform: scale(1.15);
+        filter: drop-shadow(0 0 50px var(--primary-glow));
+      }
+    }
+
+    .loading-text {
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--primary);
+      opacity: 0.8;
+      animation: pulseText 2s ease-in-out infinite;
+    }
+
+    @keyframes pulseText {
+
+      0%,
+      100% {
+        opacity: 0.4;
+      }
+
+      50% {
+        opacity: 0.9;
+      }
+    }
+
+    /* Header */
+    header {
+      height: 60px;
+      padding: 0 24px;
+      background: rgba(2, 4, 2, 0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      z-index: 100;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: var(--primary);
+    }
+
+    .brand img {
+      height: 32px;
+      width: 32px;
+    }
+
+    .nav-actions {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .btn-back {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-back:hover {
+      color: var(--text-main);
+      border-color: var(--text-muted);
+    }
+
+    /* Layout */
+    main {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Left Panel: Description */
+    .description-panel {
+      width: 40%;
+      min-width: 350px;
+      border-right: 1px solid var(--border);
+      padding: 32px;
+      overflow-y: auto;
+      background: var(--bg-card);
+      backdrop-filter: blur(10px);
+    }
+
+    @media (max-width: 768px) {
+      main {
+        flex-direction: column;
+        overflow-y: auto;
+      }
+
+      .description-panel {
+        width: 100%;
+        min-width: 0;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        height: auto;
+        overflow-y: visible;
+      }
+
+      .editor-panel {
+        width: 100%;
+        height: 500px;
+      }
+
+      body {
+        overflow-y: auto;
+      }
+    }
+
+    .meta {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .difficulty-badge {
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .difficulty-badge.easy {
+      color: var(--easy);
+      background: rgba(63, 185, 80, 0.1);
+      border: 1px solid rgba(63, 185, 80, 0.2);
+    }
+
+    .difficulty-badge.medium {
+      color: var(--medium);
+      background: rgba(210, 153, 34, 0.1);
+      border: 1px solid rgba(210, 153, 34, 0.2);
+    }
+
+    .difficulty-badge.hard {
+      color: var(--hard);
+      background: rgba(248, 81, 73, 0.1);
+      border: 1px solid rgba(248, 81, 73, 0.2);
+    }
+
+    .problem-title {
+      font-size: 24px;
+      font-weight: 700;
+      margin: 0 0 20px 0;
+    }
+
+    .problem-text {
+      line-height: 1.6;
+      color: var(--text-main);
+      font-size: 15px;
+    }
+
+    .hint-box {
+      margin-top: 32px;
+      padding: 16px;
+      background: rgba(88, 166, 255, 0.05);
+      border-left: 4px solid var(--accent);
+      border-radius: 4px;
+    }
+
+    .hint-box h4 {
+      margin: 0 0 8px 0;
+      color: var(--accent);
+      font-size: 14px;
+    }
+
+    .hint-box p {
+      margin: 0;
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    /* Right Panel: Editor */
+    .editor-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-editor);
+    }
+
+    .editor-toolbar {
+      height: 48px;
+      padding: 0 16px;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .lang-select {
+      background: var(--bg-dark);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 13px;
+      outline: none;
+    }
+
+    .editor-container {
+      flex: 1;
+      position: relative;
+    }
+
+    #code-editor {
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      color: #9cdcfe;
+      border: none;
+      padding: 24px;
+      font-family: 'Fira Code', monospace;
+      font-size: 14px;
+      resize: none;
+      outline: none;
+      line-height: 1.5;
+    }
+
+    /* Footer / Console */
+    .editor-footer {
+      height: 60px;
+      padding: 0 24px;
+      background: var(--bg-card);
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+
+    .btn-run {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      padding: 8px 18px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .btn-run:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .btn-submit {
+      background: var(--primary);
+      color: #000;
+      border: none;
+      padding: 8px 24px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    .btn-submit:hover {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+
+    .output-panel {
+      height: 180px;
+      background: var(--bg-dark);
+      border-top: 1px solid var(--border);
+      padding: 20px;
+      overflow-y: auto;
+      display: none;
+      /* Shown on run */
+    }
+
+    .output-panel h5 {
+      margin: 0 0 10px 0;
+      font-size: 12px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .output-content {
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      color: #dcdcdc;
+      white-space: pre-wrap;
+    }
+
+    /* Success Overlay */
+    #success-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      text-align: center;
+    }
+
+    .success-card {
+      background: var(--bg-card);
+      border: 1px solid var(--primary);
+      padding: 48px;
+      border-radius: 20px;
+      box-shadow: 0 0 40px rgba(13, 255, 0, 0.2);
+    }
+
+    .success-card h2 {
+      color: var(--primary);
+      font-size: 32px;
+      margin-bottom: 12px;
+    }
+
+    .success-card p {
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="loading-overlay">
+    <div class="loading-content">
+      <img src="logohiero copy.png" alt="Hiero" class="huge-logo">
+      <div class="loading-text">Preparing your path</div>
+    </div>
+  </div>
+
+  <header>
+    <div class="brand">
+      <img src="logohiero copy.png" alt="Logo">
+      <span>HIERO.SOLVE</span>
+    </div>
+    <div class="nav-actions">
+      <button class="btn-back" onclick="location.href='learn.html' + window.location.search">← Back to
+        Dashboard</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="description-panel">
+      <div class="meta">
+        <span id="problem-difficulty" class="difficulty-badge">Unknown</span>
+      </div>
+      <h1 id="problem-title" class="problem-title">Loading...</h1>
+      <div id="problem-description" class="problem-text">
+        Preparing your coding challenge...
+      </div>
+
+      <!-- Integrated Tutor Section -->
+      <div class="chat-card"
+        style="margin-top: 40px; height: 350px; border-radius: 12px; background: rgba(255,255,255,0.02); display: flex; flex-direction: column; border: 1px solid var(--border);">
+        <div class="chat-header"
+          style="padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px;">
+          <div class="status-dot" style="width: 8px; height: 8px; background: var(--primary); border-radius: 50%;">
+          </div>
+          <h3 style="font-size: 14px; margin: 0;">Hiero Tutor</h3>
+        </div>
+        <div class="chat-body" id="chat-container"
+          style="padding: 12px; gap: 12px; flex: 1; overflow-y: auto; display: flex; flex-direction: column;">
+          <div class="msg bot"
+            style="font-size: 13px; padding: 10px 14px; background: rgba(255,255,255,0.05); border-radius: 12px; align-self: flex-start;">
+            Stuck on this problem? Ask me for a hint or an explanation!
+          </div>
+        </div>
+        <div class="chat-footer" style="padding: 10px; border-top: 1px solid var(--border); display: flex; gap: 8px;">
+          <input type="text" class="chat-input" id="chat-input" placeholder="Ask for a hint..."
+            style="padding: 8px 12px; font-size: 13px; flex: 1; background: #000; border: 1px solid var(--border); color: #fff; border-radius: 8px; outline: none;">
+          <button class="btn-send" id="chat-send-btn"
+            style="background: var(--primary); color: #000; border: none; padding: 0 12px; border-radius: 8px; font-weight: 700; cursor: pointer;">Ask</button>
+        </div>
+      </div>
+
+      <div class="hint-box" id="hint-box" style="display:none; margin-top: 24px;">
+        <h4>💡 Hint</h4>
+        <p id="hint-text"></p>
+      </div>
+    </div>
+
+    <div class="editor-panel">
+      <div class="editor-toolbar">
+        <select class="lang-select" id="language-selector">
+          <option value="python">Python 3</option>
+          <option value="javascript">JavaScript (Node)</option>
+          <option value="java">Java 11</option>
+          <option value="cpp">C++ 17</option>
+        </select>
+        <button class="btn-back" onclick="toggleHint()" id="hint-toggle">Show Hint</button>
+      </div>
+
+      <div class="editor-container">
+        <textarea id="code-editor" spellcheck="false" placeholder="# Write your solution here..."></textarea>
+      </div>
+
+      <div class="output-panel" id="output-panel">
+        <h5>Console Output</h5>
+        <div id="output-content" class="output-content"></div>
+      </div>
+
+      <div class="editor-footer">
+        <button class="btn-run" onclick="runCode()">Run Code</button>
+        <button class="btn-submit" onclick="submitCode()">Submit Solution</button>
+      </div>
+    </div>
+  </main>
+
+  <div id="success-overlay">
+    <div class="success-card">
+      <h2>Challenge Mastered! 🎉</h2>
+      <p>Congratulations! Your solution passed all test cases perfectly.</p>
+      <button class="btn-submit" onclick="location.href='learn.html'">Perfect, Take me back</button>
+    </div>
+  </div>
+
+  <script>
+    const templates = {
+      python: "def solve():\n    # Write your logic here\n    print(\"Hello World\")\n\nsolve()",
+      javascript: "function solve() {\n    // Write your logic here\n    console.log(\"Hello World\");\n}\n\nsolve();",
+      java: "public class Solution {\n    public static void main(String[] args) {\n        System.out.println(\"Hello World\");\n    }\n}",
+      cpp: "#include <iostream>\nusing namespace std;\n\nint main() {\n    cout << \"Hello World\" << endl;\n    return 0;\n}"
+    };
+
+    function initialize() {
+      const params = new URLSearchParams(window.location.search);
+      currentSkill = params.get('skill') || 'Default';
+      const title = params.get('title') || 'Practice Problem';
+      const desc = params.get('description') || 'Try to solve this coding challenge.';
+      const hint = params.get('hint');
+      const diff = params.get('difficulty') || 'easy';
+
+      document.getElementById('problem-title').innerText = title;
+      document.getElementById('problem-description').innerText = desc;
+
+      const diffBadge = document.getElementById('problem-difficulty');
+      diffBadge.innerText = diff;
+      diffBadge.className = `difficulty-badge ${diff.toLowerCase()}`;
+
+      if (hint) {
+        document.getElementById('hint-text').innerText = hint;
+      } else {
+        document.getElementById('hint-toggle').style.display = 'none';
+      }
+
+      const langSelect = document.getElementById('language-selector');
+      const editor = document.getElementById('code-editor');
+
+      langSelect.addEventListener('change', (e) => {
+        editor.value = templates[e.target.value];
+        editor.placeholder = `# Write your ${e.target.value} solution here...`;
+      });
+
+      // Initial template
+      editor.value = templates.python;
+
+      // Hide loading after a short delay
+      setTimeout(() => {
+        const loading = document.getElementById('loading-overlay');
+        if (loading) {
+          loading.style.opacity = '0';
+          setTimeout(() => loading.style.display = 'none', 600);
+        }
+      }, 1000);
+
+      initChat();
+    }
+
+    async function initChat() {
+      const chatInput = document.getElementById('chat-input');
+      const chatSendBtn = document.getElementById('chat-send-btn');
+
+      const sendMessage = async () => {
+        const text = chatInput.value.trim();
+        if (!text) return;
+
+        appendMessage('user', text);
+        chatInput.value = '';
+
+        try {
+          const res = await fetch('/api/analysis/ask', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              skill: currentSkill,
+              context: `User is currently solving the problem: ${document.getElementById('problem-title').innerText}. Description: ${document.getElementById('problem-description').innerText}`,
+              question: text
+            })
+          });
+          const data = await res.json();
+          typeMessage(data.answer);
+        } catch (err) {
+          appendMessage('bot', 'Sorry, I encountered an error. Please try again.');
+        }
+      };
+
+      chatSendBtn.onclick = sendMessage;
+      chatInput.onkeypress = (e) => { if (e.key === 'Enter') sendMessage(); };
+    }
+
+    function appendMessage(sender, text) {
+      const chatContainer = document.getElementById('chat-container');
+      const div = document.createElement('div');
+      div.className = `msg ${sender}`;
+      div.innerText = text;
+      div.style.fontSize = '13px';
+      div.style.padding = '10px 14px';
+      div.style.borderRadius = '12px';
+      div.style.alignSelf = sender === 'user' ? 'flex-end' : 'flex-start';
+      div.style.background = sender === 'user' ? 'var(--primary)' : 'rgba(255,255,255,0.05)';
+      div.style.color = sender === 'user' ? '#000' : '#fff';
+
+      chatContainer.appendChild(div);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    function typeMessage(text) {
+      const chatContainer = document.getElementById('chat-container');
+      const div = document.createElement('div');
+      div.className = 'msg bot';
+      div.style.fontSize = '13px';
+      div.style.padding = '10px 14px';
+      div.style.background = 'rgba(255,255,255,0.05)';
+      div.style.borderRadius = '12px';
+      div.style.alignSelf = 'flex-start';
+      chatContainer.appendChild(div);
+
+      let i = 0;
+      const interval = setInterval(() => {
+        if (i < text.length) {
+          div.innerText += text.charAt(i);
+          i++;
+          chatContainer.scrollTop = chatContainer.scrollHeight;
+        } else {
+          clearInterval(interval);
+        }
+      }, 15);
+    }
+
+    function toggleHint() {
+      const box = document.getElementById('hint-box');
+      const btn = document.getElementById('hint-toggle');
+      if (box.style.display === 'none') {
+        box.style.display = 'block';
+        btn.innerText = 'Hide Hint';
+      } else {
+        box.style.display = 'none';
+        btn.innerText = 'Show Hint';
+      }
+    }
+
+    async function runCode() {
+      const outputPanel = document.getElementById('output-panel');
+      const outputContent = document.getElementById('output-content');
+      outputPanel.style.display = 'block';
+      outputContent.innerText = "Running...\n";
+
+      // Simulate run delay
+      setTimeout(() => {
+        outputContent.innerText += "✓ Compilation successful\n✓ Running test case 1...\nOutput: Hello World\n\n[Finished in 0.2s]";
+      }, 800);
+    }
+
+    function submitCode() {
+      const outputPanel = document.getElementById('output-panel');
+      const outputContent = document.getElementById('output-content');
+      outputPanel.style.display = 'block';
+      outputContent.innerText = "Submitting against hidden test cases...\n";
+
+      setTimeout(() => {
+        document.getElementById('success-overlay').style.display = 'flex';
+      }, 1500);
+    }
+
+    document.addEventListener('DOMContentLoaded', initialize);
+  </script>
+</body>
+
+</html>

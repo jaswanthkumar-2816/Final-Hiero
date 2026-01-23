@@ -1,0 +1,20 @@
+Data Scientist Position
+
+Required Skills:
+- Python programming (3+ years)
+- Machine Learning frameworks (TensorFlow, PyTorch)
+- Data Analysis and Visualization
+- SQL and database management
+- Statistical analysis and modeling
+- Pandas, NumPy, Scikit-learn
+- Experience with cloud platforms (AWS, GCP)
+- Big Data technologies (Spark, Hadoop)
+
+Experience Required:
+- 4+ years in data science
+- Strong mathematical background
+- Experience with deep learning
+- Knowledge of MLOps practices
+
+Education:
+- MS/PhD in Data Science, Statistics, or related field

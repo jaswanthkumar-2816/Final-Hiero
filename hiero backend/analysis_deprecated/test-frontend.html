@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Backend</title>
+</head>
+<body>
+    <h1>Test Backend Connection</h1>
+    <button onclick="testHealth()">Test Health</button>
+    <button onclick="testAnalyze()">Test Analyze</button>
+    <div id="output"></div>
+
+    <script>
+        function log(message) {
+            document.getElementById('output').innerHTML += message + '<br>';
+        }
+
+        async function testHealth() {
+            try {
+                log('Testing health endpoint...');
+                const response = await fetch('http://localhost:5001/health');
+                const data = await response.json();
+                log('Health Response: ' + JSON.stringify(data));
+            } catch (error) {
+                log('Health Error: ' + error.message);
+            }
+        }
+
+        async function testAnalyze() {
+            try {
+                log('Testing analyze endpoint...');
+                const formData = new FormData();
+                
+                // Create dummy files
+                const dummyFile = new Blob(['dummy content'], { type: 'application/pdf' });
+                formData.append('resume', dummyFile, 'resume.pdf');
+                formData.append('jd', dummyFile, 'jd.pdf');
+
+                const response = await fetch('http://localhost:5001/api/analyze', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+                
+                const rawText = await response.text();
+                log('Raw response: ' + rawText.substring(0, 200));
+                
+                try {
+                    const data = JSON.parse(rawText);
+                    log('Analyze Response: ' + JSON.stringify(data));
+                } catch (parseError) {
+                    log('JSON Parse Error: ' + parseError.message);
+                    log('Raw response was: ' + rawText);
+                }
+            } catch (error) {
+                log('Analyze Error: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+Sarah Johnson
+Frontend Developer
+
+Skills:
+- JavaScript (ES6+)
+- React.js
+- HTML5 & CSS3
+- TypeScript
+- Node.js
+- Git/GitHub
+- Responsive Design
+- REST APIs
+
+Experience:
+- 2 years frontend development
+- Built 5+ web applications
+- Strong in UI/UX design
+- Experience with modern frameworks
+
+Education:
+- Bachelor's in Computer Science
+- JavaScript Certification

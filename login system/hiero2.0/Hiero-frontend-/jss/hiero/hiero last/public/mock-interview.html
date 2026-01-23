@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Hiero – Premium Voice Interview</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ────────────────────── Core ────────────────────── */
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;font-family:'Inter',sans-serif;background:#000;color:#fff;overflow:hidden;position:relative;}
+canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;}
+
+/* ────────────────────── Layout ────────────────────── */
+.container{max-width:520px;margin:auto;padding:1.5rem;display:flex;flex-direction:column;align-items:center;height:100vh;justify-content:center;gap:2rem;position:relative;z-index:10;}
+.logo{position:absolute;top:1.5rem;right:1.5rem;display:flex;align-items:center;gap:.5rem;background:rgba(8,164,8,.9);padding:.4rem .9rem;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.5);}
+.logo img{height:36px;width:36px;object-fit:contain;}
+.logo span{font-weight:700;font-size:1.1rem;letter-spacing:1px;}
+
+/* ────────────────────── Welcome ────────────────────── */
+.welcome{text-align:center;animation:fadeIn .8s ease-out;}
+.welcome h1{font-size:2.5rem;color:#09c006;margin-bottom:.4rem;}
+.welcome p{font-size:1.1rem;color:#aaa;margin-bottom:2rem;}
+.start-btn{background:linear-gradient(135deg,#08c108,#169f04);border:none;color:#fff;padding:1rem 2.8rem;font-size:1.25rem;font-weight:600;border-radius:14px;cursor:pointer;box-shadow:0 6px 24px rgba(8,193,8,.4);transition:transform .2s,box-shadow .2s;}
+.start-btn:hover{transform:translateY(-4px);box-shadow:0 10px 30px rgba(8,193,8,.6);}
+
+/* ────────────────────── Interview ────────────────────── */
+.interview{display:none;flex-direction:column;align-items:center;gap:2rem;width:100%;animation:fadeIn .6s;position:relative;}
+.interview.active{display:flex;}
+
+/* Siri‑wave (full‑width, bottom) */
+.siri-wave{position:fixed;bottom:0;left:0;width:100%;height:40vh;display:none;z-index:1;}
+.siri-wave.active{display:block;}
+.wave-layer{position:absolute;bottom:0;left:0;width:100%;height:100%;
+  background:linear-gradient(90deg,transparent,#6e44ff,#00f5ff,#00ff88,transparent);
+  clip-path:url(#siriPath);
+  animation:flow 3.8s infinite linear;
+  opacity:.85;
+}
+@keyframes flow{0%{transform:translateX(-100%);}100%{transform:translateX(100%);}}
+
+/* Avatar */
+.avatar-wrapper{position:relative;width:180px;height:180px;z-index:10;margin-top:auto;}
+.avatar{width:100%;height:100%;border-radius:50%;background:radial-gradient(circle at 30% 30%,#08c108,#169f04);
+  box-shadow:0 0 60px rgba(8,193,8,.9),inset 0 0 40px rgba(255,255,255,.2);
+  display:flex;align-items:center;justify-content:center;overflow:hidden;
+  animation:pulse 2.5s infinite;
+}
+@keyframes pulse{
+  0%,100%{box-shadow:0 0 60px rgba(8,193,8,.9),inset 0 0 40px rgba(255,255,255,.2);}
+  50%{box-shadow:0 0 80px rgba(8,193,8,1.2),inset 0 0 50px rgba(255,255,255,.3);}
+}
+.avatar::before{content:'';position:absolute;width:75%;height:75%;background:rgba(255,255,255,.3);border-radius:50%;top:12%;left:12%;
+  animation:shimmer 3s infinite;
+}
+@keyframes shimmer{0%{transform:translateX(-130%);}100%{transform:translateX(130%);}}
+.face{font-size:4.5rem;}
+
+/* Subtitles & User Transcript */
+.subtitle{font-size:1.45rem;line-height:1.6;text-align:center;padding:0 2rem;max-width:90%;opacity:0;transition:opacity .4s;z-index:10;}
+.subtitle.show{opacity:1;}
+.user-transcript{font-size:1.1rem;color:#aaa;margin-top:.5rem;opacity:0;transition:opacity .3s;}
+.user-transcript.show{opacity:1;}
+
+/* Progress */
+.progress-wrap{width:100%;max-width:380px;z-index:10;}
+.progress-bar{height:6px;background:rgba(8,193,8,.2);border-radius:3px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,#08c108,#169f04);width:0%;transition:width .5s ease;box-shadow:0 0 15px rgba(8,193,8,.7);}
+
+/* Mic */
+.mic-wrap{display:flex;flex-direction:column;align-items:center;gap:.9rem;z-index:10;}
+.mic-btn{width:90px;height:90px;border-radius:50%;background:#08c108;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:all .3s;box-shadow:0 0 40px rgba(8,193,8,.9);
+}
+.mic-btn.listening{background:#ff3b3b;box-shadow:0 0 50px rgba(255,59,59,1.1);animation:micPulse 1.2s infinite;}
+@keyframes micPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.18);}}
+.mic-icon{font-size:2.5rem;}
+.mic-status{font-size:1rem;color:#aaa;}
+
+/* End button */
+.end-btn{background:transparent;border:2px solid #08c108;color:#08c108;padding:.75rem 2rem;border-radius:14px;font-weight:600;cursor:pointer;transition:all .3s;z-index:10;}
+.end-btn:hover{background:#08c108;color:#fff;}
+
+/* ────────────────────── Completion ────────────────────── */
+.completion{display:none;text-align:center;width:100%;animation:fadeIn .6s;z-index:10;}
+.completion.active{display:block;}
+.completion h2{font-size:2.3rem;color:#09c006;margin-bottom:1rem;}
+.feedback{background:rgba(8,193,8,.12);border-radius:14px;padding:1.8rem;margin-top:1.5rem;text-align:left;
+  font-size:1.05rem;line-height:1.7;color:#ddd;border-left:4px solid #08c108;
+}
+.feedback h3{color:#08c108;margin-bottom:1rem;text-align:center;font-size:1.3rem;}
+.restart-btn{margin-top:1.8rem;background:#08c108;color:#fff;padding:1rem 2.2rem;border:none;border-radius:14px;font-weight:600;cursor:pointer;transition:background .2s;}
+.restart-btn:hover{background:#169f04;}
+
+/* ────────────────────── Fallback Text Input ────────────────────── */
+.fallback-input{display:none;gap:.5rem;margin-top:1rem;z-index:10;}
+.fallback-input input{flex:1;padding:.6rem 1rem;border-radius:8px;border:1px solid #08c108;background:#111;color:#fff;font-size:1rem;}
+.fallback-input button{padding:.6rem 1.2rem;background:#08c108;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;}
+
+/* ────────────────────── Animations ────────────────────── */
+@keyframes fadeIn{from{opacity:0;transform:translateY(15px);}to{opacity:1;transform:none;}}
+
+/* ────────────────────── Responsive ────────────────────── */
+@media (max-width:480px){
+  .container{padding:1rem;}
+  .welcome h1{font-size:2.1rem;}
+  .avatar-wrapper{width:150px;height:150px;}
+  .subtitle{font-size:1.25rem;}
+  .mic-btn{width:80px;height:80px;}
+}
+</style>
+</head>
+<body>
+
+<canvas id="bg"></canvas>
+
+<!-- SVG clip‑path for Siri wave -->
+<svg class="wave-clip" width="0" height="0">
+  <defs>
+    <clipPath id="siriPath">
+      <path d="M0,150 Q80,90 160,150 T320,150 T480,150 T640,150 T800,150 T960,150 T1120,150 V300 H0 Z" fill="#fff"/>
+    </clipPath>
+  </defs>
+</svg>
+
+<div class="logo">
+  <img src="logohiero copy.png" alt="Hiero">
+  <span>HIERO</span>
+</div>
+
+<div class="container">
+
+  <!-- Welcome -->
+  <section class="welcome" id="welcome">
+    <h1>AI Voice Interview</h1>
+    <p>Talk naturally — the AI listens and responds in real‑time.</p>
+    <button class="start-btn" onclick="startInterview()">Start Interview</button>
+  </section>
+
+  <!-- Interview -->
+  <section class="interview" id="interview">
+    <div class="avatar-wrapper">
+      <div class="avatar"><div class="face">Robot</div></div>
+    </div>
+
+    <div class="subtitle" id="subtitle"></div>
+    <div class="user-transcript" id="userTranscript"></div>
+
+    <div class="progress-wrap">
+      <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+    </div>
+
+    <div class="mic-wrap">
+      <button class="mic-btn" id="micBtn" onclick="toggleMic()">
+        <div class="mic-icon" id="micIcon">Microphone</div>
+      </button>
+      <div class="mic-status" id="micStatus">Tap to speak</div>
+    </div>
+
+    <!-- Fallback typing -->
+    <div class="fallback-input" id="fallbackInput">
+      <input type="text" placeholder="Type your answer…" id="textInput">
+      <button onclick="sendText()">Send</button>
+    </div>
+
+    <button class="end-btn" onclick="endInterview()">End Interview</button>
+  </section>
+
+  <!-- Completion -->
+  <section class="completion" id="completion">
+    <h2>Interview Complete!</h2>
+    <p>Here’s your AI‑powered feedback:</p>
+    <div class="feedback" id="feedback">
+      <h3>Performance Summary</h3>
+      <div id="fbContent"></div>
+    </div>
+    <button class="restart-btn" onclick="restartInterview()">Try Again</button>
+    <button class="end-btn" onclick="goBack()">Back</button>
+  </section>
+
+  <!-- Siri wave -->
+  <div class="siri-wave" id="siriWave">
+    <div class="wave-layer"></div>
+  </div>
+
+</div>
+
+<script>
+// ────────────────────── CONFIG ──────────────────────
+const GROK_KEY = 'YOUR_GROK_API_KEY_HERE';   // Get free at https://x.ai/api
+const GROK_URL = 'https://api.x.ai/v1/chat/completions';
+const MODEL    = 'grok-beta';
+
+// ────────────────────── Speech & Recognition ──────────────────────
+let synth = window.speechSynthesis;
+let recognition;
+let listening = false;
+let conversation = [];
+let qCount = 0;
+const MAX_Q = 5;
+
+// Initialise recognition
+function initRec() {
+  const Rec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!Rec) {
+    document.getElementById('fallbackInput').style.display = 'flex';
+    return;
+  }
+  recognition = new Rec();
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  recognition.lang = 'en-US';
+
+  recognition.onresult = e => {
+    let final = '', interim = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      const t = e.results[i][0].transcript;
+      if (e.results[i].isFinal) final += t + ' ';
+      else interim += t;
+    }
+    if (final) userSpoke(final.trim());
+    else document.getElementById('userTranscript').textContent = interim;
+  };
+
+  recognition.onerror = () => {
+    stopMic();
+    speak("Sorry, I didn’t catch that. Could you repeat?");
+  };
+  recognition.onend = () => { if (listening) recognition.start(); };
+}
+initRec();
+
+// ────────────────────── TTS + Subtitles ──────────────────────
+function speak(text) {
+  synth.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.rate = 0.95; u.pitch = 1.02;
+  const voices = synth.getVoices();
+  u.voice = voices.find(v=>v.name.includes('Google')||v.name.includes('David'))||voices[0];
+
+  const sub = document.getElementById('subtitle');
+  sub.textContent = text; sub.classList.add('show');
+
+  u.onend = () => {
+    sub.classList.remove('show');
+    document.getElementById('userTranscript').classList.remove('show');
+    if (qCount < MAX_Q) startMic();
+  };
+  synth.speak(u);
+}
+
+// ────────────────────── Grok API ──────────────────────
+async function askGrok(userMsg) {
+  conversation.push({role:'user',content:userMsg});
+  try {
+    const r = await fetch(GROK_URL,{
+      method:'POST',
+      headers:{'Authorization':`Bearer ${GROK_KEY}`,'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:MODEL,
+        messages:[
+          {role:'system',content:`You are a friendly AI interviewer. Ask ONE clear question at a time. After ${MAX_Q} questions say "That's all! Great job." Keep replies ≤2 sentences. Use natural, warm tone.`},
+          ...conversation
+        ],
+        temperature:0.7,
+        max_tokens:130
+      })
+    });
+    const d = await r.json();
+    const ai = d.choices[0].message.content.trim();
+    conversation.push({role:'assistant',content:ai});
+    return ai;
+  } catch(e){ return "Connection issue – let’s continue."; }
+}
+
+// ────────────────────── User speech / text → AI ──────────────────────
+async function userSpoke(txt) {
+  if (!txt) return;
+  stopMic();
+  document.getElementById('userTranscript').textContent = `You: ${txt}`;
+  document.getElementById('userTranscript').classList.add('show');
+  const ai = await askGrok(txt);
+  speak(ai);
+  qCount++;
+  updateProgress();
+  if (qCount >= MAX_Q) setTimeout(endInterview,4000);
+}
+function sendText() {
+  const input = document.getElementById('textInput');
+  const txt = input.value.trim();
+  if (txt) { input.value = ''; userSpoke(txt); }
+}
+
+// ────────────────────── Mic controls ──────────────────────
+function toggleMic(){ listening ? stopMic() : startMic(); }
+function startMic(){
+  if (!recognition) return;
+  listening = true; recognition.start();
+  const b=document.getElementById('micBtn'),i=document.getElementById('micIcon'),s=document.getElementById('micStatus'),w=document.getElementById('siriWave');
+  b.classList.add('listening'); i.textContent='Microphone On'; s.textContent='Listening…'; w.classList.add('active');
+}
+function stopMic(){
+  listening = false; if(recognition) recognition.stop();
+  const b=document.getElementById('micBtn'),i=document.getElementById('micIcon'),s=document.getElementById('micStatus'),w=document.getElementById('siriWave');
+  b.classList.remove('listening'); i.textContent='Microphone'; s.textContent='Tap to speak'; w.classList.remove('active');
+}
+
+// ────────────────────── Progress ──────────────────────
+function updateProgress(){
+  const p = (qCount/MAX_Q)*100;
+  document.getElementById('progress').style.width = p+'%';
+}
+
+// ────────────────────── Interview flow ──────────────────────
+function startInterview(){
+  document.getElementById('welcome').style.display='none';
+  document.getElementById('interview').classList.add('active');
+  conversation=[]; qCount=0; updateProgress();
+  speak("Hi! I’m your AI interview coach. Ready for the first question?");
+  setTimeout(()=>speak("Tell me about yourself and your background."),2200);
+}
+async function endInterview(){
+  stopMic();
+  document.getElementById('interview').classList.remove('active');
+  document.getElementById('completion').classList.add('active');
+
+  const summary = await askGrok("Summarize the interview and give detailed feedback on communication, content, confidence, and areas to improve. Be encouraging.");
+  document.getElementById('fbContent').innerHTML = summary.replace(/\n/g,'<br>');
+}
+function restartInterview(){
+  document.getElementById('completion').classList.remove('active');
+  document.getElementById('welcome').style.display='block';
+}
+function goBack(){ location.href='result.html'; }
+
+// ────────────────────── Background particles ──────────────────────
+const canvas = document.getElementById('bg'), ctx = canvas.getContext('2d');
+canvas.width = innerWidth; canvas.height = innerHeight;
+window.addEventListener('resize',()=>{canvas.width=innerWidth;canvas.height=innerHeight;});
+
+let particles = [];
+class Particle{
+  constructor(){this.reset();}
+  reset(){
+    this.x=Math.random()*canvas.width;
+    this.y=Math.random()*canvas.height;
+    this.size=Math.random()*1.5+0.5;
+    this.speedX=(Math.random()-0.5)*0.4;
+    this.speedY=(Math.random()-0.5)*0.4;
+    this.opacity=Math.random()*0.2+0.05;
+  }
+  update(){
+    this.x+=this.speedX; this.y+=this.speedY;
+    if(this.x<0||this.x>canvas.width||this.y<0||this.y>canvas.height) this.reset();
+  }
+  draw(){
+    ctx.fillStyle=`rgba(8,193,8,${this.opacity})`;
+    ctx.beginPath(); ctx.arc(this.x,this.y,this.size,0,Math.PI*2); ctx.fill();
+  }
+}
+for(let i=0;i<120;i++) particles.push(new Particle());
+function animate(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  particles.forEach(p=>{p.update();p.draw();});
+  requestAnimationFrame(animate);
+}
+animate();
+</script>
+</body>
+</html>

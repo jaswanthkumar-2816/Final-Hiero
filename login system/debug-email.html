@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Email Verification Debug - Hiero</title>
+  <style>
+    body { 
+      font-family: Arial, sans-serif; 
+      max-width: 600px; 
+      margin: 50px auto; 
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    h1 { color: #1D4ED8; }
+    .alert { 
+      padding: 15px; 
+      border-radius: 5px; 
+      margin: 20px 0; 
+    }
+    .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+    .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+    button {
+      background: #1D4ED8;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 10px 0;
+    }
+    button:hover { background: #1e40af; }
+    input { 
+      width: 100%; 
+      padding: 10px; 
+      margin: 10px 0; 
+      border: 1px solid #ddd; 
+      border-radius: 5px; 
+    }
+    code {
+      background: #f8f9fa;
+      padding: 2px 5px;
+      border-radius: 3px;
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔧 Email Verification Debug Tool</h1>
+    
+    <div class="alert info">
+      <strong>📧 Email Issue Debugging</strong><br>
+      If verification emails aren't arriving, use this tool to manually verify accounts.
+    </div>
+
+    <h3>Create Test Account & Get Verification Link</h3>
+    <input type="text" id="name" placeholder="Full Name" value="Test User">
+    <input type="email" id="email" placeholder="Email Address" value="">
+    <input type="password" id="password" placeholder="Password" value="password123">
+    <button onclick="createAccount()">Create Account & Get Verification Link</button>
+
+    <div id="result"></div>
+
+    <hr style="margin: 30px 0;">
+
+    <h3>Manual Email Verification</h3>
+    <p>If you have a verification token, paste it here:</p>
+    <input type="text" id="token" placeholder="Verification Token">
+    <button onclick="verifyToken()">Verify Email</button>
+
+    <div id="verifyResult"></div>
+  </div>
+
+  <script>
+    async function createAccount() {
+      const name = document.getElementById('name').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      
+      if (!name || !email || !password) {
+        alert('Please fill all fields');
+        return;
+      }
+
+      try {
+        const response = await fetch('http://localhost:3000/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, password })
+        });
+
+        const result = await response.json();
+        
+        if (response.ok) {
+          document.getElementById('result').innerHTML = `
+            <div class="alert success">
+              <strong>✅ Account Created!</strong><br>
+              Email: <code>${result.email}</code><br>
+              ${result.verificationLink ? `
+                <br><strong>🔗 Manual Verification Link:</strong><br>
+                <a href="${result.verificationLink}" target="_blank" style="word-break: break-all; color: #1D4ED8;">
+                  ${result.verificationLink}
+                </a>
+                <br><br>
+                <button onclick="window.open('${result.verificationLink}', '_blank')">Verify Email Now</button>
+              ` : 'Check your email for verification link'}
+            </div>
+          `;
+        } else {
+          document.getElementById('result').innerHTML = `
+            <div class="alert" style="background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;">
+              <strong>❌ Error:</strong> ${result.error}
+            </div>
+          `;
+        }
+      } catch (error) {
+        document.getElementById('result').innerHTML = `
+          <div class="alert" style="background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;">
+            <strong>❌ Network Error:</strong> ${error.message}
+          </div>
+        `;
+      }
+    }
+
+    async function verifyToken() {
+      const token = document.getElementById('token').value;
+      
+      if (!token) {
+        alert('Please enter a verification token');
+        return;
+      }
+
+      try {
+        const response = await fetch(`http://localhost:3000/verify-email?token=${token}`);
+        
+        if (response.redirected) {
+          document.getElementById('verifyResult').innerHTML = `
+            <div class="alert success">
+              <strong>✅ Email Verified Successfully!</strong><br>
+              You can now login to your account.
+            </div>
+          `;
+        } else {
+          const result = await response.json();
+          document.getElementById('verifyResult').innerHTML = `
+            <div class="alert" style="background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;">
+              <strong>❌ Verification Failed:</strong> ${result.error || 'Unknown error'}
+            </div>
+          `;
+        }
+      } catch (error) {
+        document.getElementById('verifyResult').innerHTML = `
+          <div class="alert" style="background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;">
+            <strong>❌ Network Error:</strong> ${error.message}
+          </div>
+        `;
+      }
+    }
+  </script>
+</body>
+</html>
