@@ -5,6 +5,7 @@
   "main": "gateway.js",
   "scripts": {
     "start": "node gateway.js",
+    "build": "echo '📦 Building Hiero Unified Gateway...' && npm install --verbose",
     "dev": "nodemon gateway.js"
   },
   "dependencies": {
