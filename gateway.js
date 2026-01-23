@@ -15,9 +15,21 @@ const PORT = process.env.PORT || 2816;
 // ======================
 // CONFIG & PATHS
 // ======================
+// ======================
+// CONFIG & PATHS
+// ======================
+const fs = require('fs');
 const landingDirPath = path.join(__dirname, 'hiero last prtotype', 'jss', 'hiero', 'hiero last');
 const resumeBuilderPath = path.join(landingDirPath, 'public');
 const STARTED_HTML = path.join(landingDirPath, 'started.html');
+
+// Debug check for directory existence (Critical for Render/Linux)
+console.log('--- Path Verification ---');
+console.log('Current Dir:', __dirname);
+console.log('Landing Path:', landingDirPath, fs.existsSync(landingDirPath) ? '✅' : '❌');
+console.log('Public Path:', resumeBuilderPath, fs.existsSync(resumeBuilderPath) ? '✅' : '❌');
+console.log('Started HTML:', STARTED_HTML, fs.existsSync(STARTED_HTML) ? '✅' : '❌');
+console.log('------------------------');
 
 app.set('trust proxy', 1);
 app.use(compression());
