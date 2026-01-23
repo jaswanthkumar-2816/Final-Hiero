@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validation Fix Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-case { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        input { margin: 5px 0; padding: 8px; width: 300px; }
+        button { padding: 10px 15px; margin: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Resume Builder Validation Fix Test</h1>
+    
+    <div class="test-case">
+        <h3>Test Case 1: Valid Email and Phone</h3>
+        <p>These should be accepted:</p>
+        <input type="email" placeholder="john.doe@example.com" value="john.doe@example.com">
+        <input type="tel" pattern="[\+]?[\d\s\-\(\)\.]+" placeholder="+1 555-123-4567" value="+1 555-123-4567">
+        <button onclick="testValidation(this.parentElement)">Test</button>
+        <div class="result"></div>
+    </div>
+    
+    <div class="test-case">
+        <h3>Test Case 2: Invalid Email</h3>
+        <p>This should show validation error:</p>
+        <input type="email" placeholder="invalid-email" value="invalid-email">
+        <input type="tel" pattern="[\+]?[\d\s\-\(\)\.]+" placeholder="+1 555-123-4567" value="+1 555-123-4567">
+        <button onclick="testValidation(this.parentElement)">Test</button>
+        <div class="result"></div>
+    </div>
+    
+    <div class="test-case">
+        <h3>Test Case 3: Invalid Phone</h3>
+        <p>This should show validation error:</p>
+        <input type="email" placeholder="john@example.com" value="john@example.com">
+        <input type="tel" pattern="[\+]?[\d\s\-\(\)\.]+" placeholder="invalid-phone!" value="invalid-phone!">
+        <button onclick="testValidation(this.parentElement)">Test</button>
+        <div class="result"></div>
+    </div>
+    
+    <div class="test-case">
+        <h3>Test Case 4: Empty Fields</h3>
+        <p>This should show required field errors:</p>
+        <input type="email" placeholder="email" value="" required>
+        <input type="tel" pattern="[\+]?[\d\s\-\(\)\.]+" placeholder="phone" value="" required>
+        <button onclick="testValidation(this.parentElement)">Test</button>
+        <div class="result"></div>
+    </div>
+
+    <script>
+        function testValidation(container) {
+            const inputs = container.querySelectorAll('input');
+            const resultDiv = container.querySelector('.result');
+            let errors = [];
+            let allValid = true;
+            
+            inputs.forEach(input => {
+                if (!input.checkValidity()) {
+                    allValid = false;
+                    errors.push(`${input.type}: ${input.validationMessage}`);
+                    input.style.borderColor = '#e53e3e';
+                } else {
+                    input.style.borderColor = '#28a745';
+                }
+            });
+            
+            if (allValid) {
+                resultDiv.innerHTML = '<span style="color: green;">✅ All fields are valid!</span>';
+                container.classList.add('success');
+                container.classList.remove('error');
+            } else {
+                resultDiv.innerHTML = '<span style="color: red;">❌ Validation errors:<br>• ' + errors.join('<br>• ') + '</span>';
+                container.classList.add('error');
+                container.classList.remove('success');
+            }
+        }
+    </script>
+</body>
+</html>

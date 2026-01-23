@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skip Functionality - Direct Test</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px; 
+            background: linear-gradient(135deg, #000501 0%, #2cc42c 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        
+        .container { max-width: 1200px; margin: 0 auto; }
+        
+        .test-header {
+            text-align: center;
+            padding: 40px;
+            background: rgb(3,2,2);
+            border-radius: 24px;
+            margin-bottom: 30px;
+        }
+        
+        .form-section { 
+            margin-bottom: 50px; 
+            position: relative; 
+            transition: all 0.4s ease;
+            background: rgb(3,2,2);
+            border-radius: 24px;
+            padding: 35px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            border: 1px solid rgba(45,196,44,0.15);
+        }
+        
+        .form-section.skipped { 
+            opacity: 0.4; 
+            pointer-events: none; 
+            max-height: 60px; 
+            overflow: hidden; 
+        }
+        
+        .form-section.skipped .form-content { 
+            display: none; 
+        }
+
+        .section-title {
+            font-size: 2rem; 
+            color: #04ab07ee; 
+            margin-bottom: 30px; 
+            padding-bottom: 16px;
+            border-bottom: 4px solid #0d8705; 
+            display: flex; 
+            align-items: center; 
+            gap: 16px;
+            font-weight: 700; 
+            position: relative; 
+            flex-wrap: wrap;
+        }
+
+        .skip-link {
+            font-size: 0.85rem; 
+            color: #75ea66; 
+            cursor: pointer; 
+            font-weight: 600;
+            text-decoration: underline; 
+            text-underline-offset: 3px; 
+            opacity: 0.8; 
+            margin-left: 8px;
+        }
+        
+        .skip-link:hover { 
+            color: #2ae023; 
+            opacity: 1; 
+        }
+
+        .form-content {
+            padding: 15px 0;
+        }
+
+        .form-group { 
+            margin-bottom: 26px; 
+            position: relative; 
+        }
+
+        label { 
+            display: block; 
+            margin-bottom: 10px; 
+            font-weight: 600; 
+            color: #0fdc2a; 
+            font-size: 15px;
+        }
+
+        input, textarea {
+            width: 100%; 
+            padding: 17px 18px; 
+            border: 2px solid rgba(226,232,240,.25); 
+            border-radius: 16px;
+            font-size: 16px; 
+            background: rgba(255,255,255,.08); 
+            color: #fff; 
+            backdrop-filter: blur(5px);
+            transition: all .3s ease;
+        }
+
+        input:focus, textarea:focus { 
+            outline: none; 
+            border-color: #12ca12; 
+            box-shadow: 0 0 0 4px rgba(18,202,18,.2); 
+            transform: translateY(-1px); 
+            background: rgba(255,255,255,.12); 
+        }
+
+        .test-controls {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .test-btn {
+            background: linear-gradient(135deg, #05b41c 0%, #06c719 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 16px;
+            cursor: pointer;
+            margin: 10px;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .test-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(5,180,28,.4);
+        }
+
+        .status-display {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            font-family: monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .section-icon { 
+            color: #2ae023; 
+            font-size: 1.8rem; 
+            width: 50px; 
+            height: 50px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            background: rgba(42,224,35,.15); 
+            border-radius: 12px; 
+            border: 1px solid rgba(42,224,35,.3); 
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="test-header">
+            <h1>Skip Functionality - Direct Test</h1>
+            <p>This page directly tests the skip functionality without template selection</p>
+        </div>
+
+        <div class="test-controls">
+            <button class="test-btn" onclick="testSkipSummary()">Test Skip Summary</button>
+            <button class="test-btn" onclick="testSkipExperience()">Test Skip Experience</button>
+            <button class="test-btn" onclick="testSkipAll()">Test Skip All Sections</button>
+            <button class="test-btn" onclick="clearAllSkips()">Clear All Skips</button>
+            <button class="test-btn" onclick="checkLocalStorage()">Check localStorage</button>
+        </div>
+
+        <div class="status-display" id="statusDisplay">
+Ready to test skip functionality...
+        </div>
+
+        <!-- Test Sections (copied from actual resume builder) -->
+        
+        <!-- Professional Summary -->
+        <div class="form-section" id="section-summary">
+            <h2 class="section-title">
+                <i class="fas fa-user-tie section-icon"></i> Professional Summary
+                <span class="skip-link" onclick="toggleSection('summary')">Skip this section</span>
+            </h2>
+            <div class="form-content">
+                <div class="form-group">
+                    <label for="summary">Summary</label>
+                    <textarea id="summary" rows="4" placeholder="Brief professional overview..."></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Work Experience -->
+        <div class="form-section" id="section-experience">
+            <h2 class="section-title">
+                <i class="fas fa-briefcase section-icon"></i> Work Experience
+                <span class="skip-link" onclick="toggleSection('experience')">Skip this section</span>
+            </h2>
+            <div class="form-content">
+                <div class="form-group">
+                    <label for="jobTitle">Job Title</label>
+                    <input type="text" id="jobTitle" placeholder="Software Engineer">
+                </div>
+                <div class="form-group">
+                    <label for="company">Company</label>
+                    <input type="text" id="company" placeholder="Company Name">
+                </div>
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea id="description" rows="3" placeholder="Key responsibilities..."></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Education -->
+        <div class="form-section" id="section-education">
+            <h2 class="section-title">
+                <i class="fas fa-graduation-cap section-icon"></i> Education
+                <span class="skip-link" onclick="toggleSection('education')">Skip this section</span>
+            </h2>
+            <div class="form-content">
+                <div class="form-group">
+                    <label for="degree">Degree</label>
+                    <input type="text" id="degree" placeholder="Bachelor of Science">
+                </div>
+                <div class="form-group">
+                    <label for="school">School</label>
+                    <input type="text" id="school" placeholder="University Name">
+                </div>
+            </div>
+        </div>
+
+        <!-- Skills -->
+        <div class="form-section" id="section-skills">
+            <h2 class="section-title">
+                <i class="fas fa-tools section-icon"></i> Skills
+                <span class="skip-link" onclick="toggleSection('skills')">Skip this section</span>
+            </h2>
+            <div class="form-content">
+                <div class="form-group">
+                    <label for="technicalSkills">Technical Skills</label>
+                    <textarea id="technicalSkills" rows="3" placeholder="JavaScript, Python, React..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="softSkills">Soft Skills</label>
+                    <textarea id="softSkills" rows="3" placeholder="Leadership, Communication..."></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function log(message) {
+            const display = document.getElementById('statusDisplay');
+            const timestamp = new Date().toLocaleTimeString();
+            display.textContent += `[${timestamp}] ${message}\n`;
+            display.scrollTop = display.scrollHeight;
+        }
+
+        function testSkipSummary() {
+            log('Testing skip summary section...');
+            toggleSection('summary');
+        }
+
+        function testSkipExperience() {
+            log('Testing skip experience section...');
+            toggleSection('experience');
+        }
+
+        function testSkipAll() {
+            log('Testing skip all sections...');
+            ['summary', 'experience', 'education', 'skills'].forEach(section => {
+                const el = document.getElementById('section-' + section);
+                if (el && !el.classList.contains('skipped')) {
+                    toggleSection(section);
+                }
+            });
+        }
+
+        function clearAllSkips() {
+            log('Clearing all skip states...');
+            ['summary', 'experience', 'education', 'skills'].forEach(section => {
+                const el = document.getElementById('section-' + section);
+                if (el && el.classList.contains('skipped')) {
+                    toggleSection(section);
+                }
+            });
+        }
+
+        function checkLocalStorage() {
+            log('Checking localStorage states...');
+            ['summary', 'experience', 'education', 'skills'].forEach(section => {
+                const state = localStorage.getItem('skip_section_' + section);
+                log(`  ${section}: ${state || 'not set'}`);
+            });
+        }
+
+        // Toggle entire section (copied from resume builder)
+        function toggleSection(section) {
+            const el = document.getElementById('section-' + section);
+            if (!el) {
+                log(`❌ Section element not found for: ${section}`, 'error');
+                return;
+            }
+            
+            const link = el.querySelector('.skip-link');
+            if (!link) {
+                log(`❌ Skip link not found for: ${section}`, 'error');
+                return;
+            }
+            
+            // Toggle the skipped class
+            const isSkipped = el.classList.toggle('skipped');
+            
+            // Update the link text
+            link.textContent = isSkipped ? 'Show section' : 'Skip this section';
+            
+            // Save to localStorage
+            try {
+                localStorage.setItem('skip_section_' + section, isSkipped.toString());
+                log(`✅ Section ${section} is now ${isSkipped ? 'SKIPPED' : 'SHOWN'}`);
+            } catch (error) {
+                log(`❌ Failed to save skip state to localStorage: ${error.message}`, 'error');
+            }
+        }
+
+        // Load saved skip states on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            log('Page loaded, checking for saved skip states...');
+            
+            ['summary', 'experience', 'education', 'skills'].forEach(section => {
+                const savedState = localStorage.getItem('skip_section_' + section);
+                if (savedState === 'true') {
+                    const el = document.getElementById('section-' + section);
+                    const link = el.querySelector('.skip-link');
+                    if (el && link) {
+                        el.classList.add('skipped');
+                        link.textContent = 'Show section';
+                        log(`📋 Restored skip state for ${section}`);
+                    }
+                }
+            });
+            
+            log('🎯 Ready to test! Click the buttons above to test skip functionality.');
+        });
+    </script>
+</body>
+</html>

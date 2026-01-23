@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analysis Test</title>
+    <style>
+        body { background: #0a0a0a; color: #fff; font-family: Arial, sans-serif; padding: 20px; }
+        .result-section { margin: 20px 0; padding: 15px; border: 1px solid #0dff00; border-radius: 8px; }
+        .video-item { color: #0dff00; text-decoration: none; display: block; margin: 8px 0; padding: 8px; background: rgba(13,255,0,0.1); border-radius: 4px; }
+        .problem-item { background: rgba(13, 255, 0, 0.08); padding: 6px 10px; margin: 4px 0; border-radius: 4px; }
+        .debug-panel { position: fixed; bottom: 10px; right: 10px; max-width: 300px; max-height: 400px; overflow: auto; background: rgba(0,0,0,0.9); border: 1px solid #0dff00; padding: 10px; font-size: 10px; }
+        .btn { background: #0dff00; color: #000; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin: 10px; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Real Backend Analysis Test</h1>
+    
+    <button class="btn" onclick="runAnalysisTest()">Test Real Backend Analysis</button>
+    
+    <div id="results"></div>
+    <div id="debug" class="debug-panel" style="display: none;"></div>
+
+    <script>
+        async function runAnalysisTest() {
+            const resultsDiv = document.getElementById('results');
+            const debugDiv = document.getElementById('debug');
+            
+            resultsDiv.innerHTML = '<p>🔄 Running analysis...</p>';
+            
+            try {
+                // Create FormData for the test
+                const formData = new FormData();
+                
+                // Create a mock resume file
+                const resumeBlob = new Blob([`
+John Smith
+Software Engineer
+
+Skills:
+- Python programming
+- Data Analysis  
+- JavaScript
+- API Development
+- Cloud Computing (AWS)
+- Database management
+
+Experience:
+- Built web applications using Python
+- Performed data analysis and visualization
+- Developed REST APIs
+- Worked with cloud infrastructure
+                `], { type: 'text/plain' });
+                
+                formData.append('resume', resumeBlob, 'resume.txt');
+                formData.append('jd_text', 'Senior Python Developer position requiring Machine Learning expertise, Data Analysis skills, API Development, and Cloud Computing knowledge');
+
+                const response = await fetch('http://localhost:5001/api/analyze', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                debugDiv.innerHTML = '<pre>' + JSON.stringify(result, null, 2) + '</pre>';
+                debugDiv.style.display = 'block';
+
+                if (result.success && result.data) {
+                    displayAnalysisResult(result.data);
+                } else {
+                    throw new Error('Invalid response format');
+                }
+
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="result-section"><h3>❌ Error</h3><p>${error.message}</p></div>`;
+                console.error('Analysis test failed:', error);
+            }
+        }
+
+        function displayAnalysisResult(data) {
+            const resultsDiv = document.getElementById('results');
+            let html = '';
+
+            // Score and skills
+            html += `<div class="result-section">
+                <h3>📊 Analysis Results</h3>
+                <p><strong>Score:</strong> ${data.score}%</p>
+                <p><strong>Missing Skills:</strong> ${(data.missingSkills || []).join(', ')}</p>
+                <p><strong>Matched Skills:</strong> ${(data.matchedSkills || data.presentSkills || []).join(', ')}</p>
+            </div>`;
+
+            // Videos section
+            if (data.videos && Object.keys(data.videos).length > 0) {
+                html += `<div class="result-section">
+                    <h3>🎥 Learning Videos (${Object.keys(data.videos).length} languages)</h3>`;
+                
+                for (const [lang, videoList] of Object.entries(data.videos)) {
+                    if (Array.isArray(videoList) && videoList.length > 0) {
+                        html += `<h4>${lang.toUpperCase()}</h4>`;
+                        videoList.slice(0, 2).forEach(video => {
+                            html += `<a href="${video.url}" target="_blank" class="video-item">
+                                ▶️ ${video.title} (${video.duration || 'Duration unknown'})
+                            </a>`;
+                        });
+                    }
+                }
+                html += `</div>`;
+            } else {
+                html += `<div class="result-section">
+                    <h3>❌ No Videos Found</h3>
+                    <p>Videos object: ${JSON.stringify(data.videos)}</p>
+                </div>`;
+            }
+
+            // Problems section
+            if (data.problems && (data.problems.easy || data.problems.medium || data.problems.hard)) {
+                html += `<div class="result-section">
+                    <h3>🧠 Practice Problems</h3>`;
+                
+                ['easy', 'medium', 'hard'].forEach(level => {
+                    if (data.problems[level] && Array.isArray(data.problems[level])) {
+                        html += `<h4>${level.toUpperCase()} (${data.problems[level].length})</h4>`;
+                        data.problems[level].slice(0, 3).forEach(problem => {
+                            html += `<div class="problem-item">${problem}</div>`;
+                        });
+                    }
+                });
+                html += `</div>`;
+            } else {
+                html += `<div class="result-section">
+                    <h3>❌ No Problems Found</h3>
+                    <p>Problems object: ${JSON.stringify(data.problems)}</p>
+                </div>`;
+            }
+
+            // Projects
+            if (data.projectSuggestions && data.projectSuggestions.length > 0) {
+                html += `<div class="result-section">
+                    <h3>💡 Project Suggestions</h3>`;
+                data.projectSuggestions.forEach(project => {
+                    html += `<div class="problem-item">${project}</div>`;
+                });
+                html += `</div>`;
+            }
+
+            resultsDiv.innerHTML = html;
+        }
+    </script>
+</body>
+</html>

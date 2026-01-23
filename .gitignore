@@ -1,0 +1,15 @@
+node_modules/
+.env
+*.log
+uploads/
+temp/
+.DS_Store
+*.pdf
+all_templates_test_*/
+generated_templates_*/
+template_test_output*/
+resume_previews/
+downloaded-resumes/
+hiero-unified-deploy/
+test_oauth_init.js
+test_*.js

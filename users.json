@@ -1,0 +1,27 @@
+[
+  {
+    "id": 1,
+    "name": "Test User",
+    "email": "test@example.com",
+    "password": "$2a$10$MOpr..icHp8o3FQBbbKqwepYoCblA/Wrdzx4fGZUWesGjNqkqQL0a",
+    "emailVerified": true,
+    "signupMethod": "email"
+  },
+  {
+    "id": 2,
+    "googleId": "111669549098836605427",
+    "email": "jaswanthkumarmuthoju@gmail.com",
+    "name": "Jaswanth Kumar",
+    "emailVerified": true,
+    "signupMethod": "google",
+    "picture": "https://lh3.googleusercontent.com/a/ACg8ocL3ajwWFzPTsUQb4QH6Z1DuNGq9Xot5wdUnSI4Q-cRLBDrN94IDSQ=s96-c"
+  },
+  {
+    "id": 3,
+    "name": "Jaswanth kumar",
+    "email": "jas@123",
+    "password": "$2a$10$pQ3pB4.PBLLdERmOE2gEX.BLbL5076L485LG6xLxH281IpWiB9/NS",
+    "emailVerified": false,
+    "signupMethod": "email"
+  }
+]

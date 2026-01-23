@@ -1,0 +1,153 @@
+╔══════════════════════════════════════════════════════════════════╗
+║          🎯 RESUME BUILDER - QUICK REFERENCE CARD                ║
+╚══════════════════════════════════════════════════════════════════╝
+
+📍 BACKEND URL CONFIGURATION
+─────────────────────────────────────────────────────────────────────
+  Default:   http://localhost:5003
+  Override:  localStorage.setItem('BACKEND_URL_OVERRIDE', 'YOUR_URL')
+  Check:     console.log(localStorage.getItem('BACKEND_URL_OVERRIDE'))
+  Clear:     localStorage.removeItem('BACKEND_URL_OVERRIDE')
+
+🚀 START BACKEND SERVER
+─────────────────────────────────────────────────────────────────────
+  cd "hiero backend"
+  npm start
+
+  Expected: Server running on port 5003
+
+📡 API ENDPOINTS
+─────────────────────────────────────────────────────────────────────
+  
+  1. GENERATE RESUME
+     POST http://localhost:5003/generate-resume
+     → Validates data, prepares resume
+     → Returns: { success: true, message: "..." }
+  
+  2. DOWNLOAD RESUME
+     POST http://localhost:5003/download-resume
+     → Generates PDF, returns file
+     → Returns: PDF blob
+
+🎨 BUTTON FUNCTIONS
+─────────────────────────────────────────────────────────────────────
+  
+  "Generate Resume" button:
+    • Validates form fields (name, email, phone)
+    • Checks template selection
+    • Calls POST /generate-resume
+    • Shows success alert
+  
+  "Download Resume" button:
+    • Checks if resume data exists
+    • Calls POST /download-resume
+    • Triggers automatic PDF download
+    • Filename: FullName_template_resume.pdf
+
+🧪 QUICK TESTS
+─────────────────────────────────────────────────────────────────────
+  
+  Test Script:
+    bash test-resume-api.sh
+  
+  Manual cURL:
+    curl -X POST http://localhost:5003/generate-resume \
+      -H "Content-Type: application/json" \
+      -d '{"template":"modern","personalInfo":{"fullName":"Test"}}'
+
+⚠️ COMMON ERRORS & FIXES
+─────────────────────────────────────────────────────────────────────
+  
+  ❌ "Failed to connect to resume generator"
+     → Start backend: cd "hiero backend" && npm start
+  
+  ❌ "Please select a template"
+     → User must choose template from gallery first
+  
+  ❌ CORS error
+     → Check backend has: app.use(cors())
+  
+  ❌ "Please fill in your personal information"
+     → Fill name, email, phone fields
+
+🌐 NGROK SETUP (Optional - for remote access)
+─────────────────────────────────────────────────────────────────────
+  
+  1. Start ngrok:
+     ngrok http 5003
+  
+  2. Copy URL (e.g., https://abc123.ngrok-free.app)
+  
+  3. In browser console:
+     localStorage.setItem('BACKEND_URL_OVERRIDE', 
+       'https://abc123.ngrok-free.app')
+  
+  4. Refresh page
+
+📋 RESUME DATA FORMAT
+─────────────────────────────────────────────────────────────────────
+  {
+    "template": "modern",           // Required
+    "personalInfo": {               // Required
+      "fullName": "...",            // Required
+      "email": "...",               // Required
+      "phone": "...",               // Required
+      "address": "...",             // Optional
+      "linkedin": "...",            // Optional
+      "website": "..."              // Optional
+    },
+    "experience": [...],            // Optional
+    "education": [...],             // Optional
+    "skills": "...",                // Optional
+    "summary": "..."                // Optional
+  }
+
+✨ FEATURES
+─────────────────────────────────────────────────────────────────────
+  ✅ Form validation
+  ✅ Template selection check
+  ✅ Dynamic backend URL (localhost + ngrok)
+  ✅ Proper error messages
+  ✅ Loading button states
+  ✅ Automatic PDF download
+  ✅ Clean filename generation
+  ✅ Console logging for debugging
+
+🔍 DEBUGGING
+─────────────────────────────────────────────────────────────────────
+  
+  Check backend URL:
+    Open browser console → Network tab
+    Click button → Check request URL
+  
+  Check resume data:
+    console.log(JSON.parse(localStorage.getItem('resumeData')))
+  
+  Check backend status:
+    curl http://localhost:5003/health (if health endpoint exists)
+
+💾 FILES UPDATED
+─────────────────────────────────────────────────────────────────────
+  ✅ resume-builder.html
+     • Backend URL configuration
+     • generateResume() function
+     • downloadResume() function
+  
+  📚 Documentation:
+     • RESUME_BUILDER_API_INTEGRATION.md
+     • RESUME_API_VISUAL_SUMMARY.txt
+     • test-resume-api.sh
+
+🎉 YOU'RE ALL SET!
+─────────────────────────────────────────────────────────────────────
+  Your resume builder is now properly connected to the backend API.
+  Both buttons work with full error handling and user feedback!
+
+  Next steps:
+  1. Start backend: cd "hiero backend" && npm start
+  2. Open resume-builder.html
+  3. Fill form and test!
+
+╔══════════════════════════════════════════════════════════════════╗
+║  Need help? Check RESUME_BUILDER_API_INTEGRATION.md             ║
+╚══════════════════════════════════════════════════════════════════╝

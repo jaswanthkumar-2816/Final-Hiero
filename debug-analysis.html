@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Analysis Flow</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        pre { background: #f8f9fa; padding: 15px; border-radius: 5px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>Debug Analysis Flow</h1>
+    
+    <form id="debug-form">
+        <div>
+            <label for="resume">Resume File:</label>
+            <input type="file" id="resume" required>
+        </div>
+        <div>
+            <label for="jd">Job Description File:</label>
+            <input type="file" id="jd" required>
+        </div>
+        <button type="submit">Test Analysis</button>
+    </form>
+    
+    <div id="status"></div>
+    <div id="response"></div>
+    
+    <script>
+    document.getElementById('debug-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const statusDiv = document.getElementById('status');
+        const responseDiv = document.getElementById('response');
+        
+        const resumeFile = document.getElementById('resume').files[0];
+        const jdFile = document.getElementById('jd').files[0];
+        
+        if (!resumeFile || !jdFile) {
+            statusDiv.innerHTML = '<div class="status error">Please select both files</div>';
+            return;
+        }
+        
+        statusDiv.innerHTML = '<div class="status info">🔄 Sending request to backend...</div>';
+        
+        const formData = new FormData();
+        formData.append('resume', resumeFile);
+        formData.append('jd', jdFile);
+        
+        try {
+            console.log('📤 Sending request to:', 'http://localhost:5001/api/analyze');
+            
+            const response = await fetch('http://localhost:5001/api/analyze', {
+                method: 'POST',
+                body: formData
+            });
+            
+            console.log('📥 Response status:', response.status);
+            console.log('📥 Response headers:', [...response.headers.entries()]);
+            
+            const rawText = await response.text();
+            console.log('📥 Raw response:', rawText);
+            
+            let result;
+            try {
+                result = JSON.parse(rawText);
+                console.log('📥 Parsed JSON:', result);
+            } catch (parseError) {
+                console.error('❌ JSON parse error:', parseError);
+                statusDiv.innerHTML = '<div class="status error">❌ Server returned invalid JSON</div>';
+                responseDiv.innerHTML = '<pre>' + rawText + '</pre>';
+                return;
+            }
+            
+            if (result.success && result.data) {
+                statusDiv.innerHTML = '<div class="status success">✅ Analysis successful!</div>';
+                
+                // Store in sessionStorage like the real app
+                sessionStorage.setItem('analysisData', JSON.stringify(result.data));
+                console.log('💾 Stored in sessionStorage:', result.data);
+                
+                // Check if we can retrieve it
+                const stored = sessionStorage.getItem('analysisData');
+                const parsed = JSON.parse(stored);
+                console.log('🔍 Retrieved from sessionStorage:', parsed);
+                
+                responseDiv.innerHTML = `
+                    <h3>Analysis Results:</h3>
+                    <p><strong>Score:</strong> ${result.data.score}%</p>
+                    <p><strong>Missing Skills:</strong> ${result.data.missingSkills.join(', ')}</p>
+                    <p><strong>Skill to Learn First:</strong> ${result.data.skillToLearnFirst}</p>
+                    <p><strong>Project Suggestions:</strong> ${result.data.projectSuggestions.join(', ')}</p>
+                    
+                    <h3>Full Response:</h3>
+                    <pre>${JSON.stringify(result, null, 2)}</pre>
+                    
+                    <button onclick="window.location.href='result.html'">Go to Result Page</button>
+                `;
+            } else {
+                statusDiv.innerHTML = '<div class="status error">❌ Analysis failed</div>';
+                responseDiv.innerHTML = '<pre>' + JSON.stringify(result, null, 2) + '</pre>';
+            }
+            
+        } catch (error) {
+            console.error('❌ Request failed:', error);
+            statusDiv.innerHTML = '<div class="status error">❌ Request failed: ' + error.message + '</div>';
+            responseDiv.innerHTML = '<pre>' + error.stack + '</pre>';
+        }
+    });
+    </script>
+</body>
+</html>
