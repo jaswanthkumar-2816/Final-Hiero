@@ -19,7 +19,7 @@ const PORT = process.env.PORT || 2816;
 // CONFIG & PATHS
 // ======================
 const fs = require('fs');
-const landingDirPath = path.join(__dirname, 'hiero-prototype', 'jss', 'hiero', 'hiero last');
+const landingDirPath = path.join(__dirname, 'hiero-prototype', 'jss', 'hiero', 'hiero-last');
 const resumeBuilderPath = path.join(landingDirPath, 'public');
 const STARTED_HTML = path.join(landingDirPath, 'started.html');
 
