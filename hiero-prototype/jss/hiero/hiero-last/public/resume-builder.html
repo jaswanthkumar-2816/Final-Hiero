@@ -1008,7 +1008,7 @@
                   </div>
                   <div class="checkbox-container">
                     <label>
-                      <input type="checkbox" id="current1"> Currently working here
+                      <input type="checkbox" id="current1" onchange="toggleWorking(this)"> Currently working here
                     </label>
                   </div>
                   <div class="form-group">
@@ -1189,6 +1189,7 @@
         <div class="form-section" id="section-references">
           <h2 class="section-title">
             <i class="fas fa-users section-icon"></i> References
+            <span class="skip-link" onclick="toggleSection('references')">Skip this section</span>
           </h2>
           <div class="form-content">
             <div id="referencesContainer">
@@ -1229,6 +1230,7 @@
         <div class="form-section" id="section-custom">
           <h2 class="section-title">
             <i class="fas fa-edit section-icon"></i> Custom Details
+            <span class="skip-link" onclick="toggleSection('custom')">Skip this section</span>
           </h2>
           <div class="form-content">
             <p style="color: #2ae023; font-size: 14px; margin-bottom: 20px;">
@@ -2403,7 +2405,20 @@
             if (jobs[i]) jobs[i].value = exp.jobTitle || "";
             if (companies[i]) companies[i].value = exp.company || "";
             if (starts[i]) starts[i].value = exp.startDate || "";
-            if (ends[i]) ends[i].value = exp.endDate || "";
+
+            if (ends[i]) {
+              const isPresent = exp.endDate === 'Present' || !exp.endDate;
+              if (isPresent) {
+                const checkbox = expContainer.querySelectorAll('.experience-item')[i].querySelector('input[type="checkbox"]');
+                if (checkbox) {
+                  checkbox.checked = true;
+                  toggleWorking(checkbox);
+                }
+              } else {
+                ends[i].value = exp.endDate || "";
+              }
+            }
+
             if (descs[i]) descs[i].value = (exp.description || exp.responsibilities || "");
           });
         }
@@ -2661,6 +2676,27 @@
       localStorage.setItem('skip_field_' + field, willBeSkipped);
     }
 
+    // Toggle working here checkbox
+    function toggleWorking(checkbox) {
+      const parent = checkbox.closest('.experience-item') || checkbox.closest('.dynamic-item');
+      if (!parent) return;
+      const endDateInput = parent.querySelector('input[name="endDate[]"]');
+      if (endDateInput) {
+        if (checkbox.checked) {
+          endDateInput.style.opacity = '0.5';
+          endDateInput.style.pointerEvents = 'none';
+          endDateInput.disabled = true;
+          endDateInput.value = '';
+          endDateInput.placeholder = 'Present';
+        } else {
+          endDateInput.style.opacity = '1';
+          endDateInput.style.pointerEvents = 'auto';
+          endDateInput.disabled = false;
+          endDateInput.placeholder = '';
+        }
+      }
+    }
+
     // Add Experience / Education
     let expCount = 1, eduCount = 1;
     function addExperience() {
@@ -2680,7 +2716,7 @@
         </div>
         <div class="checkbox-container">
           <label>
-            <input type="checkbox"> Currently working here
+            <input type="checkbox" onchange="toggleWorking(this)"> Currently working here
           </label>
         </div>
         <div class="form-group"><label>Description</label><textarea name="jobDescription[]" rows="4" placeholder="Key achievements..."></textarea></div>
@@ -3169,7 +3205,7 @@
       const templateName = data.template;
 
       overlay.innerHTML = `
-        < div style = "text-align:center;padding:40px;max-width:600px;" >
+        <div style="text-align:center;padding:40px;max-width:600px;">
           <div class="logo-container" style="width:250px;height:250px;margin:0 auto 40px;position:relative;">
             <div class="logo" style="width:100%;height:100%;background:rgba(0,0,0,0.7);border-radius:20px;padding:30px;backdrop-filter:blur(10px);box-shadow:0 20px 60px rgba(0,0,0,0.5);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;">
               <img src="logohiero.png" alt="Hiero Logo" class="logo-img" style="width:100%;height:100%;object-fit:contain;filter:drop-shadow(0px 4px 20px rgba(42,224,35,0.5));position:relative;z-index:2;">
@@ -3184,7 +3220,7 @@
           <div style="margin-top:20px;font-size:14px;opacity:0.6;">
             <i class="fas fa-spinner fa-spin"></i> Processing...
           </div>
-        </div >
+        </div>
         <style>
           .logo::before {
             content: "";
@@ -3314,12 +3350,13 @@
         statusEl.textContent = 'PDF ready!';
         substatusEl.textContent = 'Preparing download...';
 
+        const fileName = `${userName.replace(/[^a-zA-Z0-9]/g, '_')}_${templateName}_resume.pdf`;
         // Download the file with proper error handling
         try {
           const url = window.URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = url;
-          a.download = `${userName.replace(/[^a-zA-Z0-9]/g, '_')}_${templateName} _resume.pdf`;
+          a.download = fileName;
           a.style.display = 'none';
           document.body.appendChild(a);
 
@@ -3347,7 +3384,24 @@
           overlay.style.transition = 'opacity 0.5s ease';
           setTimeout(() => {
             overlay.remove();
-            alert('✅ Resume downloaded successfully!\n\nFile: ' + a.download);
+
+            // Show results section
+            const resultsSection = document.getElementById('resultsSection');
+            if (resultsSection) {
+              resultsSection.style.display = 'block';
+              resultsSection.scrollIntoView({ behavior: 'smooth' });
+            }
+
+            // Hide main layout to focus on results
+            const mainLayout = document.querySelector('.main-layout');
+            const bottomActions = document.querySelector('.bottom-actions');
+            const stepIndicator = document.getElementById('formStepIndicator');
+
+            if (mainLayout) mainLayout.style.display = 'none';
+            if (bottomActions) bottomActions.style.display = 'none';
+            if (stepIndicator) stepIndicator.style.display = 'none';
+
+            alert('✅ Resume downloaded successfully!\n\nFile: ' + fileName);
           }, 500);
         }, 1500);
 
@@ -3452,17 +3506,19 @@
         }
       }
 
-      // Experience (only if not skipped)
       const expSection = document.getElementById('section-experience');
       if (expSection && !expSection.classList.contains('skipped')) {
-        document.querySelectorAll('input[name="jobTitle[]"]').forEach((el, i) => {
-          if (el.value.trim()) {
+        const expItems = document.querySelectorAll('.experience-item');
+        expItems.forEach((item, i) => {
+          const jobTitle = item.querySelector('input[name="jobTitle[]"]')?.value || '';
+          if (jobTitle.trim()) {
+            const current = item.querySelector('input[type="checkbox"]')?.checked || false;
             data.experience.push({
-              jobTitle: el.value,
-              company: document.querySelectorAll('input[name="company[]"]')[i].value,
-              startDate: document.querySelectorAll('input[name="startDate[]"]')[i].value,
-              endDate: document.querySelectorAll('input[name="endDate[]"]')[i].value,
-              description: document.querySelectorAll('textarea[name="jobDescription[]"]')[i].value
+              jobTitle: jobTitle,
+              company: item.querySelector('input[name="company[]"]')?.value || '',
+              startDate: item.querySelector('input[name="startDate[]"]')?.value || '',
+              endDate: current ? 'Present' : (item.querySelector('input[name="endDate[]"]')?.value || ''),
+              description: item.querySelector('textarea[name="jobDescription[]"]')?.value || ''
             });
           }
         });

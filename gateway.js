@@ -81,9 +81,15 @@ app.use(passport.initialize());
 // DATABASE CONNECTION
 // ======================
 if (process.env.MONGODB_URI) {
+    console.log('⏳ Connecting to MongoDB...');
     mongoose.connect(process.env.MONGODB_URI)
-        .then(() => console.log('✅ MongoDB connected'))
-        .catch(err => console.error('❌ MongoDB connection error:', err));
+        .then(() => console.log('✅ MongoDB connected successfully'))
+        .catch(err => {
+            console.error('❌ MongoDB connection error:', err.message);
+            console.error('Check your MONGODB_URI environment variable on Render.');
+        });
+} else {
+    console.warn('⚠️ MONGODB_URI is not defined. Database features will fail!');
 }
 
 // ======================
@@ -103,17 +109,12 @@ app.get('/dashboard', authObj.authenticateToken, (req, res) => {
 // PROXIES & INTEGRATED ROUTES
 // ======================
 
-// Dashboard proxy (port 8082)
-app.use('/dashboard', createProxyMiddleware({
-    target: 'http://localhost:8082',
-    changeOrigin: true,
-    pathRewrite: { '^/dashboard': '' },
-    logLevel: 'warn',
-    onError(err, req, res) {
-        console.error('[Proxy Error] Dashboard:', err.message);
-        if (!res.headersSent) res.status(502).json({ error: 'Dashboard service unavailable' });
-    }
-}));
+// Dashboard Static Serving (Replaces non-functional localhost proxy)
+// This ensures that links like /dashboard/styles.css work correctly.
+app.use('/dashboard', express.static(resumeBuilderPath));
+app.use('/dashboard', express.static(landingDirPath));
+app.use('/public/dashboard', express.static(resumeBuilderPath)); // Fix for nested paths
+
 
 // Resume API proxy (port 5003)
 app.use('/api/resume', createProxyMiddleware({
