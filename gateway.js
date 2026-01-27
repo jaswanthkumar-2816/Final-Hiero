@@ -116,30 +116,14 @@ app.use('/dashboard', express.static(landingDirPath));
 app.use('/public/dashboard', express.static(resumeBuilderPath)); // Fix for nested paths
 
 
-// Resume API proxy (port 5003)
-app.use('/api/resume', createProxyMiddleware({
-    target: 'http://localhost:5003',
-    changeOrigin: true,
-    ws: true,
-    logLevel: 'warn',
-    proxyTimeout: 120000,
-    timeout: 120000,
-    onError(err, req, res) {
-        console.error('[Proxy Error] Resume API:', err.message);
-        if (!res.headersSent) res.status(502).json({ error: 'Resume service unavailable' });
-    }
-}));
+// 📄 Resume API (Integrated!)
+const resumeRouter = require('./routes/resume');
+app.use('/api/resume', resumeRouter);
 
-// Template previews proxy (from resume service)
-app.use('/templates/previews', createProxyMiddleware({
-    target: 'http://localhost:5003',
-    changeOrigin: true,
-    logLevel: 'warn',
-    onError(err, req, res) {
-        console.error('[Proxy Error] Templates:', err.message);
-        if (!res.headersSent) res.status(502).json({ error: 'Template service unavailable' });
-    }
-}));
+// Support templates and preview folder sharing
+app.use('/templates/previews', express.static(path.join(__dirname, 'hiero-backend', 'templates', 'previews')));
+app.use('/dashboard/previews', express.static(path.join(__dirname, 'hiero-backend', 'templates', 'previews')));
+
 
 // Reviews & Admin API (Integrated - No Proxy!)
 const reviewRouter = require('./routes/review');
@@ -204,9 +188,11 @@ app.listen(PORT, () => {
    ⭐️ Review System       → Integrated (Port ${PORT}) [NEW]
    🧠 Analysis System     → Integrated (Port ${PORT})
    
-   📊 External Proxies:
-      - /dashboard        → localhost:8082
-      - /api/resume       → localhost:5003
-      - /templates        → localhost:5003
+   📊 Integrated Systems:
+      - /dashboard        → Serves Static UI
+      - /api/resume       → Native Controller
+      - /api/analysis     → AI Engine
+      - /api/review       → MongoDB Storage
+
 `);
 });

@@ -378,89 +378,10 @@ router.get('/me', authenticateToken, (req, res) => {
 // RESUME ROUTES
 // ======================
 
-router.post('/api/resume/import', upload.single('resume'), async (req, res) => {
-    try {
-        if (!req.file) return res.status(400).json({ success: false, error: 'No file uploaded' });
-
-        console.log('📄 Resume import request received:', req.file.originalname);
-        const text = await extractTextFromPdf(req.file.path);
-        const extractedData = await mapResumeToFormFields(text);
-
-        // Clean up temp file
-        if (fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
-
-        res.json({ success: true, data: extractedData });
-    } catch (error) {
-        console.error('Import error:', error);
-        res.status(500).json({ success: false, error: 'Failed to parse resume', details: error.message });
-    }
+router.post('/logout', (req, res) => {
+    res.json({ message: 'Logged out', action: 'clear_token' });
 });
 
-router.post('/generate-resume', async (req, res) => {
-    res.json({ success: true, message: 'Resume ready', template: req.body.template });
-});
-
-const { generateUnifiedResume } = require('./unifiedTemplates');
-
-// Helper to normalize data for PDFKit templates
-function normalizeDataForPdf(data) {
-    // Basic normalization to ensure fields exist
-    return {
-        ...data,
-        personalInfo: {
-            fullName: data.personalInfo?.fullName || '',
-            email: data.personalInfo?.email || '',
-            phone: data.personalInfo?.phone || '',
-            address: data.personalInfo?.address || '',
-            linkedin: data.personalInfo?.linkedin || '',
-            github: data.personalInfo?.github || '',
-            website: data.personalInfo?.website || ''
-        },
-        experience: Array.isArray(data.experience) ? data.experience : [],
-        education: Array.isArray(data.education) ? data.education : [],
-        projects: Array.isArray(data.projects) ? data.projects : [],
-        technicalSkills: data.technicalSkills || '',
-        softSkills: data.softSkills || '',
-        certifications: data.certifications || [],
-        achievements: data.achievements || [],
-        languages: data.languages || '',
-        hobbies: data.hobbies || '',
-        references: Array.isArray(data.references) ? data.references : [],
-        customDetails: Array.isArray(data.customDetails) ? data.customDetails : []
-    };
-}
-
-router.post('/download-resume', async (req, res) => {
-    try {
-        const resumeData = normalizeDataForPdf(req.body);
-        const template = resumeData.template || 'classic';
-        const filename = (resumeData.personalInfo?.fullName || 'resume').replace(/[^a-z0-9]/gi, '_');
-
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename="${filename}.pdf"`);
-
-        // Generate and pipe directly to response
-        await generateUnifiedResume(resumeData, template, res);
-
-    } catch (error) {
-        console.error('PDF Generation Error:', error);
-        if (!res.headersSent) {
-            res.status(500).json({ error: 'Failed to generate PDF', details: error.message });
-        }
-    }
-});
-
-router.post('/preview-resume', async (req, res) => {
-    try {
-        console.log('🔍 Preview request for template:', req.body.template);
-        const html = generateTemplateHTML(req.body.template || 'classic', req.body);
-        res.setHeader('Content-Type', 'text/html');
-        res.send(html);
-    } catch (error) {
-        console.error('❌ Preview error:', error);
-        res.status(500).json({ error: 'Failed to preview', details: error.message });
-    }
-});
 
 router.post('/logout', (req, res) => {
     res.json({ message: 'Logged out', action: 'clear_token' });
