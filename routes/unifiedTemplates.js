@@ -90,25 +90,34 @@ const TEMPLATE_COLORS = {
         background: '#FFFFFF',
         light: '#555555'
     },
-    // Priya Analytics single-column template (grey top bar)
-    'priya-analytics': {
-        primary: '#000000',
-        secondary: '#333333',
-        accent: '#000000',
+    // Rishi Tech Modern (Professional Tech)
+    'rishi': {
+        primary: '#6366f1', // Indigo
+        secondary: '#1e293b', // Slate 800
+        accent: '#8b5cf6', // Violet
         background: '#FFFFFF',
-        light: '#666666'
+        light: '#64748b' // Slate 500
+    },
+    // Priya Analytics (Structured & Bold)
+    'priya-analytics': {
+        primary: '#0f172a', // Slate 900
+        secondary: '#334155', // Slate 700
+        accent: '#2ae023', // Hiero Green
+        background: '#FFFFFF',
+        light: '#94a3b8' // Slate 400
     }
 };
 
-// Standardized font sizes (consistent across all templates)
+// Standardized font sizes (Refined for ATS and clarity)
 const FONT_SIZES = {
-    name: 24,
-    sectionTitle: 14,
-    jobTitle: 12,
+    name: 22,
+    sectionTitle: 13,
+    jobTitle: 11,
     body: 10,
     contact: 9,
     small: 8
 };
+
 
 // Standardized spacing (consistent across all templates)
 const SPACING = {
@@ -308,147 +317,121 @@ function renderHeader_Modern(doc, data, colors) {
     doc.y = headerHeight + 20;
 }
 
-function renderHeader_Tech(doc, data, colors) {
-    // Dark theme header
-    const { personalInfo } = data;
+function renderHeader_Rishi(doc, data, colors) {
+    const { personalInfo = {} } = data;
 
-    doc.fontSize(FONT_SIZES.name - 2)
+    // Left side: Name and Title
+    doc.fontSize(FONT_SIZES.name)
         .fillColor(colors.primary)
-        .font('Courier-Bold')
-        .text('> ' + (personalInfo.fullName || ''), PAGE_CONFIG.margin, PAGE_CONFIG.margin);
+        .font('Helvetica-Bold')
+        .text(personalInfo.fullName || '', PAGE_CONFIG.margin, PAGE_CONFIG.margin);
 
-    doc.moveDown(0.3);
+    doc.moveDown(0.1);
 
-    doc.fontSize(FONT_SIZES.contact)
-        .fillColor(colors.light)
-        .font('Courier');
-
-    if (personalInfo.email) doc.text('  email: ' + personalInfo.email);
-    if (personalInfo.phone) doc.text('  phone: ' + personalInfo.phone);
-    if (personalInfo.linkedin) doc.text('  linkedin: ' + personalInfo.linkedin);
-
-    doc.moveDown(1.5);
-}
-
-function renderHeader_ATS(doc, data, colors) {
-    // Simple ATS-friendly header
-    const { personalInfo } = data;
-
-    doc.fontSize(FONT_SIZES.name - 4)
-        .fillColor(colors.primary)
-        .font('Times-Bold')
-        .text((personalInfo.fullName || '').toUpperCase(), {
-            align: 'center',
-            width: PAGE_CONFIG.contentWidth
-        });
-
-    doc.moveDown(0.3);
-
+    // Contact Info - Horizontal Bar
     const contact = [
         personalInfo.email,
         personalInfo.phone,
-        personalInfo.address
-    ].filter(Boolean).join(' | ');
+        personalInfo.address,
+        personalInfo.linkedin ? `LinkedIn: ${personalInfo.linkedin}` : '',
+        personalInfo.website ? `Portfolio: ${personalInfo.website}` : ''
+    ].filter(Boolean).join('  |  ');
 
     doc.fontSize(FONT_SIZES.contact)
-        .fillColor(colors.secondary)
-        .font('Times-Roman')
-        .text(contact, {
-            align: 'center',
-            width: PAGE_CONFIG.contentWidth
-        });
+        .fillColor(colors.light)
+        .font('Helvetica')
+        .text(contact, { width: PAGE_CONFIG.contentWidth });
+
+    doc.moveDown(0.5);
+
+    // Accent Line
+    doc.moveTo(PAGE_CONFIG.margin, doc.y)
+        .lineTo(PAGE_CONFIG.margin + PAGE_CONFIG.contentWidth, doc.y)
+        .strokeColor(colors.primary)
+        .lineWidth(1.5)
+        .stroke();
 
     doc.moveDown(1);
 }
 
 function renderHeader_PriyaAnalytics(doc, data, colors) {
     const { personalInfo = {} } = data;
-    const headerHeight = 60;
+    const headerHeight = 70;
 
-    // Light grey bar across the top
+    // Premium Grey bar background
     doc.rect(0, 0, PAGE_CONFIG.width, headerHeight)
-        .fill('#f2f2f2');
+        .fill('#f8fafc');
 
-    // Name
+    // Name - Bold and Slate
     doc.fillColor(colors.primary)
         .font('Helvetica-Bold')
-        .fontSize(FONT_SIZES.name - 2)
-        .text(personalInfo.fullName || '', PAGE_CONFIG.margin, 15, {
-            width: PAGE_CONFIG.contentWidth
-        });
+        .fontSize(FONT_SIZES.name)
+        .text(personalInfo.fullName || '', PAGE_CONFIG.margin, 20);
 
-    // Contact line
-    const contact = [
+    // Right-aligned Contact info
+    const contactParts = [
         personalInfo.email,
         personalInfo.phone,
         personalInfo.address
-    ].filter(Boolean).join(' | ');
+    ].filter(Boolean);
 
-    if (contact) {
-        doc.font('Helvetica')
-            .fontSize(FONT_SIZES.contact)
-            .fillColor(colors.secondary)
-            .text(contact, PAGE_CONFIG.margin, 33, {
-                width: PAGE_CONFIG.contentWidth
-            });
-    }
-
-    // Links (LinkedIn, GitHub, Website)
-    const links = [
-        personalInfo.linkedin ? `LinkedIn: ${personalInfo.linkedin}` : '',
-        personalInfo.github ? `GitHub: ${personalInfo.github}` : '',
-        personalInfo.website ? `Website: ${personalInfo.website}` : ''
-    ].filter(Boolean).join('   ');
-
-    if (links) {
+    let contactY = 22;
+    contactParts.forEach(part => {
         doc.fontSize(FONT_SIZES.contact)
             .fillColor(colors.secondary)
-            .text(links, PAGE_CONFIG.margin, 45, {
-                width: PAGE_CONFIG.contentWidth
-            });
+            .font('Helvetica')
+            .text(part, PAGE_CONFIG.margin, contactY, { align: 'right', width: PAGE_CONFIG.contentWidth });
+        contactY += 12;
+    });
+
+    // Sub-links bar
+    const links = [
+        personalInfo.linkedin ? `IN: ${personalInfo.linkedin}` : '',
+        personalInfo.github ? `GH: ${personalInfo.github}` : '',
+        personalInfo.website ? `WEB: ${personalInfo.website}` : ''
+    ].filter(Boolean).join('   •   ');
+
+    if (links) {
+        doc.fontSize(FONT_SIZES.small)
+            .fillColor(colors.light)
+            .text(links, PAGE_CONFIG.margin, 52);
     }
 
-    doc.y = headerHeight + 20;
+    doc.y = headerHeight + 15;
 }
 
 // ==================== SECTION TITLE RENDERER ====================
 
 function renderSectionTitle(doc, title, colors, template) {
     const spacing = getTemplateSpacing(template);
-    doc.moveDown(0.3);
+    doc.moveDown(0.5);
+
     switch (template) {
+        case 'rishi':
         case 'modern-pro':
-        case 'corporate-ats':
-        case 'elegant-gradient':
             doc.fontSize(FONT_SIZES.sectionTitle)
-                .fillColor(colors.accent)
+                .fillColor(colors.primary)
                 .font('Helvetica-Bold')
-                .text(title);
-            doc.moveTo(PAGE_CONFIG.margin, doc.y + 3)
-                .lineTo(PAGE_CONFIG.margin + 50, doc.y + 3)
+                .text(title.toUpperCase(), { characterSpacing: 1 });
+
+            doc.moveTo(PAGE_CONFIG.margin, doc.y + 2)
+                .lineTo(PAGE_CONFIG.margin + 40, doc.y + 2)
                 .strokeColor(colors.accent)
-                .lineWidth(2)
+                .lineWidth(2.5)
                 .stroke();
             break;
 
-        case 'tech-focus':
-            doc.fontSize(FONT_SIZES.sectionTitle)
-                .fillColor(colors.primary)
-                .font('Courier-Bold')
-                .text('# ' + title);
-            break;
-
-        case 'ats-optimized':
         case 'priya-analytics':
             doc.fontSize(FONT_SIZES.sectionTitle)
                 .fillColor(colors.primary)
                 .font('Helvetica-Bold')
-                .text(title, PAGE_CONFIG.margin, doc.y);
-            // Full-width thin rule just below heading
+                .text(title.toUpperCase());
+
+            // Full width separator line for ATS look
             doc.moveTo(PAGE_CONFIG.margin, doc.y + 2)
                 .lineTo(PAGE_CONFIG.margin + PAGE_CONFIG.contentWidth, doc.y + 2)
-                .strokeColor(colors.primary)
-                .lineWidth(0.8)
+                .strokeColor('#cbd5e1')
+                .lineWidth(0.5)
                 .stroke();
             break;
 
@@ -458,7 +441,7 @@ function renderSectionTitle(doc, title, colors, template) {
                 .font('Helvetica-Bold')
                 .text(title);
     }
-    doc.moveDown(spacing.paragraphGap / 10);
+    doc.moveDown(0.4);
 }
 
 // ==================== MAIN TEMPLATE GENERATOR ====================
@@ -483,27 +466,19 @@ async function generateUnifiedResume(data, templateId, outStream) {
 
             // Render header based on template
             switch (template) {
-                case 'minimal':
-                    renderHeader_Minimal(doc, data, colors);
-                    break;
-                case 'modern-pro':
-                case 'portfolio-style':
-                case 'creative-bold':
-                    renderHeader_Modern(doc, data, colors);
-                    break;
-                case 'tech-focus':
-                    renderHeader_Tech(doc, data, colors);
-                    break;
-                case 'ats-optimized':
-                case 'corporate-ats':
-                    renderHeader_ATS(doc, data, colors);
+                case 'rishi':
+                    renderHeader_Rishi(doc, data, colors);
                     break;
                 case 'priya-analytics':
                     renderHeader_PriyaAnalytics(doc, data, colors);
                     break;
+                case 'minimal':
+                    renderHeader_Minimal(doc, data, colors);
+                    break;
                 default:
                     renderHeader_Classic(doc, data, colors);
             }
+
 
             // Render sections in standardized order
             SECTION_ORDER.forEach(sectionKey => {

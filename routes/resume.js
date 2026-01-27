@@ -181,10 +181,84 @@ router.post('/download-resume', authenticateToken, async (req, res) => {
         res.setHeader('Content-Disposition', `attachment; filename="${name}_Hiero.pdf"`);
         await generateUnifiedResume(data, data.template || 'classic', res);
     } catch (error) {
-        console.error('Download error:', error);
+        console.error('Download PDF error:', error);
         if (!res.headersSent) res.status(500).json({ error: 'Failed to generate PDF' });
     }
 });
+
+router.post('/download-docx', authenticateToken, async (req, res) => {
+    try {
+        const data = req.body;
+        const name = (data.personalInfo?.fullName || 'Resume').replace(/\s+/g, '_');
+
+        // Generate Word session content (Word-compatible HTML)
+        const html = generateWordHTML(data);
+
+        res.setHeader('Content-Type', 'application/msword');
+        res.setHeader('Content-Disposition', `attachment; filename="${name}_Hiero.doc"`);
+        res.send(html);
+    } catch (error) {
+        console.error('Download Word error:', error);
+        if (!res.headersSent) res.status(500).json({ error: 'Failed to generate Word document' });
+    }
+});
+
+// Helper for Word generation
+function generateWordHTML(data) {
+    const { personalInfo = {}, experience = [], education = [], projects = [], technicalSkills = '', softSkills = '', summary = '' } = data;
+
+    return `
+    <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+    <head><meta charset='utf-8'><title>Resume</title><style>
+        body { font-family: 'Arial', sans-serif; line-height: 1.4; color: #333; }
+        .header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 20px; }
+        .name { font-size: 24pt; font-weight: bold; margin: 0; }
+        .contact { font-size: 10pt; color: #666; }
+        .section-title { font-size: 14pt; font-weight: bold; color: #2ae023; border-bottom: 1px solid #eee; margin-top: 20px; margin-bottom: 10px; text-transform: uppercase; }
+        .item-title { font-size: 11pt; font-weight: bold; }
+        .item-meta { font-size: 10pt; color: #666; font-style: italic; }
+        .content { font-size: 10pt; margin-bottom: 10px; }
+        ul { margin-top: 5px; }
+        li { margin-bottom: 3px; }
+    </style></head>
+    <body>
+        <div class='header'>
+            <p class='name'>${personalInfo.fullName || 'RESUME'}</p>
+            <p class='contact'>${[personalInfo.email, personalInfo.phone, personalInfo.address].filter(Boolean).join(' | ')}</p>
+        </div>
+        
+        ${summary ? `<div class='section-title'>Professional Summary</div><div class='content'>${summary}</div>` : ''}
+        
+        <div class='section-title'>Experience</div>
+        ${experience.map(exp => `
+            <div style='margin-bottom: 15px;'>
+                <span class='item-title'>${exp.jobTitle}</span> | <span class='item-meta'>${exp.company} (${exp.startDate} - ${exp.endDate})</span>
+                <div class='content'>${exp.description ? `<ul>${exp.description.split('\n').filter(l => l.trim()).map(l => `<li>${l.replace(/^[\*-•]\s*/, '')}</li>`).join('')}</ul>` : ''}</div>
+            </div>
+        `).join('')}
+
+        <div class='section-title'>Education</div>
+        ${education.map(edu => `
+            <div style='margin-bottom: 10px;'>
+                <span class='item-title'>${edu.degree}</span> | <span class='item-meta'>${edu.school} (${edu.gradYear})</span>
+                ${edu.gpa ? `<div class='content'>GPA: ${edu.gpa}</div>` : ''}
+            </div>
+        `).join('')}
+
+        ${technicalSkills ? `<div class='section-title'>Technical Skills</div><div class='content'>${technicalSkills}</div>` : ''}
+        ${softSkills ? `<div class='section-title'>Soft Skills</div><div class='content'>${softSkills}</div>` : ''}
+
+        <div class='section-title'>Projects</div>
+        ${Array.isArray(projects) ? projects.map(proj => `
+            <div style='margin-bottom: 10px;'>
+                <span class='item-title'>${proj.name}</span> | <span class='item-meta'>${proj.technologies}</span>
+                <div class='content'>${proj.description}</div>
+            </div>
+        `).join('') : `<div class='content'>${projects}</div>`}
+    </body>
+    </html>`;
+}
+
 
 router.get('/preview-pdf', async (req, res) => {
     try {
