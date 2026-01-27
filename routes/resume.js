@@ -159,6 +159,33 @@ router.post('/template', authenticateToken, async (req, res) => {
 
 // --- Generation & Download ---
 
+router.get('/health', (req, res) => res.json({ status: 'ok', service: 'resume-integrated' }));
+
+router.post('/preview-resume', authenticateToken, async (req, res) => {
+    try {
+        const data = req.body;
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', 'inline; filename=resume-preview.pdf');
+        await generateUnifiedResume(data, data.template || 'classic', res);
+    } catch (error) {
+        console.error('Preview error:', error);
+        res.status(500).send('Generation failed');
+    }
+});
+
+router.post('/download-resume', authenticateToken, async (req, res) => {
+    try {
+        const data = req.body;
+        const name = (data.personalInfo?.fullName || 'Resume').replace(/\s+/g, '_');
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="${name}_Hiero.pdf"`);
+        await generateUnifiedResume(data, data.template || 'classic', res);
+    } catch (error) {
+        console.error('Download error:', error);
+        if (!res.headersSent) res.status(500).json({ error: 'Failed to generate PDF' });
+    }
+});
+
 router.get('/preview-pdf', async (req, res) => {
     try {
         const userId = req.query.userId;
@@ -185,6 +212,7 @@ router.get('/download', authenticateToken, async (req, res) => {
         if (!res.headersSent) res.status(500).json({ error: 'Failed to generate PDF' });
     }
 });
+
 
 router.get('/templates', (req, res) => {
     const templates = [
