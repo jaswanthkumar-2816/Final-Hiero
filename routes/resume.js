@@ -203,61 +203,100 @@ router.post('/download-docx', authenticateToken, async (req, res) => {
     }
 });
 
-// Helper for Word generation
+// Helper for Word generation (Refined to match the 'Jhon Smith' template)
 function generateWordHTML(data) {
-    const { personalInfo = {}, experience = [], education = [], projects = [], technicalSkills = '', softSkills = '', summary = '' } = data;
+    const { personalInfo = {}, experience = [], education = [], projects = [], technicalSkills = '', softSkills = '', summary = '', achievements = '' } = data;
+
+    // Mapping keys to perfect titles
+    const titles = {
+        summary: 'CARRIER OBJECTIVE',
+        education: 'EDUCATION',
+        projects: 'PROJECTS',
+        technicalSkills: 'TECHNICAL STRENGTHS',
+        experience: 'WORK EXPERIENCE',
+        achievements: 'ACADEMIC ACHIEVEMENTS',
+        softSkills: 'PERSONAL TRAITS'
+    };
 
     return `
     <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
     <head><meta charset='utf-8'><title>Resume</title><style>
-        body { font-family: 'Arial', sans-serif; line-height: 1.4; color: #333; }
-        .header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 20px; }
-        .name { font-size: 24pt; font-weight: bold; margin: 0; }
-        .contact { font-size: 10pt; color: #666; }
-        .section-title { font-size: 14pt; font-weight: bold; color: #2ae023; border-bottom: 1px solid #eee; margin-top: 20px; margin-bottom: 10px; text-transform: uppercase; }
+        body { font-family: 'Times New Roman', serif; line-height: 1.4; color: #000; margin: 40pt; }
+        .header { text-align: center; margin-bottom: 25pt; }
+        .name { font-size: 20pt; font-weight: bold; margin: 0; text-transform: none; }
+        .contact { font-size: 10pt; color: #333; margin-top: 5pt; }
+        .section-title { font-size: 12pt; font-weight: bold; color: #000; margin-top: 20pt; margin-bottom: 5pt; text-transform: uppercase; letter-spacing: 1px; }
+        .section-line { border-top: 1pt solid #000; margin-bottom: 10pt; }
         .item-title { font-size: 11pt; font-weight: bold; }
-        .item-meta { font-size: 10pt; color: #666; font-style: italic; }
-        .content { font-size: 10pt; margin-bottom: 10px; }
-        ul { margin-top: 5px; }
-        li { margin-bottom: 3px; }
+        .item-meta { font-size: 10pt; color: #444; }
+        .content { font-size: 10pt; margin-bottom: 8pt; text-align: justify; }
+        ul { margin-top: 5pt; padding-left: 20pt; }
+        li { margin-bottom: 4pt; }
     </style></head>
     <body>
         <div class='header'>
-            <p class='name'>${personalInfo.fullName || 'RESUME'}</p>
-            <p class='contact'>${[personalInfo.email, personalInfo.phone, personalInfo.address].filter(Boolean).join(' | ')}</p>
+            <div class='name'>${personalInfo.fullName || 'RESUME'}</div>
+            <div class='contact'>${[personalInfo.address, personalInfo.phone, personalInfo.email].filter(Boolean).join('  |  ')}</div>
         </div>
         
-        ${summary ? `<div class='section-title'>Professional Summary</div><div class='content'>${summary}</div>` : ''}
+        ${summary ? `
+            <div class='section-title'>${titles.summary}</div>
+            <div class='section-line'></div>
+            <div class='content'>${summary}</div>
+        ` : ''}
         
-        <div class='section-title'>Experience</div>
+        <div class='section-title'>${titles.education}</div>
+        <div class='section-line'></div>
+        ${education.map(edu => `
+            <div style='margin-bottom: 10pt;'>
+                <div class='item-title'>${edu.degree || ''}</div>
+                <div class='item-meta'>${edu.school || ''} ${edu.gradYear ? ` | ${edu.gradYear}` : ''} ${edu.gpa ? ` | GPA: ${edu.gpa}` : ''}</div>
+            </div>
+        `).join('')}
+
+        <div class='section-title'>${titles.projects}</div>
+        <div class='section-line'></div>
+        ${Array.isArray(projects) ? projects.map(proj => `
+            <div style='margin-bottom: 12pt;'>
+                <div class='item-title'>${proj.name || proj.title || ''}</div>
+                <div class='item-meta'>${proj.technologies || ''}</div>
+                <div class='content'>${proj.description || ''}</div>
+                ${proj.achievement ? `<div class='content'><b>Achievement:</b> ${proj.achievement}</div>` : ''}
+            </div>
+        `).join('') : `<div class='content'>${projects}</div>`}
+
+        ${technicalSkills ? `
+            <div class='section-title'>${titles.technicalSkills}</div>
+            <div class='section-line'></div>
+            <div class='content'>${technicalSkills}</div>
+        ` : ''}
+
+        <div class='section-title'>${titles.experience}</div>
+        <div class='section-line'></div>
         ${experience.map(exp => `
-            <div style='margin-bottom: 15px;'>
-                <span class='item-title'>${exp.jobTitle}</span> | <span class='item-meta'>${exp.company} (${exp.startDate} - ${exp.endDate})</span>
+            <div style='margin-bottom: 15pt;'>
+                <div class='item-title'>${exp.jobTitle || ''}</div>
+                <div class='item-meta'>${exp.company || ''} (${exp.startDate || ''} - ${exp.endDate || 'Present'})</div>
                 <div class='content'>${exp.description ? `<ul>${exp.description.split('\n').filter(l => l.trim()).map(l => `<li>${l.replace(/^[\*-•]\s*/, '')}</li>`).join('')}</ul>` : ''}</div>
             </div>
         `).join('')}
 
-        <div class='section-title'>Education</div>
-        ${education.map(edu => `
-            <div style='margin-bottom: 10px;'>
-                <span class='item-title'>${edu.degree}</span> | <span class='item-meta'>${edu.school} (${edu.gradYear})</span>
-                ${edu.gpa ? `<div class='content'>GPA: ${edu.gpa}</div>` : ''}
-            </div>
-        `).join('')}
+        ${achievements ? `
+            <div class='section-title'>${titles.achievements}</div>
+            <div class='section-line'></div>
+            <div class='content'>${achievements}</div>
+        ` : ''}
 
-        ${technicalSkills ? `<div class='section-title'>Technical Skills</div><div class='content'>${technicalSkills}</div>` : ''}
-        ${softSkills ? `<div class='section-title'>Soft Skills</div><div class='content'>${softSkills}</div>` : ''}
+        ${softSkills ? `
+            <div class='section-title'>${titles.softSkills}</div>
+            <div class='section-line'></div>
+            <div class='content'>${softSkills}</div>
+        ` : ''}
 
-        <div class='section-title'>Projects</div>
-        ${Array.isArray(projects) ? projects.map(proj => `
-            <div style='margin-bottom: 10px;'>
-                <span class='item-title'>${proj.name}</span> | <span class='item-meta'>${proj.technologies}</span>
-                <div class='content'>${proj.description}</div>
-            </div>
-        `).join('') : `<div class='content'>${projects}</div>`}
     </body>
     </html>`;
 }
+
 
 
 router.get('/preview-pdf', async (req, res) => {

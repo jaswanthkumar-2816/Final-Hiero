@@ -90,33 +90,33 @@ const TEMPLATE_COLORS = {
         background: '#FFFFFF',
         light: '#555555'
     },
-    // Rishi Tech Modern (Professional Tech)
+    // Rishi & Priya (Restored to User's Original Clean Design)
     'rishi': {
-        primary: '#6366f1', // Indigo
-        secondary: '#1e293b', // Slate 800
-        accent: '#8b5cf6', // Violet
+        primary: '#000000',
+        secondary: '#333333',
+        accent: '#000000',
         background: '#FFFFFF',
-        light: '#64748b' // Slate 500
+        light: '#666666'
     },
-    // Priya Analytics (Structured & Bold)
     'priya-analytics': {
-        primary: '#0f172a', // Slate 900
-        secondary: '#334155', // Slate 700
-        accent: '#2ae023', // Hiero Green
+        primary: '#000000',
+        secondary: '#333333',
+        accent: '#000000',
         background: '#FFFFFF',
-        light: '#94a3b8' // Slate 400
+        light: '#666666'
     }
 };
 
-// Standardized font sizes (Refined for ATS and clarity)
+// Refined Font Sizes for the "Jhon Smith" look
 const FONT_SIZES = {
-    name: 22,
-    sectionTitle: 13,
+    name: 20,
+    sectionTitle: 12,
     jobTitle: 11,
     body: 10,
     contact: 9,
     small: 8
 };
+
 
 
 // Standardized spacing (consistent across all templates)
@@ -145,19 +145,35 @@ function getTemplateSpacing(template) {
 // ==================== SECTION ORDER (STANDARDIZED) ====================
 
 const SECTION_ORDER = [
-    'summary',
-    'experience',
-    'education',
-    'technicalSkills',
-    'softSkills',
-    'projects',
+    'summary',           // CARRIER OBJECTIVE
+    'education',         // EDUCATION
+    'projects',          // PROJECTS
+    'technicalSkills',   // TECHNICAL STRENGTHS
+    'experience',        // WORK EXPERIENCE
+    'achievements',      // ACADEMIC ACHIEVEMENTS
+    'softSkills',        // PERSONAL TRAITS
     'certifications',
-    'achievements',
     'languages',
     'hobbies',
     'references',
     'customDetails'
 ];
+
+// Map section internal keys to user-preferred titles from image
+const SECTION_TITLES = {
+    summary: 'CARRIER OBJECTIVE',
+    experience: 'WORK EXPERIENCE',
+    education: 'EDUCATION',
+    technicalSkills: 'TECHNICAL STRENGTHS',
+    softSkills: 'PERSONAL TRAITS',
+    projects: 'PROJECTS',
+    certifications: 'CERTIFICATIONS',
+    achievements: 'ACADEMIC ACHIEVEMENTS',
+    languages: 'LANGUAGES',
+    hobbies: 'EXTRA-CURRICULAR', // Maps hobbies to the extra-curricular section in image
+    references: 'REFERENCES'
+};
+
 
 // ==================== HELPER FUNCTIONS ====================
 
@@ -320,129 +336,59 @@ function renderHeader_Modern(doc, data, colors) {
 function renderHeader_Rishi(doc, data, colors) {
     const { personalInfo = {} } = data;
 
-    // Left side: Name and Title
+    // Centered Name (Bold & Large) - THE JHON SMITH LOOK
     doc.fontSize(FONT_SIZES.name)
-        .fillColor(colors.primary)
-        .font('Helvetica-Bold')
-        .text(personalInfo.fullName || '', PAGE_CONFIG.margin, PAGE_CONFIG.margin);
+        .fillColor('#000000')
+        .font('Times-Bold')
+        .text(personalInfo.fullName || '', { align: 'center', width: PAGE_CONFIG.contentWidth });
 
-    doc.moveDown(0.1);
+    doc.moveDown(0.2);
 
-    // Contact Info - Horizontal Bar
+    // Centered Contact Info
     const contact = [
-        personalInfo.email,
-        personalInfo.phone,
         personalInfo.address,
-        personalInfo.linkedin ? `LinkedIn: ${personalInfo.linkedin}` : '',
-        personalInfo.website ? `Portfolio: ${personalInfo.website}` : ''
+        personalInfo.phone,
+        personalInfo.email
     ].filter(Boolean).join('  |  ');
 
     doc.fontSize(FONT_SIZES.contact)
-        .fillColor(colors.light)
-        .font('Helvetica')
-        .text(contact, { width: PAGE_CONFIG.contentWidth });
+        .fillColor('#333333')
+        .font('Times-Roman')
+        .text(contact, { align: 'center' });
 
-    doc.moveDown(0.5);
-
-    // Accent Line
-    doc.moveTo(PAGE_CONFIG.margin, doc.y)
-        .lineTo(PAGE_CONFIG.margin + PAGE_CONFIG.contentWidth, doc.y)
-        .strokeColor(colors.primary)
-        .lineWidth(1.5)
-        .stroke();
-
-    doc.moveDown(1);
+    doc.moveDown(1.2);
 }
 
 function renderHeader_PriyaAnalytics(doc, data, colors) {
-    const { personalInfo = {} } = data;
-    const headerHeight = 70;
-
-    // Premium Grey bar background
-    doc.rect(0, 0, PAGE_CONFIG.width, headerHeight)
-        .fill('#f8fafc');
-
-    // Name - Bold and Slate
-    doc.fillColor(colors.primary)
-        .font('Helvetica-Bold')
-        .fontSize(FONT_SIZES.name)
-        .text(personalInfo.fullName || '', PAGE_CONFIG.margin, 20);
-
-    // Right-aligned Contact info
-    const contactParts = [
-        personalInfo.email,
-        personalInfo.phone,
-        personalInfo.address
-    ].filter(Boolean);
-
-    let contactY = 22;
-    contactParts.forEach(part => {
-        doc.fontSize(FONT_SIZES.contact)
-            .fillColor(colors.secondary)
-            .font('Helvetica')
-            .text(part, PAGE_CONFIG.margin, contactY, { align: 'right', width: PAGE_CONFIG.contentWidth });
-        contactY += 12;
-    });
-
-    // Sub-links bar
-    const links = [
-        personalInfo.linkedin ? `IN: ${personalInfo.linkedin}` : '',
-        personalInfo.github ? `GH: ${personalInfo.github}` : '',
-        personalInfo.website ? `WEB: ${personalInfo.website}` : ''
-    ].filter(Boolean).join('   •   ');
-
-    if (links) {
-        doc.fontSize(FONT_SIZES.small)
-            .fillColor(colors.light)
-            .text(links, PAGE_CONFIG.margin, 52);
-    }
-
-    doc.y = headerHeight + 15;
+    // Exact same centered style for Consistency
+    renderHeader_Rishi(doc, data, colors);
 }
+
 
 // ==================== SECTION TITLE RENDERER ====================
 
 function renderSectionTitle(doc, title, colors, template) {
     const spacing = getTemplateSpacing(template);
-    doc.moveDown(0.5);
+    doc.moveDown(1.0);
 
-    switch (template) {
-        case 'rishi':
-        case 'modern-pro':
-            doc.fontSize(FONT_SIZES.sectionTitle)
-                .fillColor(colors.primary)
-                .font('Helvetica-Bold')
-                .text(title.toUpperCase(), { characterSpacing: 1 });
+    // UNIFIED PROFESSIONAL STYLE: BOLD, CAPS, FULL LINE (Times Font)
+    doc.fontSize(FONT_SIZES.sectionTitle)
+        .fillColor('#000000')
+        .font('Times-Bold')
+        .text(title.toUpperCase(), { characterSpacing: 1 });
 
-            doc.moveTo(PAGE_CONFIG.margin, doc.y + 2)
-                .lineTo(PAGE_CONFIG.margin + 40, doc.y + 2)
-                .strokeColor(colors.accent)
-                .lineWidth(2.5)
-                .stroke();
-            break;
+    // Thin full-width line below the title
+    doc.moveTo(PAGE_CONFIG.margin, doc.y + 2)
+        .lineTo(PAGE_CONFIG.margin + PAGE_CONFIG.contentWidth, doc.y + 2)
+        .strokeColor('#000000')
+        .lineWidth(0.5)
+        .stroke();
 
-        case 'priya-analytics':
-            doc.fontSize(FONT_SIZES.sectionTitle)
-                .fillColor(colors.primary)
-                .font('Helvetica-Bold')
-                .text(title.toUpperCase());
-
-            // Full width separator line for ATS look
-            doc.moveTo(PAGE_CONFIG.margin, doc.y + 2)
-                .lineTo(PAGE_CONFIG.margin + PAGE_CONFIG.contentWidth, doc.y + 2)
-                .strokeColor('#cbd5e1')
-                .lineWidth(0.5)
-                .stroke();
-            break;
-
-        default:
-            doc.fontSize(FONT_SIZES.sectionTitle)
-                .fillColor(colors.primary)
-                .font('Helvetica-Bold')
-                .text(title);
-    }
-    doc.moveDown(0.4);
+    doc.moveDown(0.6);
+    doc.font('Times-Roman'); // Reset for content
 }
+
+
 
 // ==================== MAIN TEMPLATE GENERATOR ====================
 // UPDATED: Now supports piping directly to a response/stream
@@ -461,11 +407,12 @@ async function generateUnifiedResume(data, templateId, outStream) {
                 doc.pipe(outStream);
             }
 
-            // Set default font
-            doc.font('Helvetica');
+            // Set default font to Times for that classic professional look
+            doc.font('Times-Roman');
 
             // Render header based on template
             switch (template) {
+
                 case 'rishi':
                     renderHeader_Rishi(doc, data, colors);
                     break;
@@ -482,8 +429,10 @@ async function generateUnifiedResume(data, templateId, outStream) {
 
             // Render sections in standardized order
             SECTION_ORDER.forEach(sectionKey => {
-                renderSection(doc, sectionKey, data, colors, template, spacing);
+                const title = SECTION_TITLES[sectionKey] || sectionKey;
+                renderSection(doc, sectionKey, data, colors, template, spacing, title);
             });
+
 
             // Finalize PDF
             doc.end();
@@ -515,14 +464,15 @@ function checkPageBreak(doc, heightNeeded = 60) {
     return false;
 }
 
-function renderSection(doc, sectionKey, data, colors, template, spacing = SPACING) {
+function renderSection(doc, sectionKey, data, colors, template, spacing = SPACING, sectionTitle) {
     const maxWidth = PAGE_CONFIG.contentWidth;
 
     switch (sectionKey) {
         case 'summary':
             if (data.summary) {
                 checkPageBreak(doc, 100);
-                renderSectionTitle(doc, 'Professional Summary', colors, template);
+                renderSectionTitle(doc, sectionTitle || 'Professional Summary', colors, template);
+
                 doc.fontSize(FONT_SIZES.body)
                     .fillColor(colors.secondary)
                     .font('Helvetica')
@@ -537,7 +487,8 @@ function renderSection(doc, sectionKey, data, colors, template, spacing = SPACIN
         case 'experience':
             if (data.experience && data.experience.length > 0) {
                 checkPageBreak(doc, 100);
-                renderSectionTitle(doc, 'Work Experience', colors, template);
+                renderSectionTitle(doc, sectionTitle || 'Work Experience', colors, template);
+
                 data.experience.forEach((exp, index) => {
                     checkPageBreak(doc, 80); // Check before each item
                     // Job title
@@ -575,7 +526,8 @@ function renderSection(doc, sectionKey, data, colors, template, spacing = SPACIN
         case 'education':
             if (data.education && data.education.length > 0) {
                 checkPageBreak(doc, 100);
-                renderSectionTitle(doc, 'Education', colors, template);
+                renderSectionTitle(doc, sectionTitle || 'Education', colors, template);
+
                 data.education.forEach((edu, index) => {
                     checkPageBreak(doc, 50);
                     doc.fontSize(FONT_SIZES.jobTitle)
@@ -599,7 +551,8 @@ function renderSection(doc, sectionKey, data, colors, template, spacing = SPACIN
         case 'technicalSkills':
             if (data.technicalSkills) {
                 checkPageBreak(doc, 100);
-                renderSectionTitle(doc, 'Technical Skills', colors, template);
+                renderSectionTitle(doc, sectionTitle || 'Technical Skills', colors, template);
+
                 doc.fontSize(FONT_SIZES.body)
                     .fillColor(colors.secondary)
                     .font('Helvetica')
@@ -614,7 +567,8 @@ function renderSection(doc, sectionKey, data, colors, template, spacing = SPACIN
         case 'softSkills':
             if (data.softSkills) {
                 checkPageBreak(doc, 100);
-                renderSectionTitle(doc, 'Soft Skills', colors, template);
+                renderSectionTitle(doc, sectionTitle || 'Soft Skills', colors, template);
+
                 doc.fontSize(FONT_SIZES.body)
                     .fillColor(colors.secondary)
                     .font('Helvetica')
@@ -629,7 +583,8 @@ function renderSection(doc, sectionKey, data, colors, template, spacing = SPACIN
         case 'projects':
             if (data.projects && (Array.isArray(data.projects) || typeof data.projects === 'string')) {
                 checkPageBreak(doc, 100);
-                renderSectionTitle(doc, 'Projects', colors, template);
+                renderSectionTitle(doc, sectionTitle || 'Projects', colors, template);
+
 
                 if (Array.isArray(data.projects)) {
                     // Newer schema: array of project objects
@@ -765,7 +720,8 @@ function renderSection(doc, sectionKey, data, colors, template, spacing = SPACIN
 
                 if (achievements.length > 0) {
                     checkPageBreak(doc, 100);
-                    renderSectionTitle(doc, 'Achievements', colors, template);
+                    renderSectionTitle(doc, sectionTitle || 'Achievements', colors, template);
+
 
                     achievements.forEach(achievement => {
                         checkPageBreak(doc, 20);

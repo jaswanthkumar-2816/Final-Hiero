@@ -17,19 +17,19 @@ export function renderPriyaAnalyticsTemplate(data) {
     return [];
   };
 
-  const edus      = Array.isArray(data.education)   ? data.education   : [];
-  const exps      = Array.isArray(data.experience)  ? data.experience  : [];
-  const projects  = toArray(data.projects);
-  const skills    = toArray(data.skills || data.technicalSkills);
-  const mgmtArr   = toArray(data.softSkills || data.managementSkills);
-  const certs     = toArray(data.certifications || data.personalCertifications);
+  const edus = Array.isArray(data.education) ? data.education : [];
+  const exps = Array.isArray(data.experience) ? data.experience : [];
+  const projects = toArray(data.projects);
+  const skills = toArray(data.skills || data.technicalSkills);
+  const mgmtArr = toArray(data.softSkills || data.managementSkills);
+  const certs = toArray(data.certifications || data.personalCertifications);
   const achievements = toArray(data.achievements);
-  const hobbies   = toArray(data.hobbies);
+  const hobbies = toArray(data.hobbies);
 
   const esc = (s = '') => String(s || '')
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;');
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
 
   const joinList = (arr) => toArray(arr).map(esc).join(' \u00b7 ');
 
@@ -41,8 +41,8 @@ export function renderPriyaAnalyticsTemplate(data) {
 
   const links = [
     p.linkedin ? `LinkedIn: ${esc(p.linkedin)}` : '',
-    p.github   ? `GitHub: ${esc(p.github)}`     : '',
-    p.website  ? `Website: ${esc(p.website)}`   : ''
+    p.github ? `GitHub: ${esc(p.github)}` : '',
+    p.website ? `Website: ${esc(p.website)}` : ''
   ].filter(Boolean).join('<br />');
 
   const section = (title, bodyHtml) => {
@@ -88,20 +88,20 @@ export function renderPriyaAnalyticsTemplate(data) {
   const hobbiesHtml = hobbies.map(h => `<p>${esc(h)}</p>`).join('');
 
   const personalDetailsLines = [];
-  if (p.dateOfBirth)   personalDetailsLines.push(`Date of Birth: ${esc(p.dateOfBirth)}`);
-  if (p.gender)        personalDetailsLines.push(`Gender: ${esc(p.gender)}`);
-  if (p.nationality)   personalDetailsLines.push(`Nationality: ${esc(p.nationality)}`);
+  if (p.dateOfBirth) personalDetailsLines.push(`Date of Birth: ${esc(p.dateOfBirth)}`);
+  if (p.gender) personalDetailsLines.push(`Gender: ${esc(p.gender)}`);
+  if (p.nationality) personalDetailsLines.push(`Nationality: ${esc(p.nationality)}`);
   if (p.maritalStatus) personalDetailsLines.push(`Marital Status: ${esc(p.maritalStatus)}`);
   const langs = joinList(data.languages || p.languagesKnown);
-  if (langs)           personalDetailsLines.push(`Languages Known: ${langs}`);
+  if (langs) personalDetailsLines.push(`Languages Known: ${langs}`);
 
   const personalDetailsHtml = personalDetailsLines.map(l => `<p>${l}</p>`).join('');
 
   const recruiterSummaryLines = [];
   if (data.totalExperienceYears) recruiterSummaryLines.push(`Total Years of Experience: ${esc(data.totalExperienceYears)}`);
-  if (data.mostRelevantSkills)   recruiterSummaryLines.push(`Most Relevant Skills: ${esc(data.mostRelevantSkills)}`);
-  if (data.bestSuitedForRole)    recruiterSummaryLines.push(`Best Suited For: ${esc(data.bestSuitedForRole)}`);
-  if (data.recruiterSummary)     recruiterSummaryLines.push(esc(data.recruiterSummary));
+  if (data.mostRelevantSkills) recruiterSummaryLines.push(`Most Relevant Skills: ${esc(data.mostRelevantSkills)}`);
+  if (data.bestSuitedForRole) recruiterSummaryLines.push(`Best Suited For: ${esc(data.bestSuitedForRole)}`);
+  if (data.recruiterSummary) recruiterSummaryLines.push(esc(data.recruiterSummary));
 
   const recruiterSummaryHtml = recruiterSummaryLines.map(l => `<p>${l}</p>`).join('');
 
