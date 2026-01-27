@@ -1828,7 +1828,7 @@
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Accept': 'text/html',
+            'Accept': 'application/pdf',
             'Authorization': token ? `Bearer ${token}` : ''
           },
           body: JSON.stringify(sampleData),
@@ -1841,51 +1841,31 @@
           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
 
-        const previewHTML = await response.text();
+        const blob = await response.blob();
+        const pdfUrl = URL.createObjectURL(blob);
 
-        console.log('✅ Preview loaded successfully for template:', templateId);
-        console.log('HTML length:', previewHTML.length);
-        console.log('HTML preview (first 200 chars):', previewHTML.substring(0, 200));
+        console.log('✅ Preview PDF blob received for:', templateId);
 
-        // Safety check
-        if (!previewHTML || previewHTML.trim().length < 100) {
-          throw new Error('No valid HTML received from backend');
-        }
-
-        // Update preview content with iframe for better isolation
+        // Update preview content with iframe
         const previewContent = modal.querySelector('#preview-content');
 
-        // Create iframe container
-        const container = document.createElement('div');
-        container.style.cssText = 'width: 100%; max-width: 700px; background: white; box-shadow: 0 2px 20px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden;';
+        // Clear loading state
+        previewContent.innerHTML = '';
 
         // Create iframe element
         const iframe = document.createElement('iframe');
-        iframe.style.cssText = 'width: 100%; height: 800px; border: none; display: block; background: white;';
-        iframe.setAttribute('sandbox', 'allow-same-origin allow-scripts');
+        iframe.style.cssText = 'width: 100%; height: 600px; border: none; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); background: white;';
+        iframe.src = pdfUrl;
 
-        // Clear preview content and append container
-        previewContent.innerHTML = '';
-        container.appendChild(iframe);
-        previewContent.appendChild(container);
-
-        // Wait for iframe to be ready, then write content
-        setTimeout(() => {
-          try {
-            const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-            iframeDoc.open();
-            iframeDoc.write(previewHTML);
-            iframeDoc.close();
-            console.log('✅ Template preview rendered in iframe for:', templateId);
-          } catch (writeError) {
-            console.error('Error writing to iframe:', writeError);
-            // Fallback: use srcdoc
-            iframe.srcdoc = previewHTML;
-            console.log('✅ Using srcdoc fallback for:', templateId);
-          }
-        }, 100);
-
+        previewContent.appendChild(iframe);
         previewLoaded = true;
+
+        // Cleanup URL when modal is closed
+        const originalRemove = modal.remove;
+        modal.remove = function () {
+          URL.revokeObjectURL(pdfUrl);
+          originalRemove.call(this);
+        };
 
       } catch (error) {
         console.error('❌ Error fetching preview:', error, 'URL:', BACKEND_URL + '/preview-resume');
