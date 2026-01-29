@@ -29,21 +29,14 @@
   }
   </script>
 
-  <!-- WebSite Schema with SearchAction (Rich Result) -->
+  <!-- WebSite Schema for "Site Name" in Search Results -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "WebSite",
     "name": "Hiero",
-    "url": "https://hiero.in",
-    "potentialAction": {
-      "@type": "SearchAction",
-      "target": {
-        "@type": "EntryPoint",
-        "urlTemplate": "https://hiero.in/search?q={search_term_string}"
-      },
-      "query-input": "required name=search_term_string"
-    }
+    "alternateName": ["Hiero AI", "Hiero Resume"],
+    "url": "https://hiero.in/"
   }
   </script>
 
@@ -54,9 +47,11 @@
   <meta property="og:url" content="https://hiero.in">
   <meta property="og:site_name" content="Hiero">
 
-  <!-- Favicon & Logo -->
-  <link rel="icon" href="/logohiero.png">
+  <!-- Favicon & Brand Branding (Search Results) -->
+  <link rel="icon" type="image/png" href="/logohiero.png">
   <link rel="apple-touch-icon" href="/logohiero.png">
+  <meta name="application-name" content="Hiero">
+  <meta name="apple-mobile-web-app-title" content="Hiero">
 
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
