@@ -3368,22 +3368,11 @@
         const fileName = `${userName.replace(/[^a-zA-Z0-9]/g, '_')}_${templateName}_resume.pdf`;
         // Download the file with proper error handling
         try {
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = fileName;
-          a.style.display = 'none';
-          document.body.appendChild(a);
-
-          // Trigger download
-          a.click();
-
-          // Clean up after a short delay
-          setTimeout(() => {
-            window.URL.revokeObjectURL(url);
-            document.body.removeChild(a);
-          }, 100);
+          // Manual download disabled in generation - choice modal will handle it
+          console.log('✅ Generation successful - showing choice modal');
+          // skip a.click()
         } catch (downloadError) {
+
           console.error('❌ Download error:', downloadError);
           throw new Error('Failed to trigger download: ' + downloadError.message);
         }

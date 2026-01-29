@@ -130,17 +130,15 @@ const SPACING = {
 
 // Helper to get per-template spacing overrides
 function getTemplateSpacing(template) {
-    if (template === 'priya-analytics') {
-        return {
-            lineHeight: 1.35,
-            sectionGap: 10,
-            itemGap: 6,
-            paragraphGap: 6,
-            bulletIndent: 18
-        };
-    }
-    return SPACING;
+    return {
+        lineHeight: 1.4,
+        sectionGap: 18,
+        itemGap: 12,
+        paragraphGap: 8,
+        bulletIndent: 15
+    };
 }
+
 
 // ==================== SECTION ORDER (STANDARDIZED) ====================
 
@@ -490,36 +488,38 @@ function renderSection(doc, sectionKey, data, colors, template, spacing = SPACIN
                 renderSectionTitle(doc, sectionTitle || 'Work Experience', colors, template);
 
                 data.experience.forEach((exp, index) => {
-                    checkPageBreak(doc, 80); // Check before each item
-                    // Job title
+                    checkPageBreak(doc, 80);
+
+                    // Company Name - Bold
                     doc.fontSize(FONT_SIZES.jobTitle)
-                        .fillColor(colors.primary)
-                        .font('Helvetica-Bold')
-                        .text(exp.jobTitle || '', PAGE_CONFIG.margin, doc.y);
+                        .fillColor('#000000')
+                        .font('Times-Bold')
+                        .text(exp.company || '', PAGE_CONFIG.margin, doc.y);
 
-                    // Company and dates
+                    // Job Title and Dates
                     doc.fontSize(FONT_SIZES.body)
-                        .fillColor(colors.secondary)
-                        .font('Helvetica');
+                        .fillColor('#333333')
+                        .font('Times-Bold');
 
-                    const companyLine = [exp.company, exp.startDate + (exp.endDate ? ' - ' + exp.endDate : ' - Present')].filter(Boolean).join(' | ');
-                    doc.text(companyLine);
+                    const subHeader = [exp.jobTitle, exp.startDate + (exp.endDate ? ' - ' + exp.endDate : ' - Present')].filter(Boolean).join(' | ');
+                    doc.text(subHeader);
 
                     // Description with bullets
                     if (exp.description) {
                         doc.moveDown(0.2);
+                        doc.font('Times-Roman');
                         const bullets = exp.description.split('\n').filter(b => b.trim());
                         bullets.forEach(bullet => {
-                            checkPageBreak(doc, 20); // Check before each bullet
+                            checkPageBreak(doc, 20);
                             const cleanBullet = bullet.replace(/^[•\-\*]\s*/, '');
                             const height = addBulletPoint(doc, cleanBullet, PAGE_CONFIG.margin + spacing.bulletIndent, doc.y, maxWidth, colors, template);
                             doc.y += height + 2;
                         });
                     }
 
-                    if (index < data.experience.length - 1) doc.moveDown(spacing.itemGap / 10);
+                    if (index < data.experience.length - 1) doc.moveDown(0.8);
                 });
-                doc.moveDown(spacing.sectionGap / 10);
+                doc.moveDown(0.5);
             }
             break;
 
@@ -530,53 +530,62 @@ function renderSection(doc, sectionKey, data, colors, template, spacing = SPACIN
 
                 data.education.forEach((edu, index) => {
                     checkPageBreak(doc, 50);
+
+                    // School Name - Bold (Per Jhon Smith Image)
                     doc.fontSize(FONT_SIZES.jobTitle)
-                        .fillColor(colors.primary)
-                        .font('Helvetica-Bold')
-                        .text(edu.degree || '', PAGE_CONFIG.margin, doc.y);
+                        .fillColor('#000000')
+                        .font('Times-Bold')
+                        .text(edu.school || '', PAGE_CONFIG.margin, doc.y);
 
+                    // Degree & Meta info
                     doc.fontSize(FONT_SIZES.body)
-                        .fillColor(colors.secondary)
-                        .font('Helvetica');
+                        .fillColor('#333333')
+                        .font('Times-Roman');
 
-                    const eduLine = [edu.school, edu.gradYear, edu.gpa ? 'GPA: ' + edu.gpa : ''].filter(Boolean).join(' | ');
-                    doc.text(eduLine);
+                    doc.text(edu.degree || '');
 
-                    if (index < data.education.length - 1) doc.moveDown(spacing.itemGap / 10);
+                    const meta = [edu.gradYear, edu.gpa ? 'GPA: ' + edu.gpa : ''].filter(Boolean).join(' | ');
+                    if (meta) doc.text(meta);
+
+                    if (index < data.education.length - 1) doc.moveDown(0.5);
                 });
-                doc.moveDown(spacing.sectionGap / 10);
+                doc.moveDown(0.5);
             }
             break;
 
         case 'technicalSkills':
             if (data.technicalSkills) {
                 checkPageBreak(doc, 100);
-                renderSectionTitle(doc, sectionTitle || 'Technical Skills', colors, template);
+                renderSectionTitle(doc, sectionTitle || 'Technical Strengths', colors, template);
 
-                doc.fontSize(FONT_SIZES.body)
-                    .fillColor(colors.secondary)
-                    .font('Helvetica')
-                    .text(data.technicalSkills, {
-                        width: maxWidth,
-                        align: 'justify'
-                    });
-                doc.moveDown(spacing.sectionGap / 10);
+                const skillLines = data.technicalSkills.split('\n').filter(l => l.trim());
+                skillLines.forEach(line => {
+                    checkPageBreak(doc, 20);
+                    if (line.includes(':')) {
+                        const [label, value] = line.split(':');
+                        doc.fontSize(FONT_SIZES.body)
+                            .font('Times-Bold')
+                            .text(label.trim() + ': ', { continued: true });
+                        doc.font('Times-Roman').text(value.trim());
+                    } else {
+                        doc.fontSize(FONT_SIZES.body).font('Times-Roman').text(line);
+                    }
+                });
+                doc.moveDown(0.5);
             }
             break;
 
         case 'softSkills':
             if (data.softSkills) {
                 checkPageBreak(doc, 100);
-                renderSectionTitle(doc, sectionTitle || 'Soft Skills', colors, template);
+                renderSectionTitle(doc, sectionTitle || 'Personal Traits', colors, template);
 
-                doc.fontSize(FONT_SIZES.body)
-                    .fillColor(colors.secondary)
-                    .font('Helvetica')
-                    .text(data.softSkills, {
-                        width: maxWidth,
-                        align: 'justify'
-                    });
-                doc.moveDown(spacing.sectionGap / 10);
+                const lines = data.softSkills.split('\n').filter(l => l.trim());
+                lines.forEach(line => {
+                    checkPageBreak(doc, 20);
+                    doc.fontSize(FONT_SIZES.body).font('Times-Roman').text(line);
+                });
+                doc.moveDown(0.5);
             }
             break;
 
