@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Video Test</title>
+  <style>
+    body {
+      background: #000;
+      color: #00ff00;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    .video-container {
+      width: 100%;
+      max-width: 800px;
+      margin: 20px auto;
+    }
+    iframe {
+      width: 100%;
+      height: 400px;
+      border: 2px solid #00ff00;
+    }
+    .test-section {
+      margin: 20px 0;
+      padding: 15px;
+      border: 1px solid #00ff00;
+    }
+  </style>
+</head>
+<body>
+  <h1>YouTube Video Test</h1>
+  
+  <div class="test-section">
+    <h3>Test 1: Direct Embed URL</h3>
+    <div class="video-container">
+      <iframe src="https://www.youtube.com/embed/bMknfKXIFA8?rel=0&modestbranding=1" allowfullscreen></iframe>
+    </div>
+  </div>
+
+  <div class="test-section">
+    <h3>Test 2: With JavaScript API</h3>
+    <div class="video-container">
+      <iframe src="https://www.youtube.com/embed/bMknfKXIFA8?rel=0&modestbranding=1&enablejsapi=1" allowfullscreen></iframe>
+    </div>
+  </div>
+
+  <div class="test-section">
+    <h3>Test 3: Different Video</h3>
+    <div class="video-container">
+      <iframe src="https://www.youtube.com/embed/Ke90Tje7VS0?rel=0&modestbranding=1" allowfullscreen></iframe>
+    </div>
+  </div>
+
+  <div class="test-section">
+    <h3>Console Log</h3>
+    <div id="console-log" style="background: #111; padding: 10px; height: 200px; overflow-y: auto;"></div>
+  </div>
+
+  <script>
+    // Test if videos are loading
+    const iframes = document.querySelectorAll('iframe');
+    iframes.forEach((iframe, index) => {
+      iframe.onload = () => {
+        console.log(`Video ${index + 1} loaded successfully`);
+        document.getElementById('console-log').innerHTML += `<p style="color:#00ff00;">✓ Video ${index + 1} loaded successfully</p>`;
+      };
+      iframe.onerror = () => {
+        console.log(`Video ${index + 1} failed to load`);
+        document.getElementById('console-log').innerHTML += `<p style="color:#ff4444;">✗ Video ${index + 1} failed to load</p>`;
+      };
+    });
+
+    // Test backend connection
+    fetch('http://localhost:5005/api/skills/videos', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ skills: ['React'] })
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log('Backend response:', data);
+      document.getElementById('console-log').innerHTML += `<p style="color:#00ff00;">✓ Backend API working: ${JSON.stringify(data)}</p>`;
+    })
+    .catch(error => {
+      console.error('Backend error:', error);
+      document.getElementById('console-log').innerHTML += `<p style="color:#ff4444;">✗ Backend API error: ${error.message}</p>`;
+    });
+  </script>
+</body>
+</html> 

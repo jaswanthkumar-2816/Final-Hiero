@@ -1,3 +1,8 @@
+<<<<<<< HEAD
 {
     "liveServer.settings.port": 5504
+=======
+{
+    "liveServer.settings.port": 5502
+>>>>>>> render-repo/main
 }

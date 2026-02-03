@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hiero - Resume System</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="screen">
+    <div class="card">
+      <h1>🎯 Hiero Resume System</h1>
+      <p>Choose your service:</p>
+      
+      <div class="service-buttons">
+        <div class="service-section">
+          <h3>📝 Resume Builder</h3>
+          <p>Create professional resumes with AI assistance</p>
+          <button onclick="window.location.href='resume-builder.html'" class="primary-btn">
+            Build Resume (Port 5003)
+          </button>
+        </div>
+        
+        <div class="service-section">
+          <h3>🔍 Resume Analysis</h3>
+          <p>Analyze resume-job description compatibility</p>
+          <button onclick="window.location.href='upload.html'" class="secondary-btn">
+            Analyze Resume (Port 5001)
+          </button>
+        </div>
+      </div>
+      
+      <div class="status-section">
+        <h4>Server Status:</h4>
+        <div id="server-status">
+          <div class="status-item">
+            <span class="status-label">Resume Builder:</span>
+            <span id="creation-status" class="status-unknown">Checking...</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">Resume Analysis:</span>
+            <span id="analysis-status" class="status-unknown">Checking...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Check server status
+    async function checkServerStatus() {
+      const creationStatus = document.getElementById('creation-status');
+      const analysisStatus = document.getElementById('analysis-status');
+      
+      // Check creation server (port 5003)
+      try {
+        await fetch('http://localhost:5003/api/resume/templates');
+        creationStatus.textContent = '🟢 Online (Port 5003)';
+        creationStatus.className = 'status-online';
+      } catch (error) {
+        creationStatus.textContent = '🔴 Offline';
+        creationStatus.className = 'status-offline';
+      }
+      
+      // Check analysis server (port 5001)
+      try {
+        const response = await fetch('http://localhost:5001/api/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ resumeText: 'test', jdText: 'test' })
+        });
+        analysisStatus.textContent = '🟢 Online (Port 5001)';
+        analysisStatus.className = 'status-online';
+      } catch (error) {
+        analysisStatus.textContent = '🔴 Offline';
+        analysisStatus.className = 'status-offline';
+      }
+    }
+    
+    // Check status when page loads
+    checkServerStatus();
+  </script>
+
+  <style>
+    .service-buttons {
+      display: flex;
+      gap: 20px;
+      margin: 20px 0;
+      flex-wrap: wrap;
+    }
+    
+    .service-section {
+      flex: 1;
+      min-width: 250px;
+      padding: 20px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      text-align: center;
+    }
+    
+    .service-section h3 {
+      margin-top: 0;
+      color: #333;
+    }
+    
+    .primary-btn, .secondary-btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      width: 100%;
+      margin-top: 10px;
+    }
+    
+    .primary-btn {
+      background: #007bff;
+      color: white;
+    }
+    
+    .primary-btn:hover {
+      background: #0056b3;
+    }
+    
+    .secondary-btn {
+      background: #28a745;
+      color: white;
+    }
+    
+    .secondary-btn:hover {
+      background: #1e7e34;
+    }
+    
+    .status-section {
+      margin-top: 30px;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 8px;
+    }
+    
+    .status-item {
+      display: flex;
+      justify-content: space-between;
+      margin: 8px 0;
+    }
+    
+    .status-label {
+      font-weight: 600;
+    }
+    
+    .status-online {
+      color: #28a745;
+    }
+    
+    .status-offline {
+      color: #dc3545;
+    }
+    
+    .status-unknown {
+      color: #6c757d;
+    }
+  </style>
+</body>
+</html>

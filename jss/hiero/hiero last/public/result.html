@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resume Analysis Result</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&family=Open+Sans:wght@400;600&display=swap"
+    rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    :root {
+      --soft-teal: #000000;
+      --lavender: #000000;
+      --warm-beige: #04ab07;
+      --soft-green: #04ab07;
+      --gold-accent: #04ab07;
+      --bg-light: #000000;
+      --card-bg: #0a0a0a;
+      --text-dark: #ffffff;
+      --shadow-glow: 0 0 20px rgba(4, 171, 7, 0.5), 0 0 40px rgba(4, 171, 7, 0.2);
+      --border-radius: 15px;
+      --padding: 20px;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #000501 0%, #000501 50%, #1a8515 70%, #2cc42c 100%);
+      background-size: 200% 200%;
+      background-attachment: fixed;
+      font-family: 'Open Sans', sans-serif;
+      color: var(--text-dark);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-x: hidden;
+      position: relative;
+      animation: gradientFlow 3s ease-in-out forwards;
+      background-position: 0% 50%;
+    }
+
+    @keyframes gradientFlow {
+      0% {
+        background-position: 0% 50%;
+      }
+
+      100% {
+        background-position: 50% 50%;
+      }
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image:
+        radial-gradient(circle at 20% 30%, rgba(4, 171, 7, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(4, 171, 7, 0.12) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(4, 171, 7, 0.08) 0%, transparent 50%);
+      animation: particleFloat 20s ease-in-out infinite;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    @keyframes particleFloat {
+
+      0%,
+      100% {
+        opacity: 0.4;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: 0.7;
+        transform: scale(1.05);
+      }
+    }
+
+    .hero {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 1400px;
+      padding: 60px 40px 60px 40px;
+      min-height: 100vh;
+      position: relative;
+      z-index: 1;
+    }
+
+    .app-logo {
+      position: absolute;
+      top: 25px;
+      left: 32px;
+      display: flex;
+      align-items: center;
+      z-index: 100;
+      background: rgba(8, 164, 8, 0.805);
+      border-radius: 12px;
+      padding: 6px 16px 6px 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.959), var(--shadow-glow);
+      transition: all 0.3s ease;
+    }
+
+    .app-logo:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.959), 0 0 25px rgba(4, 171, 7, 0.5);
+    }
+
+    .app-logo img {
+      height: 38px;
+      width: 38px;
+      min-width: 38px;
+      min-height: 38px;
+      object-fit: contain;
+      filter: drop-shadow(var(--shadow-glow));
+    }
+
+    .app-logo span {
+      font-weight: 700;
+      letter-spacing: 2px;
+      font-size: 1.25rem;
+      margin-left: 8px;
+      color: white;
+      font-family: 'Open Sans', sans-serif;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    h2 {
+      font-family: 'Lora', serif;
+      font-size: 3.2rem;
+      background: linear-gradient(135deg, #04ab07 0%, #06c719 50%, #04ab07 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 50px;
+      animation: slideUp 1.5s ease-out;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      text-align: center;
+      position: relative;
+      padding-bottom: 20px;
+      filter: drop-shadow(0 4px 16px rgba(4, 171, 7, 0.5));
+    }
+
+    h2::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 120px;
+      height: 4px;
+      background: linear-gradient(90deg, transparent, #04ab07, transparent);
+      box-shadow: 0 0 20px rgba(4, 171, 7, 0.8);
+      border-radius: 2px;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .content-stack {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 28px;
+      max-width: 1300px;
+      width: 100%;
+      margin: 0 auto;
+      align-items: start;
+    }
+
+    @media (max-width: 900px) {
+      .content-stack {
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .content-stack {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 20px;
+      border: 2px solid rgba(4, 171, 7, 0.2);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2),
+        0 0 30px rgba(4, 171, 7, 0.15),
+        inset 0 1px 0 rgba(4, 171, 7, 0.1);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      backdrop-filter: blur(10px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border-radius: 20px;
+      background: linear-gradient(135deg, rgba(4, 171, 7, 0.05) 0%, transparent 100%);
+      pointer-events: none;
+    }
+
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3),
+        0 0 40px rgba(4, 171, 7, 0.25),
+        inset 0 1px 0 rgba(4, 171, 7, 0.15);
+      border-color: rgba(4, 171, 7, 0.35);
+    }
+
+    .card p,
+    .card div {
+      font-family: 'Open Sans', sans-serif;
+      line-height: 1.6;
+    }
+
+    .card strong {
+      font-weight: 700;
+      color: #04ab07;
+      letter-spacing: 0.3px;
+    }
+
+
+    .score-section {
+      align-items: center;
+      text-align: center;
+    }
+
+    .score-ring {
+      position: relative;
+      width: 150px;
+      height: 150px;
+      margin: 20px auto;
+      filter: drop-shadow(0 8px 16px rgba(4, 171, 7, 0.4));
+    }
+
+    .score-ring svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 150px;
+      height: 150px;
+      transform: rotate(-90deg);
+    }
+
+    .score-ring .score-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 2.6rem;
+      font-weight: 900;
+      color: #04ab07;
+      font-family: 'Open Sans', sans-serif;
+      text-shadow: 0 0 25px rgba(4, 171, 7, 0.7),
+        0 3px 10px rgba(4, 171, 7, 0.5);
+      animation: gentlePulse 3s ease-in-out infinite;
+      letter-spacing: -2px;
+    }
+
+    @keyframes gentlePulse {
+
+      0%,
+      100% {
+        transform: translate(-50%, -50%) scale(1);
+      }
+
+      50% {
+        transform: translate(-50%, -50%) scale(1.08);
+      }
+    }
+
+    .score-label {
+      color: #04ab07;
+      font-size: 1.1rem;
+      margin-top: 20px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-align: center;
+    }
+
+    .section-title {
+      color: #04ab07;
+      font-size: 1.6rem;
+      font-weight: 800;
+      margin-bottom: 28px;
+      padding-bottom: 12px;
+      letter-spacing: 0.8px;
+      text-shadow: 0 2px 10px rgba(4, 171, 7, 0.4);
+      font-family: 'Open Sans', sans-serif;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+      border-bottom: 2px solid rgba(4, 171, 7, 0.3);
+      background: linear-gradient(90deg, rgba(4, 171, 7, 0.08) 0%, transparent 100%);
+      padding: 12px 16px;
+      border-radius: 8px 8px 0 0;
+      margin: -16px -16px 28px -16px;
+      position: relative;
+      text-align: center;
+    }
+
+    .section-title::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: -2px;
+      width: 60px;
+      height: 2px;
+      background: #04ab07;
+      box-shadow: 0 0 10px rgba(4, 171, 7, 0.6);
+    }
+
+    .skills-list,
+    .projects-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .skill-chip,
+    .project-card {
+      background: linear-gradient(135deg, rgba(4, 4, 4, 0.95) 0%, rgba(4, 20, 4, 0.9) 100%);
+      border-radius: 12px;
+      color: #04ab07;
+      font-size: 1rem;
+      font-weight: 600;
+      padding: 12px 20px;
+      border: 2px solid var(--soft-green);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2),
+        0 0 15px rgba(4, 171, 7, 0.25),
+        inset 0 1px 0 rgba(4, 171, 7, 0.1);
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      backdrop-filter: blur(8px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .skill-chip::before,
+    .project-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(4, 171, 7, 0.3), transparent);
+      transition: left 0.5s;
+    }
+
+    .skill-chip:hover::before,
+    .project-card:hover::before {
+      left: 100%;
+    }
+
+    .skill-chip:hover,
+    .project-card:hover {
+      background: var(--soft-green);
+      color: #000;
+      box-shadow: 0 6px 20px rgba(4, 171, 7, 0.4),
+        0 0 25px rgba(4, 171, 7, 0.3);
+      transform: translateY(-3px) scale(1.03);
+      border-color: #06c719;
+    }
+
+    .learn-first {
+      margin-top: 20px;
+      color: #04ab07;
+      font-size: 1.1rem;
+      font-weight: 600;
+      background: rgba(5, 5, 5, 0.9);
+      border-radius: 16px;
+      padding: 18px 24px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15),
+        0 0 20px rgba(4, 171, 7, 0.15);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      border: 2px solid rgba(4, 171, 7, 0.2);
+    }
+
+    .project-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .project-card .icon {
+      font-size: 1.2rem;
+      color: var(--gold-accent);
+    }
+
+    .video-section {
+      text-align: center;
+    }
+
+    .video-section h2 {
+      color: var(--soft-green);
+      font-size: 1.5rem;
+      margin-bottom: 15px;
+    }
+
+    .timestamp {
+      font-size: 1rem;
+      color: var(--gold-accent);
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .button-row {
+      display: flex;
+      gap: 20px;
+      margin-top: 40px;
+      flex-wrap: wrap;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, var(--soft-green) 0%, #06c719 100%);
+      color: #000;
+      border: none;
+      border-radius: 14px;
+      padding: 16px 32px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15),
+        0 0 20px rgba(4, 171, 7, 0.3);
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      letter-spacing: 0.3px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%, rgba(255, 255, 255, 0.05) 100%);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .btn:hover::before {
+      opacity: 1;
+    }
+
+    .btn::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transition: left 0.6s;
+    }
+
+    .btn:hover::after {
+      left: 100%;
+    }
+
+    .btn:hover {
+      background: linear-gradient(135deg, #06c719 0%, var(--gold-accent) 100%);
+      color: #000;
+      box-shadow: 0 8px 28px rgba(4, 171, 7, 0.4),
+        0 0 30px rgba(4, 171, 7, 0.4);
+      transform: translateY(-4px) scale(1.02);
+    }
+
+    .btn:active {
+      transform: translateY(-2px) scale(0.98);
+    }
+
+    /* Enhanced Focus States for Accessibility */
+    .btn:focus,
+    .skill-chip:focus,
+    .project-card:focus,
+    button:focus {
+      outline: 3px solid #04ab07;
+      outline-offset: 3px;
+      box-shadow: 0 0 0 4px rgba(4, 171, 7, 0.2);
+    }
+
+    /* Loading Shimmer Animation */
+    @keyframes shimmer {
+      0% {
+        background-position: -1000px 0;
+      }
+
+      100% {
+        background-position: 1000px 0;
+      }
+    }
+
+    .loading-shimmer {
+      background: linear-gradient(90deg,
+          rgba(4, 171, 7, 0.05) 0%,
+          rgba(4, 171, 7, 0.15) 50%,
+          rgba(4, 171, 7, 0.05) 100%);
+      background-size: 1000px 100%;
+      animation: shimmer 2s infinite;
+    }
+
+    /* Smooth transitions for all interactive elements */
+    a,
+    button,
+    input,
+    .skill-chip,
+    .project-card,
+    .btn {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Enhanced Scroll Animations */
+    @media (prefers-reduced-motion: no-preference) {
+      .card {
+        animation: fadeInUp 0.6s ease-out;
+        animation-fill-mode: both;
+      }
+
+      .card:nth-child(1) {
+        animation-delay: 0.1s;
+      }
+
+      .card:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+
+      .card:nth-child(3) {
+        animation-delay: 0.3s;
+      }
+
+      .card:nth-child(4) {
+        animation-delay: 0.4s;
+      }
+
+      .card:nth-child(5) {
+        animation-delay: 0.5s;
+      }
+
+      .card:nth-child(6) {
+        animation-delay: 0.6s;
+      }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 900px) {
+      .content-stack {
+        gap: 28px;
+        padding: 0 20px;
+      }
+
+      .card {
+        width: 100%;
+        padding: 20px;
+      }
+
+      .btn {
+        padding: 14px 28px;
+        font-size: 1rem;
+      }
+
+      .hero {
+        padding: 60px 24px 40px 24px;
+      }
+    }
+
+    @media (max-width: 600px) {
+
+      /* Mobile-optimized hero section */
+      .hero {
+        padding: 80px 16px 32px 16px;
+      }
+
+      /* Logo adjustments for mobile */
+      .app-logo {
+        top: 15px;
+        left: 15px;
+        padding: 5px 12px 5px 6px;
+        scale: 0.9;
+      }
+
+      .app-logo img {
+        height: 32px;
+        width: 32px;
+        min-width: 32px;
+        min-height: 32px;
+      }
+
+      .app-logo span {
+        font-size: 1rem;
+        letter-spacing: 1.5px;
+        margin-left: 6px;
+      }
+
+      /* Main heading mobile optimization */
+      h2 {
+        font-size: 2.2rem;
+        margin-bottom: 35px;
+        letter-spacing: 1px;
+        padding-bottom: 15px;
+      }
+
+      h2::after {
+        width: 80px;
+        height: 3px;
+      }
+
+      /* Score ring mobile optimization */
+      .score-ring {
+        width: 130px;
+        height: 130px;
+        margin: 15px auto;
+      }
+
+      .score-ring svg {
+        width: 130px;
+        height: 130px;
+      }
+
+      .score-ring .score-text {
+        font-size: 2.2rem;
+      }
+
+      .score-label {
+        font-size: 1rem;
+        margin-top: 15px;
+      }
+
+      /* Card optimizations */
+      .card {
+        padding: 12px;
+        gap: 16px;
+      }
+
+      /* Section titles mobile */
+      .section-title {
+        font-size: 1.35rem;
+        padding: 10px 12px;
+        margin: -12px -12px 20px -12px;
+        letter-spacing: 0.5px;
+      }
+
+      .section-title::before {
+        width: 40px;
+      }
+
+      /* Skills and project chips mobile */
+      .skill-chip,
+      .project-card {
+        font-size: 0.9rem;
+        padding: 10px 16px;
+      }
+
+      /* Button row mobile */
+      .button-row {
+        flex-direction: column;
+        width: 100%;
+        gap: 12px;
+        margin-top: 30px;
+      }
+
+      .btn {
+        width: 100%;
+        padding: 14px 24px;
+        font-size: 1rem;
+      }
+
+      /* Grid spacing mobile */
+      .content-stack {
+        gap: 20px;
+        padding: 0 16px;
+      }
+
+      /* Learn first section mobile */
+      .learn-first {
+        font-size: 1rem;
+        padding: 14px 18px;
+        margin-top: 16px;
+      }
+    }
+
+    /* Extra small phones */
+    @media (max-width: 375px) {
+      h2 {
+        font-size: 1.9rem;
+        letter-spacing: 0.8px;
+      }
+
+      .app-logo span {
+        font-size: 0.9rem;
+        letter-spacing: 1.2px;
+      }
+
+      .score-ring {
+        width: 110px;
+        height: 110px;
+      }
+
+      .score-ring svg {
+        width: 110px;
+        height: 110px;
+      }
+
+      .score-ring .score-text {
+        font-size: 1.9rem;
+      }
+
+      .section-title {
+        font-size: 1.2rem;
+        padding: 8px 10px;
+      }
+
+      .card {
+        padding: 10px;
+      }
+    }
+
+    /* Landscape phone optimization */
+    @media (max-width: 900px) and (orientation: landscape) {
+      .hero {
+        padding: 40px 20px 30px 20px;
+      }
+
+      h2 {
+        font-size: 2rem;
+        margin-bottom: 25px;
+      }
+
+      .score-ring {
+        width: 100px;
+        height: 100px;
+      }
+
+      .score-ring svg {
+        width: 100px;
+        height: 100px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app-logo">
+    <img src="logohiero copy.png" alt="Hiero Logo">
+    <span>HIERO</span>
+  </div>
+
+  <div class="hero">
+    <h2>Analysis Summary</h2>
+    <div class="content-stack">
+      <!-- Analysis Result Card -->
+      <div class="card">
+        <section class="score-section" aria-labelledby="score-title">
+          <h3 class="section-title" id="score-title">Analysis Result</h3>
+          <div class="score-ring">
+            <svg width="150" height="150" role="img" aria-label="Resume match score">
+              <circle class="bg" cx="75" cy="75" r="60" stroke="#333333" stroke-width="12" fill="none" />
+              <circle class="progress" cx="75" cy="75" r="60" stroke="var(--score-color, var(--soft-green))"
+                stroke-width="12" fill="none" stroke-linecap="round" />
+            </svg>
+            <div class="score-text" id="score-percent">--%</div>
+          </div>
+          <div class="score-label">Resume Match Score</div>
+        </section>
+      </div>
+
+      <!-- Analysis Details Card -->
+      <div class="card">
+        <section aria-labelledby="details-title">
+          <h3 class="section-title" id="details-title">Analysis Details</h3>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; color: var(--text-secondary);">
+            <div>
+              <div style="font-size: 0.9rem; color: var(--gold-accent); font-weight: 600;">Job Domain</div>
+              <div id="domain-display" style="font-size: 1.1rem; margin-top: 5px;">-</div>
+            </div>
+            <div>
+              <div style="font-size: 0.9rem; color: var(--gold-accent); font-weight: 600;">JD Skills Required</div>
+              <div id="jd-skills-count" style="font-size: 1.1rem; margin-top: 5px;">-</div>
+            </div>
+            <div>
+              <div style="font-size: 0.9rem; color: var(--gold-accent); font-weight: 600;">Your Skills</div>
+              <div id="resume-skills-count" style="font-size: 1.1rem; margin-top: 5px;">-</div>
+            </div>
+            <div>
+              <div style="font-size: 0.9rem; color: var(--gold-accent); font-weight: 600;">Bonus Skills</div>
+              <div id="extra-skills-count" style="font-size: 1.1rem; margin-top: 5px;">-</div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Matched Skills Card -->
+      <div class="card">
+        <section aria-labelledby="matched-skills-title">
+          <h3 class="section-title" id="matched-skills-title">Matched Skills</h3>
+          <ul class="skills-list" id="matched-skills-list"></ul>
+          <div id="no-matched-skills"
+            style="color: var(--text-secondary); font-style: italic; padding: 10px; text-align: center; display: none;">
+            No skills matched yet. Keep learning! 💪
+          </div>
+        </section>
+      </div>
+
+      <!-- Missing Skills Card -->
+      <div class="card">
+        <section aria-labelledby="skills-title">
+          <h3 class="section-title" id="skills-title">Missing Skills</h3>
+          <ul class="skills-list" id="missing-skills-list"></ul>
+          <div class="learn-first">
+            <strong>Recommended Learning Path:</strong><br>
+            <span id="learn-first"></span>
+            <button class="btn"
+              onclick="window.location.href='learn.html?skill=' + encodeURIComponent(document.getElementById('learn-first').textContent)"
+              style="margin-top: 12px; width: 100%;">
+              🚀 Start Personalized Learning
+            </button>
+          </div>
+        </section>
+      </div>
+
+      <!-- Projects Card -->
+      <div class="card">
+        <section aria-labelledby="projects-title">
+          <h3 class="section-title" id="projects-title">Projects</h3>
+          <ul class="projects-list" id="project-list"></ul>
+        </section>
+      </div>
+
+      <!-- Mock Interview Card -->
+      <div class="card">
+        <section aria-labelledby="interview-title">
+          <h3 class="section-title" id="interview-title">Mock Interview</h3>
+          <div class="interview-section" style="display: flex; flex-direction: column; gap: 15px; align-items: center;">
+            <p style="text-align: center; color: var(--text-dark); font-size: 1rem; margin: 0;">
+              Practice common interview questions for <strong id="interview-skill-name">your top skill</strong>
+            </p>
+            <button class="btn"
+              onclick="window.location.href='mock-interview.html?skill=' + encodeURIComponent(document.getElementById('interview-skill-name').textContent)"
+              style="width: 100%; padding: 12px 20px;">
+              Start Mock Interview
+            </button>
+            <div class="interview-stats"
+              style="display: flex; gap: 20px; justify-content: center; width: 100%; margin-top: 10px;">
+              <div
+                style="text-align: center; padding: 10px; background: rgba(4, 171, 7, 0.1); border-radius: var(--border-radius); flex: 1;">
+                <div style="font-size: 1.5rem; color: var(--soft-green); font-weight: 700;">5</div>
+                <div style="font-size: 0.9rem; color: var(--gold-accent);">Questions</div>
+              </div>
+              <div
+                style="text-align: center; padding: 10px; background: rgba(4, 171, 7, 0.1); border-radius: var(--border-radius); flex: 1;">
+                <div style="font-size: 1.5rem; color: var(--soft-green); font-weight: 700;">10m</div>
+                <div style="font-size: 0.9rem; color: var(--gold-accent);">Duration</div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <div class="timestamp">
+      Analyzed at: <span id="timestamp"></span>
+    </div>
+    <div class="button-row">
+      <button class="btn" onclick="window.location.href='analysis.html'">🔁 Analyze Another Resume</button>
+      <button class="btn" onclick="exportAnalysis()">📄 Export Analysis</button>
+    </div>
+  </div>
+  </div>
+  <script>
+    const defaultData = {
+      score: 85,
+      missingSkills: ['Deep Learning', 'Data Visualization', 'Cloud Deployment'],
+      skillToLearnFirst: 'Deep Learning',
+      projectSuggestions: ['Build a Sentiment Analysis App', 'Deploy a ML Model to Cloud'],
+      videoUrl: 'https://www.youtube.com/embed/aircAruvnKk'
+    };
+
+    function sanitize(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function validateData(data) {
+      if (!data || typeof data !== 'object') return false;
+      return (
+        typeof data.score === 'number' &&
+        Array.isArray(data.missingSkills) &&
+        Array.isArray(data.matchedSkills) &&
+        typeof data.skillToLearnFirst === 'string' &&
+        Array.isArray(data.projectSuggestions) &&
+        (data.videoUrl ? typeof data.videoUrl === 'string' : true)
+      );
+    }
+
+    function animateScoreRing(percent) {
+      const circle = document.querySelector('.score-ring .progress');
+      const radius = 50;
+      const circumference = 2 * Math.PI * radius;
+      circle.style.strokeDasharray = circumference;
+      circle.style.strokeDashoffset = circumference;
+      const scoreColor = percent < 50 ? '#ff4444' : percent < 75 ? '#ffaa00' : '#04ab07';
+      circle.style.setProperty('--score-color', scoreColor);
+      setTimeout(() => {
+        const offset = circumference - (percent / 100) * circumference;
+        circle.style.transition = 'stroke-dashoffset 1.5s ease-out';
+        circle.style.strokeDashoffset = offset;
+      }, 300);
+    }
+
+    function setAnalysisData(data) {
+      console.log('⚙️ setAnalysisData called with:', data);
+
+      const percent = Math.round(data.score ?? 0);
+      const scorePercentEl = document.getElementById('score-percent');
+      if (scorePercentEl) {
+        scorePercentEl.textContent = percent + '%';
+        console.log('✅ Score updated:', percent + '%');
+      } else {
+        console.warn('⚠️ Element not found: score-percent');
+      }
+
+      try {
+        animateScoreRing(percent);
+        console.log('✅ Score ring animated');
+      } catch (err) {
+        console.error('❌ Error animating score ring:', err);
+      }
+
+      // === UPDATE ANALYSIS DETAILS ===
+      const domainEl = document.getElementById('domain-display');
+      if (domainEl) {
+        const domain = (data.domain || 'IT').toUpperCase();
+        domainEl.textContent = domain;
+        console.log('✅ Domain updated:', domain);
+      }
+
+      const jdSkillsCountEl = document.getElementById('jd-skills-count');
+      if (jdSkillsCountEl) {
+        const jdCount = (data.jdSkills || []).length;
+        jdSkillsCountEl.textContent = jdCount + ' skill' + (jdCount !== 1 ? 's' : '');
+        console.log('✅ JD skills count updated:', jdCount);
+      }
+
+      const resumeSkillsCountEl = document.getElementById('resume-skills-count');
+      if (resumeSkillsCountEl) {
+        const resumeCount = (data.resumeSkills || []).length;
+        resumeSkillsCountEl.textContent = resumeCount + ' skill' + (resumeCount !== 1 ? 's' : '');
+        console.log('✅ Resume skills count updated:', resumeCount);
+      }
+
+      const extraSkillsCountEl = document.getElementById('extra-skills-count');
+      if (extraSkillsCountEl) {
+        const extraCount = (data.extraSkills || []).length;
+        extraSkillsCountEl.textContent = extraCount + ' skill' + (extraCount !== 1 ? 's' : '');
+        console.log('✅ Extra skills count updated:', extraCount);
+      }
+
+      const skillsBox = document.getElementById('missing-skills-list');
+      if (skillsBox) {
+        skillsBox.innerHTML = '';
+        (data.missingSkills || []).forEach(skill => {
+          const li = document.createElement('li');
+          li.className = 'skill-chip';
+          li.setAttribute('role', 'button');
+          li.setAttribute('aria-label', `Learn ${skill}`);
+          li.tabIndex = 0;
+          li.textContent = sanitize(skill);
+          li.onclick = () => window.location.href = `learn.html?skill=${encodeURIComponent(skill)}`;
+          li.onkeydown = (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              window.location.href = `learn.html?skill=${encodeURIComponent(skill)}`;
+            }
+          };
+          skillsBox.appendChild(li);
+        });
+        console.log('✅ Missing skills list updated:', data.missingSkills?.length || 0, 'skills');
+      } else {
+        console.warn('⚠️ Element not found: missing-skills-list');
+      }
+
+      // === RENDER MATCHED SKILLS ===
+      const matchedSkillsBox = document.getElementById('matched-skills-list');
+      const noMatchedSkillsMsg = document.getElementById('no-matched-skills');
+
+      if (matchedSkillsBox && noMatchedSkillsMsg) {
+        matchedSkillsBox.innerHTML = '';
+        const matchedSkills = data.matchedSkills || [];
+
+        if (matchedSkills.length > 0) {
+          noMatchedSkillsMsg.style.display = 'none';
+          matchedSkillsBox.style.display = 'flex';
+
+          matchedSkills.forEach(skill => {
+            const li = document.createElement('li');
+            li.className = 'skill-chip';
+            li.setAttribute('role', 'button');
+            li.setAttribute('aria-label', `Matched skill: ${skill}`);
+            li.tabIndex = 0;
+            li.innerHTML = `✅ ${sanitize(skill)}`;
+            li.style.borderColor = '#04ab07';
+            li.style.backgroundColor = 'rgba(4, 171, 7, 0.1)';
+            li.onclick = () => window.location.href = `learn.html?skill=${encodeURIComponent(skill)}&mode=reinforce`;
+            li.onkeydown = (e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                window.location.href = `learn.html?skill=${encodeURIComponent(skill)}&mode=reinforce`;
+              }
+            };
+            matchedSkillsBox.appendChild(li);
+          });
+          console.log('✅ Matched skills list updated:', matchedSkills.length, 'skills');
+        } else {
+          // Show "no matched skills" message
+          matchedSkillsBox.style.display = 'none';
+          noMatchedSkillsMsg.style.display = 'block';
+          console.log('ℹ️ No matched skills to display');
+        }
+      } else {
+        console.warn('⚠️ Matched skills elements not found');
+      }
+
+      const learnFirstEl = document.getElementById('learn-first');
+      if (learnFirstEl) {
+        learnFirstEl.textContent = sanitize(data.skillToLearnFirst || '');
+        console.log('✅ Learn first skill updated:', data.skillToLearnFirst);
+      } else {
+        console.warn('⚠️ Element not found: learn-first');
+      }
+
+      const interviewSkillEl = document.getElementById('interview-skill-name');
+      if (interviewSkillEl) {
+        interviewSkillEl.textContent = sanitize(data.skillToLearnFirst || 'your top skill');
+        console.log('✅ Interview skill name updated:', data.skillToLearnFirst);
+      } else {
+        console.warn('⚠️ Element not found: interview-skill-name');
+      }
+
+      const projectsBox = document.getElementById('project-list');
+      if (projectsBox) {
+        projectsBox.innerHTML = '';
+        (data.projectSuggestions || []).forEach((proj, i) => {
+          // Handle both string and object project formats
+          let projectLabel = '';
+          let projectName = '';
+
+          if (typeof proj === 'string') {
+            // Simple string format
+            projectLabel = proj;
+            projectName = proj;
+            console.log(`✅ Project ${i + 1}: ${projectLabel} (string)`);
+          } else if (proj && typeof proj === 'object') {
+            // Object format - try to find ANY valid string property
+            const skill = proj.skill || '';
+            const miniProjects = Array.isArray(proj.miniProjects) ? proj.miniProjects : [];
+            const firstProject = miniProjects.length > 0 ? miniProjects[0] : '';
+
+            // Try to find a name/title/label property if it's a direct project object
+            const directName = proj.name || proj.title || proj.label || proj.project || '';
+
+            if (directName) {
+              projectLabel = directName;
+              projectName = directName;
+            } else if (firstProject) {
+              projectLabel = skill ? `${skill} – ${firstProject}` : firstProject;
+              projectName = firstProject;
+            } else if (skill) {
+              projectLabel = `Project for ${skill}`;
+              projectName = skill;
+            } else {
+              projectLabel = 'New Project Idea';
+              projectName = 'Project';
+            }
+            console.log(`✅ Project ${i + 1}: ${projectLabel} (object)`);
+          } else {
+            projectLabel = 'New Project Idea';
+            projectName = 'Project';
+            console.log(`✅ Project ${i + 1}: Unknown format`);
+          }
+
+          const li = document.createElement('li');
+          li.className = 'project-card';
+          li.setAttribute('role', 'button');
+          li.setAttribute('aria-label', `View project: ${projectLabel}`);
+          li.tabIndex = 0;
+          li.innerHTML = `<span class="icon">🌱</span> ${sanitize(projectLabel)}`;
+          li.onclick = () => window.location.href = `project.html?name=${encodeURIComponent(projectName)}`;
+          li.onkeydown = (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              window.location.href = `project.html?name=${encodeURIComponent(projectName)}`;
+            }
+          };
+          projectsBox.appendChild(li);
+        });
+        console.log('✅ Projects list updated:', data.projectSuggestions?.length || 0, 'projects');
+      } else {
+        console.warn('⚠️ Element not found: project-list');
+      }
+
+      if (data.videoUrl && /^https:\/\/www\.youtube\.com\/embed\/[a-zA-Z0-9_-]+$/.test(data.videoUrl)) {
+        const videoSection = document.getElementById('video-section');
+        const youtubeVideo = document.getElementById('youtube-video');
+        if (videoSection) {
+          videoSection.style.display = '';
+          console.log('✅ Video section shown');
+        }
+        if (youtubeVideo) {
+          youtubeVideo.src = data.videoUrl;
+          youtubeVideo.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture');
+          console.log('✅ YouTube video loaded:', data.videoUrl);
+        }
+      } else {
+        console.log('ℹ️ No video URL or invalid format');
+      }
+
+      const timestampEl = document.getElementById('timestamp');
+      if (timestampEl) {
+        timestampEl.textContent = new Intl.DateTimeFormat(navigator.language, {
+          dateStyle: 'medium',
+          timeStyle: 'short'
+        }).format(new Date());
+        console.log('✅ Timestamp updated');
+      } else {
+        console.warn('⚠️ Element not found: timestamp');
+      }
+
+      console.log('🎉 setAnalysisData completed successfully');
+    }
+
+    function exportAnalysis() {
+      const data = JSON.parse(localStorage.getItem('analysisResult') || JSON.stringify(defaultData));
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'resume-analysis.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function startMockInterview() {
+      const data = JSON.parse(localStorage.getItem('analysisResult') || JSON.stringify(defaultData));
+      const skill = data.skillToLearnFirst || 'JavaScript';
+      window.location.href = `learn.html?skill=${encodeURIComponent(skill)}&mode=interview`;
+    }
+
+    window.addEventListener('DOMContentLoaded', function () {
+      let data = null;
+      try {
+        const stored = JSON.parse(localStorage.getItem('analysisResult'));
+        console.log('📦 Raw stored data:', stored);
+
+        // Extract the actual data object if it's wrapped
+        if (stored && typeof stored === 'object') {
+          if (stored.data && typeof stored.data === 'object') {
+            data = stored.data;
+            console.log('✅ Extracted wrapped data:', data);
+          } else {
+            data = stored;
+            console.log('✅ Using stored data directly:', data);
+          }
+        }
+
+        console.log('🔍 Data to validate:', data);
+        if (!validateData(data)) throw new Error('Invalid data format');
+        console.log('✅ Data validation passed');
+      } catch (error) {
+        console.error('❌ Error loading data:', error.message);
+        console.log('📋 Using default data');
+        data = defaultData;
+      }
+      console.log('🎯 Final data for display:', data);
+      setAnalysisData(data);
+    });
+  </script>
+</body>
+
+</html>

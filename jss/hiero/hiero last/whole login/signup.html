@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>One-page Resume Template</title>
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* Page and print sizing - forces one A4 page when printed */
+    @page { size: A4; margin: 16mm }
+    html,body{height:100%;}
+    body{
+      font-family: 'Open Sans', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+      color:#111;
+      margin:0;
+      padding:20px 26px;
+      box-sizing:border-box;
+      background:#fff;
+    }
+
+    /* Container with A4-like proportions; helpful for previewing in browser */
+    .sheet{
+      width:210mm; /* A4 width */
+      min-height:297mm; /* A4 height */
+      margin:0 auto;
+      padding:20mm 18mm;
+      box-sizing:border-box;
+      border:0;
+      position:relative;
+    }
+
+    /* Header */
+    .header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+    }
+    .brand{
+      display:flex;align-items:center;gap:12px;
+    }
+    .logo{
+      width:72px;height:72px;border-radius:50%;background:#000;flex:0 0 72px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:18px;
+    }
+    .name-block{
+      line-height:1;
+    }
+    .name{font-family:'Libre Caslon Text', serif;font-size:28px;font-weight:700}
+    .meta{font-size:12px;color:#333}
+
+    .contacts{
+      text-align:right;font-size:12px;line-height:1.6;
+    }
+    .contacts a{color:inherit;text-decoration:none}
+
+    hr.rule{border:none;border-top:1px solid #222;margin:14px 0 18px}
+
+    /* Two-column main layout */
+    .main{
+      display:grid;
+      grid-template-columns: 1fr 140px; /* left content + narrow right column for dates */
+      gap:12px 22px;
+      align-items:start;
+    }
+
+    /* Section styles */
+    section{margin-bottom:12px}
+    .section-title{
+      font-weight:700;letter-spacing:1px;margin-bottom:8px;font-size:13px;
+      border-bottom:1px solid #bbb;padding-bottom:6px
+    }
+    .item{
+      margin-bottom:8px;display:grid;grid-template-columns:1fr auto;align-items:start;
+    }
+    .item .left{padding-right:8px}
+    .item .right{font-size:12px;color:#333;text-align:right}
+
+    .role{font-weight:600}
+    .muted{font-size:12px;color:#444;font-style:italic}
+    ul{margin:6px 0 0 16px;padding:0}
+    li{margin-bottom:4px}
+
+    /* Personal projects / skills layout that takes full width */
+    .full-width{grid-column:1/-1}
+
+    .skills-grid{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:13px}
+    .skill-label{min-width:120px;font-weight:600;color:#222}
+
+    /* Positions & achievements aligned left with small date column on right */
+    .compact-item{display:flex;justify-content:space-between;align-items:baseline}
+
+    /* Footer small print */
+    .small{font-size:11px;color:#333}
+
+    /* Ensure everything fits on single page when printed */
+    @media print{
+      body{margin:0;padding:0}
+      .sheet{padding:12mm}
+      a[href]:after{content:''}
+    }
+
+    /* Responsive for small preview windows */
+    @media (max-width:800px){
+      .main{grid-template-columns:1fr}
+      .contacts{text-align:left;margin-top:12px}
+    }
+  </style>
+</head>
+<body>
+  <div class="sheet" id="resume-sheet">
+    <header class="header">
+      <div class="brand">
+        <div class="logo">IIIT</div>
+        <div class="name-block">
+          <div class="name">Your Name</div>
+          <div class="meta">Roll No.: xxxxxxx &nbsp;|&nbsp; Your Program &nbsp;|&nbsp; Your Course</div>
+          <div class="meta">Indian Institute Of Information Technology, Vadodara</div>
+        </div>
+      </div>
+
+      <div class="contacts">
+        <div>📞 +91-xxxxxxxxxx</div>
+        <div>✉️ youremail@email.com</div>
+        <div>📧 officialemail@iiitvadodara.ac.in</div>
+        <div>🔗 GitHub · LinkedIn</div>
+      </div>
+    </header>
+
+    <hr class="rule">
+
+    <main class="main">
+      <!-- LEFT: main content -->
+      <div>
+        <section>
+          <div class="section-title">EDUCATION</div>
+
+          <div class="item">
+            <div class="left">
+              <div class="role">• Indian Institute of Information Technology, Vadodara</div>
+              <div class="muted">Your Degree and Course name</div>
+            </div>
+            <div class="right">Year<br><span class="small">CGPA/Percentage: xxx</span></div>
+          </div>
+
+          <div class="item">
+            <div class="left">
+              <div class="role">• Your School Name</div>
+              <div class="muted">Board of Intermediate Education, State</div>
+            </div>
+            <div class="right">Year<br><span class="small">CGPA/Percentage: xxx</span></div>
+          </div>
+
+          <div class="item">
+            <div class="left">
+              <div class="role">• Your School name</div>
+              <div class="muted">Board of Secondary Education, State</div>
+            </div>
+            <div class="right">Year<br><span class="small">CGPA/Percentage: xxx</span></div>
+          </div>
+        </section>
+
+        <section>
+          <div class="section-title">EXPERIENCE</div>
+
+          <div class="item">
+            <div class="left">
+              <div class="role">• Company Name</div>
+              <div class="muted">Your Role — City</div>
+              <ul>
+                <li>Work description line 1</li>
+                <li>Work description line 2</li>
+              </ul>
+            </div>
+            <div class="right">Event dates</div>
+          </div>
+
+          <div class="item">
+            <div class="left">
+              <div class="role">• Company Name</div>
+              <div class="muted">Your Role — City</div>
+              <ul>
+                <li>Work description line 1</li>
+                <li>Work description line 2</li>
+              </ul>
+            </div>
+            <div class="right">Event dates</div>
+          </div>
+        </section>
+
+        <section class="full-width">
+          <div class="section-title">PERSONAL PROJECTS</div>
+
+          <div class="item" style="grid-template-columns:1fr auto;">
+            <div class="left">
+              <div class="role">• Project Name</div>
+              <div class="muted">Project description (Your input in the project)</div>
+              <ul>
+                <li>Tools & technologies used: xxx, xxx</li>
+                <li>More description on the project (The output you achieved by working on the project)</li>
+              </ul>
+            </div>
+            <div class="right">Event dates</div>
+          </div>
+
+          <div class="item" style="grid-template-columns:1fr auto;">
+            <div class="left">
+              <div class="role">• Project Name</div>
+              <div class="muted">Project description (Your input in the project)</div>
+              <ul>
+                <li>Tools & technologies used: xxx, xxx</li>
+                <li>More description on the project (The output you achieved by working on the project)</li>
+              </ul>
+            </div>
+            <div class="right">Event dates</div>
+          </div>
+        </section>
+
+        <section>
+          <div class="section-title">TECHNICAL SKILLS AND INTERESTS</div>
+          <div class="skills-grid">
+            <div><span class="skill-label">Languages:</span> C, C++, Python, JavaScript</div>
+            <div><span class="skill-label">Developer Tools:</span> Git, Docker, VSCode</div>
+            <div><span class="skill-label">Frameworks:</span> React, Node.js</div>
+            <div><span class="skill-label">Cloud/Databases:</span> AWS, MySQL</div>
+            <div><span class="skill-label">Soft Skills:</span> Communication, Leadership</div>
+          </div>
+        </section>
+
+        <section>
+          <div class="section-title">POSITIONS OF RESPONSIBILITY</div>
+          <div class="compact-item"><div>• Position, Club or Event</div><div class="small">Position tenure</div></div>
+          <div class="compact-item"><div>• Position, Club or Event</div><div class="small">Position tenure</div></div>
+        </section>
+
+        <section>
+          <div class="section-title">ACHIEVEMENTS</div>
+          <div class="compact-item"><div>• Achievement description</div><div class="small">Event dates</div></div>
+          <div class="compact-item"><div>• Achievement description</div><div class="small">Event dates</div></div>
+        </section>
+
+      </div>
+
+      <!-- RIGHT: narrow column for dates / city repeated if needed -->
+      <aside>
+        <!-- This column intentionally mostly empty; dates are placed on the right of each .item. Keep this for visual balance. -->
+      </aside>
+
+    </main>
+
+    <footer style="position:absolute;left:18mm;right:18mm;bottom:18mm;font-size:11px;text-align:center;color:#666">
+      Designed to fit on a single A4 page — edit content to keep it within one printed page.
+    </footer>
+  </div>
+</body>
+</html>
