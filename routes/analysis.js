@@ -246,12 +246,15 @@ async function fetchVideos(query) {
     for (const lang of languages) {
         try {
             const langCode = langCodes[lang] || 'en';
-            // Stricter, more professional queries
-            let searchQuery = `"${queryClean}" full course ${isAdvanced ? 'advanced expert tutorial' : 'beginner roadmap'} in ${lang}`;
+
+            // Relaxed queries for better match rates
+            let searchQuery = `${queryClean} ${isAdvanced ? 'advanced tutorial' : 'beginner tutorial'} in ${lang}`;
 
             if (lang === 'english') {
-                searchQuery = `"${queryClean}" ${isAdvanced ? 'advanced masterclass professional' : 'comprehensive bootcamp full course'}`;
+                searchQuery = `${queryClean} ${isAdvanced ? 'advanced expert tutorial' : 'complete course tutorial'}`;
             }
+
+            console.log(`[YT Search] Query for ${lang}: ${searchQuery}`);
 
             const ytRes = await axios.get(`https://www.googleapis.com/youtube/v3/search`, {
                 params: {
@@ -291,10 +294,10 @@ async function fetchVideos(query) {
                 });
             }
 
-            // Filter out videos that are likely too short (< 2 mins)
+            // Filter out short videos (< 1 min)
             const filteredItems = items.filter(item => {
                 const dur = durations[item.id.videoId] || "PT0M";
-                return !dur.match(/PT[0-1]M/);
+                return !dur.match(/PT[0]M/);
             }).slice(0, 4);
 
             results[lang] = filteredItems.map(item => ({

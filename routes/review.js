@@ -49,11 +49,12 @@ router.post('/review', authenticateToken, async (req, res) => {
 
         let review = await Review.findOne({ userId: user._id });
         if (review) {
-            return res.status(400).json({
-                success: false,
-                error: 'You have already submitted a review.',
-                existingReview: { rating: review.rating, reviewText: review.reviewText }
-            });
+            // Update existing review
+            review.rating = rating;
+            review.reviewText = reviewText;
+            review.updatedAt = Date.now();
+            await review.save();
+            return res.status(200).json({ success: true, message: 'Review updated successfully', review });
         }
 
         review = new Review({

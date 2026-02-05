@@ -9,13 +9,13 @@ const PDFDocument = require('pdfkit');
 
 // ==================== STANDARDIZED CONFIGURATION ====================
 
-// Unified page settings for all templates
+// Unified page settings for all templates (Optimized for space)
 const PAGE_CONFIG = {
     size: 'A4',
-    margin: 50,
-    width: 595.28,  // A4 width in points
-    height: 841.89, // A4 height in points
-    contentWidth: 495.28  // width minus margins
+    margin: 40,     // Reduced from 50 to save space
+    width: 595.28,
+    height: 841.89,
+    contentWidth: 515.28  // Adjusted for new margins
 };
 
 // Standardized colors for each template
@@ -83,95 +83,94 @@ const TEMPLATE_COLORS = {
         background: '#FFFFFF',
         light: '#5a6c7d'
     },
-    'minimalist-mono': {
-        primary: '#000000',
-        secondary: '#000000',
-        accent: '#000000',
-        background: '#FFFFFF',
-        light: '#555555'
-    },
-    // Rishi & Priya (Restored to User's Original Clean Design)
+    // Rishi: Modern Tech (Clean Black)
     'rishi': {
+        primary: '#000000',      // Solid Black
+        secondary: '#4b5563',    // Dark Grey
+        accent: '#000000',       // Solid Black
+        background: '#FFFFFF',
+        light: '#9ca3af'
+    },
+    // Priya: Analytics Professional (Daniel Gallego / Grey Pill Style)
+    'priya-analytics': {
+        primary: '#111827',      // Darker Grey/Black
+        secondary: '#374151',    // Medium Grey
+        accent: '#4b5563',       // Accent Grey
+        background: '#FFFFFF',
+        light: '#e5e7eb'         // Pill Background Color
+    },
+    'hiero-executive': {
         primary: '#000000',
         secondary: '#333333',
         accent: '#000000',
         background: '#FFFFFF',
         light: '#666666'
     },
-    'priya-analytics': {
-        primary: '#000000',
-        secondary: '#333333',
+    'hiero-studio': {
+        primary: '#1a1a1a',
+        secondary: '#4a4a4a',
         accent: '#000000',
         background: '#FFFFFF',
-        light: '#666666'
+        light: '#d1d5db'
+    },
+    'hiero-onyx': {
+        primary: '#000000',
+        secondary: '#111827',
+        accent: '#374151',
+        background: '#FFFFFF',
+        light: '#f3f4f6'
     }
 };
 
-// Refined Font Sizes for the "Jhon Smith" look
+// Standardized font sizes (Refined for a 'Perfect' look)
 const FONT_SIZES = {
-    name: 20,
+    name: 20,            // Slightly smaller for better fit
     sectionTitle: 12,
-    jobTitle: 11,
-    body: 10,
-    contact: 9,
-    small: 8
+    jobTitle: 10.5,
+    body: 10,            // Standard compact professional size
+    contact: 9.5,
+    small: 8.5
 };
 
-
-
-// Standardized spacing (consistent across all templates)
+// Standardized spacing (Ultra-Compact for One-Page perfection)
 const SPACING = {
-    lineHeight: 1.5,
-    sectionGap: 15,
-    itemGap: 10,
-    paragraphGap: 8,
-    bulletIndent: 20
+    lineHeight: 1.15,    // Tighter for better content density
+    sectionGap: 7,       // Reduced
+    itemGap: 3,          // Minimal gaps
+    paragraphGap: 2,
+    bulletIndent: 12
 };
 
-// Helper to get per-template spacing overrides
+// Helper to get per-template spacing overrides (Now Unified for density)
 function getTemplateSpacing(template) {
-    return {
-        lineHeight: 1.4,
-        sectionGap: 18,
-        itemGap: 12,
-        paragraphGap: 8,
-        bulletIndent: 15
-    };
+    if (template === 'priya-analytics' || template === 'rishi') {
+        return {
+            lineHeight: 1.15,
+            sectionGap: 7,
+            itemGap: 3,
+            paragraphGap: 3,
+            bulletIndent: 12
+        };
+    }
+    return SPACING;
 }
-
 
 // ==================== SECTION ORDER (STANDARDIZED) ====================
 
 const SECTION_ORDER = [
-    'summary',           // CARRIER OBJECTIVE
-    'education',         // EDUCATION
-    'projects',          // PROJECTS
-    'technicalSkills',   // TECHNICAL STRENGTHS
-    'experience',        // WORK EXPERIENCE
-    'achievements',      // ACADEMIC ACHIEVEMENTS
-    'softSkills',        // PERSONAL TRAITS
+    'summary',
+    'experience',
+    'education',
+    'technicalSkills',
+    'softSkills',
+    'projects',
     'certifications',
+    'achievements',
     'languages',
     'hobbies',
     'references',
     'customDetails'
 ];
-
-// Map section internal keys to user-preferred titles from image
-const SECTION_TITLES = {
-    summary: 'CARRIER OBJECTIVE',
-    experience: 'WORK EXPERIENCE',
-    education: 'EDUCATION',
-    technicalSkills: 'TECHNICAL STRENGTHS',
-    softSkills: 'PERSONAL TRAITS',
-    projects: 'PROJECTS',
-    certifications: 'CERTIFICATIONS',
-    achievements: 'ACADEMIC ACHIEVEMENTS',
-    languages: 'LANGUAGES',
-    hobbies: 'EXTRA-CURRICULAR', // Maps hobbies to the extra-curricular section in image
-    references: 'REFERENCES'
-};
-
 
 // ==================== HELPER FUNCTIONS ====================
 
@@ -334,103 +333,314 @@ function renderHeader_Modern(doc, data, colors) {
 function renderHeader_Rishi(doc, data, colors) {
     const { personalInfo = {} } = data;
 
-    // Centered Name (Bold & Large) - THE JHON SMITH LOOK
+    // LEFT ALIGNED COMPACT DESIGN
     doc.fontSize(FONT_SIZES.name)
-        .fillColor('#000000')
-        .font('Times-Bold')
-        .text(personalInfo.fullName || '', { align: 'center', width: PAGE_CONFIG.contentWidth });
+        .fillColor(colors.primary)
+        .font('Helvetica-Bold')
+        .text(personalInfo.fullName || '', PAGE_CONFIG.margin, PAGE_CONFIG.margin);
 
-    doc.moveDown(0.2);
+    doc.moveDown(0.1);
 
-    // Centered Contact Info
-    const contact = [
-        personalInfo.address,
-        personalInfo.phone,
-        personalInfo.email
-    ].filter(Boolean).join('  |  ');
+    // Modern clean contact line (Pipe separated)
+    doc.fontSize(FONT_SIZES.contact)
+        .fillColor(colors.secondary)
+        .font('Helvetica');
+
+    const contactParts = [personalInfo.email, personalInfo.phone, personalInfo.address].filter(Boolean);
+    const contactStr = contactParts.join('  |  ');
+    doc.text(contactStr);
+
+    // Links on a new compact line if they exist
+    const links = [personalInfo.linkedin, personalInfo.website].filter(Boolean).join('  •  ');
+    if (links) {
+        doc.moveDown(0.1);
+        doc.fillColor(colors.accent).text(links);
+    }
+
+    doc.moveDown(0.3);
+    // Sophisticated thin line
+    doc.moveTo(PAGE_CONFIG.margin, doc.y)
+        .lineTo(PAGE_CONFIG.margin + PAGE_CONFIG.contentWidth, doc.y)
+        .strokeColor(colors.primary)
+        .lineWidth(0.6)
+        .stroke();
+
+    doc.moveDown(0.5);
+}
+
+function renderHeader_Tech(doc, data, colors) {
+    // Dark theme header
+    const { personalInfo } = data;
+
+    doc.fontSize(FONT_SIZES.name - 2)
+        .fillColor(colors.primary)
+        .font('Courier-Bold')
+        .text('> ' + (personalInfo.fullName || ''), PAGE_CONFIG.margin, PAGE_CONFIG.margin);
+
+    doc.moveDown(0.3);
 
     doc.fontSize(FONT_SIZES.contact)
-        .fillColor('#333333')
-        .font('Times-Roman')
-        .text(contact, { align: 'center' });
+        .fillColor(colors.light)
+        .font('Courier');
 
-    doc.moveDown(1.2);
+    if (personalInfo.email) doc.text('  email: ' + personalInfo.email);
+    if (personalInfo.phone) doc.text('  phone: ' + personalInfo.phone);
+    if (personalInfo.linkedin) doc.text('  linkedin: ' + personalInfo.linkedin);
+
+    doc.moveDown(1.5);
+}
+
+function renderHeader_ATS(doc, data, colors) {
+    // Simple ATS-friendly header
+    const { personalInfo } = data;
+
+    doc.fontSize(FONT_SIZES.name - 4)
+        .fillColor(colors.primary)
+        .font('Times-Bold')
+        .text((personalInfo.fullName || '').toUpperCase(), {
+            align: 'center',
+            width: PAGE_CONFIG.contentWidth
+        });
+
+    doc.moveDown(0.3);
+
+    const contact = [
+        personalInfo.email,
+        personalInfo.phone,
+        personalInfo.address
+    ].filter(Boolean).join(' | ');
+
+    doc.fontSize(FONT_SIZES.contact)
+        .fillColor(colors.secondary)
+        .font('Times-Roman')
+        .text(contact, {
+            align: 'center',
+            width: PAGE_CONFIG.contentWidth
+        });
+
+    doc.moveDown(1);
 }
 
 function renderHeader_PriyaAnalytics(doc, data, colors) {
-    // Exact same centered style for Consistency
-    renderHeader_Rishi(doc, data, colors);
+    const { personalInfo = {} } = data;
+
+    // Name (Bold & Large)
+    doc.fontSize(FONT_SIZES.name + 2)
+        .fillColor(colors.primary)
+        .font('Helvetica-Bold')
+        .text(personalInfo.fullName || '', PAGE_CONFIG.margin, PAGE_CONFIG.margin);
+
+    doc.moveDown(0.1);
+
+    // Job Title - Assuming it's in summary or first exp if not provided
+    const jobTitle = data.experience?.[0]?.jobTitle || 'PROFESSIONAL';
+    doc.fontSize(FONT_SIZES.jobTitle + 2)
+        .fillColor(colors.primary)
+        .text(jobTitle.toUpperCase());
+
+    doc.moveDown(0.2);
+
+    // Contact info bar
+    const contact = [
+        personalInfo.address,
+        personalInfo.phone,
+        personalInfo.email,
+        personalInfo.website
+    ].filter(Boolean).join(' | ');
+
+    doc.fontSize(FONT_SIZES.contact)
+        .fillColor(colors.secondary)
+        .font('Helvetica')
+        .text(contact);
+
+    doc.moveDown(1.5);
 }
 
+function renderHeader_Executive(doc, data, colors) {
+    const { personalInfo = {} } = data;
+    const rightMargin = PAGE_CONFIG.margin + PAGE_CONFIG.contentWidth;
+
+    // Left side: Name and Title
+    doc.fontSize(FONT_SIZES.name + 2)
+        .fillColor(colors.primary)
+        .font('Helvetica-Bold')
+        .text(personalInfo.fullName || '', PAGE_CONFIG.margin, PAGE_CONFIG.margin);
+
+    doc.moveDown(0.1);
+
+    // MORGAN MAXWELL STYLE: ALL CAPS, SPACED, ITALIC
+    const jobTitle = (data.experience?.[0]?.jobTitle || 'PROFESSIONAL').toUpperCase();
+    doc.fontSize(FONT_SIZES.jobTitle + 1)
+        .font('Helvetica-Oblique')
+        .text(jobTitle.split('').join(' '));
+
+    // Right side: Contact
+    const contactInfo = [
+        personalInfo.phone,
+        personalInfo.email,
+        personalInfo.linkedin,
+        personalInfo.address
+    ].filter(Boolean);
+
+    let currentY = PAGE_CONFIG.margin + 5;
+    contactInfo.forEach(info => {
+        doc.fontSize(FONT_SIZES.contact)
+            .fillColor(colors.secondary)
+            .font('Helvetica')
+            .text(info, PAGE_CONFIG.margin, currentY, { align: 'right', width: PAGE_CONFIG.contentWidth });
+        currentY += 14;
+    });
+
+    doc.moveDown(0.8);
+    doc.moveTo(PAGE_CONFIG.margin, doc.y)
+        .lineTo(rightMargin, doc.y)
+        .strokeColor(colors.light)
+        .lineWidth(0.5)
+        .stroke();
+    doc.moveDown(1.5);
+}
+
+function renderHeader_Studio(doc, data, colors) {
+    const { personalInfo = {} } = data;
+
+    doc.fontSize(FONT_SIZES.name + 6)
+        .fillColor(colors.primary)
+        .font('Helvetica-Bold')
+        .text(personalInfo.fullName || '', { align: 'center' });
+
+    doc.moveDown(0.1);
+    doc.fontSize(FONT_SIZES.jobTitle + 2)
+        .font('Helvetica')
+        .text(data.experience?.[0]?.jobTitle || 'WEB DEVELOPMENT', { align: 'center' });
+
+    doc.moveDown(0.2);
+    doc.moveTo(PAGE_CONFIG.margin + (PAGE_CONFIG.contentWidth / 2) - 20, doc.y)
+        .lineTo(PAGE_CONFIG.margin + (PAGE_CONFIG.contentWidth / 2) + 20, doc.y)
+        .strokeColor(colors.primary)
+        .lineWidth(2)
+        .stroke();
+
+    doc.moveDown(0.5);
+    const contact = [personalInfo.address, personalInfo.email, personalInfo.website].filter(Boolean).join(' | ');
+    doc.fontSize(FONT_SIZES.contact)
+        .font('Helvetica')
+        .text(contact, { align: 'center' });
+
+    doc.moveDown(1);
+    doc.moveTo(PAGE_CONFIG.margin, doc.y)
+        .lineTo(PAGE_CONFIG.margin + PAGE_CONFIG.contentWidth, doc.y)
+        .strokeColor(colors.primary)
+        .lineWidth(0.8)
+        .stroke();
+    doc.moveDown(1.2);
+}
 
 // ==================== SECTION TITLE RENDERER ====================
 
 function renderSectionTitle(doc, title, colors, template) {
     const spacing = getTemplateSpacing(template);
-    doc.moveDown(1.0);
+    doc.moveDown(0.3);
+    switch (template) {
+        case 'modern-pro':
+        case 'corporate-ats':
+        case 'elegant-gradient':
+            doc.fontSize(FONT_SIZES.sectionTitle)
+                .fillColor(colors.accent)
+                .font('Helvetica-Bold')
+                .text(title);
+            doc.moveTo(PAGE_CONFIG.margin, doc.y + 3)
+                .lineTo(PAGE_CONFIG.margin + 50, doc.y + 3)
+                .strokeColor(colors.accent)
+                .lineWidth(2)
+                .stroke();
+            break;
 
-    // UNIFIED PROFESSIONAL STYLE: BOLD, CAPS, FULL LINE (Times Font)
-    doc.fontSize(FONT_SIZES.sectionTitle)
-        .fillColor('#000000')
-        .font('Times-Bold')
-        .text(title.toUpperCase(), { characterSpacing: 1 });
+        case 'tech-focus':
+            doc.fontSize(FONT_SIZES.sectionTitle)
+                .fillColor(colors.primary)
+                .font('Courier-Bold')
+                .text('# ' + title);
+            break;
 
-    // Thin full-width line below the title
-    doc.moveTo(PAGE_CONFIG.margin, doc.y + 2)
-        .lineTo(PAGE_CONFIG.margin + PAGE_CONFIG.contentWidth, doc.y + 2)
-        .strokeColor('#000000')
-        .lineWidth(0.5)
-        .stroke();
+        case 'priya-analytics':
+            // Rounded Pill Background across full content width
+            doc.fillColor(colors.light)
+                .roundedRect(PAGE_CONFIG.margin, doc.y - 4, PAGE_CONFIG.contentWidth, 22, 11)
+                .fill();
 
-    doc.moveDown(0.6);
-    doc.font('Times-Roman'); // Reset for content
+            doc.fontSize(FONT_SIZES.sectionTitle - 3)
+                .fillColor(colors.primary)
+                .font('Helvetica-Bold')
+                .text(title.toUpperCase(), PAGE_CONFIG.margin + 15, doc.y + 1);
+
+            doc.moveDown(1.2);
+            break;
+
+        case 'hiero-executive':
+        case 'hiero-studio':
+        case 'hiero-onyx':
+            // EXACT POSITION LOCK: Always start labels at the left margin
+            let displayTitle = title;
+            if (title.toLowerCase().includes('summary')) displayTitle = 'Professional\nSummary';
+            if (title.toLowerCase().includes('experience')) displayTitle = 'Internship\nExperience';
+            if (title.toLowerCase().includes('technical skills') || title.toLowerCase() === 'skills') displayTitle = 'Skills';
+
+            doc.fontSize(FONT_SIZES.sectionTitle)
+                .fillColor(colors.primary)
+                .font('Helvetica-Bold')
+                .text(displayTitle, PAGE_CONFIG.margin, doc.y, { width: 130 });
+            break;
+
+        default:
+            doc.fontSize(FONT_SIZES.sectionTitle)
+                .fillColor(colors.primary)
+                .font('Helvetica-Bold')
+                .text(title);
+    }
+    doc.moveDown(spacing.paragraphGap / 10);
 }
 
-
-
 // ==================== MAIN TEMPLATE GENERATOR ====================
-// UPDATED: Now supports piping directly to a response/stream
-async function generateUnifiedResume(data, templateId, outStream) {
+async function generateUnifiedResume(data, templateId, outStream, customOptions = {}) {
     return new Promise((resolve, reject) => {
         try {
-            const template = templateId || 'classic';
+            const template = (templateId || 'classic').toLowerCase().trim();
             const colors = TEMPLATE_COLORS[template] || TEMPLATE_COLORS['classic'];
             const spacing = getTemplateSpacing(template);
+            const options = customOptions || {};
 
             // Create PDF document
             const doc = new PDFDocument(PAGE_CONFIG);
 
-            // Pipe to the provided writable stream (e.g., res)
-            if (outStream) {
+            // Pipe to the provided writable stream
+            if (outStream && typeof outStream.pipe === 'function') {
                 doc.pipe(outStream);
             }
 
-            // Set default font to Times for that classic professional look
-            doc.font('Times-Roman');
+            // Set default font
+            doc.font('Helvetica');
 
             // Render header based on template
             switch (template) {
-
-                case 'rishi':
-                    renderHeader_Rishi(doc, data, colors);
-                    break;
-                case 'priya-analytics':
-                    renderHeader_PriyaAnalytics(doc, data, colors);
-                    break;
-                case 'minimal':
-                    renderHeader_Minimal(doc, data, colors);
-                    break;
-                default:
-                    renderHeader_Classic(doc, data, colors);
+                case 'rishi': renderHeader_Rishi(doc, data, colors); break;
+                case 'minimal': renderHeader_Minimal(doc, data, colors); break;
+                case 'modern-pro':
+                case 'portfolio-style':
+                case 'creative-bold': renderHeader_Modern(doc, data, colors); break;
+                case 'tech-focus': renderHeader_Tech(doc, data, colors); break;
+                case 'ats-optimized':
+                case 'corporate-ats': renderHeader_ATS(doc, data, colors); break;
+                case 'priya-analytics': renderHeader_PriyaAnalytics(doc, data, colors); break;
+                case 'hiero-studio':
+                case 'hiero-onyx':
+                case 'hiero-executive': renderHeader_Executive(doc, data, colors); break;
+                default: renderHeader_Classic(doc, data, colors);
             }
 
-
-            // Render sections in standardized order
+            // ==================== SEQUENTIAL RENDERING (WITH SIDE-BY-SIDE SUPPORT) ====================
             SECTION_ORDER.forEach(sectionKey => {
-                const title = SECTION_TITLES[sectionKey] || sectionKey;
-                renderSection(doc, sectionKey, data, colors, template, spacing, title);
+                renderSection(doc, sectionKey, data, colors, template, spacing, options);
             });
-
 
             // Finalize PDF
             doc.end();
@@ -453,147 +663,230 @@ async function generateUnifiedResume(data, templateId, outStream) {
 
 // ==================== SECTION RENDERERS ====================
 
-// Helper to check page break
-function checkPageBreak(doc, heightNeeded = 60) {
+// Helper to check page break (Now supports Forcing Single Page)
+function checkPageBreak(doc, heightNeeded = 60, forceSinglePage = false) {
     if (doc.y + heightNeeded > PAGE_CONFIG.height - PAGE_CONFIG.margin) {
-        doc.addPage();
-        return true;
+        if (!forceSinglePage) {
+            doc.addPage();
+            return true;
+        }
     }
     return false;
 }
 
-function renderSection(doc, sectionKey, data, colors, template, spacing = SPACING, sectionTitle) {
+function renderSection(doc, sectionKey, data, colors, template, spacing = SPACING, options = {}) {
     const maxWidth = PAGE_CONFIG.contentWidth;
+    const forceSingle = options.forceSinglePage || false;
+
+    // TEMPLATE-SPECIFIC LAYOUT LOGIC (Morgan Maxwell Side-by-Side)
+    const normalizedTemplate = template.toLowerCase().trim();
+    const isSideLayout = ['hiero-executive', 'hiero-studio', 'hiero-onyx'].includes(normalizedTemplate);
+    const labelWidth = isSideLayout ? 130 : 0;
+    const contentGap = 20;
+    const contentWidth = isSideLayout ? (PAGE_CONFIG.contentWidth - labelWidth - contentGap) : PAGE_CONFIG.contentWidth;
+    const contentX = PAGE_CONFIG.margin + labelWidth + contentGap;
 
     switch (sectionKey) {
         case 'summary':
             if (data.summary) {
-                checkPageBreak(doc, 100);
-                renderSectionTitle(doc, sectionTitle || 'Professional Summary', colors, template);
+                checkPageBreak(doc, 60, forceSingle);
+                if (isSideLayout) {
+                    const startY = doc.y;
+                    renderSectionTitle(doc, 'Professional Summary', colors, normalizedTemplate);
+                    const labelEndY = doc.y;
 
-                doc.fontSize(FONT_SIZES.body)
-                    .fillColor(colors.secondary)
-                    .font('Helvetica')
-                    .text(data.summary, {
-                        width: maxWidth,
-                        align: 'justify'
-                    });
-                doc.moveDown(SPACING.sectionGap / 10);
+                    doc.y = startY;
+                    doc.fontSize(FONT_SIZES.body)
+                        .fillColor(colors.secondary)
+                        .font('Helvetica')
+                        .text(data.summary, contentX, startY, { width: contentWidth, align: 'justify' });
+
+                    doc.y = Math.max(labelEndY, doc.y);
+                } else {
+                    renderSectionTitle(doc, 'Professional Summary', colors, normalizedTemplate);
+                    doc.fontSize(FONT_SIZES.body)
+                        .fillColor(colors.secondary)
+                        .font('Helvetica')
+                        .text(data.summary, PAGE_CONFIG.margin, doc.y, { width: maxWidth, align: 'justify' });
+                }
+
+                if (isSideLayout) {
+                    doc.moveDown(0.8);
+                    const dividerY = doc.y;
+                    doc.moveTo(PAGE_CONFIG.margin, dividerY).lineTo(PAGE_CONFIG.margin + PAGE_CONFIG.contentWidth, dividerY).strokeColor(colors.light).lineWidth(0.5).stroke();
+                    doc.y = dividerY;
+                }
+                doc.moveDown(spacing.sectionGap / 10);
             }
             break;
 
         case 'experience':
             if (data.experience && data.experience.length > 0) {
                 checkPageBreak(doc, 100);
-                renderSectionTitle(doc, sectionTitle || 'Work Experience', colors, template);
+                const startSectionY = doc.y;
+                let labelEndY = 0;
+
+                if (isSideLayout) {
+                    renderSectionTitle(doc, 'Internship Experience', colors, normalizedTemplate);
+                    labelEndY = doc.y;
+                    doc.y = startSectionY;
+                } else {
+                    renderSectionTitle(doc, 'Work Experience', colors, normalizedTemplate);
+                }
+
+                const drawX = isSideLayout ? contentX : PAGE_CONFIG.margin;
+                const drawWidth = isSideLayout ? contentWidth : maxWidth;
 
                 data.experience.forEach((exp, index) => {
                     checkPageBreak(doc, 80);
 
-                    // Company Name - Bold
-                    doc.fontSize(FONT_SIZES.jobTitle)
-                        .fillColor('#000000')
-                        .font('Times-Bold')
-                        .text(exp.company || '', PAGE_CONFIG.margin, doc.y);
+                    // Header
+                    doc.fontSize(FONT_SIZES.jobTitle).fillColor(colors.primary).font('Helvetica-Bold')
+                        .text(`${exp.jobTitle || ''} – ${exp.company || ''}`, drawX, doc.y, { width: drawWidth });
 
-                    // Job Title and Dates
-                    doc.fontSize(FONT_SIZES.body)
-                        .fillColor('#333333')
-                        .font('Times-Bold');
+                    // Dates
+                    const dateRange = [exp.startDate, exp.endDate || 'Present'].filter(Boolean).join(' – ');
+                    doc.fontSize(FONT_SIZES.body).font('Helvetica-Oblique').fillColor(colors.secondary)
+                        .text(`(${dateRange})`, drawX, doc.y);
 
-                    const subHeader = [exp.jobTitle, exp.startDate + (exp.endDate ? ' - ' + exp.endDate : ' - Present')].filter(Boolean).join(' | ');
-                    doc.text(subHeader);
-
-                    // Description with bullets
+                    // Desc
                     if (exp.description) {
                         doc.moveDown(0.2);
-                        doc.font('Times-Roman');
                         const bullets = exp.description.split('\n').filter(b => b.trim());
                         bullets.forEach(bullet => {
                             checkPageBreak(doc, 20);
                             const cleanBullet = bullet.replace(/^[•\-\*]\s*/, '');
-                            const height = addBulletPoint(doc, cleanBullet, PAGE_CONFIG.margin + spacing.bulletIndent, doc.y, maxWidth, colors, template);
-                            doc.y += height + 2;
+                            const h = addBulletPoint(doc, cleanBullet, drawX + spacing.bulletIndent, doc.y, drawWidth - spacing.bulletIndent, colors, normalizedTemplate);
+                            doc.y += h + 2;
                         });
                     }
-
-                    if (index < data.experience.length - 1) doc.moveDown(0.8);
+                    if (index < data.experience.length - 1) doc.moveDown(spacing.itemGap);
                 });
-                doc.moveDown(0.5);
+
+                if (isSideLayout) {
+                    doc.y = Math.max(labelEndY, doc.y);
+                    doc.moveDown(0.8);
+                    const dividerY = doc.y;
+                    doc.moveTo(PAGE_CONFIG.margin, dividerY).lineTo(PAGE_CONFIG.margin + PAGE_CONFIG.contentWidth, dividerY).strokeColor(colors.light).lineWidth(0.5).stroke();
+                    doc.y = dividerY;
+                }
+                doc.moveDown(spacing.sectionGap / 10);
             }
             break;
 
         case 'education':
             if (data.education && data.education.length > 0) {
                 checkPageBreak(doc, 100);
-                renderSectionTitle(doc, sectionTitle || 'Education', colors, template);
+                const startSectionY = doc.y;
+                let labelEndY = 0;
 
-                data.education.forEach((edu, index) => {
-                    checkPageBreak(doc, 50);
+                if (isSideLayout) {
+                    renderSectionTitle(doc, 'Education', colors, normalizedTemplate);
+                    labelEndY = doc.y;
+                    doc.y = startSectionY;
+                } else {
+                    renderSectionTitle(doc, 'Education', colors, normalizedTemplate);
+                }
 
-                    // School Name - Bold (Per Jhon Smith Image)
-                    doc.fontSize(FONT_SIZES.jobTitle)
-                        .fillColor('#000000')
-                        .font('Times-Bold')
-                        .text(edu.school || '', PAGE_CONFIG.margin, doc.y);
+                const drawX = isSideLayout ? contentX : PAGE_CONFIG.margin;
+                const drawWidth = isSideLayout ? contentWidth : maxWidth;
 
-                    // Degree & Meta info
-                    doc.fontSize(FONT_SIZES.body)
-                        .fillColor('#333333')
-                        .font('Times-Roman');
+                if (isSideLayout) {
+                    for (let i = 0; i < data.education.length; i += 2) {
+                        checkPageBreak(doc, 60);
+                        const edu1 = data.education[i];
+                        const edu2 = data.education[i + 1];
+                        const currentY = doc.y;
 
-                    doc.text(edu.degree || '');
+                        // Left
+                        doc.fontSize(FONT_SIZES.jobTitle).fillColor(colors.primary).font('Helvetica-Bold')
+                            .text(`${edu1.degree || ''}`, drawX, currentY, { width: drawWidth / 2 - 10 });
+                        doc.fontSize(FONT_SIZES.body).font('Helvetica').text(edu1.school || '', drawX, doc.y, { width: drawWidth / 2 - 10 });
+                        doc.font('Helvetica-Oblique').text(`(${edu1.gradYear || ''})`, drawX, doc.y);
 
-                    const meta = [edu.gradYear, edu.gpa ? 'GPA: ' + edu.gpa : ''].filter(Boolean).join(' | ');
-                    if (meta) doc.text(meta);
+                        // Right
+                        if (edu2) {
+                            doc.fontSize(FONT_SIZES.jobTitle).fillColor(colors.primary).font('Helvetica-Bold')
+                                .text(`${edu2.degree || ''}`, drawX + drawWidth / 2 + 10, currentY, { width: drawWidth / 2 - 10 });
+                            doc.fontSize(FONT_SIZES.body).font('Helvetica').text(edu2.school || '', drawX + drawWidth / 2 + 10, doc.y, { width: drawWidth / 2 - 10 });
+                            doc.font('Helvetica-Oblique').text(`(${edu2.gradYear || ''})`, drawX + drawWidth / 2 + 10, doc.y);
+                        }
+                        doc.moveDown(1);
+                    }
+                    doc.y = Math.max(labelEndY, doc.y);
+                } else {
+                    data.education.forEach((edu, index) => {
+                        checkPageBreak(doc, 50);
+                        doc.fontSize(FONT_SIZES.jobTitle).fillColor(colors.primary).font('Helvetica-Bold').text(edu.degree || '', drawX, doc.y);
+                        doc.fontSize(FONT_SIZES.body).fillColor(colors.secondary).font('Helvetica').text(`${edu.school || ''} | ${edu.gradYear || ''}`, drawX, doc.y);
+                        if (index < data.education.length - 1) doc.moveDown(spacing.itemGap / 10);
+                    });
+                }
 
-                    if (index < data.education.length - 1) doc.moveDown(0.5);
-                });
-                doc.moveDown(0.5);
+                if (isSideLayout) {
+                    doc.moveDown(0.5);
+                    const dividerY = doc.y;
+                    doc.moveTo(PAGE_CONFIG.margin, dividerY).lineTo(PAGE_CONFIG.margin + PAGE_CONFIG.contentWidth, dividerY).strokeColor(colors.light).lineWidth(0.5).stroke();
+                    doc.y = dividerY;
+                }
+                doc.moveDown(spacing.sectionGap / 10);
             }
             break;
 
         case 'technicalSkills':
             if (data.technicalSkills) {
-                checkPageBreak(doc, 100);
-                renderSectionTitle(doc, sectionTitle || 'Technical Strengths', colors, template);
+                checkPageBreak(doc, 80);
+                const startSectionY = doc.y;
+                let labelEndY = 0;
 
-                const skillLines = data.technicalSkills.split('\n').filter(l => l.trim());
-                skillLines.forEach(line => {
+                if (isSideLayout) {
+                    renderSectionTitle(doc, 'Skills', colors, normalizedTemplate);
+                    labelEndY = doc.y;
+                    doc.y = startSectionY;
+                } else {
+                    renderSectionTitle(doc, 'Skills', colors, normalizedTemplate);
+                }
+
+                const drawX = isSideLayout ? contentX : PAGE_CONFIG.margin;
+                const drawWidth = isSideLayout ? contentWidth : maxWidth;
+
+                const skillset = data.technicalSkills.split(/[,;\n]/).map(s => s.trim()).filter(Boolean);
+                skillset.forEach(skill => {
                     checkPageBreak(doc, 20);
-                    if (line.includes(':')) {
-                        const [label, value] = line.split(':');
-                        doc.fontSize(FONT_SIZES.body)
-                            .font('Times-Bold')
-                            .text(label.trim() + ': ', { continued: true });
-                        doc.font('Times-Roman').text(value.trim());
-                    } else {
-                        doc.fontSize(FONT_SIZES.body).font('Times-Roman').text(line);
-                    }
+                    const h = addBulletPoint(doc, skill, drawX, doc.y, drawWidth, colors, normalizedTemplate);
+                    doc.y += h + 1;
                 });
-                doc.moveDown(0.5);
+
+                if (isSideLayout) {
+                    doc.y = Math.max(labelEndY, doc.y);
+                    doc.moveDown(0.5);
+                    const dividerY = doc.y;
+                    doc.moveTo(PAGE_CONFIG.margin, dividerY).lineTo(PAGE_CONFIG.margin + PAGE_CONFIG.contentWidth, dividerY).strokeColor(colors.light).lineWidth(0.5).stroke();
+                    doc.y = dividerY;
+                }
+                doc.moveDown(spacing.sectionGap / 10);
             }
             break;
 
         case 'softSkills':
             if (data.softSkills) {
                 checkPageBreak(doc, 100);
-                renderSectionTitle(doc, sectionTitle || 'Personal Traits', colors, template);
-
-                const lines = data.softSkills.split('\n').filter(l => l.trim());
-                lines.forEach(line => {
-                    checkPageBreak(doc, 20);
-                    doc.fontSize(FONT_SIZES.body).font('Times-Roman').text(line);
-                });
-                doc.moveDown(0.5);
+                renderSectionTitle(doc, 'Soft Skills', colors, template);
+                doc.fontSize(FONT_SIZES.body)
+                    .fillColor(colors.secondary)
+                    .font('Helvetica')
+                    .text(data.softSkills, {
+                        width: maxWidth,
+                        align: 'justify'
+                    });
+                doc.moveDown(spacing.sectionGap / 10);
             }
             break;
 
         case 'projects':
             if (data.projects && (Array.isArray(data.projects) || typeof data.projects === 'string')) {
                 checkPageBreak(doc, 100);
-                renderSectionTitle(doc, sectionTitle || 'Projects', colors, template);
-
+                renderSectionTitle(doc, 'Projects', colors, template);
 
                 if (Array.isArray(data.projects)) {
                     // Newer schema: array of project objects
@@ -665,6 +958,14 @@ function renderSection(doc, sectionKey, data, colors, template, spacing = SPACIN
                     });
                 }
 
+                if (isSideLayout) {
+                    doc.moveDown(0.5);
+                    doc.moveTo(PAGE_CONFIG.margin, doc.y)
+                        .lineTo(PAGE_CONFIG.margin + PAGE_CONFIG.contentWidth, doc.y)
+                        .strokeColor(colors.light)
+                        .lineWidth(0.5)
+                        .stroke();
+                }
                 doc.moveDown(spacing.sectionGap / 10);
             }
             break;
@@ -729,8 +1030,7 @@ function renderSection(doc, sectionKey, data, colors, template, spacing = SPACIN
 
                 if (achievements.length > 0) {
                     checkPageBreak(doc, 100);
-                    renderSectionTitle(doc, sectionTitle || 'Achievements', colors, template);
-
+                    renderSectionTitle(doc, 'Achievements', colors, template);
 
                     achievements.forEach(achievement => {
                         checkPageBreak(doc, 20);

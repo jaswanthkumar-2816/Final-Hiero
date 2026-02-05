@@ -166,7 +166,7 @@ router.post('/preview-resume', authenticateToken, async (req, res) => {
         const data = req.body;
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', 'inline; filename=resume-preview.pdf');
-        await generateUnifiedResume(data, data.template || 'classic', res);
+        await generateUnifiedResume(data, data.template || 'classic', res, { forceSinglePage: true });
     } catch (error) {
         console.error('Preview error:', error);
         res.status(500).send('Generation failed');
