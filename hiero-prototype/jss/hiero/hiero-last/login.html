@@ -174,7 +174,7 @@
         if (res.ok) {
           localStorage.setItem("token", result.token);
           localStorage.setItem("user", JSON.stringify(result.user));
-          window.location.href = "/public/index.html";
+          window.location.href = "/index.html";
         } else {
           alert("❌ " + (result.error || "Login failed"));
         }

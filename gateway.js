@@ -151,7 +151,7 @@ app.get('/', (req, res) => {
 // Explicit UI Routes
 app.get(['/login', '/login.html'], (req, res) => res.sendFile(path.join(landingDirPath, 'login.html')));
 app.get(['/signup', '/signup.html'], (req, res) => res.sendFile(path.join(landingDirPath, 'signup.html')));
-app.get('/dashboard.html', (req, res) => res.sendFile(path.join(landingDirPath, 'dashboard.html')));
+app.get('/dashboard.html', (req, res) => res.sendFile(path.join(resumeBuilderPath, 'dashboard.html')));
 
 app.get('/sitemap.xml', (req, res) => res.sendFile(path.join(landingDirPath, 'sitemap.xml')));
 app.get('/robots.txt', (req, res) => res.sendFile(path.join(landingDirPath, 'robots.txt')));

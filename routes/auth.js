@@ -351,7 +351,7 @@ router.get('/auth/google/callback', passport.authenticate('google', { session: f
     const user = { id: req.user.id, name: req.user.name, email: req.user.email, picture: req.user.picture };
     const token = jwt.sign({ userId: user.id, name: user.name, email: user.email }, process.env.JWT_SECRET, { expiresIn: '7d' });
     const userJson = encodeURIComponent(JSON.stringify(user));
-    res.redirect(`/public/index.html?token=${token}&user=${userJson}`);
+    res.redirect(`/index.html?token=${token}&user=${userJson}`);
 });
 
 router.get('/auth/github', passport.authenticate('github', { scope: ['user:email'] }));
@@ -359,7 +359,7 @@ router.get('/auth/github/callback', passport.authenticate('github', { session: f
     const user = { id: req.user.id, name: req.user.name, email: req.user.email, picture: req.user.picture };
     const token = jwt.sign({ userId: user.id, name: user.name, email: user.email }, process.env.JWT_SECRET, { expiresIn: '7d' });
     const userJson = encodeURIComponent(JSON.stringify(user));
-    res.redirect(`/public/index.html?token=${token}&user=${userJson}`);
+    res.redirect(`/index.html?token=${token}&user=${userJson}`);
 });
 
 // User info

@@ -4,699 +4,778 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Solve Problem | Hiero</title>
+  <title>Orbit Studio | Neural Workspace</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
     rel="stylesheet">
   <style>
     :root {
-      --primary: #04ab07;
-      --primary-hover: #06c719;
-      --primary-glow: rgba(4, 171, 7, 0.4);
-      --bg-deep: #020402;
-      --bg-card: rgba(13, 15, 13, 0.85);
-      --bg-editor: #0a0c0a;
-      --text-main: #e6edf3;
-      --text-muted: #94a3b8;
-      --border: rgba(4, 171, 7, 0.25);
-      --accent: #58a6ff;
-      --easy: #3fb950;
-      --medium: #d29922;
-      --hard: #f85149;
-      --card-radius: 20px;
+      --orbit-green: #00ff66;
+      --orbit-green-dim: rgba(0, 255, 102, 0.15);
+      --orbit-green-glow: rgba(0, 255, 102, 0.4);
+      --bg-obsidian: #030403;
+      --bg-void: #000000;
+      --panel-bg: rgba(13, 15, 13, 0.7);
+      --border-glass: rgba(0, 255, 102, 0.1);
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --font-main: 'Outfit', sans-serif;
+      --font-code: 'JetBrains Mono', monospace;
     }
 
     * {
+      margin: 0;
+      padding: 0;
       box-sizing: border-box;
     }
 
     body {
-      margin: 0;
-      font-family: 'Inter', sans-serif;
-      background-color: var(--bg-deep);
-      background-image:
-        radial-gradient(at 0% 0%, rgba(4, 171, 7, 0.15) 0, transparent 50%),
-        radial-gradient(at 100% 0%, rgba(4, 150, 7, 0.1) 0, transparent 50%),
-        radial-gradient(at 100% 100%, rgba(10, 100, 10, 0.1) 0, transparent 50%),
-        radial-gradient(at 0% 100%, rgba(4, 171, 7, 0.15) 0, transparent 50%);
-      background-attachment: fixed;
-      color: var(--text-main);
+      font-family: var(--font-main);
+      background: var(--bg-void);
+      color: var(--text-primary);
       height: 100vh;
-      display: flex;
-      flex-direction: column;
       overflow: hidden;
-      position: relative;
-    }
-
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-      opacity: 0.03;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    @keyframes gradientFlow {
-      0% {
-        background-position: 0% 50%;
-      }
-
-      100% {
-        background-position: 50% 50%;
-      }
-    }
-
-    /* Premium Loading Overlay */
-    #loading-overlay {
-      position: fixed;
-      inset: 0;
-      background: var(--bg-deep);
-      z-index: 9999;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    .loading-content {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 32px;
+    /* Animated Nebula Background */
+    .nebula {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background:
+        radial-gradient(circle at 10% 20%, rgba(0, 255, 102, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(0, 255, 102, 0.03) 0%, transparent 40%);
+      z-index: -1;
+      filter: blur(100px);
+      animation: nebulaFlow 20s infinite alternate linear;
     }
 
-    .huge-logo {
-      height: 120px;
-      width: 120px;
-      filter: drop-shadow(0 0 30px var(--primary-glow));
-      animation: breathe 3s ease-in-out infinite;
-    }
-
-    @keyframes breathe {
-
-      0%,
-      100% {
-        transform: scale(1);
-        filter: drop-shadow(0 0 20px var(--primary-glow));
+    @keyframes nebulaFlow {
+      from {
+        transform: scale(1) translate(0, 0);
       }
 
-      50% {
-        transform: scale(1.15);
-        filter: drop-shadow(0 0 50px var(--primary-glow));
+      to {
+        transform: scale(1.2) translate(5%, 5%);
       }
     }
 
-    .loading-text {
-      font-size: 14px;
-      font-weight: 600;
-      letter-spacing: 4px;
-      text-transform: uppercase;
-      color: var(--primary);
-      opacity: 0.8;
-      animation: pulseText 2s ease-in-out infinite;
-    }
-
-    @keyframes pulseText {
-
-      0%,
-      100% {
-        opacity: 0.4;
-      }
-
-      50% {
-        opacity: 0.9;
-      }
-    }
-
-    /* Header */
-    header {
-      height: 60px;
-      padding: 0 24px;
-      background: rgba(2, 4, 2, 0.95);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
+    /* Top Navigation */
+    nav {
+      height: 64px;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-glass);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      flex-shrink: 0;
+      padding: 0 24px;
       z-index: 100;
     }
 
-    .brand {
+    .nav-logo {
       display: flex;
       align-items: center;
       gap: 12px;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      color: var(--primary);
-    }
-
-    .brand img {
-      height: 32px;
-      width: 32px;
-    }
-
-    .nav-actions {
-      display: flex;
-      gap: 16px;
-      align-items: center;
-    }
-
-    .btn-back {
-      background: transparent;
-      border: 1px solid var(--border);
-      color: var(--text-muted);
-      padding: 6px 14px;
-      border-radius: 6px;
-      font-size: 13px;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: 0.3s;
     }
 
-    .btn-back:hover {
-      color: var(--text-main);
-      border-color: var(--text-muted);
+    .nav-logo:hover {
+      opacity: 0.8;
     }
 
-    /* Layout */
-    main {
-      flex: 1;
+    .nav-logo img {
+      height: 28px;
+      filter: drop-shadow(0 0 8px var(--orbit-green));
+    }
+
+    .nav-logo span {
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #fff 0%, var(--orbit-green) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .breadcrumb {
       display: flex;
-      overflow: hidden;
-      position: relative;
-      z-index: 1;
+      align-items: center;
+      gap: 12px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
     }
 
-    /* Left Panel: Description */
-    .description-panel {
-      width: 40%;
-      min-width: 350px;
-      border-right: 1px solid var(--border);
-      padding: 32px;
-      overflow-y: auto;
-      background: var(--bg-card);
-      backdrop-filter: blur(10px);
+    .breadcrumb span.sep {
+      opacity: 0.3;
     }
 
-    @media (max-width: 768px) {
-      main {
-        flex-direction: column;
-        overflow-y: auto;
-      }
-
-      .description-panel {
-        width: 100%;
-        min-width: 0;
-        border-right: none;
-        border-bottom: 1px solid var(--border);
-        height: auto;
-        overflow-y: visible;
-      }
-
-      .editor-panel {
-        width: 100%;
-        height: 500px;
-      }
-
-      body {
-        overflow-y: auto;
-      }
+    .breadcrumb span.active {
+      color: var(--orbit-green);
+      font-weight: 700;
     }
 
-    .meta {
+    .action-btns {
       display: flex;
       gap: 12px;
-      align-items: center;
-      margin-bottom: 16px;
     }
 
-    .difficulty-badge {
-      padding: 2px 8px;
-      border-radius: 4px;
+    .btn-minimal {
+      background: transparent;
+      border: 1px solid var(--border-glass);
+      color: var(--text-secondary);
+      padding: 6px 14px;
+      border-radius: 8px;
       font-size: 12px;
       font-weight: 600;
-      text-transform: uppercase;
+      cursor: pointer;
+      transition: 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
 
-    .difficulty-badge.easy {
-      color: var(--easy);
-      background: rgba(63, 185, 80, 0.1);
-      border: 1px solid rgba(63, 185, 80, 0.2);
+    .btn-minimal:hover {
+      background: var(--orbit-green-dim);
+      color: var(--orbit-green);
+      border-color: var(--orbit-green);
     }
 
-    .difficulty-badge.medium {
-      color: var(--medium);
-      background: rgba(210, 153, 34, 0.1);
-      border: 1px solid rgba(210, 153, 34, 0.2);
-    }
-
-    .difficulty-badge.hard {
-      color: var(--hard);
-      background: rgba(248, 81, 73, 0.1);
-      border: 1px solid rgba(248, 81, 73, 0.2);
-    }
-
-    .problem-title {
-      font-size: 24px;
-      font-weight: 700;
-      margin: 0 0 20px 0;
-    }
-
-    .problem-text {
-      line-height: 1.6;
-      color: var(--text-main);
-      font-size: 15px;
-    }
-
-    .hint-box {
-      margin-top: 32px;
-      padding: 16px;
-      background: rgba(88, 166, 255, 0.05);
-      border-left: 4px solid var(--accent);
-      border-radius: 4px;
-    }
-
-    .hint-box h4 {
-      margin: 0 0 8px 0;
-      color: var(--accent);
-      font-size: 14px;
-    }
-
-    .hint-box p {
-      margin: 0;
-      font-size: 14px;
-      color: var(--text-muted);
-    }
-
-    /* Right Panel: Editor */
-    .editor-panel {
+    /* Main Workspace Splitting */
+    .workspace {
       flex: 1;
+      display: grid;
+      grid-template-columns: 420px 1fr 380px;
+      overflow: hidden;
+    }
+
+    .panel {
+      background: var(--panel-bg);
+      backdrop-filter: blur(40px);
       display: flex;
       flex-direction: column;
-      background: var(--bg-editor);
+      border-right: 1px solid var(--border-glass);
+      overflow: hidden;
     }
 
-    .editor-toolbar {
-      height: 48px;
-      padding: 0 16px;
-      background: var(--bg-card);
-      border-bottom: 1px solid var(--border);
+    .panel-header {
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border-glass);
       display: flex;
       align-items: center;
       justify-content: space-between;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-secondary);
     }
 
-    .lang-select {
-      background: var(--bg-dark);
-      border: 1px solid var(--border);
-      color: var(--text-main);
-      padding: 4px 10px;
-      border-radius: 4px;
-      font-size: 13px;
-      outline: none;
-    }
-
-    .editor-container {
+    /* Problem Context Panel */
+    .context-body {
       flex: 1;
-      position: relative;
+      padding: 32px 24px;
+      overflow-y: auto;
     }
 
-    #code-editor {
-      width: 100%;
-      height: 100%;
+    .difficulty {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 99px;
+      margin-bottom: 16px;
+    }
+
+    .difficulty.easy {
+      background: rgba(0, 255, 102, 0.1);
+      color: var(--orbit-green);
+    }
+
+    .difficulty.medium {
+      background: rgba(255, 170, 0, 0.1);
+      color: #ffaa00;
+    }
+
+    .difficulty.hard {
+      background: rgba(255, 50, 50, 0.1);
+      color: #ff3232;
+    }
+
+    .title-h1 {
+      font-size: 24px;
+      font-weight: 800;
+      margin-bottom: 12px;
+      letter-spacing: -0.5px;
+    }
+
+    .desc-p {
+      font-size: 15px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      margin-bottom: 24px;
+    }
+
+    .hint-toggle {
+      margin-top: 20px;
+      padding: 16px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px dashed var(--border-glass);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .hint-toggle:hover {
+      background: rgba(0, 255, 102, 0.05);
+    }
+
+    /* Code Editor Panel */
+    .editor-container {
+      position: relative;
+      background: #000;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .editor-toolbar {
+      height: 44px;
+      background: #080a08;
+      border-bottom: 1px solid var(--border-glass);
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      gap: 20px;
+    }
+
+    .toolbar-tab {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--orbit-green);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    #code-area {
+      flex: 1;
       background: transparent;
-      color: #9cdcfe;
-      border: none;
+      color: #d1d5db;
+      font-family: var(--font-code);
+      font-size: 15px;
       padding: 24px;
-      font-family: 'Fira Code', monospace;
-      font-size: 14px;
-      resize: none;
+      border: none;
       outline: none;
+      resize: none;
+      line-height: 1.6;
+    }
+
+    /* Orbit Assistant Sidebar */
+    .ai-panel {
+      background: rgba(5, 7, 5, 0.8);
+      border-left: 1px solid var(--border-glass);
+    }
+
+    .chat-stream {
+      flex: 1;
+      padding: 24px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .bubble {
+      max-width: 90%;
+      padding: 14px 18px;
+      border-radius: 18px;
+      font-size: 14px;
       line-height: 1.5;
     }
 
-    /* Footer / Console */
-    .editor-footer {
-      height: 60px;
-      padding: 0 24px;
-      background: var(--bg-card);
-      border-top: 1px solid var(--border);
+    .bubble.orbit {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-glass);
+      color: var(--text-primary);
+      align-self: flex-start;
+      border-bottom-left-radius: 4px;
+    }
+
+    .bubble.you {
+      background: var(--orbit-green);
+      color: #000;
+      font-weight: 600;
+      align-self: flex-end;
+      border-bottom-right-radius: 4px;
+      box-shadow: 0 4px 12px var(--orbit-green-glow);
+    }
+
+    .chat-footer {
+      padding: 20px;
+      border-top: 1px solid var(--border-glass);
+      background: rgba(0, 0, 0, 0.4);
+    }
+
+    .input-box {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-glass);
+      border-radius: 12px;
+      padding: 4px 4px 4px 14px;
       display: flex;
       align-items: center;
-      justify-content: flex-end;
-      gap: 12px;
+      gap: 10px;
+    }
+
+    .input-box input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .send-pill {
+      background: var(--orbit-green);
+      color: #000;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .send-pill:hover {
+      transform: scale(1.05);
+    }
+
+    /* Workspace Footer Controls */
+    .footer-shelf {
+      height: 72px;
+      background: rgba(0, 0, 0, 0.9);
+      border-top: 1px solid var(--border-glass);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+    }
+
+    .console-tab {
+      display: flex;
+      gap: 24px;
+    }
+
+    .c-tab {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: 0.2s;
+    }
+
+    .c-tab.active {
+      color: var(--orbit-green);
+    }
+
+    .master-btns {
+      display: flex;
+      gap: 16px;
     }
 
     .btn-run {
-      background: transparent;
-      border: 1px solid var(--border);
-      color: var(--text-main);
-      padding: 8px 18px;
-      border-radius: 6px;
-      font-weight: 600;
-      cursor: pointer;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-glass);
+      color: var(--text-primary);
+      padding: 10px 24px;
+      border-radius: 10px;
       font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.3s;
     }
 
     .btn-run:hover {
-      background: rgba(255, 255, 255, 0.05);
+      background: rgba(255, 255, 255, 0.08);
     }
 
     .btn-submit {
-      background: var(--primary);
-      color: #000;
+      background: linear-gradient(135deg, var(--orbit-green) 0%, #00cc55 100%);
       border: none;
-      padding: 8px 24px;
-      border-radius: 6px;
-      font-weight: 600;
-      cursor: pointer;
+      color: #000;
+      padding: 10px 32px;
+      border-radius: 10px;
       font-size: 14px;
-      transition: all 0.2s;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 4px 15px var(--orbit-green-glow);
+      transition: 0.3s;
     }
 
     .btn-submit:hover {
-      background: var(--primary-hover);
-      transform: translateY(-1px);
+      transform: translateY(-2px);
+      filter: brightness(1.1);
     }
 
-    .output-panel {
-      height: 180px;
-      background: var(--bg-dark);
-      border-top: 1px solid var(--border);
-      padding: 20px;
-      overflow-y: auto;
-      display: none;
-      /* Shown on run */
+    /* Console Drawer */
+    .console-drawer {
+      position: absolute;
+      bottom: 72px;
+      left: 420px;
+      right: 380px;
+      height: 0;
+      background: #000;
+      border-top: 2px solid var(--orbit-green);
+      overflow: hidden;
+      transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 50;
     }
 
-    .output-panel h5 {
-      margin: 0 0 10px 0;
-      font-size: 12px;
-      color: var(--text-muted);
-      text-transform: uppercase;
+    .console-drawer.open {
+      height: 260px;
     }
 
-    .output-content {
-      font-family: 'Fira Code', monospace;
+    .c-header {
+      padding: 12px 24px;
+      background: rgba(0, 255, 102, 0.05);
+      font-size: 11px;
+      font-weight: 800;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .c-body {
+      padding: 20px 24px;
+      font-family: var(--font-code);
       font-size: 13px;
-      color: #dcdcdc;
+      color: #00ff66;
       white-space: pre-wrap;
     }
 
-    /* Success Overlay */
-    #success-overlay {
+    /* Success Master Overlay */
+    #master-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.8);
-      backdrop-filter: blur(4px);
-      z-index: 1000;
+      background: rgba(0, 0, 0, 0.95);
+      z-index: 2000;
       display: none;
       align-items: center;
       justify-content: center;
-      flex-direction: column;
+      opacity: 0;
+      transition: 0.5s;
+    }
+
+    .success-hero {
       text-align: center;
+      transform: scale(0.9);
+      transition: 0.5s;
     }
 
-    .success-card {
-      background: var(--bg-card);
-      border: 1px solid var(--primary);
-      padding: 48px;
-      border-radius: 20px;
-      box-shadow: 0 0 40px rgba(13, 255, 0, 0.2);
+    .success-hero.pop {
+      transform: scale(1);
     }
 
-    .success-card h2 {
-      color: var(--primary);
-      font-size: 32px;
+    .glow-ring {
+      width: 120px;
+      height: 120px;
+      background: var(--orbit-green);
+      border-radius: 50%;
+      margin: 0 auto 32px auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 50px var(--orbit-green-glow);
+      animation: ringPulse 2s infinite;
+    }
+
+    @keyframes ringPulse {
+      0% {
+        box-shadow: 0 0 30px var(--orbit-green-glow);
+        transform: scale(1);
+      }
+
+      50% {
+        box-shadow: 0 0 80px var(--orbit-green-glow);
+        transform: scale(1.05);
+      }
+
+      100% {
+        box-shadow: 0 0 30px var(--orbit-green-glow);
+        transform: scale(1);
+      }
+    }
+
+    .success-hero h2 {
+      font-size: 48px;
+      font-weight: 800;
       margin-bottom: 12px;
     }
 
-    .success-card p {
-      color: var(--text-muted);
-      margin-bottom: 24px;
+    .success-hero p {
+      color: var(--text-secondary);
+      font-size: 18px;
+      margin-bottom: 40px;
+    }
+
+    /* Responsive Fixes */
+    @media (max-width: 1200px) {
+      .workspace {
+        grid-template-columns: 350px 1fr;
+      }
+
+      .ai-panel {
+        display: none;
+      }
+
+      .console-drawer {
+        right: 0;
+      }
     }
   </style>
 </head>
 
 <body>
+  <div class="nebula"></div>
 
-  <div id="loading-overlay">
-    <div class="loading-content">
-      <img src="logohiero copy.png" alt="Hiero" class="huge-logo">
-      <div class="loading-text">Preparing your path</div>
+  <nav>
+    <div class="nav-logo" onclick="location.href='/'">
+      <img src="logohiero copy.png" alt="Orbit">
+      <span>ORBIT.STUDIO</span>
     </div>
+    <div class="breadcrumb">
+      <span>Algorithm Master</span>
+      <span class="sep">/</span>
+      <span id="b-skill" class="active">REACT</span>
+    </div>
+    <div class="action-btns">
+      <button class="btn-minimal" onclick="location.href='learn.html' + window.location.search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M19 12H5M12 19l-7-7 7-7" />
+        </svg>
+        EXIT WORKSPACE
+      </button>
+    </div>
+  </nav>
+
+  <div class="workspace">
+    <aside class="panel">
+      <div class="panel-header">
+        <span>Problem Context</span>
+        <span id="p-id">CH-072</span>
+      </div>
+      <div class="context-body">
+        <div id="p-diff" class="difficulty medium">INTERMEDIATE</div>
+        <h1 id="p-title" class="title-h1">Neural Stream Analysis</h1>
+        <p id="p-desc" class="desc-p">
+          Implement a synchronized data processing pipeline to stabilize the orbital signal stream. You need to ensure
+          that the packet buffer remains within 10ms of the target latency.
+        </p>
+
+        <div class="hint-toggle" id="hint-box">
+          <div style="font-size: 12px; font-weight: 800; color: var(--orbit-green); margin-bottom: 4px;">SYSTEM ADVISORY
+          </div>
+          <div style="font-size: 13px; color: var(--text-secondary);">Click to decrypt available hints from the Orbit
+            database.</div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="panel editor-container">
+      <div class="editor-toolbar">
+        <div class="toolbar-tab">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm4.24 16L12 15.45 7.77 18l1.12-4.81-3.73-3.23 4.92-.42L12 5l1.92 4.53 4.92.42-3.73 3.23L16.23 18z" />
+          </svg>
+          SOLUTIONS.JS
+        </div>
+      </div>
+      <textarea id="code-area" spellcheck="false"></textarea>
+
+      <div class="console-drawer" id="console">
+        <div class="c-header">
+          <span>VIRTUAL TERMINAL v1.4.0</span>
+          <span style="color: var(--orbit-green)">STABLE CONNECTION</span>
+        </div>
+        <div class="c-body" id="console-out"></div>
+      </div>
+    </main>
+
+    <aside class="panel ai-panel">
+      <div class="panel-header">
+        <span>Orbit Neural Assistant</span>
+        <div
+          style="width: 8px; height: 8px; background: var(--orbit-green); border-radius: 50%; box-shadow: 0 0 10px var(--orbit-green);">
+        </div>
+      </div>
+      <div class="chat-stream" id="chat-msgs">
+        <div class="bubble orbit">
+          Hi, I'm Orbit. I've analyzed your current problem context. Need a hint on the synchronized implementation?
+        </div>
+      </div>
+      <div class="chat-footer">
+        <div class="input-box">
+          <input type="text" id="chat-inp" placeholder="Ask Orbit for neural support...">
+          <div class="send-pill" id="chat-send">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+              <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
+            </svg>
+          </div>
+        </div>
+      </div>
+    </aside>
   </div>
 
-  <header>
-    <div class="brand">
-      <img src="logohiero copy.png" alt="Logo">
-      <span>HIERO.SOLVE</span>
+  <footer class="footer-shelf">
+    <div class="console-tab">
+      <div class="c-tab active" id="toggle-console">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M4 17l6-6-6-6M12 19h8" />
+        </svg>
+        TERMINAL
+      </div>
+      <div class="c-tab">TEST CASES</div>
     </div>
-    <div class="nav-actions">
-      <button class="btn-back" onclick="location.href='learn.html' + window.location.search">← Back to
-        Dashboard</button>
+    <div class="master-btns">
+      <button class="btn-run" id="btn-run">RUN LOGIC</button>
+      <button class="btn-submit" id="btn-submit">DEPLOY SOLUTION</button>
     </div>
-  </header>
+  </footer>
 
-  <main>
-    <div class="description-panel">
-      <div class="meta">
-        <span id="problem-difficulty" class="difficulty-badge">Unknown</span>
+  <div id="master-overlay">
+    <div class="success-hero" id="hero-card">
+      <div class="glow-ring">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3.5">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
       </div>
-      <h1 id="problem-title" class="problem-title">Loading...</h1>
-      <div id="problem-description" class="problem-text">
-        Preparing your coding challenge...
-      </div>
-
-      <!-- Integrated Tutor Section -->
-      <div class="chat-card"
-        style="margin-top: 40px; height: 350px; border-radius: 12px; background: rgba(255,255,255,0.02); display: flex; flex-direction: column; border: 1px solid var(--border);">
-        <div class="chat-header"
-          style="padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px;">
-          <div class="status-dot" style="width: 8px; height: 8px; background: var(--primary); border-radius: 50%;">
-          </div>
-          <h3 style="font-size: 14px; margin: 0;">Hiero Tutor</h3>
-        </div>
-        <div class="chat-body" id="chat-container"
-          style="padding: 12px; gap: 12px; flex: 1; overflow-y: auto; display: flex; flex-direction: column;">
-          <div class="msg bot"
-            style="font-size: 13px; padding: 10px 14px; background: rgba(255,255,255,0.05); border-radius: 12px; align-self: flex-start;">
-            Stuck on this problem? Ask me for a hint or an explanation!
-          </div>
-        </div>
-        <div class="chat-footer" style="padding: 10px; border-top: 1px solid var(--border); display: flex; gap: 8px;">
-          <input type="text" class="chat-input" id="chat-input" placeholder="Ask for a hint..."
-            style="padding: 8px 12px; font-size: 13px; flex: 1; background: #000; border: 1px solid var(--border); color: #fff; border-radius: 8px; outline: none;">
-          <button class="btn-send" id="chat-send-btn"
-            style="background: var(--primary); color: #000; border: none; padding: 0 12px; border-radius: 8px; font-weight: 700; cursor: pointer;">Ask</button>
-        </div>
-      </div>
-
-      <div class="hint-box" id="hint-box" style="display:none; margin-top: 24px;">
-        <h4>💡 Hint</h4>
-        <p id="hint-text"></p>
-      </div>
-    </div>
-
-    <div class="editor-panel">
-      <div class="editor-toolbar">
-        <select class="lang-select" id="language-selector">
-          <option value="python">Python 3</option>
-          <option value="javascript">JavaScript (Node)</option>
-          <option value="java">Java 11</option>
-          <option value="cpp">C++ 17</option>
-        </select>
-        <button class="btn-back" onclick="toggleHint()" id="hint-toggle">Show Hint</button>
-      </div>
-
-      <div class="editor-container">
-        <textarea id="code-editor" spellcheck="false" placeholder="# Write your solution here..."></textarea>
-      </div>
-
-      <div class="output-panel" id="output-panel">
-        <h5>Console Output</h5>
-        <div id="output-content" class="output-content"></div>
-      </div>
-
-      <div class="editor-footer">
-        <button class="btn-run" onclick="runCode()">Run Code</button>
-        <button class="btn-submit" onclick="submitCode()">Submit Solution</button>
-      </div>
-    </div>
-  </main>
-
-  <div id="success-overlay">
-    <div class="success-card">
-      <h2>Challenge Mastered! 🎉</h2>
-      <p>Congratulations! Your solution passed all test cases perfectly.</p>
-      <button class="btn-submit" onclick="location.href='learn.html'">Perfect, Take me back</button>
+      <h2>MISSION ACCOMPLISHED</h2>
+      <p>Neural stream synchronized. Signal stability at 99.8%.</p>
+      <button class="btn-submit" onclick="location.href='learn.html' + window.location.search"
+        style="font-size: 16px; padding: 16px 48px;">RETURN TO STATION</button>
     </div>
   </div>
 
   <script>
-    const templates = {
-      python: "def solve():\n    # Write your logic here\n    print(\"Hello World\")\n\nsolve()",
-      javascript: "function solve() {\n    // Write your logic here\n    console.log(\"Hello World\");\n}\n\nsolve();",
-      java: "public class Solution {\n    public static void main(String[] args) {\n        System.out.println(\"Hello World\");\n    }\n}",
-      cpp: "#include <iostream>\nusing namespace std;\n\nint main() {\n    cout << \"Hello World\" << endl;\n    return 0;\n}"
-    };
+    const editor = document.getElementById('code-area');
+    const consoleDrawer = document.getElementById('console');
+    const consoleOut = document.getElementById('console-out');
+    const chatInp = document.getElementById('chat-inp');
+    const chatMsgs = document.getElementById('chat-msgs');
 
     function initialize() {
       const params = new URLSearchParams(window.location.search);
-      currentSkill = params.get('skill') || 'Default';
-      const title = params.get('title') || 'Practice Problem';
-      const desc = params.get('description') || 'Try to solve this coding challenge.';
-      const hint = params.get('hint');
-      const diff = params.get('difficulty') || 'easy';
+      const skill = params.get('skill') || 'React';
+      const title = params.get('title') || 'Neural Link Strategy';
+      const desc = params.get('description') || 'Implement a synchronized data processing pipeline to stabilize the orbital signal stream.';
+      const diff = params.get('difficulty') || 'intermediate';
 
-      document.getElementById('problem-title').innerText = title;
-      document.getElementById('problem-description').innerText = desc;
+      document.getElementById('p-title').innerText = title;
+      document.getElementById('p-desc').innerText = desc;
+      document.getElementById('p-diff').innerText = diff.toUpperCase();
+      document.getElementById('p-diff').className = `difficulty ${diff.toLowerCase()}`;
+      document.getElementById('b-skill').innerText = skill.toUpperCase();
 
-      const diffBadge = document.getElementById('problem-difficulty');
-      diffBadge.innerText = diff;
-      diffBadge.className = `difficulty-badge ${diff.toLowerCase()}`;
+      editor.value = "// Initialize Neural Stream\nfunction stabilizeSignal(packets) {\n    // Orbital logic here\n    console.log('Synchronizing signal...');\n    return true;\n}\n\nstabilizeSignal([]);";
 
-      if (hint) {
-        document.getElementById('hint-text').innerText = hint;
-      } else {
-        document.getElementById('hint-toggle').style.display = 'none';
-      }
-
-      const langSelect = document.getElementById('language-selector');
-      const editor = document.getElementById('code-editor');
-
-      langSelect.addEventListener('change', (e) => {
-        editor.value = templates[e.target.value];
-        editor.placeholder = `# Write your ${e.target.value} solution here...`;
-      });
-
-      // Initial template
-      editor.value = templates.python;
-
-      // Hide loading after a short delay
-      setTimeout(() => {
-        const loading = document.getElementById('loading-overlay');
-        if (loading) {
-          loading.style.opacity = '0';
-          setTimeout(() => loading.style.display = 'none', 600);
-        }
-      }, 1000);
-
-      initChat();
+      // Orbit Assistant Logic
+      setupOrbit();
     }
 
-    async function initChat() {
-      const chatInput = document.getElementById('chat-input');
-      const chatSendBtn = document.getElementById('chat-send-btn');
-
+    function setupOrbit() {
+      const btn = document.getElementById('chat-send');
       const sendMessage = async () => {
-        const text = chatInput.value.trim();
+        const text = chatInp.value.trim();
         if (!text) return;
 
-        appendMessage('user', text);
-        chatInput.value = '';
+        appendBubble('you', text);
+        chatInp.value = '';
+
+        const orbitBubble = appendBubble('orbit', 'Thinking...');
 
         try {
           const res = await fetch('/api/analysis/ask', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              skill: currentSkill,
-              context: `User is currently solving the problem: ${document.getElementById('problem-title').innerText}. Description: ${document.getElementById('problem-description').innerText}`,
-              question: text
+              question: text,
+              skill: document.getElementById('b-skill').innerText,
+              context: `Workspace: ${document.getElementById('p-title').innerText}`
             })
           });
           const data = await res.json();
-          typeMessage(data.answer);
-        } catch (err) {
-          appendMessage('bot', 'Sorry, I encountered an error. Please try again.');
+          orbitBubble.innerText = '';
+          await typeWriter(orbitBubble, data.answer);
+        } catch (e) {
+          orbitBubble.innerText = "System error. Neuro-link disrupted.";
         }
       };
 
-      chatSendBtn.onclick = sendMessage;
-      chatInput.onkeypress = (e) => { if (e.key === 'Enter') sendMessage(); };
+      btn.onclick = sendMessage;
+      chatInp.onkeypress = (e) => { if (e.key === 'Enter') sendMessage(); };
     }
 
-    function appendMessage(sender, text) {
-      const chatContainer = document.getElementById('chat-container');
+    function appendBubble(role, text) {
       const div = document.createElement('div');
-      div.className = `msg ${sender}`;
+      div.className = `bubble ${role}`;
       div.innerText = text;
-      div.style.fontSize = '13px';
-      div.style.padding = '10px 14px';
-      div.style.borderRadius = '12px';
-      div.style.alignSelf = sender === 'user' ? 'flex-end' : 'flex-start';
-      div.style.background = sender === 'user' ? 'var(--primary)' : 'rgba(255,255,255,0.05)';
-      div.style.color = sender === 'user' ? '#000' : '#fff';
-
-      chatContainer.appendChild(div);
-      chatContainer.scrollTop = chatContainer.scrollHeight;
+      chatMsgs.appendChild(div);
+      chatMsgs.scrollTop = chatMsgs.scrollHeight;
+      return div;
     }
 
-    function typeMessage(text) {
-      const chatContainer = document.getElementById('chat-container');
-      const div = document.createElement('div');
-      div.className = 'msg bot';
-      div.style.fontSize = '13px';
-      div.style.padding = '10px 14px';
-      div.style.background = 'rgba(255,255,255,0.05)';
-      div.style.borderRadius = '12px';
-      div.style.alignSelf = 'flex-start';
-      chatContainer.appendChild(div);
-
-      let i = 0;
-      const interval = setInterval(() => {
-        if (i < text.length) {
-          div.innerText += text.charAt(i);
-          i++;
-          chatContainer.scrollTop = chatContainer.scrollHeight;
-        } else {
-          clearInterval(interval);
-        }
-      }, 15);
+    function typeWriter(el, text) {
+      return new Promise(r => {
+        let i = 0;
+        const int = setInterval(() => {
+          if (i < text.length) {
+            el.innerText += text[i++];
+            chatMsgs.scrollTop = chatMsgs.scrollHeight;
+          } else {
+            clearInterval(int);
+            r();
+          }
+        }, 10);
+      });
     }
 
-    function toggleHint() {
-      const box = document.getElementById('hint-box');
-      const btn = document.getElementById('hint-toggle');
-      if (box.style.display === 'none') {
-        box.style.display = 'block';
-        btn.innerText = 'Hide Hint';
-      } else {
-        box.style.display = 'none';
-        btn.innerText = 'Show Hint';
-      }
-    }
+    document.getElementById('toggle-console').onclick = () => {
+      consoleDrawer.classList.toggle('open');
+    };
 
-    async function runCode() {
-      const outputPanel = document.getElementById('output-panel');
-      const outputContent = document.getElementById('output-content');
-      outputPanel.style.display = 'block';
-      outputContent.innerText = "Running...\n";
+    document.getElementById('btn-run').onclick = () => {
+      consoleDrawer.classList.add('open');
+      consoleOut.innerText = "> Initializing Neural Environment...\n> Running logic checks...\n> Processing Signal Stream [0...99]\n> Result: VIRTUAL STABILITY SECURED.\n\nReady for deployment.";
+    };
 
-      // Simulate run delay
-      setTimeout(() => {
-        outputContent.innerText += "✓ Compilation successful\n✓ Running test case 1...\nOutput: Hello World\n\n[Finished in 0.2s]";
-      }, 800);
-    }
-
-    function submitCode() {
-      const outputPanel = document.getElementById('output-panel');
-      const outputContent = document.getElementById('output-content');
-      outputPanel.style.display = 'block';
-      outputContent.innerText = "Submitting against hidden test cases...\n";
+    document.getElementById('btn-submit').onclick = () => {
+      consoleDrawer.classList.add('open');
+      consoleOut.innerText = "> DEPLOYING TO ORBITAL STATION...\n> Validating against 128 production streams...\n> 100% Match.\n\nMission Successful.";
 
       setTimeout(() => {
-        document.getElementById('success-overlay').style.display = 'flex';
-      }, 1500);
-    }
+        const overlay = document.getElementById('master-overlay');
+        const hero = document.getElementById('hero-card');
+        overlay.style.display = 'flex';
+        setTimeout(() => {
+          overlay.style.opacity = '1';
+          hero.classList.add('pop');
+        }, 50);
+      }, 1200);
+    };
 
-    document.addEventListener('DOMContentLoaded', initialize);
+    initialize();
   </script>
 </body>
 

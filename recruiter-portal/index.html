@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recruiter Access - Hiero Talent</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #5d5dff;
+            --primary-glow: rgba(93, 93, 255, 0.4);
+            --bg: #030303;
+            --card-bg: rgba(20, 20, 25, 0.8);
+            --text: #ffffff;
+            --text-dim: #a0a0a0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Ambient Background */
+        .ambient-bg {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            background:
+                radial-gradient(circle at 10% 20%, rgba(93, 93, 255, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(255, 93, 193, 0.05) 0%, transparent 40%);
+        }
+
+        .login-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 3rem;
+            border-radius: 32px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+            animation: slideUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(40px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            letter-spacing: -1px;
+            background: linear-gradient(135deg, #fff 0%, #a0a0a0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo span {
+            color: var(--primary);
+            -webkit-text-fill-color: var(--primary);
+        }
+
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 400;
+            color: var(--text-dim);
+            margin-bottom: 2.5rem;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.9rem;
+            color: var(--text-dim);
+            margin-bottom: 0.6rem;
+            font-weight: 500;
+        }
+
+        .input-group input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1rem 1.2rem;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .input-group input:focus {
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 15px var(--primary-glow);
+        }
+
+        .btn-login {
+            width: 100%;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 1.1rem;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px var(--primary-glow);
+            filter: brightness(1.2);
+        }
+
+        .footer-links {
+            margin-top: 2rem;
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-dim);
+        }
+
+        .footer-links a {
+            color: var(--primary);
+            text-decoration: none;
+            margin: 0 10px;
+        }
+
+        /* Error Message */
+        #error-msg {
+            color: #ff5d5d;
+            font-size: 0.85rem;
+            margin-top: 1rem;
+            text-align: center;
+            display: none;
+            padding: 10px;
+            background: rgba(255, 93, 93, 0.1);
+            border-radius: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="ambient-bg"></div>
+
+    <div class="login-card">
+        <div class="logo">HIERO <span>RECRUITER</span></div>
+        <h2>Enterprise Talent Acquisition</h2>
+
+        <form id="loginForm">
+            <div class="input-group">
+                <label>Access Code / ID</label>
+                <input type="text" id="recruiterId" placeholder="REC-XXXX-XXXX" required>
+            </div>
+            <div class="input-group">
+                <label>Security Key</label>
+                <input type="password" id="recruiterKey" placeholder="Enter key" required>
+            </div>
+
+            <button type="submit" class="btn-login">Verify Credentials</button>
+            <div id="error-msg">Invalid access code or security key.</div>
+        </form>
+
+        <div class="footer-links">
+            <a href="#">Contact Support</a> • <a href="#">Request Access</a>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const id = document.getElementById('recruiterId').value;
+            const key = document.getElementById('recruiterKey').value;
+
+            // Simple mock authentication for standalone version
+            // Access: admin / password
+            if (id === 'admin' && key === 'admin') {
+                localStorage.setItem('recruiter_auth', 'true');
+                window.location.href = 'dashboard.html';
+            } else {
+                const error = document.getElementById('error-msg');
+                error.style.display = 'block';
+                setTimeout(() => error.style.display = 'none', 3000);
+            }
+        });
+    </script>
+</body>
+
+</html>

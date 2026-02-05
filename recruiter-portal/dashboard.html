@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hiero Pro | AI Recruitment Workspace</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary: #5d5dff;
+            --primary-glow: rgba(93, 93, 255, 0.4);
+            --accent: #ff5dcf;
+            --bg: #050508;
+            --sidebar: #0a0a10;
+            --card: #12121e;
+            --text-main: #ffffff;
+            --text-dim: #94a3b8;
+            --border: rgba(255, 255, 255, 0.08);
+            --pill: rgba(255, 255, 255, 0.05);
+            --success: #34d399;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg);
+            color: var(--text-main);
+            display: flex;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--sidebar);
+            border-right: 1px solid var(--border);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 3rem;
+        }
+
+        .logo span {
+            color: var(--primary);
+        }
+
+        .nav-menu {
+            list-style: none;
+            flex-grow: 1;
+        }
+
+        .nav-item {
+            padding: 1rem 1.25rem;
+            margin-bottom: 0.5rem;
+            border-radius: 12px;
+            color: var(--text-dim);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .nav-item.active {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .nav-item:hover:not(.active) {
+            background: var(--pill);
+            color: #fff;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 280px;
+            flex-grow: 1;
+            padding: 3rem;
+            width: calc(100% - 280px);
+        }
+
+        .workspace-hdr {
+            margin-bottom: 3rem;
+            animation: fadeIn 0.8s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* JD Section */
+        .upload-section {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            transition: 0.3s;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        textarea {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            color: #fff;
+            font-family: inherit;
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 150px;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 20px rgba(93, 93, 255, 0.1);
+        }
+
+        /* Resume Upload Grid */
+        .upload-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .drop-zone {
+            border: 2px dashed var(--border);
+            border-radius: 24px;
+            padding: 3rem;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+            background: var(--pill);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .drop-zone:hover {
+            border-color: var(--primary);
+            background: rgba(93, 93, 255, 0.05);
+        }
+
+        .drop-zone.active {
+            border-color: var(--primary);
+            border-style: solid;
+            box-shadow: 0 0 30px var(--primary-glow);
+        }
+
+        .drop-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        /* Filter Section (Left Sidebar style within main) */
+        .results-container {
+            display: flex;
+            gap: 2rem;
+            margin-top: 3rem;
+            display: none;
+            /* Initially hidden */
+        }
+
+        .filter-sidebar {
+            width: 300px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 1.5rem;
+            height: fit-content;
+        }
+
+        .filter-group {
+            margin-bottom: 2rem;
+        }
+
+        .filter-label {
+            font-weight: 600;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .range-input {
+            width: 100%;
+            accent-color: var(--primary);
+            margin-top: 10px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            color: var(--text-dim);
+            transition: 0.2s;
+        }
+
+        .checkbox-item:hover {
+            color: #fff;
+        }
+
+        /* Candidate Table */
+        .talent-results {
+            flex: 1;
+        }
+
+        .candidate-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            display: grid;
+            grid-template-columns: auto 1fr auto auto;
+            align-items: center;
+            gap: 2rem;
+            transition: 0.3s;
+            animation: slideUp 0.5s ease backwards;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .candidate-card:hover {
+            border-color: var(--primary);
+            transform: translateX(10px);
+        }
+
+        .match-score {
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            background: rgba(52, 211, 153, 0.1);
+            color: var(--success);
+            display: grid;
+            place-items: center;
+            font-weight: 800;
+            font-size: 1.25rem;
+            border: 1px solid rgba(52, 211, 153, 0.2);
+        }
+
+        .skill-tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+
+        .tag {
+            background: var(--pill);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            color: var(--text-dim);
+        }
+
+        .btn-analyze {
+            background: linear-gradient(135deg, var(--primary) 0%, #4444ff 100%);
+            color: #fff;
+            padding: 1.25rem 3rem;
+            border-radius: 16px;
+            border: none;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 2rem;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .btn-analyze:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px var(--primary-glow);
+        }
+
+        /* Processing State */
+        .processing-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            place-items: center;
+        }
+
+        .progress-container {
+            width: 400px;
+            text-align: center;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--pill);
+            border-radius: 100px;
+            overflow: hidden;
+            margin: 1.5rem 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--primary);
+            transition: 0.3s;
+            box-shadow: 0 0 15px var(--primary);
+        }
+
+        .logout-btn {
+            margin-top: auto;
+            padding: 1rem;
+            color: #ff5d5d;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar">
+        <div class="logo">HIERO <span>RECRUITER</span></div>
+        <ul class="nav-menu">
+            <li class="nav-item active">🎯 Smart Screening</li>
+            <li class="nav-item">👥 Talent Pool</li>
+            <li class="nav-item">📑 Job Templates</li>
+        </ul>
+        <div class="logout-btn" onclick="localStorage.removeItem('recruiter_auth'); window.location.href='index.html'">
+            🚪 Exit System
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="workspace-hdr">
+            <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">AI Resume Screener</h1>
+            <p style="color: var(--text-dim);">Batch analyze up to 50 resumes against your specific job description</p>
+        </div>
+
+        <div id="setup-view">
+            <div class="upload-section">
+                <div class="section-title"><span>📝</span> Step 1: Define Job Description</div>
+                <textarea id="jd-input"
+                    placeholder="Paste your company job description here (Role, Requirements, Tech Stack, CGPA Criteria)..."></textarea>
+            </div>
+
+            <div class="upload-grid">
+                <div class="drop-zone" id="resume-drop">
+                    <div class="drop-icon">📂</div>
+                    <div style="font-weight: 600; font-size: 1.25rem; margin-bottom: 0.5rem;">Upload Resumes</div>
+                    <p style="color: var(--text-dim);">Drag & drop or click to select PDF/DOCX files</p>
+                    <p style="margin-top: 1rem; font-size: 0.8rem; color: var(--primary);">Max 50 files per batch</p>
+                    <input type="file" id="file-input" multiple accept=".pdf,.doc,.docx" style="display: none;">
+                </div>
+
+                <div class="upload-section"
+                    style="margin-bottom: 0; display: flex; flex-direction: column; justify-content: center;">
+                    <div id="file-status">
+                        <div style="text-align: center; color: var(--text-dim);">
+                            <p style="font-size: 1.5rem; font-weight: 700; color: #fff;" id="file-count">0</p>
+                            <p>Files Selected</p>
+                        </div>
+                    </div>
+                    <button class="btn-analyze" id="start-analysis" disabled>
+                        <span>🚀</span> Run AI Screening
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="results-container" id="results-view">
+            <div class="filter-sidebar">
+                <div class="section-title" style="font-size: 1rem; margin-bottom: 2rem;">Filter Results</div>
+
+                <div class="filter-group">
+                    <label class="filter-label">Minimum Match Score: <span id="score-val"
+                            style="color: var(--primary);">70%</span></label>
+                    <input type="range" class="range-input" min="0" max="100" value="70"
+                        oninput="document.getElementById('score-val').innerText = this.value + '%'">
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">CGPA Range: <span id="cgpa-val"
+                            style="color: var(--accent);">7.5+</span></label>
+                    <input type="range" class="range-input" min="0" max="10" step="0.5" value="7.5"
+                        oninput="document.getElementById('cgpa-val').innerText = this.value + '+'">
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">Required Skills</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-item"><input type="checkbox" checked> React.js</label>
+                        <label class="checkbox-item"><input type="checkbox" checked> Node.js</label>
+                        <label class="checkbox-item"><input type="checkbox"> Python</label>
+                        <label class="checkbox-item"><input type="checkbox"> AWS</label>
+                    </div>
+                </div>
+
+                <button class="btn-add" style="width: 100%;" onclick="resetView()">New Analysis</button>
+            </div>
+
+            <div class="talent-results">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                    <h2 id="result-stat">6 Top Matches Found</h2>
+                    <div style="color: var(--text-dim); font-size: 0.85rem;">Sorted by relevance score</div>
+                </div>
+
+                <div id="candidate-list">
+                    <!-- Results injected here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading State -->
+    <div class="processing-modal" id="loader">
+        <div class="progress-container">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">🧬</div>
+            <h2 id="process-text">Extracting Resume Data...</h2>
+            <div class="progress-bar">
+                <div class="progress-fill" id="fill"></div>
+            </div>
+            <p style="color: var(--text-dim);" id="process-sub">Analyzing 0 of 0 files</p>
+        </div>
+    </div>
+
+    <script>
+        // Check Auth
+        if (localStorage.getItem('recruiter_auth') !== 'true') {
+            window.location.href = 'index.html';
+        }
+
+        const dropZone = document.getElementById('resume-drop');
+        const fileInput = document.getElementById('file-input');
+        const startBtn = document.getElementById('start-analysis');
+        const countTxt = document.getElementById('file-count');
+        let selectedFiles = [];
+
+        // File Selection Logic
+        dropZone.onclick = () => fileInput.click();
+
+        fileInput.onchange = (e) => {
+            const files = Array.from(e.target.files);
+            if (files.length > 50) {
+                alert("Maximum 50 resumes allowed at once.");
+                return;
+            }
+            selectedFiles = files;
+            updateStatus();
+        };
+
+        function updateStatus() {
+            countTxt.innerText = selectedFiles.length;
+            startBtn.disabled = selectedFiles.length === 0 || document.getElementById('jd-input').value.trim() === '';
+        }
+
+        document.getElementById('jd-input').oninput = updateStatus;
+
+        // Analysis Simulation
+        startBtn.onclick = () => {
+            const loader = document.getElementById('loader');
+            const fill = document.getElementById('fill');
+            const text = document.getElementById('process-text');
+            const sub = document.getElementById('process-sub');
+
+            loader.style.display = 'grid';
+
+            let progress = 0;
+            const steps = ["Reading PDFs...", "Extracting Skills...", "Parsing CGPA...", "Matching verified projects...", "Calculating final rank..."];
+
+            const interval = setInterval(() => {
+                progress += 2;
+                fill.style.width = progress + '%';
+
+                const stepIdx = Math.floor((progress / 100) * steps.length);
+                text.innerText = steps[Math.min(stepIdx, steps.length - 1)];
+                sub.innerText = `Analyzing batch: ${Math.min(Math.ceil(progress / 2), selectedFiles.length)} of ${selectedFiles.length} profiles`;
+
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        loader.style.display = 'none';
+                        showResults();
+                    }, 500);
+                }
+            }, 50);
+        };
+
+        function showResults() {
+            document.getElementById('setup-view').style.display = 'none';
+            document.getElementById('results-view').style.display = 'flex';
+
+            const list = document.getElementById('candidate-list');
+            // MOCK DATA GENERATED BASED ON JD
+            const matches = [
+                { name: "Rahul Deshmukh", match: 94, skills: ["React", "Node", "MongoDB", "Express"], cgpa: 8.8, projects: 12, email: "rahul.d@gmail.com" },
+                { name: "Ananya Iyer", match: 91, skills: ["React", "AWS", "Python", "Node"], cgpa: 9.2, projects: 8, email: "ananya.i@hiero.id" },
+                { name: "Vikram Seth", match: 88, skills: ["React", "CSS3", "Firebase", "Node"], cgpa: 7.9, projects: 15, email: "vikram.s@outlook.com" },
+                { name: "Sneha Kapoor", match: 85, skills: ["Node", "SQL", "Docker", "Express"], cgpa: 8.4, projects: 5, email: "sneha.k@gmail.com" },
+                { name: "Rohan Varma", match: 78, skills: ["React", "Redux", "Node"], cgpa: 7.6, projects: 6, email: "rohan.v@hiero.id" },
+                { name: "Meera Nair", match: 74, skills: ["JavaScript", "React", "Node"], cgpa: 8.1, projects: 4, email: "meera.n@gmail.com" }
+            ];
+
+            list.innerHTML = matches.map((m, i) => `
+                <div class="candidate-card" style="animation-delay: ${i * 0.1}s">
+                    <div class="match-score">${m.match}%</div>
+                    <div>
+                        <div style="font-weight: 700; font-size: 1.2rem; margin-bottom: 4px;">${m.name}</div>
+                        <div style="font-size: 0.85rem; color: var(--text-dim); margin-bottom: 12px;">${m.email}</div>
+                        <div class="skill-tags">
+                            ${m.skills.map(s => `<span class="tag">${s}</span>`).join('')}
+                        </div>
+                    </div>
+                    <div style="text-align: center; border-left: 1px solid var(--border); padding-left: 2rem;">
+                        <div style="font-size: 1.5rem; font-weight: 700; color: var(--accent);">${m.cgpa}</div>
+                        <div style="font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase;">CGPA</div>
+                    </div>
+                    <div style="text-align: center; border-left: 1px solid var(--border); padding-left: 2rem;">
+                        <div style="font-size: 1.5rem; font-weight: 700;">${m.projects}</div>
+                        <div style="font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase;">Projects</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function resetView() {
+            document.getElementById('setup-view').style.display = 'block';
+            document.getElementById('results-view').style.display = 'none';
+            selectedFiles = [];
+            fileInput.value = '';
+            document.getElementById('jd-input').value = '';
+            updateStatus();
+        }
+
+        // Drag and Drop
+        dropZone.ondragover = (e) => { e.preventDefault(); dropZone.classList.add('active'); };
+        dropZone.ondragleave = () => dropZone.classList.remove('active');
+        dropZone.ondrop = (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('active');
+            const files = Array.from(e.dataTransfer.files);
+            selectedFiles = files.slice(0, 50);
+            updateStatus();
+        };
+    </script>
+</body>
+
+</html>
