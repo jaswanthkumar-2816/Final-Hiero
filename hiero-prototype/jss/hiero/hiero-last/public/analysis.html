@@ -1,24 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Analyze Your Resume</title>
   <link rel="stylesheet" href="/dashboard/styles.css" />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
 </head>
+
 <body>
   <div class="container">
     <h1 class="title">Analyze Resume</h1>
-    
+
     <!-- Error / Validation Message Box -->
-    <div id="validation-errors" style="display:none; margin:15px 0; padding:12px 18px; border-radius:10px; background:#240000; border:1px solid #ff3d3d; color:#ff9d9d; font-size:0.95rem; line-height:1.4;">
+    <div id="validation-errors"
+      style="display:none; margin:15px 0; padding:12px 18px; border-radius:10px; background:#240000; border:1px solid #ff3d3d; color:#ff9d9d; font-size:0.95rem; line-height:1.4;">
       <strong style="display:block; margin-bottom:6px;">Validation Issues:</strong>
       <div id="validation-errors-text"></div>
     </div>
 
     <!-- Connection Status -->
-    <div id="connection-status" style="text-align: center; margin-bottom: 20px; padding: 10px; border-radius: 8px; display: none;">
+    <div id="connection-status"
+      style="text-align: center; margin-bottom: 20px; padding: 10px; border-radius: 8px; display: none;">
       <span id="status-text"></span>
     </div>
 
@@ -32,8 +36,10 @@
         <input type="radio" name="jd_mode" value="text" /> Paste Raw Text
       </label>
       <div id="jd-text-wrapper" style="margin-top:15px; display:none;">
-        <label for="jd-text" style="display:block; font-weight:600; margin-bottom:6px;">Paste Job Description Text:</label>
-        <textarea id="jd-text" placeholder="Paste full Job Description including responsibilities, requirements, etc." style="width:100%; min-height:160px; resize:vertical; padding:12px; border-radius:8px; border:1px solid #333; background:#111; color:#eee; font-family:inherit;"></textarea>
+        <label for="jd-text" style="display:block; font-weight:600; margin-bottom:6px;">Paste Job Description
+          Text:</label>
+        <textarea id="jd-text" placeholder="Paste full Job Description including responsibilities, requirements, etc."
+          style="width:100%; min-height:160px; resize:vertical; padding:12px; border-radius:8px; border:1px solid #333; background:#111; color:#eee; font-family:inherit;"></textarea>
       </div>
     </fieldset>
 
@@ -52,41 +58,70 @@
     <!-- ✅ Enhanced Loading Screen -->
     <div id="loading-overlay">
       <div class="loading-content">
-        <img src="/dashboard/logohiero copy.png" alt="Loading..." class="glow-logo" style="height:120px; width:120px; margin-bottom:32px;">
+        <img src="/dashboard/logohiero copy.png" alt="Loading..." class="glow-logo"
+          style="height:120px; width:120px; margin-bottom:32px;">
         <div class="spinner"></div>
-        <p style="font-size:1.3rem; color:#0dff00; margin-top:18px;">Analyzing your resume...<br>This may take a few seconds.</p>
+        <p style="font-size:1.3rem; color:#0dff00; margin-top:18px;">Analyzing your resume...<br>This may take a few
+          seconds.</p>
       </div>
     </div>
     <style>
-#loading-overlay {
-  position: fixed; left: 0; top: 0; width: 100vw; height: 100vh;
-  background: #000; z-index: 9999;
-  display: none; align-items: center; justify-content: center;
-}
-#loading-overlay.visible {
-  display: flex;
-}
-.loading-content {
-  text-align: center;
-}
-.glow-logo {
-  filter: drop-shadow(0 0 32px #0dff00) drop-shadow(0 0 64px #0dff00);
-  animation: glowPulse 1.5s infinite alternate;
-  transition: height 0.2s, width 0.2s;
-}
-@keyframes glowPulse {
-  0% { filter: drop-shadow(0 0 16px #0dff00) drop-shadow(0 0 32px #0dff00); }
-  100% { filter: drop-shadow(0 0 64px #0dff00) drop-shadow(0 0 128px #0dff00); }
-}
-.spinner {
-  border: 6px solid #222; border-top: 6px solid #0dff00;
-  border-radius: 50%; width: 60px; height: 60px;
-  animation: spin 1s linear infinite; margin: 0 auto 24px auto;
-}
-@keyframes spin { 100% { transform: rotate(360deg); } }
+      #loading-overlay {
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 100vw;
+        height: 100vh;
+        background: #000;
+        z-index: 9999;
+        display: none;
+        align-items: center;
+        justify-content: center;
+      }
+
+      #loading-overlay.visible {
+        display: flex;
+      }
+
+      .loading-content {
+        text-align: center;
+      }
+
+      .glow-logo {
+        filter: drop-shadow(0 0 32px #0dff00) drop-shadow(0 0 64px #0dff00);
+        animation: glowPulse 1.5s infinite alternate;
+        transition: height 0.2s, width 0.2s;
+      }
+
+      @keyframes glowPulse {
+        0% {
+          filter: drop-shadow(0 0 16px #0dff00) drop-shadow(0 0 32px #0dff00);
+        }
+
+        100% {
+          filter: drop-shadow(0 0 64px #0dff00) drop-shadow(0 0 128px #0dff00);
+        }
+      }
+
+      .spinner {
+        border: 6px solid #222;
+        border-top: 6px solid #0dff00;
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 24px auto;
+      }
+
+      @keyframes spin {
+        100% {
+          transform: rotate(360deg);
+        }
+      }
     </style>
   </div>
 
-  <script src="script.js"></script>
+  <script src="analysis-script.js"></script>
 </body>
+
 </html>
