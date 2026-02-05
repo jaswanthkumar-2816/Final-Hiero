@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Project - Hiero</title>
   <script src="authCheck.js"></script>
   <link rel="stylesheet" href="styles.css">
@@ -16,6 +17,7 @@
       padding: 0;
       min-height: 100vh;
     }
+
     .project-container {
       max-width: 800px;
       margin: 0 auto;
@@ -24,6 +26,7 @@
       flex-direction: column;
       gap: 32px;
     }
+
     .user-stats {
       background: #18191c;
       border: 2px solid #12ef12;
@@ -33,33 +36,39 @@
       margin-bottom: 20px;
       text-align: center;
     }
+
     .user-stats h3 {
       color: #12ef12;
       margin: 0 0 15px 0;
       text-shadow: 0 0 10px #12ef12;
     }
+
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
       gap: 15px;
       margin-top: 15px;
     }
+
     .stat-item {
       background: #0a0a0a;
       padding: 10px;
       border-radius: 8px;
       border: 1px solid #12ef12;
     }
+
     .stat-value {
       font-size: 1.5rem;
       font-weight: 700;
       color: #12ef12;
     }
+
     .stat-label {
       font-size: 0.9rem;
       color: #fff;
       margin-top: 5px;
     }
+
     .project-title {
       font-size: 2.2rem;
       font-weight: 900;
@@ -68,12 +77,14 @@
       margin-bottom: 8px;
       text-align: center;
     }
+
     .project-desc {
       color: #fff;
       font-size: 1.2rem;
       margin-bottom: 18px;
       text-align: center;
     }
+
     .project-completion {
       background: #18191c;
       border-radius: 16px;
@@ -83,14 +94,17 @@
       max-width: 600px;
       text-align: center;
     }
+
     .difficulty-selector {
       margin: 20px 0;
     }
+
     .difficulty-selector label {
       color: #12ef12;
       font-weight: 600;
       margin-right: 10px;
     }
+
     .difficulty-selector select {
       background: #0a0a0a;
       color: #12ef12;
@@ -99,6 +113,7 @@
       padding: 8px 12px;
       font-size: 1rem;
     }
+
     .complete-btn {
       background: linear-gradient(45deg, #12ef12, #0a9c0a);
       color: #0a0a0a;
@@ -112,10 +127,12 @@
       box-shadow: 0 0 20px #12ef1233;
       margin-top: 15px;
     }
+
     .complete-btn:hover {
       transform: translateY(-2px);
       box-shadow: 0 0 30px #12ef12;
     }
+
     .complete-btn:disabled {
       background: #666;
       color: #999;
@@ -123,22 +140,26 @@
       transform: none;
       box-shadow: none;
     }
+
     .completion-status {
       margin: 15px 0;
       padding: 10px;
       border-radius: 8px;
       font-weight: 600;
     }
+
     .completed {
       background: rgba(18, 239, 18, 0.2);
       color: #12ef12;
       border: 1px solid #12ef12;
     }
+
     .not-completed {
       background: rgba(255, 255, 255, 0.1);
       color: #fff;
       border: 1px solid #666;
     }
+
     .resources-section {
       background: #18191c;
       border-radius: 16px;
@@ -151,12 +172,14 @@
       max-width: 600px;
       margin: 0 auto;
     }
+
     .resources-title {
       color: #12ef12;
       font-size: 1.3rem;
       font-weight: 700;
       margin-bottom: 8px;
     }
+
     .resource-link {
       color: #b0ffb0;
       font-size: 1.1rem;
@@ -167,10 +190,12 @@
       gap: 8px;
       transition: color 0.2s;
     }
+
     .resource-link:hover {
       color: #12ef12;
       text-decoration: underline;
     }
+
     .chatbot-section {
       background: #18191c;
       border-radius: 16px;
@@ -184,6 +209,7 @@
       flex-direction: column;
       min-height: 220px;
     }
+
     .section-title {
       color: #12ef12;
       font-size: 1.3rem;
@@ -191,6 +217,7 @@
       margin-bottom: 16px;
       text-align: center;
     }
+
     .chatbot-messages {
       flex: 1;
       overflow-y: auto;
@@ -203,10 +230,12 @@
       border: 1px solid #232c23;
       min-height: 80px;
     }
+
     .chatbot-input {
       display: flex;
       gap: 8px;
     }
+
     .chatbot-input input {
       flex: 1;
       padding: 8px 12px;
@@ -217,6 +246,7 @@
       font-size: 1rem;
       outline: none;
     }
+
     .chatbot-input button {
       background: #12ef12;
       color: #101010;
@@ -228,21 +258,26 @@
       cursor: pointer;
       transition: background 0.2s, color 0.2s;
     }
+
     .chatbot-input button:hover {
       background: #0a0a0a;
       color: #12ef12;
       border: 1.5px solid #12ef12;
     }
+
     @media (max-width: 600px) {
       .project-container {
         padding: 8px;
       }
-      .resources-section, .chatbot-section {
+
+      .resources-section,
+      .chatbot-section {
         padding: 12px;
       }
     }
   </style>
 </head>
+
 <body>
   <div class="project-container" id="project-root">
     <!-- Project content will be rendered here by JS -->
@@ -251,7 +286,7 @@
     // Backend API configuration
     const API_BASE_URL = 'http://localhost:5005/api';
     const CHAT_API_URL = 'http://localhost:5005/api/ask';
-    
+
     // Global variables
     let userStats = { totalPoints: 0, level: 1, badges: [], completedProjects: [] };
 
@@ -375,7 +410,7 @@
           </div>
         </div>
       `;
-      
+
       const container = document.getElementById('project-root');
       container.insertBefore(statsDiv, container.firstChild);
     }
@@ -401,13 +436,13 @@
           userStats.totalPoints = data.totalPoints;
           userStats.level = data.level;
           userStats.badges = data.badges;
-          
+
           updateUserStatsDisplay();
           showAchievement(data.message, data.leveledUp);
-          
+
           // Update completion status
           updateProjectCompletionStatus(projectName, true);
-          
+
           // Refresh user stats
           await fetchUserStats();
         } else {
@@ -429,7 +464,7 @@
     function updateProjectCompletionStatus(projectName, isCompleted) {
       const statusDiv = document.getElementById('completion-status');
       const completeBtn = document.getElementById('complete-project-btn');
-      
+
       if (statusDiv) {
         if (isCompleted) {
           statusDiv.className = 'completion-status completed';
@@ -465,13 +500,13 @@
         text-align: center;
         max-width: 400px;
       `;
-      
+
       let content = `🎉 ${message}`;
       if (leveledUp) content += `<br>🚀 LEVEL UP!`;
-      
+
       achievementDiv.innerHTML = content;
       document.body.appendChild(achievementDiv);
-      
+
       setTimeout(() => {
         achievementDiv.remove();
       }, 3000);
@@ -493,7 +528,7 @@
       `;
       errorDiv.textContent = message;
       document.body.appendChild(errorDiv);
-      
+
       setTimeout(() => {
         errorDiv.remove();
       }, 5000);
@@ -534,7 +569,7 @@
       const completionSection = document.createElement('div');
       completionSection.className = 'project-completion';
       const isCompleted = isProjectCompleted(projectName);
-      
+
       completionSection.innerHTML = `
         <h3 style="color: #12ef12; margin: 0 0 15px 0;">📊 Project Completion</h3>
         <div id="completion-status" class="completion-status ${isCompleted ? 'completed' : 'not-completed'}">
@@ -572,9 +607,9 @@
       const chatbotSection = document.createElement('div');
       chatbotSection.className = 'chatbot-section';
       chatbotSection.innerHTML = `
-        <div class="section-title">🤖 AI Project Assistant</div>
+        <div class="section-title">🤖 Orbit Assistant</div>
         <div class="chatbot-messages" id="chatbot-messages">
-          <div><strong>AI:</strong> Hi! Ask me any questions about this project. I'm here to help you succeed!</div>
+          <div><strong>Orbit:</strong> Hi! I'm Orbit. Ask me any questions about this project. I'm here to help you succeed!</div>
         </div>
         <div class="chatbot-input">
           <input type="text" id="chatbot-input" placeholder="Ask about the project..." />
@@ -602,11 +637,11 @@
       // Chatbot functionality
       const sendBtn = document.getElementById('chatbot-send');
       const chatInput = document.getElementById('chatbot-input');
-      
+
       if (sendBtn) {
         sendBtn.addEventListener('click', sendChatMessage);
       }
-      
+
       if (chatInput) {
         chatInput.addEventListener('keypress', (e) => {
           if (e.key === 'Enter') {
@@ -620,16 +655,16 @@
       const input = document.getElementById('chatbot-input');
       const message = input.value.trim();
       if (!message) return;
-      
+
       const messages = document.getElementById('chatbot-messages');
       messages.innerHTML += `<div><strong>You:</strong> ${message}</div>`;
       input.value = '';
-      
+
       // Show loading state
-      const loadingMsg = `<div><strong>AI:</strong> Thinking...</div>`;
+      const loadingMsg = `<div><strong>Orbit:</strong> Thinking...</div>`;
       messages.innerHTML += loadingMsg;
       messages.scrollTop = messages.scrollHeight;
-      
+
       try {
         // Call backend chatbot API
         const response = await fetch(CHAT_API_URL, {
@@ -648,17 +683,17 @@
         }
 
         const data = await response.json();
-        
+
         // Remove loading message and add AI response
         messages.innerHTML = messages.innerHTML.replace(loadingMsg, '');
-        messages.innerHTML += `<div><strong>AI:</strong> ${data.answer}</div>`;
+        messages.innerHTML += `<div><strong>Orbit:</strong> ${data.answer}</div>`;
       } catch (error) {
         console.error('Chatbot error:', error);
         // Remove loading message and add error response
         messages.innerHTML = messages.innerHTML.replace(loadingMsg, '');
-        messages.innerHTML += `<div><strong>AI:</strong> Sorry, I'm having trouble connecting right now. Please try again later.</div>`;
+        messages.innerHTML += `<div><strong>Orbit:</strong> Sorry, I'm having trouble connecting right now. Please try again later.</div>`;
       }
-      
+
       messages.scrollTop = messages.scrollHeight;
     }
 
@@ -682,4 +717,5 @@
     initializeApp();
   </script>
 </body>
-</html> 
+
+</html>

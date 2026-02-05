@@ -195,7 +195,7 @@ window.addEventListener("DOMContentLoaded", async () => {
 
   const questions = [
     {
-      question: "Hi there! 👋 I’m Hiero. Let's build your resume! What’s your full name?",
+      question: "Hi there! 👋 I’m Orbit. Let's build your resume! What’s your full name?",
       key: "full_name",
       validate: (val) => val.trim().split(" ").length >= 2 ? null : "Enter full name (e.g., Riya Patel).",
       response: (val) => `Nice to meet you, ${val.split(" ")[0]}! Let's get your contact info.`,
@@ -279,7 +279,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     if (isBot) {
       const iconDiv = document.createElement("div");
       iconDiv.className = "bot-icon";
-      iconDiv.textContent = "H";
+      iconDiv.textContent = "O";
       messageDiv.appendChild(iconDiv);
     }
     const span = document.createElement("span");

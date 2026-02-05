@@ -7,89 +7,82 @@
   <title>Learn Skills | Hiero</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
   <style>
     :root {
       --primary: #04ab07;
       --primary-hover: #06c719;
       --primary-glow: rgba(4, 171, 7, 0.4);
-      --bg-deep: #020402;
-      --bg-card: rgba(13, 15, 13, 0.7);
-      --text-main: #ffffff;
+      --bg-dark: #020402;
+      --bg-card: rgba(18, 20, 18, 0.6);
+      --text-main: #f8fafc;
       --text-muted: #94a3b8;
-      --border: rgba(4, 171, 7, 0.2);
-      --card-radius: 20px;
+      --border: rgba(4, 171, 7, 0.15);
+      --card-radius: 24px;
+      --glass: rgba(18, 20, 18, 0.4);
+      --glass-border: rgba(255, 255, 255, 0.05);
     }
 
     * {
       box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
     body {
-      margin: 0;
-      font-family: 'Inter', sans-serif;
-      background-color: var(--bg-deep);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg-dark);
       background-image:
-        radial-gradient(at 0% 0%, rgba(4, 171, 7, 0.15) 0, transparent 50%),
-        radial-gradient(at 100% 0%, rgba(4, 150, 7, 0.1) 0, transparent 50%),
-        radial-gradient(at 100% 100%, rgba(10, 100, 10, 0.1) 0, transparent 50%),
-        radial-gradient(at 0% 100%, rgba(4, 171, 7, 0.15) 0, transparent 50%);
+        radial-gradient(circle at 0% 0%, rgba(4, 171, 7, 0.1) 0%, transparent 40%),
+        radial-gradient(circle at 100% 0%, rgba(10, 80, 10, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 50% 50%, rgba(4, 171, 7, 0.03) 0%, transparent 100%);
       background-attachment: fixed;
       color: var(--text-main);
       min-height: 100vh;
       overflow-x: hidden;
-      position: relative;
+      line-height: 1.6;
     }
 
-    /* Fixed ambient particles */
+    /* Ambient noise effect */
     body::before {
       content: '';
       position: fixed;
       inset: 0;
       background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-      opacity: 0.03;
+      opacity: 0.02;
       pointer-events: none;
-      z-index: 0;
+      z-index: 10;
     }
 
-    @keyframes gradientFlow {
-      0% {
-        background-position: 0% 50%;
-      }
-
-      100% {
-        background-position: 50% 50%;
-      }
-    }
-
-    /* Premium Loading Overlay */
+    /* Loading Overlay */
     #loading-overlay {
       position: fixed;
       inset: 0;
-      background: var(--bg-deep);
+      background: var(--bg-dark);
       z-index: 9999;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    .loading-content {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 32px;
+    #loading-overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
     }
 
-    .huge-logo {
-      height: 120px;
-      width: 120px;
-      filter: drop-shadow(0 0 30px var(--primary-glow));
-      animation: breathe 3s ease-in-out infinite;
+    .loading-logo {
+      width: 100px;
+      height: 100px;
+      margin-bottom: 24px;
+      animation: logoPulse 2s ease-in-out infinite;
+      filter: drop-shadow(0 0 20px var(--primary-glow));
     }
 
-    @keyframes breathe {
+    @keyframes logoPulse {
 
       0%,
       100% {
@@ -98,356 +91,632 @@
       }
 
       50% {
-        transform: scale(1.15);
-        filter: drop-shadow(0 0 50px var(--primary-glow));
+        transform: scale(1.1);
+        filter: drop-shadow(0 0 40px var(--primary-glow));
       }
     }
 
-    .loading-text {
-      font-size: 14px;
-      font-weight: 600;
-      letter-spacing: 4px;
-      text-transform: uppercase;
-      color: var(--primary);
-      opacity: 0.8;
-      animation: pulseText 2s ease-in-out infinite;
-    }
-
-    @keyframes pulseText {
-
-      0%,
-      100% {
-        opacity: 0.4;
-      }
-
-      50% {
-        opacity: 0.9;
-      }
-    }
-
-    /* Layout */
-    .app-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 40px 24px;
+    .loading-bar-bg {
+      width: 180px;
+      height: 2px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      overflow: hidden;
       position: relative;
-      z-index: 1;
     }
 
-    header {
+    .loading-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 40%;
+      background: var(--primary);
+      box-shadow: 0 0 10px var(--primary);
+      animation: loadingAnim 2s infinite ease-in-out;
+    }
+
+    @keyframes loadingAnim {
+      0% {
+        left: -40%;
+      }
+
+      100% {
+        left: 100%;
+      }
+    }
+
+    /* Container */
+    .app-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 40px 80px 40px;
+    }
+
+    /* Header */
+    nav {
+      height: 90px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 48px;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-weight: 700;
-      font-size: 20px;
-      color: var(--primary);
-      letter-spacing: -0.5px;
-    }
-
-    .brand img {
-      height: 36px;
-    }
-
-    .btn-back {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid var(--border);
-      color: var(--text-main);
-      padding: 8px 16px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 500;
-      transition: all 0.2s;
-    }
-
-    .btn-back:hover {
-      background: rgba(255, 255, 255, 0.1);
-      border-color: var(--text-muted);
-    }
-
-    /* Page Title */
-    .page-header {
       margin-bottom: 40px;
     }
 
-    .page-header h1 {
-      font-size: 32px;
-      font-weight: 800;
-      margin: 0 0 8px 0;
-    }
-
-    .page-header p {
-      color: var(--text-muted);
-      margin: 0;
-    }
-
-    /* Tabs / Filters */
-    .filter-bar {
-      margin-bottom: 32px;
+    .nav-left {
       display: flex;
+      align-items: center;
       gap: 12px;
-      overflow-x: auto;
-      padding-bottom: 8px;
+      cursor: pointer;
+      z-index: 100;
     }
 
-    .filter-btn {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      color: var(--text-muted);
-      padding: 8px 20px;
-      border-radius: 99px;
-      cursor: pointer;
-      white-space: nowrap;
+    .nav-left img {
+      height: 36px;
+      filter: drop-shadow(0 0 10px var(--primary-glow));
+    }
+
+    .nav-left span {
+      font-weight: 800;
+      font-size: 20px;
+      letter-spacing: -0.5px;
+      background: linear-gradient(to right, #fff, var(--primary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .btn-back {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      color: var(--text-main);
+      padding: 10px 20px;
+      border-radius: 14px;
       font-size: 14px;
       font-weight: 600;
+      cursor: pointer;
       backdrop-filter: blur(10px);
-      transition: all 0.2s;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
-    .filter-btn:hover {
-      border-color: var(--text-muted);
-      color: var(--text-main);
+    .btn-back:hover {
+      background: rgba(4, 171, 7, 0.1);
+      border-color: var(--primary);
+      transform: translateX(-4px);
     }
 
-    .filter-btn.active {
+    /* Hero */
+    .hero {
+      margin-bottom: 60px;
+      text-align: center;
+      padding: 60px 0;
+      position: relative;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 100vw;
+      height: 100%;
+      background: radial-gradient(circle at 50% 50%, rgba(4, 171, 7, 0.05) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .hero h1 {
+      font-size: 64px;
+      font-weight: 800;
+      margin-bottom: 16px;
+      letter-spacing: -2px;
+      line-height: 1.1;
+    }
+
+    .hero h1 span {
+      color: var(--primary);
+      text-shadow: 0 0 30px var(--primary-glow);
+    }
+
+    .hero p {
+      color: var(--text-muted);
+      font-size: 18px;
+      max-width: 700px;
+      margin: 0 auto 32px auto;
+      font-weight: 400;
+    }
+
+    /* Language Switcher */
+    .lang-tabs {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      padding: 6px;
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      width: fit-content;
+      margin: 0 auto;
+      backdrop-filter: blur(10px);
+    }
+
+    .lang-tab {
+      padding: 10px 24px;
+      border-radius: 16px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: transparent;
+      border: none;
+    }
+
+    .lang-tab.active {
       background: var(--primary);
       color: #000;
-      border-color: var(--primary);
-      box-shadow: 0 0 15px var(--primary-glow);
+      box-shadow: 0 4px 15px var(--primary-glow);
     }
 
-    /* Main Grid */
+    .lang-tab:hover:not(.active) {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    /* Grid */
     .content-grid {
       display: grid;
-      grid-template-columns: 2fr 1fr;
-      gap: 32px;
+      grid-template-columns: 1fr 400px;
+      gap: 40px;
+      align-items: start;
     }
 
-    @media (max-width: 1024px) {
+    @media (max-width: 1200px) {
       .content-grid {
         grid-template-columns: 1fr;
       }
     }
 
-    /* Video Section */
-    .section-banner {
+    /* Sections */
+    .section-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 24px;
     }
 
-    .section-banner h2 {
-      font-size: 20px;
-      font-weight: 700;
-      margin: 0;
+    .section-header h2 {
+      font-size: 24px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .section-header h2::before {
+      content: '';
+      width: 4px;
+      height: 24px;
+      background: var(--primary);
+      border-radius: 2px;
+    }
+
+    .count-badge {
+      font-size: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 4px 12px;
+      border-radius: 99px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    /* Video Grid */
+    .video-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 24px;
+      margin-bottom: 48px;
     }
 
     .video-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
       border-radius: var(--card-radius);
       overflow: hidden;
-      backdrop-filter: blur(10px);
-      transition: transform 0.2s, border-color 0.2s;
       cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      backdrop-filter: blur(10px);
     }
 
     .video-card:hover {
-      transform: translateY(-4px);
+      transform: translateY(-8px);
       border-color: var(--primary);
-      box-shadow: 0 8px 32px rgba(4, 171, 7, 0.2);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(4, 171, 7, 0.1);
     }
 
     .video-thumb {
+      position: relative;
       aspect-ratio: 16/9;
       background: #000;
-      position: relative;
     }
 
     .video-thumb img {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      opacity: 0.8;
+      opacity: 0.85;
+      transition: opacity 0.3s;
     }
 
-    .duration-tag {
+    .video-card:hover .video-thumb img {
+      opacity: 1;
+    }
+
+    .play-overlay {
       position: absolute;
-      bottom: 8px;
-      right: 8px;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.3s;
+      background: rgba(0, 0, 0, 0.3);
+    }
+
+    .video-card:hover .play-overlay {
+      opacity: 1;
+    }
+
+    .play-icon {
+      width: 50px;
+      height: 50px;
+      background: var(--primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 20px var(--primary-glow);
+    }
+
+    .play-icon svg {
+      width: 20px;
+      height: 20px;
+      fill: #000;
+      margin-left: 4px;
+    }
+
+    .duration {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
       background: rgba(0, 0, 0, 0.8);
-      padding: 2px 6px;
-      border-radius: 4px;
+      padding: 4px 8px;
+      border-radius: 6px;
       font-size: 11px;
       font-weight: 700;
+      color: #fff;
     }
 
-    .video-body {
-      padding: 16px;
+    .video-info {
+      padding: 20px;
     }
 
     .video-title {
-      font-size: 15px;
-      font-weight: 600;
+      font-size: 16px;
+      font-weight: 700;
       line-height: 1.4;
       margin-bottom: 8px;
-      height: 42px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      line-clamp: 2;
       overflow: hidden;
+      min-height: 44px;
     }
 
-    /* Problems Section */
+    /* Problems */
     .problem-list {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .problem-item {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      padding: 16px;
-      border-radius: 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      transition: all 0.2s;
-      cursor: pointer;
-    }
-
-    .problem-item:hover {
-      border-color: var(--primary);
-      background: rgba(13, 255, 0, 0.02);
-    }
-
-    .problem-info h4 {
-      margin: 0 0 4px 0;
-      font-size: 15px;
-    }
-
-    .difficulty {
-      font-size: 11px;
-      font-weight: 800;
-      text-transform: uppercase;
-      padding: 2px 8px;
-      border-radius: 4px;
-    }
-
-    .difficulty.easy {
-      color: #3fb950;
-      background: rgba(63, 185, 80, 0.1);
-    }
-
-    .difficulty.medium {
-      color: #d29922;
-      background: rgba(210, 153, 34, 0.1);
-    }
-
-    .difficulty.hard {
-      color: #f85149;
-      background: rgba(248, 81, 73, 0.1);
-    }
-
-    /* Chatbot Section */
-    .chat-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--card-radius);
-      display: flex;
-      flex-direction: column;
-      height: 600px;
-      position: sticky;
-      top: 40px;
-    }
-
-    .chat-header {
-      padding: 20px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .chat-header h3 {
-      margin: 0;
-      font-size: 16px;
-    }
-
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--primary);
-    }
-
-    .chat-body {
-      flex: 1;
-      overflow-y: auto;
-      padding: 20px;
       display: flex;
       flex-direction: column;
       gap: 16px;
     }
 
-    .msg {
-      max-width: 85%;
-      padding: 12px 16px;
+    .problem-item {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      padding: 24px;
+      border-radius: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      backdrop-filter: blur(10px);
+    }
+
+    .problem-item:hover {
+      border-color: var(--primary);
+      background: rgba(4, 171, 7, 0.03);
+      transform: scale(1.01);
+    }
+
+    .prob-main h4 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .prob-badges {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .diff-badge {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 6px;
+      letter-spacing: 0.5px;
+    }
+
+    .diff-badge.easy {
+      color: #22c55e;
+      background: rgba(34, 197, 94, 0.1);
+    }
+
+    .diff-badge.medium {
+      color: #f59e0b;
+      background: rgba(245, 158, 11, 0.1);
+    }
+
+    .diff-badge.hard {
+      color: #ef4444;
+      background: rgba(239, 68, 68, 0.1);
+    }
+
+    .solve-btn {
+      background: var(--primary);
+      color: #000;
+      width: 44px;
+      height: 44px;
       border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 15px var(--primary-glow);
+      transition: all 0.3s;
+    }
+
+    .problem-item:hover .solve-btn {
+      transform: rotate(-15deg) scale(1.1);
+    }
+
+    /* Sidebar / Tutor */
+    .sidebar {
+      position: sticky;
+      top: 40px;
+    }
+
+    .tutor-card {
+      background: var(--glass);
+      border: 2px solid var(--border);
+      border-radius: 28px;
+      display: flex;
+      flex-direction: column;
+      height: 700px;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tutor-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(to right, transparent, var(--primary), transparent);
+    }
+
+    .tutor-header {
+      padding: 24px;
+      border-bottom: 1px solid var(--glass-border);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .tutor-avatar {
+      width: 48px;
+      height: 48px;
+      background: var(--primary);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 20px var(--primary-glow);
+    }
+
+    .tutor-avatar svg {
+      width: 28px;
+      height: 28px;
+      fill: #000;
+    }
+
+    .tutor-header-text h3 {
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 2px;
+    }
+
+    .online-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--primary);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--primary);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.3;
+      }
+
+      100% {
+        opacity: 1;
+      }
+    }
+
+    .chat-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--primary) transparent;
+    }
+
+    .chat-body::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .chat-body::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 10px;
+    }
+
+    .message {
+      max-width: 85%;
+      padding: 14px 18px;
+      border-radius: 20px;
       font-size: 14px;
       line-height: 1.5;
+      position: relative;
     }
 
-    .msg.bot {
+    .message.bot {
       background: rgba(255, 255, 255, 0.05);
+      color: var(--text-main);
       align-self: flex-start;
-      border-bottom-left-radius: 2px;
+      border-top-left-radius: 4px;
     }
 
-    .msg.user {
+    .message.user {
       background: var(--primary);
       color: #000;
       align-self: flex-end;
-      border-bottom-right-radius: 2px;
-      font-weight: 500;
+      border-top-right-radius: 4px;
+      font-weight: 600;
+      box-shadow: 0 10px 20px rgba(4, 171, 7, 0.15);
     }
 
     .chat-footer {
-      padding: 16px;
-      border-top: 1px solid var(--border);
+      padding: 24px;
+      background: rgba(0, 0, 0, 0.2);
+      border-top: 1px solid var(--glass-border);
       display: flex;
-      gap: 10px;
+      gap: 12px;
     }
 
     .chat-input {
       flex: 1;
-      background: var(--bg-dark);
-      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--glass-border);
       color: var(--text-main);
-      padding: 10px 16px;
-      border-radius: 10px;
-      outline: none;
+      padding: 12px 16px;
+      border-radius: 14px;
       font-size: 14px;
+      font-family: inherit;
+      outline: none;
+      transition: all 0.3s;
     }
 
     .chat-input:focus {
       border-color: var(--primary);
+      background: rgba(255, 255, 255, 0.06);
     }
 
-    .btn-send {
+    .send-btn {
       background: var(--primary);
       color: #000;
       border: none;
-      padding: 0 16px;
-      border-radius: 10px;
-      font-weight: 700;
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
       cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s;
+    }
+
+    .send-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 20px var(--primary-glow);
+    }
+
+    .send-btn svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    /* Tags */
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .tag {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--glass-border);
+      padding: 4px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .hero h1 {
+        font-size: 40px;
+      }
+
+      .app-container {
+        padding: 0 20px 40px 20px;
+      }
+
+      .content-grid {
+        gap: 32px;
+      }
+
+      .tutor-card {
+        height: 500px;
+      }
     }
   </style>
 </head>
@@ -455,71 +724,94 @@
 <body>
 
   <div id="loading-overlay">
-    <div class="loading-content">
-      <img src="logohiero copy.png" alt="Hiero" class="huge-logo">
-      <div class="loading-text">Preparing your path</div>
+    <img src="logohiero copy.png" alt="Hiero" class="loading-logo">
+    <div class="loading-bar-bg">
+      <div class="loading-bar"></div>
     </div>
   </div>
 
   <div class="app-container">
-    <header>
-      <div class="brand" onclick="location.href='/'" style="cursor:pointer">
+    <nav>
+      <div class="nav-left" onclick="location.href='/'">
         <img src="logohiero copy.png" alt="Hiero">
         <span>HIERO.LEARN</span>
       </div>
-      <button class="btn-back" onclick="location.href='result.html'">← Back to Results</button>
-    </header>
+      <button class="btn-back" onclick="location.href='result.html'">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 12H5M12 19l-7-7 7-7" />
+        </svg>
+        Back to Results
+      </button>
+    </nav>
 
-    <div class="page-header">
-      <h1 id="skill-display">Mastering %SKILL%</h1>
-      <p>Your personalized roadmap with hand-picked tutorials, interactive challenges, and an expert AI mentor at your
-        side.</p>
-    </div>
+    <div class="hero">
+      <p id="sub-header">Specialized Roadmap for</p>
+      <h1 id="skill-display">Mastering <span>%SKILL%</span></h1>
+      <p>Hand-picked lessons, interactive challenges, and an expert AI mentor to accelerate your growth.</p>
 
-    <div class="filter-bar" id="language-switcher">
-      <!-- Buttons injected by JS -->
+      <div class="lang-tabs" id="language-switcher">
+        <!-- Injected by JS -->
+      </div>
     </div>
 
     <div class="content-grid">
-      <!-- Left Column: Primary Content -->
       <div class="main-content">
         <section class="video-section">
-          <div class="section-banner">
+          <div class="section-header">
             <h2>Recommended Tutorials</h2>
-            <span id="video-count" style="font-size: 13px; color: var(--text-muted); font-weight: 500;">0
-              tutorials</span>
+            <span class="count-badge" id="video-count">0 tutorials found</span>
           </div>
           <div class="video-grid" id="video-container">
-            <!-- Videos injected by JS -->
+            <!-- Injected by JS -->
           </div>
         </section>
 
         <section class="problems-section">
-          <div class="section-banner">
+          <div class="section-header">
             <h2>Practical Challenges</h2>
+            <span class="count-badge">Build expertise through doing</span>
           </div>
           <div class="problem-list" id="problem-container">
-            <!-- Problems injected by JS -->
+            <!-- Injected by JS -->
           </div>
         </section>
       </div>
 
-      <!-- Right Column: Integrated Tutor -->
-      <aside>
-        <div class="chat-card">
-          <div class="chat-header">
-            <div class="status-dot"></div>
-            <h3>Expert Tutor</h3>
+      <aside class="sidebar">
+        <div class="tutor-card">
+          <div class="tutor-header">
+            <div class="tutor-avatar">
+              <svg viewBox="0 0 24 24">
+                <path
+                  d="M12,2A10,10,0,0,0,2,12a9.89,9.89,0,0,0,2.26,6.33l-2,2a1,1,0,0,0,-1 1.05A1,1,0,0,0,2.15,22h19.7a1,1,0,0,0,.85-1.52l-2-2A10,10,0,0,0,12,2Zm0,18a8,8,0,0,1,-5.55,-2.25l1.42,-1.42a1,1,0,0,0,-1.42,-1.42L5,16.33A8,8,0,1,1,12,20Z" />
+                <circle cx="12" cy="11" r="3" />
+                <path d="M12,14a5,5,0,0,0,-5,-5A5,5,0,0,0,7,14Z" opacity="0" />
+              </svg>
+            </div>
+            <div class="tutor-header-text">
+              <h3>Orbit</h3>
+              <div class="online-status">
+                <div class="status-dot"></div>
+                Active Now
+              </div>
+            </div>
           </div>
           <div class="chat-body" id="chat-container">
-            <div class="msg bot">
-              Welcome to your specialized learning path! I'm here to explain concepts, guide you through problems, and
-              clarify any doubts. What's on your mind?
+            <div class="message bot">
+              Hey there! I'm Orbit, your specialized AI tutor for <strong id="skill-context-name">this skill</strong>.
+              Whether you're stuck on a concept or need a hint for a problem, just ask!
             </div>
           </div>
           <div class="chat-footer">
-            <input type="text" class="chat-input" id="chat-input" placeholder="Ask anything about this skill...">
-            <button class="btn-send" id="chat-send-btn">Send</button>
+            <input type="text" class="chat-input" id="chat-input" placeholder="Type your question...">
+            <button class="send-btn" id="chat-send-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                stroke-linejoin="round">
+                <line x1="22" y1="2" x2="11" y2="13"></line>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+              </svg>
+            </button>
           </div>
         </div>
       </aside>
@@ -532,10 +824,11 @@
 
     async function init() {
       const params = new URLSearchParams(window.location.search);
-      currentSkill = params.get('skill') || 'React';
+      currentSkill = (params.get('skill') || 'React').trim();
       currentLang = (params.get('language') || 'english').toLowerCase();
 
-      document.getElementById('skill-display').innerText = `Master ${currentSkill}`;
+      document.getElementById('skill-display').innerHTML = `Mastering <span>${currentSkill}</span>`;
+      document.getElementById('skill-context-name').innerText = currentSkill;
 
       setupLanguages();
       loadData();
@@ -547,10 +840,12 @@
       container.innerHTML = '';
       langs.forEach(lang => {
         const btn = document.createElement('button');
-        btn.className = `filter-btn ${lang.toLowerCase() === currentLang ? 'active' : ''}`;
+        const lKey = lang.toLowerCase();
+        btn.className = `lang-tab ${lKey === currentLang ? 'active' : ''}`;
         btn.innerText = lang;
         btn.onclick = () => {
-          currentLang = lang.toLowerCase();
+          if (currentLang === lKey) return;
+          currentLang = lKey;
           window.history.pushState({}, '', `?skill=${currentSkill}&language=${currentLang}`);
           setupLanguages();
           loadData();
@@ -560,7 +855,8 @@
     }
 
     async function loadData() {
-      document.getElementById('loading-overlay').classList.remove('hidden');
+      const loader = document.getElementById('loading-overlay');
+      loader.classList.remove('hidden');
 
       try {
         const res = await fetch('/api/analysis/get-videos', {
@@ -571,13 +867,13 @@
         const json = await res.json();
 
         if (json.success) {
-          renderVideos(json.data.videos[currentLang] || []);
+          renderVideos(json.data.videos[currentLang] || json.data.videos['english'] || []);
           renderProblems(json.data.problems);
         }
       } catch (err) {
         console.error("Failed to load data", err);
       } finally {
-        setTimeout(() => document.getElementById('loading-overlay').classList.add('hidden'), 500);
+        setTimeout(() => loader.classList.add('hidden'), 800);
       }
     }
 
@@ -587,21 +883,37 @@
       document.getElementById('video-count').innerText = `${videos.length} tutorials found`;
 
       if (videos.length === 0) {
-        container.innerHTML = '<p class="text-muted">No tutorials found for this language. Try English.</p>';
+        container.innerHTML = `
+          <div style="grid-column: 1/-1; padding: 40px; text-align: center; background: rgba(255,255,255,0.02); border-radius: 20px; border: 1px dashed var(--border);">
+            <p style="color: var(--text-muted)">No specialized tutorials found for this language. Try switching to English.</p>
+          </div>`;
         return;
       }
 
-      videos.forEach(v => {
+      videos.forEach((v, i) => {
         const card = document.createElement('div');
         card.className = 'video-card';
+        card.style.animation = `fadeInUp 0.6s ease-out forwards ${i * 0.1}s`;
         card.onclick = () => window.open(`https://www.youtube.com/watch?v=${v.videoId}`, '_blank');
+
+        const duration = v.duration.replace('PT', '').replace('H', 'h ').replace('M', 'm ').replace('S', 's');
+
         card.innerHTML = `
           <div class="video-thumb">
             <img src="${v.thumbnail || 'https://via.placeholder.com/640x360?text=Tutorial'}" alt="Thumbnail">
-            <span class="duration-tag">${v.duration.replace('PT', '').replace('M', 'm').replace('S', 's')}</span>
+            <div class="play-overlay">
+              <div class="play-icon">
+                <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+              </div>
+            </div>
+            <span class="duration">${duration}</span>
           </div>
-          <div class="video-body">
+          <div class="video-info">
             <div class="video-title">${v.title}</div>
+            <div class="tags">
+               <span class="tag">Tutorial</span>
+               <span class="tag">${currentSkill}</span>
+            </div>
           </div>
         `;
         container.appendChild(card);
@@ -612,13 +924,16 @@
       const container = document.getElementById('problem-container');
       container.innerHTML = '';
 
+      let hasProblems = false;
       ['easy', 'medium', 'hard'].forEach(diff => {
         const list = problems[diff] || [];
         list.forEach(p => {
+          hasProblems = true;
           const item = document.createElement('div');
           item.className = 'problem-item';
           item.onclick = () => {
             const params = new URLSearchParams({
+              skill: currentSkill,
               title: p.title,
               description: p.description,
               hint: p.hint,
@@ -627,15 +942,24 @@
             location.href = `solve.html?${params.toString()}`;
           };
           item.innerHTML = `
-            <div class="problem-info">
-              <span class="difficulty ${diff}">${diff}</span>
+            <div class="prob-main">
+              <div class="prob-badges">
+                <span class="diff-badge ${diff}">${diff}</span>
+              </div>
               <h4>${p.title}</h4>
+              <p style="font-size: 13px; color: var(--text-muted)">${p.description.substring(0, 100)}...</p>
             </div>
-            <div class="text-muted">Solve →</div>
+            <div class="solve-btn">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </div>
           `;
           container.appendChild(item);
         });
       });
+
+      if (!hasProblems) {
+        container.innerHTML = `<p class="text-muted">No specific challenges available for this skill yet. Keep exploring!</p>`;
+      }
     }
 
     // Chatbot Logic
@@ -661,15 +985,15 @@
         const json = await res.json();
 
         loadingMsg.innerText = '';
-        await typeMessage(loadingMsg, json.answer || "I'm sorry, I couldn't process that.");
+        await typeMessage(loadingMsg, json.answer || "I'm sorry, I couldn't process that. Try asking something else!");
       } catch (err) {
-        loadingMsg.innerText = "Error connecting to AI tutor.";
+        loadingMsg.innerText = "Error connecting to AI tutor. Please check your connection.";
       }
     }
 
     function appendMessage(role, text) {
       const div = document.createElement('div');
-      div.className = `msg ${role}`;
+      div.className = `message ${role}`;
       div.innerText = text;
       chatBody.appendChild(div);
       chatBody.scrollTop = chatBody.scrollHeight;
@@ -694,6 +1018,14 @@
 
     chatBtn.onclick = sendChat;
     chatInput.onkeypress = (e) => { if (e.key === 'Enter') sendChat(); };
+
+    // Animations
+    document.write(`<style>
+      @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+    </style>`);
 
     document.addEventListener('DOMContentLoaded', init);
   </script>
