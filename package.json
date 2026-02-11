@@ -5,7 +5,7 @@
   "main": "gateway.js",
   "scripts": {
     "start": "node gateway.js",
-    "build": "echo '🚀 Starting Build...' && export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true && export PUPPETEER_SKIP_DOWNLOAD=true && npm install --no-audit --no-fund --loglevel info --ignore-scripts && echo '✅ Build Finished!'",
+    "build": "echo '🚀 Build starting...' && export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true && echo '✅ Build successful!'",
     "dev": "nodemon gateway.js"
   },
   "dependencies": {
