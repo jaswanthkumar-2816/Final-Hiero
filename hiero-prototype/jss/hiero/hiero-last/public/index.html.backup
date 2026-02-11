@@ -4,7 +4,34 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hiero Dashboard</title>
+  <title>Hiero – AI Career Assistant | Resume Analysis, Job Matching, Skills Learning</title>
+  <meta name="description"
+    content="Hiero is an AI-powered career platform that helps you build modern resumes, analyze job descriptions, and learn missing skills with curated projects, videos, and mock interviews.">
+  <meta name="keywords"
+    content="Hiero, AI career assistant, resume builder, resume analysis, job matching, interview preparation, skills learning" />
+  <meta name="robots" content="index, follow" />
+  <meta property="og:title" content="Hiero – AI Career Assistant" />
+  <meta property="og:description"
+    content="Build better resumes, get job-matched insights, and close your skill gaps with Hiero’s AI-powered career tools." />
+  <meta property="og:url" content="https://hiero.in/" />
+
+  <!-- WebSite Schema for "Site Name" in Search Results -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Hiero",
+    "alternateName": ["Hiero AI", "Hiero Resume"],
+    "url": "https://hiero.in/"
+  }
+  </script>
+
+  <!-- Favicon & Brand Branding (Search Results) -->
+  <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96.png">
+  <link rel="apple-touch-icon" href="/favicon-96.png">
+  <meta name="application-name" content="Hiero">
+  <meta name="apple-mobile-web-app-title" content="Hiero">
   <link rel="stylesheet" href="/dashboard/styles.css" />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
@@ -256,18 +283,6 @@
       box-shadow: 0 6px 20px rgba(255, 107, 107, 0.6);
     }
 
-    /* Anti-gravity Background */
-    #antigravity-bg {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: -1;
-      pointer-events: none;
-      filter: blur(1px);
-    }
-
     /* Responsive adjustments */
     @media (max-width: 768px) {
       .user-profile {
@@ -305,7 +320,6 @@
 </head>
 
 <body>
-  <canvas id="antigravity-bg"></canvas>
   <div class="dashboard-wrapper">
 
     <!-- User Profile Section -->
@@ -320,15 +334,15 @@
 
     <!-- Logo & Greeting -->
     <div class="dashboard-header">
-      <img src="/logohiero copy.png" alt="Hiero Logo" class="logo-glow" />
+      <img src="/dashboard/logohiero copy.png" alt="Hiero Logo" class="logo-glow" />
       <h1> <span class="brand" id="welcomeMessage">Welcome to Hiero</span></h1>
       <p class="subtext">Your Career Assistant</p>
     </div>
 
     <!-- Buttons -->
     <div class="dashboard-actions">
-      <a href="/resume-builder.html" class="glow-button">Create Resume</a>
-      <a href="/analysis.html" class="glow-button">Analyze Resume</a>
+      <a href="/dashboard/resume-builder.html" class="glow-button">Create Resume</a>
+      <a href="/dashboard/analysis.html" class="glow-button">Analyze Resume</a>
     </div>
 
     <!-- Admin Link (only visible to admin users) -->
@@ -473,7 +487,9 @@
 
       // Show user profile section
       userProfile.style.display = 'flex';
-      reviewSection.style.display = 'block';
+      // Review section visibility is controlled by loadUserReview based on whether
+      // the user has already submitted a review.
+      // reviewSection.style.display = 'block';
 
       // Update user info
       userName.textContent = userData.name || 'User';
@@ -539,6 +555,7 @@
 
     // ⭐ Load user's existing review
     async function loadUserReview() {
+      const reviewSection = document.getElementById('reviewSection');
       try {
         const token = localStorage.getItem('token');
         const response = await fetch('/api/review', {
@@ -551,12 +568,24 @@
         if (response.ok) {
           const data = await response.json();
           if (data.hasReview && data.review) {
+            // User already submitted a review → hide the box completely
             hasExistingReview = true;
-            displayExistingReview(data.review);
+            reviewSection.style.display = 'none';
+          } else {
+            // New user without review → show the box
+            hasExistingReview = false;
+            reviewSection.style.display = 'block';
           }
+        } else {
+          // On non-OK response, treat as no review yet
+          hasExistingReview = false;
+          reviewSection.style.display = 'block';
         }
       } catch (error) {
         console.error('Error loading review:', error);
+        // On error, still show review box so user can submit
+        hasExistingReview = false;
+        reviewSection.style.display = 'block';
       }
     }
 
@@ -750,159 +779,6 @@
 
     // Initialize dashboard when page loads
     window.addEventListener('load', initializeDashboard);
-
-    // --- Premium Interactive Neural Linking System ---
-    (function () {
-      const canvas = document.getElementById('antigravity-bg');
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      let particles = [];
-      const mouse = { x: -1000, y: -1000, radius: 250 };
-
-      window.addEventListener('mousemove', (e) => {
-        mouse.x = e.clientX;
-        mouse.y = e.clientY;
-      });
-
-      function resize() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        initParticles();
-      }
-
-      class Particle {
-        constructor() {
-          this.init();
-        }
-
-        init() {
-          this.x = Math.random() * canvas.width;
-          this.y = Math.random() * canvas.height;
-          this.baseX = this.x;
-          this.baseY = this.y;
-          this.size = Math.random() * 2 + 1;
-          this.baseSize = this.size;
-          this.density = (Math.random() * 30) + 10;
-          this.opacity = Math.random() * 0.4 + 0.2;
-          this.velocity = (Math.random() - 0.5) * 0.5; // Slight drift
-        }
-
-        draw() {
-          ctx.fillStyle = `rgba(7, 226, 25, ${this.opacity})`;
-          ctx.beginPath();
-          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-          ctx.fill();
-        }
-
-        update() {
-          // Slow ambient drift
-          this.baseX += this.velocity;
-          this.baseY += this.velocity;
-
-          if (this.baseX > canvas.width) this.baseX = 0;
-          if (this.baseX < 0) this.baseX = canvas.width;
-          if (this.baseY > canvas.height) this.baseY = 0;
-          if (this.baseY < 0) this.baseY = canvas.height;
-
-          let dx = mouse.x - this.x;
-          let dy = mouse.y - this.y;
-          let distance = Math.sqrt(dx * dx + dy * dy);
-
-          if (distance < mouse.radius) {
-            let force = (mouse.radius - distance) / mouse.radius;
-            let dirX = dx / distance;
-            let dirY = dy / distance;
-
-            // Push away logic (anti-gravity)
-            this.x -= dirX * force * this.density;
-            this.y -= dirY * force * this.density;
-
-            // Interaction: Grow near mouse
-            this.size = this.baseSize * (1 + force * 1.5);
-          } else {
-            // Smooth return to base drift position
-            this.x += (this.baseX - this.x) * 0.05;
-            this.y += (this.baseY - this.y) * 0.05;
-            this.size = this.baseSize;
-          }
-        }
-      }
-
-      function initParticles() {
-        particles = [];
-        let count = (canvas.width * canvas.height) / 8000; // Denser linking
-        for (let i = 0; i < count; i++) {
-          particles.push(new Particle());
-        }
-      }
-
-      function animate() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        for (let i = 0; i < particles.length; i++) {
-          particles[i].update();
-          particles[i].draw();
-        }
-
-        connect();
-        requestAnimationFrame(animate);
-      }
-
-      function connect() {
-        for (let a = 0; a < particles.length; a++) {
-          // 1. Link particles to each other
-          for (let b = a + 1; b < particles.length; b++) {
-            let dx = particles[a].x - particles[b].x;
-            let dy = particles[a].y - particles[b].y;
-            let distSq = dx * dx + dy * dy;
-
-            if (distSq < 15000) {
-              let distance = Math.sqrt(distSq);
-              let opacity = 1 - (distance / 122);
-
-              // Interaction: highlight lines near the mouse
-              let mDx = mouse.x - (particles[a].x + particles[b].x) / 2;
-              let mDy = mouse.y - (particles[a].y + particles[b].y) / 2;
-              let mDist = Math.sqrt(mDx * mDx + mDy * mDy);
-
-              ctx.beginPath();
-              if (mDist < 120) {
-                let mForce = 1 - (mDist / 120);
-                // Glow into white-green when active
-                ctx.strokeStyle = `rgba(180, 255, 180, ${opacity * (0.3 + mForce * 0.7)})`;
-                ctx.lineWidth = 0.5 + mForce * 2;
-              } else {
-                ctx.strokeStyle = `rgba(7, 226, 25, ${opacity * 0.15})`;
-                ctx.lineWidth = 0.5;
-              }
-
-              ctx.moveTo(particles[a].x, particles[a].y);
-              ctx.lineTo(particles[b].x, particles[b].y);
-              ctx.stroke();
-            }
-          }
-
-          // 2. EXTRA: Link CURSOR directly to particles for that "Neural Connection" feel
-          let mDx = mouse.x - particles[a].x;
-          let mDy = mouse.y - particles[a].y;
-          let mDist = Math.sqrt(mDx * mDx + mDy * mDy);
-
-          if (mDist < 180) {
-            let mForce = 1 - (mDist / 180);
-            ctx.strokeStyle = `rgba(7, 226, 25, ${mForce * 0.4})`;
-            ctx.lineWidth = mForce * 1.5;
-            ctx.beginPath();
-            ctx.moveTo(mouse.x, mouse.y);
-            ctx.lineTo(particles[a].x, particles[a].y);
-            ctx.stroke();
-          }
-        }
-      }
-
-      window.addEventListener('resize', resize);
-      resize();
-      animate();
-    })();
   </script>
 </body>
 

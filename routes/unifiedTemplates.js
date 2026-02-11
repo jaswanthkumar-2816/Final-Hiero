@@ -83,13 +83,13 @@ const TEMPLATE_COLORS = {
         background: '#FFFFFF',
         light: '#5a6c7d'
     },
-    // Rishi: Modern Tech (Clean Black)
+    // Rishi: Hiero Pro (Modern Tech Black & Green)
     'rishi': {
-        primary: '#000000',      // Solid Black
-        secondary: '#4b5563',    // Dark Grey
-        accent: '#000000',       // Solid Black
+        primary: '#111827',      // Deep Navy/Black
+        secondary: '#4b5563',    // Slate Grey
+        accent: '#2ae023',       // Hiero Green
         background: '#FFFFFF',
-        light: '#9ca3af'
+        light: '#f3f4f6'         // Subdued background for pills
     },
     // Priya: Analytics Professional (Daniel Gallego / Grey Pill Style)
     'priya-analytics': {
@@ -109,9 +109,9 @@ const TEMPLATE_COLORS = {
     'hiero-studio': {
         primary: '#1a1a1a',
         secondary: '#4a4a4a',
-        accent: '#000000',
+        accent: '#10b981',       // Emerald accent for Studio
         background: '#FFFFFF',
-        light: '#d1d5db'
+        light: '#f3f4f6'
     },
     'hiero-onyx': {
         primary: '#000000',
@@ -119,7 +119,21 @@ const TEMPLATE_COLORS = {
         accent: '#374151',
         background: '#FFFFFF',
         light: '#f3f4f6'
+    },
+    'template-4': {
+        primary: '#000000',
+        secondary: '#333333',
+        accent: '#000000',
+        background: '#FFFFFF',
+        light: '#666666'
     }
+};
+
+// Map template IDs to their internal keys
+const TEMPLATE_MAP = {
+    'template4': 'template-4',
+    'template-4': 'template-4',
+    'hiero-studio': 'hiero-studio'
 };
 
 // Standardized font sizes (Refined for a 'Perfect' look)
@@ -143,7 +157,7 @@ const SPACING = {
 
 // Helper to get per-template spacing overrides (Now Unified for density)
 function getTemplateSpacing(template) {
-    if (template === 'priya-analytics' || template === 'rishi') {
+    if (template === 'priya-analytics' || template === 'rishi' || template === 'template-4') {
         return {
             lineHeight: 1.15,
             sectionGap: 7,
@@ -168,8 +182,10 @@ const SECTION_ORDER = [
     'achievements',
     'languages',
     'hobbies',
+    'extraCurricular',
     'references',
-    'customDetails'
+    'customDetails',
+    'customSectionContent'
 ];
 
 // ==================== HELPER FUNCTIONS ====================
@@ -333,36 +349,44 @@ function renderHeader_Modern(doc, data, colors) {
 function renderHeader_Rishi(doc, data, colors) {
     const { personalInfo = {} } = data;
 
-    // LEFT ALIGNED COMPACT DESIGN
-    doc.fontSize(FONT_SIZES.name)
+    // LEFT VERTICAL STRIPE FOR LOGO-STYLE ACCENT
+    doc.rect(PAGE_CONFIG.margin - 10, PAGE_CONFIG.margin, 3, 40)
+        .fill(colors.accent);
+
+    // NAME & SUBTITLE
+    doc.fontSize(FONT_SIZES.name + 4)
         .fillColor(colors.primary)
         .font('Helvetica-Bold')
-        .text(personalInfo.fullName || '', PAGE_CONFIG.margin, PAGE_CONFIG.margin);
+        .text(personalInfo.fullName || '', PAGE_CONFIG.margin + 5, PAGE_CONFIG.margin);
 
     doc.moveDown(0.1);
 
     // Modern clean contact line (Pipe separated)
     doc.fontSize(FONT_SIZES.contact)
         .fillColor(colors.secondary)
-        .font('Helvetica');
+        .font('Helvetica')
+        .text((personalInfo.address || '').toUpperCase(), PAGE_CONFIG.margin + 5);
 
-    const contactParts = [personalInfo.email, personalInfo.phone, personalInfo.address].filter(Boolean);
-    const contactStr = contactParts.join('  |  ');
-    doc.text(contactStr);
+    doc.moveDown(0.2);
 
-    // Links on a new compact line if they exist
-    const links = [personalInfo.linkedin, personalInfo.website].filter(Boolean).join('  •  ');
+    const contactParts = [personalInfo.email, personalInfo.phone].filter(Boolean);
+    const contactStr = contactParts.join('  •  ');
+
+    doc.fillColor(colors.secondary).text(contactStr, PAGE_CONFIG.margin + 5);
+
+    // Links with accent color
+    const links = [personalInfo.linkedin, personalInfo.website].filter(Boolean).join('  |  ');
     if (links) {
         doc.moveDown(0.1);
-        doc.fillColor(colors.accent).text(links);
+        doc.fillColor(colors.accent).text(links, PAGE_CONFIG.margin + 5);
     }
 
-    doc.moveDown(0.3);
-    // Sophisticated thin line
+    doc.moveDown(0.8);
+    // Subtle double-tone line
     doc.moveTo(PAGE_CONFIG.margin, doc.y)
         .lineTo(PAGE_CONFIG.margin + PAGE_CONFIG.contentWidth, doc.y)
-        .strokeColor(colors.primary)
-        .lineWidth(0.6)
+        .strokeColor(colors.light)
+        .lineWidth(0.5)
         .stroke();
 
     doc.moveDown(0.5);
@@ -535,6 +559,40 @@ function renderHeader_Studio(doc, data, colors) {
     doc.moveDown(1.2);
 }
 
+function renderHeader_Academic(doc, data, colors) {
+    const { personalInfo = {} } = data;
+
+    // Centered header (Times New Roman feel)
+    doc.fontSize(FONT_SIZES.name + 2)
+        .fillColor(colors.primary)
+        .font('Times-Bold')
+        .text(personalInfo.fullName || '', PAGE_CONFIG.margin, PAGE_CONFIG.margin, {
+            align: 'center',
+            width: PAGE_CONFIG.contentWidth
+        });
+
+    doc.moveDown(0.2);
+
+    doc.fontSize(FONT_SIZES.contact)
+        .fillColor(colors.secondary)
+        .font('Times-Roman');
+
+    if (personalInfo.address) {
+        doc.text(personalInfo.address, { align: 'center' });
+    }
+
+    const contact = [
+        personalInfo.phone ? `(+91) ${personalInfo.phone}` : null,
+        personalInfo.email
+    ].filter(Boolean).join('  ');
+
+    if (contact) {
+        doc.text(contact, { align: 'center' });
+    }
+
+    doc.moveDown(1);
+}
+
 // ==================== SECTION TITLE RENDERER ====================
 
 function renderSectionTitle(doc, title, colors, template) {
@@ -542,17 +600,30 @@ function renderSectionTitle(doc, title, colors, template) {
     doc.moveDown(0.3);
     switch (template) {
         case 'modern-pro':
-        case 'corporate-ats':
-        case 'elegant-gradient':
-            doc.fontSize(FONT_SIZES.sectionTitle)
+            doc.fontSize(FONT_SIZES.sectionTitle - 2)
                 .fillColor(colors.accent)
                 .font('Helvetica-Bold')
-                .text(title);
-            doc.moveTo(PAGE_CONFIG.margin, doc.y + 3)
-                .lineTo(PAGE_CONFIG.margin + 50, doc.y + 3)
+                .text(title.toUpperCase());
+            doc.moveTo(PAGE_CONFIG.margin, doc.y + 2)
+                .lineTo(PAGE_CONFIG.margin + PAGE_CONFIG.contentWidth, doc.y + 2)
                 .strokeColor(colors.accent)
-                .lineWidth(2)
+                .lineWidth(1)
                 .stroke();
+            doc.moveDown(0.5);
+            break;
+
+        case 'corporate-ats':
+        case 'elegant-gradient':
+            doc.fontSize(FONT_SIZES.sectionTitle - 1)
+                .fillColor(colors.primary)
+                .font('Helvetica-Bold')
+                .text(title.toUpperCase());
+            doc.moveTo(PAGE_CONFIG.margin, doc.y + 2)
+                .lineTo(PAGE_CONFIG.margin + PAGE_CONFIG.contentWidth, doc.y + 2)
+                .strokeColor(colors.secondary)
+                .lineWidth(0.5)
+                .stroke();
+            doc.moveDown(0.6);
             break;
 
         case 'tech-focus':
@@ -560,6 +631,24 @@ function renderSectionTitle(doc, title, colors, template) {
                 .fillColor(colors.primary)
                 .font('Courier-Bold')
                 .text('# ' + title);
+            break;
+
+        case 'rishi':
+            // Sophisticated Header with Pill Accent
+            doc.fillColor(colors.light)
+                .roundedRect(PAGE_CONFIG.margin, doc.y - 2, 80, 18, 9)
+                .fill();
+            doc.fontSize(FONT_SIZES.sectionTitle - 3)
+                .fillColor(colors.primary)
+                .font('Helvetica-Bold')
+                .text(title.toUpperCase(), PAGE_CONFIG.margin + 12, doc.y + 1);
+
+            doc.moveTo(PAGE_CONFIG.margin + 85, doc.y - 10)
+                .lineTo(PAGE_CONFIG.margin + PAGE_CONFIG.contentWidth, doc.y - 10)
+                .strokeColor(colors.light)
+                .lineWidth(0.5)
+                .stroke();
+            doc.moveDown(0.8);
             break;
 
         case 'priya-analytics':
@@ -591,11 +680,30 @@ function renderSectionTitle(doc, title, colors, template) {
                 .text(displayTitle, PAGE_CONFIG.margin, doc.y, { width: 130 });
             break;
 
+        case 'template-4':
+            doc.fontSize(FONT_SIZES.sectionTitle)
+                .fillColor(colors.primary)
+                .font('Times-Bold')
+                .text(title.toUpperCase());
+            doc.moveTo(PAGE_CONFIG.margin, doc.y + 2)
+                .lineTo(PAGE_CONFIG.margin + PAGE_CONFIG.contentWidth, doc.y + 2)
+                .strokeColor(colors.primary)
+                .lineWidth(1)
+                .stroke();
+            doc.moveDown(0.6);
+            break;
+
         default:
             doc.fontSize(FONT_SIZES.sectionTitle)
                 .fillColor(colors.primary)
                 .font('Helvetica-Bold')
                 .text(title);
+            doc.moveTo(PAGE_CONFIG.margin, doc.y + 2)
+                .lineTo(PAGE_CONFIG.margin + 30, doc.y + 2)
+                .strokeColor(colors.primary)
+                .lineWidth(1.5)
+                .stroke();
+            doc.moveDown(0.5);
     }
     doc.moveDown(spacing.paragraphGap / 10);
 }
@@ -604,7 +712,9 @@ function renderSectionTitle(doc, title, colors, template) {
 async function generateUnifiedResume(data, templateId, outStream, customOptions = {}) {
     return new Promise((resolve, reject) => {
         try {
-            const template = (templateId || 'classic').toLowerCase().trim();
+            let template = (templateId || 'classic').toLowerCase().trim();
+            template = TEMPLATE_MAP[template] || template;
+
             const colors = TEMPLATE_COLORS[template] || TEMPLATE_COLORS['classic'];
             const spacing = getTemplateSpacing(template);
             const options = customOptions || {};
@@ -634,6 +744,7 @@ async function generateUnifiedResume(data, templateId, outStream, customOptions 
                 case 'hiero-studio':
                 case 'hiero-onyx':
                 case 'hiero-executive': renderHeader_Executive(doc, data, colors); break;
+                case 'template-4': renderHeader_Academic(doc, data, colors); break;
                 default: renderHeader_Classic(doc, data, colors);
             }
 
@@ -681,35 +792,36 @@ function renderSection(doc, sectionKey, data, colors, template, spacing = SPACIN
     // TEMPLATE-SPECIFIC LAYOUT LOGIC (Morgan Maxwell Side-by-Side)
     const normalizedTemplate = template.toLowerCase().trim();
     const isSideLayout = ['hiero-executive', 'hiero-studio', 'hiero-onyx'].includes(normalizedTemplate);
+    const isAcademicSplit = normalizedTemplate === 'template-4';
+
+    // For Side Layout (Morgan Maxwell style labels on left)
     const labelWidth = isSideLayout ? 130 : 0;
     const contentGap = 20;
-    const contentWidth = isSideLayout ? (PAGE_CONFIG.contentWidth - labelWidth - contentGap) : PAGE_CONFIG.contentWidth;
-    const contentX = PAGE_CONFIG.margin + labelWidth + contentGap;
+    const contentWidth = (isSideLayout || isAcademicSplit) ? (PAGE_CONFIG.contentWidth - (isSideLayout ? labelWidth : (PAGE_CONFIG.contentWidth / 2)) - contentGap) : PAGE_CONFIG.contentWidth;
+
+    // For Academic Split (Split starts after Technical Strengths)
+    const academicLeftWidth = (PAGE_CONFIG.contentWidth * 0.55);
+    const academicRightWidth = (PAGE_CONFIG.contentWidth * 0.40);
+    const academicGap = 20;
 
     switch (sectionKey) {
         case 'summary':
-            if (data.summary) {
+            if (data.summary || data.objective) {
+                const summaryText = data.summary || data.objective;
                 checkPageBreak(doc, 60, forceSingle);
                 if (isSideLayout) {
                     const startY = doc.y;
                     renderSectionTitle(doc, 'Professional Summary', colors, normalizedTemplate);
                     const labelEndY = doc.y;
-
                     doc.y = startY;
-                    doc.fontSize(FONT_SIZES.body)
-                        .fillColor(colors.secondary)
-                        .font('Helvetica')
-                        .text(data.summary, contentX, startY, { width: contentWidth, align: 'justify' });
-
+                    doc.fontSize(FONT_SIZES.body).fillColor(colors.secondary).font('Helvetica')
+                        .text(summaryText, PAGE_CONFIG.margin + labelWidth + contentGap, startY, { width: contentWidth, align: 'justify' });
                     doc.y = Math.max(labelEndY, doc.y);
                 } else {
-                    renderSectionTitle(doc, 'Professional Summary', colors, normalizedTemplate);
-                    doc.fontSize(FONT_SIZES.body)
-                        .fillColor(colors.secondary)
-                        .font('Helvetica')
-                        .text(data.summary, PAGE_CONFIG.margin, doc.y, { width: maxWidth, align: 'justify' });
+                    renderSectionTitle(doc, isAcademicSplit ? 'Carrier Objective' : 'Professional Summary', colors, normalizedTemplate);
+                    doc.fontSize(FONT_SIZES.body).fillColor(colors.secondary).font(isAcademicSplit ? 'Times-Roman' : 'Helvetica')
+                        .text(summaryText, PAGE_CONFIG.margin, doc.y, { width: maxWidth, align: 'justify' });
                 }
-
                 if (isSideLayout) {
                     doc.moveDown(0.8);
                     const dividerY = doc.y;
@@ -724,32 +836,26 @@ function renderSection(doc, sectionKey, data, colors, template, spacing = SPACIN
             if (data.experience && data.experience.length > 0) {
                 checkPageBreak(doc, 100);
                 const startSectionY = doc.y;
-                let labelEndY = 0;
 
-                if (isSideLayout) {
+                if (isAcademicSplit) {
+                    renderSectionTitle(doc, 'Work Experience', colors, normalizedTemplate);
+                } else if (isSideLayout) {
                     renderSectionTitle(doc, 'Internship Experience', colors, normalizedTemplate);
-                    labelEndY = doc.y;
                     doc.y = startSectionY;
                 } else {
                     renderSectionTitle(doc, 'Work Experience', colors, normalizedTemplate);
                 }
 
-                const drawX = isSideLayout ? contentX : PAGE_CONFIG.margin;
-                const drawWidth = isSideLayout ? contentWidth : maxWidth;
+                const drawX = isSideLayout ? (PAGE_CONFIG.margin + labelWidth + contentGap) : PAGE_CONFIG.margin;
+                const drawWidth = isSideLayout ? contentWidth : (isAcademicSplit ? academicLeftWidth : maxWidth);
 
                 data.experience.forEach((exp, index) => {
                     checkPageBreak(doc, 80);
-
-                    // Header
-                    doc.fontSize(FONT_SIZES.jobTitle).fillColor(colors.primary).font('Helvetica-Bold')
+                    doc.fontSize(FONT_SIZES.jobTitle).fillColor(colors.primary).font(isAcademicSplit ? 'Times-Bold' : 'Helvetica-Bold')
                         .text(`${exp.jobTitle || ''} – ${exp.company || ''}`, drawX, doc.y, { width: drawWidth });
-
-                    // Dates
                     const dateRange = [exp.startDate, exp.endDate || 'Present'].filter(Boolean).join(' – ');
-                    doc.fontSize(FONT_SIZES.body).font('Helvetica-Oblique').fillColor(colors.secondary)
+                    doc.fontSize(FONT_SIZES.body).font(isAcademicSplit ? 'Times-Italic' : 'Helvetica-Oblique').fillColor(colors.secondary)
                         .text(`(${dateRange})`, drawX, doc.y);
-
-                    // Desc
                     if (exp.description) {
                         doc.moveDown(0.2);
                         const bullets = exp.description.split('\n').filter(b => b.trim());
@@ -764,7 +870,6 @@ function renderSection(doc, sectionKey, data, colors, template, spacing = SPACIN
                 });
 
                 if (isSideLayout) {
-                    doc.y = Math.max(labelEndY, doc.y);
                     doc.moveDown(0.8);
                     const dividerY = doc.y;
                     doc.moveTo(PAGE_CONFIG.margin, dividerY).lineTo(PAGE_CONFIG.margin + PAGE_CONFIG.contentWidth, dividerY).strokeColor(colors.light).lineWidth(0.5).stroke();
@@ -778,87 +883,24 @@ function renderSection(doc, sectionKey, data, colors, template, spacing = SPACIN
             if (data.education && data.education.length > 0) {
                 checkPageBreak(doc, 100);
                 const startSectionY = doc.y;
-                let labelEndY = 0;
-
                 if (isSideLayout) {
                     renderSectionTitle(doc, 'Education', colors, normalizedTemplate);
-                    labelEndY = doc.y;
                     doc.y = startSectionY;
                 } else {
                     renderSectionTitle(doc, 'Education', colors, normalizedTemplate);
                 }
 
-                const drawX = isSideLayout ? contentX : PAGE_CONFIG.margin;
+                const drawX = isSideLayout ? (PAGE_CONFIG.margin + labelWidth + contentGap) : PAGE_CONFIG.margin;
                 const drawWidth = isSideLayout ? contentWidth : maxWidth;
 
-                if (isSideLayout) {
-                    for (let i = 0; i < data.education.length; i += 2) {
-                        checkPageBreak(doc, 60);
-                        const edu1 = data.education[i];
-                        const edu2 = data.education[i + 1];
-                        const currentY = doc.y;
-
-                        // Left
-                        doc.fontSize(FONT_SIZES.jobTitle).fillColor(colors.primary).font('Helvetica-Bold')
-                            .text(`${edu1.degree || ''}`, drawX, currentY, { width: drawWidth / 2 - 10 });
-                        doc.fontSize(FONT_SIZES.body).font('Helvetica').text(edu1.school || '', drawX, doc.y, { width: drawWidth / 2 - 10 });
-                        doc.font('Helvetica-Oblique').text(`(${edu1.gradYear || ''})`, drawX, doc.y);
-
-                        // Right
-                        if (edu2) {
-                            doc.fontSize(FONT_SIZES.jobTitle).fillColor(colors.primary).font('Helvetica-Bold')
-                                .text(`${edu2.degree || ''}`, drawX + drawWidth / 2 + 10, currentY, { width: drawWidth / 2 - 10 });
-                            doc.fontSize(FONT_SIZES.body).font('Helvetica').text(edu2.school || '', drawX + drawWidth / 2 + 10, doc.y, { width: drawWidth / 2 - 10 });
-                            doc.font('Helvetica-Oblique').text(`(${edu2.gradYear || ''})`, drawX + drawWidth / 2 + 10, doc.y);
-                        }
-                        doc.moveDown(1);
-                    }
-                    doc.y = Math.max(labelEndY, doc.y);
-                } else {
-                    data.education.forEach((edu, index) => {
-                        checkPageBreak(doc, 50);
-                        doc.fontSize(FONT_SIZES.jobTitle).fillColor(colors.primary).font('Helvetica-Bold').text(edu.degree || '', drawX, doc.y);
-                        doc.fontSize(FONT_SIZES.body).fillColor(colors.secondary).font('Helvetica').text(`${edu.school || ''} | ${edu.gradYear || ''}`, drawX, doc.y);
-                        if (index < data.education.length - 1) doc.moveDown(spacing.itemGap / 10);
-                    });
-                }
-
-                if (isSideLayout) {
-                    doc.moveDown(0.5);
-                    const dividerY = doc.y;
-                    doc.moveTo(PAGE_CONFIG.margin, dividerY).lineTo(PAGE_CONFIG.margin + PAGE_CONFIG.contentWidth, dividerY).strokeColor(colors.light).lineWidth(0.5).stroke();
-                    doc.y = dividerY;
-                }
-                doc.moveDown(spacing.sectionGap / 10);
-            }
-            break;
-
-        case 'technicalSkills':
-            if (data.technicalSkills) {
-                checkPageBreak(doc, 80);
-                const startSectionY = doc.y;
-                let labelEndY = 0;
-
-                if (isSideLayout) {
-                    renderSectionTitle(doc, 'Skills', colors, normalizedTemplate);
-                    labelEndY = doc.y;
-                    doc.y = startSectionY;
-                } else {
-                    renderSectionTitle(doc, 'Skills', colors, normalizedTemplate);
-                }
-
-                const drawX = isSideLayout ? contentX : PAGE_CONFIG.margin;
-                const drawWidth = isSideLayout ? contentWidth : maxWidth;
-
-                const skillset = data.technicalSkills.split(/[,;\n]/).map(s => s.trim()).filter(Boolean);
-                skillset.forEach(skill => {
-                    checkPageBreak(doc, 20);
-                    const h = addBulletPoint(doc, skill, drawX, doc.y, drawWidth, colors, normalizedTemplate);
-                    doc.y += h + 1;
+                data.education.forEach((edu, index) => {
+                    checkPageBreak(doc, 50);
+                    doc.fontSize(FONT_SIZES.jobTitle).fillColor(colors.primary).font(isAcademicSplit ? 'Times-Bold' : 'Helvetica-Bold').text(edu.degree || '', drawX, doc.y);
+                    doc.fontSize(FONT_SIZES.body).fillColor(colors.secondary).font(isAcademicSplit ? 'Times-Roman' : 'Helvetica').text(`${edu.school || ''} | ${edu.gradYear || ''}`, drawX, doc.y);
+                    if (index < data.education.length - 1) doc.moveDown(spacing.itemGap / 10);
                 });
 
                 if (isSideLayout) {
-                    doc.y = Math.max(labelEndY, doc.y);
                     doc.moveDown(0.5);
                     const dividerY = doc.y;
                     doc.moveTo(PAGE_CONFIG.margin, dividerY).lineTo(PAGE_CONFIG.margin + PAGE_CONFIG.contentWidth, dividerY).strokeColor(colors.light).lineWidth(0.5).stroke();
@@ -868,212 +910,140 @@ function renderSection(doc, sectionKey, data, colors, template, spacing = SPACIN
             }
             break;
 
-        case 'softSkills':
-            if (data.softSkills) {
+        case 'skills':
+            if (data.skills && data.skills.length > 0) {
                 checkPageBreak(doc, 100);
-                renderSectionTitle(doc, 'Soft Skills', colors, template);
-                doc.fontSize(FONT_SIZES.body)
-                    .fillColor(colors.secondary)
-                    .font('Helvetica')
-                    .text(data.softSkills, {
-                        width: maxWidth,
-                        align: 'justify'
+                renderSectionTitle(doc, isAcademicSplit ? 'Technical Strengths' : 'Skills & Technologies', colors, normalizedTemplate);
+
+                if (isAcademicSplit) {
+                    const skills = Array.isArray(data.skills) ? data.skills : data.skills.split(/[\n,]/).map(s => s.trim()).filter(Boolean);
+                    const colWidth = PAGE_CONFIG.contentWidth / 2;
+                    let startY = doc.y;
+
+                    skills.slice(0, 6).forEach((skill, i) => {
+                        const col = i % 2;
+                        const row = Math.floor(i / 2);
+                        const parts = skill.split(':');
+                        const label = parts.length > 1 ? parts[0].trim() : 'Tools';
+                        const value = parts.length > 1 ? parts[1].trim() : parts[0].trim();
+
+                        doc.font('Times-Bold').fontSize(FONT_SIZES.body).fillColor(colors.primary)
+                            .text(label + ':', PAGE_CONFIG.margin + (col * colWidth), startY + (row * 15), { width: colWidth * 0.4 });
+                        doc.font('Times-Roman').fillColor(colors.secondary)
+                            .text(value, PAGE_CONFIG.margin + (col * colWidth) + (colWidth * 0.35), startY + (row * 15), { width: colWidth * 0.65 });
                     });
+                    doc.y = startY + (Math.ceil(skills.slice(0, 6).length / 2) * 15) + 5;
+                    doc.academicSplitY = doc.y; // Save Y for the bottom split
+                } else {
+                    const skillsText = Array.isArray(data.skills) ? data.skills.join(' • ') : data.skills;
+                    doc.fontSize(FONT_SIZES.body).fillColor(colors.secondary).font('Helvetica')
+                        .text(skillsText, PAGE_CONFIG.margin, doc.y, { width: maxWidth });
+                }
                 doc.moveDown(spacing.sectionGap / 10);
             }
             break;
 
         case 'projects':
-            if (data.projects && (Array.isArray(data.projects) || typeof data.projects === 'string')) {
+            if (data.projects && data.projects.length > 0) {
                 checkPageBreak(doc, 100);
-                renderSectionTitle(doc, 'Projects', colors, template);
-
-                if (Array.isArray(data.projects)) {
-                    // Newer schema: array of project objects
-                    data.projects.forEach((proj, index) => {
-                        checkPageBreak(doc, 80); // Increased safety for project items
-                        const title = proj.name || proj.title || '';
-                        const tech = proj.technologies || proj.techStack || '';
-                        const duration = proj.duration || '';
-                        const desc = proj.description || '';
-                        const link = proj.link || proj.url || '';
-                        const achievement = proj.achievement || proj.result || '';
-
-                        if (title) {
-                            doc.fontSize(FONT_SIZES.jobTitle)
-                                .fillColor(colors.primary)
-                                .font('Helvetica-Bold')
-                                .text(title);
-                        }
-
-                        doc.fontSize(FONT_SIZES.body)
-                            .fillColor(colors.secondary)
-                            .font('Helvetica');
-
-                        const metaParts = [tech, duration].filter(Boolean);
-                        if (metaParts.length) {
-                            doc.text(metaParts.join(' '));
-                        }
-
-                        if (desc) {
-                            doc.text(desc, { width: maxWidth });
-                        }
-
-                        if (achievement) {
-                            doc.text('Achievement: ' + achievement, { width: maxWidth });
-                        }
-
-                        if (link) {
-                            doc.fillColor(colors.accent)
-                                .text(link, { width: maxWidth });
-                            doc.fillColor(colors.secondary);
-                        }
-
-                        if (index < data.projects.length - 1) {
-                            doc.moveDown(spacing.itemGap / 10);
-                        }
-                    });
-                } else if (typeof data.projects === 'string') {
-                    // Legacy schema: big string with blank-line separated projects
-                    const projectLines = data.projects.split('\n\n');
-                    projectLines.forEach((project, index) => {
-                        checkPageBreak(doc, 40);
-                        const lines = project.split('\n');
-                        if (lines[0]) {
-                            doc.fontSize(FONT_SIZES.jobTitle)
-                                .fillColor(colors.primary)
-                                .font('Helvetica-Bold')
-                                .text(lines[0]);
-
-                            if (lines.length > 1) {
-                                doc.fontSize(FONT_SIZES.body)
-                                    .fillColor(colors.secondary)
-                                    .font('Helvetica')
-                                    .text(lines.slice(1).join(' '), {
-                                        width: maxWidth
-                                    });
-                            }
-                        }
-                        if (index < projectLines.length - 1) doc.moveDown(spacing.itemGap / 10);
-                    });
-                }
-
-                if (isSideLayout) {
-                    doc.moveDown(0.5);
-                    doc.moveTo(PAGE_CONFIG.margin, doc.y)
-                        .lineTo(PAGE_CONFIG.margin + PAGE_CONFIG.contentWidth, doc.y)
-                        .strokeColor(colors.light)
-                        .lineWidth(0.5)
-                        .stroke();
-                }
-                doc.moveDown(spacing.sectionGap / 10);
-            }
-            break;
-
-        case 'certifications':
-            let certifications = [];
-
-            // Handle undefined/null
-            if (!data.certifications) {
-                certifications = [];
-            }
-            // If already an array
-            else if (Array.isArray(data.certifications)) {
-                certifications = data.certifications;
-            }
-            // If it's an object
-            else if (typeof data.certifications === 'object') {
-                certifications = Object.values(data.certifications).map(item => sanitizeText(item)).filter(Boolean);
-            }
-            // If it's a string
-            else if (typeof data.certifications === 'string') {
-                certifications = data.certifications.split(/[\n,]/).map(c => c.trim()).filter(Boolean);
-            }
-
-            if (certifications.length > 0) {
-                checkPageBreak(doc, 100);
-                renderSectionTitle(doc, 'Certifications', colors, template);
-
-                certifications.forEach(cert => {
-                    checkPageBreak(doc, 20);
-                    const text =
-                        typeof cert === 'string'
-                            ? cert
-                            : cert?.name || cert?.title || sanitizeText(cert);
-
-                    if (!text) return;
-
-                    const height = addBulletPoint(
-                        doc,
-                        text,
-                        PAGE_CONFIG.margin + SPACING.bulletIndent,
-                        doc.y,
-                        maxWidth,
-                        colors
-                    );
-                    doc.y += height + 2;
-                    doc.moveDown(0.3);
+                renderSectionTitle(doc, 'Projects', colors, normalizedTemplate);
+                data.projects.forEach((proj, index) => {
+                    checkPageBreak(doc, 80);
+                    doc.fontSize(FONT_SIZES.jobTitle).fillColor(colors.primary).font(isAcademicSplit ? 'Times-Bold' : 'Helvetica-Bold').text(proj.name || proj.title || '');
+                    doc.fontSize(FONT_SIZES.body).fillColor(colors.secondary).font(isAcademicSplit ? 'Times-Roman' : 'Helvetica').text(proj.description || '', { width: maxWidth });
+                    if (index < data.projects.length - 1) doc.moveDown(spacing.itemGap / 10);
                 });
-
                 doc.moveDown(spacing.sectionGap / 10);
             }
             break;
 
         case 'achievements':
             if (data.achievements) {
-                // Prepare content first
-                const achievements = Array.isArray(data.achievements)
-                    ? data.achievements
-                    : typeof data.achievements === 'string'
-                        ? data.achievements.split(/[\n,]/).map(a => a.trim()).filter(Boolean)
-                        : [];
-
-                if (achievements.length > 0) {
-                    checkPageBreak(doc, 100);
-                    renderSectionTitle(doc, 'Achievements', colors, template);
-
-                    achievements.forEach(achievement => {
-                        checkPageBreak(doc, 20);
-                        const text = typeof achievement === 'string'
-                            ? achievement
-                            : achievement?.title || achievement?.name || sanitizeText(achievement);
-
-                        if (!text) return;
-
-                        const height = addBulletPoint(doc, text, PAGE_CONFIG.margin + SPACING.bulletIndent, doc.y, maxWidth, colors);
-                        doc.y += height + 2;
-                        doc.moveDown(0.3);
+                const items = Array.isArray(data.achievements) ? data.achievements : (typeof data.achievements === 'string' ? data.achievements.split(/[\n,]/).map(a => a.trim()).filter(Boolean) : []);
+                if (items.length > 0) {
+                    if (isAcademicSplit && doc.academicSplitY) {
+                        doc.y = doc.academicSplitY;
+                        doc.x = PAGE_CONFIG.margin + academicLeftWidth + academicGap;
+                    } else {
+                        checkPageBreak(doc, 100);
+                    }
+                    renderSectionTitle(doc, 'Academic Achievements', colors, normalizedTemplate);
+                    const drawX = isAcademicSplit ? (PAGE_CONFIG.margin + academicLeftWidth + academicGap) : PAGE_CONFIG.margin;
+                    const drawWidth = isAcademicSplit ? academicRightWidth : maxWidth;
+                    items.forEach(item => {
+                        const text = typeof item === 'string' ? item : item?.title || item?.name || sanitizeText(item);
+                        const h = addBulletPoint(doc, text, drawX + SPACING.bulletIndent, doc.y, drawWidth - SPACING.bulletIndent, colors);
+                        doc.y += h + 2;
                     });
-
+                    if (isAcademicSplit) doc.academicRightY = doc.y;
                     doc.moveDown(spacing.sectionGap / 10);
                 }
             }
             break;
 
-        case 'languages':
-            if (data.languages) {
-                checkPageBreak(doc, 100);
-                renderSectionTitle(doc, 'Languages', colors, template);
-                doc.fontSize(FONT_SIZES.body)
-                    .fillColor(colors.secondary)
-                    .font('Helvetica')
-                    .text(data.languages, {
-                        width: maxWidth
+        case 'extraCurricular':
+            if (data.extraCurricular) {
+                const items = Array.isArray(data.extraCurricular) ? data.extraCurricular : (typeof data.extraCurricular === 'string' ? data.extraCurricular.split(/[\n,]/).map(a => a.trim()).filter(Boolean) : []);
+                if (items.length > 0) {
+                    if (isAcademicSplit && doc.academicRightY) {
+                        doc.y = doc.academicRightY;
+                        doc.x = PAGE_CONFIG.margin + academicLeftWidth + academicGap;
+                    } else if (isAcademicSplit && doc.academicSplitY) {
+                        doc.y = doc.academicSplitY;
+                        doc.x = PAGE_CONFIG.margin + academicLeftWidth + academicGap;
+                    } else {
+                        checkPageBreak(doc, 100);
+                    }
+                    renderSectionTitle(doc, 'Extra-Curricular', colors, normalizedTemplate);
+                    const drawX = isAcademicSplit ? (PAGE_CONFIG.margin + academicLeftWidth + academicGap) : PAGE_CONFIG.margin;
+                    const drawWidth = isAcademicSplit ? academicRightWidth : maxWidth;
+                    items.forEach(item => {
+                        const text = typeof item === 'string' ? item : sanitizeText(item);
+                        const h = addBulletPoint(doc, text, drawX + SPACING.bulletIndent, doc.y, drawWidth - SPACING.bulletIndent, colors);
+                        doc.y += h + 2;
                     });
-                doc.moveDown(spacing.sectionGap / 10);
+                    if (isAcademicSplit) doc.academicRightY = doc.y;
+                    doc.moveDown(spacing.sectionGap / 10);
+                }
             }
             break;
 
-        case 'hobbies':
-            if (data.hobbies) {
-                checkPageBreak(doc, 100);
-                renderSectionTitle(doc, 'Hobbies & Interests', colors, template);
-                doc.fontSize(FONT_SIZES.body)
-                    .fillColor(colors.secondary)
-                    .font('Helvetica')
-                    .text(data.hobbies, {
-                        width: maxWidth
+        case 'softSkills':
+            if (data.softSkills) {
+                const items = Array.isArray(data.softSkills) ? data.softSkills : (typeof data.softSkills === 'string' ? data.softSkills.split(/[\n,]/).map(s => s.trim()).filter(Boolean) : []);
+                if (items.length > 0) {
+                    if (isAcademicSplit && doc.academicRightY) {
+                        doc.y = doc.academicRightY;
+                        doc.x = PAGE_CONFIG.margin + academicLeftWidth + academicGap;
+                    } else if (isAcademicSplit && doc.academicSplitY) {
+                        doc.y = doc.academicSplitY;
+                        doc.x = PAGE_CONFIG.margin + academicLeftWidth + academicGap;
+                    } else {
+                        checkPageBreak(doc, 100);
+                    }
+                    renderSectionTitle(doc, 'Personal Traits', colors, normalizedTemplate);
+                    const drawX = isAcademicSplit ? (PAGE_CONFIG.margin + academicLeftWidth + academicGap) : PAGE_CONFIG.margin;
+                    const drawWidth = isAcademicSplit ? academicRightWidth : maxWidth;
+                    items.forEach(item => {
+                        const h = addBulletPoint(doc, item, drawX + SPACING.bulletIndent, doc.y, drawWidth - SPACING.bulletIndent, colors);
+                        doc.y += h + 2;
                     });
+                    if (isAcademicSplit) doc.academicRightY = doc.y;
+                    doc.moveDown(spacing.sectionGap / 10);
+                }
+            }
+            break;
+
+        case 'certifications':
+            if (data.certifications && data.certifications.length > 0) {
+                checkPageBreak(doc, 100);
+                renderSectionTitle(doc, 'Certifications', colors, normalizedTemplate);
+                const items = Array.isArray(data.certifications) ? data.certifications : data.certifications.split(/[\n,]/).map(c => c.trim()).filter(Boolean);
+                items.forEach(cert => {
+                    const text = typeof cert === 'string' ? cert : cert?.name || cert?.title || sanitizeText(cert);
+                    const h = addBulletPoint(doc, text, PAGE_CONFIG.margin + SPACING.bulletIndent, doc.y, maxWidth - SPACING.bulletIndent, colors);
+                    doc.y += h + 2;
+                });
                 doc.moveDown(spacing.sectionGap / 10);
             }
             break;
@@ -1081,22 +1051,13 @@ function renderSection(doc, sectionKey, data, colors, template, spacing = SPACIN
         case 'references':
             if (data.references && data.references.length > 0) {
                 checkPageBreak(doc, 100);
-                renderSectionTitle(doc, 'References', colors, template);
+                renderSectionTitle(doc, 'References', colors, normalizedTemplate);
                 data.references.forEach((ref, index) => {
-                    checkPageBreak(doc, 60); // Ensure reference doesn't split awkwardly
-                    doc.fontSize(FONT_SIZES.jobTitle)
-                        .fillColor(colors.primary)
-                        .font('Helvetica-Bold')
-                        .text(ref.name || '');
-
-                    doc.fontSize(FONT_SIZES.body)
-                        .fillColor(colors.secondary)
-                        .font('Helvetica');
-
+                    doc.fontSize(FONT_SIZES.jobTitle).fillColor(colors.primary).font('Helvetica-Bold').text(ref.name || '');
+                    doc.fontSize(FONT_SIZES.body).fillColor(colors.secondary).font('Helvetica');
                     if (ref.title) doc.text(ref.title + (ref.company ? ' - ' + ref.company : ''));
                     if (ref.phone) doc.text('Phone: ' + ref.phone);
                     if (ref.email) doc.text('Email: ' + ref.email);
-
                     if (index < data.references.length - 1) doc.moveDown(spacing.itemGap / 10);
                 });
                 doc.moveDown(spacing.sectionGap / 10);
@@ -1108,17 +1069,27 @@ function renderSection(doc, sectionKey, data, colors, template, spacing = SPACIN
                 data.customDetails.forEach(custom => {
                     if (custom.heading && custom.content) {
                         checkPageBreak(doc, 100);
-                        renderSectionTitle(doc, custom.heading, colors, template);
-                        doc.fontSize(FONT_SIZES.body)
-                            .fillColor(colors.secondary)
-                            .font('Helvetica')
-                            .text(custom.content, {
-                                width: maxWidth,
-                                align: 'justify'
-                            });
+                        renderSectionTitle(doc, custom.heading, colors, normalizedTemplate);
+                        doc.fontSize(FONT_SIZES.body).fillColor(colors.secondary).font('Helvetica').text(custom.content, { width: maxWidth, align: 'justify' });
                         doc.moveDown(spacing.sectionGap / 10);
                     }
                 });
+            }
+            break;
+
+        case 'customSectionContent':
+            if (data.customSectionContent) {
+                checkPageBreak(doc, 100);
+                const title = data.customSectionTitle || 'Additional Details';
+                renderSectionTitle(doc, title, colors, template);
+                doc.fontSize(FONT_SIZES.body)
+                    .fillColor(colors.secondary)
+                    .font('Helvetica')
+                    .text(data.customSectionContent, {
+                        width: maxWidth,
+                        align: 'justify'
+                    });
+                doc.moveDown(spacing.sectionGap / 10);
             }
             break;
     }

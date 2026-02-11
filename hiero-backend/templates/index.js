@@ -6,6 +6,7 @@ import { generateRishiTemplate } from './rishiTemplate.js';
 import { generateHemanthTemplate } from './hemanthTemplate.js';
 import { renderPriyaAnalyticsTemplate } from './priyaAnalyticsTemplate.js';
 import { renderHieroEliteTemplate } from './hieroEliteTemplate.js';
+import { generateHieroBlueTemplate } from './hieroBlueTemplate.js';
 
 export function listTemplates() {
   return [
@@ -16,6 +17,7 @@ export function listTemplates() {
     { id: 'hemanth', name: 'Hemanth Dark Creative' },
     { id: 'priya-analytics', name: 'Priya Analytics' },
     { id: 'hiero-elite', name: 'Hiero Elite' },
+    { id: 'hiero-blue', name: 'Hiero Premium Blue' },
   ];
 }
 
@@ -34,6 +36,8 @@ export function generateTemplateHTML(templateId, data = {}) {
       return renderPriyaAnalyticsTemplate(data);
     case 'hiero-elite':
       return renderHieroEliteTemplate(data);
+    case 'hiero-blue':
+      return generateHieroBlueTemplate(data);
     case 'classic':
     default:
       return generateClassicTemplate(data);

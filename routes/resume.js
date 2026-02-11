@@ -28,44 +28,6 @@ const authenticateToken = (req, res, next) => {
     });
 };
 
-// --- Resume Extraction (AI Integrated) ---
-
-async function extractTextFromPdf(filePath) {
-    const dataBuffer = fs.readFileSync(filePath);
-    const data = await pdfParse(dataBuffer);
-    return data.text || '';
-}
-
-async function mapResumeToFormFields(rawText) {
-    if (process.env.OPENROUTER_API_KEY) {
-        try {
-            const prompt = `Extract all career data from this resume text into a standard JSON format for a resume builder. Look for name, contact, summary, education (array of objects), experience (array of objects), projects (array), skills (object with technical and soft). Return JSON ONLY.\n\n TEXT: ${rawText.slice(0, 10000)}`;
-            const { data } = await axios.post('https://openrouter.ai/api/v1/chat/completions', {
-                model: 'openai/gpt-3.5-turbo',
-                messages: [{ role: 'user', content: prompt }],
-                response_format: { type: "json_object" }
-            }, {
-                headers: { 'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}` }
-            });
-            return JSON.parse(data.choices[0].message.content);
-        } catch (e) {
-            console.error('AI Extraction failed, returning basic structure');
-        }
-    }
-    return { personalInfo: { fullName: 'Extracted User' }, data: { basic: { full_name: 'Extracted' } } };
-}
-
-router.post('/import', upload.single('resume'), async (req, res) => {
-    try {
-        if (!req.file) return res.status(400).json({ success: false, error: 'No file uploaded' });
-        const text = await extractTextFromPdf(req.file.path);
-        const extractedData = await mapResumeToFormFields(text);
-        if (fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
-        res.json({ success: true, data: extractedData });
-    } catch (error) {
-        res.status(500).json({ success: false, error: 'Failed to parse resume' });
-    }
-});
 
 // --- Resume Data Routes ---
 
@@ -293,6 +255,17 @@ function generateWordHTML(data) {
             <div class='content'>${softSkills}</div>
         ` : ''}
 
+        ${Array.isArray(data.customDetails) ? data.customDetails.map(custom => `
+            <div class='section-title'>${custom.heading || 'ADDITIONAL DETAIL'}</div>
+            <div class='section-line'></div>
+            <div class='content'>${custom.content || ''}</div>
+        `).join('') : ''}
+
+        ${data.customSectionContent ? `
+            <div class='section-title'>${data.customSectionTitle || 'ADDITIONAL DETAILS'}</div>
+            <div class='section-line'></div>
+            <div class='content'>${data.customSectionContent}</div>
+        ` : ''}
     </body>
     </html>`;
 }

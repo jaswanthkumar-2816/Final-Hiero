@@ -125,6 +125,14 @@ const availableTemplates = [
     description: 'Creative edition with unique styling and visual elements. Stand out in creative industries.',
     preview: '/templates/previews/awesomece.png',
     recommended: ['Creative Director', 'Art Director', 'UX Designer']
+  },
+  {
+    id: 'hiero-blue',
+    name: 'Hiero Premium Blue',
+    category: 'premium',
+    description: 'A premium, high-fidelity template with a specialized two-column layout and blue accents. Perfect for Data Scientists and Analytical roles.',
+    preview: '/templates/previews/hiero-blue.png',
+    recommended: ['Data Scientist', 'Business Analyst', 'Engineer']
   }
 ];
 
@@ -137,7 +145,7 @@ const templateCategories = {
 
 // Get all available templates
 router.get('/templates', (req, res) => {
-  res.json({ 
+  res.json({
     success: true,
     templates: availableTemplates,
     categories: templateCategories,

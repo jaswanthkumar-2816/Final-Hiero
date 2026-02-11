@@ -121,6 +121,10 @@ app.use('/public/dashboard', express.static(resumeBuilderPath)); // Fix for nest
 
 
 // 📄 Resume API (Integrated!)
+// Mount Import Service FIRST to handle /import requests effectively
+const importRouter = require('./routes/import-service');
+app.use('/api/resume', importRouter);
+
 const resumeRouter = require('./routes/resume');
 app.use('/api/resume', resumeRouter);
 

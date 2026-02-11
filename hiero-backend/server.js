@@ -1019,35 +1019,6 @@ app.post('/download-resume', async (req, res) => {
   }
 });
 
-app.post('/preview-resume', async (req, res) => {
-  try {
-    const { template, personalInfo, experience, education, ...rest } = req.body;
-
-    let resumeData = {
-      template: template || 'classic',
-      personalInfo: personalInfo || {},
-      experience: experience || [],
-      education: education || [],
-      ...rest
-    };
-
-    // Normalize data (convert strings to arrays where needed)
-    resumeData = normalizeResumeData(resumeData);
-
-    logger.info(`⚡ Generating HTML preview with template: ${resumeData.template}`);
-
-    // Generate HTML directly for faster preview (no PDF conversion)
-    const html = generateTemplateHTML(resumeData.template, resumeData);
-
-    // Send HTML for iframe display
-    res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    res.send(html);
-
-  } catch (error) {
-    logger.error('Resume preview error:', error);
-    res.status(500).json({ error: error.message || 'Resume preview failed' });
-  }
-});
 
 // Create necessary folders
 // if (!fs.existsSync('/tmp')) fs.mkdirSync('/tmp', { recursive: true }); // /tmp usually exists
@@ -1219,21 +1190,23 @@ app.use('/resume', resumeRoutes);
 
 
 
-app.post('/preview-resume', async (req, res, next) => {
+app.post('/preview-resume', async (req, res) => {
   try {
     const resumeData = req.body;
-    const templateId = resumeData.template || 'rishi';
-
-    // Lazy import HTML generator to avoid circular dependencies if any
-    const { generateHTMLPreview } = await import('./utils/htmlGenerator.js');
-    const htmlContent = generateHTMLPreview(templateId, resumeData);
-
-    res.setHeader('Content-Type', 'text/html');
-    res.send(htmlContent);
+    const templateId = resumeData.template || 'classic';
 
     logger.info(`✨ Instant HTML preview generated for template: ${templateId}`);
+
+    // Normalize data (convert strings to arrays where needed)
+    const normalizedData = normalizeResumeData(resumeData);
+
+    // Generate HTML using the centralized template generator
+    const html = generateTemplateHTML(templateId, normalizedData);
+
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.send(html);
   } catch (err) {
     logger.error('Preview resume error:', err);
-    next(err);
+    res.status(500).json({ error: 'Failed to generate preview' });
   }
 });

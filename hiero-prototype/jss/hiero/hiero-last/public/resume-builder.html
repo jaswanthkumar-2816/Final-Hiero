@@ -925,45 +925,46 @@
           </div>
         </div>
 
-        <!-- Hiero Studio Template -->
-        <div class="template-card" data-category="creative" data-template="hiero-studio" data-type="free">
+        <!-- Hiero Academic Template (Template 4) -->
+        <div class="template-card" data-category="professional" data-template="template4" data-type="free">
+          <div class="template-preview" onclick="previewTemplate('template4')">
+            <i class="fas fa-university"></i>
+            <div class="preview-overlay">
+              <button class="preview-btn">Preview Template</button>
+            </div>
+          </div>
+          <div class="template-info">
+            <h3>Hiero Academic</h3>
+            <p>High-fidelity technical layout with centered headers and split subsections for maximum ATS readability.
+            </p>
+            <div class="template-tags">
+              <span class="tag">Academic</span>
+              <span class="tag">Technical</span>
+              <span class="tag">Bestseller</span>
+            </div>
+            <button class="start-building-btn" onclick="startBuilding('template4')">
+              <i class="fas fa-arrow-right"></i> Start Building
+            </button>
+          </div>
+        </div>
+
+        <!-- Hiero Studio Template (Template 5) -->
+        <div class="template-card" data-category="professional" data-template="hiero-studio" data-type="free">
           <div class="template-preview" onclick="previewTemplate('hiero-studio')">
-            <i class="fas fa-palette"></i>
+            <i class="fas fa-laptop-code"></i>
             <div class="preview-overlay">
               <button class="preview-btn">Preview Template</button>
             </div>
           </div>
           <div class="template-info">
             <h3>Hiero Studio</h3>
-            <p>Modern two-column grid layout designed for web developers and creative portfolios.</p>
+            <p>Modern professional layout with specialized technical sections. Ideal for developers and designers.</p>
             <div class="template-tags">
-              <span class="tag">Creative</span>
               <span class="tag">Modern</span>
-              <span class="tag">Grid</span>
+              <span class="tag">Studio</span>
+              <span class="tag">Technical</span>
             </div>
             <button class="start-building-btn" onclick="startBuilding('hiero-studio')">
-              <i class="fas fa-arrow-right"></i> Start Building
-            </button>
-          </div>
-        </div>
-
-        <!-- Hiero Onyx Template -->
-        <div class="template-card" data-category="premium" data-template="hiero-onyx" data-type="free">
-          <div class="template-preview" onclick="previewTemplate('hiero-onyx')">
-            <i class="fas fa-gem"></i>
-            <div class="preview-overlay">
-              <button class="preview-btn">Preview Template</button>
-            </div>
-          </div>
-          <div class="template-info">
-            <h3>Hiero Onyx</h3>
-            <p>Premium high-contrast design with deep black accents and structured layout for a bold impression.</p>
-            <div class="template-tags">
-              <span class="tag">Bold</span>
-              <span class="tag">Corporate</span>
-              <span class="tag">Premium</span>
-            </div>
-            <button class="start-building-btn" onclick="startBuilding('hiero-onyx')">
               <i class="fas fa-arrow-right"></i> Start Building
             </button>
           </div>
@@ -1252,6 +1253,13 @@
               </label>
               <textarea id="hobbies" rows="2" placeholder="Photography, hiking..."></textarea>
             </div>
+            <div class="form-group" id="group-extraCurricular">
+              <label>
+                Extra-Curricular Activities
+                <span class="field-skip" onclick="skipField('extraCurricular')">Skip</span>
+              </label>
+              <textarea id="extraCurricular" rows="2" placeholder="Clubs, sports, volunteering..."></textarea>
+            </div>
             <div class="form-group">
               <label for="additionalInfo">Other Details (AI Summary)</label>
               <textarea id="additionalInfo" rows="4" placeholder="Additional details from LLM..."></textarea>
@@ -1466,13 +1474,7 @@
 
     // Check authentication on page load
     function checkAuthentication() {
-      // Bypass login for localhost
-      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-        console.log('🔓 Localhost detected: Bypassing authentication');
-        return true;
-      }
-
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
       const user = localStorage.getItem('user');
 
       if (!token || !user) {
@@ -1753,6 +1755,16 @@
           name: 'Hiero Onyx (New)',
           description: 'Bold high-contrast side-label design for maximum professional impact.',
           style: 'Professional structure, high-contrast black accents, and premium spacing.'
+        },
+        'template4': {
+          name: 'Hiero Academic',
+          description: 'High-fidelity technical layout with centered headers and split subsections.',
+          style: 'Times New Roman, centered header, academic split layout, and ATS-optimized structure.'
+        },
+        'hiero-studio': {
+          name: 'Hiero Studio',
+          description: 'Modern professional layout with specialized technical sections. Ideal for developers and designers.',
+          style: 'Modern, clean, and technical.'
         }
       };
 
@@ -1956,12 +1968,12 @@
               'Published research paper on AI in peer-reviewed journal',
               'Awarded Best Project in Software Engineering course'
             ],
-            extracurricular: [
+            extraCurricular: [
               'President of Coding Club',
               'Volunteer at Local Tech Community Center',
               'Active participant in competitive programming'
             ],
-            traits: [
+            softSkills: [
               'Self-motivated and eager to learn new technologies',
               'Strong problem-solving and analytical skills',
               'Excellent collaboration and communication abilities'
@@ -1976,7 +1988,7 @@
           console.warn('⏱️ Preview request timeout after 90 seconds');
         }, 90000); // 90 seconds for ngrok
 
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
         console.log('📡 Fetching preview from:', `${BACKEND_URL}/preview-resume`);
         const response = await fetch(`${BACKEND_URL}/preview-resume`, {
           method: 'POST',
@@ -1996,9 +2008,9 @@
         }
 
         const blob = await response.blob();
-        const pdfUrl = URL.createObjectURL(blob);
+        const previewUrl = URL.createObjectURL(blob);
 
-        console.log('✅ Preview PDF blob received for:', templateId);
+        console.log('✅ Preview blob created for:', templateId);
 
         // Update preview content with iframe
         const previewContent = modal.querySelector('#preview-content');
@@ -2006,18 +2018,41 @@
         // Clear loading state
         previewContent.innerHTML = '';
 
-        // Create iframe element
-        const iframe = document.createElement('iframe');
-        iframe.style.cssText = 'width: 100%; height: 600px; border: none; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); background: white;';
-        iframe.src = pdfUrl;
+        // Mobile detection
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-        previewContent.appendChild(iframe);
+        if (isMobile) {
+          // On mobile, iframes can be tricky, but HTML usually works well
+          const mobileMsg = document.createElement('div');
+          mobileMsg.style.cssText = 'text-align: center; padding: 40px 20px; background: rgba(255,255,255,0.05); border-radius: 12px; border: 1px dashed #2ae023; margin: 20px 0;';
+          mobileMsg.innerHTML = `
+            <i class="fas fa-mobile-alt" style="font-size: 48px; color: #2ae023; margin-bottom: 20px; display: block;"></i>
+            <p style="color: #2c3e50; margin-bottom: 25px; font-size: 16px;">Preview work best in a dedicated tab on some mobile devices.</p>
+            <a href="${previewUrl}" target="_blank" class="btn btn-primary" style="display:inline-flex; width: auto; padding: 12px 24px; background: #2ae023; color: white; text-decoration: none; border-radius: 8px;">
+              <i class="fas fa-external-link-alt"></i> Open Preview
+            </a>
+          `;
+          previewContent.appendChild(mobileMsg);
+        } else {
+          // Create iframe element for desktop
+          const iframe = document.createElement('iframe');
+          iframe.style.cssText = 'width: 100%; height: 650px; border: none; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); background: white;';
+          iframe.src = previewUrl;
+          previewContent.appendChild(iframe);
+
+          // Add a fallback link below the iframe just in case
+          const fallback = document.createElement('div');
+          fallback.style.cssText = 'text-align: right; margin-top: 10px; font-size: 13px;';
+          fallback.innerHTML = `<a href="${previewUrl}" target="_blank" style="color: #2ae023; text-decoration: underline;">Open in new tab if not loading</a>`;
+          previewContent.appendChild(fallback);
+        }
+
         previewLoaded = true;
 
         // Cleanup URL when modal is closed
         const originalRemove = modal.remove;
         modal.remove = function () {
-          URL.revokeObjectURL(pdfUrl);
+          URL.revokeObjectURL(previewUrl);
           originalRemove.call(this);
         };
 
@@ -2125,8 +2160,29 @@
         addExperience();
         document.getElementsByName("jobTitle[]")[i].value = exp.jobTitle || "";
         document.getElementsByName("company[]")[i].value = exp.company || "";
-        document.getElementsByName("startDate[]")[i].value = exp.startDate || "";
-        document.getElementsByName("endDate[]")[i].value = exp.endDate || "";
+
+        // Handle Start Date
+        const startDateInput = document.getElementsByName("startDate[]")[i];
+        if (exp.startDate) {
+          // Attempt to normalize date for type="month" (YYYY-MM)
+          const date = exp.startDate.match(/\d{4}-\d{2}/) ? exp.startDate : "";
+          startDateInput.value = date;
+        }
+
+        // Handle End Date & Checkbox
+        const endDateInput = document.getElementsByName("endDate[]")[i];
+        const currentCheckbox = document.getElementById(`current${i + 1}`);
+        if (exp.endDate && (exp.endDate.toLowerCase().includes('present') || exp.endDate.toLowerCase().includes('current'))) {
+          if (currentCheckbox) {
+            currentCheckbox.checked = true;
+            toggleWorking(currentCheckbox); // Trigger UI change
+          }
+          endDateInput.value = "";
+        } else if (exp.endDate) {
+          const date = exp.endDate.match(/\d{4}-\d{2}/) ? exp.endDate : "";
+          endDateInput.value = date;
+        }
+
         document.getElementsByName("jobDescription[]")[i].value = exp.description || "";
       });
 
@@ -2195,7 +2251,9 @@
         'minimalist-mono': 'Minimalist Mono',
         'rishi': 'Rishi Tech Modern',
         'priya': 'Priya Elegant',
-        'priya-analytics': 'Priya Analytics (Single Column)'
+        'priya-analytics': 'Priya Analytics (Single Column)',
+        'hiero-studio': 'Hiero Studio',
+        'template4': 'Hiero Academic'
       };
       return names[templateId] || 'Selected';
     }
@@ -2223,18 +2281,23 @@
           <h2 style="margin: 0 0 20px 0; color: #2ae023; font-size: 24px; text-align: center;">
             <i class="fas fa-file-upload"></i> Do you have an old resume?
           </h2>
-          <p style="color: #bbb; text-align: center; margin-bottom: 30px; line-height: 1.6;">
+          <p style="color: #bbb; text-align: center; margin-bottom: 25px; line-height: 1.6;">
             Upload your existing resume and we'll auto-fill the form for you!<br>
             <span style="font-size: 14px; color: #888;">Supports PDF, DOCX, and images</span>
           </p>
           
+          <div style="margin-bottom: 25px;">
+            <label style="color: #2ae023; font-size: 14px; display: block; margin-bottom: 10px; font-weight: 600;">Optional: Paste Job Description for matching</label>
+            <textarea id="importJobDescription" placeholder="Paste the JD here to see how well you match..." style="width: 100%; height: 80px; background: rgba(0,0,0,0.3); border: 1px solid rgba(42,224,35,0.2); border-radius: 10px; color: #fff; padding: 12px; font-size: 14px; outline: none; resize: none;"></textarea>
+          </div>
+          
           <div style="display: flex; gap: 15px; flex-direction: column;">
-            <label for="resumeFileInput" style="background: linear-gradient(135deg, #2ae023 0%, #06a529 100%); color: #fff; padding: 18px; border-radius: 12px; cursor: pointer; text-align: center; font-weight: 600; transition: all 0.3s ease; border: none; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 10px;">
+            <label for="resumeFileInput" style="background: linear-gradient(135deg, #2ae023 0%, #06a529 100%); color: #fff; padding: 18px; border-radius: 12px; cursor: pointer; text-align: center; font-weight: 700; transition: all 0.3s ease; border: none; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 10px;">
               <i class="fas fa-upload"></i> Yes, Upload My Resume
             </label>
             <input type="file" id="resumeFileInput" accept=".pdf,.doc,.docx,image/*" style="display: none;">
             
-            <button id="proceedWithoutImportBtn" style="background: rgba(255,255,255,0.1); color: #fff; padding: 18px; border-radius: 12px; cursor: pointer; border: 2px solid rgba(255,255,255,0.2); font-weight: 600; transition: all 0.3s ease; font-size: 16px;">
+            <button id="proceedWithoutImportBtn" style="background: rgba(255,255,255,0.05); color: #fff; padding: 15px; border-radius: 12px; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); font-weight: 600; transition: all 0.3s ease; font-size: 14px;">
               <i class="fas fa-edit"></i> No, I'll Fill It Manually
             </button>
           </div>
@@ -2287,13 +2350,16 @@
         try {
           const formData = new FormData();
           formData.append('resume', file);
+          const jd = document.getElementById('importJobDescription')?.value || '';
+          if (jd) formData.append('jobDescription', jd);
+
 
           // Use LOCAL backend for import to get "Perfect Extraction" logic
           // The production backend doesn't have the new AI logic yet.
-          const IMPORT_URL = `${BACKEND_URL}/api/resume/import`;
+          const IMPORT_URL = `${BACKEND_URL}/import`;
           console.log('🚀 Importing resume via:', IMPORT_URL);
 
-          const token = localStorage.getItem('token');
+          const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
           const response = await fetch(IMPORT_URL, {
             method: 'POST',
             headers: {
@@ -2312,8 +2378,9 @@
           if (result.success && result.data) {
             statusDiv.innerHTML = '<i class="fas fa-check-circle"></i> Resume imported successfully!';
 
-            // Store the imported data temporarily
+            // Store the imported data and analysis
             localStorage.setItem('importedResumeData', JSON.stringify(result.data));
+            if (result.analysis) localStorage.setItem('resumeAnalysis', JSON.stringify(result.analysis));
 
             // Close modal and show form after a short delay
             setTimeout(() => {
@@ -2323,9 +2390,16 @@
               // Fill form after a short delay to ensure form fields are created
               setTimeout(() => {
                 const importedData = JSON.parse(localStorage.getItem('importedResumeData'));
+                const analysisData = JSON.parse(localStorage.getItem('resumeAnalysis'));
+
                 if (importedData) {
                   fillFormWithImportedData(importedData);
                   localStorage.removeItem('importedResumeData');
+
+                  if (analysisData) {
+                    showAnalysisPopup(analysisData);
+                    localStorage.removeItem('resumeAnalysis');
+                  }
                 }
               }, 500);
             }, 1000);
@@ -2401,6 +2475,74 @@
         console.error('❌ Error in proceedToFormWithoutImport:', error);
         alert('Error: ' + error.message);
       }
+    }
+
+    // Show ATS Analysis & Match Score Popup
+    function showAnalysisPopup(analysis) {
+      const popup = document.createElement('div');
+      popup.id = 'analysisPopup';
+      popup.style.cssText = `
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        width: 350px;
+        background: #1a1a2e;
+        border: 2px solid #2ae023;
+        border-radius: 20px;
+        padding: 25px;
+        z-index: 9999;
+        box-shadow: 0 15px 50px rgba(0,0,0,0.5);
+        color: white;
+        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        transform: translateY(150%);
+      `;
+
+      const scoreColor = analysis.score > 70 ? '#2ae023' : analysis.score > 40 ? '#ffa500' : '#ef4444';
+      const matchHtml = analysis.matchingScore !== undefined ? `
+        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span style="font-size: 14px; opacity: 0.8;">JD Match Score</span>
+            <span style="font-weight: 800; color: #3b82f6;">${analysis.matchingScore}%</span>
+          </div>
+          <div style="height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
+            <div style="width: ${analysis.matchingScore}%; height: 100%; background: #3b82f6;"></div>
+          </div>
+        </div>
+      ` : '';
+
+      const suggestionsHtml = analysis.suggestions.slice(0, 3).map(s => `
+        <li style="font-size: 12px; margin-bottom: 8px; color: #cbd5e1; list-style: none; display: flex; gap: 8px;">
+          <i class="fas fa-lightbulb" style="color: #ffd700; font-size: 10px; margin-top: 3px;"></i>
+          <span>${s}</span>
+        </li>
+      `).join('');
+
+      popup.innerHTML = `
+        <div style="position: relative;">
+          <button onclick="this.closest('#analysisPopup').remove()" style="position: absolute; top: -15px; right: -15px; background: #ef4444; color: white; border: none; width: 24px; height: 24px; border-radius: 12px; cursor: pointer; font-size: 12px;"><i class="fas fa-times"></i></button>
+          
+          <div style="text-align: center; margin-bottom: 20px;">
+            <div style="font-size: 12px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6; margin-bottom: 5px;">ATS Strength Score</div>
+            <div style="font-size: 42px; font-weight: 800; color: ${scoreColor};">${analysis.score}%</div>
+          </div>
+
+          ${matchHtml}
+
+          <div style="margin-top: 20px;">
+            <div style="font-size: 13px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+               <i class="fas fa-chart-line" style="color: #2ae023;"></i> Success Suggestions
+            </div>
+            <ul style="padding: 0; margin: 0;">
+              ${suggestionsHtml}
+            </ul>
+          </div>
+
+          <button onclick="this.closest('#analysisPopup').remove()" style="width: 100%; margin-top: 20px; background: rgba(42,224,35,0.1); border: 1px solid #2ae023; color: #2ae023; padding: 10px; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 13px;">Got it, let's refine!</button>
+        </div>
+      `;
+
+      document.body.appendChild(popup);
+      setTimeout(() => popup.style.transform = 'translateY(0)', 100);
     }
 
     // Show the form (Step 2)
@@ -2500,6 +2642,18 @@
       try {
         console.log("🎯 Filling form with imported data", data);
 
+        // Preserve selected template before clearing form
+        const preservedTemplate = selectedTemplate || localStorage.getItem('selectedTemplate');
+
+        clearForm(true); // Clear existing without prompt to prevent duplicates
+
+        // Restore template
+        if (preservedTemplate) {
+          selectedTemplate = preservedTemplate;
+          localStorage.setItem('selectedTemplate', preservedTemplate);
+          console.log("✅ Fixed: Preserved template during import:", selectedTemplate);
+        }
+
         const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ""; };
 
         // 1. Personal Information
@@ -2527,6 +2681,9 @@
         setVal("languages", langs);
         setVal("achievements", data.achievements);
         setVal("hobbies", data.hobbies);
+
+        const extras = Array.isArray(data.extraCurricular) ? data.extraCurricular.join("\n") : (data.extraCurricular || "");
+        setVal("extraCurricular", extras);
 
         // 4. Experience (Dynamic)
         const expContainer = document.getElementById("experienceContainer");
@@ -2577,6 +2734,19 @@
             if (years[i]) years[i].value = edu.gradYear || "";
             if (gpas[i]) gpas[i].value = edu.gpa || "";
           });
+        }
+
+        // 6. Custom/Additional (Fallback System)
+        if (data.customSectionContent) {
+          const customArea = document.getElementById("customSectionContent");
+          if (customArea) {
+            customArea.value = data.customSectionContent;
+            // Ensure section is visible
+            const customSection = document.getElementById("section-custom");
+            if (customSection && customSection.style.display === 'none') {
+              toggleSection('custom');
+            }
+          }
         }
 
         // 6. Projects (Dynamic)
@@ -2689,7 +2859,8 @@
           { key: 'certifications', groupId: 'group-certifications' },
           { key: 'languages', groupId: 'group-languages' },
           { key: 'achievements', groupId: 'group-achievements' },
-          { key: 'hobbies', groupId: 'group-hobbies' }
+          { key: 'hobbies', groupId: 'group-hobbies' },
+          { key: 'extraCurricular', groupId: 'group-extraCurricular' }
         ];
 
         fieldsToCheck.forEach(field => {
@@ -3431,7 +3602,7 @@
           throw new Error(`Backend server not accessible at ${BACKEND_URL}. Please check if the server is running.`);
         }
 
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
         const response = await fetch(downloadUrl, {
           method: 'POST',
           headers: {
@@ -3585,7 +3756,7 @@
       data.personalInfo.phone = document.getElementById('phone').value;
 
       // Optional fields (only if not skipped and not empty)
-      const optional = ['address', 'linkedin', 'website', 'summary', 'technicalSkills', 'softSkills', 'certifications', 'languages', 'achievements', 'hobbies', 'additionalInfo'];
+      const optional = ['address', 'linkedin', 'website', 'summary', 'technicalSkills', 'softSkills', 'certifications', 'languages', 'achievements', 'hobbies', 'extraCurricular', 'additionalInfo'];
       optional.forEach(field => {
         // Find which group/section it belongs to
         let parentId = 'section-additional';
@@ -3593,7 +3764,7 @@
         if (field === 'technicalSkills' || field === 'softSkills') parentId = 'section-skills';
         if (field === 'certifications' || field === 'languages') parentId = 'section-additional-details';
         if (['address', 'linkedin', 'website'].includes(field)) parentId = 'group-' + field;
-        if (field === 'achievements' || field === 'hobbies') parentId = 'group-' + field;
+        if (field === 'achievements' || field === 'hobbies' || field === 'extraCurricular') parentId = 'group-' + field;
 
         const group = document.getElementById(parentId);
         const input = document.getElementById(field);
@@ -3708,8 +3879,8 @@
       return data;
     }
 
-    function clearForm() {
-      if (confirm('This will clear all form data and return to template selection. Continue?')) {
+    function clearForm(skipConfirm = false) {
+      if (skipConfirm || confirm('This will clear all form data and return to template selection. Continue?')) {
         // Clear all inputs
         const inputs = document.querySelectorAll('input, textarea');
         inputs.forEach(input => {
@@ -3729,8 +3900,15 @@
           if (container) container.innerHTML = '';
         });
 
-        // Reset state
-        localStorage.clear();
+        // Reset state - Only clear resume data, NOT auth token
+        const keysToRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key !== 'token' && key !== 'jwtToken' && key !== 'user') {
+            keysToRemove.push(key);
+          }
+        }
+        keysToRemove.forEach(k => localStorage.removeItem(k));
         selectedTemplate = null;
 
         // UI Reset
@@ -3757,8 +3935,8 @@
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
         btn.disabled = true;
 
-        const token = localStorage.getItem('token');
-        const response = await fetch(`${BACKEND_URL}/api/resume/download-docx`, {
+        const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
+        const response = await fetch(`${BACKEND_URL}/download-docx`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -3808,7 +3986,7 @@
           data.template = selectedTemplate || localStorage.getItem('selectedTemplate') || 'classic';
         }
 
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
         console.log('📡 POST', `${BACKEND_URL}/download-resume`);
         const response = await fetch(`${BACKEND_URL}/download-resume`, {
           method: 'POST',
@@ -3877,7 +4055,7 @@
 
         console.log('Previewing resume with template:', data.template);
 
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
         const response = await fetch(`${BACKEND_URL}/preview-resume`, {
           method: 'POST',
           headers: {

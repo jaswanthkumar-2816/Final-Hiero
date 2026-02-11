@@ -73,6 +73,7 @@ function normalizeData(data = {}) {
             }),
             achievements: toArray(data.achievements),
             hobbies: toArray(data.hobbies),
+            extraCurricular: toArray(data.extraCurricular),
             referencesText: data.referencesText || (Array.isArray(data.references) && data.references.length > 0 ? '' : 'Available upon request'),
             references: Array.isArray(data.references) ? data.references : []
         };
@@ -123,7 +124,182 @@ const TEMPLATES = {
     'rishi': (data) => {
         const d = normalizeData(data);
         const p = d.personalInfo;
-        return `<!doctype html><html><head><style>@page{size:A4;margin:1.5cm 1.8cm}body{font-family:'Times New Roman',serif;font-size:12pt;color:#000;line-height:1.4;margin:0}h1{font-size:20pt;text-align:center;margin-bottom:8pt;font-weight:700}.contact{text-align:center;font-size:10pt;margin-bottom:20pt}h2{font-size:13pt;font-weight:700;text-transform:uppercase;border-bottom:2px solid #000;padding-bottom:3pt;margin:18pt 0 10pt}.entry{margin-bottom:12pt}h3{font-size:12pt;font-weight:700;margin-bottom:2pt}.date{float:right;font-size:10pt;font-weight:400}ul{margin:6pt 0 0 20pt}li{margin-bottom:3pt;font-size:11pt}</style></head><body><h1>${esc(p.fullName)}</h1><div class="contact">${esc(p.address)}<br/>(+91)${esc(p.phone)} ${esc(p.email)}</div><h2>Education</h2>${d.education.map(e => `<div class="entry"><div class="date">${esc(e.gradYear)}</div><h3>${esc(e.school)}</h3>${esc(e.degree)}<br/>${esc(e.gpa)}</div>`).join('')}<h2>Career Objective</h2><p>${esc(data.objective || d.summary)}</p><h2>Experience</h2>${d.experience.map(e => `<div class="entry"><div class="date">${esc(e.startDate)} - ${esc(e.endDate)}</div><h3>${esc(e.company)}</h3><i>${esc(e.jobTitle)}</i><ul>${esc(e.description).split('\n').filter(Boolean).map(l => `<li>${esc(l)}</li>`).join('')}</ul></div>`).join('')}<h2>Projects</h2>${d.projects.map(pr => `<div class="entry"><h3>${esc(pr.title)}</h3>${esc(pr.description)}</div>`).join('')}<h2>Personal Traits</h2><ul>${d.softSkills.map(s => `<li>${esc(s)}</li>`).join('')}</ul></body></html>`;
+
+        const skillsContent = d.skills.length > 0
+            ? `<h2>Technical Skills</h2><p style="font-size:11pt;">${d.skills.join(' • ')}</p>`
+            : '';
+
+        return `<!doctype html><html><head><style>
+            @page{size:A4;margin:1.5cm 1.8cm}
+            body{font-family:'Times New Roman',serif;font-size:12pt;color:#000;line-height:1.4;margin:0}
+            h1{font-size:22pt;text-align:center;margin-bottom:5pt;font-weight:700;text-transform:uppercase}
+            .contact{text-align:center;font-size:10.5pt;margin-bottom:15pt;border-bottom:1px solid #000;padding-bottom:10pt}
+            h2{font-size:13pt;font-weight:700;text-transform:uppercase;border-bottom:2.5px solid #000;padding-bottom:2pt;margin:15pt 0 8pt}
+            .entry{margin-bottom:12pt}
+            h3{font-size:12pt;font-weight:700;margin:0;display:inline-block}
+            .date{float:right;font-size:11pt;font-weight:700}
+            ul{margin:4pt 0 0 18pt}
+            li{margin-bottom:3pt;font-size:11pt}
+            .company-line{font-size:12pt;font-weight:700;margin-bottom:2pt}
+            .role-line{font-style:italic;margin-bottom:4pt;display:block}
+            .project-tech{font-size:10pt;font-weight:700;margin-top:2pt;display:block}
+        </style></head><body>
+            <h1>${esc(p.fullName)}</h1>
+            <div class="contact">
+                ${esc(p.address)} | ${esc(p.phone)}<br/>
+                ${esc(p.email)} ${p.linkedin ? `| LinkedIn: ${esc(p.linkedin.replace(/https?:\/\//, ''))}` : ''} ${p.github ? `| GitHub: ${esc(p.github.replace(/https?:\/\//, ''))}` : ''}
+            </div>
+            
+            ${(d.summary || data.objective) ? `<h2>Professional Summary</h2><p style="font-size:11pt;text-align:justify;">${esc(d.summary || data.objective)}</p>` : ''}
+            
+            <h2>Education</h2>
+            ${d.education.map(e => `
+                <div class="entry">
+                    <div class="date">${esc(e.gradYear)}</div>
+                    <div class="company-line">${esc(e.school)}</div>
+                    <div>${esc(e.degree)} ${e.gpa ? `| GPA: ${esc(e.gpa)}` : ''}</div>
+                </div>`).join('')}
+            
+            ${skillsContent}
+            
+            <h2>Experience</h2>
+            ${d.experience.map(e => `
+                <div class="entry">
+                    <div class="date">${esc(e.startDate)} - ${esc(e.endDate)}</div>
+                    <div class="company-line">${esc(e.company)}</div>
+                    <span class="role-line">${esc(e.jobTitle)}</span>
+                    <ul>${esc(e.description).split('\n').filter(Boolean).map(l => `<li>${esc(l.replace(/^[•\-\*]\s*/, ''))}</li>`).join('')}</ul>
+                </div>`).join('')}
+            
+            <h2>Projects</h2>
+            ${d.projects.map(pr => `
+                <div class="entry">
+                    <div class="company-line">${esc(pr.title)} ${pr.duration ? `<span class="date" style="font-weight:400">${esc(pr.duration)}</span>` : ''}</div>
+                    ${pr.tech ? `<span class="project-tech">Technologies: ${esc(pr.tech)}</span>` : ''}
+                    <div style="font-size:11pt;margin-top:2pt">${esc(pr.description).replace(/\n/g, '<br>')}</div>
+                    ${pr.link ? `<div style="font-size:10pt;margin-top:2pt;color:#444">Link: ${esc(pr.link)}</div>` : ''}
+                </div>`).join('')}
+            
+            ${d.softSkills.length > 0 ? `<h2>Personal Traits & Skills</h2><ul>${d.softSkills.map(s => `<li>${esc(s)}</li>`).join('')}</ul>` : ''}
+        </body></html>`;
+    },
+    'template-4': (data) => {
+        const d = normalizeData(data);
+        const p = d.personalInfo;
+
+        // Group skills into "categories" for the Technical Strengths section
+        // If not already grouped, we'll split by colon or just put all under "Software & Tools"
+        const skillsLines = d.skills.length > 0 ? d.skills : [];
+        const technicalStrengthsHtml = skillsLines.length > 0 ? `
+            <table style="width:100%; border-collapse:collapse; margin-top:5px;">
+                ${skillsLines.map(s => {
+            const parts = s.split(':');
+            const label = parts.length > 1 ? parts[0].trim() : 'Software & Tools';
+            const value = parts.length > 1 ? parts[1].trim() : parts[0].trim();
+            return `<tr>
+                        <td style="width:40%; font-weight:700; font-size:11pt; vertical-align:top; border:none; padding:4pt 0;">${esc(label)}</td>
+                        <td style="width:60%; font-size:11pt; vertical-align:top; border:none; padding:4pt 0;">${esc(value)}</td>
+                    </tr>`;
+        }).slice(0, 4).join('')}
+            </table>` : '';
+
+        return `<!doctype html><html><head><style>
+            @page { size: A4; margin: 1cm 1.5cm; }
+            body { font-family: 'Times New Roman', serif; font-size: 11pt; color: #000; line-height: 1.3; margin: 0; }
+            .header { text-align: center; margin-bottom: 20px; }
+            .name { font-size: 24pt; font-weight: 700; margin-bottom: 5pt; }
+            .contact-info { font-size: 10.5pt; }
+            h2 { font-size: 12pt; font-weight: 700; text-transform: uppercase; border-bottom: 1px solid #000; padding-bottom: 2pt; margin: 15pt 0 8pt; }
+            .section-content { margin-left: 2pt; }
+            ul { margin: 5pt 0 10pt 20pt; padding: 0; }
+            li { margin-bottom: 4pt; }
+            .bold { font-weight: 700; }
+            .italic { font-style: italic; }
+            .split-container { display: flex; justify-content: space-between; gap: 40px; }
+            .split-column { width: 48%; }
+        </style></head><body>
+            <div class="header">
+                <div class="name">${esc(p.fullName)}</div>
+                <div class="contact-info">
+                    ${esc(p.address)}<br/>
+                    (+91) ${esc(p.phone)} ${esc(p.email)}
+                </div>
+            </div>
+
+            <section>
+                <h2>EDUCATION</h2>
+                <div class="section-content">
+                    <div class="bold">${esc(d.education[0]?.school || '')}</div>
+                    <div style="font-size:10.5pt; margin-top:2pt;">
+                        ${esc(d.education[0]?.degree || '')}<br/>
+                        ${d.education[0]?.gpa ? `${esc(d.education[0].gpa)}` : ''}
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>CARRIER OBJECTIVE</h2>
+                <p class="section-content" style="text-align:justify;">${esc(d.summary || data.objective || '')}</p>
+            </section>
+
+            <section>
+                <h2>PROJECTS</h2>
+                <div class="section-content">
+                    ${d.projects.map(pr => `
+                        <div style="margin-bottom:10pt;">
+                            <div class="bold">${esc(pr.title)}</div>
+                            <div style="text-align:justify; margin-top:2pt;">${esc(pr.description)}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            </section>
+
+            <section>
+                <h2>TECHNICAL STRENGTHS</h2>
+                <div class="section-content">
+                    ${technicalStrengthsHtml}
+                </div>
+            </section>
+
+            <section>
+                <h2>WORK EXPERIENCE</h2>
+                <div class="section-content">
+                    ${d.experience.map(e => `
+                        <div style="margin-bottom:12pt;">
+                            <div class="bold">${esc(e.company)}</div>
+                            <ul style="margin-top:4pt;">
+                                ${esc(e.description).split('\n').filter(Boolean).map(line => `<li>${esc(line.replace(/^[•\-\*]\s*/, ''))}</li>`).join('')}
+                            </ul>
+                        </div>
+                    `).join('')}
+                </div>
+            </section>
+
+            <div class="split-container">
+                <div class="split-column">
+                    <section>
+                        <h2>ACADEMIC ACHIEVEMENTS</h2>
+                        <ul class="section-content">
+                            ${d.achievements.map(a => `<li>${esc(a)}</li>`).join('')}
+                        </ul>
+                    </section>
+                </div>
+                <div class="split-column">
+                    <section>
+                        <h2>EXTRA-CURRICULAR</h2>
+                        <ul class="section-content">
+                            ${toArray(data.extraCurricular || []).map(item => `<li>${esc(item)}</li>`).join('')}
+                        </ul>
+                    </section>
+                    <section>
+                        <h2>PERSONAL TRAITS</h2>
+                        <ul class="section-content">
+                            ${d.softSkills.map(s => `<li>${esc(s)}</li>`).join('')}
+                        </ul>
+                    </section>
+                </div>
+            </div>
+        </body></html>`;
     },
     'hiero-elite': (data) => {
         const d = normalizeData(data);
@@ -144,7 +320,9 @@ module.exports = {
             'minimal': 'minimal',
             'elite': 'hiero-elite',
             'hiero-elite': 'hiero-elite',
-            'modern-pro': 'modern-pro'
+            'modern-pro': 'modern-pro',
+            'template4': 'template-4',
+            'template-4': 'template-4'
         };
 
         const finalId = aliasMap[id] || id;
