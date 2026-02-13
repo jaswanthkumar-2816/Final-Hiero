@@ -1,10 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Select Your Role | Hiero</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="theme.css">
+  <script src="theme.js"></script>
   <style>
     body {
       margin: 0;
@@ -35,8 +39,13 @@
     }
 
     @keyframes glow {
-      from { filter: drop-shadow(0 0 8px #00ff00); }
-      to { filter: drop-shadow(0 0 20px #00ff00); }
+      from {
+        filter: drop-shadow(0 0 8px #00ff00);
+      }
+
+      to {
+        filter: drop-shadow(0 0 20px #00ff00);
+      }
     }
 
     @keyframes fadeOut {
@@ -82,8 +91,8 @@
       font-weight: 600;
       margin-bottom: 20px;
       background: linear-gradient(45deg, #fff, #00ff00);
-    -webkit-background-clip: text;
-    background-clip: text;
+      -webkit-background-clip: text;
+      background-clip: text;
       -webkit-text-fill-color: transparent;
     }
 
@@ -166,8 +175,12 @@
     }
   </style>
 </head>
+
 <body>
   <!-- Splash Screen -->
+  <div class="theme-toggle" onclick="toggleTheme()" title="Toggle Light/Dark Mode">
+    <i class="fas fa-sun"></i>
+  </div>
   <div class="splash-screen" id="splash-screen">
     <img src="logohiero.png" alt="Hiero Logo" class="logo-animated" />
   </div>
@@ -177,9 +190,11 @@
     <h1 class="app-title">HIERO</h1>
     <div class="content-section">
       <h2>Welcome to Your Career Journey</h2>
-      <p>Build your resume, analyze job descriptions, learn missing skills, and launch your career with AI-powered tools designed to help you succeed.</p>
+      <p>Build your resume, analyze job descriptions, learn missing skills, and launch your career with AI-powered tools
+        designed to help you succeed.</p>
       <div class="button-group" style="justify-content: center;">
-        <button style="margin: 0 auto; display: block;" onclick="window.location.href='dashboard.html'">Get Started</button>
+        <button style="margin: 0 auto; display: block;" onclick="window.location.href='dashboard.html'">Get
+          Started</button>
       </div>
     </div>
   </div>
@@ -199,4 +214,5 @@
     }
   </script>
 </body>
+
 </html>

@@ -8,6 +8,8 @@
   <link rel="stylesheet" href="/dashboard/styles.css" />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="theme.css">
+  <script src="theme.js"></script>
   <style>
     /* User Profile Styles */
     .user-profile {
@@ -269,113 +271,6 @@
       filter: blur(1px);
     }
 
-    /* LIGHT MODE STYLES */
-    body.light-mode {
-      background: linear-gradient(to right, #f0f4f8, #ffffff) !important;
-      color: #1a1a1a !important;
-    }
-
-    body.light-mode .dashboard-wrapper {
-      background: rgba(255, 255, 255, 0.85);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-      border: 1px solid rgba(0, 0, 0, 0.05);
-    }
-
-    body.light-mode .user-profile {
-      background: rgba(255, 255, 255, 0.6);
-      border-color: rgba(0, 0, 0, 0.1);
-      color: #333;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-    }
-
-    body.light-mode .avatar-initials {
-      border-color: #fff;
-      box-shadow: 0 4px 10px rgba(0, 128, 0, 0.2);
-    }
-
-    body.light-mode .user-info p {
-      color: #666;
-    }
-
-    body.light-mode .review-section {
-      background: rgba(255, 255, 255, 0.7);
-      border-color: rgba(7, 226, 25, 0.4);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
-    }
-
-    body.light-mode .review-input {
-      background: #f9f9f9;
-      color: #333;
-      border-color: #e0e0e0;
-    }
-
-    body.light-mode .review-input:focus {
-      background: #fff;
-    }
-
-    body.light-mode .existing-review {
-      background: #fff;
-      border-color: #eee;
-    }
-
-    body.light-mode .existing-review p {
-      color: #444;
-    }
-
-    body.light-mode .subtext {
-      color: #555 !important;
-    }
-
-    body.light-mode .result-heading {
-      color: #05a313 !important;
-    }
-
-    body.light-mode .title {
-      text-shadow: none !important;
-    }
-
-    /* THEME TOGGLE BUTTON */
-    .theme-toggle {
-      position: fixed;
-      top: 20px;
-      left: 20px;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      color: white;
-      font-size: 18px;
-      backdrop-filter: blur(10px);
-      transition: all 0.3s ease;
-      z-index: 1000;
-      color: white;
-    }
-
-    body.light-mode .theme-toggle {
-      background: rgba(0, 0, 0, 0.05);
-      border-color: rgba(0, 0, 0, 0.1);
-      color: #333;
-    }
-
-    .theme-toggle:hover {
-      transform: scale(1.1) rotate(15deg);
-      background: rgba(255, 255, 255, 0.2);
-    }
-
-    body.light-mode .theme-toggle:hover {
-      background: rgba(0, 0, 0, 0.1);
-    }
-
-    body.light-mode #antigravity-bg {
-      filter: none;
-      opacity: 0.6;
-    }
-
     /* Responsive adjustments */
     @media (max-width: 768px) {
       .user-profile {
@@ -584,7 +479,7 @@
 
       // Show user profile section
       userProfile.style.display = 'flex';
-      reviewSection.style.display = 'block';
+      // reviewSection visibility is handled in loadUserReview
 
       // Update user info
       userName.textContent = userData.name || 'User';
@@ -659,11 +554,18 @@
           }
         });
 
+        const reviewSection = document.getElementById('reviewSection');
+
         if (response.ok) {
           const data = await response.json();
           if (data.hasReview && data.review) {
             hasExistingReview = true;
-            displayExistingReview(data.review);
+            // User has ALREADY reviewed -> Hide section
+            reviewSection.style.display = 'none';
+          } else {
+            // User has NOT reviewed -> Show section to collect feedback
+            hasExistingReview = false;
+            reviewSection.style.display = 'block';
           }
         }
       } catch (error) {
@@ -862,49 +764,7 @@
     // Initialize dashboard when page loads
     window.addEventListener('load', initializeDashboard);
 
-    // --- Theme Management ---
-    function toggleTheme() {
-      const body = document.body;
-      const icon = document.querySelector('.theme-toggle i');
 
-      body.classList.toggle('light-mode');
-
-      const isLight = body.classList.contains('light-mode');
-      localStorage.setItem('theme', isLight ? 'light' : 'dark');
-
-      if (isLight) {
-        icon.classList.remove('fa-sun');
-        icon.classList.add('fa-moon');
-      } else {
-        icon.classList.remove('fa-moon');
-        icon.classList.add('fa-sun');
-      }
-
-      // Force repaint of canvas by triggering resize logic internally or just relying on loop
-    }
-
-    // Load saved theme
-    (function loadTheme() {
-      const savedTheme = localStorage.getItem('theme');
-      if (savedTheme === 'light') {
-        document.body.classList.add('light-mode');
-      }
-    })();
-
-    // Ensure icon matches state on load
-    window.addEventListener('load', () => {
-      const isLight = document.body.classList.contains('light-mode');
-      const icon = document.querySelector('.theme-toggle i');
-      if (icon) {
-        if (isLight) {
-          icon.classList.remove('fa-sun');
-          icon.classList.add('fa-moon');
-        } else {
-          icon.classList.remove('fa-moon');
-          icon.classList.add('fa-sun');
-        }
-      }
-    });
 
     // --- Premium Interactive Neural Linking System ---
     (function () {
