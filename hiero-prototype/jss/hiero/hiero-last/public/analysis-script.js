@@ -41,7 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
         connectionStatus.style.display = "block";
         connectionStatus.style.backgroundColor = "black";
         connectionStatus.style.color = "#00ff00";
-        statusText.textContent = "✅ Backend Ready";
+        statusText.textContent = "Welcome to Hiero";
         analyzeBtn.disabled = false;
       } else {
         throw new Error("Health check failed");
