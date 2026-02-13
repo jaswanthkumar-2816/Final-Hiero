@@ -1988,14 +1988,11 @@
           console.warn('⏱️ Preview request timeout after 90 seconds');
         }, 90000); // 90 seconds for ngrok
 
-        const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
-        console.log('📡 Fetching preview from:', `${BACKEND_URL}/preview-resume`);
         const response = await fetch(`${BACKEND_URL}/preview-resume`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Accept': 'application/pdf',
-            'Authorization': token ? `Bearer ${token}` : ''
+            'Accept': 'application/pdf'
           },
           body: JSON.stringify(sampleData),
           signal: controller.signal
@@ -4087,12 +4084,10 @@
 
         console.log('Previewing resume with template:', data.template);
 
-        const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
         const response = await fetch(`${BACKEND_URL}/preview-resume`, {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': token ? `Bearer ${token}` : ''
+            'Content-Type': 'application/json'
           },
           body: JSON.stringify(data)
         });

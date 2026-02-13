@@ -123,9 +123,13 @@ router.post('/template', authenticateToken, async (req, res) => {
 
 router.get('/health', (req, res) => res.json({ status: 'ok', service: 'resume-integrated' }));
 
-router.post('/preview-resume', authenticateToken, async (req, res) => {
+router.post('/preview-resume', async (req, res) => {
     try {
         const data = req.body;
+        // Basic validation
+        if (!data || Object.keys(data).length === 0) {
+            return res.status(400).send('No resume data provided');
+        }
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', 'inline; filename=resume-preview.pdf');
         await generateUnifiedResume(data, data.template || 'classic', res, { forceSinglePage: true });
@@ -135,9 +139,13 @@ router.post('/preview-resume', authenticateToken, async (req, res) => {
     }
 });
 
-router.post('/download-resume', authenticateToken, async (req, res) => {
+router.post('/download-resume', async (req, res) => {
     try {
         const data = req.body;
+        // Basic validation
+        if (!data || Object.keys(data).length === 0) {
+            return res.status(400).send('No resume data provided');
+        }
         const name = (data.personalInfo?.fullName || 'Resume').replace(/\s+/g, '_');
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', `attachment; filename="${name}_Hiero.pdf"`);

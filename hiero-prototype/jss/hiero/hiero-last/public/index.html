@@ -268,6 +268,113 @@
       filter: blur(1px);
     }
 
+    /* LIGHT MODE STYLES */
+    body.light-mode {
+      background: linear-gradient(to right, #f0f4f8, #ffffff) !important;
+      color: #1a1a1a !important;
+    }
+
+    body.light-mode .dashboard-wrapper {
+      background: rgba(255, 255, 255, 0.85);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    body.light-mode .user-profile {
+      background: rgba(255, 255, 255, 0.6);
+      border-color: rgba(0, 0, 0, 0.1);
+      color: #333;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    body.light-mode .avatar-initials {
+      border-color: #fff;
+      box-shadow: 0 4px 10px rgba(0, 128, 0, 0.2);
+    }
+
+    body.light-mode .user-info p {
+      color: #666;
+    }
+
+    body.light-mode .review-section {
+      background: rgba(255, 255, 255, 0.7);
+      border-color: rgba(7, 226, 25, 0.4);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+    }
+
+    body.light-mode .review-input {
+      background: #f9f9f9;
+      color: #333;
+      border-color: #e0e0e0;
+    }
+
+    body.light-mode .review-input:focus {
+      background: #fff;
+    }
+
+    body.light-mode .existing-review {
+      background: #fff;
+      border-color: #eee;
+    }
+
+    body.light-mode .existing-review p {
+      color: #444;
+    }
+
+    body.light-mode .subtext {
+      color: #555 !important;
+    }
+
+    body.light-mode .result-heading {
+      color: #05a313 !important;
+    }
+
+    body.light-mode .title {
+      text-shadow: none !important;
+    }
+
+    /* THEME TOGGLE BUTTON */
+    .theme-toggle {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: white;
+      font-size: 18px;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+      z-index: 100;
+    }
+
+    body.light-mode .theme-toggle {
+      background: rgba(0, 0, 0, 0.05);
+      border-color: rgba(0, 0, 0, 0.1);
+      color: #333;
+    }
+
+    .theme-toggle:hover {
+      transform: scale(1.1) rotate(15deg);
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    body.light-mode .theme-toggle:hover {
+      background: rgba(0, 0, 0, 0.1);
+    }
+
+    /* Adjust particles filter in light mode */
+    body.light-mode #antigravity-bg {
+      filter: none;
+      opacity: 0.6;
+    }
+
     /* Responsive adjustments */
     @media (max-width: 768px) {
       .user-profile {
@@ -305,6 +412,9 @@
 </head>
 
 <body>
+  <div class="theme-toggle" onclick="toggleTheme()" title="Toggle Light/Dark Mode">
+    <i class="fas fa-sun"></i>
+  </div>
   <canvas id="antigravity-bg"></canvas>
   <div class="dashboard-wrapper">
 
