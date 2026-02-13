@@ -3769,7 +3769,12 @@
         const group = document.getElementById(parentId);
         const input = document.getElementById(field);
         if (group && !group.classList.contains('skipped') && input && input.value.trim()) {
-          data[field] = input.value.trim();
+          // Map 'technicalSkills' to 'skills' for backend compatibility
+          if (field === 'technicalSkills') {
+            data.skills = input.value.trim();
+          } else {
+            data[field] = input.value.trim();
+          }
         }
       });
 
@@ -4044,6 +4049,33 @@
     }
 
     async function previewResume() {
+      // 1. Open blank window immediately to satisfy mobile popup blockers
+      // This must happen synchronously in the click event
+      const previewWindow = window.open('', '_blank');
+
+      if (!previewWindow) {
+        alert('Popup blocked! Please allow popups to see your resume preview.');
+        return;
+      }
+
+      previewWindow.document.write(`
+        <html>
+          <head>
+            <title>Hiero - Generating Preview</title>
+            <style>
+              body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #000; color: #fff; margin:0; }
+              .spinner { border: 4px solid rgba(42, 224, 35, 0.1); border-left-color: #2ae023; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 20px; }
+              @keyframes spin { to { transform: rotate(360deg); } }
+            </style>
+          </head>
+          <body>
+            <div class="spinner"></div>
+            <h3>Generating your premium preview...</h3>
+            <p style="color: #888; font-size: 14px;">This will take just a moment.</p>
+          </body>
+        </html>
+      `);
+
       const btn = event.target;
       const originalText = btn.innerHTML;
       btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading Preview...';
@@ -4067,17 +4099,28 @@
 
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({ error: 'Preview failed' }));
+          previewWindow.close();
           throw new Error(errorData.error || 'Preview failed');
         }
 
         const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        window.open(url, '_blank');
 
-        // Clean up after a delay
-        setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+        // Final fallback for empty response
+        if (blob.size < 100) {
+          previewWindow.close();
+          throw new Error('Server returned an invalid PDF.');
+        }
+
+        const url = window.URL.createObjectURL(blob);
+
+        // 2. Redirect the already opened window to the blob URL
+        previewWindow.location.href = url;
+
+        // Clean up memory after a delay
+        setTimeout(() => window.URL.revokeObjectURL(url), 10000);
 
       } catch (error) {
+        if (previewWindow) previewWindow.close();
         console.error('Preview error:', error);
         alert(`Failed to preview resume: ${error.message}. Please try again.`);
       } finally {
