@@ -944,16 +944,20 @@ function renderSection(doc, sectionKey, data, colors, template, spacing = SPACIN
             break;
 
         case 'projects':
-            if (data.projects && data.projects.length > 0) {
-                checkPageBreak(doc, 100);
-                renderSectionTitle(doc, 'Projects', colors, normalizedTemplate);
-                data.projects.forEach((proj, index) => {
-                    checkPageBreak(doc, 80);
-                    doc.fontSize(FONT_SIZES.jobTitle).fillColor(colors.primary).font(isAcademicSplit ? 'Times-Bold' : 'Helvetica-Bold').text(proj.name || proj.title || '');
-                    doc.fontSize(FONT_SIZES.body).fillColor(colors.secondary).font(isAcademicSplit ? 'Times-Roman' : 'Helvetica').text(proj.description || '', { width: maxWidth });
-                    if (index < data.projects.length - 1) doc.moveDown(spacing.itemGap / 10);
-                });
-                doc.moveDown(spacing.sectionGap / 10);
+            if (data.projects) {
+                const projectsList = Array.isArray(data.projects) ? data.projects : (typeof data.projects === 'string' ? [{ name: 'Projects', description: data.projects }] : []);
+
+                if (projectsList.length > 0) {
+                    checkPageBreak(doc, 100);
+                    renderSectionTitle(doc, 'Projects', colors, normalizedTemplate);
+                    projectsList.forEach((proj, index) => {
+                        checkPageBreak(doc, 80);
+                        doc.fontSize(FONT_SIZES.jobTitle).fillColor(colors.primary).font(isAcademicSplit ? 'Times-Bold' : 'Helvetica-Bold').text(proj.name || proj.title || '');
+                        doc.fontSize(FONT_SIZES.body).fillColor(colors.secondary).font(isAcademicSplit ? 'Times-Roman' : 'Helvetica').text(proj.description || '', { width: maxWidth });
+                        if (index < projectsList.length - 1) doc.moveDown(spacing.itemGap / 10);
+                    });
+                    doc.moveDown(spacing.sectionGap / 10);
+                }
             }
             break;
 

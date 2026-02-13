@@ -7,6 +7,7 @@
   <title>Hiero Dashboard</title>
   <link rel="stylesheet" href="/dashboard/styles.css" />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     /* User Profile Styles */
     .user-profile {
@@ -335,7 +336,7 @@
 
     /* THEME TOGGLE BUTTON */
     .theme-toggle {
-      position: absolute;
+      position: fixed;
       top: 20px;
       left: 20px;
       width: 40px;
@@ -351,7 +352,8 @@
       font-size: 18px;
       backdrop-filter: blur(10px);
       transition: all 0.3s ease;
-      z-index: 100;
+      z-index: 1000;
+      color: white;
     }
 
     body.light-mode .theme-toggle {
@@ -369,7 +371,6 @@
       background: rgba(0, 0, 0, 0.1);
     }
 
-    /* Adjust particles filter in light mode */
     body.light-mode #antigravity-bg {
       filter: none;
       opacity: 0.6;
@@ -861,6 +862,50 @@
     // Initialize dashboard when page loads
     window.addEventListener('load', initializeDashboard);
 
+    // --- Theme Management ---
+    function toggleTheme() {
+      const body = document.body;
+      const icon = document.querySelector('.theme-toggle i');
+
+      body.classList.toggle('light-mode');
+
+      const isLight = body.classList.contains('light-mode');
+      localStorage.setItem('theme', isLight ? 'light' : 'dark');
+
+      if (isLight) {
+        icon.classList.remove('fa-sun');
+        icon.classList.add('fa-moon');
+      } else {
+        icon.classList.remove('fa-moon');
+        icon.classList.add('fa-sun');
+      }
+
+      // Force repaint of canvas by triggering resize logic internally or just relying on loop
+    }
+
+    // Load saved theme
+    (function loadTheme() {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'light') {
+        document.body.classList.add('light-mode');
+      }
+    })();
+
+    // Ensure icon matches state on load
+    window.addEventListener('load', () => {
+      const isLight = document.body.classList.contains('light-mode');
+      const icon = document.querySelector('.theme-toggle i');
+      if (icon) {
+        if (isLight) {
+          icon.classList.remove('fa-sun');
+          icon.classList.add('fa-moon');
+        } else {
+          icon.classList.remove('fa-moon');
+          icon.classList.add('fa-sun');
+        }
+      }
+    });
+
     // --- Premium Interactive Neural Linking System ---
     (function () {
       const canvas = document.getElementById('antigravity-bg');
@@ -898,7 +943,9 @@
         }
 
         draw() {
-          ctx.fillStyle = `rgba(7, 226, 25, ${this.opacity})`;
+          const isLight = document.body.classList.contains('light-mode');
+          // Dark Mode: Green (#07e219), Light Mode: Dark Carbon (#444)
+          ctx.fillStyle = isLight ? `rgba(60, 60, 60, ${this.opacity})` : `rgba(7, 226, 25, ${this.opacity})`;
           ctx.beginPath();
           ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
           ctx.fill();
@@ -959,6 +1006,11 @@
       }
 
       function connect() {
+        const isLight = document.body.classList.contains('light-mode');
+        // Colors for linking
+        const linkBase = isLight ? 'rgba(80, 80, 80, ' : 'rgba(7, 226, 25, ';
+        const linkActive = isLight ? 'rgba(0, 0, 0, ' : 'rgba(180, 255, 180, ';
+
         for (let a = 0; a < particles.length; a++) {
           // 1. Link particles to each other
           for (let b = a + 1; b < particles.length; b++) {
@@ -978,11 +1030,11 @@
               ctx.beginPath();
               if (mDist < 120) {
                 let mForce = 1 - (mDist / 120);
-                // Glow into white-green when active
-                ctx.strokeStyle = `rgba(180, 255, 180, ${opacity * (0.3 + mForce * 0.7)})`;
+                // Glow into active color
+                ctx.strokeStyle = `${linkActive}${opacity * (0.3 + mForce * 0.7)})`;
                 ctx.lineWidth = 0.5 + mForce * 2;
               } else {
-                ctx.strokeStyle = `rgba(7, 226, 25, ${opacity * 0.15})`;
+                ctx.strokeStyle = `${linkBase}${opacity * 0.15})`;
                 ctx.lineWidth = 0.5;
               }
 
@@ -999,7 +1051,7 @@
 
           if (mDist < 180) {
             let mForce = 1 - (mDist / 180);
-            ctx.strokeStyle = `rgba(7, 226, 25, ${mForce * 0.4})`;
+            ctx.strokeStyle = `${linkActive}${mForce * 0.4})`;
             ctx.lineWidth = mForce * 1.5;
             ctx.beginPath();
             ctx.moveTo(mouse.x, mouse.y);
