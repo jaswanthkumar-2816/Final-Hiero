@@ -246,19 +246,14 @@ app.get('/get-started', (req, res) => {
   res.sendFile(path.join(__dirname, 'role-selection.html'));
 });
 
-// Added: Route /dashboard directly to the user dashboard in public/index.html
-app.get('/dashboard', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-// Support legacy dashboard.html links by redirecting to /dashboard
+// Support dashboard.html links directly
 app.get('/dashboard.html', (req, res) => {
-  res.redirect('/dashboard');
+  res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
 });
 
-// Added: Support index.html links by redirecting to /dashboard
+// Added: Support index.html links by serving dashboard
 app.get('/index.html', (req, res) => {
-  res.redirect('/dashboard');
+  res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
 });
 
 // Support for admin dashboard path
