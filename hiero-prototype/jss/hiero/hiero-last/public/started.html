@@ -4,11 +4,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Select Your Role | Hiero</title>
+  <title>Welcome to Hiero | Career Assistant</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="theme.css">
-  <script src="theme.js"></script>
   <style>
     body {
       margin: 0;
@@ -70,8 +68,6 @@
       background: linear-gradient(45deg, #fff, #00ff00);
       -webkit-background-clip: text;
       background-clip: text;
-      background-clip: text;
-      background-clip: text;
       -webkit-text-fill-color: transparent;
       letter-spacing: -1px;
     }
@@ -127,33 +123,6 @@
       transform: scale(1.05);
     }
 
-    .button-group .white-button {
-      background: rgba(255, 255, 255, 0.1);
-      color: #fff;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-
-    .button-group .white-button:hover {
-      background: rgba(255, 255, 255, 0.2);
-    }
-
-    .signup-link {
-      margin-top: 20px;
-      font-size: 14px;
-      color: #888;
-    }
-
-    .signup-link a {
-      color: #00ff00a7;
-      font-weight: 600;
-      text-decoration: none;
-      transition: color 0.3s ease;
-    }
-
-    .signup-link a:hover {
-      color: #00cc00;
-    }
-
     @media (max-width: 768px) {
       .app-title {
         font-size: 36px;
@@ -178,9 +147,6 @@
 
 <body>
   <!-- Splash Screen -->
-  <div class="theme-toggle" onclick="toggleTheme()" title="Toggle Light/Dark Mode">
-    <i class="fas fa-sun"></i>
-  </div>
   <div class="splash-screen" id="splash-screen">
     <img src="logohiero.png" alt="Hiero Logo" class="logo-animated" />
   </div>
@@ -193,7 +159,7 @@
       <p>Build your resume, analyze job descriptions, learn missing skills, and launch your career with AI-powered tools
         designed to help you succeed.</p>
       <div class="button-group" style="justify-content: center;">
-        <button style="margin: 0 auto; display: block;" onclick="window.location.href='dashboard.html'">Get
+        <button style="margin: 0 auto; display: block;" onclick="window.location.href='/get-started'">Get
           Started</button>
       </div>
     </div>
@@ -210,7 +176,7 @@
 
     function selectRole(role) {
       localStorage.setItem("role", role);
-      window.location.href = `.login.html?type=${role}`;
+      window.location.href = `/login?type=${role}`;
     }
   </script>
 </body>

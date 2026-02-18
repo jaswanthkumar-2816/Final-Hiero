@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -238,7 +239,7 @@
       border-radius: 16px;
       border: 1px solid rgba(7, 226, 25, 0.3);
       padding: 30px 25px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
     }
 
     .password-gate h2 {
@@ -256,8 +257,8 @@
       width: 100%;
       padding: 12px 14px;
       border-radius: 10px;
-      border: 1px solid rgba(255,255,255,0.2);
-      background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(0, 0, 0, 0.5);
       color: #fff;
       font-size: 18px;
       letter-spacing: 4px;
@@ -268,7 +269,7 @@
 
     .password-input:focus {
       border-color: #07e219;
-      box-shadow: 0 0 0 1px rgba(7,226,25,0.3);
+      box-shadow: 0 0 0 1px rgba(7, 226, 25, 0.3);
     }
 
     .password-error {
@@ -314,12 +315,14 @@
         font-size: 14px;
       }
 
-      th, td {
+      th,
+      td {
         padding: 10px;
       }
     }
   </style>
 </head>
+
 <body>
   <div class="container">
     <!-- Header -->
@@ -328,14 +331,15 @@
         <span>🎛️</span>
         Admin Dashboard
       </h1>
-      <a href="/index.html" class="back-btn">← Back to Dashboard</a>
+      <a href="/dashboard.html" class="back-btn">← Back to Dashboard</a>
     </div>
 
     <!-- Password Gate -->
     <div id="passwordGate" class="password-gate">
       <h2>Admin Access</h2>
       <p>Enter the 4-digit admin code to open the dashboard.</p>
-      <input id="adminPinInput" class="password-input" type="password" inputmode="numeric" maxlength="4" placeholder="••••">
+      <input id="adminPinInput" class="password-input" type="password" inputmode="numeric" maxlength="4"
+        placeholder="••••">
       <div id="passwordError" class="password-error"></div>
       <button id="passwordSubmit" class="password-btn">Unlock Dashboard</button>
     </div>
@@ -354,7 +358,7 @@
 
     <!-- Dashboard Content -->
     <div id="dashboardContent" style="display: none;">
-      
+
       <!-- Statistics Cards -->
       <div class="stats-grid">
         <div class="stat-card">
@@ -362,25 +366,25 @@
           <h3>Total Users</h3>
           <div class="value" id="totalUsers">0</div>
         </div>
-        
+
         <div class="stat-card">
           <div class="icon">✅</div>
           <h3>Unique Visitors</h3>
           <div class="value" id="uniqueUsers">0</div>
         </div>
-        
+
         <div class="stat-card">
           <div class="icon">🔄</div>
           <h3>Total Logins</h3>
           <div class="value" id="totalVisits">0</div>
         </div>
-        
+
         <div class="stat-card">
           <div class="icon">⭐</div>
           <h3>Avg Rating</h3>
           <div class="value" id="avgRating">0</div>
         </div>
-        
+
         <div class="stat-card">
           <div class="icon">📝</div>
           <h3>Total Reviews</h3>
@@ -465,7 +469,7 @@
     // Check authentication and load admin dashboard
     async function initAdminDashboard() {
       const token = localStorage.getItem('token');
-      
+
       if (!token) {
         showError('Please login to access this page.');
         setTimeout(() => {
@@ -548,7 +552,7 @@
 
     function displayUsers(users) {
       const usersTable = document.getElementById('usersTable');
-      
+
       if (users.length === 0) {
         usersTable.innerHTML = '<tr><td colspan="6" class="no-data">No users found</td></tr>';
         return;
@@ -558,7 +562,7 @@
         const lastLogin = user.lastLogin ? new Date(user.lastLogin).toLocaleString() : 'Never';
         const memberSince = new Date(user.createdAt).toLocaleDateString();
         const isActive = user.lastLogin && (Date.now() - new Date(user.lastLogin).getTime()) < 7 * 24 * 60 * 60 * 1000; // Active in last 7 days
-        
+
         return `
           <tr>
             <td><strong>${user.username || 'N/A'}</strong></td>
@@ -578,7 +582,7 @@
 
     function displayReviews(reviews) {
       const reviewsContainer = document.getElementById('reviewsContainer');
-      
+
       if (reviews.length === 0) {
         reviewsContainer.innerHTML = '<div class="no-data">No reviews yet</div>';
         return;
@@ -588,7 +592,7 @@
         const stars = '⭐'.repeat(review.rating);
         const createdDate = new Date(review.createdAt).toLocaleDateString();
         const isUpdated = review.updatedAt && new Date(review.updatedAt).getTime() !== new Date(review.createdAt).getTime();
-        
+
         return `
           <div class="review-card">
             <div class="review-header">
@@ -620,4 +624,5 @@
     });
   </script>
 </body>
+
 </html>

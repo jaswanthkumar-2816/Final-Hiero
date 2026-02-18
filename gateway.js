@@ -161,6 +161,11 @@ app.get(['/login', '/login.html'], (req, res) => res.sendFile(path.join(landingD
 app.get(['/signup', '/signup.html'], (req, res) => res.sendFile(path.join(landingDirPath, 'signup.html')));
 app.get('/dashboard.html', (req, res) => res.sendFile(path.join(resumeBuilderPath, 'dashboard.html')));
 
+// Route /get-started to the role selection page
+app.get('/get-started', (req, res) => {
+    res.sendFile(path.join(landingDirPath, 'role-selection.html'));
+});
+
 app.get('/sitemap.xml', (req, res) => res.sendFile(path.join(landingDirPath, 'sitemap.xml')));
 app.get('/robots.txt', (req, res) => res.sendFile(path.join(landingDirPath, 'robots.txt')));
 

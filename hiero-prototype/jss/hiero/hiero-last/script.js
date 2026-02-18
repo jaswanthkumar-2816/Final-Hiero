@@ -58,7 +58,7 @@ if (loginForm) {
 }
 
 // ✅ Token Validation
-if (window.location.pathname.includes("index.html")) {
+if (window.location.pathname.includes("/dashboard")) {
   const token = localStorage.getItem("token");
   if (!token) {
     document.getElementById("role-selection").classList.remove("hidden");
@@ -72,7 +72,7 @@ if (window.location.pathname.includes("index.html")) {
   if (token) {
     localStorage.setItem("token", token);
     window.history.replaceState({}, document.title, window.location.pathname);
-    window.location.href = "index.html";
+    window.location.href = "/dashboard";
   }
 })();
 
@@ -81,7 +81,7 @@ async function loadCareerToolsPage() {
   const token = localStorage.getItem("token");
   if (!token) {
     alert("Not logged in. Redirecting...");
-    window.location.href = "index.html";
+    window.location.href = "/dashboard";
     return;
   }
 
@@ -106,7 +106,7 @@ async function loadCareerToolsPage() {
     console.error("Dashboard Error:", err);
     alert("Session expired. Please log in again.");
     localStorage.removeItem("token");
-    window.location.href = "index.html";
+    window.location.href = "/dashboard";
   }
 }
 
@@ -120,7 +120,7 @@ logoutBtn?.addEventListener("click", () => {
   localStorage.removeItem("token");
   localStorage.removeItem("resumeDraft");
   alert("Logged out successfully!");
-  window.location.href = "index.html";
+  window.location.href = "/dashboard";
 });
 
 // ✅ Resume Analysis

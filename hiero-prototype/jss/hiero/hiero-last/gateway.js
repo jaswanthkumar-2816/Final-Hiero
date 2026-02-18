@@ -241,26 +241,37 @@ app.get('/', (req, res) => {
   res.sendFile(STARTED_HTML);
 });
 
-// Support started.html's current "Get Started" target without changing its design
-app.get('/dashboard.html', (req, res) => {
-  // Redirect to the actual dashboard UI file served statically from landingDir/public
-  return res.redirect('/public/index.html');
+// Added: Route /get-started to the role selection page
+app.get('/get-started', (req, res) => {
+  res.sendFile(path.join(__dirname, 'role-selection.html'));
 });
 
-// Fix accidental ".login.html" path without editing the page design
+// Added: Route /dashboard directly to the user dashboard in public/index.html
+app.get('/dashboard', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// Support legacy dashboard.html links by redirecting to /dashboard
+app.get('/dashboard.html', (req, res) => {
+  res.redirect('/dashboard');
+});
+
+// Added: Support index.html links by redirecting to /dashboard
+app.get('/index.html', (req, res) => {
+  res.redirect('/dashboard');
+});
+
+// Support for admin dashboard path
+app.get('/admin-dashboard.html', (req, res) => {
+  res.redirect('/public/admin-dashboard.html');
+});
+
+// Fix accidental ".login.html" path
 app.get('/.login.html', (req, res) => {
   return res.redirect('/login.html');
 });
 
-// After login → redirect to dashboard
-// (Your auth backend should redirect to /dashboard after login)
-app.get('/dashboard*', (req, res) => {
-  // If using proxy (live dev server on 8082)
-  res.redirect('/dashboard' + req.path.replace(/^\/dashboard/, ''));
-
-  // OR if serving static build:
-  // res.sendFile(path.join(dashboardDir, 'index.html'));
-});
+// Redundant dashboard routes removed to avoid loops
 
 // ------------------------------------------------------------------
 // 5. SPA FALLBACK (ONLY for frontend routes)
