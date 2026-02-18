@@ -135,7 +135,7 @@ router.post('/preview-resume', async (req, res) => {
         await generateUnifiedResume(data, data.template || 'classic', res, { forceSinglePage: true });
     } catch (error) {
         console.error('Preview error:', error);
-        res.status(500).send('Generation failed');
+        if (!res.headersSent) res.status(500).send('Generation failed');
     }
 });
 
@@ -175,7 +175,18 @@ router.post('/download-docx', authenticateToken, async (req, res) => {
 
 // Helper for Word generation (Refined to match the 'Jhon Smith' template)
 function generateWordHTML(data) {
-    const { personalInfo = {}, experience = [], education = [], projects = [], technicalSkills = '', softSkills = '', summary = '', achievements = '' } = data;
+    const {
+        personalInfo = {},
+        experience = [],
+        education = [],
+        projects = [],
+        softSkills = '',
+        summary = '',
+        achievements = ''
+    } = data;
+
+    // Skills can come as 'skills' or 'technicalSkills'
+    const technicalSkills = data.skills || data.technicalSkills || '';
 
     // Mapping keys to perfect titles
     const titles = {

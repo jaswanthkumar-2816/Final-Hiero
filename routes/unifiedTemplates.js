@@ -107,11 +107,11 @@ const TEMPLATE_COLORS = {
         light: '#666666'
     },
     'hiero-studio': {
-        primary: '#1a1a1a',
-        secondary: '#4a4a4a',
-        accent: '#10b981',       // Emerald accent for Studio
-        background: '#FFFFFF',
-        light: '#f3f4f6'
+        primary: '#ffffff',       // Sidebar Text (Name)
+        secondary: '#f3f4f6',     // Sidebar Secondary Text
+        accent: '#993333',        // Sidebar Background (Project Red/Brown) & Main Headers
+        background: '#FFFFFF',    // Main Background
+        light: '#1f2937'          // Main Text Color (Dark Grey)
     },
     'hiero-onyx': {
         primary: '#000000',
@@ -126,6 +126,77 @@ const TEMPLATE_COLORS = {
         accent: '#000000',
         background: '#FFFFFF',
         light: '#666666'
+    },
+    // ========== NEW TEMPLATES (10 Additional) ==========
+    'quantum-blue': {
+        primary: '#1e40af',      // Deep Blue
+        secondary: '#3b82f6',    // Bright Blue
+        accent: '#60a5fa',       // Light Blue
+        background: '#FFFFFF',
+        light: '#dbeafe'         // Pale Blue
+    },
+    'emerald-elite': {
+        primary: '#065f46',      // Forest Green
+        secondary: '#059669',    // Emerald
+        accent: '#10b981',       // Bright Emerald
+        background: '#FFFFFF',
+        light: '#d1fae5'         // Pale Green
+    },
+    'crimson-professional': {
+        primary: '#991b1b',      // Dark Red
+        secondary: '#dc2626',    // Crimson
+        accent: '#ef4444',       // Bright Red
+        background: '#FFFFFF',
+        light: '#fee2e2'         // Pale Red
+    },
+    'sapphire-tech': {
+        primary: '#1e3a8a',      // Navy Blue
+        secondary: '#2563eb',    // Royal Blue
+        accent: '#3b82f6',       // Sapphire
+        background: '#FFFFFF',
+        light: '#dbeafe'         // Sky Blue
+    },
+    'golden-executive': {
+        primary: '#92400e',      // Dark Brown
+        secondary: '#b45309',    // Bronze
+        accent: '#f59e0b',       // Gold
+        background: '#FFFFFF',
+        light: '#fef3c7'         // Pale Yellow
+    },
+    'violet-creative': {
+        primary: '#5b21b6',      // Deep Violet
+        secondary: '#7c3aed',    // Purple
+        accent: '#a78bfa',       // Light Purple
+        background: '#FFFFFF',
+        light: '#ede9fe'         // Pale Violet
+    },
+    'ocean-minimal': {
+        primary: '#0c4a6e',      // Deep Ocean
+        secondary: '#0369a1',    // Ocean Blue
+        accent: '#0ea5e9',       // Cyan
+        background: '#FFFFFF',
+        light: '#e0f2fe'         // Pale Cyan
+    },
+    'slate-modern': {
+        primary: '#1e293b',      // Slate Dark
+        secondary: '#475569',    // Slate Grey
+        accent: '#64748b',       // Light Slate
+        background: '#FFFFFF',
+        light: '#f1f5f9'         // Pale Slate
+    },
+    'ruby-bold': {
+        primary: '#881337',      // Deep Ruby
+        secondary: '#be123c',    // Rose
+        accent: '#e11d48',       // Pink Red
+        background: '#FFFFFF',
+        light: '#ffe4e6'         // Pale Pink
+    },
+    'azure-corporate': {
+        primary: '#164e63',      // Teal Dark
+        secondary: '#0891b2',    // Cyan
+        accent: '#06b6d4',       // Azure
+        background: '#FFFFFF',
+        light: '#cffafe'         // Pale Teal
     }
 };
 
@@ -593,6 +664,297 @@ function renderHeader_Academic(doc, data, colors) {
     doc.moveDown(1);
 }
 
+// ==================== NEW TEMPLATE HEADERS (10 Additional) ====================
+
+function renderHeader_QuantumBlue(doc, data, colors) {
+    const { personalInfo = {} } = data;
+
+    // Modern professional with blue accent bar
+    doc.rect(PAGE_CONFIG.margin, PAGE_CONFIG.margin - 10, PAGE_CONFIG.contentWidth, 4)
+        .fill(colors.accent);
+
+    doc.moveDown(0.5);
+    doc.fontSize(FONT_SIZES.name + 3)
+        .fillColor(colors.primary)
+        .font('Helvetica-Bold')
+        .text(personalInfo.fullName || '', PAGE_CONFIG.margin, doc.y);
+
+    doc.moveDown(0.3);
+    const contact = [personalInfo.email, personalInfo.phone, personalInfo.linkedin].filter(Boolean).join('  •  ');
+    doc.fontSize(FONT_SIZES.contact)
+        .fillColor(colors.secondary)
+        .font('Helvetica')
+        .text(contact);
+
+    doc.moveDown(1);
+}
+
+function renderHeader_EmeraldElite(doc, data, colors) {
+    const { personalInfo = {} } = data;
+
+    // Executive style with emerald accent
+    doc.fontSize(FONT_SIZES.name + 4)
+        .fillColor(colors.primary)
+        .font('Helvetica-Bold')
+        .text(personalInfo.fullName || '', PAGE_CONFIG.margin, PAGE_CONFIG.margin, {
+            align: 'center',
+            width: PAGE_CONFIG.contentWidth
+        });
+
+    doc.moveDown(0.2);
+    doc.moveTo(PAGE_CONFIG.margin + (PAGE_CONFIG.contentWidth / 2) - 30, doc.y)
+        .lineTo(PAGE_CONFIG.margin + (PAGE_CONFIG.contentWidth / 2) + 30, doc.y)
+        .strokeColor(colors.accent)
+        .lineWidth(3)
+        .stroke();
+
+    doc.moveDown(0.5);
+    const contact = [personalInfo.phone, personalInfo.email, personalInfo.address].filter(Boolean).join(' | ');
+    doc.fontSize(FONT_SIZES.contact)
+        .fillColor(colors.secondary)
+        .text(contact, { align: 'center' });
+
+    doc.moveDown(1.5);
+}
+
+function renderHeader_CrimsonProfessional(doc, data, colors) {
+    const { personalInfo = {} } = data;
+
+    // Traditional format with crimson accents
+    doc.fontSize(FONT_SIZES.name + 2)
+        .fillColor(colors.primary)
+        .font('Helvetica-Bold')
+        .text(personalInfo.fullName || '', PAGE_CONFIG.margin, PAGE_CONFIG.margin);
+
+    doc.moveDown(0.4);
+    doc.moveTo(PAGE_CONFIG.margin, doc.y)
+        .lineTo(PAGE_CONFIG.margin + PAGE_CONFIG.contentWidth, doc.y)
+        .strokeColor(colors.accent)
+        .lineWidth(2)
+        .stroke();
+
+    doc.moveDown(0.5);
+    doc.fontSize(FONT_SIZES.contact)
+        .fillColor(colors.secondary)
+        .font('Helvetica');
+
+    [personalInfo.email, personalInfo.phone, personalInfo.address].filter(Boolean).forEach(info => {
+        doc.text(info);
+    });
+
+    doc.moveDown(1);
+}
+
+function renderHeader_SapphireTech(doc, data, colors) {
+    const { personalInfo = {} } = data;
+
+    // Tech-focused with modern sapphire design
+    doc.fontSize(FONT_SIZES.name)
+        .fillColor(colors.primary)
+        .font('Helvetica-Bold')
+        .text('< ' + (personalInfo.fullName || '') + ' />', PAGE_CONFIG.margin, PAGE_CONFIG.margin);
+
+    doc.moveDown(0.5);
+    doc.fontSize(FONT_SIZES.contact)
+        .fillColor(colors.accent)
+        .font('Courier');
+
+    if (personalInfo.email) doc.text('  > email: ' + personalInfo.email);
+    if (personalInfo.phone) doc.text('  > phone: ' + personalInfo.phone);
+    if (personalInfo.linkedin) doc.text('  > linkedin: ' + personalInfo.linkedin);
+
+    doc.moveDown(1.2);
+}
+
+function renderHeader_GoldenExecutive(doc, data, colors) {
+    const { personalInfo = {} } = data;
+
+    // Luxury executive style with golden accents
+    doc.rect(0, 0, PAGE_CONFIG.width, 100)
+        .fillAndStroke(colors.light, colors.light);
+
+    doc.fontSize(FONT_SIZES.name + 5)
+        .fillColor(colors.primary)
+        .font('Times-Bold')
+        .text(personalInfo.fullName || '', PAGE_CONFIG.margin, 25, {
+            align: 'center',
+            width: PAGE_CONFIG.contentWidth
+        });
+
+    doc.moveDown(0.3);
+    doc.fontSize(FONT_SIZES.jobTitle)
+        .fillColor(colors.secondary)
+        .font('Times-Italic')
+        .text(data.experience?.[0]?.jobTitle || 'SENIOR EXECUTIVE', {
+            align: 'center'
+        });
+
+    doc.moveDown(0.4);
+    const contact = [personalInfo.email, personalInfo.phone].filter(Boolean).join('  |  ');
+    doc.fontSize(FONT_SIZES.contact)
+        .fillColor(colors.secondary)
+        .font('Times-Roman')
+        .text(contact, { align: 'center' });
+
+    doc.y = 115;
+}
+
+function renderHeader_VioletCreative(doc, data, colors) {
+    const { personalInfo = {} } = data;
+
+    // Creative purple-themed design
+    doc.fontSize(FONT_SIZES.name + 6)
+        .fillColor(colors.primary)
+        .font('Helvetica-Bold')
+        .text(personalInfo.fullName || '', PAGE_CONFIG.margin, PAGE_CONFIG.margin, {
+            align: 'center',
+            width: PAGE_CONFIG.contentWidth
+        });
+
+    doc.moveDown(0.3);
+
+    // Creative wave line
+    const centerX = PAGE_CONFIG.margin + (PAGE_CONFIG.contentWidth / 2);
+    doc.moveTo(centerX - 40, doc.y)
+        .lineTo(centerX - 20, doc.y + 3)
+        .lineTo(centerX, doc.y)
+        .lineTo(centerX + 20, doc.y + 3)
+        .lineTo(centerX + 40, doc.y)
+        .strokeColor(colors.accent)
+        .lineWidth(2)
+        .stroke();
+
+    doc.moveDown(0.8);
+    const contact = [personalInfo.email, personalInfo.phone, personalInfo.website].filter(Boolean).join(' • ');
+    doc.fontSize(FONT_SIZES.contact)
+        .fillColor(colors.secondary)
+        .text(contact, { align: 'center' });
+
+    doc.moveDown(1.5);
+}
+
+function renderHeader_OceanMinimal(doc, data, colors) {
+    const { personalInfo = {} } = data;
+
+    // Minimalist ocean theme
+    doc.fontSize(FONT_SIZES.name)
+        .fillColor(colors.primary)
+        .font('Helvetica-Light')
+        .text(personalInfo.fullName || '', PAGE_CONFIG.margin, PAGE_CONFIG.margin);
+
+    doc.moveDown(0.4);
+    doc.fontSize(FONT_SIZES.contact)
+        .fillColor(colors.secondary)
+        .font('Helvetica');
+
+    const contactLine = [personalInfo.email, personalInfo.phone, personalInfo.address].filter(Boolean).join('  |  ');
+    doc.text(contactLine);
+
+    if (personalInfo.linkedin || personalInfo.website) {
+        doc.moveDown(0.1);
+        const links = [personalInfo.linkedin, personalInfo.website].filter(Boolean).join('  |  ');
+        doc.fillColor(colors.accent).text(links);
+    }
+
+    doc.moveDown(1.5);
+}
+
+function renderHeader_SlateModern(doc, data, colors) {
+    const { personalInfo = {} } = data;
+
+    // Contemporary slate design
+    doc.fontSize(FONT_SIZES.name + 3)
+        .fillColor(colors.primary)
+        .font('Helvetica-Bold')
+        .text(personalInfo.fullName || '', PAGE_CONFIG.margin, PAGE_CONFIG.margin);
+
+    doc.moveDown(0.2);
+    doc.fontSize(FONT_SIZES.jobTitle)
+        .fillColor(colors.accent)
+        .font('Helvetica')
+        .text(data.experience?.[0]?.jobTitle || 'PROFESSIONAL');
+
+    doc.moveDown(0.5);
+    doc.moveTo(PAGE_CONFIG.margin, doc.y)
+        .lineTo(PAGE_CONFIG.margin + 100, doc.y)
+        .strokeColor(colors.accent)
+        .lineWidth(2)
+        .stroke();
+
+    doc.moveDown(0.5);
+    const contact = [personalInfo.email, personalInfo.phone, personalInfo.address].filter(Boolean).join(' • ');
+    doc.fontSize(FONT_SIZES.contact)
+        .fillColor(colors.secondary)
+        .text(contact);
+
+    doc.moveDown(1);
+}
+
+function renderHeader_RubyBold(doc, data, colors) {
+    const { personalInfo = {} } = data;
+
+    // Bold ruby design
+    doc.rect(0, 0, PAGE_CONFIG.width, 90)
+        .fillAndStroke(colors.primary, colors.primary);
+
+    doc.fontSize(FONT_SIZES.name + 4)
+        .fillColor('#FFFFFF')
+        .font('Helvetica-Bold')
+        .text(personalInfo.fullName || '', PAGE_CONFIG.margin, 20, {
+            width: PAGE_CONFIG.contentWidth
+        });
+
+    doc.moveDown(0.3);
+    const contact = [personalInfo.email, personalInfo.phone, personalInfo.address].filter(Boolean).join('  |  ');
+    doc.fontSize(FONT_SIZES.contact)
+        .fillColor('#FFFFFF')
+        .font('Helvetica')
+        .text(contact);
+
+    if (personalInfo.linkedin) {
+        doc.moveDown(0.2);
+        doc.text(personalInfo.linkedin);
+    }
+
+    doc.y = 100;
+}
+
+function renderHeader_AzureCorporate(doc, data, colors) {
+    const { personalInfo = {} } = data;
+
+    // Corporate azure layout
+    doc.fontSize(FONT_SIZES.name + 2)
+        .fillColor(colors.primary)
+        .font('Helvetica-Bold')
+        .text(personalInfo.fullName || '', PAGE_CONFIG.margin, PAGE_CONFIG.margin, {
+            align: 'center',
+            width: PAGE_CONFIG.contentWidth
+        });
+
+    doc.moveDown(0.3);
+    const jobTitle = data.experience?.[0]?.jobTitle || 'PROFESSIONAL';
+    doc.fontSize(FONT_SIZES.jobTitle)
+        .fillColor(colors.accent)
+        .font('Helvetica-Oblique')
+        .text(jobTitle, { align: 'center' });
+
+    doc.moveDown(0.5);
+    doc.moveTo(PAGE_CONFIG.margin, doc.y)
+        .lineTo(PAGE_CONFIG.margin + PAGE_CONFIG.contentWidth, doc.y)
+        .strokeColor(colors.accent)
+        .lineWidth(1.5)
+        .stroke();
+
+    doc.moveDown(0.5);
+    const contact = [personalInfo.phone, personalInfo.email, personalInfo.address].filter(Boolean).join(' | ');
+    doc.fontSize(FONT_SIZES.contact)
+        .fillColor(colors.secondary)
+        .font('Helvetica')
+        .text(contact, { align: 'center' });
+
+    doc.moveDown(1.5);
+}
+
 // ==================== SECTION TITLE RENDERER ====================
 
 function renderSectionTitle(doc, title, colors, template) {
@@ -710,7 +1072,7 @@ function renderSectionTitle(doc, title, colors, template) {
 
 // ==================== MAIN TEMPLATE GENERATOR ====================
 async function generateUnifiedResume(data, templateId, outStream, customOptions = {}) {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
         try {
             let template = (templateId || 'classic').toLowerCase().trim();
             template = TEMPLATE_MAP[template] || template;
@@ -741,7 +1103,27 @@ async function generateUnifiedResume(data, templateId, outStream, customOptions 
                 case 'ats-optimized':
                 case 'corporate-ats': renderHeader_ATS(doc, data, colors); break;
                 case 'priya-analytics': renderHeader_PriyaAnalytics(doc, data, colors); break;
+                case 'hiero-elite':
+                    renderTemplate_HieroElite(doc, data);
+                    doc.end();
+                    if (outStream && outStream.on) {
+                        outStream.on('finish', () => resolve(true));
+                        outStream.on('error', reject);
+                    } else {
+                        resolve(doc);
+                    }
+                    return;
                 case 'hiero-studio':
+                    // Studio uses a completely custom full-page layout
+                    await renderTemplate_StudioRightSidebar(doc, data, colors, spacing);
+                    doc.end();
+                    if (outStream && outStream.on) {
+                        outStream.on('finish', () => resolve(true));
+                        outStream.on('error', reject);
+                    } else {
+                        resolve(doc);
+                    }
+                    return;
                 case 'hiero-onyx':
                 case 'hiero-executive': renderHeader_Executive(doc, data, colors); break;
                 case 'template-4': renderHeader_Academic(doc, data, colors); break;
@@ -1099,4 +1481,711 @@ function renderSection(doc, sectionKey, data, colors, template, spacing = SPACIN
     }
 }
 
+// ==================== NEW STUDIO LAYOUT (TEMPLATE 5) ====================
+async function renderTemplate_StudioRightSidebar(doc, data, colors, spacing) {
+    const sidebarWidth = PAGE_CONFIG.width * 0.35; // 35% width for sidebar
+    const sidebarX = PAGE_CONFIG.width - sidebarWidth;
+
+    // 1. Draw Sidebar Background (Full Height)
+    doc.save();
+    doc.fillColor(colors.accent).rect(sidebarX, 0, sidebarWidth, PAGE_CONFIG.height).fill();
+    doc.restore();
+
+    // ==================== RIGHT SIDEBAR CONTENT ====================
+    let sidebarY = 40;
+    const sidebarMargin = 20;
+    const sidebarContentWidth = sidebarWidth - (sidebarMargin * 2);
+    const sidebarTextX = sidebarX + sidebarMargin;
+
+    // -- Photo (Base64 Upload or Initials fall-back) --
+    const photoRadius = 50;
+    const photoCenterX = sidebarX + (sidebarWidth / 2);
+    const photoCenterY = sidebarY + photoRadius;
+
+    doc.save();
+    doc.circle(photoCenterX, photoCenterY, photoRadius).clip();
+
+    if (data.personalInfo && data.personalInfo.profilePhoto) {
+        try {
+            doc.image(data.personalInfo.profilePhoto,
+                sidebarX + (sidebarWidth / 2) - photoRadius,
+                sidebarY,
+                {
+                    width: photoRadius * 2,
+                    height: photoRadius * 2,
+                    fit: 'cover'
+                }
+            );
+        } catch (error) {
+            console.error('Studio Template: Photo load failed:', error);
+            renderStudioInitials(doc, data.personalInfo?.fullName || "User", photoCenterX, photoCenterY, photoRadius, sidebarWidth, sidebarX);
+        }
+    } else {
+        renderStudioInitials(doc, data.personalInfo?.fullName || "User", photoCenterX, photoCenterY, photoRadius, sidebarWidth, sidebarX);
+    }
+    doc.restore();
+
+    sidebarY += (photoRadius * 2) + 30;
+
+    // -- Name --
+    doc.fontSize(24)
+        .fillColor(colors.primary) // White
+        .font('Helvetica-Bold')
+        .text(data.personalInfo?.fullName || 'Your Name', sidebarTextX, sidebarY, {
+            width: sidebarContentWidth,
+            align: 'left'
+        });
+    sidebarY += doc.heightOfString(data.personalInfo?.fullName || 'Your Name', { width: sidebarContentWidth }) + 10;
+
+    // -- Job Title --
+    const jobTitle = data.experience?.[0]?.jobTitle || 'Professional Title';
+    doc.fontSize(12)
+        .fillColor(colors.secondary) // Lighter for subtitle
+        .font('Helvetica')
+        .text(jobTitle.toUpperCase(), sidebarTextX, sidebarY, {
+            width: sidebarContentWidth,
+            align: 'left'
+        });
+    sidebarY += doc.heightOfString(jobTitle.toUpperCase(), { width: sidebarContentWidth }) + 30;
+
+    // -- Contact Section --
+    // Header background (Darker shade)
+    doc.save();
+    doc.fillColor('#5e1b1b').rect(sidebarX, sidebarY, sidebarWidth, 30).fill(); // Darker shade for header bar
+    doc.restore();
+
+    doc.fontSize(14)
+        .fillColor('#ffffff')
+        .font('Helvetica-Bold')
+        .text('Contact', sidebarTextX, sidebarY + 8);
+
+    sidebarY += 45;
+
+    // Contact Details
+    doc.fontSize(10)
+        .fillColor('#ffffff')
+        .font('Helvetica-Bold');
+
+    const contactItems = [
+        { label: 'Address', val: data.personalInfo?.address, icon: '📍' },
+        { label: 'Phone', val: data.personalInfo?.phone, icon: '📞' },
+        { label: 'E-mail', val: data.personalInfo?.email, icon: '✉️' },
+        { label: 'LinkedIn', val: data.personalInfo?.linkedin, icon: '🔗' },
+        { label: 'Website', val: data.personalInfo?.website, icon: '🌐' }
+    ];
+
+    contactItems.filter(i => i.val).forEach(item => {
+        doc.font('Helvetica-Bold').fontSize(10).fillColor('#ffffff')
+            .text(item.label, sidebarTextX, sidebarY);
+        sidebarY += 14;
+
+        doc.font('Helvetica').fontSize(9).fillColor(colors.secondary)
+            .text(item.val, sidebarTextX, sidebarY, { width: sidebarContentWidth });
+        sidebarY += doc.heightOfString(item.val, { width: sidebarContentWidth }) + 10;
+    });
+
+    sidebarY += 20;
+
+    // -- Skills Section --
+    if (data.skills) {
+        doc.save();
+        doc.fillColor('#5e1b1b').rect(sidebarX, sidebarY, sidebarWidth, 30).fill();
+        doc.restore();
+
+        doc.fontSize(14)
+            .fillColor('#ffffff')// White
+            .font('Helvetica-Bold')
+            .text('Skills', sidebarTextX, sidebarY + 8);
+
+        sidebarY += 45;
+
+        const skillsList = Array.isArray(data.skills)
+            ? data.skills
+            : (typeof data.skills === 'string' ? data.skills.split(/[\n,]/).map(s => s.trim()) : []);
+
+        doc.fontSize(9).font('Helvetica');
+        skillsList.filter(Boolean).slice(0, 15).forEach(skill => {
+            doc.circle(sidebarTextX + 4, sidebarY + 4, 2).fill('#ffffff');
+            doc.fillColor('#ffffff').text(skill, sidebarTextX + 15, sidebarY, { width: sidebarContentWidth - 15 });
+            sidebarY += doc.heightOfString(skill, { width: sidebarContentWidth - 15 }) + 6;
+        });
+    }
+
+    // ==================== LEFT MAIN CONTENT ====================
+    doc.y = 40; // Reset Y for main content
+    const mainMargin = 40;
+    const mainWidth = sidebarX - (mainMargin * 2);
+    const mainX = mainMargin;
+
+    // -- Education --
+    if (data.education && data.education.length > 0) {
+        doc.fontSize(16)
+            .fillColor(colors.accent) // Red/Brown color for headers
+            .font('Helvetica-Bold')
+            .text('Education', mainX, doc.y);
+
+        doc.moveTo(mainX, doc.y + 5).lineTo(mainX + mainWidth, doc.y + 5)
+            .strokeColor('#e5e7eb').lineWidth(1).stroke(); // Light grey line
+
+        doc.moveDown(0.8);
+        doc.y += 10;
+
+        data.education.forEach(edu => {
+            const date = edu.gradYear || 'Year';
+            const title = edu.degree || 'Degree';
+
+            // Two column layout for item: Date (Left), Content (Right)
+            const dateWidth = 80;
+            const contentW = mainWidth - dateWidth - 10;
+
+            const startY = doc.y;
+
+            // Date
+            doc.fontSize(10).fillColor('#6b7280').font('Helvetica')
+                .text(date, mainX, startY, { width: dateWidth });
+
+            // Title
+            doc.fontSize(12).fillColor('#000000').font('Helvetica-Bold')
+                .text(title, mainX + dateWidth + 10, startY, { width: contentW });
+
+            // School
+            if (edu.school) {
+                const currentY = doc.y;
+                doc.fontSize(10).fillColor('#374151').font('Helvetica-Oblique')
+                    .text(edu.school + (edu.location ? ', ' + edu.location : ''), mainX + dateWidth + 10, currentY + 4, { width: contentW });
+            }
+
+            doc.moveDown(2);
+        });
+
+        doc.moveDown(1.5);
+    }
+
+    // -- Work History --
+    if (data.experience && data.experience.length > 0) {
+        doc.fontSize(16)
+            .fillColor(colors.accent)
+            .font('Helvetica-Bold')
+            .text('Work History', mainX, doc.y);
+
+        doc.moveTo(mainX, doc.y + 5).lineTo(mainX + mainWidth, doc.y + 5)
+            .strokeColor('#e5e7eb').lineWidth(1).stroke();
+
+        doc.moveDown(0.8);
+        doc.y += 10;
+
+        data.experience.forEach(exp => {
+            const startDate = exp.startDate || '';
+            const endDate = exp.endDate || 'Present';
+            const dateStr = `${startDate}\n- ${endDate}`; // Multiline date
+
+            const dateWidth = 80;
+            const contentW = mainWidth - dateWidth - 10;
+
+            // Check page break for main content
+            if (doc.y > PAGE_CONFIG.height - 80) {
+                doc.addPage();
+                // Re-draw sidebar background on new page? 
+                // Yes, create a background rect for sidebar on every new page
+                doc.save();
+                doc.fillColor(colors.accent).rect(sidebarX, 0, sidebarWidth, PAGE_CONFIG.height).fill();
+                doc.restore();
+                doc.y = 40;
+            }
+
+            const startY = doc.y;
+
+            // Date
+            doc.fontSize(10).fillColor('#6b7280').font('Helvetica')
+                .text(dateStr, mainX, startY, { width: dateWidth });
+
+            // Job Title
+            doc.fontSize(12).fillColor('#000000').font('Helvetica-Bold')
+                .text(exp.jobTitle, mainX + dateWidth + 10, startY, { width: contentW });
+
+            // Company
+            doc.fontSize(10).fillColor('#374151').font('Helvetica-Oblique')
+                .text(exp.company, mainX + dateWidth + 10, doc.y + 4, { width: contentW });
+
+            doc.moveDown(0.5);
+
+            // Description bullets
+            if (exp.description) {
+                const bullets = exp.description.split('\n').filter(b => b.trim());
+                bullets.forEach(b => {
+                    // Check page break
+                    if (doc.y > PAGE_CONFIG.height - 40) {
+                        doc.addPage();
+                        doc.save();
+                        doc.fillColor(colors.accent).rect(sidebarX, 0, sidebarWidth, PAGE_CONFIG.height).fill();
+                        doc.restore();
+                        doc.y = 40;
+                    }
+
+                    const bulletY = doc.y;
+                    doc.circle(mainX + dateWidth + 15, bulletY + 4, 1.5).fill('#374151');
+                    doc.fontSize(10).fillColor('#374151').font('Helvetica')
+                        .text(b.replace(/^[•\-\*]\s*/, ''), mainX + dateWidth + 25, bulletY, { width: contentW - 20, align: 'justify' });
+                    doc.moveDown(0.3);
+                });
+            }
+
+            doc.moveDown(1.5);
+        });
+    }
+
+
+    // -- Summary / Objective (If not covered) -- 
+    if (data.summary) {
+        if (doc.y > PAGE_CONFIG.height - 100) {
+            doc.addPage();
+            doc.save();
+            doc.fillColor(colors.accent).rect(sidebarX, 0, sidebarWidth, PAGE_CONFIG.height).fill();
+            doc.restore();
+            doc.y = 40;
+        }
+
+        doc.fontSize(16)
+            .fillColor(colors.accent)
+            .font('Helvetica-Bold')
+            .text('Summary', mainX, doc.y);
+
+        doc.moveTo(mainX, doc.y + 5).lineTo(mainX + mainWidth, doc.y + 5)
+            .strokeColor('#e5e7eb').lineWidth(1).stroke();
+
+        doc.moveDown(0.8);
+        doc.y += 10;
+
+        doc.fontSize(10).fillColor('#374151').font('Helvetica')
+            .text(data.summary, mainX, doc.y, { width: mainWidth, align: 'justify' });
+
+        doc.moveDown(2);
+    }
+}
+
+// ==================== HELPER: RENDER RECTANGULAR INITIALS ====================
+function renderRectangularInitials(doc, fullName, x, y, width, height) {
+    let initials = "U";
+    if (fullName && typeof fullName === 'string') {
+        const nameParts = fullName.trim().split(/\s+/).filter(part => part.length > 0);
+        if (nameParts.length === 1) {
+            initials = nameParts[0].charAt(0).toUpperCase();
+        } else if (nameParts.length >= 2) {
+            initials = nameParts[0].charAt(0).toUpperCase() + nameParts[1].charAt(0).toUpperCase();
+        }
+    }
+
+    // Text for initials
+    const fontSize = 50;
+    doc.fillColor("#722626") // Deep reddish brown
+        .font("Helvetica-Bold")
+        .fontSize(fontSize)
+        .text(initials, x, y + (height / 2) - (fontSize / 1.5), {
+            width: width,
+            align: 'center'
+        });
+}
+
+// ==================== HELPER: RENDER STUDIO INITIALS ====================
+function renderStudioInitials(doc, fullName, centerX, centerY, radius, sidebarWidth, sidebarX) {
+    let initials = "U";
+    if (fullName && typeof fullName === 'string') {
+        const nameParts = fullName.trim().split(/\s+/).filter(part => part.length > 0);
+        if (nameParts.length === 1) {
+            initials = nameParts[0].charAt(0).toUpperCase();
+        } else if (nameParts.length >= 2) {
+            initials = nameParts[0].charAt(0).toUpperCase() + nameParts[1].charAt(0).toUpperCase();
+        }
+    }
+
+    // Grey background circle for Studio
+    doc.fillColor("#d1d5db").circle(centerX, centerY, radius).fill();
+
+    // Add a subtle border
+    doc.strokeColor("#9ca3af").lineWidth(1).circle(centerX, centerY, radius).stroke();
+
+    // Dark grey initials - Better Centering
+    const fontSize = radius * 0.7;
+    doc.fontSize(fontSize)
+        .fillColor("#4b5563")
+        .font("Helvetica-Bold")
+        .text(initials, sidebarX, centerY - (fontSize / 2.2), {
+            width: sidebarWidth,
+            align: 'center'
+        });
+}
+
+// ==================== HELPER: RENDER INITIALS ====================
+function renderInitials(doc, fullName, centerX, centerY, radius) {
+    let initials = "U";
+
+    if (fullName && typeof fullName === 'string') {
+        const nameParts = fullName.trim().split(/\s+/).filter(part => part.length > 0);
+        if (nameParts.length === 1) {
+            initials = nameParts[0].charAt(0).toUpperCase();
+        } else if (nameParts.length >= 2) {
+            initials = nameParts[0].charAt(0).toUpperCase() + nameParts[1].charAt(0).toUpperCase();
+        }
+    }
+
+    // Background circle (Darker shade for contrast)
+    doc.fillColor("#722626")
+        .circle(centerX, centerY, radius)
+        .fill();
+
+    // Premium White Border
+    doc.strokeColor("#FFFFFF")
+        .lineWidth(2)
+        .circle(centerX, centerY, radius)
+        .stroke();
+
+    // Draw initials text
+    const fontSize = radius * 0.8;
+    doc.fillColor("#FFFFFF")
+        .font("Helvetica-Bold")
+        .fontSize(fontSize)
+        .text(initials, centerX - radius, centerY - (fontSize / 2.2), {
+            width: radius * 2,
+            align: 'center'
+        });
+}
+
+function getInitials(name) {
+    if (!name) return "JD";
+    return name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
+}
+
+// ==================== HIERO ELITE TEMPLATE (USER PROVIDED) ====================
+function renderTemplate_HieroElite(doc, originalData) {
+    // Specs
+    const PAGE_WIDTH = 595;
+    const PAGE_HEIGHT = 842;
+    const SIDEBAR_WIDTH = 220;
+    const SIDEBAR_X = 375;
+    const SIDEBAR_PADDING = 20;
+
+    const COLORS = {
+        sidebarBg: "#8B3F2B",
+        sidebarDark: "#6E2F1F",
+        heading: "#8B3F2B",
+        divider: "#CCCCCC",
+        bodyText: "#333333",
+        roleColor: "#E5B8AA",
+        lightText: "#777777"
+    };
+
+    // Helper to sanitize and format data
+    const toArray = (v) => {
+        if (Array.isArray(v)) return v.map(item => (typeof item === 'object' && item !== null) ? (item.name || item.skill || JSON.stringify(item)) : String(item));
+        if (typeof v === 'string') return v.split(/[\n,;]/).map(s => s.trim()).filter(Boolean);
+        return [];
+    };
+
+    const data = {
+        name: originalData.name || originalData.personalInfo?.fullName || "Your Name",
+        role: originalData.role || originalData.personalInfo?.roleTitle || (originalData.experience && originalData.experience[0] && originalData.experience[0].jobTitle) || "Executive Manager",
+        address: originalData.address || originalData.personalInfo?.address || "",
+        phone: originalData.phone || originalData.personalInfo?.phone || "",
+        email: originalData.email || originalData.personalInfo?.email || "email@example.com",
+        skills: toArray(originalData.skills || originalData.personalInfo?.skills || originalData.technicalSkills || []),
+        education: (Array.isArray(originalData.education) ? originalData.education : []).map(e => ({
+            date: e.date || (e.startDate ? `${e.startDate} - ${e.endDate || 'Present'}` : e.gradYear) || "",
+            degree: e.degree || "",
+            school: e.school || ""
+        })),
+        experience: (Array.isArray(originalData.experience) ? originalData.experience : []).map(e => ({
+            date: e.date || (e.startDate ? `${e.startDate} - ${e.endDate || 'Present'}` : "") || "",
+            title: e.title || e.jobTitle || "",
+            company: e.company || "",
+            points: Array.isArray(e.points) ? e.points : (e.description ? e.description.split('\n').filter(l => l.trim().length > 0) : [])
+        })),
+        projects: (Array.isArray(originalData.projects) ? originalData.projects : []).map(p => ({
+            title: p.title || p.name || "",
+            date: p.date || p.duration || "",
+            description: p.description || "",
+            tech: p.tech || p.technologies || ""
+        })),
+        certifications: toArray(originalData.certifications || []),
+        achievements: toArray(originalData.achievements || []),
+        languages: toArray(originalData.languages || []),
+        summary: originalData.summary || originalData.personalInfo?.summary || originalData.objective || "",
+        photo: originalData.photo || originalData.personalInfo?.profilePhoto || originalData.personalInfo?.photo || null
+    };
+
+    // 1. Sidebar Background
+    doc.rect(SIDEBAR_X, 0, SIDEBAR_WIDTH, PAGE_HEIGHT).fill(COLORS.sidebarBg);
+
+    let sidebarX = SIDEBAR_X + SIDEBAR_PADDING;
+    let sidebarY = 40; // Top padding
+
+    // 2. Avatar (80x80)
+    const circleSize = 80;
+    const circleX = SIDEBAR_X + (SIDEBAR_WIDTH / 2) - (circleSize / 2);
+
+    doc.save();
+    doc.circle(circleX + circleSize / 2, sidebarY + circleSize / 2, circleSize / 2).clip();
+
+    if (data.photo) {
+        try {
+            // Fill background white first so transparent images look good
+            doc.rect(circleX, sidebarY, circleSize, circleSize).fill("white");
+
+            let imgData = data.photo;
+            // Robust check: Strip prefix if it's a data URL string
+            if (typeof imgData === 'string' && imgData.includes(';base64,')) {
+                const parts = imgData.split(';base64,');
+                imgData = Buffer.from(parts[1], 'base64');
+            }
+
+            doc.image(imgData, circleX, sidebarY, {
+                fit: [circleSize, circleSize],
+                align: 'center',
+                valign: 'center'
+            });
+        } catch (e) {
+            console.error("Hiero Elite: Photo render failed", e);
+            // Fallback to initials
+            doc.rect(circleX, sidebarY, circleSize, circleSize).fill("white");
+            doc.font("Helvetica-Bold").fontSize(26).fillColor(COLORS.sidebarBg)
+                .text(getInitials(data.name), circleX, sidebarY + 25, { width: circleSize, align: "center" });
+        }
+    } else {
+        // Default Circle + Initials
+        doc.circle(circleX + circleSize / 2, sidebarY + circleSize / 2, circleSize / 2)
+            .fillAndStroke("white", "white");
+        doc.font("Helvetica-Bold")
+            .fontSize(26)
+            .fillColor(COLORS.sidebarBg)
+            .text(getInitials(data.name), circleX, sidebarY + 25, {
+                width: circleSize,
+                align: "center"
+            });
+    }
+    doc.restore();
+
+    // Secondary stroke border around the circle
+    doc.circle(circleX + circleSize / 2, sidebarY + circleSize / 2, circleSize / 2)
+        .strokeColor("white")
+        .lineWidth(2)
+        .stroke();
+
+    sidebarY += circleSize + 20;
+
+    // 3. Name Scaling (Auto-adjust for long names)
+    let nameFontSize = 22;
+    doc.font("Helvetica-Bold").fontSize(nameFontSize);
+    const maxSidebarWidth = SIDEBAR_WIDTH - SIDEBAR_PADDING * 2;
+
+    while (doc.widthOfString(data.name) > maxSidebarWidth && nameFontSize > 10) {
+        nameFontSize -= 0.5;
+        doc.fontSize(nameFontSize);
+    }
+
+    doc.fillColor("white").text(data.name, sidebarX, sidebarY, { width: maxSidebarWidth });
+    sidebarY = doc.y + 5;
+
+    // 4. Role Scaling
+    let roleFontSize = 12;
+    doc.font("Helvetica").fontSize(roleFontSize);
+    while (doc.widthOfString(data.role) > maxSidebarWidth && roleFontSize > 8) {
+        roleFontSize -= 0.5;
+        doc.fontSize(roleFontSize);
+    }
+
+    doc.fillColor(COLORS.roleColor).text(data.role, sidebarX, sidebarY, { width: maxSidebarWidth });
+    sidebarY = doc.y + 25;
+
+    // 5. Contact Section
+    const BAR_HEIGHT = 26;
+    doc.rect(SIDEBAR_X, sidebarY, SIDEBAR_WIDTH, BAR_HEIGHT).fill(COLORS.sidebarDark);
+    doc.fillColor("white").font("Helvetica-Bold").fontSize(12).text("Contact", sidebarX, sidebarY + 7);
+    sidebarY += BAR_HEIGHT + 14;
+
+    const renderSidebarItem = (label, value) => {
+        if (!value) return;
+        doc.font("Helvetica-Bold").fontSize(10).fillColor(COLORS.roleColor).text(label, sidebarX, sidebarY);
+        sidebarY += 12;
+        doc.font("Helvetica").fontSize(10).fillColor("white").text(value, sidebarX, sidebarY, {
+            width: SIDEBAR_WIDTH - SIDEBAR_PADDING * 2
+        });
+        sidebarY = doc.y + 12;
+    };
+
+    renderSidebarItem("Address", data.address);
+    renderSidebarItem("Phone", data.phone);
+    renderSidebarItem("E-mail", data.email);
+
+    // 6. Skills Section
+    if (data.skills.length > 0) {
+        if (sidebarY > PAGE_HEIGHT - 100) { /* Optional: check if skills overflow sidebar */ }
+        doc.rect(SIDEBAR_X, sidebarY, SIDEBAR_WIDTH, BAR_HEIGHT).fill(COLORS.sidebarDark);
+        doc.fillColor("white").font("Helvetica-Bold").fontSize(12).text("Skills", sidebarX, sidebarY + 7);
+        sidebarY += BAR_HEIGHT + 14;
+
+        doc.font("Helvetica").fontSize(10).fillColor("white");
+        data.skills.forEach(skill => {
+            const skillText = String(skill).trim();
+            if (!skillText) return;
+
+            const skillHeight = doc.heightOfString(skillText, { width: SIDEBAR_WIDTH - SIDEBAR_PADDING * 2 - 15, lineGap: 2 });
+            if (sidebarY + skillHeight > PAGE_HEIGHT - 30) return;
+
+            doc.circle(sidebarX + 3, sidebarY + 4, 1.5).fill("white");
+            doc.text(skillText, sidebarX + 12, sidebarY, {
+                width: SIDEBAR_WIDTH - SIDEBAR_PADDING * 2 - 15,
+                lineGap: 2
+            });
+            sidebarY = doc.y + 8;
+        });
+    }
+
+    // 7. Main Content
+    let x = 35;
+    let y = 30; // Reduced from 40
+    const CONTENT_WIDTH = SIDEBAR_X - x - 25;
+
+    const checkPageBreakElite = (needed = 40) => {
+        if (y + needed > PAGE_HEIGHT - 30) { // Increased usable space
+            doc.addPage();
+            doc.rect(SIDEBAR_X, 0, SIDEBAR_WIDTH, PAGE_HEIGHT).fill(COLORS.sidebarBg);
+            y = 30; // Matches new top margin
+            return true;
+        }
+        return false;
+    };
+
+    const addSectionHeader = (title) => {
+        checkPageBreakElite(20);
+        doc.fillColor(COLORS.heading).font("Helvetica-Bold").fontSize(15).text(title.toUpperCase(), x, y); // Reduced size
+        y += 16;
+        doc.strokeColor(COLORS.divider).lineWidth(1).moveTo(x, y).lineTo(x + CONTENT_WIDTH, y).stroke();
+        y += 8;
+    };
+
+    // Profile
+    if (data.summary) {
+        addSectionHeader("Profile");
+        const summaryHeight = doc.heightOfString(data.summary, { width: CONTENT_WIDTH, lineGap: 1.5 });
+        doc.font("Helvetica").fontSize(10).fillColor(COLORS.bodyText).text(data.summary, x, y, {
+            width: CONTENT_WIDTH,
+            align: 'justify',
+            lineGap: 1.5
+        });
+        y = doc.y + 15; // Reduced from 20
+    }
+
+    // Work History
+    if (data.experience.length > 0) {
+        addSectionHeader("Work History");
+        data.experience.forEach(job => {
+            const dateHeight = doc.heightOfString(job.date, { width: 75 });
+            const titleHeight = doc.heightOfString(job.title, { width: CONTENT_WIDTH - 75 });
+            checkPageBreakElite(Math.max(dateHeight, titleHeight) + 8);
+
+            doc.font("Helvetica").fontSize(9).fillColor(COLORS.lightText).text(job.date, x, y, { width: 75 });
+            doc.font("Helvetica-Bold").fontSize(11).fillColor(COLORS.bodyText).text(job.title, x + 75, y, { width: CONTENT_WIDTH - 75 });
+            y = doc.y + 1;
+            doc.font("Helvetica-Oblique").fontSize(9).fillColor(COLORS.lightText).text(job.company, x + 75, y);
+            y = doc.y + 4;
+
+            job.points.forEach(point => {
+                const cleanPoint = "• " + point.trim().replace(/^•\s*/, '');
+                const pointHeight = doc.heightOfString(cleanPoint, { width: CONTENT_WIDTH - 75, lineGap: 1.5 });
+                checkPageBreakElite(pointHeight + 2);
+                doc.font("Helvetica").fontSize(9).fillColor(COLORS.bodyText).text(cleanPoint, x + 75, y, {
+                    width: CONTENT_WIDTH - 75,
+                    align: 'justify',
+                    lineGap: 1.5
+                });
+                y = doc.y + 2;
+            });
+            y += 5;
+        });
+        y += 8;
+    }
+
+    // Projects (New Support)
+    if (data.projects.length > 0) {
+        addSectionHeader("Projects");
+        data.projects.forEach(proj => {
+            checkPageBreakElite(20);
+            doc.font("Helvetica").fontSize(9).fillColor(COLORS.lightText).text(proj.date, x, y, { width: 75 });
+            doc.font("Helvetica-Bold").fontSize(11).fillColor(COLORS.bodyText).text(proj.title, x + 75, y, { width: CONTENT_WIDTH - 75 });
+            y = doc.y + 1;
+
+            if (proj.description) {
+                const descHeight = doc.heightOfString(proj.description, { width: CONTENT_WIDTH - 75, lineGap: 1.2 });
+                checkPageBreakElite(descHeight + 3);
+                doc.font("Helvetica").fontSize(9).fillColor(COLORS.bodyText).text(proj.description, x + 75, y, {
+                    width: CONTENT_WIDTH - 75,
+                    lineGap: 1.2
+                });
+                y = doc.y + 2;
+            }
+            if (proj.tech) {
+                doc.font("Helvetica-Oblique").fontSize(8.5).fillColor(COLORS.lightText).text("Tech: " + proj.tech, x + 75, y);
+                y = doc.y + 6;
+            } else {
+                y += 4;
+            }
+        });
+        y = (y < doc.y ? doc.y : y) + 8;
+    }
+
+    // Education
+    if (data.education.length > 0) {
+        addSectionHeader("Education");
+        data.education.forEach(edu => {
+            checkPageBreakElite(20);
+            doc.font("Helvetica").fontSize(9).fillColor(COLORS.lightText).text(edu.date, x, y, { width: 75 });
+            doc.font("Helvetica-Bold").fontSize(11).fillColor(COLORS.bodyText).text(edu.degree, x + 75, y, { width: CONTENT_WIDTH - 75 });
+            y = doc.y + 1;
+            doc.font("Helvetica-Oblique").fontSize(9).fillColor(COLORS.lightText).text(edu.school, x + 75, y);
+            y = doc.y + 6;
+        });
+        y += 8;
+    }
+
+    // Certifications (New Support)
+    if (data.certifications.length > 0) {
+        addSectionHeader("Certifications");
+        data.certifications.forEach(cert => {
+            const certText = "• " + cert;
+            const certHeight = doc.heightOfString(certText, { width: CONTENT_WIDTH, lineGap: 2 });
+            checkPageBreakElite(certHeight + 4);
+            doc.font("Helvetica").fontSize(10).fillColor(COLORS.bodyText).text(certText, x, y, {
+                width: CONTENT_WIDTH,
+                lineGap: 2
+            });
+            y = doc.y + 4;
+        });
+        y += 10; // Reduced gap
+    }
+
+    // Achievements (New Support)
+    if (data.achievements.length > 0) {
+        addSectionHeader("Achievements");
+        data.achievements.forEach(ach => {
+            const achText = "• " + ach;
+            const achHeight = doc.heightOfString(achText, { width: CONTENT_WIDTH, lineGap: 1.5 });
+            checkPageBreakElite(achHeight + 3);
+            doc.font("Helvetica").fontSize(10).fillColor(COLORS.bodyText).text(achText, x, y, {
+                width: CONTENT_WIDTH,
+                lineGap: 1.5
+            });
+            y = doc.y + 3;
+        });
+    }
+}
+
+// LINE DRAW FUNCTION
+function drawLine(doc, x, y, width) {
+    doc.strokeColor("#CCCCCC")
+        .lineWidth(1)
+        .moveTo(x, y)
+        .lineTo(x + width, y)
+        .stroke();
+}
+
 module.exports = { generateUnifiedResume };
+

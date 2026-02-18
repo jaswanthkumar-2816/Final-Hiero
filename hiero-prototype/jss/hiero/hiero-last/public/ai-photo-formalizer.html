@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hiero Executive AI | Professional Photo Formalizer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2ae023;
+            --primary-glow: rgba(42, 224, 35, 0.4);
+            --bg-dark: #020202;
+            --card-glass: rgba(255, 255, 255, 0.03);
+            --border-glass: rgba(42, 224, 35, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Animated Background */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(circle at 10% 20%, rgba(42, 224, 35, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(42, 224, 35, 0.05) 0%, transparent 40%),
+                linear-gradient(135deg, #050a05 0%, #000 100%);
+            z-index: -1;
+        }
+
+        .nav {
+            width: 100%;
+            padding: 30px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+        }
+
+        .logo-box {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+        }
+
+        .logo-img {
+            height: 40px;
+            filter: drop-shadow(0 0 8px var(--primary-glow));
+        }
+
+        .logo-text {
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            background: linear-gradient(to right, #fff, var(--primary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            max-width: 1000px;
+            padding: 40px 20px;
+        }
+
+        /* Header UI */
+        .hero {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 15px;
+            line-height: 1.1;
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            color: #aaa;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .accent-word {
+            color: var(--primary);
+            text-shadow: 0 0 20px var(--primary-glow);
+        }
+
+        /* Magic Upload Area */
+        .magic-card {
+            width: 100%;
+            background: var(--card-glass);
+            border: 1px solid var(--border-glass);
+            border-radius: 32px;
+            padding: 60px;
+            backdrop-filter: blur(20px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.4);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .upload-zone {
+            width: 100%;
+            max-width: 500px;
+            aspect-ratio: 1;
+            border: 2px dashed var(--border-glass);
+            border-radius: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            background: rgba(255, 255, 255, 0.01);
+        }
+
+        .upload-zone:hover {
+            border-color: var(--primary);
+            background: rgba(42, 224, 35, 0.03);
+            transform: scale(1.02);
+        }
+
+        .zone-icon {
+            font-size: 4rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+            filter: drop-shadow(0 0 15px var(--primary-glow));
+        }
+
+        .zone-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .zone-subtext {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 8px;
+        }
+
+        /* Loading Animation */
+        .processing-overlay {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .scanner {
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            border: 4px solid var(--border-glass);
+            position: relative;
+            overflow: hidden;
+            background: rgba(42, 224, 35, 0.05);
+        }
+
+        .scan-line {
+            position: absolute;
+            width: 100%;
+            height: 4px;
+            background: var(--primary);
+            box-shadow: 0 0 20px var(--primary), 0 0 40px var(--primary);
+            animation: scan 2.5s infinite ease-in-out;
+        }
+
+        @keyframes scan {
+            0% {
+                top: 0%;
+            }
+
+            50% {
+                top: 100%;
+            }
+
+            100% {
+                top: 0%;
+            }
+        }
+
+        .status-text {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--primary);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        /* Result Area */
+        .result-view {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            gap: 40px;
+        }
+
+        .comparison {
+            display: flex;
+            gap: 50px;
+            justify-content: center;
+            width: 100%;
+            flex-wrap: wrap;
+        }
+
+        .photo-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .photo-box span {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #666;
+            font-weight: 700;
+        }
+
+        .photo-frame {
+            width: 280px;
+            height: 320px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            background: #111;
+        }
+
+        .photo-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .photo-frame.ai-result {
+            border: 2px solid var(--primary);
+            box-shadow: 0 0 30px var(--primary-glow);
+        }
+
+        .actions {
+            display: flex;
+            gap: 20px;
+        }
+
+        .btn {
+            padding: 16px 36px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #000;
+            border: none;
+            box-shadow: 0 10px 30px var(--primary-glow);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px var(--primary-glow);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: #fff;
+        }
+
+        /* Gender Selection */
+        .gender-select {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+            width: 100%;
+        }
+
+        .gender-options {
+            display: flex;
+            gap: 20px;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .gender-card {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-glass);
+            border-radius: 20px;
+            padding: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .gender-card i {
+            font-size: 2.5rem;
+            color: #555;
+            transition: all 0.3s ease;
+        }
+
+        .gender-card:hover {
+            background: rgba(42, 224, 35, 0.05);
+            border-color: var(--primary);
+            transform: translateY(-5px);
+        }
+
+        .gender-card.active {
+            background: rgba(42, 224, 35, 0.1);
+            border-color: var(--primary);
+            box-shadow: 0 0 20px var(--primary-glow);
+        }
+
+        .gender-card.active i {
+            color: var(--primary);
+            filter: drop-shadow(0 0 8px var(--primary-glow));
+        }
+
+        .gender-card span {
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="nav">
+        <a href="dashboard.html" class="logo-box">
+            <img src="logohiero.png" alt="Hiero Logo" class="logo-img">
+            <span class="logo-text">HIERO</span>
+        </a>
+        <div class="nav-links">
+            <a href="resume-builder.html"
+                style="color: #aaa; text-decoration: none; font-weight: 600; font-size: 0.9rem;">
+                <i class="fas fa-arrow-left"></i> Back to Builder
+            </a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Step 1: Upload -->
+        <div id="initialState">
+            <header class="hero">
+                <h1>Hiero <span class="accent-word">Executive AI</span></h1>
+                <p>Upload a casual photo. Our AI will automatically extract your face and fit it into a perfect formal
+                    executive outfit.</p>
+            </header>
+
+            <div class="magic-card" id="dropCard">
+                <div class="upload-zone" onclick="document.getElementById('photoInput').click()">
+                    <i class="fas fa-camera-retro zone-icon"></i>
+                    <span class="zone-text">Step 1: Upload Casual Photo</span>
+                    <span class="zone-subtext">JPG, PNG supported (Face should be clear)</span>
+                    <input type="file" id="photoInput" style="display: none;" accept="image/*"
+                        onchange="handleUpload(event)">
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 2: Gender Selection -->
+        <div class="gender-select" id="genderState">
+            <header class="hero">
+                <h1>Select <span class="accent-word">Formal Style</span></h1>
+                <p>Choose the executive attire style for the manual AI reconstruction.</p>
+            </header>
+
+            <div class="magic-card">
+                <div class="gender-options">
+                    <div class="gender-card" id="maleCard" onclick="selectGender('male')">
+                        <i class="fas fa-user-tie"></i>
+                        <span>Male (Suit & Tie)</span>
+                    </div>
+                    <div class="gender-card" id="femaleCard" onclick="selectGender('female')">
+                        <i class="fas fa-user-graduate"></i>
+                        <span>Female (Formal Blazer)</span>
+                    </div>
+                </div>
+                <button class="btn btn-primary" id="startAiBtn" disabled onclick="startProcessing()"
+                    style="opacity: 0.5;">
+                    <i class="fas fa-wand-magic-sparkles"></i> Step 3: Generate Executive Profile
+                </button>
+            </div>
+        </div>
+
+        <!-- Step 3: Processing -->
+        <div class="processing-overlay" id="processingState">
+            <div class="scanner">
+                <div class="scan-line"></div>
+                <img id="miniPreview" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.2;">
+            </div>
+            <div class="status-box" style="text-align: center;">
+                <h3 class="status-text" id="statusMessage">Initializing Hiero Canvas Engine...</h3>
+                <p id="subStatus" style="color: #666; margin-top: 10px;">Enforcing identity preservation constraints...
+                </p>
+            </div>
+        </div>
+
+        <!-- Step 4: Result -->
+        <div class="result-view" id="resultState">
+            <header class="hero" style="margin-bottom: 30px;">
+                <h2 style="font-size: 2.5rem; font-weight: 800;"><span class="accent-word">Executive</span> Fit Ready
+                </h2>
+                <p>Your face has been successfully fitted into a formal professional outfit using the elliptical mapping
+                    algorithm.</p>
+            </header>
+
+            <div class="magic-card">
+                <div class="comparison">
+                    <div class="photo-box">
+                        <span>Original</span>
+                        <div class="photo-frame">
+                            <img id="originalPhoto" src="" alt="Original">
+                        </div>
+                    </div>
+                    <div class="photo-box">
+                        <span>Hiero AI Formal</span>
+                        <div class="photo-frame ai-result">
+                            <img id="aiResultPhoto" src="" alt="AI Formal">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="actions">
+                    <button class="btn btn-outline" onclick="resetPage()">
+                        <i class="fas fa-redo"></i> Change Outfit
+                    </button>
+                    <button class="btn btn-primary" onclick="useInResume()">
+                        <i class="fas fa-check-double"></i> Apply to Resume
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let originalFile = null;
+        let originalBase64 = null;
+        let selectedGender = null;
+        let resultBase64 = null;
+
+        const messages = [
+            "Initializing Hiero Canvas Engine...",
+            "Tracing facial landmarks (Eyes/Nose/Chin)...",
+            "Applying studio-grey background layer...",
+            "Digitally fitting hand-crafted executive suit...",
+            "Merging face with identity preservation clip...",
+            "Applying professional studio lighting & grain..."
+        ];
+
+        function handleUpload(event) {
+            originalFile = event.target.files[0];
+            if (!originalFile) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                originalBase64 = e.target.result;
+                document.getElementById('initialState').style.display = 'none';
+                document.getElementById('genderState').style.display = 'flex';
+                document.getElementById('miniPreview').src = originalBase64;
+            };
+            reader.readAsDataURL(originalFile);
+        }
+
+        function selectGender(gender) {
+            selectedGender = gender;
+            document.getElementById('maleCard').classList.remove('active');
+            document.getElementById('femaleCard').classList.remove('active');
+            document.getElementById(gender + 'Card').classList.add('active');
+            
+            const btn = document.getElementById('startAiBtn');
+            btn.disabled = false;
+            btn.style.opacity = '1';
+        }
+
+        async function startProcessing() {
+            document.getElementById('genderState').style.display = 'none';
+            document.getElementById('processingState').style.display = 'flex';
+
+            let msgIndex = 0;
+            const progressInterval = setInterval(() => {
+                if (msgIndex < messages.length) {
+                    document.getElementById('statusMessage').textContent = messages[msgIndex];
+                    msgIndex++;
+                }
+            }, 800);
+
+            setTimeout(() => {
+                clearInterval(progressInterval);
+                renderExecutivePhoto();
+            }, 5000);
+        }
+
+        function renderExecutivePhoto() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 1024;
+            canvas.height = 1024;
+
+            const userImg = new Image();
+            userImg.onload = () => {
+                // Background
+                const bgGrad = ctx.createRadialGradient(512, 512, 150, 512, 512, 900);
+                bgGrad.addColorStop(0, '#52525b'); 
+                bgGrad.addColorStop(1, '#09090b');
+                ctx.fillStyle = bgGrad;
+                ctx.fillRect(0, 0, 1024, 1024);
+
+                // Suit
+                ctx.save();
+                ctx.shadowBlur = 60;
+                ctx.shadowColor = 'rgba(0,0,0,0.9)';
+                ctx.fillStyle = '#0f172a'; 
+                ctx.beginPath();
+                ctx.moveTo(50, 1024);
+                ctx.lineTo(180, 570); 
+                ctx.quadraticCurveTo(300, 510, 512, 550); 
+                ctx.quadraticCurveTo(724, 510, 844, 570); 
+                ctx.lineTo(974, 1024);
+                ctx.fill();
+
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.moveTo(430, 550);
+                ctx.lineTo(594, 550);
+                ctx.lineTo(560, 850);
+                ctx.lineTo(464, 850);
+                ctx.fill();
+
+                if (selectedGender === 'male') {
+                    ctx.fillStyle = '#991b1b';
+                    ctx.beginPath();
+                    ctx.moveTo(495, 550);
+                    ctx.lineTo(529, 550);
+                    ctx.lineTo(540, 620);
+                    ctx.lineTo(512, 1024);
+                    ctx.lineTo(484, 620);
+                    ctx.fill();
+                } else {
+                    ctx.fillStyle = '#f8fafc';
+                    ctx.beginPath();
+                    ctx.moveTo(440, 550);
+                    ctx.lineTo(584, 550);
+                    ctx.lineTo(512, 750);
+                    ctx.fill();
+                }
+                ctx.restore();
+
+                // Face Mapping
+                ctx.save();
+                ctx.beginPath();
+                ctx.ellipse(512, 380, 190, 250, 0, 0, Math.PI * 2);
+                ctx.clip();
+
+                const scale = 750 / Math.min(userImg.width, userImg.height);
+                const w = userImg.width * scale;
+                const h = userImg.height * scale;
+                ctx.drawImage(userImg, 512 - w/2, 380 - h/2.6, w, h);
+                ctx.restore();
+
+                // Lighting
+                ctx.globalCompositeOperation = 'soft-light';
+                const light = ctx.createLinearGradient(0, 0, 1024, 1024);
+                light.addColorStop(0, 'rgba(255,255,255,0.15)');
+                light.addColorStop(1, 'rgba(0,0,0,0.1)');
+                ctx.fillStyle = light;
+                ctx.fillRect(0, 0, 1024, 1024);
+
+                resultBase64 = canvas.toDataURL('image/png');
+                document.getElementById('originalPhoto').src = originalBase64;
+                document.getElementById('aiResultPhoto').src = resultBase64;
+
+                document.getElementById('processingState').style.display = 'none';
+                document.getElementById('resultState').style.display = 'flex';
+            };
+            userImg.src = originalBase64;
+        }
+
+        function resetPage() {
+            window.location.reload();
+        }
+
+        function useInResume() {
+            localStorage.setItem('profilePhoto', resultBase64);
+            localStorage.setItem('executivePhoto', resultBase64);
+            localStorage.setItem('ai_photo_formalized', 'true');
+            window.location.href = 'resume-builder.html';
+        }
+    </script>
+</body>
+
+</html>

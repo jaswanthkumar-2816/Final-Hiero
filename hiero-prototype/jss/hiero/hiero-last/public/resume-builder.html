@@ -15,14 +15,32 @@
 
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #000501 0%, #2cc42c 100%);
+      margin: 0;
+      padding: 0;
       min-height: 100vh;
       color: #0b0a0a;
       line-height: 1.6;
+      background-color: #020202;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background:
+        radial-gradient(circle at 15% 15%, rgba(42, 224, 35, 0.12) 0%, transparent 50%),
+        radial-gradient(circle at 85% 85%, rgba(42, 224, 35, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(20, 20, 20, 0) 0%, rgba(0, 0, 0, 0.8) 100%),
+        linear-gradient(135deg, #050a05 0%, #0f2410 100%);
+      z-index: -1;
+      pointer-events: none;
     }
 
     .container {
-      max-width: 1400px;
+      max-width: 1600px;
       margin: 0 auto;
       padding: 20px;
     }
@@ -30,10 +48,10 @@
     /* Template Selection Styles */
     .template-selection {
       background: rgb(3, 2, 2);
-      border-radius: 24px;
-      padding: 40px;
-      margin-bottom: 30px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+      border-radius: 32px;
+      padding: 60px;
+      margin-bottom: 40px;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.2);
       border: 1px solid rgba(45, 196, 44, 0.15);
     }
 
@@ -46,43 +64,71 @@
     }
 
     .category-btn {
-      padding: 12px 24px;
-      border: 2px solid rgba(45, 196, 44, 0.3);
-      background: transparent;
-      color: #2ae023;
-      border-radius: 12px;
+      padding: 10px 24px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.03);
+      color: #aaa;
+      border-radius: 50px;
       cursor: pointer;
-      font-weight: 600;
-      transition: all 0.3s ease;
-      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      font-size: 13px;
+      letter-spacing: 0.5px;
+      backdrop-filter: blur(5px);
     }
 
     .category-btn.active {
       background: #2ae023;
       color: #000;
       border-color: #2ae023;
+      font-weight: 700;
+      box-shadow: 0 0 20px rgba(42, 224, 35, 0.3);
     }
 
-    .category-btn:hover {
-      background: rgba(42, 224, 35, 0.1);
-      border-color: #2ae023;
+    .category-btn:hover:not(.active) {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      transform: translateY(-2px);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    /* Responsive Header Adjustments */
+    @media (max-width: 768px) {
+      .header {
+        padding: 80px 20px 20px;
+        /* Space for absolute nav */
+      }
+
+      .header-nav {
+        left: 50%;
+        transform: translateX(-50%);
+        top: 20px;
+        width: 100%;
+        justify-content: center;
+        right: auto;
+      }
+
+      .header h1 {
+        font-size: 2.2rem;
+      }
     }
 
     .templates-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 25px;
-      margin-bottom: 30px;
+      grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+      gap: 30px;
+      margin-bottom: 40px;
     }
 
     .template-card {
       background: rgba(255, 255, 255, 0.05);
       border: 2px solid rgba(45, 196, 44, 0.2);
-      border-radius: 16px;
-      padding: 20px;
+      border-radius: 20px;
+      padding: 30px;
       transition: all 0.3s ease;
       position: relative;
       overflow: hidden;
+      display: block;
     }
 
     .template-card:hover {
@@ -93,14 +139,18 @@
 
     .template-card.premium {
       border-color: #ffd700;
+      background: rgba(255, 215, 0, 0.03);
+      box-shadow: 0 5px 15px rgba(255, 215, 0, 0.05);
     }
 
     .template-card.premium:hover {
       border-color: #ffd700;
-      box-shadow: 0 15px 40px rgba(255, 215, 0, 0.2);
+      box-shadow: 0 15px 40px rgba(255, 215, 0, 0.25);
+      background: rgba(255, 215, 0, 0.08);
     }
 
     .premium-badge {
+      animation: pulsePremium 2s infinite ease-in-out;
       position: absolute;
       top: 15px;
       right: 15px;
@@ -111,11 +161,31 @@
       font-size: 11px;
       font-weight: 700;
       text-transform: uppercase;
+      z-index: 10;
+      letter-spacing: normal;
+      border: none;
+    }
+
+    @keyframes pulsePremium {
+      0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.4);
+      }
+
+      70% {
+        transform: scale(1.05);
+        box-shadow: 0 0 0 10px rgba(255, 215, 0, 0);
+      }
+
+      100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(255, 215, 0, 0);
+      }
     }
 
     .template-preview {
       width: 100%;
-      height: 200px;
+      height: 280px;
       background: rgba(255, 255, 255, 0.1);
       border-radius: 12px;
       margin-bottom: 20px;
@@ -136,6 +206,19 @@
       border-color: #2ae023;
     }
 
+    .template-card.premium .template-preview {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .template-preview i {
+      color: inherit;
+      transition: none;
+    }
+
+    .template-card.premium .template-preview i {
+      color: #ffd700;
+    }
+
     .preview-overlay {
       position: absolute;
       top: 0;
@@ -143,6 +226,7 @@
       right: 0;
       bottom: 0;
       background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: none;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -164,11 +248,21 @@
       font-weight: 600;
       cursor: pointer;
       transition: all 0.3s ease;
+      transform: none;
+    }
+
+    .template-preview:hover .preview-btn {
+      transform: none;
     }
 
     .preview-btn:hover {
       background: #2ae023;
       color: #000;
+      transform: none;
+    }
+
+    .template-info {
+      display: block;
     }
 
     .template-info h3 {
@@ -176,7 +270,14 @@
       font-size: 1.2rem;
       margin-bottom: 10px;
       font-weight: 700;
+      letter-spacing: normal;
     }
+
+    .template-card.premium .template-info h3 {
+      color: #2ae023;
+    }
+
+    /* Override for premium card title if desired, but request says "previous design" */
 
     .template-info p {
       color: #ccc;
@@ -199,6 +300,15 @@
       border-radius: 6px;
       font-size: 0.75rem;
       font-weight: 500;
+      text-transform: none;
+      letter-spacing: normal;
+      border: none;
+    }
+
+    .tag.premium {
+      background: rgba(255, 215, 0, 0.2);
+      color: #ffd700;
+      border: none;
     }
 
     .start-building-btn {
@@ -212,11 +322,27 @@
       font-size: 14px;
       cursor: pointer;
       transition: all 0.3s ease;
+      display: block;
+    }
+
+    .template-card.premium .start-building-btn {
+      background: linear-gradient(135deg, #2ae023 0%, #1a8b17 100%);
+      color: #000;
+      border: none;
     }
 
     .start-building-btn:hover {
       transform: translateY(-2px);
       box-shadow: 0 8px 20px rgba(42, 224, 35, 0.3);
+      background: linear-gradient(135deg, #2ae023 0%, #1a8b17 100%);
+      color: #000;
+      border: none;
+    }
+
+    .template-card.premium .start-building-btn:hover {
+      background: linear-gradient(135deg, #ffd700 0%, #daa520 100%);
+      color: #000;
+      box-shadow: 0 8px 20px rgba(255, 215, 0, 0.3);
     }
 
     /* Hide form initially */
@@ -365,92 +491,123 @@
       box-shadow: 0 8px 25px rgba(42, 224, 35, 0.3);
     }
 
+    /* Header Styling */
     .header {
       text-align: center;
-      margin-bottom: 45px;
-      background: rgb(3, 2, 2);
-      padding: 70px 35px 35px 35px;
-      /* Extra top padding for buttons */
-      border-radius: 28px;
-      box-shadow: 0 25px 50px rgba(0, 0, 0, .2);
+      margin-bottom: 40px;
+      padding: 80px 40px 40px;
       position: relative;
+      background: rgba(5, 5, 5, 0.6);
+      border-radius: 30px;
+      border: 1px solid rgba(42, 224, 35, 0.1);
+      box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05),
+        0 0 100px rgba(42, 224, 35, 0.05);
+      backdrop-filter: blur(10px);
     }
 
     .header h1 {
-      font-size: 3rem;
-      color: #06a529;
-      font-weight: 800;
-      letter-spacing: -0.5px;
+      font-size: 4.2rem;
+      background: linear-gradient(135deg, #2ae023 0%, #00ff88 50%, #2ae023 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: 900;
+      letter-spacing: -2px;
+      margin-bottom: 16px;
+      filter: drop-shadow(0 0 30px rgba(42, 224, 35, 0.3));
+      animation: titleGlow 3s ease-in-out infinite;
+    }
+
+    @keyframes titleGlow {
+
+      0%,
+      100% {
+        filter: drop-shadow(0 0 30px rgba(42, 224, 35, 0.3));
+      }
+
+      50% {
+        filter: drop-shadow(0 0 50px rgba(42, 224, 35, 0.5));
+      }
     }
 
     .header p {
-      font-size: 1.2rem;
-      color: #ccc;
-      font-weight: 500;
-      max-width: 600px;
+      font-size: 1.15rem;
+      color: #b0b0b0;
+      font-weight: 400;
+      max-width: 560px;
       margin: 0 auto;
+      letter-spacing: 0.3px;
+      line-height: 1.6;
     }
 
-    /* Header Navigation Buttons - FIXED FOR MOBILE */
+    /* Navigation Buttons */
     .header-nav {
       position: absolute;
-      top: 15px;
-      right: 15px;
-      left: 15px;
+      top: 20px;
+      right: 20px;
       display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-      z-index: 10;
+      gap: 12px;
+      z-index: 20;
     }
 
     .header-nav button {
-      background: rgba(45, 196, 44, 0.2);
-      color: #2ae023;
-      border: 2px solid #2ae023;
-      padding: 10px 20px;
+      background: rgba(10, 10, 10, 0.4);
+      color: #ccc;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 8px 18px;
       border-radius: 8px;
       cursor: pointer;
-      font-size: 14px;
-      font-weight: 600;
-      transition: all 0.3s ease;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.2s ease;
       display: flex;
       align-items: center;
-      gap: 6px;
-      white-space: nowrap;
+      gap: 8px;
+      backdrop-filter: blur(8px);
     }
 
     .header-nav button:hover {
-      background: #2ae023;
-      color: #000;
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.2);
     }
 
     .header-nav button.logout-btn {
-      border-color: #ff6b6b;
+      border-color: rgba(255, 107, 107, 0.3);
       color: #ff6b6b;
-      background: rgba(255, 107, 107, 0.1);
+      background: rgba(255, 107, 107, 0.05);
     }
 
     .header-nav button.logout-btn:hover {
       background: #ff6b6b;
       color: white;
+      border-color: #ff6b6b;
+      box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
     }
 
+    /* Step Indicator */
     .step-indicator {
       text-align: center;
       margin-bottom: 40px;
       position: relative;
-      padding: 20px 150px;
-      /* Space for back button */
+      display: flex;
+      justify-content: center;
     }
 
     .step-text {
-      background: linear-gradient(135deg, #66ea75 0%, #07cf0d 100%);
-      color: rgb(37, 40, 37);
-      padding: 14px 30px;
+      background: rgba(42, 224, 35, 0.1);
+      color: #2ae023;
+      padding: 10px 30px;
       border-radius: 50px;
       font-weight: 700;
-      font-size: 1.15rem;
-      box-shadow: 0 6px 20px rgba(7, 207, 13, .3);
+      font-size: 1rem;
+      border: 1px solid rgba(42, 224, 35, 0.2);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      box-shadow: 0 0 20px rgba(42, 224, 35, 0.1);
+      backdrop-filter: blur(5px);
     }
 
     .form-section {
@@ -558,6 +715,255 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 20px;
+    }
+
+    /* Photo Upload Section */
+    .photo-upload-section {
+      background: rgba(42, 224, 35, 0.05);
+      border: 2px dashed rgba(42, 224, 35, 0.3);
+      border-radius: 20px;
+      padding: 30px;
+      margin-bottom: 35px;
+    }
+
+    .photo-upload-container {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 30px;
+      align-items: start;
+    }
+
+    .photo-preview-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .photo-preview {
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      border: 3px solid rgba(42, 224, 35, 0.3);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      overflow: hidden;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .photo-preview:hover {
+      border-color: #2ae023;
+      box-shadow: 0 0 30px rgba(42, 224, 35, 0.2);
+      transform: scale(1.05);
+    }
+
+    .photo-preview i {
+      font-size: 50px;
+      color: rgba(42, 224, 35, 0.6);
+    }
+
+    .photo-preview.has-image i,
+    .photo-preview.has-image .photo-placeholder-text {
+      display: none;
+    }
+
+    .photo-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    .photo-placeholder-text {
+      color: #aaa;
+      font-size: 13px;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .photo-upload-btn {
+      padding: 12px 28px;
+      background: linear-gradient(135deg, #2ae023 0%, #1aa018 100%);
+      color: #000;
+      border: none;
+      border-radius: 50px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      box-shadow: 0 4px 15px rgba(42, 224, 35, 0.3);
+    }
+
+    .photo-upload-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(42, 224, 35, 0.5);
+    }
+
+    .ai-magic-btn {
+      padding: 12px 28px;
+      background: linear-gradient(135deg, #0f0f0f 0%, #222 100%);
+      color: #2ae023;
+      border: 1px solid #2ae023;
+      border-radius: 50px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 0 15px rgba(42, 224, 35, 0.2);
+    }
+
+    .ai-magic-btn:hover {
+      transform: translateY(-3px) scale(1.02);
+      background: linear-gradient(135deg, #1a1a1a 0%, #333 100%);
+      box-shadow: 0 0 30px rgba(42, 224, 35, 0.4);
+      color: #fff;
+    }
+
+    .ai-magic-btn .btn-shine {
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 50%;
+      height: 100%;
+      background: linear-gradient(to right, transparent, rgba(42, 224, 35, 0.2), transparent);
+      transform: skewX(-25deg);
+      transition: 0.5s;
+    }
+
+    .ai-magic-btn:hover .btn-shine {
+      animation: shine 1.5s infinite;
+    }
+
+    @keyframes shine {
+      100% {
+        left: 200%;
+      }
+    }
+
+    .ai-magic-btn i {
+      animation: pulseSparkle 2s infinite;
+    }
+
+    @keyframes pulseSparkle {
+
+      0%,
+      100% {
+        transform: scale(1);
+        opacity: 1;
+        text-shadow: 0 0 5px #2ae023;
+      }
+
+      50% {
+        transform: scale(1.2);
+        opacity: 0.8;
+        text-shadow: 0 0 15px #2ae023;
+      }
+    }
+
+    .photo-upload-info {
+      color: #ccc;
+    }
+
+    .photo-upload-info p {
+      margin-bottom: 12px;
+      color: #2ae023;
+      font-size: 14px;
+    }
+
+    .photo-upload-info ul {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 15px 0;
+    }
+
+    .photo-upload-info li {
+      padding: 6px 0;
+      font-size: 13px;
+      color: #aaa;
+      position: relative;
+      padding-left: 20px;
+    }
+
+    .photo-upload-info li:before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: #2ae023;
+      font-weight: bold;
+    }
+
+    .photo-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 15px;
+      border-radius: 50px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .photo-status.success {
+      background: rgba(42, 224, 35, 0.15);
+      color: #2ae023;
+      border: 1px solid rgba(42, 224, 35, 0.3);
+    }
+
+    .photo-status.error {
+      background: rgba(255, 107, 107, 0.15);
+      color: #ff6b6b;
+      border: 1px solid rgba(255, 107, 107, 0.3);
+    }
+
+    /* Mobile responsive */
+    @media (max-width: 768px) {
+      .photo-upload-container {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        text-align: center;
+      }
+
+      .photo-preview-wrapper {
+        margin: 0 auto;
+      }
+
+      .photo-upload-info {
+        text-align: left;
+      }
+    }
+
+    /* Two-Column Layout for Custom Details & References */
+    .two-column-sections {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      margin-bottom: 35px;
+    }
+
+    .two-column-sections .form-section {
+      margin-bottom: 0;
+    }
+
+    /* Mobile: Stack vertically */
+    @media (max-width: 1024px) {
+      .two-column-sections {
+        grid-template-columns: 1fr;
+        gap: 25px;
+      }
     }
 
     label {
@@ -828,10 +1234,10 @@
   <div class="container">
     <div class="header">
       <div class="header-nav">
-        <button onclick="window.location.href='/dashboard'">
-          <i class="fas fa-home"></i> Dashboard
+        <button onclick="window.location.href='index.html'">
+          <i class="fas fa-home"></i> Home
         </button>
-        <button onclick="logout()" style="border-color: #ff6b6b; color: #ff6b6b;">
+        <button onclick="logout()" class="logout-btn">
           <i class="fas fa-sign-out-alt"></i> Logout
         </button>
       </div>
@@ -852,6 +1258,10 @@
         <button class="category-btn" data-category="professional">Professional</button>
         <button class="category-btn" data-category="creative">Creative</button>
         <button class="category-btn" data-category="premium">Premium</button>
+        <button class="category-btn" id="shuffleBtn"
+          style="background: linear-gradient(45deg, #2ae023, #00ff00); color: #000; border: none; font-weight: 700;">
+          <i class="fas fa-random"></i> Shuffle
+        </button>
       </div>
 
       <div class="templates-grid" id="templatesGrid"
@@ -948,27 +1358,271 @@
           </div>
         </div>
 
-        <!-- Hiero Studio Template (Template 5) -->
-        <div class="template-card" data-category="professional" data-template="hiero-studio" data-type="free">
-          <div class="template-preview" onclick="previewTemplate('hiero-studio')">
-            <i class="fas fa-laptop-code"></i>
+
+
+        <!-- Hiero Minimal Template (Template 7) -->
+        <div class="template-card" data-category="modern" data-template="hiero-minimal" data-type="free">
+          <div class="template-preview" onclick="previewTemplate('hiero-minimal')">
+            <i class="fas fa-stream"></i>
             <div class="preview-overlay">
               <button class="preview-btn">Preview Template</button>
             </div>
           </div>
           <div class="template-info">
-            <h3>Hiero Studio</h3>
-            <p>Modern professional layout with specialized technical sections. Ideal for developers and designers.</p>
+            <h3>Hiero Design</h3>
+            <p>Clean minimalist design with maximum white space. Emphasizes content with subtle sophistication.</p>
             <div class="template-tags">
+              <span class="tag">Minimal</span>
+              <span class="tag">Clean</span>
               <span class="tag">Modern</span>
-              <span class="tag">Studio</span>
-              <span class="tag">Technical</span>
+            </div>
+            <button class="start-building-btn" onclick="startBuilding('hiero-minimal')">
+              <i class="fas fa-arrow-right"></i> Start Building
+            </button>
+          </div>
+        </div>
+
+        <!-- Hiero Tech Template (Template 8) -->
+        <div class="template-card" data-category="creative" data-template="hiero-tech" data-type="free">
+          <div class="template-preview" onclick="previewTemplate('hiero-tech')">
+            <i class="fas fa-code"></i>
+            <div class="preview-overlay">
+              <button class="preview-btn">Preview Template</button>
+            </div>
+          </div>
+          <div class="template-info">
+            <h3>Hiero Prestige</h3>
+            <p>Developer-focused template with code-style aesthetics. Optimized for software engineers and programmers.
+            </p>
+            <div class="template-tags">
+              <span class="tag">Tech</span>
+              <span class="tag">Developer</span>
+              <span class="tag">Coding</span>
+            </div>
+            <button class="start-building-btn" onclick="startBuilding('hiero-tech')">
+              <i class="fas fa-arrow-right"></i> Start Building
+            </button>
+          </div>
+        </div>
+
+        <!-- Hiero Classic Template (Template 6) -->
+        <div class="template-card" data-category="professional" data-template="hiero-classic" data-type="free">
+          <div class="template-preview" onclick="previewTemplate('hiero-classic')">
+            <i class="fas fa-briefcase"></i>
+            <div class="preview-overlay">
+              <button class="preview-btn">Preview Template</button>
+            </div>
+          </div>
+          <div class="template-info">
+            <h3>Hiero Vision</h3>
+            <p>Traditional professional resume with timeless design. Perfect for conventional industries.</p>
+            <div class="template-tags">
+              <span class="tag">Classic</span>
+              <span class="tag">Corporate</span>
+              <span class="tag">Traditional</span>
+            </div>
+            <button class="start-building-btn" onclick="startBuilding('hiero-classic')">
+              <i class="fas fa-arrow-right"></i> Start Building
+            </button>
+          </div>
+        </div>
+
+        <!-- Hiero Studio Template (Template 5) -->
+        <div class="template-card" data-category="professional" data-template="hiero-studio" data-type="free">
+          <div class="template-preview" onclick="previewTemplate('hiero-studio')">
+            <i class="fas fa-columns"></i>
+            <div class="preview-overlay">
+              <button class="preview-btn">Preview Template</button>
+            </div>
+          </div>
+          <div class="template-info">
+            <h3>Hiero Minimal</h3>
+            <p>Distinctive Right Sidebar layout with a bold timeline. Perfect for showcasing a modern professional
+              profile.</p>
+            <div class="template-tags">
+              <span class="tag">Sidebar</span>
+              <span class="tag">Modern</span>
+              <span class="tag">Creative</span>
             </div>
             <button class="start-building-btn" onclick="startBuilding('hiero-studio')">
               <i class="fas fa-arrow-right"></i> Start Building
             </button>
           </div>
         </div>
+
+        <!-- Hiero Vision Template (Template 11) -->
+        <div class="template-card" data-category="creative" data-template="hiero-vision" data-type="free">
+          <div class="template-preview" onclick="previewTemplate('hiero-vision')">
+            <i class="fas fa-eye"></i>
+            <div class="preview-overlay">
+              <button class="preview-btn">Preview Template</button>
+            </div>
+          </div>
+          <div class="template-info">
+            <h3>Hiero Aurora</h3>
+            <p>Creative layout with visual storytelling approach. Perfect for designers and marketers.</p>
+            <div class="template-tags">
+              <span class="tag">Creative</span>
+              <span class="tag">Visual</span>
+              <span class="tag">Design</span>
+            </div>
+            <button class="start-building-btn" onclick="startBuilding('hiero-vision')">
+              <i class="fas fa-arrow-right"></i> Start Building
+            </button>
+          </div>
+        </div>
+
+
+
+        <!-- Hiero Elite Template (Template 10) -->
+        <div class="template-card premium" data-category="premium" data-template="hiero-elite" data-type="premium">
+          <div class="premium-badge">Premium</div>
+          <div class="template-preview" onclick="previewTemplate('hiero-elite')">
+            <i class="fas fa-crown"></i>
+            <div class="preview-overlay">
+              <button class="preview-btn">Preview Template</button>
+            </div>
+          </div>
+          <div class="template-info">
+            <h3>Hiero Signature</h3>
+            <p>Premium executive template with luxury design elements. Ideal for C-level executives and senior
+              management.</p>
+            <div class="template-tags">
+              <span class="tag premium">Premium</span>
+              <span class="tag premium">Executive</span>
+              <span class="tag premium">Luxury</span>
+            </div>
+            <button class="start-building-btn" onclick="startBuilding('hiero-elite')">
+              <i class="fas fa-arrow-right"></i> Start Building
+            </button>
+          </div>
+        </div>
+
+
+
+        <!-- Hiero Premium Template (Template 13) -->
+        <div class="template-card premium" data-category="premium" data-template="hiero-premium" data-type="premium">
+          <div class="premium-badge">Premium</div>
+          <div class="template-preview" onclick="previewTemplate('hiero-premium')">
+            <i class="fas fa-gem"></i>
+            <div class="preview-overlay">
+              <button class="preview-btn">Preview Template</button>
+            </div>
+          </div>
+          <div class="template-info">
+            <h3>Hiero Retro</h3>
+            <p>High-end professional design with sophisticated styling. Features elegant typography and premium
+              aesthetics.</p>
+            <div class="template-tags">
+              <span class="tag premium">Premium</span>
+              <span class="tag premium">Elegant</span>
+              <span class="tag premium">Refined</span>
+            </div>
+            <button class="start-building-btn" onclick="startBuilding('hiero-premium')">
+              <i class="fas fa-arrow-right"></i> Start Building
+            </button>
+          </div>
+        </div>
+
+        <!-- Hiero Prestige Template (Template 14) -->
+        <div class="template-card premium" data-category="premium" data-template="hiero-prestige" data-type="premium">
+          <div class="premium-badge">Premium</div>
+          <div class="template-preview" onclick="previewTemplate('hiero-prestige')">
+            <i class="fas fa-star"></i>
+            <div class="preview-overlay">
+              <button class="preview-btn">Preview Template</button>
+            </div>
+          </div>
+          <div class="template-info">
+            <h3>Hiero Tech</h3>
+            <p>Distinguished design for top-tier professionals. Combines classic elegance with modern sophistication.
+            </p>
+            <div class="template-tags">
+              <span class="tag premium">Prestige</span>
+              <span class="tag premium">Distinguished</span>
+              <span class="tag premium">Elite</span>
+            </div>
+            <button class="start-building-btn" onclick="startBuilding('hiero-prestige')">
+              <i class="fas fa-arrow-right"></i> Start Building
+            </button>
+          </div>
+        </div>
+
+        <!-- Hiero Signature Template -->
+        <div class="template-card premium" data-category="premium" data-template="hiero-signature" data-type="premium">
+          <div class="premium-badge">Premium</div>
+          <div class="template-preview" onclick="previewTemplate('hiero-signature')">
+            <i class="fas fa-signature"></i>
+            <div class="preview-overlay">
+              <button class="preview-btn">Preview Template</button>
+            </div>
+          </div>
+          <div class="template-info">
+            <h3>Hiero Nova</h3>
+            <p>Exclusive signature design with unique styling. The ultimate template for making an unforgettable
+              impression.</p>
+            <div class="template-tags">
+              <span class="tag premium">Signature</span>
+              <span class="tag premium">Unique</span>
+              <span class="tag premium">Premium</span>
+            </div>
+            <button class="start-building-btn" onclick="startBuilding('hiero-signature')">
+              <i class="fas fa-arrow-right"></i> Start Building
+            </button>
+          </div>
+        </div>
+
+        <!-- Hiero Aurora -->
+        <div class="template-card premium" data-category="premium" data-template="hiero-aurora" data-type="premium">
+          <div class="premium-badge">Premium</div>
+          <div class="template-preview" onclick="previewTemplate('hiero-aurora')">
+            <i class="fas fa-sun"></i>
+            <div class="preview-overlay">
+              <button class="preview-btn">Preview Template</button>
+            </div>
+          </div>
+          <div class="template-info">
+            <h3>Hiero Essence</h3>
+            <p>The Aurora design features fluid gradients and modern layouts for forward-thinking professionals.</p>
+            <div class="template-tags">
+              <span class="tag premium">Modern</span>
+              <span class="tag premium">Gradient</span>
+              <span class="tag premium">Fluid</span>
+            </div>
+            <button class="start-building-btn" onclick="startBuilding('hiero-aurora')">
+              <i class="fas fa-arrow-right"></i> Start Building
+            </button>
+          </div>
+        </div>
+
+
+
+
+
+        <!-- Hiero Velocity -->
+        <div class="template-card premium" data-category="premium" data-template="hiero-velocity" data-type="premium">
+          <div class="premium-badge">Premium</div>
+          <div class="template-preview" onclick="previewTemplate('hiero-velocity')">
+            <i class="fas fa-bolt"></i>
+            <div class="preview-overlay">
+              <button class="preview-btn">Preview Template</button>
+            </div>
+          </div>
+          <div class="template-info">
+            <h3>Hiero Velocity</h3>
+            <p>Designed for fast-paced growth and startup agility. Clean lines and energetic spacing for movers.</p>
+            <div class="template-tags">
+              <span class="tag premium">Startup</span>
+              <span class="tag premium">Agile</span>
+              <span class="tag premium">Fast</span>
+            </div>
+            <button class="start-building-btn" onclick="startBuilding('hiero-velocity')">
+              <i class="fas fa-arrow-right"></i> Start Building
+            </button>
+          </div>
+        </div>
+
+
       </div>
     </div>
 
@@ -988,6 +1642,55 @@
               <i class="fas fa-user section-icon"></i> Personal Information
             </h2>
             <div class="form-content">
+              <!-- Photo Upload Section -->
+              <div class="form-group photo-upload-section">
+                <label>
+                  <i class="fas fa-camera"></i> Profile Photo
+                  <span class="field-skip" onclick="skipField('profilePhoto')">Skip</span>
+                </label>
+                <div class="photo-upload-container">
+                  <div class="photo-preview-wrapper">
+                    <div class="photo-preview" id="photoPreview">
+                      <i class="fas fa-user"></i>
+                      <span class="photo-placeholder-text">Upload Photo</span>
+                    </div>
+                    <input type="file" id="profilePhoto" accept="image/jpeg,image/png,image/jpg" style="display: none;"
+                      onchange="handlePhotoUpload(event)">
+                    <div class="photo-controls"
+                      style="margin-top: 15px; display: flex; flex-direction: column; gap: 10px;">
+                      <button type="button" class="photo-upload-btn"
+                        onclick="document.getElementById('profilePhoto').click()">
+                        <i class="fas fa-upload"></i> Choose Photo
+                      </button>
+                      <div style="margin: 5px 0; text-align: center; color: #444; font-size: 11px; font-weight: bold;">
+                        OR</div>
+                      <button type="button" class="ai-magic-btn"
+                        onclick="window.location.href='ai-photo-formalizer.html'"
+                        style="justify-content: center; width: 100%; border: 1px solid #2ae023;">
+                        <span class="btn-shine"></span>
+                        <i class="fas fa-wand-magic-sparkles"></i> ✨ Generate Executive Photo
+                      </button>
+                      <p style="font-size: 11px; color: #2ae023; text-align: center; margin-top: 5px; opacity: 0.8;">
+                        <i class="fas fa-crown"></i> Hiero Executive AI (Premium)
+                      </p>
+                    </div>
+                  </div>
+                  <div class="photo-upload-info">
+                    <p><i class="fas fa-info-circle"></i> <strong>Photo Required:</strong></p>
+                    <ul>
+                      <li>Format: JPG or PNG</li>
+                      <li>Recommended: Square headshot</li>
+                    </ul>
+                    <div id="aiPhotoBadge"
+                      style="display: none; margin-top: 10px; background: rgba(42, 224, 35, 0.1); border: 1px solid #2ae023; padding: 10px; border-radius: 8px; font-size: 11px; color: #2ae023;">
+                      <i class="fas fa-check-circle"></i> <strong>AI POWERED:</strong> Your photo can be automatically
+                      converted to a professional executive headshot.
+                    </div>
+                    <span class="photo-status" id="photoStatus"></span>
+                  </div>
+                </div>
+              </div>
+
               <div class="form-group">
                 <label for="fullName">Full Name <span class="required">*</span></label>
                 <input type="text" id="fullName" required placeholder="Enter your full name">
@@ -1267,85 +1970,91 @@
           </div>
         </div>
 
-        <!-- References -->
-        <div class="form-section" id="section-references">
-          <h2 class="section-title">
-            <i class="fas fa-users section-icon"></i> References
-            <span class="skip-link" onclick="toggleSection('references')">Skip this section</span>
-          </h2>
-          <div class="form-content">
-            <div id="referencesContainer">
-              <div class="reference-item">
-                <div class="form-row">
-                  <div class="form-group">
-                    <label for="refName1">Reference Name</label>
-                    <input type="text" id="refName1" name="refName[]" placeholder="John Smith">
+        <!-- Two-Column Layout: Custom Details (Left) & References (Right) -->
+        <div class="two-column-sections">
+          <!-- Custom Details (Left Column) -->
+          <div class="form-section" id="section-custom">
+            <h2 class="section-title">
+              <i class="fas fa-edit section-icon"></i> Custom Details
+              <span class="skip-link" onclick="toggleSection('custom')">Skip this section</span>
+            </h2>
+            <div class="form-content">
+              <p style="color: #2ae023; font-size: 14px; margin-bottom: 20px;">
+                <i class="fas fa-info-circle"></i> Add any additional sections you need (e.g., Publications, Volunteer
+                Work, Awards, etc.)
+              </p>
+              <div id="customDetailsContainer">
+                <div class="custom-detail-item">
+                  <div class="form-group" id="customSectionTitleWrapper">
+                    <label for="customSectionTitle">Custom Section Title</label>
+                    <input type="text" id="customSectionTitle" placeholder="e.g., Publications">
                   </div>
                   <div class="form-group">
-                    <label for="refTitle1">Title/Position</label>
-                    <input type="text" id="refTitle1" name="refTitle[]" placeholder="Senior Manager">
-                  </div>
-                </div>
-                <div class="form-row">
-                  <div class="form-group">
-                    <label for="refCompany1">Company</label>
-                    <input type="text" id="refCompany1" name="refCompany[]" placeholder="Company Name">
+                    <label for="customHeading1">Item Heading</label>
+                    <input type="text" id="customHeading1" name="customHeading[]" placeholder="e.g., Research Paper A">
                   </div>
                   <div class="form-group">
-                    <label for="refPhone1">Phone</label>
-                    <input type="tel" id="refPhone1" name="refPhone[]" placeholder="(555) 123-4567"
-                      pattern="[\+]?[\d\s\-\(\)\.]+" title="Please enter a valid phone number">
+                    <label for="customContent1">Content</label>
+                    <textarea id="customContent1" name="customContent[]" rows="4"
+                      placeholder="Describe the details..."></textarea>
                   </div>
-                </div>
-                <div class="form-group">
-                  <label for="refEmail1">Email</label>
-                  <input type="email" id="refEmail1" name="refEmail[]" placeholder="reference@company.com"
-                    title="Please enter a valid email address">
                 </div>
               </div>
-            </div>
-            <button type="button" class="add-more-btn" onclick="addReference()">Add Another Reference</button>
-          </div>
-        </div>
+              <button type="button" class="add-more-btn" onclick="addCustomDetail()">Add Another Custom Item</button>
 
-        <!-- Custom Details -->
-        <div class="form-section" id="section-custom">
-          <h2 class="section-title">
-            <i class="fas fa-edit section-icon"></i> Custom Details
-            <span class="skip-link" onclick="toggleSection('custom')">Skip this section</span>
-          </h2>
-          <div class="form-content">
-            <p style="color: #2ae023; font-size: 14px; margin-bottom: 20px;">
-              <i class="fas fa-info-circle"></i> Add any additional sections you need (e.g., Publications, Volunteer
-              Work, Awards, etc.)
-            </p>
-            <div id="customDetailsContainer">
-              <div class="custom-detail-item">
-                <div class="form-group" id="customSectionTitleWrapper">
-                  <label for="customSectionTitle">Custom Section Title</label>
-                  <input type="text" id="customSectionTitle" placeholder="e.g., Publications">
-                </div>
+              <div style="margin-top: 20px; border-top: 1px dashed rgba(42,224,35,0.2); padding-top: 20px;">
                 <div class="form-group">
-                  <label for="customHeading1">Item Heading</label>
-                  <input type="text" id="customHeading1" name="customHeading[]" placeholder="e.g., Research Paper A">
+                  <label for="customSectionContent">Direct Custom Content (from AI)</label>
+                  <textarea id="customSectionContent" rows="6" placeholder="Spilled custom content..."></textarea>
                 </div>
-                <div class="form-group">
-                  <label for="customContent1">Content</label>
-                  <textarea id="customContent1" name="customContent[]" rows="4"
-                    placeholder="Describe the details..."></textarea>
-                </div>
-              </div>
-            </div>
-            <button type="button" class="add-more-btn" onclick="addCustomDetail()">Add Another Custom Item</button>
-
-            <div style="margin-top: 20px; border-top: 1px dashed rgba(42,224,35,0.2); padding-top: 20px;">
-              <div class="form-group">
-                <label for="customSectionContent">Direct Custom Content (from AI)</label>
-                <textarea id="customSectionContent" rows="6" placeholder="Spilled custom content..."></textarea>
               </div>
             </div>
           </div>
+
+          <!-- References (Right Column) -->
+          <div class="form-section" id="section-references">
+            <h2 class="section-title">
+              <i class="fas fa-users section-icon"></i> References
+              <span class="skip-link" onclick="toggleSection('references')">Skip this section</span>
+            </h2>
+            <div class="form-content">
+              <div id="referencesContainer">
+                <div class="reference-item">
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="refName1">Reference Name</label>
+                      <input type="text" id="refName1" name="refName[]" placeholder="John Smith">
+                    </div>
+                    <div class="form-group">
+                      <label for="refTitle1">Title/Position</label>
+                      <input type="text" id="refTitle1" name="refTitle[]" placeholder="Senior Manager">
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="refCompany1">Company</label>
+                      <input type="text" id="refCompany1" name="refCompany[]" placeholder="Company Name">
+                    </div>
+                    <div class="form-group">
+                      <label for="refPhone1">Phone</label>
+                      <input type="tel" id="refPhone1" name="refPhone[]" placeholder="(555) 123-4567"
+                        pattern="[\+]?[\d\s\-\(\)\.]+\" title="Please enter a valid phone number">
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label for="refEmail1">Email</label>
+                    <input type="email" id="refEmail1" name="refEmail[]" placeholder="reference@company.com"
+                      title="Please enter a valid email address">
+                  </div>
+                </div>
+              </div>
+              <button type="button" class="add-more-btn" onclick="addReference()">Add Another Reference</button>
+            </div>
+          </div>
         </div>
+
+        <!-- End of Two-Column Layout -->
+
       </div>
     </div>
   </div>
@@ -1381,8 +2090,8 @@
         onmouseover="this.style.borderColor='#3b82f6'" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'">
         <i class="fas fa-file-word" style="font-size: 3rem; color: #3b82f6; margin-bottom: 20px;"></i>
         <h4 style="color: white; margin-bottom: 20px;">Microsoft Word</h4>
-        <button class="btn btn-primary" onclick="downloadDocx()"
-          style="width: 100%; background: #3b82f6; border-color: #3b82f6;">Download</button>
+        <button id="downloadDocxBtn" class="btn btn-primary" onclick="downloadDocx()"
+          style="width: 100%; background: #3b82f6; border-color: #3b82f6;">Download Word</button>
       </div>
 
       <div class="download-card"
@@ -1504,6 +2213,19 @@
       // (User can select a different template)
       selectedTemplate = null;
 
+      // Reset category to 'all' and shuffle for a dynamic experience
+      const allBtn = document.querySelector('.category-btn[data-category="all"]');
+      if (allBtn) {
+        document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+        allBtn.classList.add('active');
+        const cards = document.querySelectorAll('.template-card');
+        cards.forEach(card => card.style.display = 'block');
+      }
+
+      if (typeof shuffleTemplates === 'function') {
+        shuffleTemplates();
+      }
+
       console.log('Page initialized - showing Step 1 (template selection)');
 
       // Ensure history state is set to Step 1
@@ -1618,6 +2340,14 @@
 
       // Category filtering
       document.querySelectorAll('.category-btn').forEach(btn => {
+        if (btn.id === 'shuffleBtn') {
+          btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            shuffleTemplates();
+          });
+          return;
+        }
+
         btn.addEventListener('click', function () {
           // Update active category
           document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
@@ -1636,6 +2366,39 @@
           });
         });
       });
+
+      function shuffleTemplates() {
+        const grid = document.getElementById('templatesGrid');
+        const cards = Array.from(grid.children);
+
+        // Fisher-Yates shuffle
+        for (let i = cards.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          grid.appendChild(cards[j]);
+        }
+
+        console.log('🎲 Templates shuffled randomly');
+
+        // Add a nice animation effect
+        cards.forEach(card => {
+          card.style.animation = 'none';
+          card.offsetHeight; // trigger reflow
+          card.style.animation = 'premiumGlow 0.5s ease-out';
+        });
+      }
+
+      // Add the animation to CSS
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes premiumGlow {
+          0% { transform: scale(0.95); opacity: 0.5; filter: brightness(1.5); }
+          100% { transform: scale(1); opacity: 1; filter: brightness(1); }
+        }
+      `;
+      document.head.appendChild(style);
+
+      // Mix them up initially
+      shuffleTemplates();
 
       // Load saved skip states
       ['summary', 'experience', 'education', 'skills', 'projects', 'additional'].forEach(sec => {
@@ -1742,17 +2505,17 @@
           style: 'Single-column, grey top bar, bold section headings with horizontal rules, matching the Priya Sharma data analyst resume style'
         },
         'hiero-executive': {
-          name: 'Hiero Executive (New)',
+          name: 'Hiero Executive',
           description: 'Premium corporate side-label layout inspired by Morgan Maxwell.',
           style: 'Left labels, clean headers, corporate type, and elegant delimiters.'
         },
         'hiero-studio': {
-          name: 'Hiero Studio (New)',
+          name: 'Hiero Studio',
           description: 'Contemporary tech-focused side-label design for a modern professional look.',
           style: 'Side-by-side structure, bold titles, and balanced professional spacing.'
         },
         'hiero-onyx': {
-          name: 'Hiero Onyx (New)',
+          name: 'Hiero Onyx',
           description: 'Bold high-contrast side-label design for maximum professional impact.',
           style: 'Professional structure, high-contrast black accents, and premium spacing.'
         },
@@ -1761,10 +2524,105 @@
           description: 'High-fidelity technical layout with centered headers and split subsections.',
           style: 'Times New Roman, centered header, academic split layout, and ATS-optimized structure.'
         },
-        'hiero-studio': {
-          name: 'Hiero Studio',
-          description: 'Modern professional layout with specialized technical sections. Ideal for developers and designers.',
-          style: 'Modern, clean, and technical.'
+        'hiero-classic': {
+          name: 'Hiero Classic',
+          description: 'Traditional professional resume with timeless design. Perfect for conventional industries.',
+          style: 'Classic layout, professional fonts, standard sections.'
+        },
+        'hiero-minimal': {
+          name: 'Hiero Minimal',
+          description: 'Clean minimalist design with maximum white space. Emphasizes content with subtle sophistication.',
+          style: 'Clean lines, lots of white space, modern typography.'
+        },
+        'hiero-tech': {
+          name: 'Hiero Tech',
+          description: 'Developer-focused template with code-style aesthetics. Optimized for software engineers.',
+          style: 'Monospace fonts, tech-inspired layout, project-focused.'
+        },
+        'hiero-bold': {
+          name: 'Hiero Bold',
+          description: 'Eye-catching design with bold typography and strong visual hierarchy.',
+          style: 'Bold fonts, high contrast, strong section headers.'
+        },
+        'hiero-elite': {
+          name: 'Hiero Elite',
+          description: 'Premium executive template with luxury design elements. Ideal for C-level executives.',
+          style: 'Luxury aesthetics, gold accents, premium typography.'
+        },
+        'hiero-vision': {
+          name: 'Hiero Vision',
+          description: 'Creative layout with visual storytelling approach. Perfect for designers and marketers.',
+          style: 'Visual segments, creative spacing, storytelling layout.'
+        },
+        'hiero-compact': {
+          name: 'Hiero Compact',
+          description: 'Space-efficient design that fits more content in less space. Great for extensive history.',
+          style: 'Tight spacing, multi-column sections, compact fonts.'
+        },
+        'hiero-premium': {
+          name: 'Hiero Premium',
+          description: 'High-end professional design with sophisticated styling. Features elegant typography.',
+          style: 'Premium fonts, elegant layout, subtle sophisticated accents.'
+        },
+        'hiero-prestige': {
+          name: 'Hiero Prestige',
+          description: 'Distinguished design for top-tier professionals. Combines classic elegance with modern sophistication.',
+          style: 'Elegant serif/sans mix, prestige branding, elite structure.'
+        },
+        'hiero-signature': {
+          name: 'Hiero Signature',
+          description: 'Exclusive signature design with unique styling. The ultimate template for a lasting impression.',
+          style: 'Unique signature header, creative layout, premium feel.'
+        },
+        'hiero-aurora': {
+          name: 'Hiero Aurora',
+          description: 'Modern gradient design with fluid layouts. Perfect for forward-thinking professionals.',
+          style: 'Fluid gradients, soft shadows, modern sans-serif type.'
+        },
+        'hiero-zenith': {
+          name: 'Hiero Zenith',
+          description: 'Top-tier executive layout for industry leaders. Combines power with elegance.',
+          style: 'Bold headers, spacious layout, authoritative typography.'
+        },
+        'hiero-nebula': {
+          name: 'Hiero Nebula',
+          description: 'Space-inspired technical layout for space-tech and high-end engineering.',
+          style: 'Deep space accents, technical grids, futuristic feel.'
+        },
+        'hiero-quantum': {
+          name: 'Hiero Quantum',
+          description: 'Precision data-driven layout for scientists and analysts.',
+          style: 'Mathematical precision, grid-based layout, analytical fonts.'
+        },
+        'hiero-velocity': {
+          name: 'Hiero Velocity',
+          description: 'Fast-paced professional design for high-growth startup environments.',
+          style: 'Dynamic lines, energetic spacing, modern professional type.'
+        },
+        'hiero-prism': {
+          name: 'Hiero Prism',
+          description: 'Multi-faceted creative layout showcasing diverse skill sets.',
+          style: 'Colorful accents, multi-pane layout, creative flair.'
+        },
+        'hiero-orbit': {
+          name: 'Hiero Orbit',
+          description: 'Modern layout with circular design elements for a unique professional brand.',
+          style: 'Rounded corners, orbital layouts, soft professional colors.'
+        },
+        'hiero-titan': {
+          name: 'Hiero Titan',
+          description: 'Large, bold, and powerful layout for making a significant impact.',
+          style: 'Oversized headers, strong borders, impactful hierarchy.'
+        },
+        'hiero-apollo': {
+          name: 'Hiero Apollo',
+          description: 'Academic excellence and research-focused layout for scholars.',
+          style: 'Traditional学术 (academic) structure, refined serif type.'
+        },
+        'hiero-orion': {
+          name: 'Hiero Orion',
+          description: 'Stellar professional design for high-achievers across all fields.',
+          style: 'Clean professional structure, stellar accents, premium feel.'
         }
       };
 
@@ -2597,6 +3455,9 @@
           console.error('❌ bottom-actions element not found');
         }
 
+        // Initialize photo if previously uploaded
+        initPhotoFromStorage();
+
         // Update step indicator with template info
         const templateName = getTemplateName(selectedTemplate);
         console.log('✅ Template name:', templateName);
@@ -2955,8 +3816,143 @@
       localStorage.setItem('skip_section_' + section, willBeSkipped);
     }
 
+
+    // ----------  PHOTO UPLOAD HANDLER  ----------
+    let uploadedPhotoData = null; // Store photo as base64
+
+    function initPhotoFromStorage() {
+      const storedPhoto = localStorage.getItem('profilePhoto');
+      if (storedPhoto) {
+        uploadedPhotoData = storedPhoto;
+        const photoPreview = document.getElementById('photoPreview');
+        if (photoPreview) {
+          photoPreview.classList.add('has-image');
+          const existingImg = photoPreview.querySelector('img');
+          if (existingImg) {
+            existingImg.src = storedPhoto;
+          } else {
+            const img = document.createElement('img');
+            img.src = storedPhoto;
+            photoPreview.appendChild(img);
+          }
+        }
+
+        // Show AI Button & description (unless it's already an AI photo)
+        if (localStorage.getItem('ai_photo_formalized') === 'true') {
+          const badge = document.getElementById('aiPhotoBadge');
+          if (badge) {
+            badge.style.display = 'block';
+            badge.innerHTML = '<i class="fas fa-crown"></i> <strong>EXECUTIVE PHOTO:</strong> Your AI Formalized photo is active.';
+            badge.style.background = 'rgba(255, 215, 0, 0.1)';
+            badge.style.borderColor = '#ffd700';
+            badge.style.color = '#ffd700';
+          }
+        } else {
+          const aiBtn = document.getElementById('aiFormalizeBtn');
+          if (aiBtn) aiBtn.style.display = 'flex';
+          const aiDesc = document.getElementById('aiPhotoDesc');
+          if (aiDesc) aiDesc.style.display = 'block';
+        }
+      }
+    }
+
+    function handlePhotoUpload(event) {
+      const file = event.target.files[0];
+      const photoPreview = document.getElementById('photoPreview');
+      const photoStatus = document.getElementById('photoStatus');
+
+      // Clear previous status
+      photoStatus.textContent = '';
+      photoStatus.className = 'photo-status';
+
+      if (!file) return;
+
+      // Validate file type
+      const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+      if (!validTypes.includes(file.type)) {
+        photoStatus.textContent = '❌ Invalid format. Please upload JPG or PNG only.';
+        photoStatus.classList.add('error');
+        event.target.value = ''; // Clear the input
+        return;
+      }
+
+      // Validate file size (minimum 50KB)
+      const minSize = 50 * 1024; // 50KB in bytes
+      if (file.size < minSize) {
+        photoStatus.textContent = `❌ Photo too small. Minimum ${Math.round(minSize / 1024)}KB required.`;
+        photoStatus.classList.add('error');
+        event.target.value = '';
+        return;
+      }
+
+      // Maximum size check (5MB)
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (file.size > maxSize) {
+        photoStatus.textContent = '❌ Photo too large. Maximum 5MB allowed.';
+        photoStatus.classList.add('error');
+        event.target.value = '';
+        return;
+      }
+
+      // Read and display photo
+      const reader = new FileReader();
+
+      reader.onload = function (e) {
+        // Store photo data
+        uploadedPhotoData = e.target.result;
+
+        // Display preview
+        photoPreview.classList.add('has-image');
+        const existingImg = photoPreview.querySelector('img');
+        if (existingImg) {
+          existingImg.src = e.target.result;
+        } else {
+          const img = document.createElement('img');
+          img.src = e.target.result;
+          photoPreview.appendChild(img);
+        }
+
+        // Show success message
+        const fileSizeKB = Math.round(file.size / 1024);
+        photoStatus.textContent = `✓ Photo uploaded successfully (${fileSizeKB}KB)`;
+        photoStatus.classList.add('success');
+
+        // Show AI Button and Badge
+        document.getElementById('aiFormalizeBtn').style.display = 'flex';
+        document.getElementById('aiPhotoBadge').style.display = 'block';
+
+        // Save to localStorage
+        localStorage.setItem('profilePhoto', uploadedPhotoData);
+      };
+
+      reader.onerror = function () {
+        photoStatus.textContent = '❌ Failed to load photo. Please try again.';
+        photoStatus.classList.add('error');
+      };
+
+      reader.readAsDataURL(file);
+    }
+
     // ----------  FIELD SKIP / SHOW  ----------
     function skipField(field) {
+      // Special handling for photo upload
+      if (field === 'profilePhoto') {
+        const photoSection = document.querySelector('.photo-upload-section');
+        if (!photoSection) return;
+
+        const label = photoSection.querySelector('label');
+        const skipSpan = label?.querySelector('.field-skip');
+        if (!skipSpan) return;
+
+        const willBeSkipped = !photoSection.classList.contains('skipped');
+        photoSection.classList.toggle('skipped', willBeSkipped);
+        skipSpan.textContent = willBeSkipped ? 'Show' : 'Skip';
+
+        localStorage.setItem('skip_field_profilePhoto', willBeSkipped);
+        return;
+      }
+
+      // Normal field handling
       const group = document.getElementById('group-' + field);
       const input = document.getElementById(field);
       if (!group || !input) return;
@@ -3751,6 +4747,12 @@
       data.personalInfo.fullName = document.getElementById('fullName').value;
       data.personalInfo.email = document.getElementById('email').value;
       data.personalInfo.phone = document.getElementById('phone').value;
+
+      // Profile photo (if uploaded and not skipped)
+      const photoSection = document.querySelector('.photo-upload-section');
+      if (photoSection && !photoSection.classList.contains('skipped') && uploadedPhotoData) {
+        data.personalInfo.profilePhoto = uploadedPhotoData;
+      }
 
       // Optional fields (only if not skipped and not empty)
       const optional = ['address', 'linkedin', 'website', 'summary', 'technicalSkills', 'softSkills', 'certifications', 'languages', 'achievements', 'hobbies', 'extraCurricular', 'additionalInfo'];

@@ -278,6 +278,97 @@
         padding: 12px;
       }
     }
+
+    /* Mobile Warning Overlay */
+    .mobile-warning-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 10, 10, 0.98);
+      backdrop-filter: blur(10px);
+      z-index: 10000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .mobile-warning-overlay.show {
+      display: flex;
+    }
+
+    .mobile-warning-content {
+      background: #18191c;
+      border: 2px solid #12ef12;
+      border-radius: 24px;
+      padding: 40px 30px;
+      max-width: 400px;
+      text-align: center;
+      box-shadow: 0 0 40px rgba(18, 239, 18, 0.3);
+      animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .mobile-warning-icon {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 24px;
+      background: #12ef12;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 30px rgba(18, 239, 18, 0.4);
+    }
+
+    .mobile-warning-icon svg {
+      width: 40px;
+      height: 40px;
+      fill: #0a0a0a;
+    }
+
+    .mobile-warning-content h2 {
+      font-size: 24px;
+      font-weight: 800;
+      margin-bottom: 16px;
+      color: #12ef12;
+      text-shadow: 0 0 10px rgba(18, 239, 18, 0.3);
+    }
+
+    .mobile-warning-content p {
+      color: #fff;
+      font-size: 15px;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .mobile-warning-btn {
+      background: linear-gradient(45deg, #12ef12, #0a9c0a);
+      color: #0a0a0a;
+      border: none;
+      padding: 14px 28px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(18, 239, 18, 0.3);
+    }
+
+    .mobile-warning-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(18, 239, 18, 0.5);
+    }
   </style>
 </head>
 
@@ -289,6 +380,26 @@
     <!-- Project content will be rendered here by JS -->
   </div>
   <script>
+    // ========== MOBILE DETECTION ==========
+    function isMobileDevice() {
+      return window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    }
+
+    function checkMobileWarning() {
+      if (isMobileDevice() && !sessionStorage.getItem('mobileWarningDismissed')) {
+        document.getElementById('mobileWarning').classList.add('show');
+      }
+    }
+
+    function dismissMobileWarning() {
+      document.getElementById('mobileWarning').classList.remove('show');
+      sessionStorage.setItem('mobileWarningDismissed', 'true');
+    }
+
+    // Check on page load
+    window.addEventListener('DOMContentLoaded', checkMobileWarning);
+
+    // ========== MAIN APP LOGIC ==========
     // Backend API configuration
     const API_BASE_URL = 'http://localhost:5005/api';
     const CHAT_API_URL = 'http://localhost:5005/api/ask';

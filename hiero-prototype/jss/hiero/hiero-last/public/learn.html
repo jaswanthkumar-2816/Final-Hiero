@@ -712,6 +712,97 @@
       color: var(--text-muted);
     }
 
+    /* Mobile Warning Overlay */
+    .mobile-warning-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(2, 4, 2, 0.98);
+      backdrop-filter: blur(10px);
+      z-index: 10000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .mobile-warning-overlay.show {
+      display: flex;
+    }
+
+    .mobile-warning-content {
+      background: var(--glass);
+      border: 2px solid var(--primary);
+      border-radius: 28px;
+      padding: 40px 30px;
+      max-width: 400px;
+      text-align: center;
+      box-shadow: 0 0 40px var(--primary-glow);
+      backdrop-filter: blur(20px);
+      animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .mobile-warning-icon {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 24px;
+      background: var(--primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 30px var(--primary-glow);
+    }
+
+    .mobile-warning-icon svg {
+      width: 40px;
+      height: 40px;
+      fill: #000;
+    }
+
+    .mobile-warning-content h2 {
+      font-size: 24px;
+      font-weight: 800;
+      margin-bottom: 16px;
+      color: var(--text-main);
+    }
+
+    .mobile-warning-content p {
+      color: var(--text-muted);
+      font-size: 15px;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .mobile-warning-btn {
+      background: var(--primary);
+      color: #000;
+      border: none;
+      padding: 14px 28px;
+      border-radius: 14px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px var(--primary-glow);
+    }
+
+    .mobile-warning-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px var(--primary-glow);
+    }
+
     /* Responsive */
     @media (max-width: 768px) {
       .hero h1 {
@@ -735,6 +826,22 @@
 
 <body>
   <canvas id="antigravity-bg"></canvas>
+
+  <!-- Mobile Warning Overlay -->
+  <div class="mobile-warning-overlay" id="mobileWarning">
+    <div class="mobile-warning-content">
+      <div class="mobile-warning-icon">
+        <svg viewBox="0 0 24 24">
+          <path
+            d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14l4 4V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z" />
+        </svg>
+      </div>
+      <h2>Desktop Recommended</h2>
+      <p>For the best learning experience with videos and interactive features, please access Hiero on your laptop or
+        desktop computer.</p>
+      <button class="mobile-warning-btn" onclick="dismissMobileWarning()">I Understand</button>
+    </div>
+  </div>
 
   <div id="loading-overlay">
     <img src="logohiero copy.png" alt="Hiero" class="loading-logo">
@@ -832,10 +939,30 @@
   </div>
 
   <script>
+    // ========== MOBILE DETECTION ==========
+    function isMobileDevice() {
+      return window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    }
+
+    function checkMobileWarning() {
+      if (isMobileDevice() && !sessionStorage.getItem('mobileWarningDismissed')) {
+        document.getElementById('mobileWarning').classList.add('show');
+      }
+    }
+
+    function dismissMobileWarning() {
+      document.getElementById('mobileWarning').classList.remove('show');
+      sessionStorage.setItem('mobileWarningDismissed', 'true');
+    }
+
+    // ========== MAIN APP LOGIC ==========
     let currentSkill = '';
     let currentLang = 'english';
 
     async function init() {
+      // Check mobile warning first
+      checkMobileWarning();
+
       const params = new URLSearchParams(window.location.search);
       currentSkill = (params.get('skill') || 'React').trim();
       currentLang = (params.get('language') || 'english').toLowerCase();
@@ -1082,7 +1209,7 @@
           let dx = mouse.x - this.x;
           let dy = mouse.y - this.y;
           let distance = Math.sqrt(dx * dx + dy * dy);
-          
+
           if (distance < mouse.radius) {
             let forceDirectionX = dx / distance;
             let forceDirectionY = dy / distance;

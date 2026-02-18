@@ -141,6 +141,10 @@ app.use('/api', reviewRouter); // Handles /api/review, /api/login-track, /api/ad
 const analysisRouter = require('./routes/analysis');
 app.use('/api/analysis', analysisRouter); // Supports /api/analysis/analyze
 
+// AI Photo Formalizer API (New!)
+const aiPhotoRouter = require('./routes/ai-photo');
+app.use('/api', aiPhotoRouter); // Handles /api/generate-executive-photo
+
 // Support legacy shortened paths
 app.use('/auth/signup', (req, res) => res.redirect(307, '/signup'));
 app.use('/auth/login', (req, res) => res.redirect(307, '/login'));
@@ -166,6 +170,7 @@ app.get(['/resume-builder', '/resume-builder.html', '/dashboard/resume-builder']
 app.get(['/resume-form', '/resume-form.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'resume-form.html')));
 app.get(['/project', '/project.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'project.html')));
 app.get(['/analysis', '/analysis.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'analysis.html')));
+app.get(['/ai-photo-formalizer', '/ai-photo-formalizer.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'ai-photo-formalizer.html')));
 
 // ======================
 // STATIC FILES
