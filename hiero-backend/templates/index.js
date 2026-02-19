@@ -2,7 +2,7 @@
 import { generateClassicTemplate } from './classic.js';
 import { generateMinimalTemplate } from './minimal.js';
 import { generateModernProTemplate } from './modernPro.js';
-import { generateRishiTemplate } from './rishiTemplate_final.js';
+import { generateRishiTemplate } from './rishiTemplate.js';
 import { generateHemanthTemplate } from './hemanthTemplate.js';
 import { renderPriyaAnalyticsTemplate } from './priyaAnalyticsTemplate.js';
 import { renderHieroEliteTemplate } from './hieroEliteTemplate.js';

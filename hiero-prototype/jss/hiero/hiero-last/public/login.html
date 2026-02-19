@@ -1,9 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Login | Hiero</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins&family=Inter&display=swap" rel="stylesheet">
   <script src="https://kit.fontawesome.com/4e56cb0e6d.js" crossorigin="anonymous"></script>
@@ -30,10 +29,8 @@
     /* ==== SPLASH SCREEN ==== */
     .splash-screen {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
       background-color: #000;
       z-index: 1000;
       display: flex;
@@ -52,7 +49,6 @@
         filter: drop-shadow(0 0 8px #00ff00);
         transform: scale(1);
       }
-
       to {
         filter: drop-shadow(0 0 20px #00ff00);
         transform: scale(1.05);
@@ -71,7 +67,6 @@
         opacity: 0;
         transform: translateY(20px);
       }
-
       to {
         opacity: 1;
         transform: translateY(0);
@@ -256,15 +251,13 @@
         width: 90%;
       }
 
-      .login-left,
-      .login-right {
+      .login-left, .login-right {
         width: 100%;
         padding: 30px;
       }
     }
   </style>
 </head>
-
 <body>
 
   <!-- ✅ Splash Screen -->
@@ -283,11 +276,10 @@
     <div class="login-right">
       <div class="login-box">
         <h2 style="color:#00ff00;font-size: 50px">𝐇𝐈𝐄𝐑𝐎</h2>
-        <p style="color: rgba(255, 255, 255, 0.7); margin-bottom: 30px; font-size: 24px;">𝐋𝐨𝐠𝐢𝐧 𝐢𝐧𝐭𝐨 𝐲𝐨𝐮𝐫
-          𝐚𝐜𝐜𝐨𝐮𝐧𝐭</p>
+        <p style="color: rgba(255, 255, 255, 0.7); margin-bottom: 30px; font-size: 24px;">𝐋𝐨𝐠𝐢𝐧 𝐢𝐧𝐭𝐨 𝐲𝐨𝐮𝐫 𝐚𝐜𝐜𝐨𝐮𝐧𝐭</p>
 
         <form id="login-form">
-          <input type="text" id="email" placeholder="Username or Email" required />
+          <input type="text" id="name" placeholder="Username or Email" required />
           <input type="password" id="password" placeholder="Password" required />
           <button type="submit" class="btn email-btn">Login</button>
         </form>
@@ -301,7 +293,7 @@
           <i class="fab fa-github"></i> Continue with GitHub
         </a>
 
-        <p class="signup-text">Don't have an account? <a href="/signup">Sign up</a></p>
+        <p class="signup-text">Don't have an account? <a href="signup.html">Sign up</a></p>
       </div>
     </div>
   </div>
@@ -318,26 +310,26 @@
     // ✅ Login form handler
     document.getElementById("login-form").addEventListener("submit", async (e) => {
       e.preventDefault();
-      const email = document.getElementById("email").value.trim();
+      const name = document.getElementById("name").value.trim();
       const password = document.getElementById("password").value.trim();
 
       try {
         const res = await fetch("/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password })
+          body: JSON.stringify({ name, password })
         });
         const result = await res.json();
-
+        
         if (res.ok) {
           // Store token and user data
           localStorage.setItem("token", result.token);
           if (result.user) {
             localStorage.setItem("user", JSON.stringify(result.user));
           }
-
+          
           // Redirect to dashboard
-          window.location.href = "/dashboard.html";
+          window.location.href = "/public/index.html";
         } else {
           alert(result.error || "Login failed");
         }
@@ -348,5 +340,4 @@
     });
   </script>
 </body>
-
 </html>

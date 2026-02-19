@@ -14,7 +14,7 @@ app.use(express.json({ limit: '20mb' }));
 
 // Debug log for auth/OAuth routes
 app.use((req, res, next) => {
-  if (req.path.startsWith('/auth') || req.path === '/callback' || req.path === '/github/callback' || req.path === '/login' || req.path === '/signup') {
+  if (req.path.startsWith('/auth') || req.path === '/callback' || req.path === '/github/callback') {
     console.log(`[GW] ${req.method} ${req.originalUrl}`);
   }
   next();
@@ -23,19 +23,11 @@ app.use((req, res, next) => {
 // Base URL for redirects (ENV or per-request)
 const PUBLIC_BASE_URL = process.env.PUBLIC_BASE_URL;
 const PROXY_LOG_LEVEL = process.env.PROXY_LOG_LEVEL || 'warn';
-const PROXY_DEBUG = /^(1|true)$/i.test(process.env.PROXY_DEBUG || 'true');
+const PROXY_DEBUG = /^(1|true)$/i.test(process.env.PROXY_DEBUG || '');
 
-// Backend service base URLs
+// Backend service base URLs (Render uses env, local uses localhost)
 const AUTH_BASE = process.env.AUTH_BASE || 'http://localhost:3000';
 const DASHBOARD_BASE = process.env.DASHBOARD_BASE || 'http://localhost:8082';
-
-// Helper to compute absolute base URL for this request
-function computeBaseUrl(req) {
-  if (PUBLIC_BASE_URL) return PUBLIC_BASE_URL;
-  const host = req.get('x-forwarded-host') || req.get('host');
-  const proto = req.get('x-forwarded-proto') || req.protocol;
-  return `${proto}://${host}`;
-}
 
 // Common proxy that rewrites redirect Location headers to the public base URL
 function gwProxy(opts) {
@@ -45,11 +37,13 @@ function gwProxy(opts) {
     cookieDomainRewrite: '',
     autoRewrite: true,
     logLevel: PROXY_LOG_LEVEL,
+    // increased timeouts for long-running ops (resume generation / preview)
     proxyTimeout: 120000,
     timeout: 120000,
     onError(err, req, res) {
       console.error('[GW] Proxy error for', req.url, ':', err.code || err.message);
       if (!res.headersSent) {
+        // Return JSON so frontend doesn't try to parse HTML
         res.status(502).json({ error: 'Bad Gateway', details: err.message });
       }
     },
@@ -58,11 +52,16 @@ function gwProxy(opts) {
       try {
         const base = computeBaseUrl(req);
         const u = new URL(base);
+        // Force accurate forwarded headers for auth servers behind ngrok
         proxyReq.setHeader('x-forwarded-proto', u.protocol.replace(':', ''));
         proxyReq.setHeader('x-forwarded-host', u.host);
         if (u.port) proxyReq.setHeader('x-forwarded-port', u.port);
+        // Some stacks read these
         proxyReq.setHeader('x-original-host', u.host);
         proxyReq.setHeader('x-original-proto', u.protocol.replace(':', ''));
+        if (PROXY_DEBUG && (req.path.startsWith('/auth') || req.path.endsWith('/callback'))) {
+          console.log('[GW] onProxyReq set forwarded', { proto: u.protocol, host: u.host, port: u.port || (u.protocol === 'https:' ? '443' : '80') });
+        }
       } catch { }
       if (typeof opts.onProxyReq === 'function') {
         try { opts.onProxyReq(proxyReq, req, res); } catch { }
@@ -74,24 +73,30 @@ function gwProxy(opts) {
       }
       const status = proxyRes.statusCode;
       const locHdr = proxyRes.headers && proxyRes.headers['location'];
+      const origLoc = locHdr;
 
-      if (PROXY_DEBUG && (req.path.startsWith('/auth') || req.path === '/login' || req.path === '/signup')) {
-        console.log('[GW] proxyRes', req.method, req.originalUrl, 'status:', status, 'location:', locHdr || '-');
+      // Always print status/Location for auth paths in debug mode
+      if (PROXY_DEBUG && (req.path.startsWith('/auth') || req.path === '/callback' || req.path === '/github/callback')) {
+        console.log('[GW] proxyRes', req.method, req.originalUrl, 'status:', status, 'location:', origLoc || '-');
       }
 
       if (!locHdr) return;
       try {
         const base = computeBaseUrl(req);
+        // 1) Rewrite relative redirects
         if (locHdr.startsWith('/')) {
           proxyRes.headers['location'] = `${base}${locHdr}`;
+          if (PROXY_DEBUG) console.log('[GW] rewrite Location (relative)', req.originalUrl, '→', proxyRes.headers['location']);
           return;
         }
         const u = new URL(locHdr);
+        // 2) Map localhost redirects to public base
         if (['localhost', '127.0.0.1'].includes(u.hostname)) {
           proxyRes.headers['location'] = `${base}${u.pathname}${u.search}${u.hash}`;
+          if (PROXY_DEBUG) console.log('[GW] rewrite Location (localhost)', req.originalUrl, '\n   from:', origLoc, '\n     to:', proxyRes.headers['location']);
           return;
         }
-        // Fix OAuth authorize redirect_uri
+        // 3) Fix OAuth authorize redirect_uri to public base
         const isGoogle = u.hostname.endsWith('accounts.google.com');
         const isGitHub = u.hostname === 'github.com' && u.pathname.startsWith('/login/oauth/authorize');
         if (isGoogle || isGitHub) {
@@ -102,50 +107,69 @@ function gwProxy(opts) {
             if (req.path && req.path.startsWith('/auth/github')) cb = '/auth/github/callback';
             sp.set('redirect_uri', `${base}${cb}`);
             proxyRes.headers['location'] = u.toString();
+            if (PROXY_DEBUG) console.log('[GW] rewrite OAuth redirect_uri', req.originalUrl, '\n   from:', origLoc, '\n     to:', proxyRes.headers['location']);
             return;
           }
         }
-      } catch (e) { }
+        // If we didn’t rewrite, log pass-through
+        if (PROXY_DEBUG) console.log('[GW] pass-through Location', req.originalUrl, '→', locHdr);
+      } catch (e) {
+        if (PROXY_DEBUG) console.log('[GW] onProxyRes error', e.message);
+      }
     }
   };
   return createProxyMiddleware(proxyConfig);
 }
 
+// ------------------------------------------------------------------
 // 1. PATHS
+// ------------------------------------------------------------------
+// Use the directory containing gateway.js (and started.html) as the landing root
 const landingDir = __dirname;
 const STARTED_HTML = path.join(landingDir, 'started.html');
+const dashboardDir = path.join(__dirname, 'dashboard-build'); // <- Put your 8082 build here
 
-// 2. PROXIES
-// Auth Backend (port 3000)
+// ------------------------------------------------------------------
+// 2. PROXIES (MUST COME BEFORE STATIC FILES)
+// ------------------------------------------------------------------
+
+// AUTH BACKEND (port 3000) - API routes
 const authApiRoutes = [
   '/signup', '/login', '/logout', '/verify-email',
   '/me', '/generate-resume', '/download-resume', '/preview-resume'
 ];
 authApiRoutes.forEach(route => {
-  // We use gwProxy but EXLUDE GET /login and GET /signup so we can serve UI
-  app.all(route, (req, res, next) => {
-    if (req.method === 'GET' && (req.path === '/login' || req.path === '/signup')) {
-      return next();
-    }
-    return gwProxy({ target: AUTH_BASE, ws: true })(req, res, next);
-  });
+  app.all(route, gwProxy({ target: AUTH_BASE, ws: true }));
 });
 
-// OAuth routes
+// Google OAuth endpoints → preserve /auth prefix (no pathRewrite)
 app.all('/auth/google', gwProxy({ target: AUTH_BASE }));
 app.all('/auth/google/callback', gwProxy({ target: AUTH_BASE }));
+
+// GitHub OAuth endpoints → preserve /auth prefix (no pathRewrite)
 app.all('/auth/github', gwProxy({ target: AUTH_BASE }));
 app.all('/auth/github/callback', gwProxy({ target: AUTH_BASE }));
 
-// Shortened callbacks
-app.use('/callback', createProxyMiddleware({ target: DASHBOARD_BASE, changeOrigin: true }));
+// General Auth endpoints → login/signup/verify etc.
+app.all('/auth/login', gwProxy({ target: AUTH_BASE, changeOrigin: true }));
+app.all('/auth/signup', gwProxy({ target: AUTH_BASE, changeOrigin: true }));
+app.all('/auth/verify', gwProxy({ target: AUTH_BASE, changeOrigin: true }));
+app.all('/auth/verify-email', gwProxy({ target: AUTH_BASE, changeOrigin: true }));
+
+// Support shortened callback paths (if backend initiated with '/callback' or '/github/callback')
+// Frontend callback → proxy to dashboard (avoid 404 if a client lands on /callback)
+app.use('/callback', createProxyMiddleware({
+  target: DASHBOARD_BASE,
+  changeOrigin: true,
+  logLevel: 'warn'
+}));
 app.use('/auth/callback', gwProxy({ target: AUTH_BASE, pathRewrite: { '^/auth/callback$': '/auth/google/callback' } }));
 app.use('/github/callback', gwProxy({ target: AUTH_BASE, pathRewrite: { '^/github/callback$': '/auth/github/callback' } }));
 
-// Dashboard UI Login Tracking / User Info (proxied to port 3000)
-app.use('/api/auth', createProxyMiddleware({ target: AUTH_BASE, pathRewrite: { '^/api/auth': '' } }));
+// REMOVED: Catch-all /auth proxy was interfering with OAuth routes
+// Static auth pages will be served from landing directory instead
 
-// Dashboard UI (port 8082) fallback
+// DASHBOARD UI (port 8082) → /
 app.use('/dashboard', createProxyMiddleware({
   target: DASHBOARD_BASE,
   changeOrigin: true,
@@ -153,62 +177,150 @@ app.use('/dashboard', createProxyMiddleware({
   logLevel: 'warn'
 }));
 
-// Resume & Analysis API (port 5003)
+// RESUME API (port 5003)
 app.use(createProxyMiddleware({
   target: 'http://localhost:5003',
-  pathFilter: ['/api/resume', '/api/analysis', '/preview-resume', '/download-resume', '/generate-resume', '/download-docx'],
+  pathFilter: [
+    '/api/resume',
+    '/api/analysis',
+    '/preview-resume',
+    '/download-resume',
+    '/generate-resume',
+    '/download-docx'
+  ],
   changeOrigin: true,
   ws: true,
-  logLevel: 'debug'
+  logLevel: 'debug',
+  proxyTimeout: 120000,
+  timeout: 120000
 }));
 
-// Previews
-app.use('/templates/previews', createProxyMiddleware({ target: 'http://localhost:5003', changeOrigin: true }));
+// ANALYSIS API handled by the multi-path proxy above
 
-// 3. UI ROUTES
+// PREVIEW IMAGES FROM RESUME SERVICE
+app.use('/templates/previews', createProxyMiddleware({
+  target: 'http://localhost:5003',
+  changeOrigin: true,
+  logLevel: 'warn'
+}));
+
+// ------------------------------------------------------------------
+// 3. STATIC FILES
+// ------------------------------------------------------------------
+
+// Serve started.html & assets from the landing directory
+// IMPORTANT: do not serve static for /auth/* so proxy can handle OAuth
+const landingStatic = express.static(landingDir, {
+  index: false,
+  extensions: ['html']
+});
+app.use((req, res, next) => {
+  // Skip static for OAuth and auth pages
+  if (req.path === '/auth' || req.path.startsWith('/auth/')) {
+    return next();
+  }
+  return landingStatic(req, res, next);
+});
+
+// Serve dashboard build (if you want to serve it statically instead of proxy)
+// Uncomment below if you build dashboard to `dashboard-build` folder
+/*
+app.use('/dashboard', express.static(dashboardDir, {
+  index: 'index.html',
+  extensions: ['html']
+}));
+*/
+
+// ------------------------------------------------------------------
+// 4. ROUTES
+// ------------------------------------------------------------------
+
+// Root → started.html
 app.get('/', (req, res) => {
   res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
   res.sendFile(STARTED_HTML);
 });
 
-app.get(['/login', '/login.html'], (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'login.html'));
-});
-
-app.get(['/signup', '/signup.html'], (req, res) => {
-  res.sendFile(path.join(__dirname, 'signup.html'));
-});
-
+// Added: Route /get-started to the role selection page
 app.get('/get-started', (req, res) => {
   res.sendFile(path.join(__dirname, 'role-selection.html'));
 });
 
-// Main Dashboard serving
-app.get(['/dashboard', '/dashboard.html', '/index.html'], (req, res) => {
+// Added: Route /dashboard directly to the user dashboard in public/index.html
+app.get('/dashboard', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.get('/admin-dashboard.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'admin-dashboard.html'));
+// Support legacy dashboard.html links by redirecting to /dashboard
+app.get('/dashboard.html', (req, res) => {
+  res.redirect('/dashboard');
 });
 
-// 4. STATIC FILES
-app.use(express.static(landingDir, { index: false, extensions: ['html'] }));
-app.use('/public', express.static(path.join(__dirname, 'public'), { index: false }));
+// Added: Support index.html links by redirecting to /dashboard
+app.get('/index.html', (req, res) => {
+  res.redirect('/dashboard');
+});
 
-// 5. SPA FALLBACK
+// Support for admin dashboard path
+app.get('/admin-dashboard.html', (req, res) => {
+  res.redirect('/public/admin-dashboard.html');
+});
+
+// Fix accidental ".login.html" path
+app.get('/.login.html', (req, res) => {
+  return res.redirect('/login.html');
+});
+
+// Redundant dashboard routes removed to avoid loops
+
+// ------------------------------------------------------------------
+// 5. SPA FALLBACK (ONLY for frontend routes)
+// ------------------------------------------------------------------
 app.get('*', (req, res, next) => {
-  if (path.extname(req.path) !== '') return next();
+  const filePath = path.join(landingDir, req.path);
+
+  // Serve any real existing file (HTML, JS, CSS, images, etc.)
+  if (require('fs').existsSync(filePath)) {
+    return res.sendFile(filePath);
+  }
+
+  // Only fallback to started.html for unmatched frontend routes (no extension)
+  // Ensure we don't catch API, dashboard or auth routes
   if (
     !req.path.startsWith('/api') &&
     !req.path.startsWith('/dashboard') &&
-    !req.path.startsWith('/auth')
+    !req.path.startsWith('/auth') &&
+    path.extname(req.path) === ''
   ) {
     return res.sendFile(STARTED_HTML);
   }
+
   next();
 });
 
+// ------------------------------------------------------------------
+// 6. START SERVER
+// ------------------------------------------------------------------
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`\nGateway LIVE at http://localhost:${PORT}`);
+  console.log(`   Landing dir          → ${landingDir}`);
+  console.log('   started.html        → /');
+  console.log('   Sign-up/Login       → /auth/signup, /auth/login');
+  console.log('   Google OAuth        → /auth/google, /auth/google/callback');
+  console.log('   GitHub OAuth        → /auth/github, /auth/github/callback');
+  console.log('   Dashboard UI        → /dashboard (proxied from :8082)');
+  console.log('   Resume API          → /api/resume/*     (:5003)');
+  console.log('   Analysis API        → /api/analysis/*   (:5001)');
+  console.log(`   Base URL Mode       → ${process.env.PUBLIC_BASE_URL ? 'ENV ' + process.env.PUBLIC_BASE_URL : 'Dynamic (x-forwarded headers)'}`);
+  console.log(`   Proxy Log Level     → ${PROXY_LOG_LEVEL}`);
+  console.log();
+});
+
+// Serve SEO files
+app.get('/sitemap.xml', (req, res) => {
+  res.sendFile(path.join(__dirname, 'sitemap.xml'));
+});
+
+app.get('/robots.txt', (req, res) => {
+  res.sendFile(path.join(__dirname, 'robots.txt'));
 });
