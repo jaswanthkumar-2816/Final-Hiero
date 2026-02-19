@@ -133,14 +133,18 @@ const dashboardDir = path.join(__dirname, 'dashboard-build'); // <- Put your 808
 // 2. PROXIES (MUST COME BEFORE STATIC FILES)
 // ------------------------------------------------------------------
 
-// AUTH BACKEND (port 3000) - API routes
-const authApiRoutes = [
-  '/signup', '/login', '/logout', '/verify-email',
-  '/me', '/generate-resume', '/download-resume', '/preview-resume'
-];
-authApiRoutes.forEach(route => {
-  app.all(route, gwProxy({ target: AUTH_BASE, ws: true }));
+// AUTH BACKEND (port 3000)
+// Map simplified paths to backend's direct paths
+const authRoutes = ['/signup', '/login', '/logout', '/verify-email', '/me', '/dashboard'];
+authRoutes.forEach(route => {
+  app.all(route, gwProxy({ target: AUTH_BASE, changeOrigin: true }));
 });
+
+// Support /auth/* prefix by rewriting it to the root
+app.all('/auth/login', gwProxy({ target: AUTH_BASE, pathRewrite: { '^/auth/login': '/login' } }));
+app.all('/auth/signup', gwProxy({ target: AUTH_BASE, pathRewrite: { '^/auth/signup': '/signup' } }));
+app.all('/auth/verify', gwProxy({ target: AUTH_BASE, pathRewrite: { '^/auth/verify': '/verify-email' } }));
+app.all('/auth/verify-email', gwProxy({ target: AUTH_BASE, pathRewrite: { '^/auth/verify-email': '/verify-email' } }));
 
 // Google OAuth endpoints → preserve /auth prefix (no pathRewrite)
 app.all('/auth/google', gwProxy({ target: AUTH_BASE }));
@@ -150,11 +154,7 @@ app.all('/auth/google/callback', gwProxy({ target: AUTH_BASE }));
 app.all('/auth/github', gwProxy({ target: AUTH_BASE }));
 app.all('/auth/github/callback', gwProxy({ target: AUTH_BASE }));
 
-// General Auth endpoints → login/signup/verify etc.
-app.all('/auth/login', gwProxy({ target: AUTH_BASE, changeOrigin: true }));
-app.all('/auth/signup', gwProxy({ target: AUTH_BASE, changeOrigin: true }));
-app.all('/auth/verify', gwProxy({ target: AUTH_BASE, changeOrigin: true }));
-app.all('/auth/verify-email', gwProxy({ target: AUTH_BASE, changeOrigin: true }));
+// No changes here, kept for structure
 
 // Support shortened callback paths (if backend initiated with '/callback' or '/github/callback')
 // Frontend callback → proxy to dashboard (avoid 404 if a client lands on /callback)
@@ -241,29 +241,46 @@ app.get('/', (req, res) => {
   res.sendFile(STARTED_HTML);
 });
 
+// Explicitly serve login and signup HTML to avoid SPA catch-all
+app.get('/login', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
+
+app.get('/login.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
+
+app.get('/signup', (req, res) => {
+  res.sendFile(path.join(__dirname, 'signup.html'));
+});
+
+app.get('/signup.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'signup.html'));
+});
+
 // Added: Route /get-started to the role selection page
 app.get('/get-started', (req, res) => {
   res.sendFile(path.join(__dirname, 'role-selection.html'));
 });
 
-// Support dashboard.html links directly
+// Support dashboard.html links directly -> Use public/index.html (The Dashboard)
 app.get('/dashboard.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Added: Support index.html links by serving dashboard
+// Support index.html links by serving dashboard
 app.get('/index.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // Support for admin dashboard path
 app.get('/admin-dashboard.html', (req, res) => {
-  res.redirect('/public/admin-dashboard.html');
+  res.sendFile(path.join(__dirname, 'public', 'admin-dashboard.html'));
 });
 
 // Fix accidental ".login.html" path
 app.get('/.login.html', (req, res) => {
-  return res.redirect('/login.html');
+  return res.redirect('/login');
 });
 
 // Redundant dashboard routes removed to avoid loops
