@@ -1571,33 +1571,28 @@
             </button>
           </div>
         </div>
-
-        <!-- Hiero Aurora -->
-        <div class="template-card premium" data-category="premium" data-template="hiero-aurora" data-type="premium">
+        <!-- Hiero Essence Template -->
+        <div class="template-card premium" data-category="premium" data-template="hiero-essence" data-type="premium">
           <div class="premium-badge">Premium</div>
-          <div class="template-preview" onclick="previewTemplate('hiero-aurora')">
-            <i class="fas fa-sun"></i>
+          <div class="template-preview" onclick="previewTemplate('hiero-essence')">
+            <i class="fas fa-columns"></i>
             <div class="preview-overlay">
               <button class="preview-btn">Preview Template</button>
             </div>
           </div>
           <div class="template-info">
             <h3>Hiero Essence</h3>
-            <p>The Aurora design features fluid gradients and modern layouts for forward-thinking professionals.</p>
+            <p>Modern corporate design featuring a sleek dark sidebar with professional orange accents.</p>
             <div class="template-tags">
-              <span class="tag premium">Modern</span>
-              <span class="tag premium">Gradient</span>
-              <span class="tag premium">Fluid</span>
+              <span class="tag premium">Two-Column</span>
+              <span class="tag premium">Corporate</span>
+              <span class="tag premium">Premium</span>
             </div>
-            <button class="start-building-btn" onclick="startBuilding('hiero-aurora')">
+            <button class="start-building-btn" onclick="startBuilding('hiero-essence')">
               <i class="fas fa-arrow-right"></i> Start Building
             </button>
           </div>
         </div>
-
-
-
-
 
         <!-- Hiero Velocity -->
         <div class="template-card premium" data-category="premium" data-template="hiero-velocity" data-type="premium">
@@ -2574,6 +2569,11 @@
           description: 'Exclusive signature design with unique styling. The ultimate template for a lasting impression.',
           style: 'Unique signature header, creative layout, premium feel.'
         },
+        'hiero-essence': {
+          name: 'Hiero Essence',
+          description: 'Modern corporate design with a distinctive dark sidebar and orange accent bars. Perfect for a structured professional presentation.',
+          style: 'Two-column layout, dark sidebar (#1F1F1F), orange accents (#F5A623), clean typography.'
+        },
         'hiero-aurora': {
           name: 'Hiero Aurora',
           description: 'Modern gradient design with fluid layouts. Perfect for forward-thinking professionals.',
@@ -3108,7 +3108,8 @@
         'priya': 'Priya Elegant',
         'priya-analytics': 'Priya Analytics (Single Column)',
         'hiero-studio': 'Hiero Studio',
-        'template4': 'Hiero Academic'
+        'template4': 'Hiero Academic',
+        'hiero-essence': 'Hiero Essence'
       };
       return names[templateId] || 'Selected';
     }

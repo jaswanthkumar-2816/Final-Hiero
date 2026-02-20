@@ -9,8 +9,17 @@ const { createProxyMiddleware } = require('http-proxy-middleware');
 
 dotenv.config();
 
+// Backup: Try to load from login-system/.env if root .env didn't provide critical variables
+if (!process.env.GOOGLE_CLIENT_ID) {
+    dotenv.config({ path: path.join(__dirname, 'login-system', '.env') });
+}
+
 const app = express();
 const PORT = process.env.PORT || 2816;
+
+console.log('🔐 Gateway Startup Logic:');
+console.log('   GOOGLE_CLIENT_ID       =', process.env.GOOGLE_CLIENT_ID ? '✅ Loaded' : '❌ Missing');
+console.log('   PORT                   =', PORT);
 
 // ======================
 // CONFIG & PATHS

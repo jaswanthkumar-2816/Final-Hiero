@@ -188,103 +188,119 @@ function generateWordHTML(data) {
     // Skills can come as 'skills' or 'technicalSkills'
     const technicalSkills = data.skills || data.technicalSkills || '';
 
-    // Mapping keys to perfect titles
+    const template = data.template || 'classic';
+    const isHieroEssence = template === 'hiero-essence' || template === 'essence';
+
+    // Hiero Essence Colors
+    const colors = {
+        bg: isHieroEssence ? '#121212' : '#FFFFFF',
+        text: isHieroEssence ? '#FFFFFF' : '#000000',
+        accent: isHieroEssence ? '#f5a623' : '#2ae023',
+        secondaryText: isHieroEssence ? '#AAAAAA' : '#333333'
+    };
+
     const titles = {
-        summary: 'CARRIER OBJECTIVE',
-        education: 'EDUCATION',
-        projects: 'PROJECTS',
-        technicalSkills: 'TECHNICAL STRENGTHS',
-        experience: 'WORK EXPERIENCE',
-        achievements: 'ACADEMIC ACHIEVEMENTS',
-        softSkills: 'PERSONAL TRAITS'
+        summary: 'Professional Summary',
+        education: 'Education',
+        projects: 'Projects',
+        technicalSkills: 'Technical Skills',
+        experience: 'Work Experience',
+        achievements: 'Achievements',
+        softSkills: 'Soft Skills'
     };
 
     return `
     <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
     <head><meta charset='utf-8'><title>Resume</title><style>
-        body { font-family: 'Times New Roman', serif; line-height: 1.4; color: #000; margin: 40pt; }
-        .header { text-align: center; margin-bottom: 25pt; }
-        .name { font-size: 20pt; font-weight: bold; margin: 0; text-transform: none; }
-        .contact { font-size: 10pt; color: #333; margin-top: 5pt; }
-        .section-title { font-size: 12pt; font-weight: bold; color: #000; margin-top: 20pt; margin-bottom: 5pt; text-transform: uppercase; letter-spacing: 1px; }
-        .section-line { border-top: 1pt solid #000; margin-bottom: 10pt; }
-        .item-title { font-size: 11pt; font-weight: bold; }
-        .item-meta { font-size: 10pt; color: #444; }
-        .content { font-size: 10pt; margin-bottom: 8pt; text-align: justify; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.4; color: ${colors.text}; background-color: ${colors.bg}; padding: 20pt; }
+        .header { text-align: center; margin-bottom: 25pt; border-bottom: 2pt solid ${colors.accent}; padding-bottom: 10pt; }
+        .name { font-size: 24pt; font-weight: bold; margin: 0; color: ${colors.accent}; }
+        .contact { font-size: 10pt; color: ${colors.secondaryText}; margin-top: 5pt; }
+        .section-title { font-size: 14pt; font-weight: bold; color: ${colors.accent}; margin-top: 20pt; margin-bottom: 5pt; text-transform: uppercase; letter-spacing: 1px; background-color: ${isHieroEssence ? '#1e1e1e' : '#f0f0f0'}; padding: 5pt; }
+        .section-line { border-top: 1pt solid ${colors.accent}; margin-bottom: 10pt; }
+        .item-title { font-size: 11pt; font-weight: bold; color: ${colors.accent}; }
+        .item-meta { font-size: 10pt; color: ${colors.secondaryText}; }
+        .content { font-size: 10pt; margin-bottom: 8pt; text-align: justify; color: ${colors.text}; }
         ul { margin-top: 5pt; padding-left: 20pt; }
-        li { margin-bottom: 4pt; }
+        li { margin-bottom: 4pt; color: ${colors.text}; }
+        a { color: ${colors.accent}; text-decoration: none; }
     </style></head>
-    <body>
-        <div class='header'>
-            <div class='name'>${personalInfo.fullName || 'RESUME'}</div>
-            <div class='contact'>${[personalInfo.address, personalInfo.phone, personalInfo.email].filter(Boolean).join('  |  ')}</div>
-        </div>
-        
-        ${summary ? `
-            <div class='section-title'>${titles.summary}</div>
-            <div class='section-line'></div>
-            <div class='content'>${summary}</div>
-        ` : ''}
-        
-        <div class='section-title'>${titles.education}</div>
-        <div class='section-line'></div>
-        ${education.map(edu => `
-            <div style='margin-bottom: 10pt;'>
-                <div class='item-title'>${edu.degree || ''}</div>
-                <div class='item-meta'>${edu.school || ''} ${edu.gradYear ? ` | ${edu.gradYear}` : ''} ${edu.gpa ? ` | GPA: ${edu.gpa}` : ''}</div>
-            </div>
-        `).join('')}
+    <body style='background-color: ${colors.bg}; color: ${colors.text}; margin: 0; padding: 0;'>
+        <table width="100%" border="0" cellspacing="0" cellpadding="40" bgcolor="${colors.bg}" style='background-color: ${colors.bg};'>
+            <tr>
+                <td align="left" valign="top">
+                    <div class='header' style="text-align: center; margin-bottom: 25pt; border-bottom: 2pt solid ${colors.accent}; padding-bottom: 10pt;">
+                        ${personalInfo.profilePhoto ? `
+                            <div style='text-align: center; margin-bottom: 10pt;'>
+                                <img src="${personalInfo.profilePhoto}" width="120" height="120" style="border-radius: 60px;">
+                            </div>
+                        ` : ''}
+                        <div class='name' style='font-size: 24pt; font-weight: bold; margin: 0; color: ${colors.accent}; text-align: center;'>${(personalInfo.fullName || 'RESUME').toUpperCase()}</div>
+                        <div class='contact' style='font-size: 10pt; color: ${colors.secondaryText}; margin-top: 5pt; text-align: center;'>${[personalInfo.address, personalInfo.phone, personalInfo.email].filter(Boolean).join('  |  ')}</div>
+                    </div>
+                    
+                    ${summary ? `
+                        <div class='section-title' style="font-size: 14pt; font-weight: bold; color: ${colors.accent}; margin-top: 20pt; margin-bottom: 5pt; text-transform: uppercase; letter-spacing: 1px; background-color: ${isHieroEssence ? '#1e1e1e' : '#f0f0f0'}; padding: 5pt;">${titles.summary}</div>
+                        <div class='section-line' style="border-top: 1pt solid ${colors.accent}; margin-bottom: 10pt;"></div>
+                        <div class='content' style="font-size: 10pt; margin-bottom: 8pt; text-align: justify; color: ${colors.text};">${summary}</div>
+                    ` : ''}
+                    
+                    <div class='section-title' style="font-size: 14pt; font-weight: bold; color: ${colors.accent}; margin-top: 20pt; margin-bottom: 5pt; text-transform: uppercase; letter-spacing: 1px; background-color: ${isHieroEssence ? '#1e1e1e' : '#f0f0f0'}; padding: 5pt;">${titles.education}</div>
+                    <div class='section-line' style="border-top: 1pt solid ${colors.accent}; margin-bottom: 10pt;"></div>
+                    ${education.map(edu => `
+                        <div style='margin-bottom: 10pt;'>
+                            <div class='item-title' style="font-size: 11pt; font-weight: bold; color: ${colors.accent};">${edu.degree || ''}</div>
+                            <div class='item-meta' style="font-size: 10pt; color: ${colors.secondaryText};">${edu.school || ''} ${edu.gradYear ? ` | ${edu.gradYear}` : ''} ${edu.gpa ? ` | GPA: ${edu.gpa}` : ''}</div>
+                        </div>
+                    `).join('')}
 
-        <div class='section-title'>${titles.projects}</div>
-        <div class='section-line'></div>
-        ${Array.isArray(projects) ? projects.map(proj => `
-            <div style='margin-bottom: 12pt;'>
-                <div class='item-title'>${proj.name || proj.title || ''}</div>
-                <div class='item-meta'>${proj.technologies || ''}</div>
-                <div class='content'>${proj.description || ''}</div>
-                ${proj.achievement ? `<div class='content'><b>Achievement:</b> ${proj.achievement}</div>` : ''}
-            </div>
-        `).join('') : `<div class='content'>${projects}</div>`}
+                    <div class='section-title' style="font-size: 14pt; font-weight: bold; color: ${colors.accent}; margin-top: 20pt; margin-bottom: 5pt; text-transform: uppercase; letter-spacing: 1px; background-color: ${isHieroEssence ? '#1e1e1e' : '#f0f0f0'}; padding: 5pt;">${titles.projects}</div>
+                    <div class='section-line' style="border-top: 1pt solid ${colors.accent}; margin-bottom: 10pt;"></div>
+                    ${Array.isArray(projects) ? projects.map(proj => `
+                        <div style='margin-bottom: 12pt;'>
+                            <div class='item-title' style="font-size: 11pt; font-weight: bold; color: ${colors.accent};">${proj.name || proj.title || ''}</div>
+                            <div class='item-meta' style="font-size: 10pt; color: ${colors.secondaryText};">${proj.technologies || ''}</div>
+                            <div class='content' style="font-size: 10pt; margin-bottom: 8pt; text-align: justify; color: ${colors.text};">${proj.description || ''}</div>
+                            ${proj.achievement ? `<div class='content' style="font-size: 10pt; margin-bottom: 8pt; text-align: justify; color: ${colors.text};"><b>Achievement:</b> ${proj.achievement}</div>` : ''}
+                        </div>
+                    `).join('') : `<div class='content' style="font-size: 10pt; margin-bottom: 8pt; text-align: justify; color: ${colors.text};">${projects}</div>`}
 
-        ${technicalSkills ? `
-            <div class='section-title'>${titles.technicalSkills}</div>
-            <div class='section-line'></div>
-            <div class='content'>${technicalSkills}</div>
-        ` : ''}
+                    ${technicalSkills ? `
+                        <div class='section-title' style="font-size: 14pt; font-weight: bold; color: ${colors.accent}; margin-top: 20pt; margin-bottom: 5pt; text-transform: uppercase; letter-spacing: 1px; background-color: ${isHieroEssence ? '#1e1e1e' : '#f0f0f0'}; padding: 5pt;">${titles.technicalSkills}</div>
+                        <div class='section-line' style="border-top: 1pt solid ${colors.accent}; margin-bottom: 10pt;"></div>
+                        <div class='content' style="font-size: 10pt; margin-bottom: 8pt; text-align: justify; color: ${colors.text};">${technicalSkills}</div>
+                    ` : ''}
 
-        <div class='section-title'>${titles.experience}</div>
-        <div class='section-line'></div>
-        ${experience.map(exp => `
-            <div style='margin-bottom: 15pt;'>
-                <div class='item-title'>${exp.jobTitle || ''}</div>
-                <div class='item-meta'>${exp.company || ''} (${exp.startDate || ''} - ${exp.endDate || 'Present'})</div>
-                <div class='content'>${exp.description ? `<ul>${exp.description.split('\n').filter(l => l.trim()).map(l => `<li>${l.replace(/^[\*-•]\s*/, '')}</li>`).join('')}</ul>` : ''}</div>
-            </div>
-        `).join('')}
+                    <div class='section-title' style="font-size: 14pt; font-weight: bold; color: ${colors.accent}; margin-top: 20pt; margin-bottom: 5pt; text-transform: uppercase; letter-spacing: 1px; background-color: ${isHieroEssence ? '#1e1e1e' : '#f0f0f0'}; padding: 5pt;">${titles.experience}</div>
+                    <div class='section-line' style="border-top: 1pt solid ${colors.accent}; margin-bottom: 10pt;"></div>
+                    ${experience.map(exp => `
+                        <div style='margin-bottom: 15pt;'>
+                            <div class='item-title' style="font-size: 11pt; font-weight: bold; color: ${colors.accent};">${exp.jobTitle || ''}</div>
+                            <div class='item-meta' style="font-size: 10pt; color: ${colors.secondaryText};">${exp.company || ''} (${exp.startDate || ''} - ${exp.endDate || 'Present'})</div>
+                            <div class='content' style="font-size: 10pt; margin-bottom: 8pt; text-align: justify; color: ${colors.text};">${exp.description ? `<ul style="margin-top: 5pt; padding-left: 20pt;">${exp.description.split('\n').filter(l => l.trim()).map(l => `<li style="margin-bottom: 4pt; color: ${colors.text};">${l.replace(/^[\*-•]\s*/, '')}</li>`).join('')}</ul>` : ''}</div>
+                        </div>
+                    `).join('')}
 
-        ${achievements ? `
-            <div class='section-title'>${titles.achievements}</div>
-            <div class='section-line'></div>
-            <div class='content'>${achievements}</div>
-        ` : ''}
+                    ${achievements ? `
+                        <div class='section-title' style="font-size: 14pt; font-weight: bold; color: ${colors.accent}; margin-top: 20pt; margin-bottom: 5pt; text-transform: uppercase; letter-spacing: 1px; background-color: ${isHieroEssence ? '#1e1e1e' : '#f0f0f0'}; padding: 5pt;">${titles.achievements}</div>
+                        <div class='section-line' style="border-top: 1pt solid ${colors.accent}; margin-bottom: 10pt;"></div>
+                        <div class='content' style="font-size: 10pt; margin-bottom: 8pt; text-align: justify; color: ${colors.text};">${achievements}</div>
+                    ` : ''}
 
-        ${softSkills ? `
-            <div class='section-title'>${titles.softSkills}</div>
-            <div class='section-line'></div>
-            <div class='content'>${softSkills}</div>
-        ` : ''}
+                    ${softSkills ? `
+                        <div class='section-title' style="font-size: 14pt; font-weight: bold; color: ${colors.accent}; margin-top: 20pt; margin-bottom: 5pt; text-transform: uppercase; letter-spacing: 1px; background-color: ${isHieroEssence ? '#1e1e1e' : '#f0f0f0'}; padding: 5pt;">${titles.softSkills}</div>
+                        <div class='section-line' style="border-top: 1pt solid ${colors.accent}; margin-bottom: 10pt;"></div>
+                        <div class='content' style="font-size: 10pt; margin-bottom: 8pt; text-align: justify; color: ${colors.text};">${softSkills}</div>
+                    ` : ''}
 
-        ${Array.isArray(data.customDetails) ? data.customDetails.map(custom => `
-            <div class='section-title'>${custom.heading || 'ADDITIONAL DETAIL'}</div>
-            <div class='section-line'></div>
-            <div class='content'>${custom.content || ''}</div>
-        `).join('') : ''}
-
-        ${data.customSectionContent ? `
-            <div class='section-title'>${data.customSectionTitle || 'ADDITIONAL DETAILS'}</div>
-            <div class='section-line'></div>
-            <div class='content'>${data.customSectionContent}</div>
-        ` : ''}
+                    ${Array.isArray(data.customDetails) ? data.customDetails.map(custom => `
+                        <div class='section-title' style="font-size: 14pt; font-weight: bold; color: ${colors.accent}; margin-top: 20pt; margin-bottom: 5pt; text-transform: uppercase; letter-spacing: 1px; background-color: ${isHieroEssence ? '#1e1e1e' : '#f0f0f0'}; padding: 5pt;">${custom.heading || 'ADDITIONAL DETAIL'}</div>
+                        <div class='section-line' style="border-top: 1pt solid ${colors.accent}; margin-bottom: 10pt;"></div>
+                        <div class='content' style="font-size: 10pt; margin-bottom: 8pt; text-align: justify; color: ${colors.text};">${custom.content || ''}</div>
+                    `).join('') : ''}
+                </td>
+            </tr>
+        </table>
     </body>
     </html>`;
 }

@@ -23,5 +23,14 @@
     "password": "$2a$10$pQ3pB4.PBLLdERmOE2gEX.BLbL5076L485LG6xLxH281IpWiB9/NS",
     "emailVerified": false,
     "signupMethod": "email"
+  },
+  {
+    "id": 4,
+    "googleId": "107912609514858711010",
+    "email": "souvikkhaitan@gmail.com",
+    "name": "Souvik Khaitan",
+    "emailVerified": true,
+    "signupMethod": "google",
+    "picture": "https://lh3.googleusercontent.com/a/ACg8ocKo9GP2ePWPjtnnIzeF9kk0FHgVMO3YP87v7jx7nNxeSPs3hQ=s96-c"
   }
 ]
