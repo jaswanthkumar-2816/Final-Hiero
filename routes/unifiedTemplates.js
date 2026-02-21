@@ -3199,317 +3199,328 @@ module.exports = {
     TEMPLATE_COLORS,
     TEMPLATE_MAP,
     renderTemplate_HieroMonethon,
-    renderTemplate_HieroNova
+    renderTemplate_HieroNova,
+    renderTemplate_HieroEssence
 };
 
 
+/**
+ * HIERO ESSENCE - A modern two-column corporate layout
+ * Left sidebar (dark background, orange accent)
+ * Right main content (white background)
+ */
+async function renderTemplate_HieroEssence(doc, rawData, colors, spacing) {
+    const data = normalizeData(rawData);
+    const sidebarWidth = PAGE_CONFIG.width * 0.35;
+    const contentX = sidebarWidth;
+    const contentWidth = PAGE_CONFIG.width - sidebarWidth;
 
-const pInfo = data.personalInfo || {};
-const skills = getSafeArray(data.skills);
-const languages = getSafeArray(data.languages);
-const hobbies = getSafeArray(data.hobbies);
-const projects = getSafeArray(data.projects);
-const edu = getSafeArray(data.education);
-const exp = getSafeArray(data.experience);
-const socials = getSafeArray(data.socialLinks);
-const summary = data.summary || '';
+    const pInfo = data.personalInfo || {};
+    const skills = getSafeArray(data.skills);
+    const languages = getSafeArray(data.languages);
+    const hobbies = getSafeArray(data.hobbies);
+    const projects = getSafeArray(data.projects);
+    const edu = getSafeArray(data.education);
+    const exp = getSafeArray(data.experience);
+    const socials = getSafeArray(data.socialLinks);
+    const summary = data.summary || '';
 
-const drawPageBackground = () => {
-    doc.save();
-    doc.fillColor('#000000').rect(0, 0, PAGE_CONFIG.width, PAGE_CONFIG.height).fill();
-    doc.fillColor('#333333').rect(0, 0, sidebarWidth, PAGE_CONFIG.height).fill();
-    doc.restore();
-};
+    const drawPageBackground = () => {
+        doc.save();
+        doc.fillColor('#000000').rect(0, 0, PAGE_CONFIG.width, PAGE_CONFIG.height).fill();
+        doc.fillColor('#333333').rect(0, 0, sidebarWidth, PAGE_CONFIG.height).fill();
+        doc.restore();
+    };
 
-const smartAddPage = () => {
-    doc.addPage();
+    const smartAddPage = () => {
+        doc.addPage();
+        drawPageBackground();
+    };
+
+    // 1. Initial Backgrounds
     drawPageBackground();
-};
 
-// 1. Initial Backgrounds
-drawPageBackground();
+    // ==================== SIDEBAR (LEFT) ====================
+    let sidebarY = 0;
+    const sidebarInnerX = 15;
+    const sidebarInnerWidth = sidebarWidth - (sidebarInnerX * 2);
 
-// ==================== SIDEBAR (LEFT) ====================
-let sidebarY = 0;
-const sidebarInnerX = 15;
-const sidebarInnerWidth = sidebarWidth - (sidebarInnerX * 2);
-
-// Profile Photo Area (Reduced Height for One-Page Fit)
-doc.save();
-doc.fillColor('#111111').rect(0, 0, sidebarWidth, 200).fill();
-if (pInfo.profilePhoto) {
-    try {
-        let imgData = pInfo.profilePhoto;
-        if (imgData.startsWith('data:')) {
-            const parts = imgData.split(',');
-            if (parts.length > 1) {
-                imgData = Buffer.from(parts[1], 'base64');
+    // Profile Photo Area (Reduced Height for One-Page Fit)
+    doc.save();
+    doc.fillColor('#111111').rect(0, 0, sidebarWidth, 200).fill();
+    if (pInfo.profilePhoto) {
+        try {
+            let imgData = pInfo.profilePhoto;
+            if (imgData.startsWith('data:')) {
+                const parts = imgData.split(',');
+                if (parts.length > 1) {
+                    imgData = Buffer.from(parts[1], 'base64');
+                }
             }
+            doc.image(imgData, 15, 15, {
+                width: sidebarWidth - 30, height: 140
+            });
+        } catch (e) {
+            console.error('Photo render error in PDF:', e);
+            renderRectangularInitials(doc, pInfo.fullName, 15, 15, sidebarWidth - 30, 140);
         }
-        doc.image(imgData, 15, 15, {
-            width: sidebarWidth - 30, height: 140
+    } else {
+        renderRectangularInitials(doc, pInfo.fullName || 'User', 15, 15, sidebarWidth - 30, 140);
+    }
+    doc.restore();
+    sidebarY = 165;
+
+    // Name & Title (Condensed)
+    doc.fontSize(18).fillColor('#ffffff').font('Helvetica-Bold');
+    const nameStr = (pInfo.fullName || 'YOUR NAME').toUpperCase();
+    const nameH = doc.heightOfString(nameStr, { width: sidebarWidth - 20, align: 'center' });
+    doc.text(nameStr, 10, sidebarY, { width: sidebarWidth - 20, align: 'center' });
+    sidebarY += nameH + 2;
+
+    doc.fontSize(8.5).fillColor(colors.accent).font('Helvetica');
+    const roleStr = (pInfo.roleTitle || 'PROFESSIONAL').toUpperCase();
+    const roleH = doc.heightOfString(roleStr, { width: sidebarWidth - 20, align: 'center', characterSpacing: 1.2 });
+    doc.text(roleStr, 10, sidebarY, { width: sidebarWidth - 20, align: 'center', characterSpacing: 1.2 });
+    sidebarY += roleH + 8;
+
+    // Ensure contact starts below name/title
+    sidebarY = Math.max(195, sidebarY);
+
+    // Ultra-Condensed Folded Ribbons for Sidebar
+    const addSidebarRibbon = (title) => {
+        const ribbonH = 20;
+        doc.fillColor(colors.accent).rect(0, sidebarY, sidebarWidth - 10, ribbonH).fill();
+        doc.fillColor('#b37a1a').polygon([sidebarWidth - 10, sidebarY], [sidebarWidth, sidebarY + 8], [sidebarWidth - 10, sidebarY + 12]).fill();
+        doc.fontSize(9.5).fillColor('#ffffff').font('Helvetica-Bold').text(title.toUpperCase(), sidebarInnerX, sidebarY + 5);
+        sidebarY += ribbonH + 8;
+    };
+
+    // Contact
+    addSidebarRibbon("Contact");
+    doc.fontSize(8.5).font('Helvetica');
+    const contactList = [
+        { label: 'A', icon: '●', val: pInfo.address },
+        { label: 'T', icon: '●', val: pInfo.phone },
+        { label: 'E', icon: '●', val: pInfo.email },
+        { label: 'W', icon: '●', val: pInfo.website }
+    ];
+    contactList.forEach(item => {
+        if (item.val) {
+            const h = doc.heightOfString(item.val, { width: sidebarInnerWidth - 30 });
+            doc.fillColor(colors.accent).circle(sidebarInnerX + 4, sidebarY + 5, 2).fill();
+            doc.fillColor('#ffffff').fontSize(8).text(item.val, sidebarInnerX + 18, sidebarY, { width: sidebarInnerWidth - 30 });
+            sidebarY += Math.max(12, h + 4);
+        }
+    });
+
+    // Portfolio
+    if (socials.length > 0) {
+        sidebarY += 2;
+        addSidebarRibbon("Portfolio");
+        socials.forEach(link => {
+            if (!link) return;
+            const h = doc.heightOfString(link, { width: sidebarInnerWidth - 30 });
+            doc.fillColor(colors.accent).circle(sidebarInnerX + 4, sidebarY + 5, 2).fill();
+            doc.fillColor('#ffffff').fontSize(8).text(link, sidebarInnerX + 18, sidebarY, { width: sidebarInnerWidth - 30 });
+            sidebarY += Math.max(12, h + 4);
         });
-    } catch (e) {
-        console.error('Photo render error in PDF:', e);
-        renderRectangularInitials(doc, pInfo.fullName, 15, 15, sidebarWidth - 30, 140);
     }
-} else {
-    renderRectangularInitials(doc, pInfo.fullName || 'User', 15, 15, sidebarWidth - 30, 140);
-}
-doc.restore();
-sidebarY = 165;
 
-// Name & Title (Condensed)
-doc.fontSize(18).fillColor('#ffffff').font('Helvetica-Bold');
-const nameStr = (pInfo.fullName || 'YOUR NAME').toUpperCase();
-const nameH = doc.heightOfString(nameStr, { width: sidebarWidth - 20, align: 'center' });
-doc.text(nameStr, 10, sidebarY, { width: sidebarWidth - 20, align: 'center' });
-sidebarY += nameH + 2;
-
-doc.fontSize(8.5).fillColor(colors.accent).font('Helvetica');
-const roleStr = (pInfo.roleTitle || 'PROFESSIONAL').toUpperCase();
-const roleH = doc.heightOfString(roleStr, { width: sidebarWidth - 20, align: 'center', characterSpacing: 1.2 });
-doc.text(roleStr, 10, sidebarY, { width: sidebarWidth - 20, align: 'center', characterSpacing: 1.2 });
-sidebarY += roleH + 8;
-
-// Ensure contact starts below name/title
-sidebarY = Math.max(195, sidebarY);
-
-// Ultra-Condensed Folded Ribbons for Sidebar
-const addSidebarRibbon = (title) => {
-    const ribbonH = 20;
-    doc.fillColor(colors.accent).rect(0, sidebarY, sidebarWidth - 10, ribbonH).fill();
-    doc.fillColor('#b37a1a').polygon([sidebarWidth - 10, sidebarY], [sidebarWidth, sidebarY + 8], [sidebarWidth - 10, sidebarY + 12]).fill();
-    doc.fontSize(9.5).fillColor('#ffffff').font('Helvetica-Bold').text(title.toUpperCase(), sidebarInnerX, sidebarY + 5);
-    sidebarY += ribbonH + 8;
-};
-
-// Contact
-addSidebarRibbon("Contact");
-doc.fontSize(8.5).font('Helvetica');
-const contactList = [
-    { label: 'A', icon: '●', val: pInfo.address },
-    { label: 'T', icon: '●', val: pInfo.phone },
-    { label: 'E', icon: '●', val: pInfo.email },
-    { label: 'W', icon: '●', val: pInfo.website }
-];
-contactList.forEach(item => {
-    if (item.val) {
-        const h = doc.heightOfString(item.val, { width: sidebarInnerWidth - 30 });
-        doc.fillColor(colors.accent).circle(sidebarInnerX + 4, sidebarY + 5, 2).fill();
-        doc.fillColor('#ffffff').fontSize(8).text(item.val, sidebarInnerX + 18, sidebarY, { width: sidebarInnerWidth - 30 });
-        sidebarY += Math.max(12, h + 4);
+    // Language
+    if (languages.length > 0) {
+        sidebarY += 2;
+        addSidebarRibbon("Language");
+        languages.forEach((lang, i) => {
+            const langName = lang.name || lang;
+            const proficiency = lang.proficiency || (0.7 + Math.random() * 0.25);
+            doc.fontSize(8.5).fillColor('#ffffff').text(String(langName).toUpperCase(), sidebarInnerX, sidebarY);
+            sidebarY += 10;
+            doc.rect(sidebarInnerX, sidebarY, sidebarInnerWidth, 4).fill('#111111');
+            doc.rect(sidebarInnerX, sidebarY, sidebarInnerWidth * proficiency, 4).fill(colors.accent);
+            sidebarY += 12;
+        });
     }
-});
 
-// Portfolio
-if (socials.length > 0) {
-    sidebarY += 2;
-    addSidebarRibbon("Portfolio");
-    socials.forEach(link => {
-        if (!link) return;
-        const h = doc.heightOfString(link, { width: sidebarInnerWidth - 30 });
-        doc.fillColor(colors.accent).circle(sidebarInnerX + 4, sidebarY + 5, 2).fill();
-        doc.fillColor('#ffffff').fontSize(8).text(link, sidebarInnerX + 18, sidebarY, { width: sidebarInnerWidth - 30 });
-        sidebarY += Math.max(12, h + 4);
-    });
-}
+    // Hobbies
+    if (hobbies.length > 0) {
+        sidebarY += 5;
+        addSidebarRibbon("Hobbies");
+        doc.fontSize(9).fillColor('#ffffff');
+        let hX = sidebarInnerX;
+        let hY = sidebarY;
+        hobbies.forEach((h, i) => {
+            doc.text(String(h), hX, hY, { width: sidebarInnerWidth / 2 - 5 });
+            if (i % 2 === 0) hX += (sidebarInnerWidth / 2);
+            else { hX = sidebarInnerX; hY += 18; }
+        });
+        sidebarY = hY + 15;
+    }
 
-// Language
-if (languages.length > 0) {
-    sidebarY += 2;
-    addSidebarRibbon("Language");
-    languages.forEach((lang, i) => {
-        const langName = lang.name || lang;
-        const proficiency = lang.proficiency || (0.7 + Math.random() * 0.25);
-        doc.fontSize(8.5).fillColor('#ffffff').text(String(langName).toUpperCase(), sidebarInnerX, sidebarY);
-        sidebarY += 10;
-        doc.rect(sidebarInnerX, sidebarY, sidebarInnerWidth, 4).fill('#111111');
-        doc.rect(sidebarInnerX, sidebarY, sidebarInnerWidth * proficiency, 4).fill(colors.accent);
-        sidebarY += 12;
-    });
-}
+    // ==================== MAIN CONTENT (RIGHT) ====================
+    let mainY = 30;
+    const mainInnerX = contentX + 25;
+    const mainInnerWidth = contentWidth - 50;
 
-// Hobbies
-if (hobbies.length > 0) {
-    sidebarY += 5;
-    addSidebarRibbon("Hobbies");
-    doc.fontSize(9).fillColor('#ffffff');
-    let hX = sidebarInnerX;
-    let hY = sidebarY;
-    hobbies.forEach((h, i) => {
-        doc.text(String(h), hX, hY, { width: sidebarInnerWidth / 2 - 5 });
-        if (i % 2 === 0) hX += (sidebarInnerWidth / 2);
-        else { hX = sidebarInnerX; hY += 18; }
-    });
-    sidebarY = hY + 15;
-}
+    // Ultra-Condensed Ribbons for Main Area
+    const addMainRibbon = (title) => {
+        const ribbonH = 20;
+        if (mainY > PAGE_CONFIG.height - 110) { smartAddPage(); mainY = 30; }
+        doc.fillColor(colors.accent).rect(contentX + 5, mainY, contentWidth - 5, ribbonH).fill();
+        // Fold on the LEFT for main content
+        doc.fillColor('#b37a1a').polygon(
+            [contentX + 5, mainY],
+            [contentX, mainY + 6],
+            [contentX + 5, mainY + 12]
+        ).fill();
 
-// ==================== MAIN CONTENT (RIGHT) ====================
-let mainY = 30;
-const mainInnerX = contentX + 25;
-const mainInnerWidth = contentWidth - 50;
+        const upperTitle = (title || '').toUpperCase();
+        doc.fontSize(8.5).fillColor('#ffffff').font('Helvetica-Bold').text(upperTitle, mainInnerX - 10, mainY + 6, { align: 'center', width: mainInnerWidth + 20 });
+        mainY += ribbonH + 4;
+    };
 
-// Ultra-Condensed Ribbons for Main Area
-const addMainRibbon = (title) => {
-    const ribbonH = 20;
-    if (mainY > PAGE_CONFIG.height - 110) { smartAddPage(); mainY = 30; }
-    doc.fillColor(colors.accent).rect(contentX + 5, mainY, contentWidth - 5, ribbonH).fill();
-    // Fold on the LEFT for main content
-    doc.fillColor('#b37a1a').polygon(
-        [contentX + 5, mainY],
-        [contentX, mainY + 6],
-        [contentX + 5, mainY + 12]
-    ).fill();
+    // About Me (Condensed)
+    if (summary) {
+        addMainRibbon("About Me");
+        doc.fontSize(8).font('Helvetica').fillColor('#eeeeee');
+        doc.text(summary, mainInnerX, mainY, { width: mainInnerWidth, align: 'justify', lineGap: 1.0 });
+        mainY += doc.heightOfString(summary, { width: mainInnerWidth, align: 'justify', lineGap: 1.0 }) + 5;
+    }
 
-    const upperTitle = (title || '').toUpperCase();
-    doc.fontSize(8.5).fillColor('#ffffff').font('Helvetica-Bold').text(upperTitle, mainInnerX - 10, mainY + 6, { align: 'center', width: mainInnerWidth + 20 });
-    mainY += ribbonH + 4;
-};
+    // Education
+    if (edu.length > 0) {
+        addMainRibbon("Education");
+        edu.forEach(e => {
+            doc.fontSize(8.5).font('Helvetica-Bold');
+            const school = (e.school || e.institution || 'Education').toUpperCase();
+            const schoolH = doc.heightOfString(school, { width: mainInnerWidth - 80 });
+            if (mainY + 30 > PAGE_CONFIG.height - 30) { smartAddPage(); mainY = 30; }
 
-// About Me (Condensed)
-if (summary) {
-    addMainRibbon("About Me");
-    doc.fontSize(8).font('Helvetica').fillColor('#eeeeee');
-    doc.text(summary, mainInnerX, mainY, { width: mainInnerWidth, align: 'justify', lineGap: 1.0 });
-    mainY += doc.heightOfString(summary, { width: mainInnerWidth, align: 'justify', lineGap: 1.0 }) + 5;
-}
+            doc.fillColor(colors.accent).circle(mainInnerX + 3, mainY + 4, 1.5).fill();
+            doc.fillColor('#ffffff').text(school, mainInnerX + 15, mainY, { width: mainInnerWidth - 80 });
+            doc.fontSize(7).fillColor(colors.accent).font('Helvetica').text(e.gradYear || '', mainInnerX, mainY, { align: 'right', width: mainInnerWidth });
+            mainY += schoolH + 1;
 
-// Education
-if (edu.length > 0) {
-    addMainRibbon("Education");
-    edu.forEach(e => {
-        doc.fontSize(8.5).font('Helvetica-Bold');
-        const school = (e.school || e.institution || 'Education').toUpperCase();
-        const schoolH = doc.heightOfString(school, { width: mainInnerWidth - 80 });
-        if (mainY + 30 > PAGE_CONFIG.height - 30) { smartAddPage(); mainY = 30; }
+            doc.fontSize(7.5).fillColor('#bbbbbb').font('Helvetica-Bold').text(e.degree || '', mainInnerX + 15, mainY);
+            mainY += 8;
 
-        doc.fillColor(colors.accent).circle(mainInnerX + 3, mainY + 4, 1.5).fill();
-        doc.fillColor('#ffffff').text(school, mainInnerX + 15, mainY, { width: mainInnerWidth - 80 });
-        doc.fontSize(7).fillColor(colors.accent).font('Helvetica').text(e.gradYear || '', mainInnerX, mainY, { align: 'right', width: mainInnerWidth });
-        mainY += schoolH + 1;
-
-        doc.fontSize(7.5).fillColor('#bbbbbb').font('Helvetica-Bold').text(e.degree || '', mainInnerX + 15, mainY);
-        mainY += 8;
-
-        if (e.gpa) {
-            doc.fontSize(7).fillColor(colors.accent).text(`Result: CGPA ${e.gpa}`, mainInnerX + 15, mainY);
-            mainY += 7;
-        }
-        mainY += 2;
-    });
-}
-
-// Experience
-if (exp.length > 0) {
-    addMainRibbon("Experience");
-    exp.forEach(e => {
-        const desc = e.description || '';
-        const descH = desc ? doc.heightOfString(desc, { width: mainInnerWidth - 15, lineGap: 1.0 }) : 0;
-        if (mainY + descH + 25 > PAGE_CONFIG.height - 30) { smartAddPage(); mainY = 30; }
-
-        doc.fontSize(8.5).font('Helvetica-Bold').fillColor('#ffffff');
-        doc.fillColor(colors.accent).circle(mainInnerX + 3, mainY + 4, 1.5).fill();
-        const jobTitle = (e.jobTitle || 'Experience').toUpperCase();
-        doc.text(jobTitle, mainInnerX + 15, mainY, { width: mainInnerWidth - 100 });
-        doc.fontSize(7).fillColor(colors.accent).font('Helvetica').text(`${e.startDate || ''} - ${e.endDate || ''}`, mainInnerX, mainY, { align: 'right', width: mainInnerWidth });
-        mainY += doc.heightOfString(jobTitle, { width: mainInnerWidth - 100 }) + 1;
-
-        doc.fontSize(7.5).fillColor(colors.accent).font('Helvetica-Bold').text(e.company || '', mainInnerX + 15, mainY);
-        mainY += 8;
-
-        if (desc) {
-            doc.fontSize(7.5).fillColor('#eeeeee').font('Helvetica').text(desc, mainInnerX + 15, mainY, { width: mainInnerWidth - 15, lineGap: 1.0 });
-            mainY += descH + 3;
-        } else {
+            if (e.gpa) {
+                doc.fontSize(7).fillColor(colors.accent).text(`Result: CGPA ${e.gpa}`, mainInnerX + 15, mainY);
+                mainY += 7;
+            }
             mainY += 2;
-        }
-    });
-}
+        });
+    }
 
-// Projects (If data exists)
-if (projects.length > 0) {
-    addMainRibbon("Projects");
-    projects.forEach(proj => {
-        const title = (proj.title || 'Project').toUpperCase();
-        const desc = proj.description || '';
-        const tech = proj.tech || '';
+    // Experience
+    if (exp.length > 0) {
+        addMainRibbon("Experience");
+        exp.forEach(e => {
+            const desc = e.description || '';
+            const descH = desc ? doc.heightOfString(desc, { width: mainInnerWidth - 15, lineGap: 1.0 }) : 0;
+            if (mainY + descH + 25 > PAGE_CONFIG.height - 30) { smartAddPage(); mainY = 30; }
 
-        const titleH = doc.heightOfString(title, { width: mainInnerWidth - 15 });
-        const techH = tech ? doc.heightOfString(tech, { width: mainInnerWidth - 15 }) : 0;
-        const descH = desc ? doc.heightOfString(desc, { width: mainInnerWidth - 15, lineGap: 1.2 }) : 0;
+            doc.fontSize(8.5).font('Helvetica-Bold').fillColor('#ffffff');
+            doc.fillColor(colors.accent).circle(mainInnerX + 3, mainY + 4, 1.5).fill();
+            const jobTitle = (e.jobTitle || 'Experience').toUpperCase();
+            doc.text(jobTitle, mainInnerX + 15, mainY, { width: mainInnerWidth - 100 });
+            doc.fontSize(7).fillColor(colors.accent).font('Helvetica').text(`${e.startDate || ''} - ${e.endDate || ''}`, mainInnerX, mainY, { align: 'right', width: mainInnerWidth });
+            mainY += doc.heightOfString(jobTitle, { width: mainInnerWidth - 100 }) + 1;
 
-        if (mainY + titleH + techH + descH + 30 > PAGE_CONFIG.height - 40) { smartAddPage(); mainY = 30; }
+            doc.fontSize(7.5).fillColor(colors.accent).font('Helvetica-Bold').text(e.company || '', mainInnerX + 15, mainY);
+            mainY += 8;
 
-        doc.fontSize(9.5).font('Helvetica-Bold').fillColor('#ffffff').text(title, mainInnerX + 15, mainY);
-        doc.fillColor(colors.accent).circle(mainInnerX + 3, mainY + 4, 2).fill();
-        mainY += titleH + 2;
-
-        if (tech) {
-            doc.fontSize(8.5).fillColor(colors.accent).font('Helvetica-Bold').text(tech, mainInnerX + 15, mainY);
-            mainY += 10;
-        }
-
-        if (desc) {
-            doc.fontSize(8).fillColor('#eeeeee').font('Helvetica').text(desc, mainInnerX + 15, mainY, { width: mainInnerWidth - 15, lineGap: 1.2 });
-            mainY += descH + 8;
-        }
-    });
-}
-
-// Certifications
-const certs = getSafeArray(data.certifications || data.certificates);
-if (certs.length > 0) {
-    addMainRibbon("Certifications");
-    certs.forEach(c => {
-        const name = typeof c === 'string' ? c : (c.name || c.title || '');
-        if (!name) return;
-        if (mainY + 40 > PAGE_CONFIG.height - 40) { smartAddPage(); mainY = 30; }
-        doc.fillColor(colors.accent).circle(mainInnerX + 5, mainY + 7, 2).fill();
-        doc.fontSize(10).fillColor('#ffffff').font('Helvetica-Bold').text(name, mainInnerX + 20, mainY);
-        mainY += 25;
-    });
-}
-
-// Achievements
-const achievements = getSafeArray(data.achievements || data.awards);
-if (achievements.length > 0) {
-    addMainRibbon("Achievements");
-    achievements.forEach(a => {
-        const val = typeof a === 'string' ? a : (a.name || a.title || '');
-        if (!val) return;
-        const h = doc.heightOfString(val, { width: mainInnerWidth - 25 });
-        if (mainY + h + 20 > PAGE_CONFIG.height - 40) { smartAddPage(); mainY = 30; }
-        doc.fillColor(colors.accent).circle(mainInnerX + 5, mainY + 7, 2).fill();
-        doc.fontSize(10).fillColor('#eeeeee').font('Helvetica').text(val, mainInnerX + 20, mainY, { width: mainInnerWidth - 25 });
-        mainY += h + 15;
-    });
-}
-
-// Professional Skills (3-COLUMN ULTRA-GRID)
-if (skills.length > 0) {
-    addMainRibbon("Professional Skills");
-    let sY = mainY;
-    const sWidth = (mainInnerWidth / 3) - 10;
-
-    for (let i = 0; i < skills.length; i += 3) {
-        if (sY + 40 > PAGE_CONFIG.height - 40) { smartAddPage(); sY = 30; }
-
-        [0, 1, 2].forEach(offset => {
-            const skill = skills[i + offset];
-            if (skill) {
-                const sName = (skill.name || skill || '').toUpperCase();
-                doc.fontSize(7.5).font('Helvetica-Bold').fillColor('#ffffff');
-                const h = doc.heightOfString(sName, { width: sWidth });
-                const sX = mainInnerX + (offset * (sWidth + 15));
-                doc.text(sName, sX, sY, { width: sWidth });
-                doc.rect(sX, sY + h + 2, sWidth, 3).fill('#222222');
-                doc.rect(sX, sY + h + 2, sWidth * (0.8 + Math.random() * 0.15), 3).fill(colors.accent);
+            if (desc) {
+                doc.fontSize(7.5).fillColor('#eeeeee').font('Helvetica').text(desc, mainInnerX + 15, mainY, { width: mainInnerWidth - 15, lineGap: 1.0 });
+                mainY += descH + 3;
+            } else {
+                mainY += 2;
             }
         });
-        sY += 28;
     }
-}
+
+    // Projects (If data exists)
+    if (projects.length > 0) {
+        addMainRibbon("Projects");
+        projects.forEach(proj => {
+            const title = (proj.title || 'Project').toUpperCase();
+            const desc = proj.description || '';
+            const tech = proj.tech || '';
+
+            const titleH = doc.heightOfString(title, { width: mainInnerWidth - 15 });
+            const techH = tech ? doc.heightOfString(tech, { width: mainInnerWidth - 15 }) : 0;
+            const descH = desc ? doc.heightOfString(desc, { width: mainInnerWidth - 15, lineGap: 1.2 }) : 0;
+
+            if (mainY + titleH + techH + descH + 30 > PAGE_CONFIG.height - 40) { smartAddPage(); mainY = 30; }
+
+            doc.fontSize(9.5).font('Helvetica-Bold').fillColor('#ffffff').text(title, mainInnerX + 15, mainY);
+            doc.fillColor(colors.accent).circle(mainInnerX + 3, mainY + 4, 2).fill();
+            mainY += titleH + 2;
+
+            if (tech) {
+                doc.fontSize(8.5).fillColor(colors.accent).font('Helvetica-Bold').text(tech, mainInnerX + 15, mainY);
+                mainY += 10;
+            }
+
+            if (desc) {
+                doc.fontSize(8).fillColor('#eeeeee').font('Helvetica').text(desc, mainInnerX + 15, mainY, { width: mainInnerWidth - 15, lineGap: 1.2 });
+                mainY += descH + 8;
+            }
+        });
+    }
+
+    // Certifications
+    const certs = getSafeArray(data.certifications || data.certificates);
+    if (certs.length > 0) {
+        addMainRibbon("Certifications");
+        certs.forEach(c => {
+            const name = typeof c === 'string' ? c : (c.name || c.title || '');
+            if (!name) return;
+            if (mainY + 40 > PAGE_CONFIG.height - 40) { smartAddPage(); mainY = 30; }
+            doc.fillColor(colors.accent).circle(mainInnerX + 5, mainY + 7, 2).fill();
+            doc.fontSize(10).fillColor('#ffffff').font('Helvetica-Bold').text(name, mainInnerX + 20, mainY);
+            mainY += 25;
+        });
+    }
+
+    // Achievements
+    const achievements = getSafeArray(data.achievements || data.awards);
+    if (achievements.length > 0) {
+        addMainRibbon("Achievements");
+        achievements.forEach(a => {
+            const val = typeof a === 'string' ? a : (a.name || a.title || '');
+            if (!val) return;
+            const h = doc.heightOfString(val, { width: mainInnerWidth - 25 });
+            if (mainY + h + 20 > PAGE_CONFIG.height - 40) { smartAddPage(); mainY = 30; }
+            doc.fillColor(colors.accent).circle(mainInnerX + 5, mainY + 7, 2).fill();
+            doc.fontSize(10).fillColor('#eeeeee').font('Helvetica').text(val, mainInnerX + 20, mainY, { width: mainInnerWidth - 25 });
+            mainY += h + 15;
+        });
+    }
+
+    // Professional Skills (3-COLUMN ULTRA-GRID)
+    if (skills.length > 0) {
+        addMainRibbon("Professional Skills");
+        let sY = mainY;
+        const sWidth = (mainInnerWidth / 3) - 10;
+
+        for (let i = 0; i < skills.length; i += 3) {
+            if (sY + 40 > PAGE_CONFIG.height - 40) { smartAddPage(); sY = 30; }
+
+            [0, 1, 2].forEach(offset => {
+                const skill = skills[i + offset];
+                if (skill) {
+                    const sName = (skill.name || skill || '').toUpperCase();
+                    doc.fontSize(7.5).font('Helvetica-Bold').fillColor('#ffffff');
+                    const h = doc.heightOfString(sName, { width: sWidth });
+                    const sX = mainInnerX + (offset * (sWidth + 15));
+                    doc.text(sName, sX, sY, { width: sWidth });
+                    doc.rect(sX, sY + h + 2, sWidth, 3).fill('#222222');
+                    doc.rect(sX, sY + h + 2, sWidth * (0.8 + Math.random() * 0.15), 3).fill(colors.accent);
+                }
+            });
+            sY += 28;
+        }
+    }
 }
 
 /**
