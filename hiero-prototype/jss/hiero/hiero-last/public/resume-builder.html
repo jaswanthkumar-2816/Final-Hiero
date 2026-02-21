@@ -1289,6 +1289,62 @@
           </div>
         </div>
 
+
+
+
+        <!-- Hiero Monethon Template -->
+        <div class="template-card" data-category="premium" data-template="hiero-monethon" data-type="premium">
+          <div class="premium-badge">NEW</div>
+          <div class="template-preview" onclick="previewTemplate('hiero-monethon')">
+            <i class="fas fa-file-invoice"></i>
+
+            <div class="preview-overlay">
+              <button class="preview-btn">Preview Template</button>
+            </div>
+          </div>
+          <div class="template-info">
+            <h3>Hiero Monethon</h3>
+            <p>Premium professional layout with orange header accents and a dark navy sidebar. Perfectly balanced for
+              high-impact roles.</p>
+            <div class="template-tags">
+              <span class="tag">Premium</span>
+              <span class="tag">Two Column</span>
+              <span class="tag">Corporate</span>
+            </div>
+            <button class="start-building-btn" onclick="startBuilding('hiero-monethon')"
+              style="background: linear-gradient(135deg, #F2B66D 0%, #d4954a 100%);">
+              <i class="fas fa-arrow-right"></i> Start Building
+            </button>
+          </div>
+        </div>
+
+        <!-- Hiero Nova Template -->
+        <div class="template-card" data-category="premium" data-template="hiero-nova" data-type="premium">
+          <div class="premium-badge">PREMIUM</div>
+          <div class="template-preview" onclick="previewTemplate('hiero-nova')">
+            <i class="fas fa-shield" style="color: #2ae023;"></i>
+            <div class="preview-overlay">
+              <button class="preview-btn">Preview Template</button>
+            </div>
+          </div>
+          <div class="template-info">
+            <h3>Hiero Legion</h3>
+
+            <p>A sophisticated monochrome design with a bold shield profile and a strong vertical badge. Perfect for
+              modern professionals seeking a high-contrast look.</p>
+            <div class="template-tags">
+              <span class="tag">Modern</span>
+              <span class="tag">Monochrome</span>
+              <span class="tag">Badge</span>
+            </div>
+            <button class="start-building-btn" onclick="startBuilding('hiero-nova')">
+
+              <i class="fas fa-arrow-right"></i> Start Building
+            </button>
+          </div>
+        </div>
+
+
         <!-- Priya Analytics Single-Column Template (matches Priya Sharma PDF) -->
         <div class="template-card" data-category="analytics" data-template="priya-analytics" data-type="free">
           <div class="template-preview" onclick="previewTemplate('priya-analytics')">
@@ -1691,9 +1747,15 @@
                 </div>
               </div>
 
-              <div class="form-group">
-                <label for="fullName">Full Name <span class="required">*</span></label>
-                <input type="text" id="fullName" required placeholder="Enter your full name">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="fullName">Full Name <span class="required">*</span></label>
+                  <input type="text" id="fullName" required placeholder="Enter your full name">
+                </div>
+                <div class="form-group">
+                  <label for="headline">Professional Title</label>
+                  <input type="text" id="headline" placeholder="e.g. Senior Software Engineer">
+                </div>
               </div>
               <div class="form-row">
                 <div class="form-group">
@@ -1799,6 +1861,46 @@
               <button type="button" class="add-more-btn" onclick="addExperience()">Add Another Experience</button>
             </div>
           </div>
+
+          <!-- Internship Experience (NEW) -->
+          <div class="form-section" id="section-internships">
+            <h2 class="section-title">
+              <i class="fas fa-microchip section-icon"></i> Internship Experience
+              <span class="skip-link" onclick="toggleSection('internships')">Skip this section</span>
+            </h2>
+            <div class="form-content">
+              <div id="internshipsContainer">
+                <div class="internship-item">
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>Intern Role</label>
+                      <input type="text" name="internRole[]" placeholder="Software Intern">
+                    </div>
+                    <div class="form-group">
+                      <label>Organization</label>
+                      <input type="text" name="internOrg[]" placeholder="Tech Solutions">
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>Start Date</label>
+                      <input type="month" name="internStart[]">
+                    </div>
+                    <div class="form-group">
+                      <label>End Date</label>
+                      <input type="month" name="internEnd[]">
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label>Description</label>
+                    <textarea name="internDesc[]" rows="4" placeholder="Key contributions..."></textarea>
+                  </div>
+                </div>
+              </div>
+              <button type="button" class="add-more-btn" onclick="addInternship()">Add Another Internship</button>
+            </div>
+          </div>
+
 
           <!-- Education -->
           <div class="form-section" id="section-education">
@@ -2504,6 +2606,11 @@
           description: 'Single-column layout with a grey top bar and bold section headings. Ideal for data-driven professionals.',
           style: 'Single-column, grey top bar, bold section headings with horizontal rules, matching the Priya Sharma data analyst resume style'
         },
+        'hiero-monethon': {
+          name: 'Hiero Monethon',
+          description: 'Premium layout with vibrant orange accents and a dominant navy sidebar.',
+          style: 'Two-column, orange profile header, navy sidebar with progress skill bars'
+        },
         'hiero-executive': {
           name: 'Hiero Executive',
           description: 'Premium corporate side-label layout inspired by Morgan Maxwell.',
@@ -2623,8 +2730,15 @@
           name: 'Hiero Orion',
           description: 'Stellar professional design for high-achievers across all fields.',
           style: 'Clean professional structure, stellar accents, premium feel.'
+        },
+        'hiero-nova': {
+          name: 'Hiero Legion',
+          description: 'A sophisticated monochrome design with a bold shield profile and a strong vertical badge.',
+          style: 'Modern monochrome, high-contrast black accents, shield profile mask.'
         }
+
       };
+
 
       const template = templateDetails[templateId];
       if (!template) return;
@@ -2639,34 +2753,38 @@
       `;
 
       modal.innerHTML = `
-        <div style="background: white; border-radius: 16px; max-width: 900px; width: 100%; 
-                    max-height: 90vh; display: flex; flex-direction: column; position: relative; box-shadow: 0 25px 50px rgba(0,0,0,0.5);">
-          <div style="padding: 25px 30px; border-bottom: 1px solid #eee; flex-shrink: 0;">
+        <div style="background: #111111; border: 1px solid #333; border-radius: 16px; max-width: 950px; width: 100%; 
+                    max-height: 90vh; display: flex; flex-direction: column; position: relative; box-shadow: 0 30px 60px rgba(0,0,0,0.8);">
+          <div style="padding: 25px 30px; border-bottom: 1px solid #222; flex-shrink: 0; background: linear-gradient(to right, #111, #1a1a1a);">
             <button onclick="this.closest('.preview-modal-overlay').remove()" 
-                    style="position: absolute; top: 15px; right: 15px; background: none; 
-                           border: none; font-size: 28px; cursor: pointer; color: #999; line-height: 1; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 4px; transition: all 0.2s;"
-                    onmouseover="this.style.background='#f0f0f0'; this.style.color='#333';"
-                    onmouseout="this.style.background='none'; this.style.color='#999';">×</button>
-            <h2 style="margin: 0 0 8px 0; color: #2c3e50; font-size: 24px;">${template.name}</h2>
-            <p style="margin: 0; color: #7f8c8d; font-size: 14px;">${template.description}</p>
+                    style="position: absolute; top: 20px; right: 20px; background: #222; 
+                           border: none; font-size: 20px; cursor: pointer; color: #fff; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: all 0.2s;"
+                    onmouseover="this.style.background='#ff4d4d';"
+                    onmouseout="this.style.background='#222';">×</button>
+            <h2 style="margin: 0 0 5px 0; color: #fff; font-size: 24px; font-weight: 700; letter-spacing: -0.5px;">${template.name}</h2>
+            <p style="margin: 0; color: #888; font-size: 14px;">Premium Design • High Fidelity Preview</p>
           </div>
-          <div id="preview-content" style="flex: 1; overflow-y: auto; padding: 30px; display: flex; justify-content: center; align-items: flex-start; background: #f8f9fa; min-height: 400px;">
-            <div style="text-align: center; color: #666; padding: 60px 20px;">
-              <i class="fas fa-spinner fa-spin" style="font-size: 42px; margin-bottom: 15px; color: #2ae023;"></i>
-              <p style="font-size: 16px; margin: 0;">Loading preview...</p>
+          <div id="preview-content" style="flex: 1; overflow-y: auto; padding: 40px; display: flex; justify-content: center; align-items: flex-start; background: #0a0a0a; min-height: 500px; scrollbar-width: thin; scrollbar-color: #333 #0a0a0a;">
+            <div style="text-align: center; color: #888; padding: 80px 20px;">
+              <div class="spinner-container" style="margin-bottom: 20px;">
+                <i class="fas fa-circle-notch fa-spin" style="font-size: 48px; color: #2ae023;"></i>
+              </div>
+              <p style="font-size: 16px; font-weight: 500;">Crafting your professional preview...</p>
             </div>
           </div>
-          <div style="padding: 20px 30px; background: #f8f9fa; border-top: 1px solid #e0e0e0; flex-shrink: 0;">
+          <div style="padding: 25px 30px; background: #161616; border-top: 1px solid #222; flex-shrink: 0; display: flex; align-items: center; justify-content: space-between;">
+            <div style="color: #666; font-size: 13px;">Selected: <span style="color: #2ae023;">${template.name}</span></div>
             <button onclick="startBuilding('${templateId}'); this.closest('.preview-modal-overlay').remove();" 
-                    style="background: #2ae023; color: white; border: none; padding: 14px 28px; 
-                           border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%; font-size: 16px; transition: all 0.3s; box-shadow: 0 2px 8px rgba(42,224,35,0.3);"
-                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(42,224,35,0.4)';"
-                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(42,224,35,0.3)';">
-              Use This Template
+                    style="background: linear-gradient(135deg, #2ae023 0%, #1a9e16 100%); color: white; border: none; padding: 14px 40px; 
+                           border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 16px; transition: all 0.3s; box-shadow: 0 4px 15px rgba(42,224,35,0.4);"
+                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(42,224,35,0.5)';"
+                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(42,224,35,0.4)';">
+              Start Building with This Template
             </button>
           </div>
         </div>
-      `;
+`;
+
 
       modal.addEventListener('click', function (e) {
         if (e.target === modal) modal.remove();
@@ -3009,9 +3127,14 @@
       document.getElementById("summary").value = data.summary || "";
 
       // Experience
+      const expSection = document.getElementById("section-experience");
+      if (data.experience && data.experience.length > 0 && expSection && expSection.classList.contains('skipped')) {
+        toggleSection('experience');
+      }
       const expContainer = document.getElementById("experienceContainer");
       expContainer.innerHTML = "";
       (data.experience || []).forEach((exp, i) => {
+
         addExperience();
         document.getElementsByName("jobTitle[]")[i].value = exp.jobTitle || "";
         document.getElementsByName("company[]")[i].value = exp.company || "";
@@ -3042,9 +3165,14 @@
       });
 
       // Education
+      const eduSection = document.getElementById("section-education");
+      if (data.education && data.education.length > 0 && eduSection && eduSection.classList.contains('skipped')) {
+        toggleSection('education');
+      }
       const eduContainer = document.getElementById("educationContainer");
       eduContainer.innerHTML = "";
       (data.education || []).forEach((edu, i) => {
+
         addEducation();
         document.getElementsByName("degree[]")[i].value = edu.degree || "";
         document.getElementsByName("school[]")[i].value = edu.school || "";
@@ -3057,9 +3185,14 @@
       document.getElementById("softSkills").value = data.softSkills || "";
 
       // Projects
+      const projSection = document.getElementById("section-projects");
+      if (data.projects && data.projects.length > 0 && projSection && projSection.classList.contains('skipped')) {
+        toggleSection('projects');
+      }
       const projContainer = document.getElementById("projectsContainer");
       projContainer.innerHTML = "";
       (data.projects || []).forEach((project, i) => {
+
         addProject();
         document.getElementsByName("projectName[]")[i].value = project.name || "";
         document.getElementsByName("projectTech[]")[i].value = project.tech || "";
@@ -3108,7 +3241,8 @@
         'priya': 'Priya Elegant',
         'priya-analytics': 'Priya Analytics (Single Column)',
         'hiero-studio': 'Hiero Studio',
-        'template4': 'Hiero Academic'
+        'template4': 'Hiero Academic',
+        'hiero-monethon': 'Hiero Monethon'
       };
       return names[templateId] || 'Selected';
     }
@@ -3594,6 +3728,31 @@
           });
         }
 
+        // 5b. Internships (Dynamic)
+        const internContainer = document.getElementById("internshipsContainer");
+        if (internContainer) {
+          internContainer.innerHTML = "";
+          const internships = Array.isArray(data.internships) ? data.internships : [];
+          if (internships.length > 0) {
+            const section = document.getElementById('section-internships');
+            if (section && section.classList.contains('skipped')) toggleSection('internships');
+          }
+          internships.forEach((intern, i) => {
+            addInternship();
+            const roles = document.querySelectorAll("[name='internRole[]']");
+            const orgs = document.querySelectorAll("[name='internOrg[]']");
+            const starts = document.querySelectorAll("[name='internStart[]']");
+            const ends = document.querySelectorAll("[name='internEnd[]']");
+            const descs = document.querySelectorAll("[name='internDesc[]']");
+            if (roles[i]) roles[i].value = intern.jobTitle || intern.role || "";
+            if (orgs[i]) orgs[i].value = intern.company || intern.org || "";
+            if (starts[i]) starts[i].value = intern.startDate || intern.start || "";
+            if (ends[i]) ends[i].value = intern.endDate || intern.end || "";
+            if (descs[i]) descs[i].value = intern.description || intern.desc || "";
+          });
+        }
+
+
         // 6. Custom/Additional (Fallback System)
         if (data.customSectionContent) {
           const customArea = document.getElementById("customSectionContent");
@@ -4026,6 +4185,7 @@
       container.appendChild(div);
     }
 
+
     function addEducation() {
       eduCount++;
       const container = document.getElementById('educationContainer');
@@ -4044,6 +4204,26 @@
       `;
       container.appendChild(div);
     }
+
+    function addInternship() {
+      const container = document.getElementById('internshipsContainer');
+      const div = document.createElement('div');
+      div.className = 'internship-item';
+      div.innerHTML = `
+        <button type="button" class="remove-btn" aria-label="Remove entry" onclick="this.parentElement.remove()">Remove</button>
+        <div class="form-row">
+          <div class="form-group"><label>Intern Role</label><input type="text" name="internRole[]" placeholder="Software Intern"></div>
+          <div class="form-group"><label>Organization</label><input type="text" name="internOrg[]" placeholder="Tech Solutions"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Start Date</label><input type="month" name="internStart[]"></div>
+          <div class="form-group"><label>End Date</label><input type="month" name="internEnd[]"></div>
+        </div>
+        <div class="form-group"><label>Description</label><textarea name="internDesc[]" rows="4" placeholder="Key contributions..."></textarea></div>
+      `;
+      container.appendChild(div);
+    }
+
 
     // Add Reference
     let refCount = 1;
@@ -4330,6 +4510,44 @@
             if (allGPAs[index]) allGPAs[index].value = edu.gpa;
           }, 100 * index);
         });
+
+        // Fill Internship Sample Data
+        const internSection = document.getElementById('section-internships');
+        if (internSection && internSection.classList.contains('skipped')) {
+          toggleSection('internships');
+        }
+
+        const internships = [
+          {
+            role: 'Product Management Intern',
+            org: 'FinTech Solutions',
+            start: '2021-05',
+            end: '2021-07',
+            desc: 'Assisted in product roadmap development and conducted competitor analysis.'
+          }
+        ];
+
+        const internContainer = document.getElementById('internshipsContainer');
+        if (internContainer) {
+          internContainer.innerHTML = '';
+          internships.forEach((intern, index) => {
+            if (index > 0) addInternship();
+            setTimeout(() => {
+              const allRoles = document.querySelectorAll('input[name="internRole[]"]');
+              const allOrgs = document.querySelectorAll('input[name="internOrg[]"]');
+              const allStarts = document.querySelectorAll('input[name="internStart[]"]');
+              const allEnds = document.querySelectorAll('input[name="internEnd[]"]');
+              const allDescs = document.querySelectorAll('textarea[name="internDesc[]"]');
+
+              if (allRoles[index]) allRoles[index].value = intern.role;
+              if (allOrgs[index]) allOrgs[index].value = intern.org;
+              if (allStarts[index]) allStarts[index].value = intern.start;
+              if (allEnds[index]) allEnds[index].value = intern.end;
+              if (allDescs[index]) allDescs[index].value = intern.desc;
+            }, 100 * index);
+          });
+        }
+
 
         // Add references (un-skip the section first if it's skipped)
         const refSection = document.getElementById('section-references');
@@ -4745,6 +4963,7 @@
 
       // Personal
       data.personalInfo.fullName = document.getElementById('fullName').value;
+      data.personalInfo.headline = document.getElementById('headline')?.value || '';
       data.personalInfo.email = document.getElementById('email').value;
       data.personalInfo.phone = document.getElementById('phone').value;
 
@@ -4841,6 +5060,24 @@
           }
         });
       }
+
+      // 4. Internships (Structured Capture)
+      data.internships = [];
+      const internSection = document.getElementById('section-internships');
+      if (internSection && !internSection.classList.contains('skipped')) {
+        document.querySelectorAll('input[name="internRole[]"]').forEach((el, i) => {
+          if (el.value.trim()) {
+            data.internships.push({
+              jobTitle: el.value,
+              company: document.querySelectorAll('input[name="internOrg[]"]')[i].value,
+              startDate: document.querySelectorAll('input[name="internStart[]"]')[i].value,
+              endDate: document.querySelectorAll('input[name="internEnd[]"]')[i].value,
+              description: document.querySelectorAll('textarea[name="internDesc[]"]')[i].value
+            });
+          }
+        });
+      }
+
 
       // References (only if section is not skipped)
       const refSection = document.getElementById('section-references');
