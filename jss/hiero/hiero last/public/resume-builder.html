@@ -917,6 +917,29 @@
             </button>
           </div>
         </div>
+
+        <!-- Hiero Minimal (Timeline) Template -->
+        <div class="template-card" data-category="minimal" data-template="hiero-timeline" data-type="free">
+          <div class="template-preview" onclick="previewTemplate('hiero-timeline')">
+            <i class="fas fa-stream"></i>
+            <div class="preview-overlay">
+              <button class="preview-btn">Preview Template</button>
+            </div>
+          </div>
+          <div class="template-info">
+            <h3>Hiero Minimal</h3>
+            <p>Elegant vertical timeline layout with a professional grayscale design. Ideal for clean, corporate
+              presentation.</p>
+            <div class="template-tags">
+              <span class="tag">Timeline</span>
+              <span class="tag">Minimalist</span>
+              <span class="tag">Corporate</span>
+            </div>
+            <button class="start-building-btn" onclick="startBuilding('hiero-timeline')">
+              <i class="fas fa-arrow-right"></i> Start Building
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -967,6 +990,12 @@
                   <small style="color: #666; font-size: 12px;">Examples: +1 555-123-4567, (555) 123-4567,
                     555.123.4567</small>
                 </div>
+              </div>
+
+              <div class="form-group">
+                <label for="roleTitle">Professional Title / Headline</label>
+                <input type="text" id="roleTitle" placeholder="e.g. Senior Data Scientist | ML Engineer">
+                <small style="color: #666; font-size: 12px;">This appears below your name on the resume.</small>
               </div>
 
               <!-- Optional: Address -->
@@ -1696,6 +1725,11 @@
           name: 'Priya Analytics',
           description: 'Single-column layout with a grey top bar and bold section headings. Ideal for data-driven professionals.',
           style: 'Single-column, grey top bar, bold section headings with horizontal rules, matching the Priya Sharma data analyst resume style'
+        },
+        'hiero-timeline': {
+          name: 'Hiero Minimal',
+          description: 'Elegant vertical timeline layout with a professional grayscale design. Ideal for clean, corporate presentation.',
+          style: 'Vertical timeline, grayscale design, circular nodes, and professional alignment.'
         }
       };
 
@@ -2057,9 +2091,10 @@
         'rishi': 'Rishi Tech Modern',
         'priya': 'Priya Elegant',
         'priya-analytics': 'Priya Analytics (Single Column)',
-        'hiero-essence': 'Hiero Essence'
+        'hiero-essence': 'Hiero Essence',
+        'hiero-timeline': 'Hiero Minimal'
       };
-      return names[templateId] || 'Selected';
+      return names[templateId] || templateId.charAt(0).toUpperCase() + templateId.slice(1);
     }
 
     // Show modal asking if user has an old resume
@@ -2811,6 +2846,12 @@
           hobbiesEl.value = 'Contributing to open-source data science projects, Reading research papers on ML, Participating in Kaggle competitions';
         }
 
+        // Experience - Unskip the section if it was hidden
+        const sectionExperience = document.getElementById('section-experience');
+        if (sectionExperience && sectionExperience.classList.contains('skipped')) {
+          toggleSection('experience');
+        }
+
         // Clear existing experience and add comprehensive sample
         const expContainer = document.getElementById('experienceContainer');
         expContainer.innerHTML = '';
@@ -2835,7 +2876,8 @@
         ];
 
         experiences.forEach((exp, index) => {
-          if (index > 0) addExperience();
+          // Add a new experience item
+          addExperience();
 
           setTimeout(() => {
             const allTitles = document.querySelectorAll('input[name="jobTitle[]"]');
@@ -2851,12 +2893,19 @@
             if (allDescriptions[index]) allDescriptions[index].value = exp.description;
 
             // Handle "currently working" checkbox
-            if (exp.current && allEnds[index]) {
-              const checkbox = allEnds[index].parentElement.querySelector('input[type="checkbox"]');
+            if (exp.current && allTitles[index]) {
+              const item = allTitles[index].closest('.experience-item');
+              const checkbox = item.querySelector('input[type="checkbox"]');
               if (checkbox) checkbox.checked = true;
             }
           }, 100 * index);
         });
+
+        // Education - Unskip the section
+        const sectionEducation = document.getElementById('section-education');
+        if (sectionEducation && sectionEducation.classList.contains('skipped')) {
+          toggleSection('education');
+        }
 
         // Clear existing education and add comprehensive sample
         const eduContainer = document.getElementById('educationContainer');
@@ -2867,18 +2916,18 @@
             degree: 'M.Sc. in Data Science',
             school: 'Christ University, Bengaluru',
             year: '2021',
-            gpa: ''
+            gpa: '3.9/4.0'
           },
           {
             degree: 'B.Sc. in Computer Science',
             school: 'Osmania University, Hyderabad',
             year: '2019',
-            gpa: ''
+            gpa: '3.8/4.0'
           }
         ];
 
         education.forEach((edu, index) => {
-          if (index > 0) addEducation();
+          addEducation();
 
           setTimeout(() => {
             const allDegrees = document.querySelectorAll('input[name="degree[]"]');
@@ -3302,8 +3351,9 @@
       data.personalInfo.email = document.getElementById('email').value;
       data.personalInfo.phone = document.getElementById('phone').value;
       data.personalInfo.profilePhoto = document.getElementById('profilePhoto').value;
+      data.personalInfo.roleTitle = document.getElementById('roleTitle')?.value || '';
 
-      // Optional fields (only if not skipped and not empty)
+      // Optional fields
       const optional = ['address', 'linkedin', 'website', 'summary', 'technicalSkills', 'softSkills', 'certifications', 'languages', 'achievements', 'hobbies'];
       optional.forEach(field => {
         const group = document.getElementById('group-' + field) || document.getElementById('section-' + field);
@@ -3313,61 +3363,56 @@
         }
       });
 
-      // Projects (structured data)
+      // Projects
       const projectsSection = document.getElementById('section-projects');
       if (projectsSection && !projectsSection.classList.contains('skipped')) {
         data.projects = [];
         document.querySelectorAll('input[name="projectName[]"]').forEach((el, i) => {
           if (el.value.trim()) {
-            const project = {
+            data.projects.push({
               name: el.value.trim(),
               technologies: document.querySelectorAll('input[name="projectTech[]"]')[i]?.value || '',
               duration: document.querySelectorAll('input[name="projectDuration[]"]')[i]?.value || '',
               description: document.querySelectorAll('textarea[name="projectDescription[]"]')[i]?.value || '',
               link: document.querySelectorAll('input[name="projectLink[]"]')[i]?.value || '',
               achievement: document.querySelectorAll('input[name="projectAchievement[]"]')[i]?.value || ''
-            };
-            data.projects.push(project);
+            });
           }
         });
-        // If no structured projects, fall back to old textarea format
-        if (data.projects.length === 0) {
-          const oldProjectsInput = document.getElementById('projects');
-          if (oldProjectsInput && oldProjectsInput.value.trim()) {
-            data.projects = oldProjectsInput.value.trim();
-          }
-        }
-      } else {
-        // Fallback to old textarea if section is skipped
-        const oldProjectsInput = document.getElementById('projects');
-        if (oldProjectsInput && oldProjectsInput.value.trim()) {
-          data.projects = oldProjectsInput.value.trim();
-        }
       }
 
       // Experience & Education
-      document.querySelectorAll('input[name="jobTitle[]"]').forEach((el, i) => {
-        if (el.value.trim()) {
-          data.experience.push({
-            jobTitle: el.value,
-            company: document.querySelectorAll('input[name="company[]"]')[i].value,
-            startDate: document.querySelectorAll('input[name="startDate[]"]')[i].value,
-            endDate: document.querySelectorAll('input[name="endDate[]"]')[i].value,
-            description: document.querySelectorAll('textarea[name="jobDescription[]"]')[i].value
-          });
-        }
-      });
+      const expSection = document.getElementById('section-experience');
+      if (expSection && !expSection.classList.contains('skipped')) {
+        const expItems = document.querySelectorAll('.experience-item');
+        expItems.forEach((item, i) => {
+          const jobTitle = item.querySelector('input[name="jobTitle[]"]')?.value || '';
+          if (jobTitle.trim()) {
+            const current = item.querySelector('input[type="checkbox"]')?.checked || false;
+            data.experience.push({
+              jobTitle: jobTitle,
+              company: item.querySelector('input[name="company[]"]')?.value || '',
+              startDate: item.querySelector('input[name="startDate[]"]')?.value || '',
+              endDate: current ? 'Present' : (item.querySelector('input[name="endDate[]"]')?.value || ''),
+              description: item.querySelector('textarea[name="jobDescription[]"]')?.value || ''
+            });
+          }
+        });
+      }
 
-      document.querySelectorAll('input[name="degree[]"]').forEach((el, i) => {
-        if (el.value.trim()) {
-          data.education.push({
-            degree: el.value,
-            school: document.querySelectorAll('input[name="school[]"]')[i].value,
-            gradYear: document.querySelectorAll('input[name="gradYear[]"]')[i].value,
-            gpa: document.querySelectorAll('input[name="gpa[]"]')[i].value
-          });
-        }
-      });
+      const eduSection = document.getElementById('section-education');
+      if (eduSection && !eduSection.classList.contains('skipped')) {
+        document.querySelectorAll('input[name="degree[]"]').forEach((el, i) => {
+          if (el.value.trim()) {
+            data.education.push({
+              degree: el.value,
+              school: document.querySelectorAll('input[name="school[]"]')[i].value,
+              gradYear: document.querySelectorAll('input[name="gradYear[]"]')[i].value,
+              gpa: document.querySelectorAll('input[name="gpa[]"]')[i].value
+            });
+          }
+        });
+      }
 
       // References (only if section is not skipped)
       const refSection = document.getElementById('section-references');

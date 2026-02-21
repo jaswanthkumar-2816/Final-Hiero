@@ -205,6 +205,14 @@ const TEMPLATE_COLORS = {
         background: '#121212',   // Very Dark Background for main
         sidebarBg: '#1e1e1e',    // Slightly lighter dark for sidebar
         sidebarText: '#ffffff'   // White text for sidebar
+    },
+    'hiero-timeline': {
+        primary: '#222222',
+        secondary: '#777777',
+        accent: '#222222',
+        background: '#FFFFFF',
+        light: '#e5e7e5',
+        timeline: '#dddddd'
     }
 };
 
@@ -214,7 +222,10 @@ const TEMPLATE_MAP = {
     'template-4': 'template-4',
     'hiero-studio': 'hiero-studio',
     'hiero-essence': 'hiero-essence',
-    'essence': 'hiero-essence'
+    'essence': 'hiero-essence',
+    'hiero-timeline': 'hiero-timeline',
+    'timeline': 'hiero-timeline',
+    'hiero-minimal': 'hiero-timeline'
 };
 
 // Standardized font sizes (Refined for a 'Perfect' look)
@@ -270,6 +281,12 @@ const SECTION_ORDER = [
 ];
 
 // ==================== HELPER FUNCTIONS ====================
+function getSafeArray(arr) {
+    if (!arr) return [];
+    if (Array.isArray(arr)) return arr;
+    if (typeof arr === 'string') return arr.split('\n').filter(s => s.trim());
+    return [];
+}
 
 function sanitizeText(text) {
     if (!text) return '';
@@ -1246,6 +1263,16 @@ async function generateUnifiedResume(data, templateId, outStream, customOptions 
                 case 'hiero-executive': renderHeader_Executive(doc, data, colors); break;
                 case 'hiero-essence':
                     await renderTemplate_HieroEssence(doc, data, colors, spacing);
+                    doc.end();
+                    if (outStream && outStream.on) {
+                        outStream.on('finish', () => resolve(true));
+                        outStream.on('error', reject);
+                    } else {
+                        resolve(doc);
+                    }
+                    return;
+                case 'hiero-timeline':
+                    await renderTemplate_HieroTimeline(doc, data, colors, spacing);
                     doc.end();
                     if (outStream && outStream.on) {
                         outStream.on('finish', () => resolve(true));
@@ -2326,7 +2353,6 @@ async function renderTemplate_HieroEssence(doc, rawData, colors, spacing) {
     const contentX = sidebarWidth;
     const contentWidth = PAGE_CONFIG.width - sidebarWidth;
 
-    const getSafeArray = (arr) => Array.isArray(arr) ? arr : [];
     const pInfo = data.personalInfo || {};
     const skills = getSafeArray(data.skills);
     const languages = getSafeArray(data.languages);
@@ -2633,6 +2659,385 @@ async function renderTemplate_HieroEssence(doc, rawData, colors, spacing) {
             sY += 28;
         }
     }
+}
+
+/**
+ * 🏛️ HIERO MINIMAL (TIMELINE) TEMPLATE
+ * A light, elegant corporate resume with a vertical timeline layout.
+ */
+async function renderTemplate_HieroTimeline(doc, rawData, colors, spacing) {
+    const data = normalizeData(rawData);
+    const pInfo = data.personalInfo || {};
+    const exp = getSafeArray(data.experience);
+    const edu = getSafeArray(data.education);
+    const projects = getSafeArray(data.projects);
+    const certs = getSafeArray(data.certifications);
+    const summary = data.summary || '';
+    const skills = getSafeArray(data.skills);
+    const softSkills = getSafeArray(data.softSkills);
+
+    // Derive professional title: explicit > first job title > "Professional"
+    const roleTitle = pInfo.roleTitle
+        || pInfo.title
+        || (exp.length > 0 ? (exp[0].jobTitle || exp[0].role || '') : '')
+        || '';
+
+    let currentY = PAGE_CONFIG.margin;
+    const margin = PAGE_CONFIG.margin;
+    const contentWidth = PAGE_CONFIG.contentWidth;
+
+    // Helper: Add new page and reset Y
+    const smartAddPage = () => {
+        if (currentY <= PAGE_CONFIG.margin + 5) return; // Already at top of a page
+        doc.addPage();
+        // Redraw the signature left border on new page
+        doc.save().rect(0, 0, 15, PAGE_CONFIG.height).fill('#111111').restore();
+        currentY = PAGE_CONFIG.margin;
+    };
+
+    // Draw the signature left border on initial page
+    doc.save().rect(0, 0, 15, PAGE_CONFIG.height).fill('#111111').restore();
+
+    // ==================== HEADER ====================
+    const photoSize = 90;
+    const headerX = margin + photoSize + 25;
+    const headerWidth = contentWidth - (photoSize + 25);
+
+    // Profile Photo (Circular - matched to image scale)
+    if (pInfo.profilePhoto) {
+        try {
+            let imgData = pInfo.profilePhoto;
+            if (imgData.startsWith('data:')) {
+                const parts = imgData.split(',');
+                if (parts.length > 1) imgData = Buffer.from(parts[1], 'base64');
+            }
+            doc.save()
+                .circle(margin + photoSize / 2, currentY + photoSize / 2, photoSize / 2)
+                .clip()
+                .image(imgData, margin, currentY, { width: photoSize, height: photoSize })
+                .restore();
+        } catch (e) {
+            renderCircularInitials(doc, pInfo.fullName, margin, currentY, photoSize);
+        }
+    } else {
+        renderCircularInitials(doc, pInfo.fullName || 'U', margin, currentY, photoSize);
+    }
+
+    // Name - Elite Serif Bold (Synchronized with Headings)
+    const nameY = currentY + 4;
+    doc.fillColor('#000000') // Pure black for maximum thickness
+        .font('Times-Bold')
+        .fontSize(29) // Slightly larger
+        .text(pInfo.fullName || 'RESUME', headerX, nameY, { width: headerWidth, characterSpacing: 0.2 });
+
+    // Professional Title - Subtle uppercase with elevated kerning
+    let currentTextY = doc.y + 1;
+    if (roleTitle) {
+        doc.fillColor('#666666')
+            .font('Helvetica')
+            .fontSize(9.5)
+            .text(roleTitle.toUpperCase(), headerX, currentTextY, {
+                width: headerWidth,
+                characterSpacing: 1.8
+            });
+        currentTextY = doc.y + 12;
+    }
+
+    // Contact Info Grid (2 Columns) - Ultra-Premium Vector Icon Implementation
+    const contactX1 = headerX;
+    const contactX2 = headerX + (headerWidth / 2) + 5;
+
+    // Custom Vector Icon Drawing (High-Fidelity & Glitch-Free)
+    const drawPremiumIcon = (type, x, y) => {
+        doc.save().lineWidth(0.6).strokeColor('#333333');
+        if (type === 'PHONE') {
+            doc.rect(x + 2.5, y + 1, 5, 8).stroke();
+            doc.circle(x + 5, y + 7.5, 0.4).fill('#333333');
+        } else if (type === 'LOCATION') {
+            doc.circle(x + 5, y + 3.5, 2.8).stroke();
+            doc.circle(x + 5, y + 3.5, 0.8).fill('#333333');
+            doc.moveTo(x + 2.3, y + 4.5).quadraticCurveTo(x + 5, y + 10, x + 7.7, y + 4.5).stroke();
+        } else if (type === 'WEB') {
+            doc.circle(x + 5, y + 5, 4.2).stroke();
+            doc.ellipse(x + 5, y + 5, 1.8, 4.2).stroke();
+            doc.moveTo(x + 1, y + 5).lineTo(x + 9, y + 5).stroke();
+        } else if (type === 'EMAIL') {
+            doc.rect(x + 1, y + 2, 8, 6).stroke();
+            doc.moveTo(x + 1, y + 2).lineTo(x + 5, y + 5.5).lineTo(x + 9, y + 2).stroke();
+        }
+        doc.restore();
+    };
+
+    const drawContactItem = (type, text, x, y) => {
+        if (!text) return 0;
+        drawPremiumIcon(type, x, y);
+        doc.fillColor(colors.secondary)
+            .font('Helvetica')
+            .fontSize(8.5)
+            .text(text, x + 18, y + 1, { width: (headerWidth / 2) - 25, height: 12, lineBreak: false });
+        return 16;
+    };
+
+    let contactY = currentTextY + 10;
+    const row1H = Math.max(
+        drawContactItem('PHONE', pInfo.phone, contactX1, contactY),
+        drawContactItem('LOCATION', pInfo.address, contactX2, contactY)
+    );
+    contactY += row1H;
+
+    const row2H = Math.max(
+        drawContactItem('WEB', pInfo.website || pInfo.linkedin, contactX1, contactY),
+        drawContactItem('EMAIL', pInfo.email, contactX2, contactY)
+    );
+    contactY += row2H;
+
+    currentY = Math.max(contactY + 22, margin + photoSize + 22);
+
+    // Divider - Ultra-thin Executive Line (Slightly bolder)
+    doc.moveTo(headerX, currentY - 14)
+        .lineTo(margin + contentWidth, currentY - 14)
+        .strokeColor(colors.light)
+        .lineWidth(0.8)
+        .stroke();
+
+    currentY += 5;
+
+    // ==================== SUMMARY (if present) ====================
+    if (summary) {
+        if (currentY + 40 > PAGE_CONFIG.height - margin) smartAddPage();
+        doc.fillColor('#555555') // Soft grey as requested
+            .font('Helvetica')
+            .fontSize(10) // Balanced size
+            .text(summary, margin, currentY, {
+                width: contentWidth,
+                lineGap: 1.8,
+                align: 'justify'
+            });
+        currentY = doc.y + 16;
+
+        // Second thin divider after summary
+        doc.moveTo(margin, currentY - 8)
+            .lineTo(margin + contentWidth, currentY - 8)
+            .strokeColor(colors.light)
+            .lineWidth(0.5)
+            .stroke();
+    }
+
+    // ==================== BODY LAYOUT ====================
+    const leftColWidth = contentWidth * 0.25;
+    const timelineX = margin + leftColWidth + 20;
+    const rightColX = timelineX + 25;
+    const rightColWidth = contentWidth - (leftColWidth + 45);
+
+    const renderTimelineSection = (title, items) => {
+        if (!items || items.length === 0) return;
+
+        // Section header
+        if (currentY + 40 > PAGE_CONFIG.height - margin) smartAddPage();
+
+        doc.fillColor(colors.primary)
+            .font('Times-Bold')
+            .fontSize(10)
+            .text(title.toUpperCase(), rightColX, currentY, {
+                characterSpacing: 1.4,
+                width: rightColWidth
+            });
+
+        currentY += 18;
+
+        // Underline section header (Extending from right column) - Increased padding for premium feel
+        doc.moveTo(rightColX, currentY - 4)
+            .lineTo(margin + contentWidth, currentY - 4)
+            .strokeColor('#dddddd')
+            .lineWidth(1)
+            .stroke();
+
+        currentY += 6;
+
+        items.forEach((item, idx) => {
+            // Map fields generically across all section types
+            const itemTitle = item.jobTitle || item.role || item.degree || item.title || item.name || '';
+            const subTitle = item.company || item.school || item.org || item.institution || '';
+            const dateStr = item.date
+                ? String(item.date)
+                : item.startDate
+                    ? `${item.startDate} - ${item.endDate || 'Present'}`
+                    : item.gradYear
+                        ? String(item.gradYear)
+                        : item.duration || '';
+            const description = item.description || item.responsibilities || item.subtitle || item.achievement || item.details || '';
+
+            if (!itemTitle && !subTitle) return; // Skip empty items
+
+            // Estimate heights
+            doc.font('Helvetica-Bold').fontSize(10);
+            const titleH = doc.heightOfString(itemTitle || ' ', { width: rightColWidth });
+            doc.font('Helvetica').fontSize(9);
+            const descH = description
+                ? doc.heightOfString(description, { width: rightColWidth, lineGap: 1.5 })
+                : 0;
+            const itemTotalH = titleH + (subTitle ? 14 : 0) + descH + 12;
+
+            // Page break check (more conservative)
+            if (currentY + itemTotalH > PAGE_CONFIG.height - margin - 10) {
+                smartAddPage();
+            }
+
+            const nodeY = currentY + 5;
+
+            // Draw Timeline vertical line
+            const lineTop = idx === 0 ? nodeY : currentY - 10;
+            const lineBottom = currentY + itemTotalH - 4;
+            doc.moveTo(timelineX, lineTop)
+                .lineTo(timelineX, lineBottom)
+                .strokeColor(colors.timeline)
+                .lineWidth(1.5)
+                .stroke();
+
+            // Draw Node circle (filled white with border)
+            doc.save();
+            doc.circle(timelineX, nodeY, 4).fillAndStroke('#ffffff', colors.timeline);
+            doc.restore();
+
+            // ---- LEFT COLUMN ----
+            const isSkills = title.toUpperCase() === "SKILLS";
+            if (isSkills && itemTitle) {
+                doc.fillColor(colors.primary)
+                    .font('Helvetica-Bold')
+                    .fontSize(9)
+                    .text(itemTitle, margin, currentY, { width: leftColWidth, align: 'right' });
+            } else if (subTitle) {
+                doc.fillColor(colors.primary)
+                    .font('Helvetica-Bold')
+                    .fontSize(9)
+                    .text(subTitle, margin, currentY, { width: leftColWidth, align: 'right' });
+            }
+            if (dateStr && !isSkills) {
+                doc.fillColor(colors.secondary)
+                    .font('Helvetica')
+                    .fontSize(8)
+                    .text(dateStr, margin, subTitle ? doc.y : currentY, { width: leftColWidth, align: 'right' });
+            }
+
+            // ---- RIGHT COLUMN ----
+            if (!isSkills && itemTitle) {
+                doc.fillColor(colors.primary)
+                    .font('Helvetica-Bold')
+                    .fontSize(9.5)
+                    .text(itemTitle, rightColX, currentY, { width: rightColWidth });
+            }
+
+            if (description) {
+                doc.fillColor(colors.secondary)
+                    .font('Helvetica')
+                    .fontSize(8.5)
+                    .text(description, rightColX, (isSkills ? currentY : doc.y + 1), { width: rightColWidth, lineGap: 1.5 });
+            }
+
+            // High-density vertical rhythm
+            currentY = Math.max(doc.y + 10, currentY + itemTotalH - 4);
+        });
+
+        currentY += 8;
+    };
+
+    // ==================== RENDER SECTIONS ====================
+    // 1. Work Experience
+    renderTimelineSection("Work Experience", exp);
+
+    // 2. Education
+    // Normalise education field names before rendering
+    const eduNorm = edu.map(e => ({
+        title: e.degree || e.name || e.title || '',
+        school: e.school || e.institution || '',
+        date: e.gradYear ? String(e.gradYear) : (e.date || ''),
+        description: e.description || (e.gpa ? `GPA: ${e.gpa}` : '')
+    }));
+    renderTimelineSection("Education", eduNorm);
+
+    // 3. Skills (brief list in single item)
+    const allSkillItems = [];
+    // Technical Skills
+    const techSkillsSrc = data.skills && data.skills.length > 0 ? data.skills
+        : data.technicalSkills ? [data.technicalSkills]
+            : [];
+    const techSkillsStr = Array.isArray(techSkillsSrc)
+        ? techSkillsSrc.join(' • ')
+        : String(techSkillsSrc);
+    if (techSkillsStr) allSkillItems.push({ title: 'Technical Skills', description: techSkillsStr });
+
+    // Soft Skills
+    const softSkillsSrc = data.softSkills && data.softSkills.length > 0 ? data.softSkills : [];
+    const softSkillsStr = Array.isArray(softSkillsSrc)
+        ? softSkillsSrc.join(' • ')
+        : String(softSkillsSrc);
+    if (softSkillsStr) allSkillItems.push({ title: 'Soft Skills', description: softSkillsStr });
+
+    if (allSkillItems.length > 0) {
+        renderTimelineSection("Skills", allSkillItems);
+    }
+
+    // 4. Certifications & Projects
+    const certsNorm = certs.map(c => ({
+        title: c.name || c.title || (typeof c === 'string' ? c : ''),
+        description: c.description || c.issuer || ''
+    }));
+    const projNorm = projects.map(p => ({
+        title: p.title || p.name || '',
+        description: [(p.tech || p.technologies ? `Tech: ${p.tech || p.technologies}` : ''), p.description].filter(Boolean).join(' — ')
+    }));
+    const combined = [...certsNorm, ...projNorm].filter(i => i.title);
+    if (combined.length > 0) {
+        renderTimelineSection("Certifications & Projects", combined);
+    }
+
+    // 5. Achievements, Languages, Hobbies (Combined into one section if needed or separate)
+    const achievements = getSafeArray(data.achievements);
+    const languages = getSafeArray(data.languages);
+    const hobbies = getSafeArray(data.hobbies);
+
+    if (achievements.length > 0) {
+        renderTimelineSection("Achievements", achievements.map(a => ({ title: 'Key Achievement', description: typeof a === 'string' ? a : (a.name || a.title || '') })));
+    }
+
+    const miscItems = [];
+    if (languages.length > 0) {
+        miscItems.push({ title: 'Languages', description: languages.join(', ') });
+    }
+    if (hobbies.length > 0) {
+        miscItems.push({ title: 'Interests', description: hobbies.join(', ') });
+    }
+    if (miscItems.length > 0) {
+        renderTimelineSection("Personal Details", miscItems);
+    }
+
+    // 6. References
+    const refs = getSafeArray(data.references);
+    if (refs.length > 0) {
+        const refItems = refs.map(r => ({
+            title: r.name || 'Reference',
+            description: `${r.title || ''}${r.company ? ' at ' + r.company : ''}${r.email ? ' | ' + r.email : ''}${r.phone ? ' | ' + r.phone : ''}`
+        }));
+        renderTimelineSection("References", refItems);
+    }
+
+    // Final positioning check (prevent potential PDFKit auto-page-break on end)
+    currentY = Math.min(currentY, PAGE_CONFIG.height - margin);
+}
+
+// Helper for Circular Initials fallback
+function renderCircularInitials(doc, name, x, y, size) {
+    doc.save();
+    doc.circle(x + size / 2, y + size / 2, size / 2)
+        .fillColor('#f0f0f0')
+        .fill();
+
+    const initials = name ? name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : '?';
+    doc.fillColor('#777777')
+        .font('Helvetica-Bold')
+        .fontSize(size * 0.4)
+        .text(initials, x, y + size * 0.35, { width: size, align: 'center' });
+    doc.restore();
 }
 
 // Helper for initials in essence (Banner Style)
