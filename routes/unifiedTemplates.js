@@ -1220,6 +1220,17 @@ async function generateUnifiedResume(data, templateId, outStream, customOptions 
                         resolve(doc);
                     }
                     return;
+                case 'hiero-retail':
+                    renderTemplate_HieroRetail(doc, data);
+                    doc.end();
+                    if (outStream && outStream.on) {
+                        outStream.on('finish', () => resolve(true));
+                        outStream.on('error', reject);
+                    } else {
+                        resolve(doc);
+                    }
+                    return;
+
                 case 'hiero-studio':
                     // Studio uses a completely custom full-page layout
                     await renderTemplate_StudioRightSidebar(doc, data, colors, spacing);
@@ -2632,6 +2643,172 @@ function renderRectangularInitials(doc, name, x, y, w, h) {
     doc.fontSize(40).fillColor('#f5a623').font('Helvetica-Bold');
     doc.text(initials, x, y + (h / 2) - 20, { width: w, align: 'center' });
     doc.restore();
+}
+
+// ==================== HIERO RETAIL TEMPLATE ====================
+function renderTemplate_HieroRetail(doc, rawData) {
+    // Helper to sanitize and format data
+    const toArray = (v) => {
+        if (Array.isArray(v)) return v.map(item => (typeof item === 'object' && item !== null) ? (item.name || item.title || item.skill || JSON.stringify(item)) : String(item));
+        if (typeof v === 'string') return v.split(/[\n,;]/).map(s => s.trim()).filter(Boolean);
+        return [];
+    };
+
+    let pInfo = rawData.personalInfo || {};
+    let data = {
+        name: rawData.name || pInfo.fullName || "John Doe",
+        title: rawData.title || pInfo.roleTitle || rawData.role || (rawData.experience && rawData.experience[0] && rawData.experience[0].jobTitle) || "Retail Professional",
+        summary: rawData.summary || "Motivated professional with experience boosting sales and customer loyalty. Resourceful at understanding customer needs and directing to desirable merchandise.",
+        profileImage: rawData.profileImage || pInfo.profilePhoto || null,
+        contact: {
+            address: rawData.address || pInfo.address || "123 Main Street, City",
+            phone: rawData.phone || pInfo.phone || "(555) 123-4567",
+            email: rawData.email || pInfo.email || "hello@example.com"
+        },
+        skills: toArray(rawData.skills || pInfo.skills || ["Customer Service", "Sales expertise", "Inventory Management", "Loss Prevention", "Product Promotions"]),
+        education: (Array.isArray(rawData.education) && rawData.education.length > 0 ? rawData.education : [{ gradYear: "2016", degree: "Diploma: Retail Management", school: "State University" }]).map(e => ({
+            date: (e.startDate ? `${e.startDate} - ${e.endDate || 'Present'}` : e.gradYear) || e.date || "",
+            degree: e.degree || "",
+            institution: e.school || e.institution || ""
+        })),
+        workHistory: (Array.isArray(rawData.experience) && rawData.experience.length > 0 ? rawData.experience : [
+            { startDate: "2016", endDate: "Present", jobTitle: "Retail Sales Associate", company: "H&M", description: "Effectively upsold products by introducing accessories.\nGenerated brand awareness and positive product impressions." }
+        ]).map(e => ({
+            date: (e.startDate ? `${e.startDate} -\n${e.endDate || 'Present'}` : e.date) || "",
+            title: e.jobTitle || e.title || "",
+            company: e.company || "",
+            bullets: toArray(e.description || e.points || e.bullets || "")
+        }))
+    };
+
+    const PAGE_WIDTH = 595.28;
+    const PAGE_HEIGHT = 841.89;
+
+    // Background and Outer Border
+    doc.save();
+    doc.rect(0, 0, PAGE_WIDTH, PAGE_HEIGHT).fill('#1f2a6b');
+    doc.rect(12, 12, PAGE_WIDTH - 24, PAGE_HEIGHT - 24).fill('#ffffff');
+    doc.restore();
+
+    // HEADER SECTION
+    let startY = 50;
+    let startX = 50;
+
+    doc.font('Helvetica-Bold').fontSize(32).fillColor('#1f2a6b').text(data.name, startX, startY);
+    let titleY = doc.y + 4;
+
+    doc.font('Helvetica-Oblique').fontSize(14).fillColor('#6c757d').text(data.title.toUpperCase(), startX, titleY);
+    let summaryY = doc.y + 12;
+
+    doc.font('Helvetica').fontSize(10).fillColor('#333333')
+        .text(data.summary, startX, summaryY, { width: 495, lineGap: 4 });
+
+    // LEFT COLUMN
+    let leftY = doc.y + 30;
+    const rightX = 260;
+
+    // Profile Image
+    if (data.profileImage && data.profileImage.startsWith('data:image')) {
+        try {
+            // Circle crop image
+            doc.save();
+            doc.circle(startX + 60, leftY + 60, 60).clip();
+            doc.image(data.profileImage, startX, leftY, { width: 120, height: 120 });
+            doc.restore();
+            leftY += 130 + 15;
+        } catch (e) {
+            console.error('Error rendering image in Hiero Retail', e);
+        }
+    }
+
+    // CONTACT Header
+    doc.font('Helvetica-Bold').fontSize(14).fillColor('#1f2a6b').text('Contact', startX, leftY);
+    leftY = doc.y + 4;
+    doc.moveTo(startX, leftY).lineTo(startX + 170, leftY).strokeColor('#d0d0d0').lineWidth(1).stroke();
+    leftY += 10;
+
+    // Contact Fields
+    const contactFields = [
+        { label: 'Address', value: data.contact.address },
+        { label: 'Phone', value: data.contact.phone },
+        { label: 'E-mail', value: data.contact.email }
+    ];
+
+    contactFields.forEach(field => {
+        if (field.value) {
+            doc.font('Helvetica-Bold').fontSize(10).fillColor('#333333').text(field.label, startX, leftY);
+            doc.font('Helvetica').fontSize(10).fillColor('#555555').text(field.value, startX, doc.y + 2, { width: 170 });
+            leftY = doc.y + 8;
+        }
+    });
+
+    leftY += 10;
+
+    // SKILLS Header
+    doc.font('Helvetica-Bold').fontSize(14).fillColor('#1f2a6b').text('Skills', startX, leftY);
+    leftY = doc.y + 4;
+    doc.moveTo(startX, leftY).lineTo(startX + 170, leftY).strokeColor('#d0d0d0').lineWidth(1).stroke();
+    leftY += 10;
+
+    // Skills List
+    doc.font('Helvetica').fontSize(10).fillColor('#333333');
+    data.skills.forEach(skill => {
+        doc.circle(startX + 3, leftY + 4, 1.5).fill('#333333');
+        doc.text(skill, startX + 12, leftY, { width: 170 - 12 });
+        leftY = doc.y + 4;
+    });
+
+    // RIGHT COLUMN (align top to the same Y as left column start)
+    let rightY = summaryY + doc.heightOfString(data.summary, { width: 495, lineGap: 4 }) + 30;
+
+    // EDUCATION Header
+    doc.font('Helvetica-Bold').fontSize(16).fillColor('#1f2a6b').text('Education', rightX, rightY);
+    rightY = doc.y + 4;
+    doc.moveTo(rightX, rightY).lineTo(PAGE_WIDTH - 50, rightY).strokeColor('#d0d0d0').lineWidth(1).stroke();
+    rightY += 10;
+
+    data.education.forEach(edu => {
+        let entryY = rightY;
+        doc.font('Helvetica-Bold').fontSize(10).fillColor('#555555').text(edu.date, rightX, entryY, { width: 70 });
+        let dateBottom = doc.y;
+
+        doc.font('Helvetica-Bold').fontSize(12).fillColor('#333333').text(edu.degree, rightX + 80, entryY, { width: 200 });
+        doc.font('Helvetica-Oblique').fontSize(10).fillColor('#666666').text(edu.institution, rightX + 80, doc.y + 2, { width: 200 });
+
+        rightY = Math.max(dateBottom, doc.y) + 12;
+    });
+
+    rightY += 5;
+
+    // WORK HISTORY Header
+    doc.font('Helvetica-Bold').fontSize(16).fillColor('#1f2a6b').text('Work History', rightX, rightY);
+    rightY = doc.y + 4;
+    doc.moveTo(rightX, rightY).lineTo(PAGE_WIDTH - 50, rightY).strokeColor('#d0d0d0').lineWidth(1).stroke();
+    rightY += 10;
+
+    data.workHistory.forEach(job => {
+        let eY = rightY;
+
+        // Date column 
+        doc.font('Helvetica-Bold').fontSize(10).fillColor('#555555').text(job.date, rightX, eY, { width: 70 });
+        let dateBottomY = doc.y;
+
+        // Content column
+        doc.font('Helvetica-Bold').fontSize(12).fillColor('#333333').text(job.title, rightX + 80, eY, { width: 200 });
+        if (job.company) {
+            doc.font('Helvetica-Oblique').fontSize(10).fillColor('#666666').text(job.company, rightX + 80, doc.y + 2, { width: 200 });
+        }
+
+        let contentY = doc.y + 6;
+        job.bullets.forEach(bullet => {
+            if (!bullet) return;
+            doc.circle(rightX + 80 + 3, contentY + 4, 1.5).fill('#333333');
+            doc.font('Helvetica').fontSize(10).fillColor('#333333').text(bullet, rightX + 80 + 12, contentY, { width: 200 - 12 });
+            contentY = doc.y + 3;
+        });
+
+        rightY = Math.max(dateBottomY, contentY) + 12;
+    });
 }
 
 module.exports = { generateUnifiedResume };

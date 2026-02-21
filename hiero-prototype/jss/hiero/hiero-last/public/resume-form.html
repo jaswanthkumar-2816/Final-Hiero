@@ -1765,6 +1765,11 @@
           name: 'Hiero Studio',
           description: 'Modern professional layout with specialized technical sections. Ideal for developers and designers.',
           style: 'Modern, clean, and technical.'
+        },
+        'hiero-retail': {
+          name: 'Hiero Retail Timeline',
+          description: 'Clean formatting with clear timeline layout. Ideal for retail professionals.',
+          style: 'Timeline structure, left profile, distinctive border.'
         }
       };
 
@@ -2657,6 +2662,16 @@
         setVal("fullName", data.personalInfo?.fullName);
         setVal("email", data.personalInfo?.email);
         setVal("phone", data.personalInfo?.phone);
+
+        if (data.personalInfo?.address) {
+          data.personalInfo.address = data.personalInfo.address.replace(/^(Contact|Address)[\s\n]*/gi, '').trim();
+        }
+        if (data.summary) {
+          data.summary = data.summary.replace(/^(RETAIL PROFESSIONAL)[\s\n]*/gi, '').trim();
+        }
+        if (data.personalInfo?.website && !data.personalInfo.website.startsWith('http') && data.personalInfo.website.length > 3) {
+          data.personalInfo.website = 'https://' + data.personalInfo.website;
+        }
         setVal("address", data.personalInfo?.address);
         setVal("linkedin", data.personalInfo?.linkedin);
         setVal("website", data.personalInfo?.website);

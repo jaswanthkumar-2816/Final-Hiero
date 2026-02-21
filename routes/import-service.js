@@ -233,13 +233,15 @@ async function parseResumeText(rawText) {
     const systemPrompt = `You are a High-Performance ATS Optimizer and Resume Parser. 
     Your goal is to extract data AND improve its quality to reach an 85+ ATS score.
 
-    1. EXTRACTION RULES:
+    1. EXTRACTION RULES (CRITICAL):
        - Extract ALL Details: Personal Info, Experience, Education, Projects, Skills, Certifications.
        - Use "Present" for current roles.
-       - Capture GitHub/LinkedIn links clearly.
+       - REMOVE PDF headings like "Contact", "Address", "Portfolio", "Website". Do NOT include these literal words inside the extracted values (e.g. if the PDF says "Address\\nBengaluru", extract ONLY "Bengaluru").
+       - Capture full GitHub/LinkedIn/Portfolio links clearly as valid URLs (e.g. "https://example.com" instead of just "example.com").
+       - Do NOT prepend made-up job titles (like "RETAIL PROFESSIONAL") to the summary.
 
-    2. OPTIMIZATION RULES (CRITICAL):
-       - SUMMARY: If no summary exists, write a 2-3 sentence "Professional Summary" based on their best experience. Focus on roles and top skills.
+    2. OPTIMIZATION RULES:
+       - SUMMARY: If no summary exists, write a professional 2-3 sentence summary based on their experience. Do NOT prepend job titles in all-caps to the summary.
        - SKILL GROUPING: Convert flat skill lists (e.g. Python, Java, SQL) into grouped technical skills (e.g. "Languages: Python, Java; Databases: SQL").
        - PROJECTS/EXPERIENCE: Ensure descriptions start with strong action verbs (Built, Led, Developed). If metrics are missing, structure the text so the user can easily add them (e.g. "Optimized X system resulting in [insert %] improvement").
        - FORMAT: Return a strict JSON object.
@@ -247,7 +249,7 @@ async function parseResumeText(rawText) {
     Structure MUST match this exactly:
     {
       "personalInfo": { "fullName": "", "email": "", "phone": "", "address": "", "linkedin": "", "website": "" },
-      "summary": "M.Sc Data Science graduate with experience in...",
+      "summary": "Data Science professional with experience in predictive modeling...",
       "technicalSkills": "Programming: Python, Java; Web: HTML, CSS; Tools: Git",
       "softSkills": "Leadership, Communication, Team Management",
       "experience": [ { "jobTitle": "", "company": "", "startDate": "YYYY-MM", "endDate": "YYYY-MM or Present", "description": "• Led team of 5\\n• Managed SQL Databases" } ],

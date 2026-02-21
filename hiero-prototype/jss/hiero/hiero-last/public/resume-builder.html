@@ -1562,7 +1562,6 @@
             <p>Exclusive signature design with unique styling. The ultimate template for making an unforgettable
               impression.</p>
             <div class="template-tags">
-              <span class="tag premium">Signature</span>
               <span class="tag premium">Unique</span>
               <span class="tag premium">Premium</span>
             </div>
@@ -1571,6 +1570,30 @@
             </button>
           </div>
         </div>
+
+        <!-- Hiero Retail Template -->
+        <div class="template-card" data-category="professional" data-template="hiero-retail" data-type="free">
+          <div class="template-preview" onclick="previewTemplate('hiero-retail')">
+            <i class="fas fa-store"></i>
+            <div class="preview-overlay">
+              <button class="preview-btn">Preview Template</button>
+            </div>
+          </div>
+          <div class="template-info">
+            <h3>Hiero Retail Timeline</h3>
+            <p>Clean formatting with clear timeline layout. Ideal for retail professionals and customer-facing roles.
+            </p>
+            <div class="template-tags">
+              <span class="tag">Timeline</span>
+              <span class="tag">Retail</span>
+              <span class="tag">Professional</span>
+            </div>
+            <button class="start-building-btn" onclick="startBuilding('hiero-retail')">
+              <i class="fas fa-arrow-right"></i> Start Building
+            </button>
+          </div>
+        </div>
+
         <!-- Hiero Essence Template -->
         <div class="template-card premium" data-category="premium" data-template="hiero-essence" data-type="premium">
           <div class="premium-badge">Premium</div>
@@ -2543,6 +2566,11 @@
           name: 'Hiero Elite',
           description: 'Premium executive template with luxury design elements. Ideal for C-level executives.',
           style: 'Luxury aesthetics, gold accents, premium typography.'
+        },
+        'hiero-retail': {
+          name: 'Hiero Retail Timeline',
+          description: 'Clean formatting with clear timeline layout. Ideal for retail professionals.',
+          style: 'Timeline structure, left profile, distinctive border.'
         },
         'hiero-vision': {
           name: 'Hiero Vision',
@@ -3519,6 +3547,16 @@
         setVal("fullName", data.personalInfo?.fullName);
         setVal("email", data.personalInfo?.email);
         setVal("phone", data.personalInfo?.phone);
+
+        if (data.personalInfo?.address) {
+          data.personalInfo.address = data.personalInfo.address.replace(/^(Contact|Address)[\s\n]*/gi, '').trim();
+        }
+        if (data.summary) {
+          data.summary = data.summary.replace(/^(RETAIL PROFESSIONAL)[\s\n]*/gi, '').trim();
+        }
+        if (data.personalInfo?.website && !data.personalInfo.website.startsWith('http') && data.personalInfo.website.length > 3) {
+          data.personalInfo.website = 'https://' + data.personalInfo.website;
+        }
         setVal("address", data.personalInfo?.address);
         setVal("linkedin", data.personalInfo?.linkedin);
         setVal("website", data.personalInfo?.website);
