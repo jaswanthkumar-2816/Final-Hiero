@@ -1416,23 +1416,24 @@
 
 
 
-        <!-- Hiero Minimal Template (Template 7) -->
-        <div class="template-card" data-category="modern" data-template="hiero-minimal" data-type="free">
-          <div class="template-preview" onclick="previewTemplate('hiero-minimal')">
+        <!-- Hiero Minimal (Timeline) Template -->
+        <div class="template-card" data-category="minimal" data-template="hiero-timeline" data-type="free">
+          <div class="template-preview" onclick="previewTemplate('hiero-timeline')">
             <i class="fas fa-stream"></i>
             <div class="preview-overlay">
               <button class="preview-btn">Preview Template</button>
             </div>
           </div>
           <div class="template-info">
-            <h3>Hiero Design</h3>
-            <p>Clean minimalist design with maximum white space. Emphasizes content with subtle sophistication.</p>
+            <h3>Hiero Minimal</h3>
+            <p>Elegant vertical timeline layout with a professional grayscale design. Ideal for clean, corporate
+              presentation.</p>
             <div class="template-tags">
-              <span class="tag">Minimal</span>
-              <span class="tag">Clean</span>
-              <span class="tag">Modern</span>
+              <span class="tag">Timeline</span>
+              <span class="tag">Minimalist</span>
+              <span class="tag">Corporate</span>
             </div>
-            <button class="start-building-btn" onclick="startBuilding('hiero-minimal')">
+            <button class="start-building-btn" onclick="startBuilding('hiero-timeline')">
               <i class="fas fa-arrow-right"></i> Start Building
             </button>
           </div>
@@ -1492,9 +1493,8 @@
             </div>
           </div>
           <div class="template-info">
-            <h3>Hiero Minimal</h3>
-            <p>Distinctive Right Sidebar layout with a bold timeline. Perfect for showcasing a modern professional
-              profile.</p>
+            <h3>Hiero Studio</h3>
+            <p>Contemporary tech-focused side-label design for a modern professional look.</p>
             <div class="template-tags">
               <span class="tag">Sidebar</span>
               <span class="tag">Modern</span>
@@ -1618,7 +1618,6 @@
             <p>Exclusive signature design with unique styling. The ultimate template for making an unforgettable
               impression.</p>
             <div class="template-tags">
-              <span class="tag premium">Signature</span>
               <span class="tag premium">Unique</span>
               <span class="tag premium">Premium</span>
             </div>
@@ -1628,32 +1627,51 @@
           </div>
         </div>
 
-        <!-- Hiero Aurora -->
-        <div class="template-card premium" data-category="premium" data-template="hiero-aurora" data-type="premium">
+        <!-- Hiero Retail Template -->
+        <div class="template-card" data-category="professional" data-template="hiero-retail" data-type="free">
+          <div class="template-preview" onclick="previewTemplate('hiero-retail')">
+            <i class="fas fa-store"></i>
+            <div class="preview-overlay">
+              <button class="preview-btn">Preview Template</button>
+            </div>
+          </div>
+          <div class="template-info">
+            <h3>Hiero Retail Timeline</h3>
+            <p>Clean formatting with clear timeline layout. Ideal for retail professionals and customer-facing roles.
+            </p>
+            <div class="template-tags">
+              <span class="tag">Timeline</span>
+              <span class="tag">Retail</span>
+              <span class="tag">Professional</span>
+            </div>
+            <button class="start-building-btn" onclick="startBuilding('hiero-retail')">
+              <i class="fas fa-arrow-right"></i> Start Building
+            </button>
+          </div>
+        </div>
+
+        <!-- Hiero Essence Template -->
+        <div class="template-card premium" data-category="premium" data-template="hiero-essence" data-type="premium">
           <div class="premium-badge">Premium</div>
-          <div class="template-preview" onclick="previewTemplate('hiero-aurora')">
-            <i class="fas fa-sun"></i>
+          <div class="template-preview" onclick="previewTemplate('hiero-essence')">
+            <i class="fas fa-columns"></i>
             <div class="preview-overlay">
               <button class="preview-btn">Preview Template</button>
             </div>
           </div>
           <div class="template-info">
             <h3>Hiero Essence</h3>
-            <p>The Aurora design features fluid gradients and modern layouts for forward-thinking professionals.</p>
+            <p>Modern corporate design featuring a sleek dark sidebar with professional orange accents.</p>
             <div class="template-tags">
-              <span class="tag premium">Modern</span>
-              <span class="tag premium">Gradient</span>
-              <span class="tag premium">Fluid</span>
+              <span class="tag premium">Two-Column</span>
+              <span class="tag premium">Corporate</span>
+              <span class="tag premium">Premium</span>
             </div>
-            <button class="start-building-btn" onclick="startBuilding('hiero-aurora')">
+            <button class="start-building-btn" onclick="startBuilding('hiero-essence')">
               <i class="fas fa-arrow-right"></i> Start Building
             </button>
           </div>
         </div>
-
-
-
-
 
         <!-- Hiero Velocity -->
         <div class="template-card premium" data-category="premium" data-template="hiero-velocity" data-type="premium">
@@ -2611,6 +2629,12 @@
           description: 'Premium layout with vibrant orange accents and a dominant navy sidebar.',
           style: 'Two-column, orange profile header, navy sidebar with progress skill bars'
         },
+        'hiero-timeline': {
+          name: 'Hiero Minimal',
+          description: 'Elegant vertical timeline layout with a professional grayscale design. Ideal for clean, corporate presentation.',
+          style: 'Vertical timeline, grayscale design, circular nodes, and professional alignment.'
+        },
+
         'hiero-executive': {
           name: 'Hiero Executive',
           description: 'Premium corporate side-label layout inspired by Morgan Maxwell.',
@@ -2656,6 +2680,11 @@
           description: 'Premium executive template with luxury design elements. Ideal for C-level executives.',
           style: 'Luxury aesthetics, gold accents, premium typography.'
         },
+        'hiero-retail': {
+          name: 'Hiero Retail Timeline',
+          description: 'Clean formatting with clear timeline layout. Ideal for retail professionals.',
+          style: 'Timeline structure, left profile, distinctive border.'
+        },
         'hiero-vision': {
           name: 'Hiero Vision',
           description: 'Creative layout with visual storytelling approach. Perfect for designers and marketers.',
@@ -2680,6 +2709,11 @@
           name: 'Hiero Signature',
           description: 'Exclusive signature design with unique styling. The ultimate template for a lasting impression.',
           style: 'Unique signature header, creative layout, premium feel.'
+        },
+        'hiero-essence': {
+          name: 'Hiero Essence',
+          description: 'Modern corporate design with a distinctive dark sidebar and orange accent bars. Perfect for a structured professional presentation.',
+          style: 'Two-column layout, dark sidebar (#1F1F1F), orange accents (#F5A623), clean typography.'
         },
         'hiero-aurora': {
           name: 'Hiero Aurora',
@@ -3242,7 +3276,9 @@
         'priya-analytics': 'Priya Analytics (Single Column)',
         'hiero-studio': 'Hiero Studio',
         'template4': 'Hiero Academic',
-        'hiero-monethon': 'Hiero Monethon'
+        'hiero-monethon': 'Hiero Monethon',
+        'hiero-essence': 'Hiero Essence'
+
       };
       return names[templateId] || 'Selected';
     }
@@ -3652,6 +3688,16 @@
         setVal("fullName", data.personalInfo?.fullName);
         setVal("email", data.personalInfo?.email);
         setVal("phone", data.personalInfo?.phone);
+
+        if (data.personalInfo?.address) {
+          data.personalInfo.address = data.personalInfo.address.replace(/^(Contact|Address)[\s\n]*/gi, '').trim();
+        }
+        if (data.summary) {
+          data.summary = data.summary.replace(/^(RETAIL PROFESSIONAL)[\s\n]*/gi, '').trim();
+        }
+        if (data.personalInfo?.website && !data.personalInfo.website.startsWith('http') && data.personalInfo.website.length > 3) {
+          data.personalInfo.website = 'https://' + data.personalInfo.website;
+        }
         setVal("address", data.personalInfo?.address);
         setVal("linkedin", data.personalInfo?.linkedin);
         setVal("website", data.personalInfo?.website);

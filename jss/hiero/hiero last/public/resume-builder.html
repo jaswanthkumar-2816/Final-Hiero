@@ -895,27 +895,48 @@
           </div>
         </div>
 
-        <!-- Hiero Tech Nova Template (User Requested) -->
-        <div class="template-card" data-category="professional" data-template="tech-nova" data-type="premium">
-          <div class="premium-badge">NEW</div>
-          <div class="template-preview" onclick="previewTemplate('tech-nova')" style="background: #1a202c;">
-            <i class="fas fa-id-card" style="color: #ff6b00;"></i>
+        <!-- Hiero Essence Template -->
+        <div class="template-card premium" data-category="premium" data-template="hiero-essence" data-type="premium">
+          <div class="premium-badge">Premium</div>
+          <div class="template-preview" onclick="previewTemplate('hiero-essence')">
+            <i class="fas fa-columns"></i>
             <div class="preview-overlay">
               <button class="preview-btn">Preview Template</button>
             </div>
           </div>
           <div class="template-info">
-            <h3>Hiero Tech Nova</h3>
-            <p>Modern professional layout with a dark navy sidebar, warm orange accents, and horizontal skill progress
-              bars.</p>
+            <h3>Hiero Essence</h3>
+            <p>Modern corporate design featuring a sleek dark sidebar with professional orange accents.</p>
             <div class="template-tags">
-              <span class="tag">Corporate</span>
-              <span class="tag">Two Column</span>
-              <span class="tag">Modern</span>
+              <span class="tag premium">Two-Column</span>
+              <span class="tag premium">Corporate</span>
+              <span class="tag premium">Premium</span>
             </div>
-            <button class="start-building-btn" onclick="startBuilding('tech-nova')"
-              style="background: linear-gradient(135deg, #ff6b00 0%, #ff8c33 100%);">
-              <i class="fas fa-rocket"></i> Launch Design
+            <button class="start-building-btn" onclick="startBuilding('hiero-essence')">
+              <i class="fas fa-arrow-right"></i> Start Building
+            </button>
+          </div>
+        </div>
+
+        <!-- Hiero Minimal (Timeline) Template -->
+        <div class="template-card" data-category="minimal" data-template="hiero-timeline" data-type="free">
+          <div class="template-preview" onclick="previewTemplate('hiero-timeline')">
+            <i class="fas fa-stream"></i>
+            <div class="preview-overlay">
+              <button class="preview-btn">Preview Template</button>
+            </div>
+          </div>
+          <div class="template-info">
+            <h3>Hiero Minimal</h3>
+            <p>Elegant vertical timeline layout with a professional grayscale design. Ideal for clean, corporate
+              presentation.</p>
+            <div class="template-tags">
+              <span class="tag">Timeline</span>
+              <span class="tag">Minimalist</span>
+              <span class="tag">Corporate</span>
+            </div>
+            <button class="start-building-btn" onclick="startBuilding('hiero-timeline')">
+              <i class="fas fa-arrow-right"></i> Start Building
             </button>
           </div>
         </div>
@@ -938,9 +959,22 @@
               <i class="fas fa-user section-icon"></i> Personal Information
             </h2>
             <div class="form-content">
-              <div class="form-group">
-                <label for="fullName">Full Name <span class="required">*</span></label>
-                <input type="text" id="fullName" required placeholder="Enter your full name">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="fullName">Full Name <span class="required">*</span></label>
+                  <input type="text" id="fullName" required placeholder="Enter your full name">
+                </div>
+                <div class="form-group">
+                  <label for="profilePhotoInput">Profile Photo</label>
+                  <input type="file" id="profilePhotoInput" accept="image/*" onchange="handlePhotoUpload(this)">
+                  <input type="hidden" id="profilePhoto">
+                  <div id="photoPreviewContainer" style="margin-top: 10px; display: none;">
+                    <img id="photoPreview" src=""
+                      style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px; border: 2px solid #2ae023;">
+                    <button type="button" onclick="removePhoto()"
+                      style="background: #ff6b6b; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 12px; cursor: pointer; margin-left: 10px; vertical-align: bottom;">Remove</button>
+                  </div>
+                </div>
               </div>
               <div class="form-row">
                 <div class="form-group">
@@ -956,6 +990,12 @@
                   <small style="color: #666; font-size: 12px;">Examples: +1 555-123-4567, (555) 123-4567,
                     555.123.4567</small>
                 </div>
+              </div>
+
+              <div class="form-group">
+                <label for="roleTitle">Professional Title / Headline</label>
+                <input type="text" id="roleTitle" placeholder="e.g. Senior Data Scientist | ML Engineer">
+                <small style="color: #666; font-size: 12px;">This appears below your name on the resume.</small>
               </div>
 
               <!-- Optional: Address -->
@@ -1044,45 +1084,6 @@
                 </div>
               </div>
               <button type="button" class="add-more-btn" onclick="addExperience()">Add Another Experience</button>
-            </div>
-          </div>
-
-          <!-- Internships -->
-          <div class="form-section" id="section-internships">
-            <h2 class="section-title">
-              <i class="fas fa-user-graduate section-icon"></i> Internship Experience
-              <span class="skip-link" onclick="toggleSection('internships')">Skip this section</span>
-            </h2>
-            <div class="form-content">
-              <div id="internshipsContainer">
-                <div class="internship-item">
-                  <div class="form-row">
-                    <div class="form-group">
-                      <label>Internship Role</label>
-                      <input type="text" name="internRole[]" placeholder="Research Intern">
-                    </div>
-                    <div class="form-group">
-                      <label>Organization</label>
-                      <input type="text" name="internOrg[]" placeholder="Research Lab">
-                    </div>
-                  </div>
-                  <div class="form-row">
-                    <div class="form-group">
-                      <label>Start Date</label>
-                      <input type="month" name="internStart[]">
-                    </div>
-                    <div class="form-group">
-                      <label>End Date</label>
-                      <input type="month" name="internEnd[]">
-                    </div>
-                  </div>
-                  <div class="form-group">
-                    <label>Description</label>
-                    <textarea name="internDesc[]" rows="3" placeholder="Internship duties..."></textarea>
-                  </div>
-                </div>
-              </div>
-              <button type="button" class="add-more-btn" onclick="addInternship()">Add Another Internship</button>
             </div>
           </div>
 
@@ -1319,6 +1320,7 @@
     <div style="display:flex; gap:20px; justify-content:center; flex-wrap:wrap; margin-top:30px;">
       <button class="btn btn-secondary" onclick="editResume()">Edit Details</button>
       <button class="btn btn-primary" onclick="downloadResume()">Download PDF</button>
+      <button class="btn btn-primary" style="background:#2b6cb0;" onclick="downloadDocx()">Download Word</button>
       <button class="btn btn-primary" onclick="previewResume()">Preview</button>
     </div>
   </div>
@@ -1401,6 +1403,59 @@
         return false;
       }
       return true;
+    }
+
+    // Photo Upload Handling
+    // Photo Upload Handling (with Canvas resizing for reliability and size optimization)
+    function handlePhotoUpload(input) {
+      if (input.files && input.files[0]) {
+        const file = input.files[0];
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          const img = new Image();
+          img.onload = function () {
+            const canvas = document.createElement('canvas');
+            const MAX_WIDTH = 400;
+            const MAX_HEIGHT = 400;
+            let width = img.width;
+            let height = img.height;
+
+            if (width > height) {
+              if (width > MAX_WIDTH) {
+                height *= MAX_WIDTH / width;
+                width = MAX_WIDTH;
+              }
+            } else {
+              if (height > MAX_HEIGHT) {
+                width *= MAX_HEIGHT / height;
+                height = MAX_HEIGHT;
+              }
+            }
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+
+            // Convert to JPEG with 0.8 quality to keep size small
+            const base64 = canvas.toDataURL('image/jpeg', 0.8);
+            document.getElementById('profilePhoto').value = base64;
+            document.getElementById('photoPreview').src = base64;
+            document.getElementById('photoPreviewContainer').style.display = 'block';
+            localStorage.setItem('field_value_profilePhoto', base64);
+            console.log('✅ Photo resized and uploaded. Base64 length:', base64.length);
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function removePhoto() {
+      document.getElementById('profilePhoto').value = '';
+      document.getElementById('photoPreview').src = '';
+      document.getElementById('photoPreviewContainer').style.display = 'none';
+      document.getElementById('profilePhotoInput').value = '';
+      localStorage.removeItem('field_value_profilePhoto');
     }
 
     // Initialize page - always start at Step 1 (template selection)
@@ -1587,6 +1642,14 @@
           }
         }
       });
+
+      // Restore photo if exists
+      const savedPhoto = localStorage.getItem('field_value_profilePhoto');
+      if (savedPhoto) {
+        document.getElementById('profilePhoto').value = savedPhoto;
+        document.getElementById('photoPreview').src = savedPhoto;
+        document.getElementById('photoPreviewContainer').style.display = 'block';
+      }
     });
 
     // Template preview functionality with fallback static preview
@@ -1599,14 +1662,19 @@
           style: 'Traditional serif fonts, centered header, clean sections'
         },
         'minimal': {
-          name: 'Minimal',
-          description: 'Ultra-clean design with excellent readability',
-          style: 'Minimalist design, sans-serif fonts, lots of whitespace'
+          name: 'Minimalist',
+          description: 'A simple, no-nonsense template that focuses on content',
+          style: 'Sans-serif fonts, ample whitespace, bold headings'
         },
         'modern-pro': {
           name: 'Modern Professional',
-          description: 'Contemporary design with subtle colors',
-          style: 'Modern layout, accent colors, professional styling'
+          description: 'Contemporary design with accent colors and clear hierarchy',
+          style: 'Dynamic layout, accent bars, modern typography'
+        },
+        'hiero-essence': {
+          name: 'Hiero Essence',
+          description: 'Modern corporate design with a distinctive dark sidebar and orange accent bars. Perfect for a structured professional presentation.',
+          style: 'Two-column layout, dark sidebar (#1F1F1F), orange accents (#F5A623), clean typography.'
         },
         'tech-focus': {
           name: 'Tech Focus',
@@ -1657,6 +1725,11 @@
           name: 'Priya Analytics',
           description: 'Single-column layout with a grey top bar and bold section headings. Ideal for data-driven professionals.',
           style: 'Single-column, grey top bar, bold section headings with horizontal rules, matching the Priya Sharma data analyst resume style'
+        },
+        'hiero-timeline': {
+          name: 'Hiero Minimal',
+          description: 'Elegant vertical timeline layout with a professional grayscale design. Ideal for clean, corporate presentation.',
+          style: 'Vertical timeline, grayscale design, circular nodes, and professional alignment.'
         }
       };
 
@@ -2017,9 +2090,11 @@
         'minimalist-mono': 'Minimalist Mono',
         'rishi': 'Rishi Tech Modern',
         'priya': 'Priya Elegant',
-        'priya-analytics': 'Priya Analytics (Single Column)'
+        'priya-analytics': 'Priya Analytics (Single Column)',
+        'hiero-essence': 'Hiero Essence',
+        'hiero-timeline': 'Hiero Minimal'
       };
-      return names[templateId] || 'Selected';
+      return names[templateId] || templateId.charAt(0).toUpperCase() + templateId.slice(1);
     }
 
     // Show modal asking if user has an old resume
@@ -2375,32 +2450,6 @@
           });
         }
 
-        // Internships
-        if (data.internships && Array.isArray(data.internships)) {
-          const internSection = document.getElementById('section-internships');
-          if (internSection && internSection.classList.contains('skipped')) {
-            toggleSection('internships');
-          }
-          data.internships.forEach((intern, index) => {
-            if (index > 0) addInternship();
-            const containers = document.querySelectorAll('.internship-item');
-            const container = containers[index];
-            if (container) {
-              const roleField = container.querySelector('input[name="internRole[]"]');
-              const orgField = container.querySelector('input[name="internOrg[]"]');
-              const startField = container.querySelector('input[name="internStart[]"]');
-              const endField = container.querySelector('input[name="internEnd[]"]');
-              const descField = container.querySelector('textarea[name="internDesc[]"]');
-
-              if (roleField && (intern.role || intern.jobTitle)) roleField.value = intern.role || intern.jobTitle;
-              if (orgField && (intern.org || intern.company)) orgField.value = intern.org || intern.company;
-              if (startField && (intern.startDate || intern.start)) startField.value = intern.startDate || intern.start;
-              if (endField && (intern.endDate || intern.end)) endField.value = intern.endDate || intern.end;
-              if (descField && (intern.description || intern.desc)) descField.value = intern.description || intern.desc;
-            }
-          });
-        }
-
         // Projects
         if (data.projects && Array.isArray(data.projects)) {
           // First, un-skip projects section if it's skipped
@@ -2570,25 +2619,6 @@
           </label>
         </div>
         <div class="form-group"><label>Description</label><textarea name="jobDescription[]" rows="4" placeholder="Key achievements..."></textarea></div>
-      `;
-      container.appendChild(div);
-    }
-
-    function addInternship() {
-      const container = document.getElementById('internshipsContainer');
-      const div = document.createElement('div');
-      div.className = 'internship-item';
-      div.innerHTML = `
-        <button type="button" class="remove-btn" onclick="this.parentElement.remove()">Remove</button>
-        <div class="form-row">
-          <div class="form-group"><label>Internship Role</label><input type="text" name="internRole[]" placeholder="Research Intern"></div>
-          <div class="form-group"><label>Organization</label><input type="text" name="internOrg[]" placeholder="Research Lab"></div>
-        </div>
-        <div class="form-row">
-          <div class="form-group"><label>Start Date</label><input type="month" name="internStart[]"></div>
-          <div class="form-group"><label>End Date</label><input type="month" name="internEnd[]"></div>
-        </div>
-        <div class="form-group"><label>Description</label><textarea name="internDesc[]" rows="3" placeholder="Internship duties..."></textarea></div>
       `;
       container.appendChild(div);
     }
@@ -2816,6 +2846,12 @@
           hobbiesEl.value = 'Contributing to open-source data science projects, Reading research papers on ML, Participating in Kaggle competitions';
         }
 
+        // Experience - Unskip the section if it was hidden
+        const sectionExperience = document.getElementById('section-experience');
+        if (sectionExperience && sectionExperience.classList.contains('skipped')) {
+          toggleSection('experience');
+        }
+
         // Clear existing experience and add comprehensive sample
         const expContainer = document.getElementById('experienceContainer');
         expContainer.innerHTML = '';
@@ -2840,7 +2876,8 @@
         ];
 
         experiences.forEach((exp, index) => {
-          if (index > 0) addExperience();
+          // Add a new experience item
+          addExperience();
 
           setTimeout(() => {
             const allTitles = document.querySelectorAll('input[name="jobTitle[]"]');
@@ -2856,47 +2893,18 @@
             if (allDescriptions[index]) allDescriptions[index].value = exp.description;
 
             // Handle "currently working" checkbox
-            if (exp.current && allEnds[index]) {
-              const checkbox = allEnds[index].parentElement.querySelector('input[type="checkbox"]');
+            if (exp.current && allTitles[index]) {
+              const item = allTitles[index].closest('.experience-item');
+              const checkbox = item.querySelector('input[type="checkbox"]');
               if (checkbox) checkbox.checked = true;
             }
           }, 100 * index);
         });
 
-        // Clear existing internships and add comprehensive sample
-        const internSection = document.getElementById('section-internships');
-        if (internSection && internSection.classList.contains('skipped')) {
-          toggleSection('internships');
-        }
-        const internContainer = document.getElementById('internshipsContainer');
-        if (internContainer) {
-          internContainer.innerHTML = '';
-          const sampleInternships = [
-            {
-              role: 'Machine Learning Intern',
-              org: 'AI Research Lab',
-              start: '2021-06',
-              end: '2021-08',
-              desc: 'Assisted in training large language models for sentiment analysis. Implemented data preprocessing pipelines using Python and PyTorch.'
-            }
-          ];
-
-          sampleInternships.forEach((intern, index) => {
-            if (index > 0) addInternship();
-            setTimeout(() => {
-              const allRoles = document.querySelectorAll('input[name="internRole[]"]');
-              const allOrgs = document.querySelectorAll('input[name="internOrg[]"]');
-              const allStarts = document.querySelectorAll('input[name="internStart[]"]');
-              const allEnds = document.querySelectorAll('input[name="internEnd[]"]');
-              const allDescs = document.querySelectorAll('textarea[name="internDesc[]"]');
-
-              if (allRoles[index]) allRoles[index].value = intern.role;
-              if (allOrgs[index]) allOrgs[index].value = intern.org;
-              if (allStarts[index]) allStarts[index].value = intern.start;
-              if (allEnds[index]) allEnds[index].value = intern.end;
-              if (allDescs[index]) allDescs[index].value = intern.desc;
-            }, 100 * index);
-          });
+        // Education - Unskip the section
+        const sectionEducation = document.getElementById('section-education');
+        if (sectionEducation && sectionEducation.classList.contains('skipped')) {
+          toggleSection('education');
         }
 
         // Clear existing education and add comprehensive sample
@@ -2908,18 +2916,18 @@
             degree: 'M.Sc. in Data Science',
             school: 'Christ University, Bengaluru',
             year: '2021',
-            gpa: ''
+            gpa: '3.9/4.0'
           },
           {
             degree: 'B.Sc. in Computer Science',
             school: 'Osmania University, Hyderabad',
             year: '2019',
-            gpa: ''
+            gpa: '3.8/4.0'
           }
         ];
 
         education.forEach((edu, index) => {
-          if (index > 0) addEducation();
+          addEducation();
 
           setTimeout(() => {
             const allDegrees = document.querySelectorAll('input[name="degree[]"]');
@@ -3342,8 +3350,10 @@
       data.personalInfo.fullName = document.getElementById('fullName').value;
       data.personalInfo.email = document.getElementById('email').value;
       data.personalInfo.phone = document.getElementById('phone').value;
+      data.personalInfo.profilePhoto = document.getElementById('profilePhoto').value;
+      data.personalInfo.roleTitle = document.getElementById('roleTitle')?.value || '';
 
-      // Optional fields (only if not skipped and not empty)
+      // Optional fields
       const optional = ['address', 'linkedin', 'website', 'summary', 'technicalSkills', 'softSkills', 'certifications', 'languages', 'achievements', 'hobbies'];
       optional.forEach(field => {
         const group = document.getElementById('group-' + field) || document.getElementById('section-' + field);
@@ -3353,74 +3363,56 @@
         }
       });
 
-      // Projects (structured data)
+      // Projects
       const projectsSection = document.getElementById('section-projects');
       if (projectsSection && !projectsSection.classList.contains('skipped')) {
         data.projects = [];
         document.querySelectorAll('input[name="projectName[]"]').forEach((el, i) => {
           if (el.value.trim()) {
-            const project = {
+            data.projects.push({
               name: el.value.trim(),
               technologies: document.querySelectorAll('input[name="projectTech[]"]')[i]?.value || '',
               duration: document.querySelectorAll('input[name="projectDuration[]"]')[i]?.value || '',
               description: document.querySelectorAll('textarea[name="projectDescription[]"]')[i]?.value || '',
               link: document.querySelectorAll('input[name="projectLink[]"]')[i]?.value || '',
               achievement: document.querySelectorAll('input[name="projectAchievement[]"]')[i]?.value || ''
-            };
-            data.projects.push(project);
+            });
           }
         });
-        // If no structured projects, fall back to old textarea format
-        if (data.projects.length === 0) {
-          const oldProjectsInput = document.getElementById('projects');
-          if (oldProjectsInput && oldProjectsInput.value.trim()) {
-            data.projects = oldProjectsInput.value.trim();
-          }
-        }
-      } else {
-        // Fallback to old textarea if section is skipped
-        const oldProjectsInput = document.getElementById('projects');
-        if (oldProjectsInput && oldProjectsInput.value.trim()) {
-          data.projects = oldProjectsInput.value.trim();
-        }
       }
 
       // Experience & Education
-      document.querySelectorAll('input[name="jobTitle[]"]').forEach((el, i) => {
-        if (el.value.trim()) {
-          data.experience.push({
-            jobTitle: el.value,
-            company: document.querySelectorAll('input[name="company[]"]')[i].value,
-            startDate: document.querySelectorAll('input[name="startDate[]"]')[i].value,
-            endDate: document.querySelectorAll('input[name="endDate[]"]')[i].value,
-            description: document.querySelectorAll('textarea[name="jobDescription[]"]')[i].value
-          });
-        }
-      });
+      const expSection = document.getElementById('section-experience');
+      if (expSection && !expSection.classList.contains('skipped')) {
+        const expItems = document.querySelectorAll('.experience-item');
+        expItems.forEach((item, i) => {
+          const jobTitle = item.querySelector('input[name="jobTitle[]"]')?.value || '';
+          if (jobTitle.trim()) {
+            const current = item.querySelector('input[type="checkbox"]')?.checked || false;
+            data.experience.push({
+              jobTitle: jobTitle,
+              company: item.querySelector('input[name="company[]"]')?.value || '',
+              startDate: item.querySelector('input[name="startDate[]"]')?.value || '',
+              endDate: current ? 'Present' : (item.querySelector('input[name="endDate[]"]')?.value || ''),
+              description: item.querySelector('textarea[name="jobDescription[]"]')?.value || ''
+            });
+          }
+        });
+      }
 
-      document.querySelectorAll('input[name="degree[]"]').forEach((el, i) => {
-        if (el.value.trim()) {
-          data.education.push({
-            degree: el.value,
-            school: document.querySelectorAll('input[name="school[]"]')[i].value,
-            gradYear: document.querySelectorAll('input[name="gradYear[]"]')[i].value,
-            gpa: document.querySelectorAll('input[name="gpa[]"]')[i].value
-          });
-        }
-      });
-
-      // Internships
-      document.querySelectorAll('input[name="internRole[]"]').forEach((el, i) => {
-        if (el.value.trim()) {
-          data.internships.push({
-            jobTitle: el.value,
-            company: document.querySelectorAll('input[name="internOrg[]"]')[i].value,
-            startDate: document.querySelectorAll('input[name="internStart[]"]')[i].value,
-            endDate: document.querySelectorAll('input[name="internEnd[]"]')[i].value,
-            description: document.querySelectorAll('textarea[name="internDesc[]"]')[i].value
-          });
-        }
-      });
+      const eduSection = document.getElementById('section-education');
+      if (eduSection && !eduSection.classList.contains('skipped')) {
+        document.querySelectorAll('input[name="degree[]"]').forEach((el, i) => {
+          if (el.value.trim()) {
+            data.education.push({
+              degree: el.value,
+              school: document.querySelectorAll('input[name="school[]"]')[i].value,
+              gradYear: document.querySelectorAll('input[name="gradYear[]"]')[i].value,
+              gpa: document.querySelectorAll('input[name="gpa[]"]')[i].value
+            });
+          }
+        });
+      }
 
       // References (only if section is not skipped)
       const refSection = document.getElementById('section-references');
@@ -3546,12 +3538,9 @@
       btn.disabled = true;
 
       try {
-        const data = JSON.parse(localStorage.getItem('resumeData') || '{}');
-
-        // Ensure template is included
-        if (!data.template) {
-          data.template = selectedTemplate || localStorage.getItem('selectedTemplate') || 'classic';
-        }
+        const data = collectFormData(); // Re-collect to ensure current data is used
+        data.template = selectedTemplate || localStorage.getItem('selectedTemplate') || 'classic';
+        localStorage.setItem('resumeData', JSON.stringify(data));
 
         console.log('Previewing resume with template:', data.template);
 
@@ -3576,6 +3565,56 @@
       } catch (error) {
         console.error('Preview error:', error);
         alert(`Failed to preview resume: ${error.message}. Please try again.`);
+      } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+      }
+    }
+
+    async function downloadDocx() {
+      const btn = event.target;
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating Word...';
+      btn.disabled = true;
+
+      try {
+        const data = collectFormData();
+        data.template = selectedTemplate || localStorage.getItem('selectedTemplate') || 'classic';
+
+        console.log('Downloading Word resume at:', `${BACKEND_URL}/api/resume/download-docx`);
+
+        const response = await fetch(`${BACKEND_URL}/api/resume/download-docx`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data)
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('❌ Word download failed:', errorText);
+          throw new Error(`Word download failed: ${response.status} ${response.statusText}`);
+        }
+
+        const blob = await response.blob();
+        console.log('✅ Word blob received, size:', blob.size);
+
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${data.personalInfo?.fullName || 'resume'}_${data.template}_resume.doc`;
+        document.body.appendChild(a);
+        a.click();
+
+        setTimeout(() => {
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+        }, 100);
+
+      } catch (error) {
+        console.error('Word download error:', error);
+        alert(`Failed to download Word document: ${error.message}. Please try again.`);
       } finally {
         btn.innerHTML = originalText;
         btn.disabled = false;

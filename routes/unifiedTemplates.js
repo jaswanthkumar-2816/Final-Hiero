@@ -199,11 +199,27 @@ const TEMPLATE_COLORS = {
         light: '#cffafe'         // Pale Teal
     },
     'hiero-monethon': {
-        primary: '#1F2A36',      // Dark Navy
-        secondary: '#F2B66D',    // Orange
-        accent: '#F2B66D',       // Orange
+        primary: '#1F2A36',
+        secondary: '#F2B66D',
+        accent: '#F2B66D',
         background: '#FFFFFF',
         light: '#EEEEEE'
+    },
+    'hiero-essence': {
+        primary: '#ffffff',
+        secondary: '#aaaaaa',
+        accent: '#f5a623',
+        background: '#121212',
+        sidebarBg: '#1e1e1e',
+        sidebarText: '#ffffff'
+    },
+    'hiero-timeline': {
+        primary: '#222222',
+        secondary: '#777777',
+        accent: '#222222',
+        background: '#FFFFFF',
+        light: '#e5e7e5',
+        timeline: '#dddddd'
     }
 };
 
@@ -217,7 +233,13 @@ const TEMPLATE_MAP = {
     'hiero-nova': 'hiero-nova',
     'nova': 'hiero-nova',
     'hiero-legion': 'hiero-nova',
-    'legion': 'hiero-nova'
+    'legion': 'hiero-nova',
+    'hiero-essence': 'hiero-essence',
+    'essence': 'hiero-essence',
+    'hiero-timeline': 'hiero-timeline',
+    'timeline': 'hiero-timeline',
+    'hiero-minimal': 'hiero-timeline'
+
 };
 
 
@@ -276,6 +298,12 @@ const SECTION_ORDER = [
 ];
 
 // ==================== HELPER FUNCTIONS ====================
+function getSafeArray(arr) {
+    if (!arr) return [];
+    if (Array.isArray(arr)) return arr;
+    if (typeof arr === 'string') return arr.split('\n').filter(s => s.trim());
+    return [];
+}
 
 /**
  * Converts a Base64 data URL (or raw Base64 string) to a Buffer for PDFKit.
@@ -351,6 +379,102 @@ function addBulletPoint(doc, text, x, y, maxWidth, colors, template = 'classic')
     });
 
     return lineHeightPx * lines.length;
+}
+
+const toArray = (v) => {
+    if (!v) return [];
+    if (Array.isArray(v)) return v;
+    if (typeof v === 'string') return v.split(/[\n,]/).map(s => s.trim()).filter(Boolean);
+    return [];
+};
+
+function normalizeData(data = {}) {
+    if (!data || typeof data !== 'object') data = {};
+    const p = data.personalInfo || {};
+
+    const getArr = (v, aliases = []) => {
+        if (Array.isArray(v) && v.length > 0) return v;
+        for (let alias of aliases) {
+            if (data[alias] && Array.isArray(data[alias]) && data[alias].length > 0) return data[alias];
+            if (p[alias] && Array.isArray(p[alias]) && p[alias].length > 0) return p[alias];
+        }
+        if (typeof v === 'string') return toArray(v);
+        return [];
+    };
+
+    const getStr = (v, aliases = []) => {
+        if (v && typeof v === 'string' && v.trim().length > 0) return v;
+        for (let alias of aliases) {
+            if (data[alias] && typeof data[alias] === 'string' && data[alias].trim().length > 0) return data[alias];
+            if (p[alias] && typeof p[alias] === 'string' && p[alias].trim().length > 0) return p[alias];
+        }
+        return '';
+    };
+
+    try {
+        return {
+            ...data,
+            personalInfo: {
+                fullName: p.fullName || p.name || data.fullName || data.name || '',
+                email: p.email || data.email || '',
+                phone: p.phone || data.phone || '',
+                address: p.address || data.address || p.location || data.location || '',
+                linkedin: p.linkedin || data.linkedin || '',
+                github: p.github || data.github || '',
+                website: p.website || data.website || '',
+                roleTitle: p.roleTitle || p.headline || p.role || data.roleTitle || data.headline || data.role || '',
+                dateOfBirth: p.dateOfBirth || data.dateOfBirth || '',
+                gender: p.gender || data.gender || '',
+                nationality: p.nationality || data.nationality || '',
+                maritalStatus: p.maritalStatus || data.maritalStatus || '',
+                languagesKnown: p.languagesKnown || data.languages || '',
+                profilePhoto: p.profilePhoto || p.picture || data.profilePhoto || data.picture || data.photoUrl || ''
+            },
+            summary: getStr(data.summary, ['aboutMe', 'personalSummary', 'about', 'objective', 'professionalSummary']),
+            experience: getArr(data.experience, ['workHistory', 'workExperience', 'experienceList', 'work', 'employmentHistory']).map(exp => {
+                const dates = String(exp.dates || '');
+                return {
+                    jobTitle: exp.jobTitle || exp.title || exp.position || exp.role || '',
+                    company: exp.company || exp.organization || '',
+                    startDate: exp.startDate || exp.start || (dates ? dates.split('-')[0]?.trim() : ''),
+                    endDate: exp.endDate || exp.end || (dates ? dates.split('-')[1]?.trim() : 'Present'),
+                    description: exp.description || exp.responsibilities || (Array.isArray(exp.points) ? exp.points.join('\n') : ''),
+                    location: exp.location || ''
+                };
+            }),
+            education: getArr(data.education, ['academicDetails', 'educationList', 'academics', 'academicHistory']).map(edu => {
+                const dates = String(edu.dates || '');
+                return {
+                    degree: edu.degree || edu.course || '',
+                    school: edu.school || edu.institution || edu.institute || '',
+                    gradYear: edu.gradYear || edu.year || edu.graduationDate || (dates ? dates.split('-')[1]?.trim() || dates : ''),
+                    gpa: edu.gpa || edu.grade || edu.details || '',
+                    location: edu.location || ''
+                };
+            }),
+            skills: getArr(data.skills, ['technicalSkills', 'professionalSkills', 'skillsList', 'coreCompetencies', 'expertise']),
+            softSkills: getArr(data.softSkills, ['managementSkills', 'interpersonalSkills', 'softSkillsList']),
+            certifications: getArr(data.certifications, ['certificates', 'personalCertifications', 'awards']).map(c => typeof c === 'string' ? { name: c } : c),
+            projects: getArr(data.projects, ['projectList', 'customDetails', 'personalProjects']).filter(proj => !proj.heading || proj.heading.toLowerCase().includes('project')).map(proj => {
+                return {
+                    title: proj.title || proj.projectName || proj.name || proj.heading || '',
+                    description: proj.description || proj.details || proj.content || '',
+                    tech: proj.tech || proj.technologies || proj.techStack || '',
+                    duration: proj.duration || proj.date || ''
+                };
+            }),
+            achievements: getArr(data.achievements, ['awards', 'honors', 'achievementsList']),
+            hobbies: getArr(data.hobbies, ['interests', 'hobbiesList', 'activities']),
+            extraCurricular: getArr(data.extraCurricular, ['activities', 'volunteerWork']),
+            socialLinks: getArr(data.socialLinks, ['socials', 'links', 'onlinePortfolios']),
+            languages: getArr(data.languages, ['languagesKnown', 'languagesList']),
+            referencesText: data.referencesText || (Array.isArray(data.references) && data.references.length > 0 ? '' : 'Available upon request'),
+            references: Array.isArray(data.references) ? data.references : []
+        };
+    } catch (err) {
+        console.error('CRITICAL: normalizeData failed:', err);
+        return data;
+    }
 }
 
 // ==================== TEMPLATE HEADER RENDERERS ====================
@@ -831,6 +955,7 @@ function renderHeader_GoldenExecutive(doc, data, colors) {
     doc.y = 115;
 }
 
+
 function renderHeader_VioletCreative(doc, data, colors) {
     const { personalInfo = {} } = data;
 
@@ -1145,6 +1270,17 @@ async function generateUnifiedResume(data, templateId, outStream, customOptions 
                         resolve(doc);
                     }
                     return;
+                case 'hiero-retail':
+                    renderTemplate_HieroRetail(doc, data);
+                    doc.end();
+                    if (outStream && outStream.on) {
+                        outStream.on('finish', () => resolve(true));
+                        outStream.on('error', reject);
+                    } else {
+                        resolve(doc);
+                    }
+                    return;
+
                 case 'hiero-studio':
                     // Studio uses a completely custom full-page layout
                     await renderTemplate_StudioRightSidebar(doc, data, colors, spacing);
@@ -1157,6 +1293,26 @@ async function generateUnifiedResume(data, templateId, outStream, customOptions 
                     }
                     return;
                 case 'hiero-executive': renderHeader_Executive(doc, data, colors); break;
+                case 'hiero-essence':
+                    await renderTemplate_HieroEssence(doc, data, colors, spacing);
+                    doc.end();
+                    if (outStream && outStream.on) {
+                        outStream.on('finish', () => resolve(true));
+                        outStream.on('error', reject);
+                    } else {
+                        resolve(doc);
+                    }
+                    return;
+                case 'hiero-timeline':
+                    await renderTemplate_HieroTimeline(doc, data, colors, spacing);
+                    doc.end();
+                    if (outStream && outStream.on) {
+                        outStream.on('finish', () => resolve(true));
+                        outStream.on('error', reject);
+                    } else {
+                        resolve(doc);
+                    }
+                    return;
                 case 'template-4': renderHeader_Academic(doc, data, colors); break;
                 case 'hiero-monethon':
                     renderTemplate_HieroMonethon(doc, data, options);
@@ -2351,6 +2507,7 @@ function drawLine(doc, x, y, width) {
 }
 
 
+
 // ==================== MONETHON TEMPLATE (NEW) ====================
 /**
  * renderTemplate_HieroMonethon - Implementation matching reference image
@@ -3047,3 +3204,867 @@ module.exports = {
 
 
 
+const pInfo = data.personalInfo || {};
+const skills = getSafeArray(data.skills);
+const languages = getSafeArray(data.languages);
+const hobbies = getSafeArray(data.hobbies);
+const projects = getSafeArray(data.projects);
+const edu = getSafeArray(data.education);
+const exp = getSafeArray(data.experience);
+const socials = getSafeArray(data.socialLinks);
+const summary = data.summary || '';
+
+const drawPageBackground = () => {
+    doc.save();
+    doc.fillColor('#000000').rect(0, 0, PAGE_CONFIG.width, PAGE_CONFIG.height).fill();
+    doc.fillColor('#333333').rect(0, 0, sidebarWidth, PAGE_CONFIG.height).fill();
+    doc.restore();
+};
+
+const smartAddPage = () => {
+    doc.addPage();
+    drawPageBackground();
+};
+
+// 1. Initial Backgrounds
+drawPageBackground();
+
+// ==================== SIDEBAR (LEFT) ====================
+let sidebarY = 0;
+const sidebarInnerX = 15;
+const sidebarInnerWidth = sidebarWidth - (sidebarInnerX * 2);
+
+// Profile Photo Area (Reduced Height for One-Page Fit)
+doc.save();
+doc.fillColor('#111111').rect(0, 0, sidebarWidth, 200).fill();
+if (pInfo.profilePhoto) {
+    try {
+        let imgData = pInfo.profilePhoto;
+        if (imgData.startsWith('data:')) {
+            const parts = imgData.split(',');
+            if (parts.length > 1) {
+                imgData = Buffer.from(parts[1], 'base64');
+            }
+        }
+        doc.image(imgData, 15, 15, {
+            width: sidebarWidth - 30, height: 140
+        });
+    } catch (e) {
+        console.error('Photo render error in PDF:', e);
+        renderRectangularInitials(doc, pInfo.fullName, 15, 15, sidebarWidth - 30, 140);
+    }
+} else {
+    renderRectangularInitials(doc, pInfo.fullName || 'User', 15, 15, sidebarWidth - 30, 140);
+}
+doc.restore();
+sidebarY = 165;
+
+// Name & Title (Condensed)
+doc.fontSize(18).fillColor('#ffffff').font('Helvetica-Bold');
+const nameStr = (pInfo.fullName || 'YOUR NAME').toUpperCase();
+const nameH = doc.heightOfString(nameStr, { width: sidebarWidth - 20, align: 'center' });
+doc.text(nameStr, 10, sidebarY, { width: sidebarWidth - 20, align: 'center' });
+sidebarY += nameH + 2;
+
+doc.fontSize(8.5).fillColor(colors.accent).font('Helvetica');
+const roleStr = (pInfo.roleTitle || 'PROFESSIONAL').toUpperCase();
+const roleH = doc.heightOfString(roleStr, { width: sidebarWidth - 20, align: 'center', characterSpacing: 1.2 });
+doc.text(roleStr, 10, sidebarY, { width: sidebarWidth - 20, align: 'center', characterSpacing: 1.2 });
+sidebarY += roleH + 8;
+
+// Ensure contact starts below name/title
+sidebarY = Math.max(195, sidebarY);
+
+// Ultra-Condensed Folded Ribbons for Sidebar
+const addSidebarRibbon = (title) => {
+    const ribbonH = 20;
+    doc.fillColor(colors.accent).rect(0, sidebarY, sidebarWidth - 10, ribbonH).fill();
+    doc.fillColor('#b37a1a').polygon([sidebarWidth - 10, sidebarY], [sidebarWidth, sidebarY + 8], [sidebarWidth - 10, sidebarY + 12]).fill();
+    doc.fontSize(9.5).fillColor('#ffffff').font('Helvetica-Bold').text(title.toUpperCase(), sidebarInnerX, sidebarY + 5);
+    sidebarY += ribbonH + 8;
+};
+
+// Contact
+addSidebarRibbon("Contact");
+doc.fontSize(8.5).font('Helvetica');
+const contactList = [
+    { label: 'A', icon: '●', val: pInfo.address },
+    { label: 'T', icon: '●', val: pInfo.phone },
+    { label: 'E', icon: '●', val: pInfo.email },
+    { label: 'W', icon: '●', val: pInfo.website }
+];
+contactList.forEach(item => {
+    if (item.val) {
+        const h = doc.heightOfString(item.val, { width: sidebarInnerWidth - 30 });
+        doc.fillColor(colors.accent).circle(sidebarInnerX + 4, sidebarY + 5, 2).fill();
+        doc.fillColor('#ffffff').fontSize(8).text(item.val, sidebarInnerX + 18, sidebarY, { width: sidebarInnerWidth - 30 });
+        sidebarY += Math.max(12, h + 4);
+    }
+});
+
+// Portfolio
+if (socials.length > 0) {
+    sidebarY += 2;
+    addSidebarRibbon("Portfolio");
+    socials.forEach(link => {
+        if (!link) return;
+        const h = doc.heightOfString(link, { width: sidebarInnerWidth - 30 });
+        doc.fillColor(colors.accent).circle(sidebarInnerX + 4, sidebarY + 5, 2).fill();
+        doc.fillColor('#ffffff').fontSize(8).text(link, sidebarInnerX + 18, sidebarY, { width: sidebarInnerWidth - 30 });
+        sidebarY += Math.max(12, h + 4);
+    });
+}
+
+// Language
+if (languages.length > 0) {
+    sidebarY += 2;
+    addSidebarRibbon("Language");
+    languages.forEach((lang, i) => {
+        const langName = lang.name || lang;
+        const proficiency = lang.proficiency || (0.7 + Math.random() * 0.25);
+        doc.fontSize(8.5).fillColor('#ffffff').text(String(langName).toUpperCase(), sidebarInnerX, sidebarY);
+        sidebarY += 10;
+        doc.rect(sidebarInnerX, sidebarY, sidebarInnerWidth, 4).fill('#111111');
+        doc.rect(sidebarInnerX, sidebarY, sidebarInnerWidth * proficiency, 4).fill(colors.accent);
+        sidebarY += 12;
+    });
+}
+
+// Hobbies
+if (hobbies.length > 0) {
+    sidebarY += 5;
+    addSidebarRibbon("Hobbies");
+    doc.fontSize(9).fillColor('#ffffff');
+    let hX = sidebarInnerX;
+    let hY = sidebarY;
+    hobbies.forEach((h, i) => {
+        doc.text(String(h), hX, hY, { width: sidebarInnerWidth / 2 - 5 });
+        if (i % 2 === 0) hX += (sidebarInnerWidth / 2);
+        else { hX = sidebarInnerX; hY += 18; }
+    });
+    sidebarY = hY + 15;
+}
+
+// ==================== MAIN CONTENT (RIGHT) ====================
+let mainY = 30;
+const mainInnerX = contentX + 25;
+const mainInnerWidth = contentWidth - 50;
+
+// Ultra-Condensed Ribbons for Main Area
+const addMainRibbon = (title) => {
+    const ribbonH = 20;
+    if (mainY > PAGE_CONFIG.height - 110) { smartAddPage(); mainY = 30; }
+    doc.fillColor(colors.accent).rect(contentX + 5, mainY, contentWidth - 5, ribbonH).fill();
+    // Fold on the LEFT for main content
+    doc.fillColor('#b37a1a').polygon(
+        [contentX + 5, mainY],
+        [contentX, mainY + 6],
+        [contentX + 5, mainY + 12]
+    ).fill();
+
+    const upperTitle = (title || '').toUpperCase();
+    doc.fontSize(8.5).fillColor('#ffffff').font('Helvetica-Bold').text(upperTitle, mainInnerX - 10, mainY + 6, { align: 'center', width: mainInnerWidth + 20 });
+    mainY += ribbonH + 4;
+};
+
+// About Me (Condensed)
+if (summary) {
+    addMainRibbon("About Me");
+    doc.fontSize(8).font('Helvetica').fillColor('#eeeeee');
+    doc.text(summary, mainInnerX, mainY, { width: mainInnerWidth, align: 'justify', lineGap: 1.0 });
+    mainY += doc.heightOfString(summary, { width: mainInnerWidth, align: 'justify', lineGap: 1.0 }) + 5;
+}
+
+// Education
+if (edu.length > 0) {
+    addMainRibbon("Education");
+    edu.forEach(e => {
+        doc.fontSize(8.5).font('Helvetica-Bold');
+        const school = (e.school || e.institution || 'Education').toUpperCase();
+        const schoolH = doc.heightOfString(school, { width: mainInnerWidth - 80 });
+        if (mainY + 30 > PAGE_CONFIG.height - 30) { smartAddPage(); mainY = 30; }
+
+        doc.fillColor(colors.accent).circle(mainInnerX + 3, mainY + 4, 1.5).fill();
+        doc.fillColor('#ffffff').text(school, mainInnerX + 15, mainY, { width: mainInnerWidth - 80 });
+        doc.fontSize(7).fillColor(colors.accent).font('Helvetica').text(e.gradYear || '', mainInnerX, mainY, { align: 'right', width: mainInnerWidth });
+        mainY += schoolH + 1;
+
+        doc.fontSize(7.5).fillColor('#bbbbbb').font('Helvetica-Bold').text(e.degree || '', mainInnerX + 15, mainY);
+        mainY += 8;
+
+        if (e.gpa) {
+            doc.fontSize(7).fillColor(colors.accent).text(`Result: CGPA ${e.gpa}`, mainInnerX + 15, mainY);
+            mainY += 7;
+        }
+        mainY += 2;
+    });
+}
+
+// Experience
+if (exp.length > 0) {
+    addMainRibbon("Experience");
+    exp.forEach(e => {
+        const desc = e.description || '';
+        const descH = desc ? doc.heightOfString(desc, { width: mainInnerWidth - 15, lineGap: 1.0 }) : 0;
+        if (mainY + descH + 25 > PAGE_CONFIG.height - 30) { smartAddPage(); mainY = 30; }
+
+        doc.fontSize(8.5).font('Helvetica-Bold').fillColor('#ffffff');
+        doc.fillColor(colors.accent).circle(mainInnerX + 3, mainY + 4, 1.5).fill();
+        const jobTitle = (e.jobTitle || 'Experience').toUpperCase();
+        doc.text(jobTitle, mainInnerX + 15, mainY, { width: mainInnerWidth - 100 });
+        doc.fontSize(7).fillColor(colors.accent).font('Helvetica').text(`${e.startDate || ''} - ${e.endDate || ''}`, mainInnerX, mainY, { align: 'right', width: mainInnerWidth });
+        mainY += doc.heightOfString(jobTitle, { width: mainInnerWidth - 100 }) + 1;
+
+        doc.fontSize(7.5).fillColor(colors.accent).font('Helvetica-Bold').text(e.company || '', mainInnerX + 15, mainY);
+        mainY += 8;
+
+        if (desc) {
+            doc.fontSize(7.5).fillColor('#eeeeee').font('Helvetica').text(desc, mainInnerX + 15, mainY, { width: mainInnerWidth - 15, lineGap: 1.0 });
+            mainY += descH + 3;
+        } else {
+            mainY += 2;
+        }
+    });
+}
+
+// Projects (If data exists)
+if (projects.length > 0) {
+    addMainRibbon("Projects");
+    projects.forEach(proj => {
+        const title = (proj.title || 'Project').toUpperCase();
+        const desc = proj.description || '';
+        const tech = proj.tech || '';
+
+        const titleH = doc.heightOfString(title, { width: mainInnerWidth - 15 });
+        const techH = tech ? doc.heightOfString(tech, { width: mainInnerWidth - 15 }) : 0;
+        const descH = desc ? doc.heightOfString(desc, { width: mainInnerWidth - 15, lineGap: 1.2 }) : 0;
+
+        if (mainY + titleH + techH + descH + 30 > PAGE_CONFIG.height - 40) { smartAddPage(); mainY = 30; }
+
+        doc.fontSize(9.5).font('Helvetica-Bold').fillColor('#ffffff').text(title, mainInnerX + 15, mainY);
+        doc.fillColor(colors.accent).circle(mainInnerX + 3, mainY + 4, 2).fill();
+        mainY += titleH + 2;
+
+        if (tech) {
+            doc.fontSize(8.5).fillColor(colors.accent).font('Helvetica-Bold').text(tech, mainInnerX + 15, mainY);
+            mainY += 10;
+        }
+
+        if (desc) {
+            doc.fontSize(8).fillColor('#eeeeee').font('Helvetica').text(desc, mainInnerX + 15, mainY, { width: mainInnerWidth - 15, lineGap: 1.2 });
+            mainY += descH + 8;
+        }
+    });
+}
+
+// Certifications
+const certs = getSafeArray(data.certifications || data.certificates);
+if (certs.length > 0) {
+    addMainRibbon("Certifications");
+    certs.forEach(c => {
+        const name = typeof c === 'string' ? c : (c.name || c.title || '');
+        if (!name) return;
+        if (mainY + 40 > PAGE_CONFIG.height - 40) { smartAddPage(); mainY = 30; }
+        doc.fillColor(colors.accent).circle(mainInnerX + 5, mainY + 7, 2).fill();
+        doc.fontSize(10).fillColor('#ffffff').font('Helvetica-Bold').text(name, mainInnerX + 20, mainY);
+        mainY += 25;
+    });
+}
+
+// Achievements
+const achievements = getSafeArray(data.achievements || data.awards);
+if (achievements.length > 0) {
+    addMainRibbon("Achievements");
+    achievements.forEach(a => {
+        const val = typeof a === 'string' ? a : (a.name || a.title || '');
+        if (!val) return;
+        const h = doc.heightOfString(val, { width: mainInnerWidth - 25 });
+        if (mainY + h + 20 > PAGE_CONFIG.height - 40) { smartAddPage(); mainY = 30; }
+        doc.fillColor(colors.accent).circle(mainInnerX + 5, mainY + 7, 2).fill();
+        doc.fontSize(10).fillColor('#eeeeee').font('Helvetica').text(val, mainInnerX + 20, mainY, { width: mainInnerWidth - 25 });
+        mainY += h + 15;
+    });
+}
+
+// Professional Skills (3-COLUMN ULTRA-GRID)
+if (skills.length > 0) {
+    addMainRibbon("Professional Skills");
+    let sY = mainY;
+    const sWidth = (mainInnerWidth / 3) - 10;
+
+    for (let i = 0; i < skills.length; i += 3) {
+        if (sY + 40 > PAGE_CONFIG.height - 40) { smartAddPage(); sY = 30; }
+
+        [0, 1, 2].forEach(offset => {
+            const skill = skills[i + offset];
+            if (skill) {
+                const sName = (skill.name || skill || '').toUpperCase();
+                doc.fontSize(7.5).font('Helvetica-Bold').fillColor('#ffffff');
+                const h = doc.heightOfString(sName, { width: sWidth });
+                const sX = mainInnerX + (offset * (sWidth + 15));
+                doc.text(sName, sX, sY, { width: sWidth });
+                doc.rect(sX, sY + h + 2, sWidth, 3).fill('#222222');
+                doc.rect(sX, sY + h + 2, sWidth * (0.8 + Math.random() * 0.15), 3).fill(colors.accent);
+            }
+        });
+        sY += 28;
+    }
+}
+}
+
+/**
+ * 🏛️ HIERO MINIMAL (TIMELINE) TEMPLATE
+ * A light, elegant corporate resume with a vertical timeline layout.
+ */
+async function renderTemplate_HieroTimeline(doc, rawData, colors, spacing) {
+    const data = normalizeData(rawData);
+    const pInfo = data.personalInfo || {};
+    const exp = getSafeArray(data.experience);
+    const edu = getSafeArray(data.education);
+    const projects = getSafeArray(data.projects);
+    const certs = getSafeArray(data.certifications);
+    const summary = data.summary || '';
+    const skills = getSafeArray(data.skills);
+    const softSkills = getSafeArray(data.softSkills);
+
+    // Derive professional title: explicit > first job title > "Professional"
+    const roleTitle = pInfo.roleTitle
+        || pInfo.title
+        || (exp.length > 0 ? (exp[0].jobTitle || exp[0].role || '') : '')
+        || '';
+
+    let currentY = PAGE_CONFIG.margin;
+    const margin = PAGE_CONFIG.margin;
+    const contentWidth = PAGE_CONFIG.contentWidth;
+
+    // Helper: Add new page and reset Y
+    const smartAddPage = () => {
+        if (currentY <= PAGE_CONFIG.margin + 5) return; // Already at top of a page
+        doc.addPage();
+        // Redraw the signature left border on new page
+        doc.save().rect(0, 0, 15, PAGE_CONFIG.height).fill('#111111').restore();
+        currentY = PAGE_CONFIG.margin;
+    };
+
+    // Draw the signature left border on initial page
+    doc.save().rect(0, 0, 15, PAGE_CONFIG.height).fill('#111111').restore();
+
+    // ==================== HEADER ====================
+    const photoSize = 90;
+    const headerX = margin + photoSize + 25;
+    const headerWidth = contentWidth - (photoSize + 25);
+
+    // Profile Photo (Circular - matched to image scale)
+    if (pInfo.profilePhoto) {
+        try {
+            let imgData = pInfo.profilePhoto;
+            if (imgData.startsWith('data:')) {
+                const parts = imgData.split(',');
+                if (parts.length > 1) imgData = Buffer.from(parts[1], 'base64');
+            }
+            doc.save()
+                .circle(margin + photoSize / 2, currentY + photoSize / 2, photoSize / 2)
+                .clip()
+                .image(imgData, margin, currentY, { width: photoSize, height: photoSize })
+                .restore();
+        } catch (e) {
+            renderCircularInitials(doc, pInfo.fullName, margin, currentY, photoSize);
+        }
+    } else {
+        renderCircularInitials(doc, pInfo.fullName || 'U', margin, currentY, photoSize);
+    }
+
+    // Name - Elite Serif Bold (Synchronized with Headings)
+    const nameY = currentY + 4;
+    doc.fillColor('#000000') // Pure black for maximum thickness
+        .font('Times-Bold')
+        .fontSize(29) // Slightly larger
+        .text(pInfo.fullName || 'RESUME', headerX, nameY, { width: headerWidth, characterSpacing: 0.2 });
+
+    // Professional Title - Subtle uppercase with elevated kerning
+    let currentTextY = doc.y + 1;
+    if (roleTitle) {
+        doc.fillColor('#666666')
+            .font('Helvetica')
+            .fontSize(9.5)
+            .text(roleTitle.toUpperCase(), headerX, currentTextY, {
+                width: headerWidth,
+                characterSpacing: 1.8
+            });
+        currentTextY = doc.y + 12;
+    }
+
+    // Contact Info Grid (2 Columns) - Ultra-Premium Vector Icon Implementation
+    const contactX1 = headerX;
+    const contactX2 = headerX + (headerWidth / 2) + 5;
+
+    // Custom Vector Icon Drawing (High-Fidelity & Glitch-Free)
+    const drawPremiumIcon = (type, x, y) => {
+        doc.save().lineWidth(0.6).strokeColor('#333333');
+        if (type === 'PHONE') {
+            doc.rect(x + 2.5, y + 1, 5, 8).stroke();
+            doc.circle(x + 5, y + 7.5, 0.4).fill('#333333');
+        } else if (type === 'LOCATION') {
+            doc.circle(x + 5, y + 3.5, 2.8).stroke();
+            doc.circle(x + 5, y + 3.5, 0.8).fill('#333333');
+            doc.moveTo(x + 2.3, y + 4.5).quadraticCurveTo(x + 5, y + 10, x + 7.7, y + 4.5).stroke();
+        } else if (type === 'WEB') {
+            doc.circle(x + 5, y + 5, 4.2).stroke();
+            doc.ellipse(x + 5, y + 5, 1.8, 4.2).stroke();
+            doc.moveTo(x + 1, y + 5).lineTo(x + 9, y + 5).stroke();
+        } else if (type === 'EMAIL') {
+            doc.rect(x + 1, y + 2, 8, 6).stroke();
+            doc.moveTo(x + 1, y + 2).lineTo(x + 5, y + 5.5).lineTo(x + 9, y + 2).stroke();
+        }
+        doc.restore();
+    };
+
+    const drawContactItem = (type, text, x, y) => {
+        if (!text) return 0;
+        drawPremiumIcon(type, x, y);
+        doc.fillColor(colors.secondary)
+            .font('Helvetica')
+            .fontSize(8.5)
+            .text(text, x + 18, y + 1, { width: (headerWidth / 2) - 25, height: 12, lineBreak: false });
+        return 16;
+    };
+
+    let contactY = currentTextY + 10;
+    const row1H = Math.max(
+        drawContactItem('PHONE', pInfo.phone, contactX1, contactY),
+        drawContactItem('LOCATION', pInfo.address, contactX2, contactY)
+    );
+    contactY += row1H;
+
+    const row2H = Math.max(
+        drawContactItem('WEB', pInfo.website || pInfo.linkedin, contactX1, contactY),
+        drawContactItem('EMAIL', pInfo.email, contactX2, contactY)
+    );
+    contactY += row2H;
+
+    currentY = Math.max(contactY + 22, margin + photoSize + 22);
+
+    // Divider - Ultra-thin Executive Line (Slightly bolder)
+    doc.moveTo(headerX, currentY - 14)
+        .lineTo(margin + contentWidth, currentY - 14)
+        .strokeColor(colors.light)
+        .lineWidth(0.8)
+        .stroke();
+
+    currentY += 5;
+
+    // ==================== SUMMARY (if present) ====================
+    if (summary) {
+        if (currentY + 40 > PAGE_CONFIG.height - margin) smartAddPage();
+        doc.fillColor('#555555') // Soft grey as requested
+            .font('Helvetica')
+            .fontSize(10) // Balanced size
+            .text(summary, margin, currentY, {
+                width: contentWidth,
+                lineGap: 1.8,
+                align: 'justify'
+            });
+        currentY = doc.y + 16;
+
+        // Second thin divider after summary
+        doc.moveTo(margin, currentY - 8)
+            .lineTo(margin + contentWidth, currentY - 8)
+            .strokeColor(colors.light)
+            .lineWidth(0.5)
+            .stroke();
+    }
+
+    // ==================== BODY LAYOUT ====================
+    const leftColWidth = contentWidth * 0.25;
+    const timelineX = margin + leftColWidth + 20;
+    const rightColX = timelineX + 25;
+    const rightColWidth = contentWidth - (leftColWidth + 45);
+
+    const renderTimelineSection = (title, items) => {
+        if (!items || items.length === 0) return;
+
+        // Section header
+        if (currentY + 40 > PAGE_CONFIG.height - margin) smartAddPage();
+
+        doc.fillColor(colors.primary)
+            .font('Times-Bold')
+            .fontSize(10)
+            .text(title.toUpperCase(), rightColX, currentY, {
+                characterSpacing: 1.4,
+                width: rightColWidth
+            });
+
+        currentY += 18;
+
+        // Underline section header (Extending from right column) - Increased padding for premium feel
+        doc.moveTo(rightColX, currentY - 4)
+            .lineTo(margin + contentWidth, currentY - 4)
+            .strokeColor('#dddddd')
+            .lineWidth(1)
+            .stroke();
+
+        currentY += 6;
+
+        items.forEach((item, idx) => {
+            // Map fields generically across all section types
+            const itemTitle = item.jobTitle || item.role || item.degree || item.title || item.name || '';
+            const subTitle = item.company || item.school || item.org || item.institution || '';
+            const dateStr = item.date
+                ? String(item.date)
+                : item.startDate
+                    ? `${item.startDate} - ${item.endDate || 'Present'}`
+                    : item.gradYear
+                        ? String(item.gradYear)
+                        : item.duration || '';
+            const description = item.description || item.responsibilities || item.subtitle || item.achievement || item.details || '';
+
+            if (!itemTitle && !subTitle) return; // Skip empty items
+
+            // Estimate heights
+            doc.font('Helvetica-Bold').fontSize(10);
+            const titleH = doc.heightOfString(itemTitle || ' ', { width: rightColWidth });
+            doc.font('Helvetica').fontSize(9);
+            const descH = description
+                ? doc.heightOfString(description, { width: rightColWidth, lineGap: 1.5 })
+                : 0;
+            const itemTotalH = titleH + (subTitle ? 14 : 0) + descH + 12;
+
+            // Page break check (more conservative)
+            if (currentY + itemTotalH > PAGE_CONFIG.height - margin - 10) {
+                smartAddPage();
+            }
+
+            const nodeY = currentY + 5;
+
+            // Draw Timeline vertical line
+            const lineTop = idx === 0 ? nodeY : currentY - 10;
+            const lineBottom = currentY + itemTotalH - 4;
+            doc.moveTo(timelineX, lineTop)
+                .lineTo(timelineX, lineBottom)
+                .strokeColor(colors.timeline)
+                .lineWidth(1.5)
+                .stroke();
+
+            // Draw Node circle (filled white with border)
+            doc.save();
+            doc.circle(timelineX, nodeY, 4).fillAndStroke('#ffffff', colors.timeline);
+            doc.restore();
+
+            // ---- LEFT COLUMN ----
+            const isSkills = title.toUpperCase() === "SKILLS";
+            if (isSkills && itemTitle) {
+                doc.fillColor(colors.primary)
+                    .font('Helvetica-Bold')
+                    .fontSize(9)
+                    .text(itemTitle, margin, currentY, { width: leftColWidth, align: 'right' });
+            } else if (subTitle) {
+                doc.fillColor(colors.primary)
+                    .font('Helvetica-Bold')
+                    .fontSize(9)
+                    .text(subTitle, margin, currentY, { width: leftColWidth, align: 'right' });
+            }
+            if (dateStr && !isSkills) {
+                doc.fillColor(colors.secondary)
+                    .font('Helvetica')
+                    .fontSize(8)
+                    .text(dateStr, margin, subTitle ? doc.y : currentY, { width: leftColWidth, align: 'right' });
+            }
+
+            // ---- RIGHT COLUMN ----
+            if (!isSkills && itemTitle) {
+                doc.fillColor(colors.primary)
+                    .font('Helvetica-Bold')
+                    .fontSize(9.5)
+                    .text(itemTitle, rightColX, currentY, { width: rightColWidth });
+            }
+
+            if (description) {
+                doc.fillColor(colors.secondary)
+                    .font('Helvetica')
+                    .fontSize(8.5)
+                    .text(description, rightColX, (isSkills ? currentY : doc.y + 1), { width: rightColWidth, lineGap: 1.5 });
+            }
+
+            // High-density vertical rhythm
+            currentY = Math.max(doc.y + 10, currentY + itemTotalH - 4);
+        });
+
+        currentY += 8;
+    };
+
+    // ==================== RENDER SECTIONS ====================
+    // 1. Work Experience
+    renderTimelineSection("Work Experience", exp);
+
+    // 2. Education
+    // Normalise education field names before rendering
+    const eduNorm = edu.map(e => ({
+        title: e.degree || e.name || e.title || '',
+        school: e.school || e.institution || '',
+        date: e.gradYear ? String(e.gradYear) : (e.date || ''),
+        description: e.description || (e.gpa ? `GPA: ${e.gpa}` : '')
+    }));
+    renderTimelineSection("Education", eduNorm);
+
+    // 3. Skills (brief list in single item)
+    const allSkillItems = [];
+    // Technical Skills
+    const techSkillsSrc = data.skills && data.skills.length > 0 ? data.skills
+        : data.technicalSkills ? [data.technicalSkills]
+            : [];
+    const techSkillsStr = Array.isArray(techSkillsSrc)
+        ? techSkillsSrc.join(' • ')
+        : String(techSkillsSrc);
+    if (techSkillsStr) allSkillItems.push({ title: 'Technical Skills', description: techSkillsStr });
+
+    // Soft Skills
+    const softSkillsSrc = data.softSkills && data.softSkills.length > 0 ? data.softSkills : [];
+    const softSkillsStr = Array.isArray(softSkillsSrc)
+        ? softSkillsSrc.join(' • ')
+        : String(softSkillsSrc);
+    if (softSkillsStr) allSkillItems.push({ title: 'Soft Skills', description: softSkillsStr });
+
+    if (allSkillItems.length > 0) {
+        renderTimelineSection("Skills", allSkillItems);
+    }
+
+    // 4. Certifications & Projects
+    const certsNorm = certs.map(c => ({
+        title: c.name || c.title || (typeof c === 'string' ? c : ''),
+        description: c.description || c.issuer || ''
+    }));
+    const projNorm = projects.map(p => ({
+        title: p.title || p.name || '',
+        description: [(p.tech || p.technologies ? `Tech: ${p.tech || p.technologies}` : ''), p.description].filter(Boolean).join(' — ')
+    }));
+    const combined = [...certsNorm, ...projNorm].filter(i => i.title);
+    if (combined.length > 0) {
+        renderTimelineSection("Certifications & Projects", combined);
+    }
+
+    // 5. Achievements, Languages, Hobbies (Combined into one section if needed or separate)
+    const achievements = getSafeArray(data.achievements);
+    const languages = getSafeArray(data.languages);
+    const hobbies = getSafeArray(data.hobbies);
+
+    if (achievements.length > 0) {
+        renderTimelineSection("Achievements", achievements.map(a => ({ title: 'Key Achievement', description: typeof a === 'string' ? a : (a.name || a.title || '') })));
+    }
+
+    const miscItems = [];
+    if (languages.length > 0) {
+        miscItems.push({ title: 'Languages', description: languages.join(', ') });
+    }
+    if (hobbies.length > 0) {
+        miscItems.push({ title: 'Interests', description: hobbies.join(', ') });
+    }
+    if (miscItems.length > 0) {
+        renderTimelineSection("Personal Details", miscItems);
+    }
+
+    // 6. References
+    const refs = getSafeArray(data.references);
+    if (refs.length > 0) {
+        const refItems = refs.map(r => ({
+            title: r.name || 'Reference',
+            description: `${r.title || ''}${r.company ? ' at ' + r.company : ''}${r.email ? ' | ' + r.email : ''}${r.phone ? ' | ' + r.phone : ''}`
+        }));
+        renderTimelineSection("References", refItems);
+    }
+
+    // Final positioning check (prevent potential PDFKit auto-page-break on end)
+    currentY = Math.min(currentY, PAGE_CONFIG.height - margin);
+}
+
+// Helper for Circular Initials fallback
+function renderCircularInitials(doc, name, x, y, size) {
+    doc.save();
+    doc.circle(x + size / 2, y + size / 2, size / 2)
+        .fillColor('#f0f0f0')
+        .fill();
+
+    const initials = name ? name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : '?';
+    doc.fillColor('#777777')
+        .font('Helvetica-Bold')
+        .fontSize(size * 0.4)
+        .text(initials, x, y + size * 0.35, { width: size, align: 'center' });
+    doc.restore();
+}
+
+// Helper for initials in essence (Banner Style)
+function renderRectangularInitials(doc, name, x, y, w, h) {
+    doc.save();
+    doc.fillColor('#222222').rect(x, y, w, h).fill();
+    const initials = name ? name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'U';
+    doc.fontSize(40).fillColor('#f5a623').font('Helvetica-Bold');
+    doc.text(initials, x, y + (h / 2) - 20, { width: w, align: 'center' });
+    doc.restore();
+}
+
+// ==================== HIERO RETAIL TEMPLATE ====================
+function renderTemplate_HieroRetail(doc, rawData) {
+    // Helper to sanitize and format data
+    const toArray = (v) => {
+        if (Array.isArray(v)) return v.map(item => (typeof item === 'object' && item !== null) ? (item.name || item.title || item.skill || JSON.stringify(item)) : String(item));
+        if (typeof v === 'string') return v.split(/[\n,;]/).map(s => s.trim()).filter(Boolean);
+        return [];
+    };
+
+    let pInfo = rawData.personalInfo || {};
+    let data = {
+        name: rawData.name || pInfo.fullName || "John Doe",
+        title: rawData.title || pInfo.roleTitle || rawData.role || (rawData.experience && rawData.experience[0] && rawData.experience[0].jobTitle) || "Retail Professional",
+        summary: rawData.summary || "Motivated professional with experience boosting sales and customer loyalty. Resourceful at understanding customer needs and directing to desirable merchandise.",
+        profileImage: rawData.profileImage || pInfo.profilePhoto || null,
+        contact: {
+            address: rawData.address || pInfo.address || "123 Main Street, City",
+            phone: rawData.phone || pInfo.phone || "(555) 123-4567",
+            email: rawData.email || pInfo.email || "hello@example.com"
+        },
+        skills: toArray(rawData.skills || pInfo.skills || ["Customer Service", "Sales expertise", "Inventory Management", "Loss Prevention", "Product Promotions"]),
+        education: (Array.isArray(rawData.education) && rawData.education.length > 0 ? rawData.education : [{ gradYear: "2016", degree: "Diploma: Retail Management", school: "State University" }]).map(e => ({
+            date: (e.startDate ? `${e.startDate} - ${e.endDate || 'Present'}` : e.gradYear) || e.date || "",
+            degree: e.degree || "",
+            institution: e.school || e.institution || ""
+        })),
+        workHistory: (Array.isArray(rawData.experience) && rawData.experience.length > 0 ? rawData.experience : [
+            { startDate: "2016", endDate: "Present", jobTitle: "Retail Sales Associate", company: "H&M", description: "Effectively upsold products by introducing accessories.\nGenerated brand awareness and positive product impressions." }
+        ]).map(e => ({
+            date: (e.startDate ? `${e.startDate} -\n${e.endDate || 'Present'}` : e.date) || "",
+            title: e.jobTitle || e.title || "",
+            company: e.company || "",
+            bullets: toArray(e.description || e.points || e.bullets || "")
+        }))
+    };
+
+    const PAGE_WIDTH = 595.28;
+    const PAGE_HEIGHT = 841.89;
+
+    // Background and Outer Border
+    doc.save();
+    doc.rect(0, 0, PAGE_WIDTH, PAGE_HEIGHT).fill('#1f2a6b');
+    doc.rect(12, 12, PAGE_WIDTH - 24, PAGE_HEIGHT - 24).fill('#ffffff');
+    doc.restore();
+
+    // HEADER SECTION
+    let startY = 50;
+    let startX = 50;
+
+    doc.font('Helvetica-Bold').fontSize(32).fillColor('#1f2a6b').text(data.name, startX, startY);
+    let titleY = doc.y + 4;
+
+    doc.font('Helvetica-Oblique').fontSize(14).fillColor('#6c757d').text(data.title.toUpperCase(), startX, titleY);
+    let summaryY = doc.y + 12;
+
+    doc.font('Helvetica').fontSize(10).fillColor('#333333')
+        .text(data.summary, startX, summaryY, { width: 495, lineGap: 4 });
+
+    // LEFT COLUMN
+    let leftY = doc.y + 30;
+    const rightX = 260;
+
+    // Profile Image
+    if (data.profileImage && data.profileImage.startsWith('data:image')) {
+        try {
+            // Circle crop image
+            doc.save();
+            doc.circle(startX + 60, leftY + 60, 60).clip();
+            doc.image(data.profileImage, startX, leftY, { width: 120, height: 120 });
+            doc.restore();
+            leftY += 130 + 15;
+        } catch (e) {
+            console.error('Error rendering image in Hiero Retail', e);
+        }
+    }
+
+    // CONTACT Header
+    doc.font('Helvetica-Bold').fontSize(14).fillColor('#1f2a6b').text('Contact', startX, leftY);
+    leftY = doc.y + 4;
+    doc.moveTo(startX, leftY).lineTo(startX + 170, leftY).strokeColor('#d0d0d0').lineWidth(1).stroke();
+    leftY += 10;
+
+    // Contact Fields
+    const contactFields = [
+        { label: 'Address', value: data.contact.address },
+        { label: 'Phone', value: data.contact.phone },
+        { label: 'E-mail', value: data.contact.email }
+    ];
+
+    contactFields.forEach(field => {
+        if (field.value) {
+            doc.font('Helvetica-Bold').fontSize(10).fillColor('#333333').text(field.label, startX, leftY);
+            doc.font('Helvetica').fontSize(10).fillColor('#555555').text(field.value, startX, doc.y + 2, { width: 170 });
+            leftY = doc.y + 8;
+        }
+    });
+
+    leftY += 10;
+
+    // SKILLS Header
+    doc.font('Helvetica-Bold').fontSize(14).fillColor('#1f2a6b').text('Skills', startX, leftY);
+    leftY = doc.y + 4;
+    doc.moveTo(startX, leftY).lineTo(startX + 170, leftY).strokeColor('#d0d0d0').lineWidth(1).stroke();
+    leftY += 10;
+
+    // Skills List
+    doc.font('Helvetica').fontSize(10).fillColor('#333333');
+    data.skills.forEach(skill => {
+        doc.circle(startX + 3, leftY + 4, 1.5).fill('#333333');
+        doc.text(skill, startX + 12, leftY, { width: 170 - 12 });
+        leftY = doc.y + 4;
+    });
+
+    // RIGHT COLUMN (align top to the same Y as left column start)
+    let rightY = summaryY + doc.heightOfString(data.summary, { width: 495, lineGap: 4 }) + 30;
+
+    // EDUCATION Header
+    doc.font('Helvetica-Bold').fontSize(16).fillColor('#1f2a6b').text('Education', rightX, rightY);
+    rightY = doc.y + 4;
+    doc.moveTo(rightX, rightY).lineTo(PAGE_WIDTH - 50, rightY).strokeColor('#d0d0d0').lineWidth(1).stroke();
+    rightY += 10;
+
+    data.education.forEach(edu => {
+        let entryY = rightY;
+        doc.font('Helvetica-Bold').fontSize(10).fillColor('#555555').text(edu.date, rightX, entryY, { width: 70 });
+        let dateBottom = doc.y;
+
+        doc.font('Helvetica-Bold').fontSize(12).fillColor('#333333').text(edu.degree, rightX + 80, entryY, { width: 200 });
+        doc.font('Helvetica-Oblique').fontSize(10).fillColor('#666666').text(edu.institution, rightX + 80, doc.y + 2, { width: 200 });
+
+        rightY = Math.max(dateBottom, doc.y) + 12;
+    });
+
+    rightY += 5;
+
+    // WORK HISTORY Header
+    doc.font('Helvetica-Bold').fontSize(16).fillColor('#1f2a6b').text('Work History', rightX, rightY);
+    rightY = doc.y + 4;
+    doc.moveTo(rightX, rightY).lineTo(PAGE_WIDTH - 50, rightY).strokeColor('#d0d0d0').lineWidth(1).stroke();
+    rightY += 10;
+
+    data.workHistory.forEach(job => {
+        let eY = rightY;
+
+        // Date column 
+        doc.font('Helvetica-Bold').fontSize(10).fillColor('#555555').text(job.date, rightX, eY, { width: 70 });
+        let dateBottomY = doc.y;
+
+        // Content column
+        doc.font('Helvetica-Bold').fontSize(12).fillColor('#333333').text(job.title, rightX + 80, eY, { width: 200 });
+        if (job.company) {
+            doc.font('Helvetica-Oblique').fontSize(10).fillColor('#666666').text(job.company, rightX + 80, doc.y + 2, { width: 200 });
+        }
+
+        let contentY = doc.y + 6;
+        job.bullets.forEach(bullet => {
+            if (!bullet) return;
+            doc.circle(rightX + 80 + 3, contentY + 4, 1.5).fill('#333333');
+            doc.font('Helvetica').fontSize(10).fillColor('#333333').text(bullet, rightX + 80 + 12, contentY, { width: 200 - 12 });
+            contentY = doc.y + 3;
+        });
+
+        rightY = Math.max(dateBottomY, contentY) + 12;
+    });
+}
+
+module.exports = { generateUnifiedResume };

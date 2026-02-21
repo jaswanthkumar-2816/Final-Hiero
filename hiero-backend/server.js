@@ -1052,19 +1052,26 @@ app.post('/api/resume/download-docx', (req, res) => {
       <head>
         <meta charset="utf-8">
         <style>
-          body { font-family: Arial, sans-serif; line-height: 1.5; font-size: 11pt; }
-          h1 { text-align: center; font-size: 18pt; margin-bottom: 5px; }
-          .contact { text-align: center; font-size: 10pt; margin-bottom: 20px; color: #555; }
-          h2 { border-bottom: 1px solid #000; padding-bottom: 3px; margin-top: 15px; font-size: 14pt; text-transform: uppercase; }
-          .job-header { display: flex; justify-content: space-between; font-weight: bold; margin-top: 10px; }
-          .company { font-style: italic; }
+          body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.5; font-size: 11pt; color: ${data.template === 'hiero-essence' ? '#FFFFFF' : '#333333'}; background-color: ${data.template === 'hiero-essence' ? '#121212' : '#FFFFFF'}; }
+          .header { text-align: center; margin-bottom: 25pt; border-bottom: 2pt solid #f5a623; padding-bottom: 10pt; }
+          h1 { text-align: center; font-size: 24pt; margin-bottom: 5px; color: #f5a623; text-transform: uppercase; }
+          .contact { text-align: center; font-size: 10pt; margin-bottom: 20px; color: ${data.template === 'hiero-essence' ? '#AAAAAA' : '#666666'}; }
+          h2 { border-bottom: 1.5pt solid #f5a623; padding: 5pt; margin-top: 15px; font-size: 14pt; text-transform: uppercase; color: #f5a623; background-color: ${data.template === 'hiero-essence' ? '#1e1e1e' : '#f8f8f8'}; }
+          .job-header { display: flex; justify-content: space-between; font-weight: bold; margin-top: 10px; color: #f5a623; }
+          .company { font-style: italic; color: #f5a623; font-weight: bold; }
           ul { margin-top: 5px; padding-left: 20px; }
-          li { margin-bottom: 3px; }
+          li { margin-bottom: 3px; color: ${data.template === 'hiero-essence' ? '#FFFFFF' : '#333333'}; }
+          p { color: ${data.template === 'hiero-essence' ? '#FFFFFF' : '#333333'}; }
         </style>
       </head>
-      <body>
-        <h1>${data.personalInfo?.fullName || 'Resume'}</h1>
-        <div class="contact">
+      <body style="background-color: ${data.template === 'hiero-essence' ? '#121212' : '#FFFFFF'};">
+        ${data.personalInfo?.profilePhoto ? `
+          <div style="text-align: center; margin-bottom: 20px;">
+            <img src="${data.personalInfo.profilePhoto}" width="120" height="120" style="border-radius: 60px;">
+          </div>
+        ` : ''}
+        <h1 style="text-align: center; color: #f5a623;">${(data.personalInfo?.fullName || 'Resume').toUpperCase()}</h1>
+        <div class="contact" style="text-align: center; color: ${data.template === 'hiero-essence' ? '#AAAAAA' : '#666666'};">
           ${[
         data.personalInfo?.email,
         data.personalInfo?.phone,
@@ -1073,41 +1080,45 @@ app.post('/api/resume/download-docx', (req, res) => {
       ].filter(Boolean).join(' | ')}
         </div>
         
-        ${data.summary ? `<h2>Professional Summary</h2><p>${data.summary}</p>` : ''}
+        ${data.summary ? `<h2 style="border-bottom: 1.5pt solid #f5a623; padding: 5pt; margin-top: 15px; font-size: 14pt; text-transform: uppercase; color: #f5a623; background-color: ${data.template === 'hiero-essence' ? '#1e1e1e' : '#f8f8f8'};">Professional Summary</h2><p style="color: ${data.template === 'hiero-essence' ? '#FFFFFF' : '#333333'};">${data.summary}</p>` : ''}
         
-        ${data.experience && data.experience.length ? `<h2>Work Experience</h2>${data.experience.map(exp => `
-          <div>
-            <div style="display:flex; justify-content:space-between;">
-              <strong>${exp.jobTitle || ''}</strong>
-              <span>${exp.startDate || ''} - ${exp.endDate || 'Present'}</span>
-            </div>
-            <div class="company">${exp.company || ''}</div>
-            <ul>${(exp.description || '').split('\n').filter(d => d.trim()).map(d => `<li>${d.replace(/^[•-]\s*/, '')}</li>`).join('')}</ul>
+        ${data.experience && data.experience.length ? `<h2 style="border-bottom: 1.5pt solid #f5a623; padding: 5pt; margin-top: 15px; font-size: 14pt; text-transform: uppercase; color: #f5a623; background-color: ${data.template === 'hiero-essence' ? '#1e1e1e' : '#f8f8f8'};">Work Experience</h2>${data.experience.map(exp => `
+          <div style="margin-bottom: 15pt;">
+            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+              <tr>
+                <td style="font-weight: bold; color: #f5a623; font-size: 12pt;">${(exp.jobTitle || '').toUpperCase()}</td>
+                <td align="right" style="color: #f5a623; font-size: 10pt;">${exp.startDate || ''} - ${exp.endDate || 'Present'}</td>
+              </tr>
+            </table>
+            <div style="color: #f5a623; font-style: italic; margin-top: 2pt; font-weight: bold;">${exp.company || ''}</div>
+            <ul style="margin-top: 5pt; padding-left: 20pt;">${(exp.description || '').split('\n').filter(d => d.trim()).map(d => `<li style="margin-bottom: 4pt; color: ${data.template === 'hiero-essence' ? '#FFFFFF' : '#333333'};">${d.replace(/^[•-]\s*/, '')}</li>`).join('')}</ul>
           </div>
         `).join('')}` : ''}
         
-        ${data.education && data.education.length ? `<h2>Education</h2>${data.education.map(edu => `
-          <div>
-            <div style="display:flex; justify-content:space-between;">
-              <strong>${edu.school || ''}</strong>
-              <span>${edu.gradYear || ''}</span>
-            </div>
-            <div>${edu.degree || ''} ${edu.gpa ? `(GPA: ${edu.gpa})` : ''}</div>
+        ${data.education && data.education.length ? `<h2 style="border-bottom: 1.5pt solid #f5a623; padding: 5pt; margin-top: 15px; font-size: 14pt; text-transform: uppercase; color: #f5a623; background-color: ${data.template === 'hiero-essence' ? '#1e1e1e' : '#f8f8f8'};">Education</h2>${data.education.map(edu => `
+          <div style="margin-bottom: 10pt;">
+            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+              <tr>
+                <td style="font-weight: bold; color: #f5a623;">${(edu.school || '').toUpperCase()}</td>
+                <td align="right" style="color: #f5a623;">${edu.gradYear || ''}</td>
+              </tr>
+            </table>
+            <div style="color: ${data.template === 'hiero-essence' ? '#AAAAAA' : '#666666'};">${edu.degree || ''} ${edu.gpa ? `(GPA: ${edu.gpa})` : ''}</div>
           </div>
         `).join('')}` : ''}
         
-        ${data.technicalSkills ? `<h2>Technical Skills</h2><p>${data.technicalSkills}</p>` : ''}
-        ${data.softSkills ? `<h2>Soft Skills</h2><p>${data.softSkills}</p>` : ''}
+        ${data.technicalSkills ? `<h2 style="border-bottom: 1.5pt solid #f5a623; padding: 5pt; margin-top: 15px; font-size: 14pt; text-transform: uppercase; color: #f5a623; background-color: ${data.template === 'hiero-essence' ? '#1e1e1e' : '#f8f8f8'};">Technical Skills</h2><p style="color: ${data.template === 'hiero-essence' ? '#FFFFFF' : '#333333'};">${data.technicalSkills}</p>` : ''}
+        ${data.softSkills ? `<h2 style="border-bottom: 1.5pt solid #f5a623; padding: 5pt; margin-top: 15px; font-size: 14pt; text-transform: uppercase; color: #f5a623; background-color: ${data.template === 'hiero-essence' ? '#1e1e1e' : '#f8f8f8'};">Soft Skills</h2><p style="color: ${data.template === 'hiero-essence' ? '#FFFFFF' : '#333333'};">${data.softSkills}</p>` : ''}
         
-        ${data.projects && data.projects.length ? `<h2>Projects</h2>${data.projects.map(p => `
-          <div style="margin-bottom: 10px;">
-            <strong>${p.name || ''}</strong> ${p.tech ? `| <em>${p.tech}</em>` : ''}
-            <p>${p.description || ''}</p>
-            ${p.link ? `<a href="${p.link}">${p.link}</a>` : ''}
+        ${data.projects && data.projects.length ? `<h2 style="border-bottom: 1.5pt solid #f5a623; padding: 5pt; margin-top: 15px; font-size: 14pt; text-transform: uppercase; color: #f5a623; background-color: ${data.template === 'hiero-essence' ? '#1e1e1e' : '#f8f8f8'};">Projects</h2>${data.projects.map(p => `
+          <div style="margin-bottom: 12pt;">
+            <div style="font-weight: bold; color: #f5a623;">${(p.name || '').toUpperCase()}</div>
+            <div style="color: #f5a623; font-size: 9pt; font-style: italic;">${p.tech || ''}</div>
+            <p style="margin-top: 3pt; color: ${data.template === 'hiero-essence' ? '#FFFFFF' : '#333333'};">${p.description || ''}</p>
           </div>
         `).join('')}` : ''}
 
-        ${data.certifications && data.certifications.length ? `<h2>Certifications</h2><ul>${(Array.isArray(data.certifications) ? data.certifications : []).map(c => `<li>${c}</li>`).join('')}</ul>` : ''}
+        ${data.certifications && data.certifications.length ? `<h2 style="border-bottom: 1.5pt solid #f5a623; padding: 5pt; margin-top: 15px; font-size: 14pt; text-transform: uppercase; color: #f5a623; background-color: ${data.template === 'hiero-essence' ? '#1e1e1e' : '#f8f8f8'};">Certifications</h2><ul>${(Array.isArray(data.certifications) ? data.certifications : []).map(c => `<li style="color: ${data.template === 'hiero-essence' ? '#FFFFFF' : '#333333'};">${c}</li>`).join('')}</ul>` : ''}
         
       </body>
       </html>

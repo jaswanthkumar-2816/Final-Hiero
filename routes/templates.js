@@ -18,6 +18,26 @@ const toArray = (v) => {
 function normalizeData(data = {}) {
     if (!data || typeof data !== 'object') data = {};
     const p = data.personalInfo || {};
+
+    const getArr = (v, aliases = []) => {
+        if (Array.isArray(v) && v.length > 0) return v;
+        for (let alias of aliases) {
+            if (data[alias] && Array.isArray(data[alias]) && data[alias].length > 0) return data[alias];
+            if (p[alias] && Array.isArray(p[alias]) && p[alias].length > 0) return p[alias];
+        }
+        if (typeof v === 'string') return toArray(v);
+        return [];
+    };
+
+    const getStr = (v, aliases = []) => {
+        if (v && typeof v === 'string' && v.trim().length > 0) return v;
+        for (let alias of aliases) {
+            if (data[alias] && typeof data[alias] === 'string' && data[alias].trim().length > 0) return data[alias];
+            if (p[alias] && typeof p[alias] === 'string' && p[alias].trim().length > 0) return p[alias];
+        }
+        return '';
+    };
+
     try {
         return {
             ...data,
@@ -34,21 +54,23 @@ function normalizeData(data = {}) {
                 gender: p.gender || data.gender || '',
                 nationality: p.nationality || data.nationality || '',
                 maritalStatus: p.maritalStatus || data.maritalStatus || '',
-                languagesKnown: p.languagesKnown || data.languages || ''
+                languagesKnown: p.languagesKnown || data.languages || '',
+                profilePhoto: p.profilePhoto || p.picture || data.profilePhoto || data.picture || data.photoUrl || ''
             },
-            experience: (Array.isArray(data.experience) ? data.experience : []).map(exp => {
+            summary: getStr(data.summary, ['aboutMe', 'personalSummary', 'about', 'objective', 'professionalSummary']),
+            experience: getArr(data.experience, ['workHistory', 'workExperience', 'experienceList', 'work', 'employmentHistory']).map(exp => {
                 if (!exp) return {};
                 const dates = String(exp.dates || '');
                 return {
                     jobTitle: exp.jobTitle || exp.title || exp.position || exp.role || '',
-                    company: exp.company || '',
+                    company: exp.company || exp.organization || '',
                     startDate: exp.startDate || exp.start || (dates ? dates.split('-')[0]?.trim() : ''),
                     endDate: exp.endDate || exp.end || (dates ? dates.split('-')[1]?.trim() : 'Present'),
                     description: exp.description || exp.responsibilities || (Array.isArray(exp.points) ? exp.points.join('\n') : ''),
                     location: exp.location || ''
                 };
             }),
-            education: (Array.isArray(data.education) ? data.education : []).map(edu => {
+            education: getArr(data.education, ['academicDetails', 'educationList', 'academics', 'academicHistory']).map(edu => {
                 if (!edu) return {};
                 const dates = String(edu.dates || '');
                 return {
@@ -59,21 +81,23 @@ function normalizeData(data = {}) {
                     location: edu.location || ''
                 };
             }),
-            skills: toArray(data.skills || data.technicalSkills),
-            softSkills: toArray(data.softSkills || data.managementSkills),
-            certifications: (Array.isArray(data.certifications) ? data.certifications : toArray(data.certifications || data.personalCertifications)).map(c => typeof c === 'string' ? { name: c } : c),
-            projects: (Array.isArray(data.projects) ? data.projects : []).map(proj => {
+            skills: getArr(data.skills, ['technicalSkills', 'professionalSkills', 'skillsList', 'coreCompetencies', 'expertise']),
+            softSkills: getArr(data.softSkills, ['managementSkills', 'interpersonalSkills', 'softSkillsList']),
+            certifications: getArr(data.certifications, ['certificates', 'personalCertifications', 'awards']).map(c => typeof c === 'string' ? { name: c } : c),
+            projects: getArr(data.projects, ['projectList', 'customDetails', 'personalProjects']).filter(p => !p.heading || p.heading.toLowerCase().includes('project')).map(proj => {
                 if (!proj) return {};
                 return {
-                    title: proj.title || proj.name || '',
-                    description: proj.description || '',
-                    tech: proj.tech || proj.technologies || '',
+                    title: proj.title || proj.projectName || proj.name || proj.heading || '',
+                    description: proj.description || proj.details || proj.content || '',
+                    tech: proj.tech || proj.technologies || proj.techStack || '',
                     duration: proj.duration || proj.date || ''
                 };
             }),
-            achievements: toArray(data.achievements),
-            hobbies: toArray(data.hobbies),
-            extraCurricular: toArray(data.extraCurricular),
+            achievements: getArr(data.achievements, ['awards', 'honors', 'achievementsList']),
+            hobbies: getArr(data.hobbies, ['interests', 'hobbiesList', 'activities']),
+            extraCurricular: getArr(data.extraCurricular, ['activities', 'volunteerWork']),
+            socialLinks: getArr(data.socialLinks, ['socials', 'links', 'onlinePortfolios']),
+            languages: getArr(data.languages, ['languagesKnown', 'languagesList']),
             referencesText: data.referencesText || (Array.isArray(data.references) && data.references.length > 0 ? '' : 'Available upon request'),
             references: Array.isArray(data.references) ? data.references : []
         };
@@ -305,6 +329,224 @@ const TEMPLATES = {
         const d = normalizeData(data);
         const p = d.personalInfo;
         return `<!doctype html><html><head><style>@page{margin:30pt}body{font-family:'Inter',system-ui,sans-serif;color:#111827;line-height:1.5;margin:30px}.header{display:flex;justify-content:space-between;border-bottom:2px solid #0ea5e9;padding-bottom:10px;margin-bottom:20px}.name{font-size:24px;font-weight:700;letter-spacing:-0.02em}.role{font-size:13px;color:#0ea5e9;text-transform:uppercase;font-weight:700;letter-spacing:0.1em}.contact{font-size:10px;color:#4b5563;text-align:right}.sec-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.15em;margin:15px 0 5px;border-bottom:1px solid #e5e7eb;padding-bottom:3px}p{font-size:10px;margin:0 0 5px}.chip{font-size:9px;padding:2px 8px;background:#f0f9ff;color:#0369a1;border:1px solid #bae6fd;border-radius:12px;margin:2px;display:inline-block}</style></head><body><div class="header"><div><div class="name">${esc(p.fullName)}</div><div class="role">${esc(p.roleTitle)}</div></div><div class="contact">${esc(p.email)}<br/>${esc(p.phone)}<br/>${esc(p.address)}</div></div><section><div class="sec-title">Profile</div><p>${esc(d.summary)}</p></section><section><div class="sec-title">Experience</div>${d.experience.map(e => `<div><b>${esc(e.jobTitle)}</b>, ${esc(e.company)} <span style="float:right;font-weight:400;color:#6b7280">${esc(e.startDate)} - ${esc(e.endDate)}</span><p style="margin-top:2px">${esc(e.description).replace(/\n/g, '<br>')}</p></div>`).join('')}</section><section><div class="sec-title">Education</div>${d.education.map(e => `<div><b>${esc(e.degree)}</b>, ${esc(e.school)} <span style="float:right;font-weight:400;color:#6b7280">${esc(e.gradYear)}</span></div>`).join('')}</section><section><div class="sec-title">Skills</div>${d.skills.map(s => `<span class="chip">${esc(s)}</span>`).join('')}</section></body></html>`;
+    },
+    'hiero-essence': (data) => {
+        const d = normalizeData(data);
+        const p = d.personalInfo || {};
+        const orange = "#f5a623";
+        const darkOrange = "#b37a1a";
+
+        return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --orange: ${orange}; --dark-orange: ${darkOrange}; --bg: #000000; --sidebar-bg: #333333; }
+        * { box-sizing: border-box; }
+        body { font-family: 'Poppins', sans-serif; margin: 0; padding: 0; background: var(--bg); color: #ffffff; display: flex; min-height: 100vh; font-size: 8pt; line-height: 1.3; }
+        
+        .sidebar { width: 33%; background: var(--sidebar-bg); min-height: 100vh; position: relative; }
+        .main { width: 67%; padding: 25px 20px; background: var(--bg); }
+
+        .banner-photo { position: relative; width: 100%; height: 160px; background: #111; overflow: hidden; padding: 10px 10px; }
+        .banner-photo img { width: 100%; height: 120px; object-fit: cover; border: none; }
+        .banner-photo .initials { width: 100%; height: 120px; background: #222; display: flex; align-items: center; justify-content: center; font-size: 32pt; font-weight: 700; color: var(--orange); }
+
+        .name-area { margin-top: -25px; text-align: center; color: white; padding: 0 5px; }
+        .name { font-size: 15pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin: 0; line-height: 1.1; }
+        .title { font-size: 8pt; color: var(--orange); text-transform: uppercase; letter-spacing: 1.2px; margin-top: 5px; font-weight: 400; }
+
+        .ribbon-container { position: relative; margin: 15px 0 10px 0; z-index: 10; width: 100%; }
+        .ribbon { background: var(--orange); color: #fff; padding: 5px 15px; font-weight: 700; text-transform: uppercase; font-size: 8.5pt; position: relative; width: calc(100% - 10px); }
+        
+        .sidebar .ribbon::after { content: ''; position: absolute; right: -8px; top: 0; border-left: 8px solid var(--orange); border-bottom: 10px solid transparent; }
+        .sidebar .fold { position: absolute; right: -8px; top: 10px; border-left: 8px solid var(--dark-orange); border-bottom: 6px solid transparent; }
+
+        .main .ribbon-container { text-align: center; margin-left: -20px; margin-right: -20px; width: calc(100% + 40px); }
+        .main .ribbon { width: calc(100% - 12px); display: inline-block; margin-left: 12px; }
+        .main .ribbon::before { content: ''; position: absolute; left: -12px; top: 0; border-right: 12px solid var(--orange); border-bottom: 12px solid transparent; }
+        .main .fold { position: absolute; left: 0; top: 12px; border-right: 12px solid var(--dark-orange); border-bottom: 8px solid transparent; }
+
+        .side-content { padding: 20px 15px; }
+        .contact-item { display: flex; margin-bottom: 8px; font-size: 7.5pt; align-items: flex-start; }
+        .bullet { color: var(--orange); margin-right: 10px; font-size: 9pt; line-height: 1; margin-top: 1px; }
+
+        .progress-container { margin-bottom: 10px; }
+        .progress-label { font-size: 7.5pt; margin-bottom: 4px; text-transform: uppercase; color: #fff; font-weight: 600; }
+        .progress-bar { height: 4px; background: #111111; border-radius: 2px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--orange); border-radius: 2px; }
+
+        .hobbies-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 7.5pt; color: #fff; }
+
+        .about-text { text-align: justify; color: #eeeeee; margin-bottom: 15px; white-space: pre-line; padding: 0 5px; font-size: 8pt; line-height: 1.25; }
+
+        .item { margin-bottom: 12px; position: relative; padding-left: 20px; }
+        .item-dot { position: absolute; left: 0; top: 5px; width: 7px; height: 7px; background: var(--orange); border-radius: 50%; }
+        .item-header { display: flex; justify-content: space-between; margin-bottom: 2px; align-items: flex-start; }
+        .item-name { font-weight: 700; font-size: 9.5pt; color: #fff; text-transform: uppercase; }
+        .item-date { color: var(--orange); font-size: 8pt; font-weight: 600; min-width: 80px; text-align: right; }
+        .item-sub { color: var(--orange); font-size: 8.5pt; font-weight: 600; margin-bottom: 3px; }
+        .item-desc { color: #dddddd; font-size: 8pt; line-height: 1.3; }
+
+        .skills-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px 15px; }
+
+        @media print {
+            body { -webkit-print-color-adjust: exact; }
+            .sidebar { background: var(--sidebar-bg) !important; }
+            .main { background: var(--bg) !important; }
+            .ribbon { background: var(--orange) !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="banner-photo">
+            ${p.profilePhoto ? `<img src="${p.profilePhoto}" alt="Profile">` : `<div class="initials">${p.fullName?.charAt(0) || 'U'}</div>`}
+        </div>
+        <div class="name-area">
+            <h1 class="name">${esc(p.fullName)}</h1>
+            <div class="title">${esc(p.roleTitle || 'Professional')}</div>
+        </div>
+
+        <div class="side-content">
+            <div class="ribbon-container">
+                <div class="ribbon">Contact</div>
+                <div class="fold"></div>
+            </div>
+            ${p.address ? `<div class="contact-item"><span class="bullet">●</span> <span>${esc(p.address)}</span></div>` : ''}
+            ${p.phone ? `<div class="contact-item"><span class="bullet">●</span> <span>${esc(p.phone)}</span></div>` : ''}
+            ${p.email ? `<div class="contact-item"><span class="bullet">●</span> <span>${esc(p.email)}</span></div>` : ''}
+            ${p.website ? `<div class="contact-item"><span class="bullet">●</span> <span>${esc(p.website)}</span></div>` : ''}
+
+            ${d.socialLinks?.length ? `
+                <div class="ribbon-container">
+                    <div class="ribbon">Portfolio</div>
+                    <div class="fold"></div>
+                </div>
+                ${d.socialLinks.map(s => `
+                    <div class="contact-item"><span class="bullet">●</span> <span>${esc(s)}</span></div>
+                `).join('')}
+            ` : ''}
+
+            ${d.languages?.length ? `
+                <div class="ribbon-container">
+                    <div class="ribbon">Language</div>
+                    <div class="fold"></div>
+                </div>
+                ${d.languages.map((lang, i) => `
+                    <div class="progress-container">
+                        <div class="progress-label">${esc(lang.name || lang)}</div>
+                        <div class="progress-bar"><div class="progress-fill" style="width: ${85 - (i % 3 * 10)}%;"></div></div>
+                    </div>
+                `).join('')}
+            ` : ''}
+
+            ${d.hobbies?.length ? `
+                <div class="ribbon-container">
+                    <div class="ribbon">Hobbies</div>
+                    <div class="fold"></div>
+                </div>
+                <div class="hobbies-grid">
+                    ${d.hobbies.map(h => `<div>${esc(h)}</div>`).join('')}
+                </div>
+            ` : ''}
+        </div>
+    </div>
+
+    <div class="main">
+        ${d.summary ? `
+            <div class="ribbon-container">
+                <div class="ribbon">About Me</div>
+                <div class="fold"></div>
+            </div>
+            <div class="about-text">${esc(d.summary)}</div>
+        ` : ''}
+
+        ${d.education?.length ? `
+            <div class="ribbon-container">
+                <div class="ribbon">Education</div>
+                <div class="fold"></div>
+            </div>
+            ${d.education.map(e => `
+                <div class="item">
+                    <div class="item-dot"></div>
+                    <div class="item-header">
+                        <div class="item-name">${esc(e.school)}</div>
+                        <div class="item-date">${esc(e.gradYear)}</div>
+                    </div>
+                    <div class="item-sub">${esc(e.degree)}</div>
+                    ${e.gpa ? `<div class="item-desc">Result: CGPA ${esc(e.gpa)}</div>` : ''}
+                </div>
+            `).join('')}
+        ` : ''}
+
+        ${d.experience?.length ? `
+            <div class="ribbon-container">
+                <div class="ribbon">Experience</div>
+                <div class="fold"></div>
+            </div>
+            ${d.experience.map(e => `
+                <div class="item">
+                    <div class="item-dot"></div>
+                    <div class="item-header">
+                        <div class="item-name">${esc(e.jobTitle)}</div>
+                        <div class="item-date">${esc(e.startDate)} - ${esc(e.endDate)}</div>
+                    </div>
+                    <div class="item-sub">${esc(e.company)}</div>
+                    <div class="item-desc">${esc(e.description).replace(/\n/g, '<br>')}</div>
+                </div>
+            `).join('')}
+        ` : ''}
+
+        ${d.projects?.length ? `
+            <div class="ribbon-container">
+                <div class="ribbon">Projects</div>
+                <div class="fold"></div>
+            </div>
+            ${d.projects.map(proj => `
+                <div class="item">
+                    <div class="item-dot"></div>
+                    <div class="item-header">
+                        <div class="item-name">${esc(proj.title)}</div>
+                        <div class="item-date">${esc(proj.duration || '')}</div>
+                    </div>
+                    ${proj.tech ? `<div class="item-sub">${esc(proj.tech)}</div>` : ''}
+                    <div class="item-desc">${esc(proj.description)}</div>
+                </div>
+            `).join('')}
+        ` : ''}
+
+        ${d.certifications?.length ? `
+            <div class="ribbon-container">
+                <div class="ribbon">Certifications</div>
+                <div class="fold"></div>
+            </div>
+            ${d.certifications.map(c => `
+                <div class="contact-item" style="margin-left: 20px;">
+                    <span class="bullet" style="font-size: 8pt;">●</span>
+                    <span class="item-desc" style="color: #fff; font-weight: 600;">${esc(c.name || c)}</span>
+                </div>
+            `).join('')}
+        ` : ''}
+
+        ${d.skills?.length ? `
+            <div class="ribbon-container">
+                <div class="ribbon">Professional Skills</div>
+                <div class="fold"></div>
+            </div>
+            <div class="skills-grid">
+                ${d.skills.map((s, i) => `
+                    <div class="progress-container">
+                        <div class="progress-label" style="font-size: 7pt;">${esc(s.name || s)}</div>
+                        <div class="progress-bar"><div class="progress-fill" style="width: ${80 + (i % 15)}%;"></div></div>
+                    </div>
+                `).join('')}
+            </div>
+        ` : ''}
+    </div>
+</body>
+</html>`;
     }
 };
 
@@ -316,13 +558,15 @@ module.exports = {
         const aliasMap = {
             'priya': 'priya-analytics',
             'priya-elegant': 'priya-analytics',
-            'rishi': 'rishi',
+            'rishi': 'modern-pro',
             'minimal': 'minimal',
             'elite': 'hiero-elite',
             'hiero-elite': 'hiero-elite',
             'modern-pro': 'modern-pro',
             'template4': 'template-4',
-            'template-4': 'template-4'
+            'template-4': 'template-4',
+            'hiero-essence': 'hiero-essence',
+            'essence': 'hiero-essence'
         };
 
         const finalId = aliasMap[id] || id;
