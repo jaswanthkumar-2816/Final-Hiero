@@ -2896,37 +2896,45 @@ function renderTemplate_HieroNova(doc, originalData, options = {}) {
             email: originalData.email || originalData.emailAddress || originalData.personalInfo?.email || originalData.basics?.email || ""
         },
         expertise: toArray(originalData.skills || originalData.technicalSkills || originalData.skillSet || originalData.expertise || originalData.keywords || originalData.skill_list || []),
-        experience: (originalData.experience || originalData.work || originalData.workHistory || originalData.work_experience || originalData.jobHistory || [])
-            .concat(originalData.internships || originalData.volunteer || originalData.volunteering || [])
+        experience: toArray(originalData.experience || originalData.work || originalData.workHistory || originalData.work_experience || originalData.jobHistory || [])
+            .concat(toArray(originalData.internships || originalData.volunteer || originalData.volunteering || []))
+            .filter(exp => exp && typeof exp === 'object')
             .map(exp => ({
                 role: exp.role || exp.jobTitle || exp.position || exp.title || "",
                 company: exp.company || exp.employer || exp.organization || exp.org || "",
                 years: exp.years || exp.duration || exp.dateRange || (exp.startDate && exp.endDate ? `${exp.startDate} - ${exp.endDate}` : (exp.startDate || exp.date || "")),
                 bullets: toArray(exp.bullets || exp.description || exp.responsibilities || exp.highlights || exp.summary || [])
             })),
-        education: (originalData.education || originalData.academic || originalData.studies || originalData.education_history || originalData.academic_background || []).map(edu => ({
-            degree: edu.degree || edu.qualification || edu.area || edu.studyType || "",
-            institute: edu.institute || edu.school || edu.university || edu.college || edu.institution || "",
-            years: edu.years || edu.gradYear || edu.duration || edu.date || (edu.startDate && edu.endDate ? `${edu.startDate} - ${edu.endDate}` : (edu.startDate || "")),
-            description: edu.description || edu.courses || edu.major || ""
-        })),
-        projects: (Array.isArray(originalData.projects) ? originalData.projects : (originalData.projs || originalData.projectHistory || [])).map(proj => ({
-            name: proj.name || proj.title || proj.projectName || "",
-            technologies: proj.technologies || proj.tech || proj.keywords || proj.tools || "",
-            years: proj.duration || proj.date || proj.years || "",
-            description: proj.description || proj.summary || proj.details || ""
-        })),
-        awards: (originalData.awards || originalData.achievements || originalData.certifications || originalData.honors || []).map(aw => typeof aw === 'string' ? { title: aw } : {
-            title: aw.title || aw.name || "",
-            issuer: aw.issuer || aw.organization || aw.company || aw.authority || "",
-            year: aw.year || aw.date || ""
-        }),
-        references: (originalData.references || originalData.recommenders || []).map(ref => ({
-            name: ref.name || ref.fullName || "",
-            role: ref.role || ref.title || ref.position || ref.relationship || "",
-            phone: ref.phone || ref.contact || "",
-            email: ref.email || ""
-        }))
+        education: toArray(originalData.education || originalData.academic || originalData.studies || originalData.education_history || originalData.academic_background || [])
+            .filter(edu => edu && typeof edu === 'object')
+            .map(edu => ({
+                degree: edu.degree || edu.qualification || edu.area || edu.studyType || "",
+                institute: edu.institute || edu.school || edu.university || edu.college || edu.institution || "",
+                years: edu.years || edu.gradYear || edu.duration || edu.date || (edu.startDate && edu.endDate ? `${edu.startDate} - ${edu.endDate}` : (edu.startDate || "")),
+                description: edu.description || edu.courses || edu.major || ""
+            })),
+        projects: toArray(originalData.projects || originalData.projs || originalData.projectHistory || [])
+            .filter(proj => proj && typeof proj === 'object')
+            .map(proj => ({
+                name: proj.name || proj.title || proj.projectName || "",
+                technologies: proj.technologies || proj.tech || proj.keywords || proj.tools || "",
+                years: proj.duration || proj.date || proj.years || "",
+                description: proj.description || proj.summary || proj.details || ""
+            })),
+        awards: toArray(originalData.awards || originalData.achievements || originalData.certifications || originalData.honors || [])
+            .map(aw => typeof aw === 'string' ? { title: aw, issuer: '', year: '' } : {
+                title: aw.title || aw.name || "",
+                issuer: aw.issuer || aw.organization || aw.company || aw.authority || "",
+                year: aw.year || aw.date || ""
+            }),
+        references: toArray(originalData.references || originalData.recommenders || [])
+            .filter(ref => ref && typeof ref === 'object')
+            .map(ref => ({
+                name: ref.name || ref.fullName || "",
+                role: ref.role || ref.title || ref.position || ref.relationship || "",
+                phone: ref.phone || ref.contact || "",
+                email: ref.email || ""
+            }))
     };
 
 
