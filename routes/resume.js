@@ -2,6 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
 const PDFDocument = require('pdfkit');
 const jwt = require('jsonwebtoken');
 const pdfParse = require('pdf-parse');
@@ -123,16 +124,36 @@ router.post('/template', authenticateToken, async (req, res) => {
 
 router.get('/health', (req, res) => res.json({ status: 'ok', service: 'resume-integrated' }));
 
+const { generateTemplateHTML } = require('./templates');
+const { generatePuppeteerPDF } = require('../utils/puppeteer-service');
+
 router.post('/preview-resume', async (req, res) => {
     try {
         const data = req.body;
-        // Basic validation
         if (!data || Object.keys(data).length === 0) {
             return res.status(400).send('No resume data provided');
         }
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', 'inline; filename=resume-preview.pdf');
-        await generateUnifiedResume(data, data.template || 'classic', res, { forceSinglePage: true });
+
+        const templateId = data.template || 'classic';
+
+        if (templateId === 'hiero-signature') {
+            const html = generateTemplateHTML(templateId, data);
+            const outputPath = path.join(os.tmpdir(), `preview_${Date.now()}.pdf`);
+
+            await generatePuppeteerPDF(html, outputPath);
+
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', 'inline; filename=resume-preview.pdf');
+            res.sendFile(outputPath, (err) => {
+                if (err) console.error('Error sending file:', err);
+                // Try to delete temp file after sending
+                try { fs.unlinkSync(outputPath); } catch (e) { }
+            });
+        } else {
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', 'inline; filename=resume-preview.pdf');
+            await generateUnifiedResume(data, templateId, res, { forceSinglePage: true });
+        }
     } catch (error) {
         console.error('Preview error:', error);
         if (!res.headersSent) res.status(500).send('Generation failed');
@@ -142,14 +163,30 @@ router.post('/preview-resume', async (req, res) => {
 router.post('/download-resume', async (req, res) => {
     try {
         const data = req.body;
-        // Basic validation
         if (!data || Object.keys(data).length === 0) {
             return res.status(400).send('No resume data provided');
         }
+
+        const templateId = data.template || 'classic';
         const name = (data.personalInfo?.fullName || 'Resume').replace(/\s+/g, '_');
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename="${name}_Hiero.pdf"`);
-        await generateUnifiedResume(data, data.template || 'classic', res);
+
+        if (templateId === 'hiero-signature') {
+            const html = generateTemplateHTML(templateId, data);
+            const outputPath = path.join(os.tmpdir(), `${name}_Hiero_${Date.now()}.pdf`);
+
+            await generatePuppeteerPDF(html, outputPath);
+
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', `attachment; filename="${name}_Hiero.pdf"`);
+            res.download(outputPath, `${name}_Hiero.pdf`, (err) => {
+                if (err) console.error('Error sending file:', err);
+                try { fs.unlinkSync(outputPath); } catch (e) { }
+            });
+        } else {
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', `attachment; filename="${name}_Hiero.pdf"`);
+            await generateUnifiedResume(data, templateId, res);
+        }
     } catch (error) {
         console.error('Download PDF error:', error);
         if (!res.headersSent) res.status(500).json({ error: 'Failed to generate PDF' });
@@ -404,10 +441,28 @@ router.get('/preview-pdf', async (req, res) => {
         const userId = req.query.userId;
         const resume = await Resume.findOne({ userId });
         if (!resume) return res.status(404).send('Resume not found');
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', 'inline; filename=resume-preview.pdf');
-        await generateUnifiedResume(resume.data, resume.data.template || 'classic', res);
+
+        const templateId = resume.data.template || 'classic';
+
+        if (templateId === 'hiero-signature') {
+            const html = generateTemplateHTML(templateId, resume.data);
+            const outputPath = path.join(os.tmpdir(), `preview_get_${Date.now()}.pdf`);
+
+            await generatePuppeteerPDF(html, outputPath);
+
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', 'inline; filename=resume-preview.pdf');
+            res.sendFile(outputPath, (err) => {
+                if (err) console.error('Error sending file:', err);
+                try { fs.unlinkSync(outputPath); } catch (e) { }
+            });
+        } else {
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', 'inline; filename=resume-preview.pdf');
+            await generateUnifiedResume(resume.data, templateId, res);
+        }
     } catch (error) {
+        console.error('Preview GET error:', error);
         res.status(500).send('Generation failed');
     }
 });
@@ -417,11 +472,29 @@ router.get('/download', authenticateToken, async (req, res) => {
         const userId = req.user.userId || req.user.id;
         const resume = await Resume.findOne({ userId });
         if (!resume) return res.status(404).json({ error: 'Resume not found' });
+
+        const templateId = resume.data.template || 'classic';
         const name = (resume.data.basic?.full_name || 'Resume').replace(/\s+/g, '_');
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename="${name}_Hiero.pdf"`);
-        await generateUnifiedResume(resume.data, resume.data.template || 'classic', res);
+
+        if (templateId === 'hiero-signature') {
+            const html = generateTemplateHTML(templateId, resume.data);
+            const outputPath = path.join(os.tmpdir(), `${name}_Hiero_get_${Date.now()}.pdf`);
+
+            await generatePuppeteerPDF(html, outputPath);
+
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', `attachment; filename="${name}_Hiero.pdf"`);
+            res.download(outputPath, `${name}_Hiero.pdf`, (err) => {
+                if (err) console.error('Error sending file:', err);
+                try { fs.unlinkSync(outputPath); } catch (e) { }
+            });
+        } else {
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', `attachment; filename="${name}_Hiero.pdf"`);
+            await generateUnifiedResume(resume.data, templateId, res);
+        }
     } catch (error) {
+        console.error('Download GET error:', error);
         if (!res.headersSent) res.status(500).json({ error: 'Failed to generate PDF' });
     }
 });
@@ -431,7 +504,8 @@ router.get('/templates', (req, res) => {
         { id: 'classic', name: 'Classic Professional', preview: '/templates/previews/classic.png' },
         { id: 'modern-pro', name: 'Modern Tech', preview: '/templates/previews/modern-pro.png' },
         { id: 'tech-focus', name: 'Developer Focus', preview: '/templates/previews/tech-focus.png' },
-        { id: 'minimal', name: 'Elegant Minimal', preview: '/templates/previews/minimal.png' }
+        { id: 'minimal', name: 'Elegant Minimal', preview: '/templates/previews/minimal.png' },
+        { id: 'hiero-signature', name: 'Hiero Signature', preview: '/templates/previews/hiero-signature.png' }
     ];
     res.json({ success: true, templates });
 });
