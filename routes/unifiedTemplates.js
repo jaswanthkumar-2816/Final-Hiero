@@ -220,6 +220,13 @@ const TEMPLATE_COLORS = {
         background: '#FFFFFF',
         light: '#e5e7e5',
         timeline: '#dddddd'
+    },
+    'hiero-signature': {
+        primary: '#000000',
+        secondary: '#555555',
+        accent: '#f37021', // Orange
+        background: '#FFFFFF',
+        light: '#f7f7f7'
     }
 };
 
@@ -238,7 +245,9 @@ const TEMPLATE_MAP = {
     'essence': 'hiero-essence',
     'hiero-timeline': 'hiero-timeline',
     'timeline': 'hiero-timeline',
-    'hiero-minimal': 'hiero-timeline'
+    'hiero-minimal': 'hiero-timeline',
+    'hiero-signature': 'hiero-signature',
+    'signature': 'hiero-signature'
 
 };
 
@@ -1328,6 +1337,17 @@ async function generateUnifiedResume(data, templateId, outStream, customOptions 
                     renderTemplate_HieroNova(doc, data, options);
                     doc.end();
 
+                    if (outStream && outStream.on) {
+                        outStream.on('finish', () => resolve(true));
+                        outStream.on('error', reject);
+                    } else {
+                        resolve(doc);
+                    }
+                    return;
+
+                case 'hiero-signature':
+                    renderTemplate_HieroSignature(doc, data);
+                    doc.end();
                     if (outStream && outStream.on) {
                         outStream.on('finish', () => resolve(true));
                         outStream.on('error', reject);
@@ -4083,6 +4103,207 @@ function renderTemplate_HieroRetail(doc, rawData) {
         });
 
         rightY = Math.max(dateBottomY, contentY) + 12;
+    });
+}
+
+function renderTemplate_HieroSignature(doc, rawData) {
+    const data = normalizeData(rawData);
+    const colors = TEMPLATE_COLORS['hiero-signature'];
+
+    const PAGE_W = 595.28;
+    const PAGE_H = 841.89;
+    const SIDEBAR_W = PAGE_W * 0.35;
+    const LEFT_W = PAGE_W - SIDEBAR_W;
+    const SIDEBAR_X = LEFT_W;
+
+    // Helper for rotated text
+    const renderRotatedLabel = (text, x, y, color) => {
+        doc.save();
+        doc.fillColor(color).font('Helvetica-Bold').fontSize(14);
+        const textW = doc.widthOfString(text.toUpperCase());
+        doc.translate(x, y);
+        doc.rotate(-90);
+        doc.text(text.toUpperCase(), -textW / 2, 0);
+        doc.restore();
+    };
+
+    // Backgrounds
+    doc.save();
+    doc.fillColor('#000000').rect(SIDEBAR_X, 0, SIDEBAR_W, PAGE_H).fill();
+    doc.restore();
+
+    // Sections on Left
+    let currentY = 0;
+    const sections = [
+        { id: 'summary', title: 'About Me', color: '#f7f7f7', textColor: '#000000' },
+        { id: 'experience', title: 'Experience', color: '#FFFFFF', accent: true, textColor: '#FFFFFF' },
+        { id: 'education', title: 'Education', color: '#FFFFFF', textColor: '#000000' },
+        { id: 'projects', title: 'Projects', color: '#FFFFFF', textColor: '#000000' }
+    ];
+
+    sections.forEach(sec => {
+        let contentHeight = 150; // default min height
+        let items = [];
+
+        if (sec.id === 'summary') {
+            items = [data.summary].filter(Boolean);
+            contentHeight = Math.max(120, doc.heightOfString(data.summary || '', { width: LEFT_W - 140 }) + 80);
+        } else {
+            items = getSafeArray(data[sec.id]);
+            if (items.length === 0) return;
+            // Rough calc for height
+            contentHeight = items.length * 80 + 60;
+        }
+
+        if (currentY + contentHeight > PAGE_H) {
+            // Very basic page overflow handling for this custom renderer
+            // (In a real scenario we'd need more complex logic, but trying to keep it "per-template" as requested)
+        }
+
+        doc.save();
+        doc.fillColor(sec.color).rect(0, currentY, LEFT_W, contentHeight).fill();
+        if (sec.accent) {
+            doc.fillColor(colors.accent).rect(0, currentY, 85, contentHeight).fill();
+        }
+        doc.restore();
+
+        renderRotatedLabel(sec.title, 45, currentY + (contentHeight / 2), sec.id === 'experience' ? '#FFFFFF' : '#000000');
+
+        // Content
+        let itemY = currentY + 35;
+        const contentX = 100;
+        const contentW = LEFT_W - 140;
+
+        if (sec.id === 'summary') {
+            doc.fillColor('#000000').font('Helvetica-Bold').fontSize(11).text('PROFESSIONAL PROFILE', contentX, itemY);
+            itemY += 18;
+            doc.fillColor(colors.secondary).font('Helvetica').fontSize(10).text(data.summary || '', contentX, itemY, { width: contentW, align: 'justify', lineGap: 3 });
+        } else if (sec.id === 'experience') {
+            items.forEach(exp => {
+                doc.fillColor(colors.accent).font('Helvetica-Bold').fontSize(9).text(`${exp.startDate || ''} - ${exp.endDate || 'Present'}`, contentX, itemY);
+                itemY += 12;
+                doc.fillColor('#000000').font('Helvetica-Bold').fontSize(11).text((exp.jobTitle || '').toUpperCase(), contentX, itemY);
+                itemY += 14;
+                doc.fillColor('#333333').font('Helvetica-Bold').fontSize(9).text((exp.company || '').toUpperCase(), contentX, itemY);
+                itemY += 12;
+                if (exp.description) {
+                    doc.fillColor(colors.secondary).font('Helvetica').fontSize(9).text(exp.description, contentX, itemY, { width: contentW, lineGap: 2 });
+                    itemY = doc.y + 15;
+                } else {
+                    itemY += 15;
+                }
+            });
+        } else if (sec.id === 'education') {
+            items.forEach(edu => {
+                doc.fillColor(colors.accent).font('Helvetica-Bold').fontSize(9).text(edu.gradYear || '', contentX, itemY);
+                itemY += 12;
+                doc.fillColor('#000000').font('Helvetica-Bold').fontSize(11).text((edu.school || '').toUpperCase(), contentX, itemY);
+                itemY += 14;
+                doc.fillColor(colors.secondary).font('Helvetica').fontSize(10).text(edu.degree || '', contentX, itemY);
+                itemY = doc.y + 15;
+            });
+        } else if (sec.id === 'projects') {
+            items.forEach(proj => {
+                doc.fillColor(colors.accent).font('Helvetica-Bold').fontSize(9).text(proj.duration || '', contentX, itemY);
+                itemY += 12;
+                doc.fillColor('#000000').font('Helvetica-Bold').fontSize(11).text((proj.title || '').toUpperCase(), contentX, itemY);
+                itemY += 14;
+                doc.fillColor(colors.secondary).font('Helvetica').fontSize(10).text(proj.description || '', contentX, itemY, { width: contentW });
+                itemY = doc.y + 15;
+            });
+        }
+
+        currentY += contentHeight;
+        // Separator
+        doc.save();
+        doc.strokeColor('#f0f0f0').lineWidth(1).moveTo(0, currentY).lineTo(LEFT_W, currentY).stroke();
+        doc.restore();
+    });
+
+    // Sidebar Content (Right)
+    const sidebarInnerX = SIDEBAR_X + 25;
+    const sidebarInnerW = SIDEBAR_W - 50;
+    let sidebarY = 35;
+
+    // Photo
+    const photoFrameH = 220;
+    doc.save();
+    doc.fillColor('#1a1a1a').rect(SIDEBAR_X + 35, sidebarY, SIDEBAR_W - 70, photoFrameH).fill();
+    if (data.personalInfo?.profilePhoto) {
+        try {
+            const buffer = base64ToBuffer(data.personalInfo.profilePhoto);
+            if (buffer) {
+                doc.image(buffer, SIDEBAR_X + 35, sidebarY, { width: SIDEBAR_W - 70, height: photoFrameH, fit: [SIDEBAR_W - 70, photoFrameH], align: 'center', valign: 'center' });
+            }
+        } catch (e) {
+            console.error('Signature Photo Error:', e);
+        }
+    }
+    doc.restore();
+
+    // Initials Circle
+    const initials = (data.personalInfo.fullName || 'UN').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    doc.save();
+    doc.fillColor(colors.accent).circle(SIDEBAR_X + 24, sidebarY + 35, 24).fill();
+    doc.fillColor('#FFFFFF').font('Helvetica-Bold').fontSize(14).text(initials, SIDEBAR_X, sidebarY + 35 - 7, { width: 48, align: 'center' });
+    doc.restore();
+
+    sidebarY += photoFrameH + 30;
+
+    // Name
+    const fullName = (data.personalInfo.fullName || 'User Name').toUpperCase();
+    const nameParts = fullName.split(/\s+/).filter(Boolean);
+    const firstName = nameParts[0] || 'USER';
+    const lastName = nameParts.slice(1).join(' ') || 'NAME';
+
+    // Dynamic Font Size for Sidebar Name
+    let nameSize = 24;
+    if (fullName.length > 20) nameSize = 20;
+    if (fullName.length > 28) nameSize = 16;
+
+    doc.fillColor('#FFFFFF').font('Helvetica').fontSize(nameSize).text(firstName, sidebarInnerX, sidebarY);
+    sidebarY = doc.y;
+    doc.font('Helvetica-Bold').fontSize(nameSize).text(lastName, sidebarInnerX, sidebarY);
+    sidebarY = doc.y + 10;
+
+    // Job Title
+    doc.fillColor('#888888').font('Helvetica-Bold').fontSize(8).text((data.personalInfo.roleTitle || 'Professional Title').toUpperCase(), sidebarInnerX, sidebarY, { characterSpacing: 2 });
+    sidebarY = doc.y + 15;
+    doc.strokeColor('#333333').lineWidth(1).moveTo(sidebarInnerX, sidebarY).lineTo(SIDEBAR_X + SIDEBAR_W - 25, sidebarY).stroke();
+    sidebarY += 25;
+
+    // Expertise (Skills with Bars)
+    doc.fillColor('#FFFFFF').font('Helvetica-Bold').fontSize(11).text('EXPERTISE', sidebarInnerX, sidebarY);
+    sidebarY = doc.y + 15;
+
+    const skills = getSafeArray(data.skills).slice(0, 6);
+    skills.forEach(skill => {
+        doc.fillColor('#AAAAAA').font('Helvetica-Bold').fontSize(8).text(String(skill).toUpperCase(), sidebarInnerX, sidebarY, { characterSpacing: 1 });
+        sidebarY = doc.y + 5;
+        doc.fillColor('#222222').rect(sidebarInnerX, sidebarY, sidebarInnerW, 4).fill();
+        doc.fillColor(colors.accent).rect(sidebarInnerX, sidebarY, sidebarInnerW * 0.85, 4).fill();
+        sidebarY += 15;
+    });
+
+    sidebarY += 15;
+
+    // Contact
+    doc.fillColor('#FFFFFF').font('Helvetica-Bold').fontSize(11).text('CONTACT', sidebarInnerX, sidebarY);
+    sidebarY = doc.y + 15;
+
+    const contactItems = [
+        { label: 'LOCATION', val: data.personalInfo.address || 'India' },
+        { label: 'EMAIL', val: data.personalInfo.email },
+        { label: 'PHONE', val: data.personalInfo.phone }
+    ];
+
+    contactItems.forEach(item => {
+        if (item.val) {
+            doc.fillColor('#FFFFFF').font('Helvetica-Bold').fontSize(7.5).text(item.label, sidebarInnerX, sidebarY, { characterSpacing: 1 });
+            sidebarY = doc.y + 4;
+            doc.fillColor('#888888').font('Helvetica').fontSize(9).text(item.val, sidebarInnerX, sidebarY);
+            sidebarY = doc.y + 12;
+        }
     });
 }
 
