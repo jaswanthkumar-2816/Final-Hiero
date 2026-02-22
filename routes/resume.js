@@ -124,7 +124,7 @@ router.post('/template', authenticateToken, async (req, res) => {
 
 router.get('/health', (req, res) => res.json({ status: 'ok', service: 'resume-integrated' }));
 
-const { generateTemplateHTML } = require('./templates');
+
 const { generatePuppeteerPDF } = require('../utils/puppeteer-service');
 
 router.post('/preview-resume', async (req, res) => {
@@ -136,24 +136,9 @@ router.post('/preview-resume', async (req, res) => {
 
         const templateId = data.template || 'classic';
 
-        if (templateId === 'hiero-signature') {
-            const html = generateTemplateHTML(templateId, data);
-            const outputPath = path.join(os.tmpdir(), `preview_${Date.now()}.pdf`);
-
-            await generatePuppeteerPDF(html, outputPath);
-
-            res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', 'inline; filename=resume-preview.pdf');
-            res.sendFile(outputPath, (err) => {
-                if (err) console.error('Error sending file:', err);
-                // Try to delete temp file after sending
-                try { fs.unlinkSync(outputPath); } catch (e) { }
-            });
-        } else {
-            res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', 'inline; filename=resume-preview.pdf');
-            await generateUnifiedResume(data, templateId, res, { forceSinglePage: true });
-        }
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', 'inline; filename=resume-preview.pdf');
+        await generateUnifiedResume(data, templateId, res, { forceSinglePage: true });
     } catch (error) {
         console.error('Preview error:', error);
         if (!res.headersSent) res.status(500).send('Generation failed');
@@ -170,23 +155,9 @@ router.post('/download-resume', async (req, res) => {
         const templateId = data.template || 'classic';
         const name = (data.personalInfo?.fullName || 'Resume').replace(/\s+/g, '_');
 
-        if (templateId === 'hiero-signature') {
-            const html = generateTemplateHTML(templateId, data);
-            const outputPath = path.join(os.tmpdir(), `${name}_Hiero_${Date.now()}.pdf`);
-
-            await generatePuppeteerPDF(html, outputPath);
-
-            res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', `attachment; filename="${name}_Hiero.pdf"`);
-            res.download(outputPath, `${name}_Hiero.pdf`, (err) => {
-                if (err) console.error('Error sending file:', err);
-                try { fs.unlinkSync(outputPath); } catch (e) { }
-            });
-        } else {
-            res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', `attachment; filename="${name}_Hiero.pdf"`);
-            await generateUnifiedResume(data, templateId, res);
-        }
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="${name}_Hiero.pdf"`);
+        await generateUnifiedResume(data, templateId, res);
     } catch (error) {
         console.error('Download PDF error:', error);
         if (!res.headersSent) res.status(500).json({ error: 'Failed to generate PDF' });
@@ -444,23 +415,9 @@ router.get('/preview-pdf', async (req, res) => {
 
         const templateId = resume.data.template || 'classic';
 
-        if (templateId === 'hiero-signature') {
-            const html = generateTemplateHTML(templateId, resume.data);
-            const outputPath = path.join(os.tmpdir(), `preview_get_${Date.now()}.pdf`);
-
-            await generatePuppeteerPDF(html, outputPath);
-
-            res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', 'inline; filename=resume-preview.pdf');
-            res.sendFile(outputPath, (err) => {
-                if (err) console.error('Error sending file:', err);
-                try { fs.unlinkSync(outputPath); } catch (e) { }
-            });
-        } else {
-            res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', 'inline; filename=resume-preview.pdf');
-            await generateUnifiedResume(resume.data, templateId, res);
-        }
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', 'inline; filename=resume-preview.pdf');
+        await generateUnifiedResume(resume.data, templateId, res);
     } catch (error) {
         console.error('Preview GET error:', error);
         res.status(500).send('Generation failed');
@@ -476,23 +433,9 @@ router.get('/download', authenticateToken, async (req, res) => {
         const templateId = resume.data.template || 'classic';
         const name = (resume.data.basic?.full_name || 'Resume').replace(/\s+/g, '_');
 
-        if (templateId === 'hiero-signature') {
-            const html = generateTemplateHTML(templateId, resume.data);
-            const outputPath = path.join(os.tmpdir(), `${name}_Hiero_get_${Date.now()}.pdf`);
-
-            await generatePuppeteerPDF(html, outputPath);
-
-            res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', `attachment; filename="${name}_Hiero.pdf"`);
-            res.download(outputPath, `${name}_Hiero.pdf`, (err) => {
-                if (err) console.error('Error sending file:', err);
-                try { fs.unlinkSync(outputPath); } catch (e) { }
-            });
-        } else {
-            res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', `attachment; filename="${name}_Hiero.pdf"`);
-            await generateUnifiedResume(resume.data, templateId, res);
-        }
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="${name}_Hiero.pdf"`);
+        await generateUnifiedResume(resume.data, templateId, res);
     } catch (error) {
         console.error('Download GET error:', error);
         if (!res.headersSent) res.status(500).json({ error: 'Failed to generate PDF' });
