@@ -5,7 +5,7 @@
   "main": "gateway.js",
   "scripts": {
     "start": "node gateway.js",
-    "build": "npm install && npx puppeteer browsers install chrome",
+    "build": "npm install",
     "dev": "nodemon gateway.js"
   },
   "dependencies": {
