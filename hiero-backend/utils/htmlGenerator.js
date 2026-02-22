@@ -1,6 +1,7 @@
 // Fast HTML Resume Generator
 // This generates instant HTML previews without LaTeX compilation
 
+import { generateHieroSignatureTemplate } from '../templates/hieroSignatureTemplate.js';
 import fs from 'fs';
 import path from 'path';
 
@@ -14,11 +15,33 @@ export function generateHTMLPreview(templateId, resumeData) {
     elegant: generateExecutiveHTML,
     functional: generateFunctionalHTML,
     rishi: generateModernHTML,
-    'priya-analytics': generateProfessionalHTML
+    'priya-analytics': generateProfessionalHTML,
+    'hiero-signature': (data) => generateHieroSignatureTemplate(convertToModernSchema(data))
   };
 
   const generator = templates[templateId] || templates.professionalcv;
   return generator(resumeData);
+}
+
+function convertToModernSchema(data) {
+  if (data.personalInfo) return data; // Already in modern schema
+
+  return {
+    personalInfo: {
+      fullName: data.basic?.full_name,
+      email: data.basic?.contact_info?.email,
+      phone: data.basic?.contact_info?.phone,
+      address: data.basic?.contact_info?.address,
+      website: data.basic?.website,
+      summary: data.basic?.career_summary
+    },
+    experience: data.experience || [],
+    education: data.education || [],
+    skills: Array.isArray(data.skills) ? data.skills :
+      (data.skills && typeof data.skills === 'object' ?
+        [...(data.skills.technical || []), ...(data.skills.management || [])] :
+        data.skills || [])
+  };
 }
 
 function sanitizeHTML(text) {
