@@ -555,7 +555,7 @@ const TEMPLATES = {
     const firstName = nameParts[0] || '';
     const lastName = nameParts.slice(1).join(' ') || '';
     const initials = (firstName[0] || 'U') + (lastName[0] || 'N');
-    const userPhoto = p.profilePhoto || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=600';
+    const userPhoto = p.profilePhoto || '';
 
     return `<!doctype html>
 <html lang="en">
@@ -587,8 +587,9 @@ const TEMPLATES = {
     
     /* Profiles */
     .profile-photo { width: 100%; padding: 35px 35px 0 35px; background: var(--black); }
-    .photo-frame { width: 100%; height: 260px; overflow: hidden; border-radius: 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    .photo-frame { width: 100%; height: 260px; overflow: hidden; border-radius: 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); background: #1a1a1a; display: flex; align-items: center; justify-content: center; }
     .photo-frame img { width: 100%; height: 100%; object-fit: cover; }
+    .photo-frame .photo-placeholder { color: #333; font-size: 40pt; }
     
     .sidebar-inner { padding: 35px 25px; flex: 1; display: flex; flex-direction: column; }
     .name-line { font-family: 'Syne', sans-serif; font-size: 21pt; font-weight: 400; line-height: 1.1; text-transform: uppercase; letter-spacing: -0.5px; word-break: break-all; }
@@ -757,7 +758,7 @@ const TEMPLATES = {
       <div class="initials-circle" style="top: 35px; z-index: 999;">${esc(initials)}</div>
       <div class="profile-photo">
         <div class="photo-frame">
-          <img src="${userPhoto}" alt="Profile">
+          ${userPhoto ? `<img src="${userPhoto}" alt="Profile">` : '<div class="photo-placeholder"><i class="fas fa-user"></i></div>'}
         </div>
       </div>
       <div class="sidebar-inner">
