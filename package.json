@@ -5,7 +5,7 @@
   "main": "gateway.js",
   "scripts": {
     "start": "node gateway.js",
-    "build": "echo '🚀 Build starting...' && export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true && echo '✅ Build successful!'",
+    "build": "npm install && npx puppeteer browsers install chrome",
     "dev": "nodemon gateway.js"
   },
   "dependencies": {
