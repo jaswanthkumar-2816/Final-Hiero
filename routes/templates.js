@@ -555,7 +555,7 @@ const TEMPLATES = {
     const firstName = nameParts[0] || '';
     const lastName = nameParts.slice(1).join(' ') || '';
     const initials = (firstName[0] || 'U') + (lastName[0] || 'N');
-    const userPhoto = p.photo || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=600';
+    const userPhoto = p.profilePhoto || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=600';
 
     return `<!doctype html>
 <html lang="en">
@@ -734,7 +734,7 @@ const TEMPLATES = {
           ${d.projects.map(proj => `
             <div class="entry">
               <div class="eyear">${esc(proj.duration)}</div>
-              <h4>${esc(proj.name)}</h4>
+              <h4>${esc(proj.title)}</h4>
               <div class="edesc">${esc(proj.description)}</div>
             </div>
           `).join('')}
