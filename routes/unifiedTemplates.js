@@ -1347,7 +1347,7 @@ async function generateUnifiedResume(data, templateId, outStream, customOptions 
                     }
                     return;
                 case 'hiero-nova':
-                    renderTemplate_HieroNova(doc, data, options);
+                    await renderTemplate_HieroNova(doc, data);
                     doc.end();
 
                     if (outStream && outStream.on) {
@@ -2893,356 +2893,200 @@ function renderTemplate_HieroMonethon(doc, data, options = {}) {
     doc.constructor.prototype.addPage = _protoAddPage;
 }
 
-function renderTemplate_HieroNova(doc, originalData, options = {}) {
-    const COLORS = {
-        black: '#111111',
-        darkGray: '#2B2B2B',
-        lightGray: '#EFEFEF',
-        textGray: '#555555',
-        white: '#FFFFFF'
-    };
+async function renderTemplate_HieroNova(doc, rawData) {
+    const data = normalizeData(rawData);
+    const pInfo = data.personalInfo || {};
 
-    const MARGIN = 40;
-    const LEFT_WIDTH = 175;
-    const RIGHT_X = 240;
+    // Layout Constants (Editorial Perfection)
     const PAGE_WIDTH = 595.28;
     const PAGE_HEIGHT = 841.89;
-    const RIGHT_WIDTH = PAGE_WIDTH - RIGHT_X - MARGIN;
-    const CENTER_L = MARGIN + (LEFT_WIDTH / 2);
+    const sidebarWidth = PAGE_WIDTH * 0.38;
+    const headerHeight = 170;
 
-    const forceSinglePage = options.forceSinglePage === true; // Only if explicitly requested
+    const yellow = '#f4b400';
+    const dark = '#1a1a1a';
+    const textBlack = '#1a1a1a';
+    const greyText = '#777777';
+    const lightGrey = '#e5e5e5';
+    const white = '#ffffff';
 
-
-    // CRITICAL: Override doc.addPage for single-page constraint if requested
-    const _originalAddPage = doc.addPage.bind(doc);
-    const _protoAddPage = doc.constructor.prototype.addPage;
-    const noOpAddPage = function () { return doc; };
-
-    if (forceSinglePage) {
-        doc.addPage = noOpAddPage;
-        doc.constructor.prototype.addPage = noOpAddPage;
-    }
-
-
-    const toArray = (v) => {
-        if (Array.isArray(v)) return v;
-        if (typeof v === 'string') return v.split(/[\n,;]/).map(s => s.trim()).filter(Boolean);
-        return [];
+    // Helper: Premium Vector Icons
+    const drawCustomIcon = (type, x, y) => {
+        doc.save();
+        doc.circle(x, y, 9).fill(white);
+        doc.fillColor(dark);
+        doc.translate(x, y);
+        if (type === 'LOC') {
+            doc.moveTo(0, 4).lineTo(-3, 0).bezierCurveTo(-4, -4, 4, -4, 3, 0).closePath().fill();
+            doc.fillColor(white).circle(0, -1, 1).fill();
+        } else if (type === 'TEL') {
+            doc.rect(-2.5, -4, 5, 8).fill();
+            doc.fillColor(white).rect(-1.5, -3, 3, 5).fill();
+            doc.fillColor(dark).circle(0, 3, 0.5).fill();
+        } else if (type === 'MAIL') {
+            doc.rect(-4, -3, 8, 6).fill();
+            doc.strokeColor(white).lineWidth(0.5).moveTo(-4, -3).lineTo(0, 0).lineTo(4, -3).stroke();
+        } else if (type === 'WEB') {
+            doc.circle(0, 0, 4.5).stroke();
+            doc.lineWidth(0.5).moveTo(-4.5, 0).lineTo(4.5, 0).stroke();
+            doc.moveTo(0, -4.5).lineTo(0, 4.5).stroke();
+            doc.ellipse(0, 0, 2, 4.5).stroke();
+        } else if (type === 'LINKEDIN') {
+            doc.rect(-4, -4, 8, 8).fill();
+            doc.fillColor(white).font('Helvetica-Bold').fontSize(6).text('in', -3, -3);
+        } else if (type === 'GITHUB') {
+            doc.circle(0, 0, 4.5).fill();
+            doc.fillColor(dark).circle(-1.5, -1, 1.5).fill();
+            doc.circle(1.5, -1, 1.5).fill();
+        }
+        doc.restore();
     };
 
-    const data = {
-        name: originalData.name || originalData.fullName || originalData.personalInfo?.fullName || originalData.basics?.name || originalData.full_name || "Your Name",
-        title: originalData.title || originalData.jobTitle || originalData.headline || originalData.personalInfo?.headline || originalData.basics?.label || (originalData.experience && originalData.experience[0] && (originalData.experience[0].jobTitle || originalData.experience[0].role)) || "Professional Title",
-        summary: originalData.summary || originalData.description || originalData.personalInfo?.summary || originalData.basics?.summary || originalData.profile || "",
-        contact: {
-            address: originalData.address || originalData.location || originalData.personalInfo?.address || originalData.basics?.location?.address || originalData.basics?.location?.city || "",
-            phone: originalData.phone || originalData.contactNumber || originalData.personalInfo?.phone || originalData.basics?.phone || "",
-            email: originalData.email || originalData.emailAddress || originalData.personalInfo?.email || originalData.basics?.email || ""
-        },
-        expertise: toArray(originalData.skills || originalData.technicalSkills || originalData.skillSet || originalData.expertise || originalData.keywords || originalData.skill_list || []),
-        experience: toArray(originalData.experience || originalData.work || originalData.workHistory || originalData.work_experience || originalData.jobHistory || [])
-            .concat(toArray(originalData.internships || originalData.volunteer || originalData.volunteering || []))
-            .filter(exp => exp && typeof exp === 'object')
-            .map(exp => ({
-                role: exp.role || exp.jobTitle || exp.position || exp.title || "",
-                company: exp.company || exp.employer || exp.organization || exp.org || "",
-                years: exp.years || exp.duration || exp.dateRange || (exp.startDate && exp.endDate ? `${exp.startDate} - ${exp.endDate}` : (exp.startDate || exp.date || "")),
-                bullets: toArray(exp.bullets || exp.description || exp.responsibilities || exp.highlights || exp.summary || [])
-            })),
-        education: toArray(originalData.education || originalData.academic || originalData.studies || originalData.education_history || originalData.academic_background || [])
-            .filter(edu => edu && typeof edu === 'object')
-            .map(edu => ({
-                degree: edu.degree || edu.qualification || edu.area || edu.studyType || "",
-                institute: edu.institute || edu.school || edu.university || edu.college || edu.institution || "",
-                years: edu.years || edu.gradYear || edu.duration || edu.date || (edu.startDate && edu.endDate ? `${edu.startDate} - ${edu.endDate}` : (edu.startDate || "")),
-                description: edu.description || edu.courses || edu.major || ""
-            })),
-        projects: toArray(originalData.projects || originalData.projs || originalData.projectHistory || [])
-            .filter(proj => proj && typeof proj === 'object')
-            .map(proj => ({
-                name: proj.name || proj.title || proj.projectName || "",
-                technologies: proj.technologies || proj.tech || proj.keywords || proj.tools || "",
-                years: proj.duration || proj.date || proj.years || "",
-                description: proj.description || proj.summary || proj.details || ""
-            })),
-        awards: toArray(originalData.awards || originalData.achievements || originalData.certifications || originalData.honors || [])
-            .map(aw => typeof aw === 'string' ? { title: aw, issuer: '', year: '' } : {
-                title: aw.title || aw.name || "",
-                issuer: aw.issuer || aw.organization || aw.company || aw.authority || "",
-                year: aw.year || aw.date || ""
-            }),
-        references: toArray(originalData.references || originalData.recommenders || [])
-            .filter(ref => ref && typeof ref === 'object')
-            .map(ref => ({
-                name: ref.name || ref.fullName || "",
-                role: ref.role || ref.title || ref.position || ref.relationship || "",
-                phone: ref.phone || ref.contact || "",
-                email: ref.email || ""
-            }))
-    };
+    // 1. Backgrounds
+    doc.rect(0, 0, sidebarWidth, headerHeight).fill(yellow);
+    doc.rect(PAGE_WIDTH - 85, 0, 85, 45).fill(yellow);
+    doc.rect(0, headerHeight, sidebarWidth, PAGE_HEIGHT - headerHeight).fill(dark);
 
-
-
-    // Draw Subtle Page Background to avoid "whitish" feel
-    doc.save();
-    doc.rect(0, 0, PAGE_WIDTH, PAGE_HEIGHT).fillColor('#FBFAFB').fill();
-    doc.restore();
-
-    // --- LEFT COLUMN (Vertical Badge) ---
-
-    // Shield Shape for Photo (Legion Rebranding)
-    const hX = CENTER_L;
-    const hY = 110;
-    const hR = 60;
-
-    const drawShield = (pathDoc) => {
-        pathDoc.moveTo(hX, hY - hR)
-            .quadraticCurveTo(hX + 55, hY - hR, hX + 55, hY - 10)
-            .lineTo(hX + 55, hY + 20)
-            .quadraticCurveTo(hX + 55, hY + 50, hX, hY + hR + 5)
-            .quadraticCurveTo(hX - 55, hY + 50, hX - 55, hY + 20)
-            .lineTo(hX - 55, hY - 10)
-            .quadraticCurveTo(hX - 55, hY - hR, hX, hY - hR)
-            .closePath();
-    };
-
-    // Draw Placeholder Background
-    doc.save();
-    drawShield(doc);
-    doc.fillColor(COLORS.lightGray).fill();
-
-    // Render Actual Photo if available
-    const photo = originalData.personalInfo?.profilePhoto || originalData.photo;
-    if (photo) {
+    // 2. Profile Photo
+    if (pInfo.profilePhoto) {
         try {
-            doc.save();
-            drawShield(doc);
-            doc.clip();
-
-
-            let imgData = photo;
-            if (typeof imgData === 'string' && imgData.includes(';base64,')) {
-                imgData = Buffer.from(imgData.split(';base64,')[1], 'base64');
+            let imgData = pInfo.profilePhoto;
+            if (imgData.startsWith('data:image')) {
+                const parts = imgData.split(',');
+                if (parts.length > 1) imgData = Buffer.from(parts[1], 'base64');
             }
+            const pSize = 135;
+            const pX = (sidebarWidth - pSize) / 2;
+            const pY = (headerHeight - pSize) / 2;
 
-            doc.image(imgData, hX - 60, hY - 60, {
-                fit: [120, 120],
-                align: 'center',
-                valign: 'center'
-            });
+            doc.save();
+            doc.circle(pX + pSize / 2, pY + pSize / 2, pSize / 2).clip();
+            doc.image(imgData, pX, pY, { width: pSize, height: pSize, cover: [pSize, pSize] });
             doc.restore();
-        } catch (e) {
-            console.error("Hiero Nova Photo Error:", e);
-        }
-    }
-    doc.restore();
 
-    // Vertical Badge Background
-    const bTop = 180;
-    const bHeight = 310;
-    doc.save();
-    doc.moveTo(MARGIN, bTop + 35)
-        .lineTo(CENTER_L, bTop)
-        .lineTo(MARGIN + LEFT_WIDTH, bTop + 35)
-        .lineTo(MARGIN + LEFT_WIDTH, bTop + bHeight - 40)
-        .lineTo(CENTER_L, bTop + bHeight)
-        .lineTo(MARGIN, bTop + bHeight - 40)
-        .closePath()
-        .fillColor(COLORS.black)
-        .fill();
-
-    // Name & Title in Badge
-    // Name & Title in Badge
-    const nameStr = (data.name || "YOUR NAME").toUpperCase();
-    const nameParts = nameStr.split(/\s+/).filter(Boolean);
-
-    // Dynamic Name Handling to prevent overlap
-    let fontSize = 23;
-    if (nameStr.length > 20) fontSize = 20;
-    if (nameStr.length > 30) fontSize = 17;
-
-    doc.fillColor(COLORS.white).font('Times-Bold').fontSize(fontSize);
-
-    let curY = bTop + 55;
-    const badgeContentWidth = LEFT_WIDTH - 10;
-    const badgeX = MARGIN + 5;
-
-    nameParts.forEach(p => {
-        // If a single word is too wide, shrink it further
-        let pSize = fontSize;
-        while (doc.widthOfString(p, { size: pSize }) > badgeContentWidth && pSize > 12) {
-            pSize -= 1;
-        }
-
-        doc.fontSize(pSize).text(p, badgeX, curY, {
-            width: badgeContentWidth,
-            align: 'center',
-            lineGap: 0
-        });
-        curY = doc.y + 2; // Real text height tracking
-    });
-
-    curY += 10;
-    doc.fontSize(10).font('Helvetica').text((data.title || '').toUpperCase(), MARGIN, curY, { width: LEFT_WIDTH, align: 'center' });
-    curY = doc.y + 25;
-
-
-    doc.moveTo(CENTER_L - 30, curY).lineTo(CENTER_L + 30, curY).strokeColor(COLORS.white).lineWidth(0.5).stroke();
-    curY += 15;
-
-    doc.fontSize(8).font('Helvetica').lineGap(2).text(data.summary || '', MARGIN + 15, curY, {
-        width: LEFT_WIDTH - 30,
-        align: 'center',
-        height: bTop + bHeight - curY - 50,
-        ellipsis: true
-    });
-    doc.restore();
-
-    // Contact Section
-    let leftY = bTop + bHeight + 10;
-    const drawLeftHeader = (label) => {
-        doc.fillColor(COLORS.black).font('Times-Bold').fontSize(12).text(label, MARGIN, leftY);
-        leftY += 16;
-        doc.moveTo(MARGIN, leftY).lineTo(MARGIN + 35, leftY).strokeColor(COLORS.black).lineWidth(1.2).stroke();
-        leftY += 10;
-    };
-
-
-    drawLeftHeader('CONTACT');
-    const contactLinks = [
-        { val: data.contact?.address },
-        { val: data.contact?.phone },
-        { val: data.contact?.email }
-    ];
-    contactLinks.forEach(item => {
-        if (item.val) {
-            doc.circle(MARGIN + 4, leftY + 4, 2.5).fillColor(COLORS.black).fill();
-            doc.fillColor(COLORS.textGray).font('Helvetica').fontSize(8.5).text(item.val, MARGIN + 15, leftY, { width: LEFT_WIDTH - 15 });
-            leftY += 16;
-        }
-    });
-
-    // Expertise Section
-    leftY += 10;
-    drawLeftHeader('EXPERTISE');
-    (data.expertise || []).forEach(sk => {
-        doc.fillColor(COLORS.textGray).font('Helvetica').fontSize(8.5).text('• ' + sk, MARGIN, leftY);
-        leftY += 13;
-    });
-
-    // Awards Section
-    if (data.awards.length > 0) {
-        leftY += 10;
-        drawLeftHeader('AWARD');
-        data.awards.forEach(aw => {
-            doc.fillColor(COLORS.black).font('Times-Bold').fontSize(9).text((aw.title || '').toUpperCase(), MARGIN, leftY, { width: LEFT_WIDTH, ellipsis: true });
-            leftY = doc.y + 1;
-            doc.fillColor(COLORS.textGray).font('Helvetica').fontSize(8).text(aw.issuer || '', MARGIN, leftY, { width: LEFT_WIDTH, height: 10, ellipsis: true });
-            leftY = doc.y + 10;
-        });
+            doc.circle(pX + pSize / 2, pY + pSize / 2, pSize / 2 + 3).lineWidth(3).strokeColor(white).stroke();
+        } catch (e) { }
     }
 
+    // 3. Header Text
+    const nameX = sidebarWidth + 45;
+    let nameY = 65;
+    const fullName = (pInfo.fullName || data.name || "YOUR NAME").toUpperCase();
+    const nameParts = fullName.split(' ');
+    const firstName = nameParts[0] || "";
+    const lastName = nameParts.slice(1).join(' ') || "";
 
+    doc.fillColor(textBlack).font('Times-Roman').fontSize(34).text(firstName, nameX, nameY);
+    nameY = doc.y - 8;
+    doc.font('Times-Bold').fontSize(44).text(lastName, nameX, nameY);
 
+    const role = (pInfo.roleTitle || data.title || "PROFESSIONAL TITLE").toUpperCase();
+    doc.font('Helvetica').fontSize(14).fillColor(greyText).text(role, nameX, doc.y + 8, { characterSpacing: 4 });
+    doc.moveTo(nameX + 110, doc.y + 10).lineTo(PAGE_WIDTH - 40, doc.y + 10).strokeColor(yellow).lineWidth(6).stroke();
 
-    // --- RIGHT COLUMN (WHITE) ---
-    let rightY = 40;
+    // 4. Main Content (Optimized for One Page)
+    let mY = headerHeight + 55;
+    const mX = nameX;
+    const mWidth = PAGE_WIDTH - mX - 40;
 
-    const checkBreak = (h) => {
-        if (!forceSinglePage && rightY + h > PAGE_HEIGHT - MARGIN) {
-            doc.addPage();
-            rightY = MARGIN;
-        }
+    const mSecH = (t) => {
+        doc.fillColor(textBlack).font('Times-Bold').fontSize(16).text(t.toUpperCase(), mX, mY, { characterSpacing: 2 });
+        const lineY = doc.y + 2;
+        doc.moveTo(mX, lineY).lineTo(mX + 160, lineY).strokeColor('#cccccc').lineWidth(1.5).stroke();
+        mY = lineY + 18;
     };
-
-    const drawRightHeader = (label) => {
-        checkBreak(35);
-        doc.fillColor(COLORS.black).font('Times-Bold').fontSize(14).text(label.toUpperCase(), RIGHT_X, rightY);
-        rightY += 18;
-        doc.moveTo(RIGHT_X, rightY).lineTo(RIGHT_X + 60, rightY).strokeColor(COLORS.black).lineWidth(2).stroke();
-        rightY += 15;
-    };
-
 
     // Experience
-    if (data.experience.length > 0) {
-        drawRightHeader('WORK EXPERIENCE');
-        data.experience.forEach((exp, idx) => {
-            checkBreak(60);
-
-            doc.fillColor(COLORS.black).font('Times-Bold').fontSize(11).text((exp.role || '').toUpperCase(), RIGHT_X, rightY, { width: RIGHT_WIDTH - 80 });
-
-            doc.fillColor(COLORS.textGray).font('Helvetica').fontSize(9).text(exp.years || '', RIGHT_X, rightY, { width: RIGHT_WIDTH, align: 'right' });
-            rightY = doc.y + 2;
-            doc.fillColor(COLORS.textGray).font('Helvetica').fontSize(9.5).text(exp.company || '', RIGHT_X, rightY);
-            rightY = doc.y + 6;
-
-            exp.bullets.forEach(b => {
-                const bText = '• ' + b;
-                const bH = doc.heightOfString(bText, { width: RIGHT_WIDTH - 10, fontSize: 9 });
-                checkBreak(bH + 2);
-                doc.font('Helvetica').fontSize(9).fillColor(COLORS.textGray).text(bText, RIGHT_X + 10, rightY, { width: RIGHT_WIDTH - 10, lineGap: 1 });
-                rightY = doc.y + 3;
-            });
-            rightY += 10;
+    const exp = getSafeArray(data.experience);
+    if (exp.length > 0) {
+        mSecH('EXPERIENCE');
+        exp.slice(0, 3).forEach(e => {
+            doc.circle(mX - 25, mY + 6, 4).fill(yellow);
+            doc.fillColor(textBlack).font('Helvetica-Bold').fontSize(11.5).text((e.jobTitle || "").toUpperCase(), mX, mY, { continued: true });
+            doc.fillColor(greyText).font('Helvetica').fontSize(9.5).text(` (${e.startDate || ""} - ${e.endDate || "Present"})`);
+            doc.fillColor('#444444').font('Helvetica').fontSize(10.5).lineGap(0.5).text(e.description || "", mX, doc.y + 1, { width: mWidth });
+            mY = doc.y + 10;
         });
     }
-
 
     // Projects
-    if (data.projects && data.projects.length > 0) {
-        rightY += 10;
-        drawRightHeader('PROJECTS');
-        data.projects.forEach(proj => {
-            checkBreak(50);
-            doc.fillColor(COLORS.black).font('Times-Bold').fontSize(10.5).text((proj.name || proj.title || '').toUpperCase(), RIGHT_X, rightY, { width: RIGHT_WIDTH - 80 });
-            if (proj.years) doc.fillColor(COLORS.textGray).font('Helvetica').fontSize(8.5).text(proj.years, RIGHT_X, rightY, { width: RIGHT_WIDTH, align: 'right' });
-            rightY = doc.y + 2;
-
-            doc.fillColor(COLORS.textGray).font('Helvetica').fontSize(9).text(proj.description || '', RIGHT_X, rightY, { width: RIGHT_WIDTH, lineGap: 1 });
-            rightY = doc.y + 12;
+    const projs = getSafeArray(data.projects);
+    if (projs.length > 0) {
+        mSecH('PROJECTS');
+        projs.slice(0, 2).forEach(p => {
+            doc.circle(mX - 25, mY + 6, 4).fill(yellow);
+            doc.fillColor('#333333').font('Helvetica').fontSize(11.5).text((p.title || p.name || "").toUpperCase(), mX, mY);
+            doc.fillColor('#444444').font('Helvetica').fontSize(10.5).lineGap(0.5).text(p.description || "", mX, doc.y + 1, { width: mWidth });
+            mY = doc.y + 8;
         });
     }
-
 
     // Education
-    if (data.education.length > 0) {
-        rightY += 10;
-        drawRightHeader('EDUCATION');
-        data.education.forEach(edu => {
-            checkBreak(50);
-            doc.rect(RIGHT_X - 5, rightY - 5, RIGHT_WIDTH + 10, 42).fillColor(COLORS.lightGray).fill();
-            doc.fillColor(COLORS.black).font('Times-Bold').fontSize(10.5).text(edu.degree || '', RIGHT_X, rightY, { width: RIGHT_WIDTH - 60 });
-            doc.fillColor(COLORS.textGray).font('Helvetica').fontSize(9).text(edu.years || '', RIGHT_X, rightY, { width: RIGHT_WIDTH - 5, align: 'right' });
-            rightY = doc.y + 2;
-
-            doc.fillColor(COLORS.darkGray).font('Helvetica').fontSize(9).text(edu.institute || '', RIGHT_X, rightY);
-            rightY = doc.y + 15;
+    const edu = getSafeArray(data.education);
+    if (edu.length > 0) {
+        mSecH('EDUCATION');
+        edu.slice(0, 2).forEach(e => {
+            doc.circle(mX - 25, mY + 6, 4).fill(yellow);
+            doc.fillColor(textBlack).font('Helvetica-Bold').fontSize(11).text((e.degree || "").toUpperCase(), mX, mY);
+            doc.fillColor('#444444').font('Helvetica').fontSize(10.5).text(`${e.school || ""} (${e.gradYear || ""})`, mX, doc.y + 1);
+            mY = doc.y + 8;
         });
     }
 
+    mSecH('SKILLS');
+    const sks = getSafeArray(data.skills).slice(0, 8);
+    const colW = mWidth / 2 - 10;
+    doc.font('Helvetica-Bold').fontSize(9.5);
+    sks.forEach((s, i) => {
+        const n = (typeof s === 'string' ? s : (s.name || "")).toUpperCase();
+        if (!n) return;
+        const col = i % 2;
+        const row = Math.floor(i / 2);
+        const cX = mX + (col * (colW + 20));
+        const cY = mY + (row * 18);
+        if (cY > PAGE_HEIGHT - 35) return;
+        doc.fillColor(textBlack).text(n, cX, cY, { width: colW - 55, height: 12, ellipsis: true });
+        const tX = cX + colW - 45;
+        doc.save();
+        doc.roundedRect(tX, cY + 2, 40, 4, 1.5).fillColor('#f0f0f0').fill();
+        doc.roundedRect(tX, cY + 2, 30, 4, 1.5).fillColor(yellow).fill();
+        doc.restore();
+    });
 
-    // References
-    if (data.references.length > 0) {
-        rightY += 15;
-        drawRightHeader('REFERENCES');
-        const refW = RIGHT_WIDTH / 2;
-        data.references.slice(0, 2).forEach((ref, i) => {
-            const rx = RIGHT_X + (i * refW);
-            let ry = rightY;
-            doc.fillColor(COLORS.black).font('Times-Bold').fontSize(10).text(ref.name || '', rx, ry);
-            ry = doc.y + 2;
-            doc.fillColor(COLORS.textGray).font('Helvetica').fontSize(8.5).text(ref.role || '', rx, ry);
-            ry = doc.y + 1;
+    // 5. Sidebar Content
+    const sPadding = 32;
+    const sWidth = sidebarWidth - (sPadding * 2);
+    let sY = headerHeight + 30;
 
-            if (ref.phone) { doc.text(ref.phone, rx, ry); ry = doc.y + 1; }
-            if (ref.email) doc.text(ref.email, rx, ry);
-        });
+    const sSecH = (txt) => {
+        doc.fillColor(white).font('Times-Bold').fontSize(14).text(txt.toUpperCase(), sPadding, sY, { characterSpacing: 2 });
+        sY = doc.y + 15;
+    };
+
+    sSecH('ABOUT ME');
+    doc.font('Helvetica').fontSize(11).fillColor(white).lineGap(1.2).text(data.summary || "Professional summary here.", sPadding, sY, { width: sWidth });
+    sY = doc.y + 30;
+
+    sSecH('CONTACT');
+    const cLabels = [
+        { t: 'LOC', lab: 'Address:', v: pInfo.address || data.address || "" },
+        { t: 'TEL', lab: 'Tel:', v: pInfo.phone || data.phone || "" },
+        { t: 'MAIL', lab: 'Email:', v: pInfo.email || data.email || "" }
+    ];
+    cLabels.forEach(c => {
+        if (!c.v) return;
+        drawCustomIcon(c.t, sPadding + 10, sY + 6);
+        doc.fillColor(white).font('Helvetica-Bold').fontSize(9).text(c.lab, sPadding + 32, sY, { continued: true });
+        doc.font('Helvetica').text(" " + c.v, { width: sWidth - 32 });
+        sY = doc.y + 8;
+    });
+
+    const languages = pInfo.languagesKnown || data.languages;
+    if (languages) {
+        sY += 25;
+        sSecH('LANGUAGES');
+        doc.font('Helvetica').fontSize(9).fillColor(white).text(languages, sPadding, sY, { width: sWidth });
     }
-
-    // Restore page handling
-    doc.addPage = _originalAddPage;
-    doc.constructor.prototype.addPage = _protoAddPage;
 }
 
 
