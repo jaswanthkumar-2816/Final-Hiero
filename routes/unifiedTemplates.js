@@ -227,6 +227,15 @@ const TEMPLATE_COLORS = {
         accent: '#f37021', // Orange
         background: '#FFFFFF',
         light: '#f7f7f7'
+    },
+    'hiero-prestige': {
+        primary: '#2e2e2e',
+        secondary: '#333333',
+        accent: '#2e2e2e',
+        background: '#f4f4f4',
+        sidebarBg: '#2e2e2e',
+        sidebarText: '#ffffff',
+        light: '#e0e0e0'
     }
 };
 
@@ -247,7 +256,9 @@ const TEMPLATE_MAP = {
     'timeline': 'hiero-timeline',
     'hiero-minimal': 'hiero-timeline',
     'hiero-signature': 'hiero-signature',
-    'signature': 'hiero-signature'
+    'signature': 'hiero-signature',
+    'hiero-prestige': 'hiero-prestige',
+    'prestige': 'hiero-prestige'
 
 };
 
@@ -358,20 +369,22 @@ function wrapText(doc, text, maxWidth) {
     return lines;
 }
 
-function addBulletPoint(doc, text, x, y, maxWidth, colors, template = 'classic') {
+function addBulletPoint(doc, text, x, y, maxWidth, options, template = 'classic') {
     const spacing = getTemplateSpacing(template);
+    const colors = options.accent ? options : { accent: options.primary || '#000', secondary: options.secondary || '#333' };
+    const fontSize = options.fontSize || FONT_SIZES.body;
 
-    doc.fillColor(colors.accent).circle(x - 10, y + 3, 1.5).fill();
-    doc.fillColor(colors.secondary);
-    const lineHeightPx = FONT_SIZES.body * spacing.lineHeight;
+    doc.fillColor(colors.accent).circle(x - 10, y + 3, (fontSize / 6)).fill();
+    doc.fillColor(colors.secondary).fontSize(fontSize);
+    const lineHeightPx = fontSize * spacing.lineHeight;
 
     const words = text.split(' ');
     const lines = [];
     let currentLine = '';
     words.forEach(word => {
         const testLine = currentLine + (currentLine ? ' ' : '') + word;
-        const testWidth = doc.widthOfString(testLine, { width: maxWidth - 20 });
-        if (testWidth > maxWidth - 20 && currentLine) {
+        const testWidth = doc.widthOfString(testLine);
+        if (testWidth > maxWidth && currentLine) {
             lines.push(currentLine);
             currentLine = word;
         } else {
@@ -382,7 +395,7 @@ function addBulletPoint(doc, text, x, y, maxWidth, colors, template = 'classic')
 
     lines.forEach((line, index) => {
         doc.text(line, x, y + (index * lineHeightPx), {
-            width: maxWidth - 20,
+            width: maxWidth,
             align: 'left'
         });
     });
@@ -1347,6 +1360,17 @@ async function generateUnifiedResume(data, templateId, outStream, customOptions 
 
                 case 'hiero-signature':
                     renderTemplate_HieroSignature(doc, data);
+                    doc.end();
+                    if (outStream && outStream.on) {
+                        outStream.on('finish', () => resolve(true));
+                        outStream.on('error', reject);
+                    } else {
+                        resolve(doc);
+                    }
+                    return;
+
+                case 'hiero-prestige':
+                    await renderTemplate_HieroPrestige(doc, data, colors, spacing);
                     doc.end();
                     if (outStream && outStream.on) {
                         outStream.on('finish', () => resolve(true));
@@ -4305,6 +4329,245 @@ function renderTemplate_HieroSignature(doc, rawData) {
             sidebarY = doc.y + 12;
         }
     });
+}
+
+/**
+ * HIERO PRESTIGE - Corporate editorial layout with sidebar
+ */
+async function renderTemplate_HieroPrestige(doc, rawData, colors, spacing) {
+    const data = normalizeData(rawData);
+    const sidebarWidth = PAGE_CONFIG.width * 0.32;
+    const contentWidth = PAGE_CONFIG.width - sidebarWidth;
+    const pInfo = data.personalInfo || {};
+
+    // Standard high-end colors
+    const COLORS = {
+        sidebar: '#1e293b',
+        main: '#ffffff',
+        accent: '#3b82f6',
+        textDark: '#0f172a',
+        textLight: '#f8fafc',
+        textMuted: '#64748b',
+        sectionBar: '#f1f5f9'
+    };
+
+    const drawBackgrounds = () => {
+        doc.save();
+        doc.fillColor(COLORS.main).rect(sidebarWidth, 0, contentWidth, PAGE_CONFIG.height).fill();
+        doc.fillColor(COLORS.sidebar).rect(0, 0, sidebarWidth, PAGE_CONFIG.height).fill();
+        doc.restore();
+    };
+
+    const smartAddPage = () => {
+        doc.addPage();
+        drawBackgrounds();
+        return 50; // New page top margin
+    };
+
+    drawBackgrounds();
+
+    // --- SIDEBAR ---
+    let sidebarY = 50;
+    const sidebarInnerX = 30;
+    const sidebarInnerWidth = sidebarWidth - 60;
+
+    // Sidebar Title Helper
+    const drawSidebarTitle = (title) => {
+        doc.fillColor('#ffffff').font('Helvetica-Bold').fontSize(9).text(title.toUpperCase(), sidebarInnerX, sidebarY, { characterSpacing: 2 });
+        sidebarY = doc.y + 5;
+        doc.save().lineWidth(0.5).strokeColor('rgba(255, 255, 255, 0.1)').moveTo(sidebarInnerX, sidebarY).lineTo(sidebarInnerX + sidebarInnerWidth, sidebarY).stroke().restore();
+        sidebarY += 15;
+    };
+
+    drawSidebarTitle('Information');
+
+    const contactFields = [
+        { val: pInfo.address, label: 'Location' },
+        { val: pInfo.phone, label: 'Phone' },
+        { val: pInfo.email, label: 'Email' },
+        { val: pInfo.website || pInfo.linkedin, label: 'Web' }
+    ];
+
+    contactFields.forEach(field => {
+        if (field.val) {
+            doc.fillColor('#ffffff').font('Helvetica').fontSize(9).text(field.val, sidebarInnerX, sidebarY, { width: sidebarInnerWidth, lineGap: 2 });
+            sidebarY = doc.y + 12;
+        }
+    });
+
+    // References in Sidebar
+    const refs = getSafeArray(data.references);
+    if (refs.length > 0) {
+        sidebarY += 20;
+        drawSidebarTitle('References');
+        refs.slice(0, 2).forEach(ref => {
+            doc.fillColor('#ffffff').font('Helvetica-Bold').fontSize(10).text((ref.name || '').toUpperCase(), sidebarInnerX, sidebarY);
+            doc.font('Helvetica-Oblique').fontSize(8.5).fillColor('#cbd5e1').text(ref.role || ref.title || '', sidebarInnerX, doc.y + 2);
+            doc.font('Helvetica').fontSize(8.5).fillColor('#ffffff').text(ref.phone || '', sidebarInnerX, doc.y + 3);
+            doc.text(ref.email || '', sidebarInnerX, doc.y + 1);
+            sidebarY = doc.y + 20;
+        });
+    }
+
+    // --- MAIN CONTENT ---
+    let mainY = 50;
+    const mainInnerX = sidebarWidth + 45;
+    const mainInnerWidth = contentWidth - 90;
+
+    // Header with photo on right
+    const name = (pInfo.fullName || 'JOHN DOE').toUpperCase();
+    const role = (pInfo.roleTitle || 'PROFESSIONAL').toUpperCase();
+
+    // Calculate dynamic name size
+    let nameFontSize = 30; // Reduced from 34
+    if (name.length > 15) nameFontSize = 24; // Reduced from 28
+    if (name.length > 22) nameFontSize = 20; // Reduced from 24
+
+    // We calculate heights to help alignment
+    const photoSize = 100;
+    const photoX = sidebarWidth + contentWidth - 45 - photoSize;
+    const headerTop = 50;
+
+    doc.fillColor(COLORS.textDark).font('Times-Bold').fontSize(nameFontSize).text(name, mainInnerX, headerTop, { width: mainInnerWidth - photoSize - 20 });
+    const headerBottom = doc.y;
+
+    // doc.fillColor(COLORS.accent).font('Times-Bold').fontSize(12).text(role, mainInnerX, nameBottom + 8, { characterSpacing: 2 });
+    // const headerBottom = doc.y;
+
+    // Profile Photo on the right - Centered 'Cover' logic
+    if (pInfo.profilePhoto) {
+        try {
+            const buffer = base64ToBuffer(pInfo.profilePhoto);
+            if (buffer) {
+                const finalPhotoY = headerTop;
+
+                // Manual 'cover' calculation for perfect centering
+                const img = doc.openImage(buffer);
+                const iw = img.width;
+                const ih = img.height;
+                const scale = Math.max(photoSize / iw, photoSize / ih);
+                const finalW = iw * scale;
+                const finalH = ih * scale;
+                const offX = (photoSize - finalW) / 2;
+                const offY = (photoSize - finalH) / 2;
+
+                doc.save();
+                doc.circle(photoX + (photoSize / 2), finalPhotoY + (photoSize / 2), photoSize / 2).clip();
+                doc.image(buffer, photoX + offX, finalPhotoY + offY, { width: finalW, height: finalH });
+                doc.restore();
+                doc.save().lineWidth(2).strokeColor(COLORS.sectionBar).circle(photoX + (photoSize / 2), finalPhotoY + (photoSize / 2), photoSize / 2).stroke().restore();
+            }
+        } catch (e) {
+            console.error('Prestige PDF Photo Error:', e);
+        }
+    }
+
+    mainY = Math.max(headerBottom, headerTop + photoSize) + 15; // Tightened from 20
+
+    const renderHeader = (title) => {
+        if (mainY > PAGE_CONFIG.height - 80) { mainY = smartAddPage(); }
+        doc.fillColor(COLORS.textDark).font('Times-Bold').fontSize(10).text(title.toUpperCase(), mainInnerX, mainY, { characterSpacing: 1.5 });
+        mainY = doc.y + 3;
+        doc.save().lineWidth(1.5).strokeColor('#cbd5e1').moveTo(mainInnerX, mainY).lineTo(mainInnerX + mainInnerWidth, mainY).stroke().restore();
+        mainY += 8;
+    };
+
+    // Experience
+    const exp = getSafeArray(data.experience);
+    if (exp.length > 0) {
+        renderHeader('Work Experience');
+        const timelineX = mainInnerX - 25;
+        exp.forEach(item => {
+            if (mainY > PAGE_CONFIG.height - 100) { mainY = smartAddPage(); }
+
+            // Year
+            doc.fillColor(COLORS.accent).font('Helvetica-Bold').fontSize(9).text(`${item.startDate || ''} - ${item.endDate || 'Present'}`, mainInnerX, mainY);
+            const yearY = mainY;
+            mainY = doc.y + 4;
+
+            // Company & Title
+            doc.fillColor(COLORS.textDark).font('Times-Bold').fontSize(11).text(item.company || '', mainInnerX, mainY);
+            mainY = doc.y + 1;
+            doc.font('Helvetica-Oblique').fontSize(9).fillColor(COLORS.textMuted).text(item.jobTitle || '', mainInnerX, mainY);
+            mainY = doc.y + 6;
+
+            // Description - slightly smaller font
+            if (item.description) {
+                const bullets = String(item.description).split('\n').filter(b => b.trim());
+                bullets.forEach(bullet => {
+                    const h = addBulletPoint(doc, bullet.replace(/^[•\-\*]\s*/, ''), mainInnerX + 15, mainY, mainInnerWidth - 15, {
+                        accent: COLORS.textDark,
+                        secondary: COLORS.textDark,
+                        fontSize: 8.5 // Reduced font size
+                    });
+                    mainY += h + 1; // Reduced line gap
+                });
+            }
+
+            // Timeline Node
+            doc.save().lineWidth(2).strokeColor(COLORS.sidebar).circle(timelineX, yearY + 5, 4).stroke().restore();
+
+            mainY += 6; // Reduced from 10
+        });
+    }
+
+    // Education
+    const education = getSafeArray(data.education);
+    if (education.length > 0) {
+        renderHeader('Education');
+        education.forEach(item => {
+            if (mainY > PAGE_CONFIG.height - 80) { mainY = smartAddPage(); }
+
+            doc.fillColor(COLORS.accent).font('Helvetica-Bold').fontSize(9).text(item.gradYear || item.startDate || '', mainInnerX, mainY);
+            const yearY = mainY;
+            mainY = doc.y + 4;
+
+            doc.fillColor(COLORS.textDark).font('Times-Bold').fontSize(10).text(item.school || '', mainInnerX, mainY);
+            mainY = doc.y + 1;
+            doc.font('Helvetica').fontSize(9).fillColor(COLORS.textMuted).text(item.degree || '', mainInnerX, mainY);
+
+            // Node
+            doc.save().lineWidth(2).strokeColor(COLORS.sidebar).circle(mainInnerX - 25, yearY + 5, 4).stroke().restore();
+
+            mainY = doc.y + 6; // Reduced from 12
+        });
+    }
+
+    // Skills - Aggressive compaction
+    const skills = getSafeArray(data.skills);
+    if (skills.length > 0) {
+        renderHeader('Skills & Expertise');
+        const colWidth = (mainInnerWidth - 30) / 2;
+        const rowHeight = 22; // Very tight row height
+        let currentSkillsY = mainY;
+
+        skills.forEach((skill, i) => {
+            const isRight = i % 2 === 1;
+            const x = isRight ? mainInnerX + colWidth + 30 : mainInnerX;
+            const y = currentSkillsY;
+
+            if (y > PAGE_CONFIG.height - 40) {
+                mainY = smartAddPage();
+                currentSkillsY = mainY;
+            }
+
+            // Skill Name & Percentage - Tiny but readable
+            const level = (0.7 + (Math.random() * 0.25)).toFixed(2);
+            const percent = Math.round(level * 100);
+
+            doc.fillColor(COLORS.textDark).font('Helvetica').fontSize(7.5).text(String(skill).toUpperCase(), x, y, { width: colWidth - 30, lineBreak: false });
+            doc.fillColor(COLORS.accent).font('Helvetica').fontSize(7).text(`${percent}%`, x + colWidth - 25, y, { width: 25, align: 'right' });
+
+            const barsY = doc.y + 4;
+            doc.fillColor(COLORS.sectionBar).rect(x, barsY, colWidth, 3).fill();
+            doc.fillColor(COLORS.accent).rect(x, barsY, colWidth * level, 3).fill();
+
+            if (isRight || i === skills.length - 1) {
+                currentSkillsY = y + rowHeight;
+            }
+        });
+        mainY = currentSkillsY;
+    }
 }
 
 module.exports = { generateUnifiedResume };
