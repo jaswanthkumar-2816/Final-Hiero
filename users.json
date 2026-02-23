@@ -41,5 +41,13 @@
     "emailVerified": true,
     "signupMethod": "google",
     "picture": "https://lh3.googleusercontent.com/a/ACg8ocLQ9Bf3f85XMRjeuQHhSQp0EcO-xas68S1_8Aw4dC76CPvjZFc0=s96-c"
+  },
+  {
+    "id": 6,
+    "name": "Test User",
+    "email": "test@test.com",
+    "password": "$2a$10$k48afuhMJ8WdKcNgh62.iuc3egnP54NWxwStPNBSZYAGYzlrPQLA.",
+    "emailVerified": false,
+    "signupMethod": "email"
   }
 ]
