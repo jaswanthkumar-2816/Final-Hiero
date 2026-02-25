@@ -4147,7 +4147,7 @@ function renderTemplate_HieroSignature(doc, rawData) {
         const textW = doc.widthOfString(text.toUpperCase());
         doc.translate(x, y);
         doc.rotate(-90);
-        doc.text(text.toUpperCase(), -textW / 2, 0);
+        doc.text(text.toUpperCase(), -textW / 2, -7); // Adjusted Y offset for better vertical centering in the 85px box
         doc.restore();
     };
 
@@ -4166,24 +4166,46 @@ function renderTemplate_HieroSignature(doc, rawData) {
     ];
 
     sections.forEach(sec => {
-        let contentHeight = 150; // default min height
         let items = [];
-
         if (sec.id === 'summary') {
             items = [data.summary].filter(Boolean);
-            contentHeight = Math.max(120, doc.heightOfString(data.summary || '', { width: LEFT_W - 140 }) + 80);
         } else {
             items = getSafeArray(data[sec.id]);
-            if (items.length === 0) return;
-            // Rough calc for height
-            contentHeight = items.length * 80 + 60;
+        }
+        if (items.length === 0) return;
+
+        const contentX = 100;
+        const contentW = LEFT_W - 140;
+
+        // --- CALC HEIGHT FIRST ---
+        let estimatedH = 40; // Top padding
+        items.forEach(item => {
+            if (sec.id === 'summary') {
+                estimatedH += doc.heightOfString(item, { width: contentW, lineGap: 3 }) + 20;
+            } else if (sec.id === 'experience') {
+                estimatedH += 12 + 14 + 12 + 20; // Dates, Title, Company padding
+                if (item.description) {
+                    const bullets = String(item.description).split('\n').filter(b => b.trim());
+                    bullets.forEach(b => {
+                        estimatedH += doc.heightOfString(b, { width: contentW - 15, size: 9 }) + 2;
+                    });
+                }
+                estimatedH += 15; // Gap between items
+            } else {
+                estimatedH += 60; // Basic guess for others
+            }
+        });
+        const contentHeight = Math.max(120, estimatedH + 20);
+
+        // Check for page overflow
+        if (currentY + contentHeight > PAGE_H - 40) {
+            doc.addPage();
+            // Redraw sidebar background for new page
+            doc.save().fillColor('#000000').rect(SIDEBAR_X, 0, SIDEBAR_W, PAGE_H).fill().restore();
+            currentY = 40;
         }
 
-        if (currentY + contentHeight > PAGE_H) {
-            // Very basic page overflow handling for this custom renderer
-            // (In a real scenario we'd need more complex logic, but trying to keep it "per-template" as requested)
-        }
-
+        // Draw Background
         doc.save();
         doc.fillColor(sec.color).rect(0, currentY, LEFT_W, contentHeight).fill();
         if (sec.accent) {
@@ -4191,12 +4213,11 @@ function renderTemplate_HieroSignature(doc, rawData) {
         }
         doc.restore();
 
-        renderRotatedLabel(sec.title, 45, currentY + (contentHeight / 2), sec.id === 'experience' ? '#FFFFFF' : '#000000');
+        // Draw Label
+        renderRotatedLabel(sec.title, 42.5, currentY + (contentHeight / 2), sec.id === 'experience' ? '#FFFFFF' : '#000000');
 
-        // Content
+        // Render Content
         let itemY = currentY + 35;
-        const contentX = 100;
-        const contentW = LEFT_W - 140;
 
         if (sec.id === 'summary') {
             doc.fillColor('#000000').font('Helvetica-Bold').fontSize(11).text('PROFESSIONAL PROFILE', contentX, itemY);
@@ -4211,8 +4232,16 @@ function renderTemplate_HieroSignature(doc, rawData) {
                 doc.fillColor('#333333').font('Helvetica-Bold').fontSize(9).text((exp.company || '').toUpperCase(), contentX, itemY);
                 itemY += 12;
                 if (exp.description) {
-                    doc.fillColor(colors.secondary).font('Helvetica').fontSize(9).text(exp.description, contentX, itemY, { width: contentW, lineGap: 2 });
-                    itemY = doc.y + 15;
+                    const bullets = String(exp.description).split('\n').filter(b => b.trim());
+                    bullets.forEach(bullet => {
+                        const h = addBulletPoint(doc, bullet.replace(/^[•\-\*]\s*/, ''), contentX + 15, itemY, contentW - 15, {
+                            accent: colors.accent,
+                            secondary: colors.secondary,
+                            fontSize: 9
+                        });
+                        itemY += h + 2;
+                    });
+                    itemY += 10;
                 } else {
                     itemY += 15;
                 }
