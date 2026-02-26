@@ -895,6 +895,29 @@
           </div>
         </div>
 
+        <!-- Hiero Cool Template -->
+        <div class="template-card" data-category="premium" data-template="hiero-cool" data-type="premium">
+          <div class="template-preview" onclick="previewTemplate('hiero-cool')">
+            <i class="fas fa-rocket" style="color: #6C63FF;"></i>
+            <div class="preview-overlay">
+              <button class="preview-btn">Preview Template</button>
+            </div>
+            <div class="template-badge">NEW</div>
+          </div>
+          <div class="template-info">
+            <h3>Hiero Cool</h3>
+            <p>A stunning modern template with a dark charcoal sidebar and vibrant purple accents.</p>
+            <div class="template-tags">
+              <span class="tag premium">Modern</span>
+              <span class="tag premium">Purple</span>
+              <span class="tag premium">Premium</span>
+            </div>
+            <button class="start-building-btn" onclick="startBuilding('hiero-cool')">
+              <i class="fas fa-arrow-right"></i> Start Building
+            </button>
+          </div>
+        </div>
+
         <!-- Hiero Essence Template -->
         <div class="template-card premium" data-category="premium" data-template="hiero-essence" data-type="premium">
           <div class="premium-badge">Premium</div>
@@ -1327,8 +1350,12 @@
   </div>
 
   <script>
-    // Version: 2024-11-26-v3 - Modal close fix + getTemplateName defined at line 1681
-    // Last updated: 2024-11-26 17:30
+    // Version: 2026-02-21-v5 - Added Hiero Cool Template
+    // Last updated: 2026-02-21 20:20
+    // GLOBAL VERSION: V5
+    // CACHE BUSTER: If you see broken code, hard refresh: Ctrl+Shift+R (Windows) or Cmd+Shift+R (Mac)
+
+    console.log('🔥 Resume Builder v5 Loaded - 2026-02-21 20:20');
     // Global state
     let selectedTemplate = null;
 
@@ -1675,6 +1702,11 @@
           name: 'Hiero Essence',
           description: 'Modern corporate design with a distinctive dark sidebar and orange accent bars. Perfect for a structured professional presentation.',
           style: 'Two-column layout, dark sidebar (#1F1F1F), orange accents (#F5A623), clean typography.'
+        },
+        'hiero-cool': {
+          name: 'Hiero Cool',
+          description: 'A stunning modern template with a dark charcoal sidebar and vibrant purple accents.',
+          style: 'Two-column, charcoal sidebar, purple accents, unique timeline layout, skill progress bars'
         },
         'tech-focus': {
           name: 'Tech Focus',
