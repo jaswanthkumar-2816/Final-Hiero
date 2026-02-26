@@ -1343,10 +1343,10 @@
           </div>
         </div>
 
-        <!-- Hiero Nova Template -->
-        <div class="template-card" data-category="premium" data-template="hiero-nova" data-type="premium">
+        <!-- Hiero Legion Template -->
+        <div class="template-card" data-category="premium" data-template="hiero-legion" data-type="premium">
           <div class="premium-badge">PREMIUM</div>
-          <div class="template-preview" onclick="previewTemplate('hiero-nova')">
+          <div class="template-preview" onclick="previewTemplate('hiero-legion')">
             <i class="fas fa-shield" style="color: #2ae023;"></i>
             <div class="preview-overlay">
               <button class="preview-btn">Preview Template</button>
@@ -1354,16 +1354,38 @@
           </div>
           <div class="template-info">
             <h3>Hiero Legion</h3>
-
-            <p>A sophisticated monochrome design with a bold shield profile and a strong vertical badge. Perfect for
-              modern professionals seeking a high-contrast look.</p>
+            <p>A sophisticated monochrome design with a bold shield profile and a strong vertical badge. High-contrast
+              professional look.</p>
             <div class="template-tags">
-              <span class="tag">Modern</span>
               <span class="tag">Monochrome</span>
-              <span class="tag">Badge</span>
+              <span class="tag">Shield</span>
+              <span class="tag">Executive</span>
+            </div>
+            <button class="start-building-btn" onclick="startBuilding('hiero-legion')">
+              <i class="fas fa-arrow-right"></i> Start Building
+            </button>
+          </div>
+        </div>
+
+        <!-- Hiero Nova Template -->
+        <div class="template-card" data-category="premium" data-template="hiero-nova" data-type="premium">
+          <div class="premium-badge">PREMIUM</div>
+          <div class="template-preview" onclick="previewTemplate('hiero-nova')">
+            <i class="fas fa-sun" style="color: #f4b400;"></i>
+            <div class="preview-overlay">
+              <button class="preview-btn">Preview Template</button>
+            </div>
+          </div>
+          <div class="template-info">
+            <h3>Hiero Nova</h3>
+            <p>Modern editorial layout with a signature yellow header and deep charcoal sidebar. Bold and high-impact.
+            </p>
+            <div class="template-tags">
+              <span class="tag">Editorial</span>
+              <span class="tag">Yellow</span>
+              <span class="tag">Impact</span>
             </div>
             <button class="start-building-btn" onclick="startBuilding('hiero-nova')">
-
               <i class="fas fa-arrow-right"></i> Start Building
             </button>
           </div>
@@ -2803,9 +2825,14 @@
           style: 'Clean professional structure, stellar accents, premium feel.'
         },
         'hiero-nova': {
+          name: 'Hiero Nova',
+          description: 'Modern editorial layout with a signature yellow header and deep charcoal sidebar.',
+          style: 'Yellow sidebar header, dark charcoal sidebar, bold editorial typography.'
+        },
+        'hiero-legion': {
           name: 'Hiero Legion',
-          description: 'A sophisticated monochrome design with a bold shield profile and a strong vertical badge.',
-          style: 'Modern monochrome, high-contrast black accents, shield profile mask.'
+          description: 'A sophisticated monochrome design with a bold shield profile and a strong vertical charcoal badge.',
+          style: 'Monochrome, charcoal sidebar, shield profile mask, high-contrast typography.'
         }
 
       };
