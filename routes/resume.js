@@ -999,7 +999,8 @@ router.get('/templates', (req, res) => {
         { id: 'tech-focus', name: 'Developer Focus', preview: '/templates/previews/tech-focus.png' },
         { id: 'minimal', name: 'Elegant Minimal', preview: '/templates/previews/minimal.png' },
         { id: 'hiero-signature', name: 'Hiero Signature', preview: '/templates/previews/hiero-signature.png' },
-        { id: 'hiero-prestige', name: 'Hiero Prestige', preview: '/templates/previews/hiero-prestige.png' }
+        { id: 'hiero-prestige', name: 'Hiero Prestige', preview: '/templates/previews/hiero-prestige.png' },
+        { id: 'hiero-cool', name: 'Hiero Cool (Premium)', preview: '/templates/previews/hiero-cool.png' }
     ];
     res.json({ success: true, templates });
 });

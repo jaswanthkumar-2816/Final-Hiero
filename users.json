@@ -67,5 +67,14 @@
     "emailVerified": true,
     "signupMethod": "google",
     "picture": "https://lh3.googleusercontent.com/a/ACg8ocJ3dRujwhYbCJDx5wVBZlmPGFvNVyAGndfT0RrA0xpwUDJ3Iw=s96-c"
+  },
+  {
+    "id": 9,
+    "googleId": "101268208284939283465",
+    "email": "chatterjeesaswata5@gmail.com",
+    "name": "Saswata Chatterjee",
+    "emailVerified": true,
+    "signupMethod": "google",
+    "picture": "https://lh3.googleusercontent.com/a/ACg8ocJQ56-ls04RB6vtmL55REDp5wuZBoAj5__l0UpBCfBVCIbWtUga=s96-c"
   }
 ]

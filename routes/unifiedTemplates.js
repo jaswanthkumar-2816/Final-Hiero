@@ -257,6 +257,21 @@ const TEMPLATE_COLORS = {
         accent: '#8B7D6B',       // Warm brown/tan for section icons
         background: '#EDE8D9',  // Warm beige background
         light: '#BFAF9A'         // Light warm beige
+    },
+    'hiero-cool': {
+        primary: '#0B0B0B',
+        secondary: '#151515',
+        accent: '#10B981',
+        background: '#0B0B0B',
+        light: '#34D399',
+        text: '#F9FAFB'
+    },
+    'hiero-legion': {
+        primary: '#000000',
+        secondary: '#1a1a1a',
+        accent: '#000000',
+        background: '#FFFFFF',
+        light: '#f3f4f6'
     }
 };
 
@@ -271,8 +286,8 @@ const TEMPLATE_MAP = {
     'hiero monethon': 'hiero-monethon',
     'hiero-nova': 'hiero-nova',
     'nova': 'hiero-nova',
-    'hiero-legion': 'hiero-nova',
-    'legion': 'hiero-nova',
+    'hiero-legion': 'hiero-legion',
+    'legion': 'hiero-legion',
     'hiero-essence': 'hiero-essence',
     'essence': 'hiero-essence',
     'hiero-timeline': 'hiero-timeline',
@@ -287,7 +302,9 @@ const TEMPLATE_MAP = {
     'hiero-prestige': 'hiero-prestige',
     'prestige': 'hiero-prestige',
     'hiero-royal': 'hiero-royal',
-    'royal': 'hiero-royal'
+    'royal': 'hiero-royal',
+    'hiero-cool': 'hiero-cool',
+    'cool': 'hiero-cool'
 
 };
 
@@ -445,11 +462,12 @@ function normalizeData(data = {}) {
 
     const getArr = (v, aliases = []) => {
         if (Array.isArray(v) && v.length > 0) return v;
+        if (v && typeof v === 'string') return toArray(v);
         for (let alias of aliases) {
-            if (data[alias] && Array.isArray(data[alias]) && data[alias].length > 0) return data[alias];
-            if (p[alias] && Array.isArray(p[alias]) && p[alias].length > 0) return p[alias];
+            const val = data[alias] || p[alias];
+            if (Array.isArray(val) && val.length > 0) return val;
+            if (val && typeof val === 'string' && val.trim().length > 0) return toArray(val);
         }
-        if (typeof v === 'string') return toArray(v);
         return [];
     };
 
@@ -493,20 +511,20 @@ function normalizeData(data = {}) {
                     location: exp.location || ''
                 };
             }),
-            education: getArr(data.education, ['academicDetails', 'educationList', 'academics', 'academicHistory']).map(edu => {
+            education: getArr(data.education, ['academicDetails', 'educationList', 'academics', 'academicHistory', 'edu']).map(edu => {
                 const dates = String(edu.dates || '');
                 return {
-                    degree: edu.degree || edu.course || '',
+                    degree: edu.degree || edu.course || edu.title || '',
                     school: edu.school || edu.institution || edu.institute || '',
                     gradYear: edu.gradYear || edu.year || edu.graduationDate || (dates ? dates.split('-')[1]?.trim() || dates : ''),
                     gpa: edu.gpa || edu.grade || edu.details || '',
                     location: edu.location || ''
                 };
             }),
-            skills: getArr(data.skills, ['technicalSkills', 'professionalSkills', 'skillsList', 'coreCompetencies', 'expertise']),
-            softSkills: getArr(data.softSkills, ['managementSkills', 'interpersonalSkills', 'softSkillsList']),
-            certifications: getArr(data.certifications, ['certificates', 'personalCertifications', 'awards']).map(c => typeof c === 'string' ? { name: c } : c),
-            projects: getArr(data.projects, ['projectList', 'customDetails', 'personalProjects']).filter(proj => !proj.heading || proj.heading.toLowerCase().includes('project')).map(proj => {
+            skills: getArr(data.skills, ['technicalSkills', 'professionalSkills', 'skillsList', 'coreCompetencies', 'expertise', 'techSkills']),
+            softSkills: getArr(data.softSkills, ['managementSkills', 'interpersonalSkills', 'softSkillsList', 'personalSkills']),
+            certifications: getArr(data.certifications, ['certificates', 'personalCertifications', 'awards', 'certificationList']).map(c => typeof c === 'string' ? { name: c } : c),
+            projects: getArr(data.projects, ['projectList', 'customDetails', 'personalProjects', 'portfolios']).filter(proj => !proj.heading || proj.heading.toLowerCase().includes('project')).map(proj => {
                 return {
                     title: proj.title || proj.projectName || proj.name || proj.heading || '',
                     description: proj.description || proj.details || proj.content || '',
@@ -514,7 +532,7 @@ function normalizeData(data = {}) {
                     duration: proj.duration || proj.date || ''
                 };
             }),
-            achievements: getArr(data.achievements, ['awards', 'honors', 'achievementsList']),
+            achievements: getArr(data.achievements, ['awards', 'honors', 'achievementsList', 'awardList']),
             hobbies: getArr(data.hobbies, ['interests', 'hobbiesList', 'activities']),
             extraCurricular: getArr(data.extraCurricular, ['activities', 'volunteerWork']),
             socialLinks: getArr(data.socialLinks, ['socials', 'links', 'onlinePortfolios']),
@@ -1398,7 +1416,17 @@ async function generateUnifiedResume(data, templateId, outStream, customOptions 
                 case 'hiero-nova':
                     await renderTemplate_HieroNova(doc, data);
                     doc.end();
+                    if (outStream && outStream.on) {
+                        outStream.on('finish', () => resolve(true));
+                        outStream.on('error', reject);
+                    } else {
+                        resolve(doc);
+                    }
+                    return;
 
+                case 'hiero-legion':
+                    await renderTemplate_HieroLegion(doc, data);
+                    doc.end();
                     if (outStream && outStream.on) {
                         outStream.on('finish', () => resolve(true));
                         outStream.on('error', reject);
@@ -1440,6 +1468,16 @@ async function generateUnifiedResume(data, templateId, outStream, customOptions 
                     return;
                 case 'hiero-prestige':
                     await renderTemplate_HieroPrestige(doc, data, colors, spacing);
+                    doc.end();
+                    if (outStream && outStream.on) {
+                        outStream.on('finish', () => resolve(true));
+                        outStream.on('error', reject);
+                    } else {
+                        resolve(doc);
+                    }
+                    return;
+                case 'hiero-cool':
+                    renderTemplate_HieroCool(doc, data);
                     doc.end();
                     if (outStream && outStream.on) {
                         outStream.on('finish', () => resolve(true));
@@ -3169,6 +3207,144 @@ async function renderTemplate_HieroNova(doc, rawData) {
     }
 }
 
+/**
+ * 🏛️ HIERO LEGION TEMPLATE
+ * A sophisticated monochrome design with a bold shield-masked profile 
+ * and a strong vertical charcoal badge.
+ */
+async function renderTemplate_HieroLegion(doc, rawData) {
+    const data = normalizeData(rawData);
+    const pInfo = data.personalInfo || {};
+
+    const PAGE_WIDTH = 595.28;
+    const PAGE_HEIGHT = 841.89;
+    const sidebarWidth = 220;
+    const headerHeight = 160;
+
+    const black = '#000000';
+    const dark = '#1a1a1a';
+    const softGrey = '#f3f4f6';
+    const white = '#ffffff';
+
+    // 1. Sidebar Background (Vertical Badge)
+    doc.rect(0, 0, sidebarWidth, PAGE_HEIGHT).fill(dark);
+
+    // 2. Shield Profile Mask
+    if (pInfo.profilePhoto) {
+        try {
+            let imgData = base64ToBuffer(pInfo.profilePhoto);
+            const pSize = 130;
+            const pX = (sidebarWidth - pSize) / 2;
+            const pY = 40;
+
+            doc.save();
+            // Shield Path
+            const cx = pX + pSize / 2;
+            const cy = pY + pSize / 2;
+            const r = pSize / 2;
+
+            doc.moveTo(cx, pY) // Top center
+                .bezierCurveTo(cx + r, pY, cx + r, cy, cx + r, cy + 10)
+                .bezierCurveTo(cx + r, cy + r, cx, cy + r + 15, cx, cy + r + 25) // Pointed bottom
+                .bezierCurveTo(cx, cy + r + 15, cx - r, cy + r, cx - r, cy + 10)
+                .bezierCurveTo(cx - r, cy, cx - r, pY, cx, pY)
+                .closePath().clip();
+
+            doc.image(imgData, pX, pY, { width: pSize, height: (pSize * 1.2), cover: [pSize, pSize] });
+            doc.restore();
+
+            // Border
+            doc.save();
+            doc.moveTo(cx, pY)
+                .bezierCurveTo(cx + r, pY, cx + r, cy, cx + r, cy + 10)
+                .bezierCurveTo(cx + r, cy + r, cx, cy + r + 15, cx, cy + r + 25)
+                .bezierCurveTo(cx, cy + r + 15, cx - r, cy + r, cx - r, cy + 10)
+                .bezierCurveTo(cx - r, cy, cx - r, pY, cx, pY)
+                .closePath().lineWidth(3).strokeColor(white).stroke();
+            doc.restore();
+        } catch (e) { }
+    }
+
+    // 3. Main Content Rendering (White Area)
+    const mainX = sidebarWidth + 35;
+    const mainWidth = PAGE_WIDTH - mainX - 35;
+    let y = 50;
+
+    // Header in Main Area
+    const name = (pInfo.fullName || "").toUpperCase();
+    doc.fillColor(black).font('Helvetica-Bold').fontSize(32).text(name, mainX, y);
+    y = doc.y + 5;
+    doc.fillColor(dark).font('Helvetica').fontSize(14).text((pInfo.roleTitle || "").toUpperCase(), { characterSpacing: 2 });
+    y = doc.y + 20;
+
+    // Standard Section Rendering
+    const mSec = (title) => {
+        doc.fillColor(black).font('Helvetica-Bold').fontSize(14).text(title.toUpperCase(), mainX, y, { characterSpacing: 2 });
+        const lineY = doc.y + 3;
+        doc.moveTo(mainX, lineY).lineTo(PAGE_WIDTH - 35, lineY).lineWidth(1).strokeColor('#eeeeee').stroke();
+        y = lineY + 12;
+    };
+
+    // Experience
+    const exp = getSafeArray(data.experience);
+    if (exp.length > 0) {
+        mSec('Professional Experience');
+        exp.forEach(e => {
+            doc.fillColor(black).font('Helvetica-Bold').fontSize(11).text(e.jobTitle || "", mainX, y, { continued: true });
+            doc.fillColor('#666666').font('Helvetica').fontSize(10).text(`  |  ${e.company || ""}  (${e.startDate || ""} - ${e.endDate || "Present"})`);
+            doc.fillColor('#333333').font('Helvetica').fontSize(10.5).lineGap(1).text(e.description || "", mainX, doc.y + 2, { width: mainWidth });
+            y = doc.y + 12;
+        });
+    }
+
+    // Projects
+    const projs = getSafeArray(data.projects);
+    if (projs.length > 0) {
+        mSec('Projects');
+        projs.forEach(p => {
+            doc.fillColor(black).font('Helvetica-Bold').fontSize(11).text(p.title || p.name || "", mainX, y);
+            doc.fillColor('#444444').font('Helvetica').fontSize(10.5).text(p.description || "", { width: mainWidth });
+            y = doc.y + 10;
+        });
+    }
+
+    // Education
+    const edu = getSafeArray(data.education);
+    if (edu.length > 0) {
+        mSec('Education');
+        edu.forEach(e => {
+            doc.fillColor(black).font('Helvetica-Bold').fontSize(10.5).text(e.degree || "", mainX, y);
+            doc.fillColor('#444444').font('Helvetica').fontSize(10).text(`${e.school || ""} | ${e.gradYear || ""}`);
+            y = doc.y + 10;
+        });
+    }
+
+    // 4. Sidebar Content (Contacts, Skills)
+    let sY = 220;
+    const sX = 25;
+    const sW = sidebarWidth - 50;
+
+    const sidebarSec = (t) => {
+        doc.fillColor(white).font('Helvetica-Bold').fontSize(12).text(t.toUpperCase(), sX, sY, { characterSpacing: 1.5 });
+        sY = doc.y + 10;
+    };
+
+    sidebarSec('Contact');
+    doc.fillColor('#cccccc').font('Helvetica').fontSize(9);
+    if (pInfo.email) { doc.text(pInfo.email, sX, sY); sY = doc.y + 4; }
+    if (pInfo.phone) { doc.text(pInfo.phone, sX, sY); sY = doc.y + 4; }
+    if (pInfo.address) { doc.text(pInfo.address, sX, sY, { width: sW }); sY = doc.y + 8; }
+    sY += 20;
+
+    sidebarSec('Skills');
+    const skills = getSafeArray(data.skills);
+    doc.fillColor(white).font('Helvetica').fontSize(9.5).lineGap(2);
+    skills.forEach(s => {
+        const n = typeof s === 'string' ? s : (s.name || "");
+        doc.text("• " + n, sX, sY);
+        sY = doc.y;
+    });
+}
 
 module.exports = {
     generateUnifiedResume,
@@ -3176,6 +3352,7 @@ module.exports = {
     TEMPLATE_MAP,
     renderTemplate_HieroMonethon,
     renderTemplate_HieroNova,
+    renderTemplate_HieroLegion,
     renderTemplate_HieroEssence
 };
 
@@ -4054,6 +4231,7 @@ function renderTemplate_HieroRetail(doc, rawData) {
     });
 }
 
+
 function renderTemplate_HieroSignature(doc, rawData) {
     const data = normalizeData(rawData);
     const colors = TEMPLATE_COLORS['hiero-signature'];
@@ -4071,7 +4249,7 @@ function renderTemplate_HieroSignature(doc, rawData) {
         const textW = doc.widthOfString(text.toUpperCase());
         doc.translate(x, y);
         doc.rotate(-90);
-        doc.text(text.toUpperCase(), -textW / 2, 0);
+        doc.text(text.toUpperCase(), -textW / 2, -7); // Adjusted Y offset for better vertical centering in the 85px box
         doc.restore();
     };
 
@@ -4090,24 +4268,46 @@ function renderTemplate_HieroSignature(doc, rawData) {
     ];
 
     sections.forEach(sec => {
-        let contentHeight = 150; // default min height
         let items = [];
-
         if (sec.id === 'summary') {
             items = [data.summary].filter(Boolean);
-            contentHeight = Math.max(120, doc.heightOfString(data.summary || '', { width: LEFT_W - 140 }) + 80);
         } else {
             items = getSafeArray(data[sec.id]);
-            if (items.length === 0) return;
-            // Rough calc for height
-            contentHeight = items.length * 80 + 60;
+        }
+        if (items.length === 0) return;
+
+        const contentX = 100;
+        const contentW = LEFT_W - 140;
+
+        // --- CALC HEIGHT FIRST ---
+        let estimatedH = 40; // Top padding
+        items.forEach(item => {
+            if (sec.id === 'summary') {
+                estimatedH += doc.heightOfString(item, { width: contentW, lineGap: 3 }) + 20;
+            } else if (sec.id === 'experience') {
+                estimatedH += 12 + 14 + 12 + 20; // Dates, Title, Company padding
+                if (item.description) {
+                    const bullets = String(item.description).split('\n').filter(b => b.trim());
+                    bullets.forEach(b => {
+                        estimatedH += doc.heightOfString(b, { width: contentW - 15, size: 9 }) + 2;
+                    });
+                }
+                estimatedH += 15; // Gap between items
+            } else {
+                estimatedH += 60; // Basic guess for others
+            }
+        });
+        const contentHeight = Math.max(120, estimatedH + 20);
+
+        // Check for page overflow
+        if (currentY + contentHeight > PAGE_H - 40) {
+            doc.addPage();
+            // Redraw sidebar background for new page
+            doc.save().fillColor('#000000').rect(SIDEBAR_X, 0, SIDEBAR_W, PAGE_H).fill().restore();
+            currentY = 40;
         }
 
-        if (currentY + contentHeight > PAGE_H) {
-            // Very basic page overflow handling for this custom renderer
-            // (In a real scenario we'd need more complex logic, but trying to keep it "per-template" as requested)
-        }
-
+        // Draw Background
         doc.save();
         doc.fillColor(sec.color).rect(0, currentY, LEFT_W, contentHeight).fill();
         if (sec.accent) {
@@ -4115,12 +4315,11 @@ function renderTemplate_HieroSignature(doc, rawData) {
         }
         doc.restore();
 
-        renderRotatedLabel(sec.title, 45, currentY + (contentHeight / 2), sec.id === 'experience' ? '#FFFFFF' : '#000000');
+        // Draw Label
+        renderRotatedLabel(sec.title, 42.5, currentY + (contentHeight / 2), sec.id === 'experience' ? '#FFFFFF' : '#000000');
 
-        // Content
+        // Render Content
         let itemY = currentY + 35;
-        const contentX = 100;
-        const contentW = LEFT_W - 140;
 
         if (sec.id === 'summary') {
             doc.fillColor('#000000').font('Helvetica-Bold').fontSize(11).text('PROFESSIONAL PROFILE', contentX, itemY);
@@ -4135,8 +4334,16 @@ function renderTemplate_HieroSignature(doc, rawData) {
                 doc.fillColor('#333333').font('Helvetica-Bold').fontSize(9).text((exp.company || '').toUpperCase(), contentX, itemY);
                 itemY += 12;
                 if (exp.description) {
-                    doc.fillColor(colors.secondary).font('Helvetica').fontSize(9).text(exp.description, contentX, itemY, { width: contentW, lineGap: 2 });
-                    itemY = doc.y + 15;
+                    const bullets = String(exp.description).split('\n').filter(b => b.trim());
+                    bullets.forEach(bullet => {
+                        const h = addBulletPoint(doc, bullet.replace(/^[•\-\*]\s*/, ''), contentX + 15, itemY, contentW - 15, {
+                            accent: colors.accent,
+                            secondary: colors.secondary,
+                            fontSize: 9
+                        });
+                        itemY += h + 2;
+                    });
+                    itemY += 10;
                 } else {
                     itemY += 15;
                 }
@@ -5888,6 +6095,235 @@ async function renderTemplate_HieroUrban(doc, rawData) {
                 doc.font('Helvetica').fontSize(8).fillColor(DARK).text(`E : ${ref.email}`, rx + 10, tryy);
             }
             rx += refW + 15; // Move X over for next reference
+        });
+    }
+}
+
+/**
+ * 🎨 HIERO COOL TEMPLATE
+ * Two-column modern template with dark sidebar and purple accents.
+ */
+function renderTemplate_HieroCool(doc, data) {
+    const margin = 40;
+    const pageWidth = 595.28;
+    const pageHeight = 841.89;
+    const leftWidth = 195;
+
+    // Normalize data to standard structure used in this file
+    const normalized = typeof normalizeData === 'function' ? normalizeData(data) : data;
+    const pInfo = normalized.personalInfo || {};
+
+    const colors = {
+        bg: '#0B0B0B',        // Obsidian Background
+        sidebar: '#151515',   // Slightly lighter sidebar
+        accent: '#10B981',    // Emerald
+        highlight: '#34D399', // Soft Emerald
+        text: '#F9FAFB',      // Main Text (Off-white)
+        dim: '#94A3B8'        // Muted Slate
+    };
+
+    // Draw main background (Dark Theme)
+    doc.rect(0, 0, pageWidth, pageHeight).fill(colors.bg);
+
+    // Draw Left Column Sidebar
+    doc.rect(0, 0, leftWidth, pageHeight).fill(colors.sidebar);
+
+    // Profile Photo (Top Left)
+    const photoSize = 110;
+    const photoX = (leftWidth - photoSize) / 2;
+    const photoY = margin;
+
+    doc.save();
+    doc.roundedRect(photoX, photoY, photoSize, photoSize, 15).clip();
+    const photoSource = pInfo.profilePhoto || data.photo;
+    if (photoSource) {
+        try {
+            const photoBuffer = typeof base64ToBuffer === 'function' ? base64ToBuffer(photoSource) : photoSource;
+            if (photoBuffer) {
+                doc.image(photoBuffer, photoX, photoY, { width: photoSize, height: photoSize });
+            } else {
+                doc.rect(photoX, photoY, photoSize, photoSize).fill('#222222');
+            }
+        } catch (e) {
+            doc.rect(photoX, photoY, photoSize, photoSize).fill('#222222');
+        }
+    } else {
+        doc.rect(photoX, photoY, photoSize, photoSize).fill('#222222');
+    }
+    doc.restore();
+
+    // --- LEFT SIDEBAR CONTENT ---
+    let sideY = photoY + photoSize + 40;
+    const sideX = 25;
+    const sideContentWidth = leftWidth - 50;
+
+    // Contact Section
+    doc.fillColor(colors.accent).font('Helvetica-Bold').fontSize(11).text("CONTACT", sideX, sideY, { characterSpacing: 1.5 });
+    doc.moveTo(sideX, sideY + 14).lineTo(sideX + 30, sideY + 14).strokeColor(colors.accent).lineWidth(2).stroke();
+    sideY += 30;
+
+    const contactFields = [
+        { val: pInfo.phone || (data.contact && data.contact.phone), icon: 'P' },
+        { val: pInfo.email || (data.contact && data.contact.email), icon: 'E' },
+        { val: pInfo.address || (data.contact && data.contact.address), icon: 'A' },
+        { val: pInfo.linkedin || (data.contact && data.contact.linkedin), icon: 'L' }
+    ].filter(f => f.val);
+
+    contactFields.forEach(f => {
+        doc.fillColor(colors.highlight).font('Helvetica-Bold').fontSize(7.5).text(f.icon, sideX, sideY + 1.5);
+        doc.fillColor(colors.text).font('Helvetica').fontSize(8.5).text(f.val, sideX + 18, sideY, { width: sideContentWidth - 10 });
+        sideY = doc.y + 12;
+    });
+
+    // Sidebar Items Helper (Skills / Languages)
+    function renderSidebarList(title, items) {
+        if (!items || items.length === 0) return;
+        sideY += 20;
+        const count = items.length;
+        const fontSize = count > 15 ? 7.5 : (count > 10 ? 8.5 : 9.5);
+        const itemSpacing = count > 15 ? 18 : (count > 10 ? 22 : 28);
+
+        doc.fillColor(colors.accent).font('Helvetica-Bold').fontSize(11).text(title.toUpperCase(), sideX, sideY, { characterSpacing: 1.5 });
+        doc.moveTo(sideX, sideY + 14).lineTo(sideX + 30, sideY + 14).strokeColor(colors.accent).lineWidth(2).stroke();
+        sideY += 30;
+
+        items.forEach(item => {
+            if (sideY > pageHeight - 30) return;
+
+            const raw = typeof item === 'string' ? item : (item.name || item.skill || '');
+            const name = String(raw).replace(/^[^a-zA-Z0-9]+/, '').trim();
+            if (!name) return;
+            const level = (typeof item === 'object' && item.level) ? parseInt(item.level) : (75 + Math.floor(Math.random() * 20));
+
+            doc.fillColor(colors.text).font('Helvetica').fontSize(fontSize);
+            const textWidth = sideContentWidth;
+            const textHeight = doc.heightOfString(name, { width: textWidth });
+            doc.text(name, sideX, sideY, { width: textWidth });
+
+            // Compact Progress Bar
+            const barY = sideY + textHeight + 2;
+            doc.rect(sideX, barY, textWidth, 2).fill('#222222');
+            doc.rect(sideX, barY, textWidth * (level / 100), 2).fill(colors.accent);
+
+            sideY = barY + (itemSpacing - 10);
+        });
+    }
+
+    renderSidebarList("SKILLS", normalized.skills);
+    if (sideY < pageHeight - 150) renderSidebarList("LANGUAGES", normalized.languages);
+
+    // --- MAIN CONTENT AREA (RIGHT) ---
+    const mainX = leftWidth + 30;
+    const mainWidth = pageWidth - mainX - margin;
+    let mainY = margin;
+
+    // Name & Title Header
+    const fullName = (pInfo.fullName || data.name || 'Professional Name').toUpperCase();
+    doc.fillColor(colors.text).font('Times-Bold').fontSize(34).text(fullName, mainX, mainY, { width: mainWidth });
+    mainY = doc.y + 2;
+
+    const roleTitle = (pInfo.roleTitle || data.title || 'Professional Title');
+    doc.fillColor(colors.accent).font('Helvetica-Bold').fontSize(14).text(roleTitle, mainX, mainY, { characterSpacing: 1 });
+    mainY = doc.y + 15;
+
+    // Professional Summary (Elegant Box)
+    const summary = normalized.summary || data.summary || '';
+    if (summary) {
+        doc.fillColor(colors.dim).font('Helvetica').fontSize(9.5).text(summary, mainX, mainY, { width: mainWidth, lineGap: 3, align: 'justify' });
+        mainY = doc.y + 30;
+    }
+
+    // Main Sections Helper
+    function renderSection(title, items, type) {
+        if (!items || items.length === 0) return;
+
+        // Section Title with Modern Underline
+        doc.fillColor(colors.text).font('Helvetica-Bold').fontSize(13).text(title.toUpperCase(), mainX, mainY, { characterSpacing: 1 });
+        doc.rect(mainX, mainY + 15, 40, 3).fill(colors.accent);
+        mainY += 35;
+
+        items.forEach((item, idx) => {
+            const heading = item.jobTitle || item.degree || item.title || '';
+            const subHeading = item.company || item.school || item.institution || '';
+            const date = item.years || (item.startDate ? `${item.startDate} - ${item.endDate || 'Present'}` : item.gradYear) || '';
+            const details = item.description || item.tech || '';
+            const bullets = Array.isArray(item.bullets) ? item.bullets : (details ? details.split('\n').filter(s => s.trim()) : []);
+
+            // Check if item fits on page
+            if (mainY > pageHeight - 100) {
+                doc.addPage().rect(0, 0, pageWidth, pageHeight).fill(colors.bg);
+                doc.rect(0, 0, leftWidth, pageHeight).fill(colors.sidebar);
+                mainY = margin;
+            }
+
+            // Left side Date Column
+            doc.fillColor(colors.highlight).font('Helvetica-Bold').fontSize(8.5).text(date.toUpperCase(), mainX, mainY, { width: 85 });
+
+            // Content
+            const contentX = mainX + 95;
+            const contentWidth = mainWidth - 95;
+
+            doc.fillColor(colors.text).font('Helvetica-Bold').fontSize(11).text(heading, contentX, mainY, { width: contentWidth });
+            doc.fillColor(colors.accent).font('Helvetica').fontSize(10).text(subHeading, contentX, doc.y + 2, { width: contentWidth });
+
+            mainY = doc.y + 8;
+
+            bullets.forEach(b => {
+                doc.fillColor(colors.dim).font('Helvetica').fontSize(9).text('•', contentX, mainY);
+                doc.text(b.trim(), contentX + 10, mainY, { width: contentWidth - 10, lineGap: 2 });
+                mainY = doc.y + 4;
+            });
+
+            mainY += 15;
+
+            // Separator between items
+            if (idx < items.length - 1) {
+                doc.moveTo(mainX + 95, mainY - 5).lineTo(mainX + mainWidth, mainY - 5).strokeColor('#222222').lineWidth(0.5).stroke();
+            }
+        });
+        mainY += 20;
+    }
+
+    renderSection("Work Experience", normalized.experience);
+    renderSection("Education", normalized.education);
+    if (normalized.projects && normalized.projects.length > 0) {
+        renderSection("Selected Projects", normalized.projects);
+    }
+
+    // Certifications (Distinct Heading)
+    if (normalized.certifications && normalized.certifications.length > 0) {
+        doc.fillColor(colors.text).font('Helvetica-Bold').fontSize(13).text("CERTIFICATIONS", mainX, mainY, { characterSpacing: 1 });
+        doc.rect(mainX, mainY + 15, 40, 3).fill(colors.accent);
+        mainY += 35;
+
+        normalized.certifications.forEach(cert => {
+            const raw = typeof cert === 'object' ? (cert.name || cert.title) : cert;
+            if (!raw) return;
+            const text = raw.replace(/^[^a-zA-Z0-9]+/, '').trim();
+            if (!text) return;
+
+            doc.fillColor(colors.accent).circle(mainX + 4, mainY + 6, 2.5).fill();
+            doc.fillColor(colors.text).font('Helvetica').fontSize(9.5).text(text, mainX + 15, mainY, { width: mainWidth - 20 });
+            mainY = doc.y + 8;
+        });
+        mainY += 15;
+    }
+
+    // Achievements / Awards
+    if (normalized.achievements && normalized.achievements.length > 0) {
+        doc.fillColor(colors.text).font('Helvetica-Bold').fontSize(13).text("ACHIEVEMENTS", mainX, mainY, { characterSpacing: 1 });
+        doc.rect(mainX, mainY + 15, 40, 3).fill(colors.accent);
+        mainY += 35;
+
+        normalized.achievements.forEach(item => {
+            const raw = typeof item === 'object' ? (item.name || item.title) : item;
+            if (!raw) return;
+            const text = raw.replace(/^[^a-zA-Z0-9]+/, '').trim();
+            if (!text || text.includes('%')) return;
+
+            doc.fillColor(colors.accent).rect(mainX + 1, mainY + 3, 5, 5).fill();
+            doc.fillColor(colors.text).font('Helvetica').fontSize(9.5).text(text, mainX + 15, mainY, { width: mainWidth - 20 });
+            mainY = doc.y + 8;
         });
     }
 }
