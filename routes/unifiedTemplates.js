@@ -7,7 +7,6 @@
 
 const PDFDocument = require('pdfkit');
 
-// ==================== STANDARDIZED CONFIGURATION ====================
 
 // Unified page settings for all templates (Optimized for space)
 const PAGE_CONFIG = {
@@ -127,7 +126,6 @@ const TEMPLATE_COLORS = {
         background: '#FFFFFF',
         light: '#666666'
     },
-    // ========== NEW TEMPLATES (10 Additional) ==========
     'quantum-blue': {
         primary: '#1e40af',      // Deep Blue
         secondary: '#3b82f6',    // Bright Blue
@@ -345,7 +343,6 @@ function getTemplateSpacing(template) {
     return SPACING;
 }
 
-// ==================== SECTION ORDER (STANDARDIZED) ====================
 
 const SECTION_ORDER = [
     'summary',
@@ -365,7 +362,6 @@ const SECTION_ORDER = [
     'customSectionContent'
 ];
 
-// ==================== HELPER FUNCTIONS ====================
 function getSafeArray(arr) {
     if (!arr) return [];
     if (Array.isArray(arr)) return arr;
@@ -548,7 +544,6 @@ function normalizeData(data = {}) {
     }
 }
 
-// ==================== TEMPLATE HEADER RENDERERS ====================
 
 function renderHeader_Classic(doc, data, colors) {
     const { personalInfo } = data;
@@ -891,7 +886,6 @@ function renderHeader_Academic(doc, data, colors) {
     doc.moveDown(1);
 }
 
-// ==================== NEW TEMPLATE HEADERS (10 Additional) ====================
 
 function renderHeader_QuantumBlue(doc, data, colors) {
     const { personalInfo = {} } = data;
@@ -1183,7 +1177,6 @@ function renderHeader_AzureCorporate(doc, data, colors) {
     doc.moveDown(1.5);
 }
 
-// ==================== SECTION TITLE RENDERER ====================
 
 function renderSectionTitle(doc, title, colors, template) {
     const spacing = getTemplateSpacing(template);
@@ -1298,7 +1291,6 @@ function renderSectionTitle(doc, title, colors, template) {
     doc.moveDown(spacing.paragraphGap / 10);
 }
 
-// ==================== MAIN TEMPLATE GENERATOR ====================
 async function generateUnifiedResume(data, templateId, outStream, customOptions = {}) {
     return new Promise(async (resolve, reject) => {
         try {
@@ -1545,7 +1537,6 @@ async function generateUnifiedResume(data, templateId, outStream, customOptions 
                 default: renderHeader_Classic(doc, data, colors);
             }
 
-            // ==================== SEQUENTIAL RENDERING (WITH SIDE-BY-SIDE SUPPORT) ====================
             SECTION_ORDER.forEach(sectionKey => {
                 renderSection(doc, sectionKey, data, colors, template, spacing, options);
             });
@@ -1570,7 +1561,6 @@ async function generateUnifiedResume(data, templateId, outStream, customOptions 
 }
 
 
-// ==================== SECTION RENDERERS ====================
 
 // Helper to check page break (Now supports Forcing Single Page)
 function checkPageBreak(doc, heightNeeded = 60, forceSinglePage = false) {
@@ -1926,7 +1916,6 @@ function renderSection(doc, sectionKey, data, colors, template, spacing = SPACIN
     }
 }
 
-// ==================== NEW STUDIO LAYOUT (TEMPLATE 5) ====================
 async function renderTemplate_StudioRightSidebar(doc, data, colors, spacing) {
     const sidebarWidth = PAGE_CONFIG.width * 0.35; // 35% width for sidebar
     const sidebarX = PAGE_CONFIG.width - sidebarWidth;
@@ -1936,7 +1925,6 @@ async function renderTemplate_StudioRightSidebar(doc, data, colors, spacing) {
     doc.fillColor(colors.accent).rect(sidebarX, 0, sidebarWidth, PAGE_CONFIG.height).fill();
     doc.restore();
 
-    // ==================== RIGHT SIDEBAR CONTENT ====================
     let sidebarY = 40;
     const sidebarMargin = 20;
     const sidebarContentWidth = sidebarWidth - (sidebarMargin * 2);
@@ -2087,7 +2075,6 @@ async function renderTemplate_StudioRightSidebar(doc, data, colors, spacing) {
     addStudioSidebarList('Certifications', data.certifications);
     addStudioSidebarList('Achievements', data.achievements);
 
-    // ==================== LEFT MAIN CONTENT ====================
     doc.y = 40; // Reset Y for main content
     const mainMargin = 40;
     const mainWidth = sidebarX - (mainMargin * 2);
@@ -2271,7 +2258,6 @@ async function renderTemplate_StudioRightSidebar(doc, data, colors, spacing) {
     }
 }
 
-// ==================== HELPER: RENDER RECTANGULAR INITIALS ====================
 function renderRectangularInitials(doc, fullName, x, y, width, height) {
     let initials = "U";
     if (fullName && typeof fullName === 'string') {
@@ -2294,7 +2280,6 @@ function renderRectangularInitials(doc, fullName, x, y, width, height) {
         });
 }
 
-// ==================== HELPER: RENDER STUDIO INITIALS ====================
 function renderStudioInitials(doc, fullName, centerX, centerY, radius, sidebarWidth, sidebarX) {
     let initials = "U";
     if (fullName && typeof fullName === 'string') {
@@ -2323,7 +2308,6 @@ function renderStudioInitials(doc, fullName, centerX, centerY, radius, sidebarWi
         });
 }
 
-// ==================== HELPER: RENDER INITIALS ====================
 function renderInitials(doc, fullName, centerX, centerY, radius) {
     let initials = "U";
 
@@ -2363,7 +2347,6 @@ function getInitials(name) {
     return name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
 }
 
-// ==================== HIERO ELITE TEMPLATE (USER PROVIDED) ====================
 function renderTemplate_HieroElite(doc, originalData) {
     // Specs
     const PAGE_WIDTH = 595;
@@ -2714,7 +2697,6 @@ function drawLine(doc, x, y, width) {
 
 
 
-// ==================== MONETHON TEMPLATE (NEW) ====================
 /**
  * renderTemplate_HieroMonethon - Implementation matching reference image
  * One JavaScript function ONLY as requested.
@@ -2737,9 +2719,7 @@ function renderTemplate_HieroMonethon(doc, data, options = {}) {
     const forceSinglePage = options.forceSinglePage || false;
     const personal = data.personalInfo || {};
 
-    // ============================================================
     // CRITICAL: Override doc.addPage to be a no-op only if forceSinglePage is requested
-    // ============================================================
     const _originalAddPage = doc.addPage.bind(doc);
     const _protoAddPage = doc.constructor.prototype.addPage;
     const noOpAddPage = function () { return doc; };
@@ -3437,7 +3417,6 @@ async function renderTemplate_HieroEssence(doc, rawData, colors, spacing) {
     // 1. Initial Backgrounds
     drawPageBackground();
 
-    // ==================== SIDEBAR (LEFT) ====================
     let sidebarY = 0;
     const sidebarInnerX = 15;
     const sidebarInnerWidth = sidebarWidth - (sidebarInnerX * 2);
@@ -3553,7 +3532,6 @@ async function renderTemplate_HieroEssence(doc, rawData, colors, spacing) {
         sidebarY = hY + 15;
     }
 
-    // ==================== MAIN CONTENT (RIGHT) ====================
     let mainY = 30;
     const mainInnerX = contentX + 25;
     const mainInnerWidth = contentWidth - 50;
@@ -3757,7 +3735,6 @@ async function renderTemplate_HieroTimeline(doc, rawData, colors, spacing) {
     // Draw the signature left border on initial page
     doc.save().rect(0, 0, 15, PAGE_CONFIG.height).fill('#111111').restore();
 
-    // ==================== HEADER ====================
     const photoSize = 90;
     const headerX = margin + photoSize + 25;
     const headerWidth = contentWidth - (photoSize + 25);
@@ -3861,7 +3838,6 @@ async function renderTemplate_HieroTimeline(doc, rawData, colors, spacing) {
 
     currentY += 5;
 
-    // ==================== SUMMARY (if present) ====================
     if (summary) {
         if (currentY + 40 > PAGE_CONFIG.height - margin) smartAddPage();
         doc.fillColor('#555555') // Soft grey as requested
@@ -3882,7 +3858,6 @@ async function renderTemplate_HieroTimeline(doc, rawData, colors, spacing) {
             .stroke();
     }
 
-    // ==================== BODY LAYOUT ====================
     const leftColWidth = contentWidth * 0.25;
     const timelineX = margin + leftColWidth + 20;
     const rightColX = timelineX + 25;
@@ -4000,7 +3975,6 @@ async function renderTemplate_HieroTimeline(doc, rawData, colors, spacing) {
         currentY += 8;
     };
 
-    // ==================== RENDER SECTIONS ====================
     // 1. Work Experience
     renderTimelineSection("Work Experience", exp);
 
@@ -4109,7 +4083,6 @@ function renderRectangularInitials(doc, name, x, y, w, h) {
     doc.restore();
 }
 
-// ==================== HIERO RETAIL TEMPLATE ====================
 function renderTemplate_HieroRetail(doc, rawData) {
     // Helper to sanitize and format data
     const toArray = (v) => {
@@ -4275,9 +4248,7 @@ function renderTemplate_HieroRetail(doc, rawData) {
     });
 }
 
-=======
 
->>>>>>> origin/main
 function renderTemplate_HieroSignature(doc, rawData) {
     const data = normalizeData(rawData);
     const colors = TEMPLATE_COLORS['hiero-signature'];
@@ -4295,7 +4266,6 @@ function renderTemplate_HieroSignature(doc, rawData) {
         const textW = doc.widthOfString(text.toUpperCase());
         doc.translate(x, y);
         doc.rotate(-90);
-<<<<<<< HEAD
         doc.text(text.toUpperCase(), -textW / 2, 0);
         doc.restore();
     };
@@ -4734,7 +4704,6 @@ async function renderTemplate_HieroPrestige(doc, rawData, colors, spacing) {
 
 
 
-// ==================== HIERO VISION TEMPLATE ====================
 // Two-column layout: terracotta left sidebar + white right content area
 async function renderTemplate_HieroVision(doc, rawData, colors, spacing) {
     const data = normalizeData(rawData);
@@ -5086,7 +5055,7 @@ async function renderTemplate_HieroPremium(doc, rawData, colors, spacing) {
     }
 
     // --- LEFT COLUMN ---
-    // 1. Personal Info 
+    // 1. Personal Info
     leftY += drawCard(LEFT_X, leftY, LEFT_W, (cx, cy, cw, dry) => {
         let cyy = cy;
         const items = [
@@ -5322,9 +5291,6 @@ async function renderTemplate_HieroPremium(doc, rawData, colors, spacing) {
     }
 }
 
-<<<<<<< HEAD
-=======
-// ==================== HIERO ROYAL (KickResume-Style Beige) ====================
 async function renderTemplate_HieroRoyal(doc, rawData) {
     const data = normalizeData(rawData);
     // Prevent paginating
@@ -5353,7 +5319,6 @@ async function renderTemplate_HieroRoyal(doc, rawData) {
 
     let y = MARGIN;
 
-    // ======= HEADER =======
     const PHOTO_SIZE = 88;
     const PHOTO_X = PAGE_W - MARGIN - PHOTO_SIZE;
     const HEADER_TEXT_W = PHOTO_X - MARGIN - 10;
@@ -5405,7 +5370,6 @@ async function renderTemplate_HieroRoyal(doc, rawData) {
     doc.moveTo(MARGIN, y).lineTo(PAGE_W - MARGIN, y).strokeColor(LINE_CLR).lineWidth(0.8).stroke();
     y += 14;
 
-    // ======= SECTION RENDERER =======
     // Icon radius and dimensions
     const ICON_R = 12;
     const DATE_COL_W = 105;   // left: dates / location
@@ -5439,7 +5403,6 @@ async function renderTemplate_HieroRoyal(doc, rawData) {
         y += ICON_R * 2 + 10;
     }
 
-    // ======= SUMMARY =======
     if (data.summary) {
         drawSectionHeader('Resume summary');
         doc.font('Helvetica').fontSize(9.5).fillColor(MED);
@@ -5450,7 +5413,6 @@ async function renderTemplate_HieroRoyal(doc, rawData) {
         y += 14;
     }
 
-    // ======= WORK EXPERIENCE =======
     const exps = data.experience || [];
     if (exps.length > 0) {
         drawSectionHeader('Work experience');
@@ -5498,7 +5460,6 @@ async function renderTemplate_HieroRoyal(doc, rawData) {
         y += 14;
     }
 
-    // ======= EDUCATION =======
     const edus = data.education || [];
     if (edus.length > 0) {
         drawSectionHeader('Education');
@@ -5528,7 +5489,6 @@ async function renderTemplate_HieroRoyal(doc, rawData) {
         y += 14;
     }
 
-    // ======= STRENGTHS / SKILLS =======
     const allSkills = [
         ...(data.skills || []),
         ...(data.softSkills || []),
@@ -5563,7 +5523,6 @@ async function renderTemplate_HieroRoyal(doc, rawData) {
         y += 14;
     }
 
-    // ======= CERTIFICATIONS =======
     const certs = data.certifications || [];
     if (certs.length > 0) {
         drawSectionHeader('Certificates');
@@ -5593,7 +5552,6 @@ async function renderTemplate_HieroRoyal(doc, rawData) {
         y += 14;
     }
 
-    // ======= HOBBIES =======
     const hobbies = data.hobbies || data.interests || [];
     if (hobbies.length > 0) {
         drawSectionHeader('Hobbies');
@@ -5618,7 +5576,6 @@ async function renderTemplate_HieroRoyal(doc, rawData) {
     }
 }
 
-// ==================== HIERO ACADEMIC (Dark / Yellow — KickResume Pixel-Perfect) ====================
 async function renderTemplate_HieroAcademic(doc, rawData) {
     const data = normalizeData(rawData);
     doc.addPage = function () { return doc; };  // strict single page
@@ -5876,7 +5833,6 @@ async function renderTemplate_HieroAcademic(doc, rawData) {
 }
 
 
-// ==================== HIERO CLASSIC (Specific Layout) ====================
 async function renderTemplate_HieroUrban(doc, rawData) {
     const data = normalizeData(rawData);
     doc.addPage = function () { return doc; };  // strict single page
@@ -6361,5 +6317,4 @@ function renderTemplate_HieroCool(doc, data) {
     }
 }
 
->>>>>>> origin/main
 module.exports = { generateUnifiedResume };

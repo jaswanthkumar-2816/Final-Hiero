@@ -415,9 +415,6 @@ function generateWordHTML(data) {
     }
     // ... (rest of logic) ...
 
-<<<<<<< HEAD
-=======
-    // ===================== HIERO ACADEMIC — Dark/Yellow KickResume Style =====================
     if (template === 'template4' || template === 'template-4' || template === 'hiero-academic') {
         const BG = '#161616';
         const YELLOW = '#F5C518';
@@ -598,7 +595,6 @@ function generateWordHTML(data) {
         </body></html>`;
     }
 
-    // ===================== HIERO ROYAL (Beige Classic) =====================
     if (template === 'hiero-royal' || template === 'royal') {
         const BG = '#EDE8D9';
         const DARK = '#2C2C2C';
@@ -771,7 +767,6 @@ function generateWordHTML(data) {
         </html>`;
     }
 
->>>>>>> origin/main
     if (template === 'hiero-premium' || template === 'premium') {
         const BG_COLOR = '#F4F5F7';
         const CARD_BG = '#FFFFFF';
