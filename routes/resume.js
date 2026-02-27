@@ -126,9 +126,6 @@ router.post('/template', authenticateToken, async (req, res) => {
 
 router.get('/health', (req, res) => res.json({ status: 'ok', service: 'resume-integrated' }));
 
-
-const { generatePuppeteerPDF } = require('../utils/puppeteer-service');
-
 router.post('/preview-resume', async (req, res) => {
     try {
         const data = req.body;
