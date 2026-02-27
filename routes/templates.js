@@ -555,7 +555,7 @@ const TEMPLATES = {
     const firstName = nameParts[0] || '';
     const lastName = nameParts.slice(1).join(' ') || '';
     const initials = (firstName[0] || 'U') + (lastName[0] || 'N');
-    const userPhoto = p.photo || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=600';
+    const userPhoto = p.profilePhoto || '';
 
     return `<!doctype html>
 <html lang="en">
@@ -577,26 +577,27 @@ const TEMPLATES = {
     * { margin: 0; padding: 0; box-sizing: border-box; }
     @page { size: A4 portrait; margin: 0; }
     body { font-family: 'Inter', sans-serif; margin: 0; padding: 0; color: var(--text-main); -webkit-print-color-adjust: exact; background: #e0e0e0; }
-    .page { width: 210mm; height: 297mm; display: flex; background: white; margin: auto; overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
+    .page { width: 210mm; min-height: 297mm; display: flex; background: white; margin: auto; position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
     
     /* Left Column (65%) */
-    .left-col { width: 65%; background: var(--white); padding: 0; display: flex; flex-direction: column; position: relative; }
+    .left-col { width: 65%; background: var(--white); padding: 0; display: flex; flex-direction: column; position: relative; flex-grow: 1; }
     
     /* Right Column (35%) - Sidebar */
-    .right-col { width: var(--sidebar-width); background: var(--black); color: white; display: flex; flex-direction: column; position: relative; border-left: 1px solid #222; }
+    .right-col { width: var(--sidebar-width); background: var(--black); color: white; display: flex; flex-direction: column; position: relative; border-left: 1px solid #222; flex-grow: 1; }
     
     /* Profiles */
     .profile-photo { width: 100%; padding: 35px 35px 0 35px; background: var(--black); }
-    .photo-frame { width: 100%; height: 260px; overflow: hidden; border-radius: 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    .photo-frame { width: 100%; height: 260px; overflow: hidden; border-radius: 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); background: #1a1a1a; display: flex; align-items: center; justify-content: center; }
     .photo-frame img { width: 100%; height: 100%; object-fit: cover; }
+    .photo-frame .photo-placeholder { color: #333; font-size: 40pt; }
     
     .sidebar-inner { padding: 35px 25px; flex: 1; display: flex; flex-direction: column; }
-    .name-line { font-family: 'Syne', sans-serif; font-size: 21pt; font-weight: 400; line-height: 1.1; text-transform: uppercase; letter-spacing: -0.5px; word-break: break-all; }
+    .name-line { font-family: 'Syne', sans-serif; font-size: 21pt; font-weight: 400; line-height: 1.1; text-transform: uppercase; letter-spacing: -0.5px; }
     .name-line.bold { font-weight: 800; }
     .job-title { font-family: 'Syne', sans-serif; font-size: 7.5pt; text-transform: uppercase; letter-spacing: 2px; color: #888; margin-top: 12px; font-weight: 700; border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 30px; }
     
     /* Section Structure on Left */
-    .section-container { display: flex; position: relative; width: 100%; min-height: 220px; border-bottom: 1px solid #f0f0f0; }
+    .section-container { display: flex; position: relative; width: 100%; min-height: 220px; border-bottom: 1px solid #f0f0f0; page-break-inside: avoid; break-inside: avoid; }
     .section-container:last-of-type { border-bottom: none; }
     
     .section-title-vert { 
@@ -606,11 +607,8 @@ const TEMPLATES = {
         align-items: center; 
         justify-content: center; 
         position: relative; 
-        z-index: 2;
+        background: transparent;
     }
-    
-    /* Avoid collision fixed */
-    .about-section .rotated-text { transform: rotate(-90deg); }
     
     .section-content { flex: 1; padding: 50px 50px 50px 10px; z-index: 3; position: relative; }
     
@@ -623,8 +621,10 @@ const TEMPLATES = {
         letter-spacing: 2px;
         white-space: nowrap;
         transform: rotate(-90deg);
+        transform-origin: center;
+        width: 400px;
+        position: absolute;
         text-align: center;
-        width: fit-content;
     }
     
     /* Individual Section Styling */
@@ -734,7 +734,7 @@ const TEMPLATES = {
           ${d.projects.map(proj => `
             <div class="entry">
               <div class="eyear">${esc(proj.duration)}</div>
-              <h4>${esc(proj.name)}</h4>
+              <h4>${esc(proj.title)}</h4>
               <div class="edesc">${esc(proj.description)}</div>
             </div>
           `).join('')}
@@ -757,7 +757,7 @@ const TEMPLATES = {
       <div class="initials-circle" style="top: 35px; z-index: 999;">${esc(initials)}</div>
       <div class="profile-photo">
         <div class="photo-frame">
-          <img src="${userPhoto}" alt="Profile">
+          ${userPhoto ? `<img src="${userPhoto}" alt="Profile">` : '<div class="photo-placeholder"><i class="fas fa-user"></i></div>'}
         </div>
       </div>
       <div class="sidebar-inner">
@@ -799,10 +799,369 @@ const TEMPLATES = {
   </div>
 </body>
 </html>`;
+  },
+  'hiero-classic': (data) => {
+    const d = normalizeData(data);
+    const p = d.personalInfo;
+    const nameParts = (p.fullName || 'User Name').trim().split(/\s+/);
+    const firstName = nameParts[0] || '';
+    const lastName = nameParts.slice(1).join(' ') || '';
+    const userPhoto = p.profilePhoto || '';
+
+    return `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #e7e1d5;
+      --primary-green: #2f4f46;
+      --secondary-charcoal: #2b2b2b;
+      --accent-green: #355e4a;
+      --accent-mustard: #d4b24c;
+      --text-muted: #666666;
+    }
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    @page { size: A4 portrait; margin: 0; }
+    
+    body { 
+      font-family: 'Poppins', sans-serif; 
+      margin: 0; 
+      padding: 0; 
+      color: var(--secondary-charcoal);
+      -webkit-print-color-adjust: exact;
+      background: #f0f0f0;
+    }
+    
+    .page { 
+      width: 210mm; 
+      height: 297mm; 
+      max-height: 297mm;
+      background: var(--bg-color); 
+      margin: 0 auto; 
+      position: relative; 
+      display: flex;
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+
+    @media print {
+      body { background: none; }
+      .page { margin: 0; box-shadow: none; }
+    }
+
+    /* Decorative Shapes */
+    .shape { position: absolute; pointer-events: none; z-index: 0; }
+    
+    .shape-bottom-left {
+      bottom: -30mm;
+      left: -15mm;
+      width: 100mm;
+      height: 80mm;
+      background: var(--accent-mustard);
+      border-radius: 50% 50% 40% 60% / 60% 40% 60% 40%;
+      transform: rotate(15deg);
+      opacity: 0.8;
+      position: absolute;
+    }
+
+    .shape-bottom-center {
+      bottom: -35mm;
+      left: 20mm;
+      width: 120mm;
+      height: 90mm;
+      background: var(--accent-green);
+      border-radius: 60% 40% 50% 50% / 50% 50% 40% 60%;
+      transform: rotate(-5deg);
+      position: absolute;
+    }
+
+    .shape-right-middle {
+      right: -20mm;
+      top: 50%;
+      width: 60mm;
+      height: 80mm;
+      background: #f1ebd8;
+      border-radius: 30% 70% 40% 60% / 60% 30% 70% 40%;
+      opacity: 0.7;
+    }
+
+    .shape-photo-bg {
+      top: -20mm;
+      right: -20mm;
+      width: 110mm;
+      height: 130mm;
+      background: var(--accent-green);
+      border-radius: 40% 60% 30% 70% / 70% 30% 60% 40%;
+      opacity: 0.15;
+    }
+
+    .content-wrapper {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      width: 100%;
+      padding: 15mm;
+    }
+
+    .left-col {
+      width: 65%;
+      padding-right: 15mm;
+    }
+
+    .right-col {
+      width: 35%;
+    }
+
+    /* TYPOGRAPHY */
+    .name-container {
+      margin-top: 10mm;
+      margin-bottom: 5mm;
+    }
+
+    h1 {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      font-size: 44pt;
+      line-height: 0.85;
+      color: var(--primary-green);
+      text-transform: capitalize;
+    }
+
+    .summary {
+      font-size: 9.3pt;
+      line-height: 1.45;
+      color: var(--secondary-charcoal);
+      text-align: justify;
+      margin-bottom: 5mm;
+    }
+
+    .section-title {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      font-size: 14pt;
+      color: var(--secondary-charcoal);
+      margin-bottom: 3.5mm;
+      margin-top: 3.5mm;
+    }
+
+    .entry {
+      margin-bottom: 4mm;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    .entry-header {
+      font-weight: 700;
+      font-size: 11pt;
+      color: var(--secondary-charcoal);
+    }
+
+    .entry-meta {
+      font-size: 8pt;
+      font-weight: 600;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 2px;
+      margin-bottom: 4px;
+    }
+
+    .entry-list {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .entry-list li {
+      font-size: 9.5pt;
+      color: #444;
+      position: relative;
+      padding-left: 15px;
+      margin-bottom: 3px;
+    }
+
+    .entry-list li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: var(--accent-mustard);
+    }
+
+    /* RIGHT COLUMN STYLES */
+    .photo-area {
+      margin-bottom: 15mm;
+      position: relative;
+    }
+    
+    .profile-photo {
+      width: 100%;
+      height: 60mm;
+      object-fit: cover;
+      border-radius: 40px;
+      background-color: #f1ebd8;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+
+    .sidebar-section {
+      margin-bottom: 8mm;
+    }
+
+    .sidebar-title {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      font-size: 13pt;
+      color: var(--secondary-charcoal);
+      margin-bottom: 3mm;
+    }
+
+    .contact-item {
+      margin-bottom: 4mm;
+    }
+
+    .contact-text {
+      font-size: 9pt;
+      line-height: 1.5;
+      color: #555;
+    }
+
+    .skills-section {
+      margin-bottom: 8mm;
+    }
+
+    .skills-grid {
+      display: grid;
+      gap: 2mm;
+      row-gap: 3mm;
+      page-break-inside: avoid;
+    }
+
+    .skills-grid-2 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .skills-grid-3 {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .skill-item {
+      display: flex;
+      align-items: center;
+      font-size: 8.5pt;
+      color: #444;
+      line-height: 1.2;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+      padding-bottom: 1.5mm;
+    }
+
+    .skill-bullet {
+      width: 4px;
+      height: 4px;
+      background: var(--accent-mustard);
+      border-radius: 50%;
+      margin-right: 2mm;
+      flex-shrink: 0;
+    }
+
+    .reference-item {
+      margin-bottom: 6mm;
+    }
+
+    .ref-name {
+      font-weight: 700;
+      font-size: 10pt;
+      color: var(--secondary-charcoal);
+    }
+
+    .ref-detail {
+        font-size: 9pt;
+        color: #666;
+        line-height: 1.4;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="shape shape-bottom-left"></div>
+    <div class="shape shape-bottom-center"></div>
+    <div class="shape shape-right-middle"></div>
+    <div class="shape shape-photo-bg"></div>
+
+    <div class="content-wrapper">
+      <div class="left-col">
+        <div class="name-container">
+          <h1>${esc(firstName)}<br>${esc(lastName)}</h1>
+        </div>
+        
+        <div class="summary">
+          ${esc(d.summary || 'Strategic professional with a focus on delivering high-quality results. Experienced in collaborative environments and dedicated to continuous improvement.')}
+        </div>
+
+        <div class="section-title">Employment History</div>
+        ${d.experience.map(exp => `
+          <div class="entry">
+            <div class="entry-header">${esc(exp.jobTitle)} at ${esc(exp.company)}${exp.location ? `, ${esc(exp.location)}` : ''}</div>
+            <div class="entry-meta">${esc(exp.startDate)} — ${esc(exp.endDate || 'PRESENT')}</div>
+            <ul class="entry-list">
+              ${(exp.description || "").split('\n').filter(Boolean).map(line => `<li>${esc(line.replace(/^[•\-\*]\s*/, ''))}</li>`).join('')}
+            </ul>
+          </div>
+        `).join('')}
+
+        <div class="section-title">Education</div>
+        ${d.education.map(edu => `
+          <div class="entry">
+            <div class="entry-header">${esc(edu.degree)} at ${esc(edu.school || edu.institution)}${edu.location ? `, ${esc(edu.location)}` : ''}</div>
+            <div class="entry-meta">${esc(edu.startDate || '')}${edu.startDate ? ' — ' : ''}${esc(edu.gradYear || '')}</div>
+          </div>
+        `).join('')}
+      </div>
+
+      <div class="right-col">
+        <div class="photo-area">
+          ${userPhoto ? `<img src="${userPhoto}" alt="Profile" class="profile-photo">` : `<div class="profile-photo" style="display: flex; align-items: center; justify-content: center; font-size: 30pt; color: #ccc;">No Photo</div>`}
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-title">Details</div>
+          <div class="contact-item">
+            <div class="contact-text">${esc(p.address || 'Location information')}</div>
+            <div class="contact-text">${esc(p.phone || 'Phone number')}</div>
+            <div class="contact-text" style="color: var(--primary-green); font-weight: 500;">${esc(p.email)}</div>
+          </div>
+        </div>
+
+        <div class="sidebar-section skills-section">
+          <div class="sidebar-title">Expertise</div>
+          <div class="skills-grid ${d.skills.length > 10 ? 'skills-grid-3' : 'skills-grid-2'}">
+            ${d.skills.map((skill) => `
+              <div class="skill-item">
+                <div class="skill-bullet"></div>
+                ${esc(skill)}
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-title">References</div>
+          ${d.references.length > 0 ? d.references.map(ref => `
+            <div class="reference-item">
+              <div class="ref-name">${esc(ref.name)} from ${esc(ref.organization)}</div>
+              <div class="ref-detail">${esc(ref.email)}</div>
+              <div class="ref-detail">${esc(ref.phone)}</div>
+            </div>
+          `).join('') : '<div class="contact-text">References available upon request</div>'}
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>`;
   }
-
-
-
 };
 
 module.exports = {
@@ -823,7 +1182,9 @@ module.exports = {
       'hiero-essence': 'hiero-essence',
       'essence': 'hiero-essence',
       'signature': 'hiero-signature',
-      'hiero-signature': 'hiero-signature'
+      'hiero-signature': 'hiero-signature',
+      'classic-new': 'hiero-classic',
+      'hiero-classic': 'hiero-classic'
     };
 
     const finalId = aliasMap[id] || id;

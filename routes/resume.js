@@ -9,6 +9,8 @@ const pdfParse = require('pdf-parse');
 const axios = require('axios');
 const Resume = require('../models/Resume');
 const { generateUnifiedResume } = require('./unifiedTemplates');
+const { generatePuppeteerPDF } = require('../utils/puppeteer-service');
+const { generateTemplateHTML } = require('./templates');
 
 const router = express.Router();
 
@@ -124,8 +126,7 @@ router.post('/template', authenticateToken, async (req, res) => {
 
 router.get('/health', (req, res) => res.json({ status: 'ok', service: 'resume-integrated' }));
 
-const { generateTemplateHTML } = require('./templates');
-const { generatePuppeteerPDF } = require('../utils/puppeteer-service');
+
 
 router.post('/preview-resume', async (req, res) => {
     try {
@@ -136,24 +137,21 @@ router.post('/preview-resume', async (req, res) => {
 
         const templateId = data.template || 'classic';
 
-        if (templateId === 'hiero-signature') {
+        if (templateId === 'hiero-signature' || templateId === 'hiero-classic' || templateId === 'signature') {
             const html = generateTemplateHTML(templateId, data);
-            const outputPath = path.join(os.tmpdir(), `preview_${Date.now()}.pdf`);
-
-            await generatePuppeteerPDF(html, outputPath);
-
-            res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', 'inline; filename=resume-preview.pdf');
-            res.sendFile(outputPath, (err) => {
-                if (err) console.error('Error sending file:', err);
-                // Try to delete temp file after sending
-                try { fs.unlinkSync(outputPath); } catch (e) { }
+            const tempPath = path.join(os.tmpdir(), `preview_post_${Date.now()}.pdf`);
+            await generatePuppeteerPDF(html, tempPath);
+            res.sendFile(tempPath, (err) => {
+                if (fs.existsSync(tempPath)) {
+                    try { fs.unlinkSync(tempPath); } catch (e) { }
+                }
             });
-        } else {
-            res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', 'inline; filename=resume-preview.pdf');
-            await generateUnifiedResume(data, templateId, res, { forceSinglePage: true });
+            return;
         }
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', 'inline; filename=resume-preview.pdf');
+        await generateUnifiedResume(data, templateId, res, { forceSinglePage: true });
     } catch (error) {
         console.error('Preview error:', error);
         if (!res.headersSent) res.status(500).send('Generation failed');
@@ -170,23 +168,21 @@ router.post('/download-resume', async (req, res) => {
         const templateId = data.template || 'classic';
         const name = (data.personalInfo?.fullName || 'Resume').replace(/\s+/g, '_');
 
-        if (templateId === 'hiero-signature') {
+        if (templateId === 'hiero-signature' || templateId === 'hiero-classic' || templateId === 'signature') {
             const html = generateTemplateHTML(templateId, data);
-            const outputPath = path.join(os.tmpdir(), `${name}_Hiero_${Date.now()}.pdf`);
-
-            await generatePuppeteerPDF(html, outputPath);
-
-            res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', `attachment; filename="${name}_Hiero.pdf"`);
-            res.download(outputPath, `${name}_Hiero.pdf`, (err) => {
-                if (err) console.error('Error sending file:', err);
-                try { fs.unlinkSync(outputPath); } catch (e) { }
+            const tempPath = path.join(os.tmpdir(), `download_post_${Date.now()}.pdf`);
+            await generatePuppeteerPDF(html, tempPath);
+            res.download(tempPath, `${name}_Hiero.pdf`, (err) => {
+                if (fs.existsSync(tempPath)) {
+                    try { fs.unlinkSync(tempPath); } catch (e) { }
+                }
             });
-        } else {
-            res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', `attachment; filename="${name}_Hiero.pdf"`);
-            await generateUnifiedResume(data, templateId, res);
+            return;
         }
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="${name}_Hiero.pdf"`);
+        await generateUnifiedResume(data, templateId, res);
     } catch (error) {
         console.error('Download PDF error:', error);
         if (!res.headersSent) res.status(500).json({ error: 'Failed to generate PDF' });
@@ -420,6 +416,202 @@ function generateWordHTML(data) {
     }
     // ... (rest of logic) ...
 
+    if (template === 'hiero-premium' || template === 'premium') {
+        const BG_COLOR = '#F4F5F7';
+        const CARD_BG = '#FFFFFF';
+        const PEACH_ACCENT = '#F2B66D';
+        const TEXT_PRI = '#333333';
+        const TEXT_SEC = '#555555';
+        const TEXT_HEADER = '#000000';
+
+        const activitiesArr = data.extraCurricular || data.activities || [];
+        const skillsArr = Array.isArray(data.skills) ? data.skills : (data.technicalSkills || '').split(/[,|]/).filter(Boolean);
+        const nameText = (personalInfo.fullName || 'STEVEN TERRY').toUpperCase();
+
+        return `
+        <html xmlns:v='urn:schemas-microsoft-com:vml' xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+        <head><meta charset='utf-8'><title>Resume</title>
+        <style>
+            @page {
+                size: 8.27in 11.69in;
+                margin: 0in;
+            }
+            body { 
+                font-family: 'Helvetica', 'Open Sans', Arial, sans-serif; 
+                margin: 0; 
+                padding: 0; 
+                background-color: ${BG_COLOR};
+            }
+            table { border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; border: none; }
+            td { padding: 0; vertical-align: top; border: none; }
+            
+            .card-outer {
+                background-color: ${CARD_BG};
+                margin-bottom: 12pt;
+                border: 1pt solid #E2E6EA;
+                border-radius: 6pt;
+                overflow: hidden;
+                box-shadow: 2px 2px 5px rgba(0,0,0,0.05);
+            }
+            .card-inner-table {
+                padding: 12pt;
+            }
+            .card-header {
+                background-color: ${PEACH_ACCENT};
+                color: ${TEXT_HEADER};
+                font-size: 10pt;
+                font-weight: bold;
+                padding: 5pt 10pt;
+                margin-bottom: 10pt;
+            }
+        </style>
+        </head>
+        <body>
+            <table width="100%" border="0" cellspacing="0" cellpadding="0" style="table-layout: fixed;">
+                <tr><td height="30" style="height: 30px; line-height: 30px;"></td></tr>
+                <tr>
+                    <td width="30" style="width: 30px;"></td>
+                    <td>
+                        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                            <tr>
+                                <!-- LEFT COLUMN: 35% -->
+                                <td width="35%" valign="top">
+                                    <div style="text-align: center; margin-bottom: 20pt;">
+                                        ${personalInfo.profilePhoto ?
+                `<!--[if gte vml 1]><v:oval style="position:relative;width:110px;height:110px;" strokecolor="${BG_COLOR}" strokeweight="1pt"><v:fill type="frame" src="${personalInfo.profilePhoto}" /></v:oval><![endif]--><![if !vml]><img src="${personalInfo.profilePhoto}" width="110" height="110" style="border-radius: 55px;"><![endif]>` :
+                `<div style="width: 110px; height: 110px; border-radius: 55px; background-color: #d0d0d0; margin: 0 auto;"></div>`
+            }
+                                    </div>
+                                    
+                                    <table class="card-outer" width="100%"><tr><td class="card-inner-table">
+                                        <div style="font-size:10pt; color:${TEXT_SEC}; line-height:1.6;">
+                                            ${[data.personalInfo.gender, data.personalInfo.dob, data.personalInfo.phone, data.personalInfo.email, data.personalInfo.linkedin, data.personalInfo.github, data.personalInfo.website, data.personalInfo.address].filter(Boolean).map(i => `<div><span style="color:${PEACH_ACCENT}">•</span> ${i}</div>`).join('')}
+                                        </div>
+                                    </td></tr></table>
+
+                                    ${data.summary ? `
+                                    <table class="card-outer" width="100%"><tr><td class="card-inner-table">
+                                        <div class="card-header">OBJECTIVE</div>
+                                        <div style="font-size:9.5pt; color:${TEXT_SEC}; line-height:1.4;">${data.summary}</div>
+                                    </td></tr></table>
+                                    ` : ''}
+
+                                    ${skillsArr.length > 0 ? `
+                                    <table class="card-outer" width="100%"><tr><td class="card-inner-table">
+                                        <div class="card-header">SKILLS</div>
+                                        <div style="font-size:9.5pt; color:${TEXT_SEC}; line-height:1.6;">
+                                            ${skillsArr.map(s => `<div>- ${s.toString().trim()}</div>`).join('')}
+                                        </div>
+                                    </td></tr></table>
+                                    ` : ''}
+
+                                    ${data.personalInfo.languagesKnown || data.languages ? `
+                                    <table class="card-outer" width="100%"><tr><td class="card-inner-table">
+                                        <div class="card-header">LANGUAGES</div>
+                                        <div style="font-size:9.5pt; color:${TEXT_SEC}; line-height:1.4;">${data.personalInfo.languagesKnown || data.languages}</div>
+                                    </td></tr></table>
+                                    ` : ''}
+
+                                </td>
+                                <td width="5%" style="width:20px;"></td>
+
+                                <!-- RIGHT COLUMN: 60% -->
+                                <td width="60%" valign="top">
+                                    <div style="padding-top: 25pt; padding-bottom: 20pt;">
+                                        <div style="font-size: 26pt; font-family: 'Helvetica', Arial, sans-serif; font-weight: bold; color: ${TEXT_PRI};">${nameText}</div>
+                                        <div style="height: 1px; background-color: #CCCCCC; line-height: 1px; margin: 10pt 0;"></div>
+                                        <div style="font-size: 12pt; color: ${TEXT_SEC};">${data.personalInfo.jobTitle || data.experience?.[0]?.jobTitle || 'Sales Staff'}</div>
+                                    </div>
+                                    
+                                    ${(data.education && data.education.length > 0) ? `
+                                    <table class="card-outer" width="100%"><tr><td class="card-inner-table">
+                                        <div class="card-header">EDUCATION</div>
+                                        ${data.education.map(edu => `
+                                            <div style="margin-bottom:12pt;">
+                                                <div style="font-size:11pt; font-weight:bold; color:${TEXT_PRI};">${edu.school || ''}</div>
+                                                <div style="font-size:10pt; color:${TEXT_SEC}; margin-top:2pt;">${edu.degree || ''}</div>
+                                                <div style="font-size:9.5pt; color:${TEXT_SEC}; margin-top:2pt;">${edu.startDate || ''} - ${edu.endDate || ''}</div>
+                                                ${edu.gpa ? `<div style="font-size:9.5pt; color:${TEXT_SEC};">GPA: ${edu.gpa}</div>` : ''}
+                                            </div>
+                                        `).join('')}
+                                    </td></tr></table>
+                                    ` : ''}
+
+                                    ${(data.experience && data.experience.length > 0) ? `
+                                    <table class="card-outer" width="100%"><tr><td class="card-inner-table">
+                                        <div class="card-header">WORK EXPERIENCE</div>
+                                        ${data.experience.map(exp => `
+                                            <div style="margin-bottom:15pt;">
+                                                <div style="font-size:10.5pt; font-weight:bold; color:${TEXT_PRI};">${exp.company ? exp.company + ', ' : ''}${exp.jobTitle || ''}</div>
+                                                <div style="font-size:9.5pt; color:${TEXT_SEC}; margin-top:2pt; margin-bottom:5pt;">${exp.startDate || ''} - ${exp.endDate || 'Present'}</div>
+                                                ${exp.description ? `
+                                                    <div style="font-size:9.5pt; color:${TEXT_SEC}; line-height:1.4;">
+                                                        ${!exp.description.includes('Main responsibilities:') ? 'Main responsibilities:<br>' : ''}
+                                                        ${exp.description.split('\n').filter(Boolean).map(l => `<div>- ${l.replace(/^[-•]\s*/, '')}</div>`).join('')}
+                                                    </div>
+                                                ` : ''}
+                                            </div>
+                                        `).join('')}
+                                    </td></tr></table>
+                                    ` : ''}
+
+                                    ${(data.projects && data.projects.length > 0) ? `
+                                    <table class="card-outer" width="100%"><tr><td class="card-inner-table">
+                                        <div class="card-header">PROJECTS</div>
+                                        ${data.projects.map(proj => `
+                                            <div style="margin-bottom:15pt;">
+                                                <div style="font-size:10.5pt; font-weight:bold; color:${TEXT_PRI};">${proj.title || ''}</div>
+                                                ${proj.tech ? `<div style="font-size:9.5pt; color:${PEACH_ACCENT}; margin-top:2pt;">${proj.tech}</div>` : ''}
+                                                ${proj.description ? `
+                                                    <div style="font-size:9.5pt; color:${TEXT_SEC}; line-height:1.4; margin-top:5pt;">
+                                                        ${proj.description.split('\n').filter(Boolean).map(l => `<div>- ${l.replace(/^[-•]\s*/, '')}</div>`).join('')}
+                                                    </div>
+                                                ` : ''}
+                                            </div>
+                                        `).join('')}
+                                    </td></tr></table>
+                                    ` : ''}
+
+                                    ${(data.certifications && data.certifications.length > 0) ? `
+                                    <table class="card-outer" width="100%"><tr><td class="card-inner-table">
+                                        <div class="card-header">CERTIFICATIONS</div>
+                                        ${data.certifications.map(cert => {
+                const name = typeof cert === 'string' ? cert : (cert.name || cert.title || '');
+                return `
+                                            <div style="margin-bottom:8pt;">
+                                                <div style="font-size:10.5pt; font-weight:bold; color:${TEXT_PRI};">• ${name}</div>
+                                            </div>
+                                            `;
+            }).join('')}
+                                    </td></tr></table>
+                                    ` : ''}
+                                    
+                                    ${(activitiesArr.length > 0) ? `
+                                    <table class="card-outer" width="100%"><tr><td class="card-inner-table">
+                                        <div class="card-header">ACTIVITIES</div>
+                                        ${activitiesArr.map(act => {
+                const t = typeof act === 'string' ? act : (act.title || act.name || '');
+                const r = typeof act === 'string' ? '' : (act.role || act.description || '');
+                return `
+                                            <div style="margin-bottom:10pt;">
+                                                <div style="font-size:10.5pt; font-weight:bold; color:${TEXT_PRI};">${t}</div>
+                                                ${r ? `<div style="font-size:9.5pt; color:${TEXT_SEC}; margin-top:2pt;">${r}</div>` : ''}
+                                            </div>
+                                            `;
+            }).join('')}
+                                    </td></tr></table>
+                                    ` : ''}
+
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td width="30" style="width: 30px;"></td>
+                </tr>
+            </table>
+        </body></html>`;
+    }
+
     // DEFAULT FALLBACK
     const bgFallback = '#FFFFFF', textFallback = '#000000', accentFallback = '#2ae023', metaFallback = '#333333';
     return `
@@ -444,23 +636,21 @@ router.get('/preview-pdf', async (req, res) => {
 
         const templateId = resume.data.template || 'classic';
 
-        if (templateId === 'hiero-signature') {
+        if (templateId === 'hiero-signature' || templateId === 'hiero-classic' || templateId === 'signature') {
             const html = generateTemplateHTML(templateId, resume.data);
-            const outputPath = path.join(os.tmpdir(), `preview_get_${Date.now()}.pdf`);
-
-            await generatePuppeteerPDF(html, outputPath);
-
-            res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', 'inline; filename=resume-preview.pdf');
-            res.sendFile(outputPath, (err) => {
-                if (err) console.error('Error sending file:', err);
-                try { fs.unlinkSync(outputPath); } catch (e) { }
+            const tempPath = path.join(os.tmpdir(), `preview_get_${Date.now()}.pdf`);
+            await generatePuppeteerPDF(html, tempPath);
+            res.sendFile(tempPath, (err) => {
+                if (fs.existsSync(tempPath)) {
+                    try { fs.unlinkSync(tempPath); } catch (e) { }
+                }
             });
-        } else {
-            res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', 'inline; filename=resume-preview.pdf');
-            await generateUnifiedResume(resume.data, templateId, res);
+            return;
         }
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', 'inline; filename=resume-preview.pdf');
+        await generateUnifiedResume(resume.data, templateId, res);
     } catch (error) {
         console.error('Preview GET error:', error);
         res.status(500).send('Generation failed');
@@ -476,23 +666,21 @@ router.get('/download', authenticateToken, async (req, res) => {
         const templateId = resume.data.template || 'classic';
         const name = (resume.data.basic?.full_name || 'Resume').replace(/\s+/g, '_');
 
-        if (templateId === 'hiero-signature') {
+        if (templateId === 'hiero-signature' || templateId === 'hiero-classic' || templateId === 'signature') {
             const html = generateTemplateHTML(templateId, resume.data);
-            const outputPath = path.join(os.tmpdir(), `${name}_Hiero_get_${Date.now()}.pdf`);
-
-            await generatePuppeteerPDF(html, outputPath);
-
-            res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', `attachment; filename="${name}_Hiero.pdf"`);
-            res.download(outputPath, `${name}_Hiero.pdf`, (err) => {
-                if (err) console.error('Error sending file:', err);
-                try { fs.unlinkSync(outputPath); } catch (e) { }
+            const tempPath = path.join(os.tmpdir(), `download_get_${Date.now()}.pdf`);
+            await generatePuppeteerPDF(html, tempPath);
+            res.download(tempPath, `${name}_Hiero.pdf`, (err) => {
+                if (fs.existsSync(tempPath)) {
+                    try { fs.unlinkSync(tempPath); } catch (e) { }
+                }
             });
-        } else {
-            res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', `attachment; filename="${name}_Hiero.pdf"`);
-            await generateUnifiedResume(resume.data, templateId, res);
+            return;
         }
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="${name}_Hiero.pdf"`);
+        await generateUnifiedResume(resume.data, templateId, res);
     } catch (error) {
         console.error('Download GET error:', error);
         if (!res.headersSent) res.status(500).json({ error: 'Failed to generate PDF' });
@@ -505,7 +693,10 @@ router.get('/templates', (req, res) => {
         { id: 'modern-pro', name: 'Modern Tech', preview: '/templates/previews/modern-pro.png' },
         { id: 'tech-focus', name: 'Developer Focus', preview: '/templates/previews/tech-focus.png' },
         { id: 'minimal', name: 'Elegant Minimal', preview: '/templates/previews/minimal.png' },
-        { id: 'hiero-signature', name: 'Hiero Signature', preview: '/templates/previews/hiero-signature.png' }
+        { id: 'hiero-signature', name: 'Hiero Signature', preview: '/templates/previews/hiero-signature.png' },
+        { id: 'hiero-prestige', name: 'Hiero Prestige', preview: '/templates/previews/hiero-prestige.png' },
+        { id: 'hiero-classic', name: 'Hiero Classic', preview: '/templates/previews/hiero-classic.png' },
+        { id: 'hiero-cool', name: 'Hiero Cool (Premium)', preview: '/templates/previews/hiero-cool.png' }
     ];
     res.json({ success: true, templates });
 });
