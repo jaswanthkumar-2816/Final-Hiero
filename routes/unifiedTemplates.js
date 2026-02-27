@@ -4048,22 +4048,33 @@ function renderTemplate_HieroSignature(doc, rawData) {
     ];
 
     sections.forEach(sec => {
-        let contentHeight = 150; // default min height
         let items = [];
-
         if (sec.id === 'summary') {
             items = [data.summary].filter(Boolean);
-            contentHeight = Math.max(120, doc.heightOfString(data.summary || '', { width: LEFT_W - 140 }) + 80);
         } else {
             items = getSafeArray(data[sec.id]);
-            if (items.length === 0) return;
-            // Rough calc for height
-            contentHeight = items.length * 80 + 60;
         }
+        if (items.length === 0 && sec.id !== 'summary') return;
 
-        if (currentY + contentHeight > PAGE_H) {
-            // Very basic page overflow handling for this custom renderer
-            // (In a real scenario we'd need more complex logic, but trying to keep it "per-template" as requested)
+        // Dynamic Height Calculation
+        let contentHeight = 60; // Padding
+        const contentW = LEFT_W - 140;
+        doc.fontSize(10);
+        if (sec.id === 'summary') {
+            contentHeight += doc.heightOfString(data.summary || '', { width: contentW, lineGap: 1 }) + 20;
+        } else {
+            items.forEach(item => {
+                contentHeight += 45; // Headers and spacing
+                if (item.description) {
+                    contentHeight += doc.heightOfString(item.description, { width: contentW, lineGap: 1 }) + 5;
+                }
+            });
+        }
+        contentHeight = Math.max(120, contentHeight);
+
+        // Preventive compression if we're running out of space
+        if (currentY + contentHeight > PAGE_H - 20) {
+            contentHeight = PAGE_H - currentY;
         }
 
         doc.save();
@@ -4076,63 +4087,65 @@ function renderTemplate_HieroSignature(doc, rawData) {
         renderRotatedLabel(sec.title, 45, currentY + (contentHeight / 2), sec.id === 'experience' ? '#FFFFFF' : '#000000');
 
         // Content
-        let itemY = currentY + 35;
+        let itemY = currentY + 25; // Tied to 25 instead of 35
         const contentX = 100;
-        const contentW = LEFT_W - 140;
 
         if (sec.id === 'summary') {
             doc.fillColor('#000000').font('Helvetica-Bold').fontSize(11).text('PROFESSIONAL PROFILE', contentX, itemY);
-            itemY += 18;
-            doc.fillColor(colors.secondary).font('Helvetica').fontSize(10).text(data.summary || '', contentX, itemY, { width: contentW, align: 'justify', lineGap: 3 });
+            itemY += 15;
+            doc.fillColor(colors.secondary).font('Helvetica').fontSize(10).text(data.summary || '', contentX, itemY, { width: contentW, align: 'justify', lineGap: 1 });
         } else if (sec.id === 'experience') {
             items.forEach(exp => {
-                doc.fillColor(colors.accent).font('Helvetica-Bold').fontSize(9).text(`${exp.startDate || ''} - ${exp.endDate || 'Present'}`, contentX, itemY);
-                itemY += 12;
-                doc.fillColor('#000000').font('Helvetica-Bold').fontSize(11).text((exp.jobTitle || '').toUpperCase(), contentX, itemY);
-                itemY += 14;
-                doc.fillColor('#333333').font('Helvetica-Bold').fontSize(9).text((exp.company || '').toUpperCase(), contentX, itemY);
-                itemY += 12;
+                if (itemY + 40 > currentY + contentHeight) return;
+                doc.fillColor(colors.accent).font('Helvetica-Bold').fontSize(8.5).text(`${exp.startDate || ''} - ${exp.endDate || 'Present'}`, contentX, itemY);
+                itemY += 11;
+                doc.fillColor('#000000').font('Helvetica-Bold').fontSize(10.5).text((exp.jobTitle || '').toUpperCase(), contentX, itemY);
+                itemY += 13;
+                doc.fillColor('#333333').font('Helvetica-Bold').fontSize(8.5).text((exp.company || '').toUpperCase(), contentX, itemY);
+                itemY += 11;
                 if (exp.description) {
-                    doc.fillColor(colors.secondary).font('Helvetica').fontSize(9).text(exp.description, contentX, itemY, { width: contentW, lineGap: 2 });
-                    itemY = doc.y + 15;
+                    doc.fillColor(colors.secondary).font('Helvetica').fontSize(9).text(exp.description, contentX, itemY, { width: contentW, lineGap: 1 });
+                    itemY = doc.y + 10;
                 } else {
-                    itemY += 15;
+                    itemY += 10;
                 }
             });
         } else if (sec.id === 'education') {
             items.forEach(edu => {
-                doc.fillColor(colors.accent).font('Helvetica-Bold').fontSize(9).text(edu.gradYear || '', contentX, itemY);
-                itemY += 12;
-                doc.fillColor('#000000').font('Helvetica-Bold').fontSize(11).text((edu.school || '').toUpperCase(), contentX, itemY);
-                itemY += 14;
-                doc.fillColor(colors.secondary).font('Helvetica').fontSize(10).text(edu.degree || '', contentX, itemY);
-                itemY = doc.y + 15;
+                if (itemY + 30 > currentY + contentHeight) return;
+                doc.fillColor(colors.accent).font('Helvetica-Bold').fontSize(8.5).text(edu.gradYear || '', contentX, itemY);
+                itemY += 11;
+                doc.fillColor('#000000').font('Helvetica-Bold').fontSize(10.5).text((edu.school || '').toUpperCase(), contentX, itemY);
+                itemY += 13;
+                doc.fillColor(colors.secondary).font('Helvetica').fontSize(9.5).text(edu.degree || '', contentX, itemY);
+                itemY = doc.y + 10;
             });
         } else if (sec.id === 'projects') {
             items.forEach(proj => {
-                doc.fillColor(colors.accent).font('Helvetica-Bold').fontSize(9).text(proj.duration || '', contentX, itemY);
-                itemY += 12;
-                doc.fillColor('#000000').font('Helvetica-Bold').fontSize(11).text((proj.title || '').toUpperCase(), contentX, itemY);
-                itemY += 14;
-                doc.fillColor(colors.secondary).font('Helvetica').fontSize(10).text(proj.description || '', contentX, itemY, { width: contentW });
-                itemY = doc.y + 15;
+                if (itemY + 30 > currentY + contentHeight) return;
+                doc.fillColor(colors.accent).font('Helvetica-Bold').fontSize(8.5).text(proj.duration || '', contentX, itemY);
+                itemY += 11;
+                doc.fillColor('#000000').font('Helvetica-Bold').fontSize(10.5).text((proj.title || '').toUpperCase(), contentX, itemY);
+                itemY += 13;
+                doc.fillColor(colors.secondary).font('Helvetica').fontSize(9.5).text(proj.description || '', contentX, itemY, { width: contentW, lineGap: 1 });
+                itemY = doc.y + 10;
             });
         }
 
         currentY += contentHeight;
         // Separator
         doc.save();
-        doc.strokeColor('#f0f0f0').lineWidth(1).moveTo(0, currentY).lineTo(LEFT_W, currentY).stroke();
+        doc.strokeColor('#f0f0f0').lineWidth(0.5).moveTo(0, currentY).lineTo(LEFT_W, currentY).stroke();
         doc.restore();
     });
 
     // Sidebar Content (Right)
     const sidebarInnerX = SIDEBAR_X + 25;
     const sidebarInnerW = SIDEBAR_W - 50;
-    let sidebarY = 35;
+    let sidebarY = 30;
 
     // Photo
-    const photoFrameH = 220;
+    const photoFrameH = 180;
     doc.save();
     doc.fillColor('#1a1a1a').rect(SIDEBAR_X + 35, sidebarY, SIDEBAR_W - 70, photoFrameH).fill();
     if (data.personalInfo?.profilePhoto) {
@@ -4205,10 +4218,10 @@ function renderTemplate_HieroSignature(doc, rawData) {
 
     contactItems.forEach(item => {
         if (item.val) {
-            doc.fillColor('#FFFFFF').font('Helvetica-Bold').fontSize(7.5).text(item.label, sidebarInnerX, sidebarY, { characterSpacing: 1 });
-            sidebarY = doc.y + 4;
-            doc.fillColor('#888888').font('Helvetica').fontSize(9).text(item.val, sidebarInnerX, sidebarY);
-            sidebarY = doc.y + 12;
+            doc.fillColor('#FFFFFF').font('Helvetica-Bold').fontSize(7).text(item.label, sidebarInnerX, sidebarY, { characterSpacing: 1 });
+            sidebarY = doc.y + 2;
+            doc.fillColor('#888888').font('Helvetica').fontSize(8.5).text(item.val, sidebarInnerX, sidebarY);
+            sidebarY = doc.y + 8;
         }
     });
 }
