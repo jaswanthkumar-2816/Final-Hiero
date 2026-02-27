@@ -98,11 +98,20 @@ function parseResumeTextRuleBased(rawText) {
         if (addr.length < 40 && !addr.toLowerCase().includes('using') && !addr.toLowerCase().includes('built')) data.personalInfo.address = addr;
     }
 
-    for (let i = 0; i < Math.min(8, cleanLines.length); i++) {
+    for (let i = 0; i < Math.min(10, cleanLines.length); i++) {
         let line = cleanLines[i];
         if (line.includes('@') || line.match(/\d{4}/) || line.length < 3 || line.includes('|')) continue;
-        let clean = line.replace(/^(whoami:?|name:?|resume:?|#|\$|>)\s*/i, '').replace(/^\W+/, '').trim();
-        if (clean.length > 3 && clean.length < 45 && !clean.match(/\d/)) { data.personalInfo.fullName = clean; break; }
+
+        let clean = line.replace(/^(whoami:?|name:?|resume:?|curriculum vitae:?|#|\$|>)\s*/i, '').replace(/^\W+/, '').trim();
+
+        // Exclude lines that look like locations (City, State or City, Country)
+        const isLocation = /^[A-Z][a-z]+,?\s+[A-Z][a-z]+(\s+[A-Z][a-z]+)?$/i.test(clean);
+        const hasNumbers = /\d/.test(clean);
+
+        if (clean.length > 2 && clean.length < 50 && !hasNumbers && !isLocation) {
+            data.personalInfo.fullName = clean;
+            break;
+        }
     }
 
     const sections = { experience: [], education: [], skills: [], projects: [], summary: [], certifications: [], achievements: [], languages: [], hobbies: [], references: [], fallback: [] };

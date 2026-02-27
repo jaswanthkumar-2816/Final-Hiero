@@ -49,8 +49,8 @@
     .template-selection {
       background: rgb(3, 2, 2);
       border-radius: 32px;
-      padding: 60px;
-      margin-bottom: 40px;
+      padding: 30px;
+      margin-bottom: 30px;
       box-shadow: 0 30px 60px rgba(0, 0, 0, 0.2);
       border: 1px solid rgba(45, 196, 44, 0.15);
     }
@@ -494,8 +494,8 @@
     /* Header Styling */
     .header {
       text-align: center;
-      margin-bottom: 40px;
-      padding: 80px 40px 40px;
+      margin-bottom: 30px;
+      padding: 40px 20px 20px;
       position: relative;
       background: rgba(5, 5, 5, 0.6);
       border-radius: 30px;
@@ -611,7 +611,7 @@
     }
 
     .form-section {
-      margin-bottom: 50px;
+      margin-bottom: 30px;
       position: relative;
       transition: all .4s ease;
     }
@@ -628,10 +628,10 @@
     }
 
     .section-title {
-      font-size: 2rem;
+      font-size: 1.8rem;
       color: #04ab07ee;
-      margin-bottom: 30px;
-      padding-bottom: 16px;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
       border-bottom: 4px solid #0d8705;
       display: flex;
       align-items: center;
@@ -697,7 +697,7 @@
     }
 
     .form-group {
-      margin-bottom: 26px;
+      margin-bottom: 20px;
       position: relative;
     }
 
@@ -1318,10 +1318,35 @@
           </div>
         </div>
 
-        <!-- Hiero Nova Template -->
-        <div class="template-card" data-category="premium" data-template="hiero-nova" data-type="premium">
+        <!-- Hiero Cool Template -->
+        <div class="template-card premium" data-category="premium" data-template="hiero-cool" data-type="premium">
+          <div class="premium-badge">NEW</div>
+          <div class="template-preview" onclick="previewTemplate('hiero-cool')">
+            <i class="fas fa-rocket" style="color: #6C63FF;"></i>
+            <div class="preview-overlay">
+              <button class="preview-btn">Preview Template</button>
+            </div>
+          </div>
+          <div class="template-info">
+            <h3>Hiero Cool</h3>
+            <p>A stunning modern template with a dark charcoal sidebar and vibrant purple accents. Features a unique
+              timeline layout and progress bars.</p>
+            <div class="template-tags">
+              <span class="tag">Modern</span>
+              <span class="tag">Purple</span>
+              <span class="tag">Sidebar</span>
+            </div>
+            <button class="start-building-btn" onclick="startBuilding('hiero-cool')"
+              style="background: linear-gradient(135deg, #6C63FF 0%, #4b44d1 100%);">
+              <i class="fas fa-arrow-right"></i> Start Building
+            </button>
+          </div>
+        </div>
+
+        <!-- Hiero Legion Template -->
+        <div class="template-card" data-category="premium" data-template="hiero-legion" data-type="premium">
           <div class="premium-badge">PREMIUM</div>
-          <div class="template-preview" onclick="previewTemplate('hiero-nova')">
+          <div class="template-preview" onclick="previewTemplate('hiero-legion')">
             <i class="fas fa-shield" style="color: #2ae023;"></i>
             <div class="preview-overlay">
               <button class="preview-btn">Preview Template</button>
@@ -1329,16 +1354,38 @@
           </div>
           <div class="template-info">
             <h3>Hiero Legion</h3>
-
-            <p>A sophisticated monochrome design with a bold shield profile and a strong vertical badge. Perfect for
-              modern professionals seeking a high-contrast look.</p>
+            <p>A sophisticated monochrome design with a bold shield profile and a strong vertical badge. High-contrast
+              professional look.</p>
             <div class="template-tags">
-              <span class="tag">Modern</span>
               <span class="tag">Monochrome</span>
-              <span class="tag">Badge</span>
+              <span class="tag">Shield</span>
+              <span class="tag">Executive</span>
+            </div>
+            <button class="start-building-btn" onclick="startBuilding('hiero-legion')">
+              <i class="fas fa-arrow-right"></i> Start Building
+            </button>
+          </div>
+        </div>
+
+        <!-- Hiero Nova Template -->
+        <div class="template-card" data-category="premium" data-template="hiero-nova" data-type="premium">
+          <div class="premium-badge">PREMIUM</div>
+          <div class="template-preview" onclick="previewTemplate('hiero-nova')">
+            <i class="fas fa-sun" style="color: #f4b400;"></i>
+            <div class="preview-overlay">
+              <button class="preview-btn">Preview Template</button>
+            </div>
+          </div>
+          <div class="template-info">
+            <h3>Hiero Nova</h3>
+            <p>Modern editorial layout with a signature yellow header and deep charcoal sidebar. Bold and high-impact.
+            </p>
+            <div class="template-tags">
+              <span class="tag">Editorial</span>
+              <span class="tag">Yellow</span>
+              <span class="tag">Impact</span>
             </div>
             <button class="start-building-btn" onclick="startBuilding('hiero-nova')">
-
               <i class="fas fa-arrow-right"></i> Start Building
             </button>
           </div>
@@ -1461,23 +1508,24 @@
           </div>
         </div>
 
-        <!-- Hiero Classic Template (Template 6) -->
-        <div class="template-card" data-category="professional" data-template="hiero-classic" data-type="free">
-          <div class="template-preview" onclick="previewTemplate('hiero-classic')">
+        <!-- Hiero Urban Template (Template 6) -->
+        <div class="template-card" data-category="modern" data-template="hiero-urban" data-type="free">
+          <div class="template-preview" onclick="previewTemplate('hiero-urban')">
             <i class="fas fa-briefcase"></i>
             <div class="preview-overlay">
               <button class="preview-btn">Preview Template</button>
             </div>
           </div>
           <div class="template-info">
-            <h3>Hiero Classic</h3>
-            <p>Traditional professional resume with timeless design. Perfect for conventional industries.</p>
+            <h3>Hiero Urban</h3>
+            <p>Modern urban design with vibrant slate and sky blue accents. Perfect for making an attractive
+              professional statement.</p>
             <div class="template-tags">
-              <span class="tag">Classic</span>
-              <span class="tag">Corporate</span>
-              <span class="tag">Traditional</span>
+              <span class="tag">Modern</span>
+              <span class="tag">Urban</span>
+              <span class="tag">Attractive</span>
             </div>
-            <button class="start-building-btn" onclick="startBuilding('hiero-classic')">
+            <button class="start-building-btn" onclick="startBuilding('hiero-urban')">
               <i class="fas fa-arrow-right"></i> Start Building
             </button>
           </div>
@@ -1692,6 +1740,29 @@
               <span class="tag premium">Fast</span>
             </div>
             <button class="start-building-btn" onclick="startBuilding('hiero-velocity')">
+              <i class="fas fa-arrow-right"></i> Start Building
+            </button>
+          </div>
+        </div>
+
+        <!-- Hiero Royal Template (Classic Beige) -->
+        <div class="template-card" data-category="classic" data-template="hiero-royal" data-type="free">
+          <div class="template-preview" onclick="previewTemplate('hiero-royal')">
+            <i class="fas fa-crown"></i>
+            <div class="preview-overlay">
+              <button class="preview-btn">Preview Template</button>
+            </div>
+          </div>
+          <div class="template-info">
+            <h3>Hiero Royal</h3>
+            <p>Classic beige-toned template with elegant section icons, profile photo, strength tag pills and hobbies
+              row. Ideal for executive and classic professional profiles.</p>
+            <div class="template-tags">
+              <span class="tag">Classic</span>
+              <span class="tag">Elegant</span>
+              <span class="tag">Executive</span>
+            </div>
+            <button class="start-building-btn" onclick="startBuilding('hiero-royal')">
               <i class="fas fa-arrow-right"></i> Start Building
             </button>
           </div>
@@ -2197,40 +2268,40 @@
 
   <!-- Results -->
   <div id="resultsSection"
-    style="display:none; margin-top:40px; text-align:center; padding: 40px; background: rgba(0,0,0,0.4); border-radius: 20px; border: 1px solid rgba(42,224,35,0.2);">
-    <h2 style="color:#2ae023; font-size:2.4rem; margin-bottom:20px; font-weight: 700;">Resume Tailored Successfully!
+    style="display:none; margin-top:25px; text-align:center; padding: 30px; background: rgba(0,0,0,0.4); border-radius: 20px; border: 1px solid rgba(42,224,35,0.2);">
+    <h2 style="color:#2ae023; font-size:2.2rem; margin-bottom:15px; font-weight: 700;">Resume Tailored Successfully!
     </h2>
-    <p style="color: #cbd5e1; margin-bottom: 40px; font-size: 1.1rem;">Your professional ATS-friendly resume is ready.
+    <p style="color: #cbd5e1; margin-bottom: 30px; font-size: 1.1rem;">Your professional ATS-friendly resume is ready.
       Select your preferred format below.</p>
 
     <div style="display:flex; gap:25px; justify-content:center; flex-wrap:wrap;">
       <div class="download-card"
-        style="background: rgba(255,255,255,0.05); padding: 30px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); width: 220px; transition: all 0.3s;"
+        style="background: rgba(255,255,255,0.05); padding: 25px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); width: 220px; transition: all 0.3s;"
         onmouseover="this.style.borderColor='#2ae023'" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'">
         <i class="fas fa-file-pdf" style="font-size: 3rem; color: #ef4444; margin-bottom: 20px;"></i>
-        <h4 style="color: white; margin-bottom: 20px;">Standard PDF</h4>
+        <h4 style="color: white; margin-bottom: 15px;">Standard PDF</h4>
         <button class="btn btn-primary" onclick="downloadResume()" style="width: 100%;">Download</button>
       </div>
 
       <div class="download-card"
-        style="background: rgba(255,255,255,0.05); padding: 30px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); width: 220px; transition: all 0.3s;"
-        onmouseover="this.style.borderColor='#3b82f6'" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'">
-        <i class="fas fa-file-word" style="font-size: 3rem; color: #3b82f6; margin-bottom: 20px;"></i>
-        <h4 style="color: white; margin-bottom: 20px;">Microsoft Word</h4>
+        style="background: rgba(255,255,255,0.05); padding: 25px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); width: 220px; transition: all 0.3s;"
+        onmouseover="this.style.borderColor='#00CEC9'" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'">
+        <i class="fas fa-file-word" style="font-size: 3rem; color: #00CEC9; margin-bottom: 20px;"></i>
+        <h4 style="color: white; margin-bottom: 15px;">Microsoft Word</h4>
         <button id="downloadDocxBtn" class="btn btn-primary" onclick="downloadDocx()"
-          style="width: 100%; background: #3b82f6; border-color: #3b82f6;">Download Word</button>
+          style="width: 100%; background: #00CEC9; border-color: #00CEC9;">Download Word</button>
       </div>
 
       <div class="download-card"
-        style="background: rgba(255,255,255,0.05); padding: 30px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); width: 220px; transition: all 0.3s;"
+        style="background: rgba(255,255,255,0.05); padding: 25px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); width: 220px; transition: all 0.3s;"
         onmouseover="this.style.borderColor='#2ae023'" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'">
         <i class="fas fa-eye" style="font-size: 3rem; color: #2ae023; margin-bottom: 20px;"></i>
-        <h4 style="color: white; margin-bottom: 20px;">Live Preview</h4>
+        <h4 style="color: white; margin-bottom: 15px;">Live Preview</h4>
         <button class="btn btn-secondary" onclick="previewResume()" style="width: 100%;">View PDF</button>
       </div>
     </div>
 
-    <div style="margin-top: 40px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 30px;">
+    <div style="margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
       <button class="btn btn-secondary" onclick="editResume()" style="opacity: 0.7;">
         <i class="fas fa-edit"></i> Edit Details
       </button>
@@ -2240,11 +2311,11 @@
   </div>
 
   <script>
-    // Version: 2024-12-02-v4 - Complete fillFormWithImportedData function fix
-    // Last updated: 2024-12-02 20:45
+    // Version: 2026-02-21-v5 - Added Hiero Cool Template
+    // Last updated: 2026-02-21 20:15
     // CACHE BUSTER: If you see broken code, hard refresh: Ctrl+Shift+R (Windows) or Cmd+Shift+R (Mac)
 
-    console.log('🔥 Resume Builder v4 Loaded - 2024-12-02 20:45');
+    console.log('🔥 Resume Builder v5 Loaded - 2026-02-21 20:15');
     console.log('✅ fillFormWithImportedData function: COMPLETE AND WORKING');
 
     // Global state
@@ -2636,6 +2707,11 @@
           description: 'Premium layout with vibrant orange accents and a dominant navy sidebar.',
           style: 'Two-column, orange profile header, navy sidebar with progress skill bars'
         },
+        'hiero-cool': {
+          name: 'Hiero Cool',
+          description: 'A stunning modern template with a dark charcoal sidebar and vibrant purple accents.',
+          style: 'Two-column, charcoal sidebar, purple accents, unique timeline layout, skill progress bars'
+        },
         'hiero-timeline': {
           name: 'Hiero Minimal',
           description: 'Elegant vertical timeline layout with a professional grayscale design. Ideal for clean, corporate presentation.',
@@ -2662,10 +2738,10 @@
           description: 'High-fidelity technical layout with centered headers and split subsections.',
           style: 'Times New Roman, centered header, academic split layout, and ATS-optimized structure.'
         },
-        'hiero-classic': {
-          name: 'Hiero Classic',
-          description: 'Traditional professional resume with timeless design. Perfect for conventional industries.',
-          style: 'Classic layout, professional fonts, standard sections.'
+        'hiero-urban': {
+          name: 'Hiero Urban',
+          description: 'Modern urban design with vibrant slate and sky blue accents. Perfect for making an attractive professional statement.',
+          style: 'Modern layout, slate & sky blue colours, stylish sections.'
         },
         'hiero-minimal': {
           name: 'Hiero Minimal',
@@ -2773,9 +2849,19 @@
           style: 'Clean professional structure, stellar accents, premium feel.'
         },
         'hiero-nova': {
+          name: 'Hiero Nova',
+          description: 'Modern editorial layout with a signature yellow header and deep charcoal sidebar.',
+          style: 'Yellow sidebar header, dark charcoal sidebar, bold editorial typography.'
+        },
+        'hiero-legion': {
           name: 'Hiero Legion',
-          description: 'A sophisticated monochrome design with a bold shield profile and a strong vertical badge.',
-          style: 'Modern monochrome, high-contrast black accents, shield profile mask.'
+          description: 'A sophisticated monochrome design with a bold shield profile and a strong vertical charcoal badge.',
+          style: 'Monochrome, charcoal sidebar, shield profile mask, high-contrast typography.'
+        },
+        'hiero-royal': {
+          name: 'Hiero Royal',
+          description: 'Classic beige-toned resume with elegant section icons, profile photo, strength tags and hobbies row. Ideal for classic and executive professionals.',
+          style: 'Warm beige (#EDE8D9) background, left date column, right content, rounded skill pills, hobbies row with circle icons.'
         }
 
       };
@@ -3534,10 +3620,10 @@
         <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
             <span style="font-size: 14px; opacity: 0.8;">JD Match Score</span>
-            <span style="font-weight: 800; color: #3b82f6;">${analysis.matchingScore}%</span>
+            <span style="font-weight: 800; color: #14b8a6;">${analysis.matchingScore}%</span>
           </div>
           <div style="height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
-            <div style="width: ${analysis.matchingScore}%; height: 100%; background: #3b82f6;"></div>
+            <div style="width: ${analysis.matchingScore}%; height: 100%; background: #14b8a6;"></div>
           </div>
         </div>
       ` : '';

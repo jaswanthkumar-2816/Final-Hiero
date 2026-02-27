@@ -51,7 +51,7 @@ async function extractTextFromPdf(filePath) {
     }
 }
 
-const { generateTemplateHTML } = require('./templates');
+
 
 // ✨ Helper: Extract sections by keywords
 function extractSection(text, keywords) {

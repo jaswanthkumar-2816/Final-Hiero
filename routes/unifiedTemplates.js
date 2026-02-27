@@ -250,20 +250,44 @@ const TEMPLATE_COLORS = {
         sidebarBg: '#2e2e2e',
         sidebarText: '#ffffff',
         light: '#e0e0e0'
+    },
+    'hiero-royal': {
+        primary: '#1a1a1a',      // Deep black for name/titles
+        secondary: '#3a3a3a',    // Dark grey for text
+        accent: '#8B7D6B',       // Warm brown/tan for section icons
+        background: '#EDE8D9',  // Warm beige background
+        light: '#BFAF9A'         // Light warm beige
+    },
+    'hiero-cool': {
+        primary: '#0B0B0B',
+        secondary: '#151515',
+        accent: '#10B981',
+        background: '#0B0B0B',
+        light: '#34D399',
+        text: '#F9FAFB'
+    },
+    'hiero-legion': {
+        primary: '#000000',
+        secondary: '#1a1a1a',
+        accent: '#000000',
+        background: '#FFFFFF',
+        light: '#f3f4f6'
     }
 };
 
 // Map template IDs to their internal keys
 const TEMPLATE_MAP = {
     'template-4': 'template-4',
+    'template4': 'template-4',
+    'hiero-academic': 'template-4',
     'hiero-studio': 'hiero-studio',
     'hiero-monethon': 'hiero-monethon',
     'monethon': 'hiero-monethon',
     'hiero monethon': 'hiero-monethon',
     'hiero-nova': 'hiero-nova',
     'nova': 'hiero-nova',
-    'hiero-legion': 'hiero-nova',
-    'legion': 'hiero-nova',
+    'hiero-legion': 'hiero-legion',
+    'legion': 'hiero-legion',
     'hiero-essence': 'hiero-essence',
     'essence': 'hiero-essence',
     'hiero-timeline': 'hiero-timeline',
@@ -276,7 +300,13 @@ const TEMPLATE_MAP = {
     'hiero-premium': 'hiero-premium',
     'premium': 'hiero-premium',
     'hiero-prestige': 'hiero-prestige',
-    'prestige': 'hiero-prestige'
+    'prestige': 'hiero-prestige',
+    'hiero-royal': 'hiero-royal',
+    'royal': 'hiero-royal',
+    'hiero-cool': 'hiero-cool',
+    'cool': 'hiero-cool',
+    'hiero-legion': 'hiero-legion',
+    'legion': 'hiero-legion'
 
 };
 
@@ -434,11 +464,12 @@ function normalizeData(data = {}) {
 
     const getArr = (v, aliases = []) => {
         if (Array.isArray(v) && v.length > 0) return v;
+        if (v && typeof v === 'string') return toArray(v);
         for (let alias of aliases) {
-            if (data[alias] && Array.isArray(data[alias]) && data[alias].length > 0) return data[alias];
-            if (p[alias] && Array.isArray(p[alias]) && p[alias].length > 0) return p[alias];
+            const val = data[alias] || p[alias];
+            if (Array.isArray(val) && val.length > 0) return val;
+            if (val && typeof val === 'string' && val.trim().length > 0) return toArray(val);
         }
-        if (typeof v === 'string') return toArray(v);
         return [];
     };
 
@@ -482,20 +513,20 @@ function normalizeData(data = {}) {
                     location: exp.location || ''
                 };
             }),
-            education: getArr(data.education, ['academicDetails', 'educationList', 'academics', 'academicHistory']).map(edu => {
+            education: getArr(data.education, ['academicDetails', 'educationList', 'academics', 'academicHistory', 'edu']).map(edu => {
                 const dates = String(edu.dates || '');
                 return {
-                    degree: edu.degree || edu.course || '',
+                    degree: edu.degree || edu.course || edu.title || '',
                     school: edu.school || edu.institution || edu.institute || '',
                     gradYear: edu.gradYear || edu.year || edu.graduationDate || (dates ? dates.split('-')[1]?.trim() || dates : ''),
                     gpa: edu.gpa || edu.grade || edu.details || '',
                     location: edu.location || ''
                 };
             }),
-            skills: getArr(data.skills, ['technicalSkills', 'professionalSkills', 'skillsList', 'coreCompetencies', 'expertise']),
-            softSkills: getArr(data.softSkills, ['managementSkills', 'interpersonalSkills', 'softSkillsList']),
-            certifications: getArr(data.certifications, ['certificates', 'personalCertifications', 'awards']).map(c => typeof c === 'string' ? { name: c } : c),
-            projects: getArr(data.projects, ['projectList', 'customDetails', 'personalProjects']).filter(proj => !proj.heading || proj.heading.toLowerCase().includes('project')).map(proj => {
+            skills: getArr(data.skills, ['technicalSkills', 'professionalSkills', 'skillsList', 'coreCompetencies', 'expertise', 'techSkills']),
+            softSkills: getArr(data.softSkills, ['managementSkills', 'interpersonalSkills', 'softSkillsList', 'personalSkills']),
+            certifications: getArr(data.certifications, ['certificates', 'personalCertifications', 'awards', 'certificationList']).map(c => typeof c === 'string' ? { name: c } : c),
+            projects: getArr(data.projects, ['projectList', 'customDetails', 'personalProjects', 'portfolios']).filter(proj => !proj.heading || proj.heading.toLowerCase().includes('project')).map(proj => {
                 return {
                     title: proj.title || proj.projectName || proj.name || proj.heading || '',
                     description: proj.description || proj.details || proj.content || '',
@@ -503,7 +534,7 @@ function normalizeData(data = {}) {
                     duration: proj.duration || proj.date || ''
                 };
             }),
-            achievements: getArr(data.achievements, ['awards', 'honors', 'achievementsList']),
+            achievements: getArr(data.achievements, ['awards', 'honors', 'achievementsList', 'awardList']),
             hobbies: getArr(data.hobbies, ['interests', 'hobbiesList', 'activities']),
             extraCurricular: getArr(data.extraCurricular, ['activities', 'volunteerWork']),
             socialLinks: getArr(data.socialLinks, ['socials', 'links', 'onlinePortfolios']),
@@ -1321,6 +1352,17 @@ async function generateUnifiedResume(data, templateId, outStream, customOptions 
                     }
                     return;
 
+                case 'hiero-urban':
+                    await renderTemplate_HieroUrban(doc, data);
+                    doc.end();
+                    if (outStream && outStream.on) {
+                        outStream.on('finish', () => resolve(true));
+                        outStream.on('error', reject);
+                    } else {
+                        resolve(doc);
+                    }
+                    return;
+
                 case 'hiero-studio':
                     // Studio uses a completely custom full-page layout
                     await renderTemplate_StudioRightSidebar(doc, data, colors, spacing);
@@ -1353,7 +1395,16 @@ async function generateUnifiedResume(data, templateId, outStream, customOptions 
                         resolve(doc);
                     }
                     return;
-                case 'template-4': renderHeader_Academic(doc, data, colors); break;
+                case 'template-4':
+                    await renderTemplate_HieroAcademic(doc, data);
+                    doc.end();
+                    if (outStream && outStream.on) {
+                        outStream.on('finish', () => resolve(true));
+                        outStream.on('error', reject);
+                    } else {
+                        resolve(doc);
+                    }
+                    return;
                 case 'hiero-monethon':
                     renderTemplate_HieroMonethon(doc, data, options);
                     doc.end();
@@ -1367,7 +1418,80 @@ async function generateUnifiedResume(data, templateId, outStream, customOptions 
                 case 'hiero-nova':
                     await renderTemplate_HieroNova(doc, data);
                     doc.end();
+                    if (outStream && outStream.on) {
+                        outStream.on('finish', () => resolve(true));
+                        outStream.on('error', reject);
+                    } else {
+                        resolve(doc);
+                    }
+                    return;
 
+                case 'hiero-legion':
+                    await renderTemplate_HieroLegion(doc, data);
+                    doc.end();
+                    if (outStream && outStream.on) {
+                        outStream.on('finish', () => resolve(true));
+                        outStream.on('error', reject);
+                    } else {
+                        resolve(doc);
+                    }
+                    return;
+
+                case 'hiero-signature':
+                    renderTemplate_HieroSignature(doc, data);
+                    doc.end();
+                    if (outStream && outStream.on) {
+                        outStream.on('finish', () => resolve(true));
+                        outStream.on('error', reject);
+                    } else {
+                        resolve(doc);
+                    }
+                    return;
+
+                case 'hiero-vision':
+                    await renderTemplate_HieroVision(doc, data, colors, spacing);
+                    doc.end();
+                    if (outStream && outStream.on) {
+                        outStream.on('finish', () => resolve(true));
+                        outStream.on('error', reject);
+                    } else {
+                        resolve(doc);
+                    }
+                    return;
+                case 'hiero-premium':
+                    await renderTemplate_HieroPremium(doc, data, colors, spacing);
+                    doc.end();
+                    if (outStream && outStream.on) {
+                        outStream.on('finish', () => resolve(true));
+                        outStream.on('error', reject);
+                    } else {
+                        resolve(doc);
+                    }
+                    return;
+                case 'hiero-prestige':
+                    await renderTemplate_HieroPrestige(doc, data, colors, spacing);
+                    doc.end();
+                    if (outStream && outStream.on) {
+                        outStream.on('finish', () => resolve(true));
+                        outStream.on('error', reject);
+                    } else {
+                        resolve(doc);
+                    }
+                    return;
+                case 'hiero-cool':
+                    renderTemplate_HieroCool(doc, data);
+                    doc.end();
+                    if (outStream && outStream.on) {
+                        outStream.on('finish', () => resolve(true));
+                        outStream.on('error', reject);
+                    } else {
+                        resolve(doc);
+                    }
+                    return;
+
+                case 'hiero-royal':
+                    await renderTemplate_HieroRoyal(doc, data);
+                    doc.end();
                     if (outStream && outStream.on) {
                         outStream.on('finish', () => resolve(true));
                         outStream.on('error', reject);
@@ -3127,6 +3251,144 @@ async function renderTemplate_HieroNova(doc, rawData) {
     }
 }
 
+/**
+ * 🏛️ HIERO LEGION TEMPLATE
+ * A sophisticated monochrome design with a bold shield-masked profile 
+ * and a strong vertical charcoal badge.
+ */
+async function renderTemplate_HieroLegion(doc, rawData) {
+    const data = normalizeData(rawData);
+    const pInfo = data.personalInfo || {};
+
+    const PAGE_WIDTH = 595.28;
+    const PAGE_HEIGHT = 841.89;
+    const sidebarWidth = 220;
+    const headerHeight = 160;
+
+    const black = '#000000';
+    const dark = '#1a1a1a';
+    const softGrey = '#f3f4f6';
+    const white = '#ffffff';
+
+    // 1. Sidebar Background (Vertical Badge)
+    doc.rect(0, 0, sidebarWidth, PAGE_HEIGHT).fill(dark);
+
+    // 2. Shield Profile Mask
+    if (pInfo.profilePhoto) {
+        try {
+            let imgData = base64ToBuffer(pInfo.profilePhoto);
+            const pSize = 130;
+            const pX = (sidebarWidth - pSize) / 2;
+            const pY = 40;
+
+            doc.save();
+            // Shield Path
+            const cx = pX + pSize / 2;
+            const cy = pY + pSize / 2;
+            const r = pSize / 2;
+
+            doc.moveTo(cx, pY) // Top center
+                .bezierCurveTo(cx + r, pY, cx + r, cy, cx + r, cy + 10)
+                .bezierCurveTo(cx + r, cy + r, cx, cy + r + 15, cx, cy + r + 25) // Pointed bottom
+                .bezierCurveTo(cx, cy + r + 15, cx - r, cy + r, cx - r, cy + 10)
+                .bezierCurveTo(cx - r, cy, cx - r, pY, cx, pY)
+                .closePath().clip();
+
+            doc.image(imgData, pX, pY, { width: pSize, height: (pSize * 1.2), cover: [pSize, pSize] });
+            doc.restore();
+
+            // Border
+            doc.save();
+            doc.moveTo(cx, pY)
+                .bezierCurveTo(cx + r, pY, cx + r, cy, cx + r, cy + 10)
+                .bezierCurveTo(cx + r, cy + r, cx, cy + r + 15, cx, cy + r + 25)
+                .bezierCurveTo(cx, cy + r + 15, cx - r, cy + r, cx - r, cy + 10)
+                .bezierCurveTo(cx - r, cy, cx - r, pY, cx, pY)
+                .closePath().lineWidth(3).strokeColor(white).stroke();
+            doc.restore();
+        } catch (e) { }
+    }
+
+    // 3. Main Content Rendering (White Area)
+    const mainX = sidebarWidth + 35;
+    const mainWidth = PAGE_WIDTH - mainX - 35;
+    let y = 50;
+
+    // Header in Main Area
+    const name = (pInfo.fullName || "").toUpperCase();
+    doc.fillColor(black).font('Helvetica-Bold').fontSize(32).text(name, mainX, y);
+    y = doc.y + 5;
+    doc.fillColor(dark).font('Helvetica').fontSize(14).text((pInfo.roleTitle || "").toUpperCase(), { characterSpacing: 2 });
+    y = doc.y + 20;
+
+    // Standard Section Rendering
+    const mSec = (title) => {
+        doc.fillColor(black).font('Helvetica-Bold').fontSize(14).text(title.toUpperCase(), mainX, y, { characterSpacing: 2 });
+        const lineY = doc.y + 3;
+        doc.moveTo(mainX, lineY).lineTo(PAGE_WIDTH - 35, lineY).lineWidth(1).strokeColor('#eeeeee').stroke();
+        y = lineY + 12;
+    };
+
+    // Experience
+    const exp = getSafeArray(data.experience);
+    if (exp.length > 0) {
+        mSec('Professional Experience');
+        exp.forEach(e => {
+            doc.fillColor(black).font('Helvetica-Bold').fontSize(11).text(e.jobTitle || "", mainX, y, { continued: true });
+            doc.fillColor('#666666').font('Helvetica').fontSize(10).text(`  |  ${e.company || ""}  (${e.startDate || ""} - ${e.endDate || "Present"})`);
+            doc.fillColor('#333333').font('Helvetica').fontSize(10.5).lineGap(1).text(e.description || "", mainX, doc.y + 2, { width: mainWidth });
+            y = doc.y + 12;
+        });
+    }
+
+    // Projects
+    const projs = getSafeArray(data.projects);
+    if (projs.length > 0) {
+        mSec('Projects');
+        projs.forEach(p => {
+            doc.fillColor(black).font('Helvetica-Bold').fontSize(11).text(p.title || p.name || "", mainX, y);
+            doc.fillColor('#444444').font('Helvetica').fontSize(10.5).text(p.description || "", { width: mainWidth });
+            y = doc.y + 10;
+        });
+    }
+
+    // Education
+    const edu = getSafeArray(data.education);
+    if (edu.length > 0) {
+        mSec('Education');
+        edu.forEach(e => {
+            doc.fillColor(black).font('Helvetica-Bold').fontSize(10.5).text(e.degree || "", mainX, y);
+            doc.fillColor('#444444').font('Helvetica').fontSize(10).text(`${e.school || ""} | ${e.gradYear || ""}`);
+            y = doc.y + 10;
+        });
+    }
+
+    // 4. Sidebar Content (Contacts, Skills)
+    let sY = 220;
+    const sX = 25;
+    const sW = sidebarWidth - 50;
+
+    const sidebarSec = (t) => {
+        doc.fillColor(white).font('Helvetica-Bold').fontSize(12).text(t.toUpperCase(), sX, sY, { characterSpacing: 1.5 });
+        sY = doc.y + 10;
+    };
+
+    sidebarSec('Contact');
+    doc.fillColor('#cccccc').font('Helvetica').fontSize(9);
+    if (pInfo.email) { doc.text(pInfo.email, sX, sY); sY = doc.y + 4; }
+    if (pInfo.phone) { doc.text(pInfo.phone, sX, sY); sY = doc.y + 4; }
+    if (pInfo.address) { doc.text(pInfo.address, sX, sY, { width: sW }); sY = doc.y + 8; }
+    sY += 20;
+
+    sidebarSec('Skills');
+    const skills = getSafeArray(data.skills);
+    doc.fillColor(white).font('Helvetica').fontSize(9.5).lineGap(2);
+    skills.forEach(s => {
+        const n = typeof s === 'string' ? s : (s.name || "");
+        doc.text("• " + n, sX, sY);
+        sY = doc.y;
+    });
+}
 
 module.exports = {
     generateUnifiedResume,
@@ -3134,6 +3396,7 @@ module.exports = {
     TEMPLATE_MAP,
     renderTemplate_HieroMonethon,
     renderTemplate_HieroNova,
+    renderTemplate_HieroLegion,
     renderTemplate_HieroEssence
 };
 
@@ -4012,6 +4275,9 @@ function renderTemplate_HieroRetail(doc, rawData) {
     });
 }
 
+=======
+
+>>>>>>> origin/main
 function renderTemplate_HieroSignature(doc, rawData) {
     const data = normalizeData(rawData);
     const colors = TEMPLATE_COLORS['hiero-signature'];
@@ -4029,6 +4295,7 @@ function renderTemplate_HieroSignature(doc, rawData) {
         const textW = doc.widthOfString(text.toUpperCase());
         doc.translate(x, y);
         doc.rotate(-90);
+<<<<<<< HEAD
         doc.text(text.toUpperCase(), -textW / 2, 0);
         doc.restore();
     };
@@ -4135,17 +4402,17 @@ function renderTemplate_HieroSignature(doc, rawData) {
         currentY += contentHeight;
         // Separator
         doc.save();
-        doc.strokeColor('#f0f0f0').lineWidth(0.5).moveTo(0, currentY).lineTo(LEFT_W, currentY).stroke();
+        doc.strokeColor('#f0f0f0').lineWidth(1).moveTo(0, currentY).lineTo(LEFT_W, currentY).stroke();
         doc.restore();
     });
 
     // Sidebar Content (Right)
     const sidebarInnerX = SIDEBAR_X + 25;
     const sidebarInnerW = SIDEBAR_W - 50;
-    let sidebarY = 30;
+    let sidebarY = 35;
 
     // Photo
-    const photoFrameH = 180;
+    const photoFrameH = 220;
     doc.save();
     doc.fillColor('#1a1a1a').rect(SIDEBAR_X + 35, sidebarY, SIDEBAR_W - 70, photoFrameH).fill();
     if (data.personalInfo?.profilePhoto) {
@@ -4218,10 +4485,10 @@ function renderTemplate_HieroSignature(doc, rawData) {
 
     contactItems.forEach(item => {
         if (item.val) {
-            doc.fillColor('#FFFFFF').font('Helvetica-Bold').fontSize(7).text(item.label, sidebarInnerX, sidebarY, { characterSpacing: 1 });
-            sidebarY = doc.y + 2;
-            doc.fillColor('#888888').font('Helvetica').fontSize(8.5).text(item.val, sidebarInnerX, sidebarY);
-            sidebarY = doc.y + 8;
+            doc.fillColor('#FFFFFF').font('Helvetica-Bold').fontSize(7.5).text(item.label, sidebarInnerX, sidebarY, { characterSpacing: 1 });
+            sidebarY = doc.y + 4;
+            doc.fillColor('#888888').font('Helvetica').fontSize(9).text(item.val, sidebarInnerX, sidebarY);
+            sidebarY = doc.y + 12;
         }
     });
 }
@@ -5055,4 +5322,1044 @@ async function renderTemplate_HieroPremium(doc, rawData, colors, spacing) {
     }
 }
 
+<<<<<<< HEAD
+=======
+// ==================== HIERO ROYAL (KickResume-Style Beige) ====================
+async function renderTemplate_HieroRoyal(doc, rawData) {
+    const data = normalizeData(rawData);
+    // Prevent paginating
+    doc.addPage = function () { return doc; };
+
+    const PAGE_W = 595.28;
+    const PAGE_H = 841.89;
+    const MARGIN = 36;
+    const CONTENT_W = PAGE_W - MARGIN * 2;
+
+    // Colors from image
+    const BG = '#EDE8D9';   // warm beige background
+    const ICON_BG = '#B8AC98';   // the round icon circle color
+    const ICON_FG = '#FFFFFF';   // icon glyph color
+    const BLACK = '#1A1A1A';   // name
+    const DARK = '#2C2C2C';   // section titles, bold text
+    const MED = '#4A4A4A';   // body text
+    const LIGHT = '#6A6A6A';   // dates, secondary
+    const BULLET = '#7A7060';   // bullet dots in contact row
+    const LINE_CLR = '#C5BC9E';   // horizontal divider lines
+    const TAG_BG = '#D8D2C0';   // strength tag pill background
+    const TAG_TXT = '#3A3A2A';   // strength tag text
+
+    // Fill beige background
+    doc.rect(0, 0, PAGE_W, PAGE_H).fill(BG);
+
+    let y = MARGIN;
+
+    // ======= HEADER =======
+    const PHOTO_SIZE = 88;
+    const PHOTO_X = PAGE_W - MARGIN - PHOTO_SIZE;
+    const HEADER_TEXT_W = PHOTO_X - MARGIN - 10;
+
+    // Name
+    const fullName = data.personalInfo.fullName || 'Your Name';
+    doc.font('Helvetica-Bold').fontSize(28).fillColor(BLACK);
+    doc.text(fullName, MARGIN, y, { width: HEADER_TEXT_W });
+    y += 36;
+
+    // Contact line — each item prefixed with a filled bullet dot
+    const contactItems = [
+        data.personalInfo.nationality ? `Nationality: ${data.personalInfo.nationality}` : null,
+        data.personalInfo.address ? `Address: ${data.personalInfo.address}` : null,
+        data.personalInfo.email ? `Email address: ${data.personalInfo.email}` : null,
+        data.personalInfo.phone ? `Phone: ${data.personalInfo.phone}` : null,
+        data.personalInfo.linkedin ? `LinkedIn: ${data.personalInfo.linkedin}` : null,
+    ].filter(Boolean);
+
+    doc.font('Helvetica').fontSize(9).fillColor(MED);
+    contactItems.forEach((item, i) => {
+        // bullet
+        doc.fillColor(BULLET).circle(MARGIN + 4, y + 3.5, 2.5).fill();
+        doc.fillColor(MED).text(item, MARGIN + 12, y, { width: HEADER_TEXT_W - 12 });
+        y += 14;
+    });
+
+    // Profile photo – positioned at top right
+    const PHOTO_Y = MARGIN;
+    if (data.personalInfo.profilePhoto) {
+        try {
+            const buf = base64ToBuffer(data.personalInfo.profilePhoto);
+            if (buf) {
+                doc.save();
+                doc.rect(PHOTO_X, PHOTO_Y, PHOTO_SIZE, PHOTO_SIZE).clip();
+                doc.image(buf, PHOTO_X, PHOTO_Y, { width: PHOTO_SIZE, height: PHOTO_SIZE, cover: [PHOTO_SIZE, PHOTO_SIZE] });
+                doc.restore();
+            }
+        } catch (e) {
+            // placeholder grey box
+            doc.rect(PHOTO_X, PHOTO_Y, PHOTO_SIZE, PHOTO_SIZE).fill('#C0B8A8');
+        }
+    } else {
+        doc.rect(PHOTO_X, PHOTO_Y, PHOTO_SIZE, PHOTO_SIZE).fill('#C0B8A8');
+    }
+
+    // Horizontal divider after header
+    y = Math.max(y, PHOTO_Y + PHOTO_SIZE) + 10;
+    doc.moveTo(MARGIN, y).lineTo(PAGE_W - MARGIN, y).strokeColor(LINE_CLR).lineWidth(0.8).stroke();
+    y += 14;
+
+    // ======= SECTION RENDERER =======
+    // Icon radius and dimensions
+    const ICON_R = 12;
+    const DATE_COL_W = 105;   // left: dates / location
+    const BODY_X = MARGIN + ICON_R * 2 + 14 + DATE_COL_W + 14;
+    const BODY_W = PAGE_W - MARGIN - BODY_X;
+
+    function drawSectionHeader(title) {
+        // Icon circle with simple text glyph shorthand
+        doc.circle(MARGIN + ICON_R, y + ICON_R, ICON_R).fill(ICON_BG);
+        // For icon text, use a simple single letter or symbol
+        const icons = {
+            'Resume summary': 'R',
+            'Work experience': 'W',
+            'Education': 'E',
+            'Strengths': 'S',
+            'Certificates': 'C',
+            'Hobbies': 'H'
+        };
+        const glyph = icons[title] || title.charAt(0);
+        doc.font('Helvetica-Bold').fontSize(9).fillColor(ICON_FG);
+        const gW = doc.widthOfString(glyph);
+        doc.text(glyph, MARGIN + ICON_R - gW / 2, y + ICON_R - 4.5);
+
+        doc.font('Helvetica-Bold').fontSize(12).fillColor(DARK);
+        doc.text(title, MARGIN + ICON_R * 2 + 10, y + ICON_R - 6.5, { width: 180 });
+
+        // Horizontal rule extending from right of title to right margin
+        const ruleStartX = MARGIN + ICON_R * 2 + 10 + doc.widthOfString(title) + 10;
+        doc.moveTo(ruleStartX, y + ICON_R).lineTo(PAGE_W - MARGIN, y + ICON_R).strokeColor(LINE_CLR).lineWidth(0.7).stroke();
+
+        y += ICON_R * 2 + 10;
+    }
+
+    // ======= SUMMARY =======
+    if (data.summary) {
+        drawSectionHeader('Resume summary');
+        doc.font('Helvetica').fontSize(9.5).fillColor(MED);
+        doc.text(data.summary, MARGIN, y, { width: CONTENT_W, align: 'justify', lineGap: 1.5 });
+        y += doc.heightOfString(data.summary, { width: CONTENT_W }) + 16;
+
+        doc.moveTo(MARGIN, y).lineTo(PAGE_W - MARGIN, y).strokeColor(LINE_CLR).lineWidth(0.6).stroke();
+        y += 14;
+    }
+
+    // ======= WORK EXPERIENCE =======
+    const exps = data.experience || [];
+    if (exps.length > 0) {
+        drawSectionHeader('Work experience');
+
+        exps.forEach(exp => {
+            // Date + location left column
+            const dateStr = `${exp.startDate || ''} – ${exp.endDate || 'present'}`;
+            const locStr = exp.location || '';
+            doc.font('Helvetica').fontSize(9).fillColor(LIGHT);
+            doc.text(dateStr, MARGIN, y, { width: DATE_COL_W + ICON_R * 2 + 14 });
+            if (locStr) {
+                y += 12;
+                doc.text(locStr, MARGIN, y, { width: DATE_COL_W + ICON_R * 2 + 14 });
+                y -= 12;
+            }
+
+            // Job title + company
+            doc.font('Helvetica-Bold').fontSize(10.5).fillColor(DARK);
+            doc.text(exp.jobTitle || '', BODY_X, y, { width: BODY_W });
+            y += 14;
+
+            const company = exp.company || '';
+            if (company) {
+                doc.font('Helvetica-Bold').fontSize(9.5).fillColor(DARK);
+                doc.text(company, BODY_X, y, { width: BODY_W });
+                y += 13;
+            }
+
+            // Bullet points
+            if (exp.description) {
+                const lines = exp.description.split('\n').filter(l => l.trim());
+                lines.forEach(line => {
+                    const clean = line.replace(/^[\*\-•]\s*/, '');
+                    doc.font('Helvetica').fontSize(9.5).fillColor(MED);
+                    const txt = '• ' + clean;
+                    const lh = doc.heightOfString(txt, { width: BODY_W - 4 });
+                    doc.text(txt, BODY_X, y, { width: BODY_W - 4, lineGap: 1 });
+                    y += lh + 3;
+                });
+            }
+            y += 12;
+        });
+
+        doc.moveTo(MARGIN, y).lineTo(PAGE_W - MARGIN, y).strokeColor(LINE_CLR).lineWidth(0.6).stroke();
+        y += 14;
+    }
+
+    // ======= EDUCATION =======
+    const edus = data.education || [];
+    if (edus.length > 0) {
+        drawSectionHeader('Education');
+
+        edus.forEach(edu => {
+            const dateStr = edu.gradYear ? edu.gradYear : '';
+            doc.font('Helvetica').fontSize(9).fillColor(LIGHT);
+            doc.text(dateStr, MARGIN, y, { width: DATE_COL_W + ICON_R * 2 + 14 });
+
+            doc.font('Helvetica-Bold').fontSize(10.5).fillColor(DARK);
+            doc.text(edu.degree || '', BODY_X, y, { width: BODY_W });
+            y += 14;
+
+            doc.font('Helvetica-Bold').fontSize(9.5).fillColor(DARK);
+            doc.text(edu.school || '', BODY_X, y, { width: BODY_W });
+            y += 13;
+
+            if (edu.gpa) {
+                doc.font('Helvetica').fontSize(9).fillColor(MED);
+                doc.text(edu.gpa, BODY_X, y, { width: BODY_W });
+                y += 12;
+            }
+            y += 8;
+        });
+
+        doc.moveTo(MARGIN, y).lineTo(PAGE_W - MARGIN, y).strokeColor(LINE_CLR).lineWidth(0.6).stroke();
+        y += 14;
+    }
+
+    // ======= STRENGTHS / SKILLS =======
+    const allSkills = [
+        ...(data.skills || []),
+        ...(data.softSkills || []),
+        ...(typeof data.technicalSkills === 'string' ? data.technicalSkills.split(',').map(s => s.trim()).filter(Boolean) : [])
+    ].filter(Boolean).slice(0, 14); // cap to avoid overflow
+
+    if (allSkills.length > 0) {
+        drawSectionHeader('Strengths');
+        // Tag pills – wrapping
+        let tagX = MARGIN;
+        const TAG_H = 22;
+        const TAG_PAD = 10;
+        const TAG_GAP = 8;
+        const TAG_ROW_GAP = 8;
+
+        allSkills.forEach(skill => {
+            const label = typeof skill === 'string' ? skill : String(skill);
+            doc.font('Helvetica').fontSize(9);
+            const tagW = Math.min(doc.widthOfString(label) + TAG_PAD * 2, 160);
+
+            if (tagX + tagW > PAGE_W - MARGIN) {
+                tagX = MARGIN;
+                y += TAG_H + TAG_ROW_GAP;
+            }
+            doc.roundedRect(tagX, y, tagW, TAG_H, 4).fill(TAG_BG);
+            doc.fillColor(TAG_TXT).text(label, tagX + TAG_PAD, y + 6, { width: tagW - TAG_PAD * 2, ellipsis: true });
+            tagX += tagW + TAG_GAP;
+        });
+        y += TAG_H + 16;
+
+        doc.moveTo(MARGIN, y).lineTo(PAGE_W - MARGIN, y).strokeColor(LINE_CLR).lineWidth(0.6).stroke();
+        y += 14;
+    }
+
+    // ======= CERTIFICATIONS =======
+    const certs = data.certifications || [];
+    if (certs.length > 0) {
+        drawSectionHeader('Certificates');
+
+        certs.forEach(cert => {
+            const name = typeof cert === 'string' ? cert : (cert.name || cert.title || '');
+            const date = typeof cert === 'object' ? (cert.date || cert.year || '') : '';
+
+            if (date) {
+                doc.font('Helvetica').fontSize(9).fillColor(LIGHT);
+                doc.text(date, MARGIN, y, { width: DATE_COL_W + ICON_R * 2 + 14 });
+            }
+
+            doc.font('Helvetica-Bold').fontSize(10.5).fillColor(DARK);
+            doc.text(name, BODY_X, y, { width: BODY_W });
+            y += 14;
+
+            if (typeof cert === 'object' && cert.issuer) {
+                doc.font('Helvetica-Bold').fontSize(9.5).fillColor(DARK);
+                doc.text(cert.issuer, BODY_X, y, { width: BODY_W });
+                y += 13;
+            }
+            y += 6;
+        });
+
+        doc.moveTo(MARGIN, y).lineTo(PAGE_W - MARGIN, y).strokeColor(LINE_CLR).lineWidth(0.6).stroke();
+        y += 14;
+    }
+
+    // ======= HOBBIES =======
+    const hobbies = data.hobbies || data.interests || [];
+    if (hobbies.length > 0) {
+        drawSectionHeader('Hobbies');
+
+        // Display as row of labeled groups (like the image icons row)
+        const hobbyArr = Array.isArray(hobbies)
+            ? hobbies.map(h => typeof h === 'string' ? h : String(h))
+            : [String(hobbies)];
+
+        doc.font('Helvetica').fontSize(9.5).fillColor(MED);
+        const hobbyIconSymbols = ['📷', '📚', '🎸', '⚽', '🎨', '🏃', '🍳', '✈️'];
+        const colW = Math.floor(CONTENT_W / Math.min(hobbyArr.length, 5));
+
+        hobbyArr.slice(0, 5).forEach((hobby, i) => {
+            const hx = MARGIN + i * colW;
+            // draw a simple circle icon placeholder
+            doc.circle(hx + colW / 2, y + 16, 14).fillColor(LINE_CLR).fill();
+            doc.font('Helvetica').fontSize(8).fillColor(MED);
+            doc.text(hobby, hx, y + 36, { width: colW, align: 'center' });
+        });
+        y += 60;
+    }
+}
+
+// ==================== HIERO ACADEMIC (Dark / Yellow — KickResume Pixel-Perfect) ====================
+async function renderTemplate_HieroAcademic(doc, rawData) {
+    const data = normalizeData(rawData);
+    doc.addPage = function () { return doc; };  // strict single page
+
+    const PW = 595.28;
+    const PH = 841.89;
+
+    const DARK = '#222222';
+    const YEL = '#F0D03D';
+    const WHITE = '#FFFFFF';
+    const LGRAY = '#D0D0D0';
+    const BLACK = '#111111';
+
+    const LEFT_W = 230;
+    const RIGHT_X = 230;
+    const RIGHT_W = PW - RIGHT_X;
+
+    // 1. Base dark background
+    doc.rect(0, 0, PW, PH).fill(DARK);
+
+    // 2. Top yellow polygon on right side
+    doc.moveTo(RIGHT_X, 0)
+        .lineTo(PW, 0)
+        .lineTo(PW, 140)
+        .lineTo(RIGHT_X, 200)
+        .closePath()
+        .fill(YEL);
+
+    // 3. Bottom yellow polygon on right side
+    doc.moveTo(RIGHT_X, PH - 60)
+        .lineTo(PW, PH - 120)
+        .lineTo(PW, PH)
+        .lineTo(RIGHT_X, PH)
+        .closePath()
+        .fill(YEL);
+
+    const PI = data.personalInfo || {};
+
+    // ---------------- RIGHT HEADER ELEMENTS ----------------
+    // Profile Picture
+    const PR = 45;
+    const PCX = 310;
+    const PCY = 85;
+
+    doc.save();
+    doc.circle(PCX, PCY, PR).clip();
+    let photoDrawn = false;
+    if (PI.profilePhoto) {
+        try {
+            const buf = base64ToBuffer(PI.profilePhoto);
+            if (buf) {
+                doc.image(buf, PCX - PR, PCY - PR, { width: PR * 2, height: PR * 2, cover: [PR * 2, PR * 2] });
+                photoDrawn = true;
+            }
+        } catch (e) { }
+    }
+    if (!photoDrawn) {
+        doc.rect(PCX - PR, PCY - PR, PR * 2, PR * 2).fill('#444444');
+    }
+    doc.restore();
+
+    // Contact Info (Top Right - black text on yellow)
+    let detY = 40;
+    const detX = 390;
+    doc.font('Helvetica').fontSize(9).fillColor(BLACK);
+    const detailItems = [
+        PI.dob ? PI.dob : null,
+        PI.nationality ? PI.nationality : null,
+        PI.phone ? PI.phone : null,
+        PI.email ? PI.email : null,
+        PI.linkedin ? PI.linkedin : null
+    ].filter(Boolean);
+
+    detailItems.forEach(txt => {
+        doc.circle(detX + 4, detY + 4, 3).stroke(BLACK).lineWidth(1);
+        doc.circle(detX + 4, detY + 4, 1.5).fill(BLACK);
+        doc.text(txt, detX + 12, detY, { width: PW - detX - 20, lineBreak: false });
+        detY += 15;
+    });
+
+    // Footer Text (Bottom Right - black text on yellow)
+    const fX = PW - 180;
+    const fY = PH - 40;
+    doc.font('Helvetica').fontSize(9).fillColor(BLACK);
+    if (PI.address) {
+        doc.circle(fX - 8, fY + 4, 3).stroke(BLACK).lineWidth(1);
+        doc.circle(fX - 8, fY + 4, 1.5).fill(BLACK);
+        doc.text(PI.address, fX, fY, { width: 160 });
+    }
+    if (PI.website) {
+        doc.circle(fX - 8, fY + 19, 3).stroke(BLACK).lineWidth(1);
+        doc.circle(fX - 8, fY + 19, 1.5).fill(BLACK);
+        doc.text(PI.website, fX, fY + 15, { width: 160 });
+    }
+
+    // ---------------- LEFT COLUMN ELEMENTS ----------------
+    let ly = 40;
+
+    // Name
+    const fullName = (PI.fullName || 'YOUR NAME').trim();
+    const nameParts = fullName.split(' ');
+    const firstName = nameParts[0] || '';
+    const lastName = nameParts.slice(1).join(' ') || '';
+
+    doc.font('Helvetica-Bold').fontSize(34).fillColor(WHITE).text(firstName.toUpperCase(), 30, ly);
+    ly += 34;
+    doc.font('Helvetica-Bold').fontSize(34).fillColor(LGRAY).text(lastName.toUpperCase(), 30, ly);
+    ly += 50;
+
+    // Objective
+    if (data.summary) {
+        doc.rect(30, ly + 2, 8, 8).stroke(YEL).lineWidth(1.5);
+        doc.font('Helvetica-Bold').fontSize(11).fillColor(YEL).text('RESUME OBJECTIVE', 45, ly);
+        ly += 22;
+        doc.font('Helvetica').fontSize(8.5).fillColor(LGRAY);
+        const summH = doc.heightOfString(data.summary, { width: 170, lineGap: 2 });
+        doc.text(data.summary, 30, ly, { width: 170, lineGap: 2 });
+        ly += summH + 20;
+    }
+
+    // Experience
+    const exps = data.experience || [];
+    if (exps.length > 0) {
+        doc.rect(30, ly + 2, 8, 8).stroke(YEL).lineWidth(1.5);
+        doc.font('Helvetica-Bold').fontSize(11).fillColor(YEL).text('WORK EXPERIENCE', 45, ly);
+        ly += 25;
+
+        exps.forEach(exp => {
+            if (ly > PH - 40) return;
+            const startD = exp.startDate || '';
+            const endD = exp.endDate || 'Present';
+            const loc = exp.location || '';
+            let dateLoc = `${startD} - ${endD}`;
+            if (loc) dateLoc += `    ${loc}`;
+            doc.font('Helvetica').fontSize(7.5).fillColor(YEL).text(dateLoc.toUpperCase(), 30, ly);
+            ly += 12;
+
+            doc.font('Helvetica-Bold').fontSize(10).fillColor(WHITE).text(exp.jobTitle || '', 30, ly);
+            ly += 13;
+
+            if (exp.company) {
+                doc.font('Helvetica-Bold').fontSize(9).fillColor(LGRAY).text(exp.company, 30, ly);
+                ly += 12;
+            }
+
+            if (exp.description) {
+                const lines = exp.description.split('\n').filter(l => l.trim());
+                doc.font('Helvetica').fontSize(8).fillColor(LGRAY);
+                lines.forEach(line => {
+                    if (ly > PH - 30) return;
+                    const clean = line.replace(/^[\*\-•]\s*/, '');
+                    const txt = '•  ' + clean;
+                    const h = doc.heightOfString(txt, { width: 170, lineGap: 1.5 });
+                    doc.text(txt, 30, ly, { width: 170, lineGap: 1.5 });
+                    ly += h + 2;
+                });
+            }
+            ly += 15;
+        });
+    }
+
+    // ---------------- RIGHT COLUMN ELEMENTS ----------------
+    let ry = 230; // Starts below the top yellow polygon
+
+    // Education
+    const edus = data.education || [];
+    if (edus.length > 0) {
+        doc.rect(RIGHT_X + 20, ry + 2, 8, 8).stroke(YEL).lineWidth(1.5);
+        doc.font('Helvetica-Bold').fontSize(11).fillColor(YEL).text('EDUCATION', RIGHT_X + 35, ry);
+        ry += 25;
+
+        edus.forEach(edu => {
+            if (ry > PH - 100) return;
+            const d = edu.gradYear || '';
+            const loc = edu.location || '';
+            let dateLoc = d;
+            if (loc) dateLoc += (d ? '    ' : '') + loc;
+            if (dateLoc) {
+                doc.font('Helvetica').fontSize(7.5).fillColor(YEL).text(dateLoc.toUpperCase(), RIGHT_X + 20, ry);
+                ry += 12;
+            }
+
+            doc.font('Helvetica-Bold').fontSize(10).fillColor(WHITE).text(edu.degree || '', RIGHT_X + 20, ry);
+            ry += 13;
+
+            if (edu.school) {
+                doc.font('Helvetica-Bold').fontSize(9).fillColor(LGRAY).text(edu.school, RIGHT_X + 20, ry);
+                ry += 12;
+            }
+            if (edu.gpa) {
+                doc.font('Helvetica').fontSize(8.5).fillColor(LGRAY).text(edu.gpa, RIGHT_X + 20, ry);
+                ry += 12;
+            }
+            ry += 15;
+        });
+    }
+
+    // Skills
+    const techSkills = typeof data.technicalSkills === 'string' ? data.technicalSkills.split(',').map(s => s.trim()).filter(Boolean) : (data.technicalSkills || []);
+    const extSkills = data.skills ? data.skills : techSkills;
+
+    if (extSkills.length > 0) {
+        doc.rect(RIGHT_X + 20, ry + 2, 8, 8).stroke(YEL).lineWidth(1.5);
+        doc.font('Helvetica-Bold').fontSize(11).fillColor(YEL).text('SKILLS', RIGHT_X + 35, ry);
+        ry += 20;
+
+        doc.font('Helvetica-Bold').fontSize(8).fillColor(WHITE).text('SOFTWARE', RIGHT_X + 20, ry);
+        ry += 15;
+
+        extSkills.slice(0, 5).forEach((sk, i) => {
+            if (ry > PH - 90) return;
+            doc.font('Helvetica').fontSize(8.5).fillColor(LGRAY).text(sk, RIGHT_X + 20, ry);
+            const barX = RIGHT_X + 110;
+            const percentages = [0.95, 0.85, 0.75, 0.65, 0.55];
+            const pct = percentages[i] || 0.6;
+            doc.rect(barX, ry + 3, RIGHT_W - 140, 4).fill('#444444');
+            doc.rect(barX, ry + 3, (RIGHT_W - 140) * pct, 4).fill(YEL);
+            ry += 14;
+        });
+        ry += 10;
+    }
+
+    // Languages
+    const langs = typeof data.languages === 'string' ? data.languages.split(',').map(s => s.trim()).filter(Boolean) : (data.languages || []);
+    if (langs.length > 0 && ry < PH - 140) {
+        doc.font('Helvetica-Bold').fontSize(8).fillColor(WHITE).text('LANGUAGES', RIGHT_X + 20, ry);
+        ry += 15;
+        langs.slice(0, 3).forEach((lang, i) => {
+            if (ry > PH - 100) return;
+            doc.font('Helvetica').fontSize(8.5).fillColor(LGRAY).text(lang, RIGHT_X + 20, ry);
+            const profs = ['Native', 'Professional', 'Limited'];
+            const lvl = profs[i] || 'Limited';
+            doc.font('Helvetica-Bold').fontSize(8.5).fillColor(YEL).text(lvl, RIGHT_X + 110, ry);
+            ry += 14;
+        });
+        ry += 10;
+    }
+
+    // Special Skills
+    const soft = typeof data.softSkills === 'string' ? data.softSkills.split(',').map(s => s.trim()).filter(Boolean) : (data.softSkills || []);
+    if (soft.length > 0 && ry < PH - 140) {
+        doc.rect(RIGHT_X + 20, ry + 2, 8, 8).stroke(YEL).lineWidth(1.5);
+        doc.font('Helvetica-Bold').fontSize(11).fillColor(YEL).text('SPECIAL SKILLS', RIGHT_X + 35, ry);
+        ry += 20;
+
+        soft.slice(0, 5).forEach(sk => {
+            if (ry > PH - 100) return;
+            const txt = '•  ' + sk;
+            doc.font('Helvetica').fontSize(8.5).fillColor(LGRAY);
+            const h = doc.heightOfString(txt, { width: RIGHT_W - 50 });
+            doc.text(txt, RIGHT_X + 20, ry, { width: RIGHT_W - 50 });
+            ry += h + 3;
+        });
+    }
+}
+
+
+// ==================== HIERO CLASSIC (Specific Layout) ====================
+async function renderTemplate_HieroUrban(doc, rawData) {
+    const data = normalizeData(rawData);
+    doc.addPage = function () { return doc; };  // strict single page
+
+    const PW = 595.28;
+    const PH = 841.89;
+
+    const DARK = '#1E293B';      // Deep Slate Blue for dark sections
+    const LIGHT = '#F8FAFC';     // Very Soft Slate for background
+    const WHITE = '#FFFFFF';
+    const GRAY_TEXT = '#475569'; // Slate 600 for body text
+    const BLACK = '#0F172A';     // Darker Slate for headings
+    const ACCENT = '#0284C7';    // Vibrant Sky Blue for highlights
+
+    const LEFT_W = 205;
+    const RIGHT_X = 230;
+    const RIGHT_W = PW - RIGHT_X - 30;
+    const HDR_H = 160;
+
+    // 1. Base background (Light Gray)
+    doc.rect(0, 0, PW, PH).fill(LIGHT);
+
+    // 2. Header Left Dark Box
+    doc.rect(0, 0, LEFT_W, HDR_H).fill(DARK);
+
+    const PI = data.personalInfo || {};
+
+    // ---------------- HEADER ELEMENTS ----------------
+    // Profile Picture
+    const PR = 50;
+    const PCX = LEFT_W / 2;
+    const PCY = HDR_H / 2;
+
+    doc.save();
+    doc.circle(PCX, PCY, PR).clip();
+    let photoDrawn = false;
+    if (PI.profilePhoto) {
+        try {
+            const buf = base64ToBuffer(PI.profilePhoto);
+            if (buf) {
+                doc.image(buf, PCX - PR, PCY - PR, { width: PR * 2, height: PR * 2, cover: [PR * 2, PR * 2] });
+                photoDrawn = true;
+            }
+        } catch (e) { }
+    }
+    if (!photoDrawn) {
+        doc.rect(PCX - PR, PCY - PR, PR * 2, PR * 2).fill('#555555');
+    }
+    doc.restore();
+
+    // Name and Title
+    let ry = 40;
+    const fullName = (PI.fullName || 'YOUR NAME').trim();
+    doc.font('Helvetica-Bold').fontSize(34).fillColor(BLACK).text(fullName.toUpperCase(), RIGHT_X, ry);
+    ry += 40;
+
+    // Title Box
+    const title = PI.jobTitle || 'Professional';
+    doc.rect(RIGHT_X, ry, PW - RIGHT_X - 30, 20).fill(ACCENT);
+    doc.font('Helvetica').fontSize(10).fillColor(WHITE).text(title, RIGHT_X + 10, ry + 6);
+
+    // ---------------- LEFT COLUMN ELEMENTS ----------------
+    let ly = HDR_H + 20;
+
+    // Contact Info
+    const contacts = [
+        { icon: 'p', txt: PI.phone || '' },
+        { icon: 'e', txt: PI.email || '' },
+        { icon: 'w', txt: PI.website || PI.linkedin || '' },
+        { icon: 'a', txt: PI.address || '' }
+    ];
+
+    doc.lineWidth(1);
+    contacts.forEach(c => {
+        if (!c.txt) return;
+        doc.moveTo(25, ly).lineTo(LEFT_W - 25, ly).strokeColor('#CCCCCC').stroke();
+        ly += 10;
+
+        // Use a generic rectangle/polygon as "Icon placeholder"
+        doc.circle(35, ly + 5, 6).fill(ACCENT);
+        doc.font('Helvetica-Bold').fontSize(8).fillColor(WHITE).text(c.icon.toUpperCase(), 32.5, ly + 1.5, { lineBreak: false });
+
+        doc.font('Helvetica').fontSize(9).fillColor(DARK).text(c.txt, 55, ly + 0.5, { width: 120, lineBreak: false });
+        ly += 15;
+    });
+    // Final contact line
+    doc.moveTo(25, ly).lineTo(LEFT_W - 25, ly).strokeColor('#CCCCCC').stroke();
+    ly += 20;
+
+    // Dark Bottom Box
+    doc.rect(0, ly, LEFT_W, PH - ly).fill(DARK);
+
+    // Education
+    ly += 25;
+    if (data.education && data.education.length > 0) {
+        doc.font('Helvetica-Bold').fontSize(12).fillColor(ACCENT).text('EDUCATION', 25, ly, { characterSpacing: 1.5 });
+        doc.moveTo(25, ly + 16).lineTo(100, ly + 16).strokeColor(ACCENT).stroke();
+        ly += 30;
+
+        data.education.forEach(edu => {
+            if (ly > PH - 40) return;
+            doc.font('Helvetica-Bold').fontSize(9).fillColor(WHITE).text(edu.degree || '', 25, ly);
+            ly += 12;
+            doc.font('Helvetica').fontSize(8).fillColor('#CCCCCC').text(edu.school || '', 25, ly);
+            ly += 11;
+            const dates = edu.gradYear || '';
+            if (dates) {
+                doc.font('Helvetica').fontSize(8).fillColor('#CCCCCC').text(dates, 25, ly);
+                ly += 11;
+            }
+            ly += 8;
+        });
+    }
+
+    // Skills
+    const techSkills = typeof data.technicalSkills === 'string' ? data.technicalSkills.split(',').map(s => s.trim()).filter(Boolean) : (data.technicalSkills || []);
+    const extSkills = data.skills ? data.skills : techSkills;
+
+    if (extSkills.length > 0) {
+        ly += 10;
+        doc.font('Helvetica-Bold').fontSize(12).fillColor(ACCENT).text('SKILLS', 25, ly, { characterSpacing: 1.5 });
+        doc.moveTo(25, ly + 16).lineTo(80, ly + 16).strokeColor(ACCENT).stroke();
+        ly += 30;
+
+        extSkills.slice(0, 5).forEach((sk, i) => {
+            if (ly > PH - 40) return;
+            doc.font('Helvetica').fontSize(8.5).fillColor(WHITE).text(sk, 25, ly);
+            const percentages = [0.95, 0.85, 0.75, 0.65, 0.55];
+            const pct = percentages[i] || 0.6;
+
+            // Outer rectangle
+            doc.rect(95, ly + 2, 75, 5).strokeColor(ACCENT).stroke();
+            // Inner filled
+            doc.rect(95, ly + 2, 75 * pct, 5).fill(ACCENT);
+
+            ly += 16;
+        });
+    }
+
+    // Interests
+    const hobbies = typeof data.hobbies === 'string' ? data.hobbies.split(',').map(s => s.trim()).filter(Boolean) : (data.hobbies || []);
+    if (hobbies.length > 0) {
+        ly += 15;
+        doc.font('Helvetica-Bold').fontSize(12).fillColor(ACCENT).text('INTERESTS', 25, ly, { characterSpacing: 1.5 });
+        doc.moveTo(25, ly + 16).lineTo(100, ly + 16).strokeColor(ACCENT).stroke();
+        ly += 30;
+
+        let col1 = [], col2 = [];
+        hobbies.slice(0, 6).forEach((h, i) => { i % 2 === 0 ? col1.push(h) : col2.push(h); });
+
+        let tempy = ly;
+        col1.forEach(h => {
+            if (tempy > PH - 20) return;
+            doc.font('Helvetica').fontSize(8.5).fillColor('#CCCCCC').text(h, 25, tempy);
+            tempy += 14;
+        });
+        tempy = ly;
+        col2.forEach(h => {
+            if (tempy > PH - 20) return;
+            doc.font('Helvetica').fontSize(8.5).fillColor('#CCCCCC').text(h, 95, tempy);
+            tempy += 14;
+        });
+    }
+
+    // ---------------- RIGHT COLUMN ELEMENTS ----------------
+    ry = HDR_H + 20;
+
+    function renderSectionTitleR(title, y) {
+        doc.font('Helvetica-Bold').fontSize(12).fillColor(BLACK).text(title.toUpperCase(), RIGHT_X, y, { characterSpacing: 1 });
+        doc.moveTo(RIGHT_X, y + 16).lineTo(PW - 30, y + 16).strokeColor(ACCENT).stroke();
+        return y + 30;
+    }
+
+    // Statement
+    if (data.summary) {
+        ry = renderSectionTitleR('STATEMENT', ry);
+        doc.font('Helvetica').fontSize(9).fillColor(GRAY_TEXT);
+        const sh = doc.heightOfString(data.summary, { width: RIGHT_W, lineGap: 2 });
+        doc.text(data.summary, RIGHT_X, ry, { width: RIGHT_W, lineGap: 2 });
+        ry += sh + 25;
+    }
+
+    // Experience
+    const exps = data.experience || [];
+    if (exps.length > 0) {
+        ry = renderSectionTitleR('EXPERIENCE', ry);
+
+        exps.forEach(exp => {
+            if (ry > PH - 80) return;
+            const startD = exp.startDate || '';
+            const endD = exp.endDate || 'Present';
+            const dateStr = `${startD}-${endD}`;
+
+            // Date Box (Right aligned box like in image)
+            const dateW = 60;
+            doc.rect(PW - 30 - dateW, ry, dateW, 14).fill('#E0F2FE');
+            doc.font('Helvetica-Bold').fontSize(7.5).fillColor(ACCENT).text(dateStr.toUpperCase(), PW - 30 - dateW, ry + 3, { width: dateW, align: 'center' });
+
+            // Job Title
+            doc.font('Helvetica-Bold').fontSize(10).fillColor(DARK).text(exp.jobTitle ? exp.jobTitle.toUpperCase() : '', RIGHT_X, ry);
+            ry += 15;
+
+            // Company/Location
+            const loc = exp.location ? `/${exp.location}` : '';
+            doc.font('Helvetica').fontSize(8.5).fillColor(GRAY_TEXT).text(`${exp.company || ''}${loc}`, RIGHT_X, ry);
+            ry += 15;
+
+            // Description
+            if (exp.description) {
+                const lines = exp.description.split('\n').filter(l => l.trim());
+                doc.font('Helvetica').fontSize(8.5).fillColor(GRAY_TEXT);
+                lines.forEach(line => {
+                    if (ry > PH - 30) return;
+                    const clean = line.replace(/^[\*\-•]\s*/, '');
+                    const txt = '• ' + clean;
+                    const h = doc.heightOfString(txt, { width: RIGHT_W, lineGap: 2 });
+                    doc.text(txt, RIGHT_X, ry, { width: RIGHT_W, lineGap: 2 });
+                    ry += h + 2;
+                });
+            }
+            ry += 15;
+        });
+    }
+
+    // References
+    const refs = data.references || [];
+    if (refs.length > 0 && ry < PH - 80) {
+        ry = renderSectionTitleR('REFERENCE', ry);
+
+        // Calculate available width for boxes
+        const spaceW = PW - RIGHT_X - 30; // approx 335
+        const refW = (spaceW - 15) / 2;
+        let rx = RIGHT_X;
+
+        refs.slice(0, 2).forEach((ref, index) => {
+            // Draw Box
+            doc.rect(rx, ry, refW, 60).fillAndStroke('#F1F5F9', '#CBD5E1');
+
+            let tryy = ry + 8;
+            doc.font('Helvetica-Bold').fontSize(9).fillColor(DARK).text(ref.name || 'Reference Name', rx + 10, tryy);
+            tryy += 12;
+            doc.font('Helvetica').fontSize(8).fillColor(GRAY_TEXT).text(ref.title || 'Role', rx + 10, tryy);
+            tryy += 12;
+            if (ref.phone) {
+                doc.font('Helvetica').fontSize(8).fillColor(DARK).text(`T : ${ref.phone}`, rx + 10, tryy);
+                tryy += 10;
+            }
+            if (ref.email) {
+                doc.font('Helvetica').fontSize(8).fillColor(DARK).text(`E : ${ref.email}`, rx + 10, tryy);
+            }
+            rx += refW + 15; // Move X over for next reference
+        });
+    }
+}
+
+/**
+ * 🎨 HIERO COOL TEMPLATE
+ * Two-column modern template with dark sidebar and purple accents.
+ */
+function renderTemplate_HieroCool(doc, data) {
+    const margin = 40;
+    const pageWidth = 595.28;
+    const pageHeight = 841.89;
+    const leftWidth = 195;
+
+    // Normalize data to standard structure used in this file
+    const normalized = typeof normalizeData === 'function' ? normalizeData(data) : data;
+    const pInfo = normalized.personalInfo || {};
+
+    const colors = {
+        bg: '#0B0B0B',        // Obsidian Background
+        sidebar: '#151515',   // Slightly lighter sidebar
+        accent: '#10B981',    // Emerald
+        highlight: '#34D399', // Soft Emerald
+        text: '#F9FAFB',      // Main Text (Off-white)
+        dim: '#94A3B8'        // Muted Slate
+    };
+
+    // Draw main background (Dark Theme)
+    doc.rect(0, 0, pageWidth, pageHeight).fill(colors.bg);
+
+    // Draw Left Column Sidebar
+    doc.rect(0, 0, leftWidth, pageHeight).fill(colors.sidebar);
+
+    // Profile Photo (Top Left)
+    const photoSize = 110;
+    const photoX = (leftWidth - photoSize) / 2;
+    const photoY = margin;
+
+    doc.save();
+    doc.roundedRect(photoX, photoY, photoSize, photoSize, 15).clip();
+    const photoSource = pInfo.profilePhoto || data.photo;
+    if (photoSource) {
+        try {
+            const photoBuffer = typeof base64ToBuffer === 'function' ? base64ToBuffer(photoSource) : photoSource;
+            if (photoBuffer) {
+                doc.image(photoBuffer, photoX, photoY, { width: photoSize, height: photoSize });
+            } else {
+                doc.rect(photoX, photoY, photoSize, photoSize).fill('#222222');
+            }
+        } catch (e) {
+            doc.rect(photoX, photoY, photoSize, photoSize).fill('#222222');
+        }
+    } else {
+        doc.rect(photoX, photoY, photoSize, photoSize).fill('#222222');
+    }
+    doc.restore();
+
+    // --- LEFT SIDEBAR CONTENT ---
+    let sideY = photoY + photoSize + 40;
+    const sideX = 25;
+    const sideContentWidth = leftWidth - 50;
+
+    // Contact Section
+    doc.fillColor(colors.accent).font('Helvetica-Bold').fontSize(11).text("CONTACT", sideX, sideY, { characterSpacing: 1.5 });
+    doc.moveTo(sideX, sideY + 14).lineTo(sideX + 30, sideY + 14).strokeColor(colors.accent).lineWidth(2).stroke();
+    sideY += 30;
+
+    const contactFields = [
+        { val: pInfo.phone || (data.contact && data.contact.phone), icon: 'P' },
+        { val: pInfo.email || (data.contact && data.contact.email), icon: 'E' },
+        { val: pInfo.address || (data.contact && data.contact.address), icon: 'A' },
+        { val: pInfo.linkedin || (data.contact && data.contact.linkedin), icon: 'L' }
+    ].filter(f => f.val);
+
+    contactFields.forEach(f => {
+        doc.fillColor(colors.highlight).font('Helvetica-Bold').fontSize(7.5).text(f.icon, sideX, sideY + 1.5);
+        doc.fillColor(colors.text).font('Helvetica').fontSize(8.5).text(f.val, sideX + 18, sideY, { width: sideContentWidth - 10 });
+        sideY = doc.y + 12;
+    });
+
+    // Sidebar Items Helper (Skills / Languages)
+    function renderSidebarList(title, items) {
+        if (!items || items.length === 0) return;
+        sideY += 20;
+        const count = items.length;
+        const fontSize = count > 15 ? 7.5 : (count > 10 ? 8.5 : 9.5);
+        const itemSpacing = count > 15 ? 18 : (count > 10 ? 22 : 28);
+
+        doc.fillColor(colors.accent).font('Helvetica-Bold').fontSize(11).text(title.toUpperCase(), sideX, sideY, { characterSpacing: 1.5 });
+        doc.moveTo(sideX, sideY + 14).lineTo(sideX + 30, sideY + 14).strokeColor(colors.accent).lineWidth(2).stroke();
+        sideY += 30;
+
+        items.forEach(item => {
+            if (sideY > pageHeight - 30) return;
+
+            const raw = typeof item === 'string' ? item : (item.name || item.skill || '');
+            const name = String(raw).replace(/^[^a-zA-Z0-9]+/, '').trim();
+            if (!name) return;
+            const level = (typeof item === 'object' && item.level) ? parseInt(item.level) : (75 + Math.floor(Math.random() * 20));
+
+            doc.fillColor(colors.text).font('Helvetica').fontSize(fontSize);
+            const textWidth = sideContentWidth;
+            const textHeight = doc.heightOfString(name, { width: textWidth });
+            doc.text(name, sideX, sideY, { width: textWidth });
+
+            // Compact Progress Bar
+            const barY = sideY + textHeight + 2;
+            doc.rect(sideX, barY, textWidth, 2).fill('#222222');
+            doc.rect(sideX, barY, textWidth * (level / 100), 2).fill(colors.accent);
+
+            sideY = barY + (itemSpacing - 10);
+        });
+    }
+
+    renderSidebarList("SKILLS", normalized.skills);
+    if (sideY < pageHeight - 150) renderSidebarList("LANGUAGES", normalized.languages);
+
+    // --- MAIN CONTENT AREA (RIGHT) ---
+    const mainX = leftWidth + 30;
+    const mainWidth = pageWidth - mainX - margin;
+    let mainY = margin;
+
+    // Name & Title Header
+    const fullName = (pInfo.fullName || data.name || 'Professional Name').toUpperCase();
+    doc.fillColor(colors.text).font('Times-Bold').fontSize(34).text(fullName, mainX, mainY, { width: mainWidth });
+    mainY = doc.y + 2;
+
+    const roleTitle = (pInfo.roleTitle || data.title || 'Professional Title');
+    doc.fillColor(colors.accent).font('Helvetica-Bold').fontSize(14).text(roleTitle, mainX, mainY, { characterSpacing: 1 });
+    mainY = doc.y + 15;
+
+    // Professional Summary (Elegant Box)
+    const summary = normalized.summary || data.summary || '';
+    if (summary) {
+        doc.fillColor(colors.dim).font('Helvetica').fontSize(9.5).text(summary, mainX, mainY, { width: mainWidth, lineGap: 3, align: 'justify' });
+        mainY = doc.y + 30;
+    }
+
+    // Main Sections Helper
+    function renderSection(title, items, type) {
+        if (!items || items.length === 0) return;
+
+        // Section Title with Modern Underline
+        doc.fillColor(colors.text).font('Helvetica-Bold').fontSize(13).text(title.toUpperCase(), mainX, mainY, { characterSpacing: 1 });
+        doc.rect(mainX, mainY + 15, 40, 3).fill(colors.accent);
+        mainY += 35;
+
+        items.forEach((item, idx) => {
+            const heading = item.jobTitle || item.degree || item.title || '';
+            const subHeading = item.company || item.school || item.institution || '';
+            const date = item.years || (item.startDate ? `${item.startDate} - ${item.endDate || 'Present'}` : item.gradYear) || '';
+            const details = item.description || item.tech || '';
+            const bullets = Array.isArray(item.bullets) ? item.bullets : (details ? details.split('\n').filter(s => s.trim()) : []);
+
+            // Check if item fits on page
+            if (mainY > pageHeight - 100) {
+                doc.addPage().rect(0, 0, pageWidth, pageHeight).fill(colors.bg);
+                doc.rect(0, 0, leftWidth, pageHeight).fill(colors.sidebar);
+                mainY = margin;
+            }
+
+            // Left side Date Column
+            doc.fillColor(colors.highlight).font('Helvetica-Bold').fontSize(8.5).text(date.toUpperCase(), mainX, mainY, { width: 85 });
+
+            // Content
+            const contentX = mainX + 95;
+            const contentWidth = mainWidth - 95;
+
+            doc.fillColor(colors.text).font('Helvetica-Bold').fontSize(11).text(heading, contentX, mainY, { width: contentWidth });
+            doc.fillColor(colors.accent).font('Helvetica').fontSize(10).text(subHeading, contentX, doc.y + 2, { width: contentWidth });
+
+            mainY = doc.y + 8;
+
+            bullets.forEach(b => {
+                doc.fillColor(colors.dim).font('Helvetica').fontSize(9).text('•', contentX, mainY);
+                doc.text(b.trim(), contentX + 10, mainY, { width: contentWidth - 10, lineGap: 2 });
+                mainY = doc.y + 4;
+            });
+
+            mainY += 15;
+
+            // Separator between items
+            if (idx < items.length - 1) {
+                doc.moveTo(mainX + 95, mainY - 5).lineTo(mainX + mainWidth, mainY - 5).strokeColor('#222222').lineWidth(0.5).stroke();
+            }
+        });
+        mainY += 20;
+    }
+
+    renderSection("Work Experience", normalized.experience);
+    renderSection("Education", normalized.education);
+    if (normalized.projects && normalized.projects.length > 0) {
+        renderSection("Selected Projects", normalized.projects);
+    }
+
+    // Certifications (Distinct Heading)
+    if (normalized.certifications && normalized.certifications.length > 0) {
+        doc.fillColor(colors.text).font('Helvetica-Bold').fontSize(13).text("CERTIFICATIONS", mainX, mainY, { characterSpacing: 1 });
+        doc.rect(mainX, mainY + 15, 40, 3).fill(colors.accent);
+        mainY += 35;
+
+        normalized.certifications.forEach(cert => {
+            const raw = typeof cert === 'object' ? (cert.name || cert.title) : cert;
+            if (!raw) return;
+            const text = raw.replace(/^[^a-zA-Z0-9]+/, '').trim();
+            if (!text) return;
+
+            doc.fillColor(colors.accent).circle(mainX + 4, mainY + 6, 2.5).fill();
+            doc.fillColor(colors.text).font('Helvetica').fontSize(9.5).text(text, mainX + 15, mainY, { width: mainWidth - 20 });
+            mainY = doc.y + 8;
+        });
+        mainY += 15;
+    }
+
+    // Achievements / Awards
+    if (normalized.achievements && normalized.achievements.length > 0) {
+        doc.fillColor(colors.text).font('Helvetica-Bold').fontSize(13).text("ACHIEVEMENTS", mainX, mainY, { characterSpacing: 1 });
+        doc.rect(mainX, mainY + 15, 40, 3).fill(colors.accent);
+        mainY += 35;
+
+        normalized.achievements.forEach(item => {
+            const raw = typeof item === 'object' ? (item.name || item.title) : item;
+            if (!raw) return;
+            const text = raw.replace(/^[^a-zA-Z0-9]+/, '').trim();
+            if (!text || text.includes('%')) return;
+
+            doc.fillColor(colors.accent).rect(mainX + 1, mainY + 3, 5, 5).fill();
+            doc.fillColor(colors.text).font('Helvetica').fontSize(9.5).text(text, mainX + 15, mainY, { width: mainWidth - 20 });
+            mainY = doc.y + 8;
+        });
+    }
+}
+
+>>>>>>> origin/main
 module.exports = { generateUnifiedResume };
