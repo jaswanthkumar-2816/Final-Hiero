@@ -940,6 +940,29 @@
             </button>
           </div>
         </div>
+
+        <!-- Hiero Royal Template -->
+        <div class="template-card" data-category="classic" data-template="hiero-royal" data-type="free">
+          <div class="template-preview" onclick="previewTemplate('hiero-royal')">
+            <i class="fas fa-crown"></i>
+            <div class="preview-overlay">
+              <button class="preview-btn">Preview Template</button>
+            </div>
+          </div>
+          <div class="template-info">
+            <h3>Hiero Royal</h3>
+            <p>Classic beige-toned template with elegant section icons, a profile photo, strength tags and hobbies.
+              Ideal for executive and classic professional profiles.</p>
+            <div class="template-tags">
+              <span class="tag">Classic</span>
+              <span class="tag">Elegant</span>
+              <span class="tag">Professional</span>
+            </div>
+            <button class="start-building-btn" onclick="startBuilding('hiero-royal')">
+              <i class="fas fa-arrow-right"></i> Start Building
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -1730,6 +1753,11 @@
           name: 'Hiero Minimal',
           description: 'Elegant vertical timeline layout with a professional grayscale design. Ideal for clean, corporate presentation.',
           style: 'Vertical timeline, grayscale design, circular nodes, and professional alignment.'
+        },
+        'hiero-royal': {
+          name: 'Hiero Royal',
+          description: 'Classic beige-toned resume with elegant section icons, profile photo, strength tags and hobbies row.',
+          style: 'Warm beige (#EDE8D9) background, left date column, right content, rounded skill pills, hobbies row with circle icons.'
         }
       };
 
@@ -2092,7 +2120,8 @@
         'priya': 'Priya Elegant',
         'priya-analytics': 'Priya Analytics (Single Column)',
         'hiero-essence': 'Hiero Essence',
-        'hiero-timeline': 'Hiero Minimal'
+        'hiero-timeline': 'Hiero Minimal',
+        'hiero-royal': 'Hiero Royal'
       };
       return names[templateId] || templateId.charAt(0).toUpperCase() + templateId.slice(1);
     }

@@ -391,7 +391,361 @@ function generateWordHTML(data) {
     }
     // ... (rest of logic) ...
 
-            if (template === 'hiero-premium' || template === 'premium') {
+    // ===================== HIERO ACADEMIC — Dark/Yellow KickResume Style =====================
+    if (template === 'template4' || template === 'template-4' || template === 'hiero-academic') {
+        const BG = '#161616';
+        const YELLOW = '#F5C518';
+        const WHITE = '#FFFFFF';
+        const GRAY = '#CCCCCC';
+        const TOPBG = '#1A1A1A';
+
+        const photoHtml = personalInfo.profilePhoto
+            ? `<img src="${personalInfo.profilePhoto}" width="80" height="80" style="border-radius:40px;border:2px solid #fff;object-fit:cover;">`
+            : `<div style="width:80px;height:80px;background:#444;border-radius:40px;"></div>`;
+
+        const detailRows = [
+            personalInfo.dob ? `<tr><td style="color:${YELLOW};font-size:8pt;padding-right:6pt;">&#9776;</td><td style="color:${WHITE};font-size:8pt;">${personalInfo.dob}</td></tr>` : '',
+            personalInfo.nationality ? `<tr><td style="color:${YELLOW};font-size:8pt;">&#9711;</td><td style="color:${WHITE};font-size:8pt;">${personalInfo.nationality}</td></tr>` : '',
+            personalInfo.phone ? `<tr><td style="color:${YELLOW};font-size:8pt;">&#9743;</td><td style="color:${WHITE};font-size:8pt;">${personalInfo.phone}</td></tr>` : '',
+            personalInfo.email ? `<tr><td style="color:${YELLOW};font-size:8pt;">&#9993;</td><td style="color:${WHITE};font-size:8pt;">${personalInfo.email}</td></tr>` : '',
+        ].join('');
+
+        const nameParts = (personalInfo.fullName || 'YOUR NAME').trim().split(' ');
+        const firstName = nameParts[0] || '';
+        const lastName = nameParts.slice(1).join(' ') || '';
+
+        const sectionHead = (title) => `
+            <div style="margin:14pt 0 4pt;border-bottom:1.5pt solid ${YELLOW};padding-bottom:2pt;">
+                <span style="font-size:9pt;font-weight:bold;color:${YELLOW};letter-spacing:1pt;font-family:'Segoe UI',Arial,sans-serif;">${title.toUpperCase()}</span>
+            </div>`;
+
+        // Build left column
+        let leftCol = '';
+
+        // Summary / Objective
+        if (summary) {
+            leftCol += sectionHead('Resume Objective');
+            leftCol += `<p style="font-size:8pt;color:${GRAY};margin:4pt 0;line-height:1.5;font-family:'Segoe UI',Arial,sans-serif;">${summary}</p>`;
+        }
+
+        // Work Experience
+        if (experience.length > 0) {
+            leftCol += sectionHead('Work Experience');
+            experience.forEach(exp => {
+                const dateStr = `${exp.startDate || ''} – ${exp.endDate || 'Present'}`.toUpperCase();
+                const locStr = exp.location ? exp.location.toUpperCase() : '';
+                leftCol += `<div style="margin-top:8pt;">`;
+                leftCol += `<div style="font-size:7.5pt;color:${YELLOW};font-family:'Segoe UI',Arial,sans-serif;margin-bottom:3pt;">&#9744; ${dateStr}${locStr ? `&nbsp;&nbsp;&#9711; ${locStr}` : ''}</div>`;
+                leftCol += `<div style="font-size:9pt;font-weight:bold;color:${WHITE};font-family:'Segoe UI',Arial,sans-serif;">${exp.jobTitle || ''}</div>`;
+                if (exp.company) leftCol += `<div style="font-size:8.5pt;font-weight:bold;color:${WHITE};font-family:'Segoe UI',Arial,sans-serif;">${exp.company}</div>`;
+                if (exp.description) {
+                    const lines = exp.description.split('\n').filter(l => l.trim());
+                    leftCol += `<ul style="margin:4pt 0 0 12pt;padding:0;">`;
+                    lines.forEach(l => {
+                        leftCol += `<li style="font-size:7.8pt;color:${GRAY};margin-bottom:2pt;font-family:'Segoe UI',Arial,sans-serif;">${l.replace(/^[\*\-•]\s*/, '')}</li>`;
+                    });
+                    leftCol += `</ul>`;
+                }
+                leftCol += `</div>`;
+            });
+        }
+
+        // Build right column
+        let rightCol = '';
+
+        // Education
+        if (education.length > 0) {
+            rightCol += sectionHead('Education');
+            education.forEach(edu => {
+                const dateStr = edu.gradYear || '';
+                const locStr = edu.location ? edu.location.toUpperCase() : '';
+                rightCol += `<div style="margin-top:8pt;">`;
+                rightCol += `<div style="font-size:7.5pt;color:${YELLOW};font-family:'Segoe UI',Arial,sans-serif;margin-bottom:3pt;">&#9744; ${dateStr}${locStr ? `&nbsp;&nbsp;&#9711; ${locStr}` : ''}</div>`;
+                rightCol += `<div style="font-size:9pt;font-weight:bold;color:${WHITE};font-family:'Segoe UI',Arial,sans-serif;">${edu.degree || ''}</div>`;
+                if (edu.school) rightCol += `<div style="font-size:8.5pt;font-weight:bold;color:${WHITE};font-family:'Segoe UI',Arial,sans-serif;">${edu.school}</div>`;
+                if (edu.gpa) rightCol += `<div style="font-size:7.8pt;color:${GRAY};font-family:'Segoe UI',Arial,sans-serif;">${edu.gpa}</div>`;
+                rightCol += `</div>`;
+            });
+        }
+
+        // Skills
+        const allSkills = typeof technicalSkills === 'string'
+            ? technicalSkills.split(',').map(s => s.trim()).filter(Boolean)
+            : (Array.isArray(technicalSkills) ? technicalSkills : []);
+        const langArr = typeof languages === 'string'
+            ? languages.split(',').map(s => s.trim()).filter(Boolean) : [];
+        const softArr = typeof softSkills === 'string'
+            ? softSkills.split(',').map(s => s.trim()).filter(Boolean) : [];
+
+        if (allSkills.length > 0 || langArr.length > 0) {
+            rightCol += sectionHead('Skills');
+            if (allSkills.length > 0) {
+                rightCol += `<div style="font-size:7.5pt;color:${GRAY};font-weight:bold;margin:6pt 0 4pt;font-family:'Segoe UI',Arial,sans-serif;">&#9312; SOFTWARE</div>`;
+                const pcts = [90, 75, 70, 65, 55, 50, 45, 40];
+                allSkills.slice(0, 8).forEach((sk, i) => {
+                    const p = pcts[i] || 40;
+                    rightCol += `<div style="display:flex;align-items:center;margin-bottom:5pt;">
+                        <div style="width:55pt;font-size:7.5pt;color:${GRAY};font-family:'Segoe UI',Arial,sans-serif;">${sk}</div>
+                        <div style="flex:1;background:#333;height:5pt;border-radius:2pt;">
+                            <div style="width:${p}%;background:${YELLOW};height:5pt;border-radius:2pt;"></div>
+                        </div>
+                    </div>`;
+                });
+            }
+            if (langArr.length > 0) {
+                const levels = ['Native', 'Professional', 'Limited', 'Basic'];
+                rightCol += `<div style="font-size:7.5pt;color:${GRAY};font-weight:bold;margin:8pt 0 4pt;font-family:'Segoe UI',Arial,sans-serif;">&#9312; LANGUAGES</div>`;
+                langArr.slice(0, 4).forEach((lang, i) => {
+                    rightCol += `<div style="font-size:7.8pt;color:${GRAY};margin-bottom:4pt;font-family:'Segoe UI',Arial,sans-serif;">
+                        ${lang} <span style="color:${YELLOW};font-weight:bold;">${levels[i] || 'Limited'}</span>
+                    </div>`;
+                });
+            }
+        }
+
+        // Special Skills
+        if (softArr.length > 0) {
+            rightCol += sectionHead('Special Skills');
+            rightCol += `<ul style="margin:4pt 0 0 12pt;padding:0;">`;
+            softArr.slice(0, 7).forEach(s => {
+                rightCol += `<li style="font-size:7.8pt;color:${GRAY};margin-bottom:3pt;font-family:'Segoe UI',Arial,sans-serif;">${s}</li>`;
+            });
+            rightCol += `</ul>`;
+        }
+
+        const footerAddr = personalInfo.address || '';
+        const footerWeb = personalInfo.website || personalInfo.linkedin || '';
+
+        return `
+        <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+        <head><meta charset='utf-8'><title>${personalInfo.fullName || 'Resume'}</title>
+        <style>
+            @page { size: 8.5in 11in; margin: 0; }
+            body { margin:0; padding:0; background:${BG}; color:${WHITE}; font-family:'Segoe UI',Arial,sans-serif; }
+            table { border-collapse:collapse; }
+        </style></head>
+        <body style="background:${BG};">
+
+          <!-- HEADER -->
+          <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background:${TOPBG};height:120pt;">
+            <tr>
+              <!-- Yellow triangle (simulated with border-left colored cell) -->
+              <td width="70" style="background:${YELLOW};"></td>
+              <!-- Name -->
+              <td width="200" valign="middle" style="padding:16pt 0 16pt 14pt;">
+                <div style="font-size:26pt;font-weight:bold;color:${WHITE};line-height:1.1;letter-spacing:1pt;">${firstName.toUpperCase()}<br>${lastName.toUpperCase()}</div>
+              </td>
+              <!-- Photo -->
+              <td align="center" valign="middle" style="padding:16pt;">${photoHtml}</td>
+              <!-- Personal details -->
+              <td valign="top" style="padding:20pt 20pt 0 10pt;">
+                <table border="0" cellspacing="0" cellpadding="2">${detailRows}</table>
+              </td>
+            </tr>
+          </table>
+
+          <!-- BODY: Two Columns -->
+          <table width="100%" border="0" cellspacing="0" cellpadding="0">
+            <tr valign="top">
+              <!-- LEFT -->
+              <td width="54%" style="padding:14pt 10pt 14pt 28pt;border-right:0.5pt solid #333;">
+                ${leftCol}
+              </td>
+              <!-- RIGHT -->
+              <td style="padding:14pt 24pt 14pt 14pt;">
+                ${rightCol}
+              </td>
+            </tr>
+          </table>
+
+          <!-- FOOTER -->
+          <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background:${YELLOW};margin-top:10pt;">
+            <tr>
+              <td style="padding:8pt 20pt;font-size:7.5pt;color:#1A1A1A;">
+                ${footerAddr ? `&#9711;&nbsp;${footerAddr}` : ''}
+              </td>
+              <td align="right" style="padding:8pt 20pt;font-size:7.5pt;color:#1A1A1A;">
+                ${footerWeb ? `&#8853;&nbsp;${footerWeb}` : ''}
+              </td>
+            </tr>
+          </table>
+        </body></html>`;
+    }
+
+    // ===================== HIERO ROYAL (Beige Classic) =====================
+    if (template === 'hiero-royal' || template === 'royal') {
+        const BG = '#EDE8D9';
+        const DARK = '#2C2C2C';
+        const MED = '#4A4A4A';
+        const LIGHT = '#6A6A6A';
+        const ICON_BG = '#B8AC98';
+        const LINE_CLR = '#C5BC9E';
+        const TAG_BG = '#D8D2C0';
+        const TAG_TXT = '#3A3A2A';
+
+        const photoHtml = personalInfo.profilePhoto
+            ? `<img src="${personalInfo.profilePhoto}" width="90" height="90" style="object-fit:cover;">`
+            : `<div style="width:90px;height:90px;background:#C0B8A8;"></div>`;
+
+        const contactItems = [
+            personalInfo.nationality ? `<b>Nationality:</b> ${personalInfo.nationality}` : null,
+            personalInfo.address ? `<b>Address:</b> ${personalInfo.address}` : null,
+            personalInfo.email ? `<b>Email address:</b> ${personalInfo.email}` : null,
+            personalInfo.phone ? `<b>Phone:</b> ${personalInfo.phone}` : null,
+            personalInfo.linkedin ? `<b>LinkedIn:</b> ${personalInfo.linkedin}` : null,
+        ].filter(Boolean).map(c => `<div style="font-size:9pt;color:${MED};margin-bottom:4pt;">• ${c}</div>`).join('');
+
+        const sectionHeader = (title) => `
+            <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-top:16pt;margin-bottom:8pt;">
+                <tr>
+                    <td width="28" align="center" valign="middle">
+                        <div style="width:24px;height:24px;background:${ICON_BG};border-radius:12px;text-align:center;line-height:24px;font-size:10pt;color:#fff;font-weight:bold;">${title.charAt(0)}</div>
+                    </td>
+                    <td valign="middle" style="padding-left:8pt;">
+                        <span style="font-size:12pt;font-weight:bold;color:${DARK};font-family:'Times New Roman',serif;">${title}</span>
+                    </td>
+                    <td style="border-bottom:1pt solid ${LINE_CLR};"></td>
+                </tr>
+            </table>`;
+
+        const divider = `<div style="height:1pt;background:${LINE_CLR};margin:10pt 0;"></div>`;
+
+        // Build sections
+        let body = '';
+
+        // Summary
+        if (summary) {
+            body += sectionHeader('Resume summary');
+            body += `<div style="font-size:9.5pt;color:${MED};line-height:1.5;text-align:justify;font-family:'Segoe UI',Arial,sans-serif;">${summary}</div>`;
+            body += divider;
+        }
+
+        // Work Experience
+        if (experience.length > 0) {
+            body += sectionHeader('Work experience');
+            experience.forEach(exp => {
+                body += `
+                <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom:10pt;">
+                    <tr>
+                        <td width="120" valign="top" style="font-size:8.5pt;color:${LIGHT};font-family:'Segoe UI',Arial,sans-serif;padding-top:2pt;">
+                            ${exp.startDate || ''} – ${exp.endDate || 'present'}<br>
+                            <span style="font-size:8pt;">${exp.location || ''}</span>
+                        </td>
+                        <td valign="top" style="padding-left:14pt;font-family:'Segoe UI',Arial,sans-serif;">
+                            <div style="font-size:10.5pt;font-weight:bold;color:${DARK};">${exp.jobTitle || ''}</div>
+                            <div style="font-size:9.5pt;font-weight:bold;color:${DARK};margin-bottom:4pt;">${exp.company || ''}</div>
+                            ${exp.description ? `<div style="font-size:9pt;color:${MED};line-height:1.5;">${exp.description.split('\n').filter(l => l.trim()).map(l => `<div>• ${l.replace(/^[\*\-•]\s*/, '')}</div>`).join('')}</div>` : ''}
+                        </td>
+                    </tr>
+                </table>`;
+            });
+            body += divider;
+        }
+
+        // Education
+        if (education.length > 0) {
+            body += sectionHeader('Education');
+            education.forEach(edu => {
+                body += `
+                <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom:10pt;">
+                    <tr>
+                        <td width="120" valign="top" style="font-size:8.5pt;color:${LIGHT};font-family:'Segoe UI',Arial,sans-serif;padding-top:2pt;">${edu.gradYear || ''}</td>
+                        <td valign="top" style="padding-left:14pt;font-family:'Segoe UI',Arial,sans-serif;">
+                            <div style="font-size:10.5pt;font-weight:bold;color:${DARK};">${edu.degree || ''}</div>
+                            <div style="font-size:9.5pt;font-weight:bold;color:${DARK};">${edu.school || ''}</div>
+                            ${edu.gpa ? `<div style="font-size:9pt;color:${MED};">${edu.gpa}</div>` : ''}
+                        </td>
+                    </tr>
+                </table>`;
+            });
+            body += divider;
+        }
+
+        // Skills as tags
+        const skillsArr = typeof technicalSkills === 'string'
+            ? technicalSkills.split(',').map(s => s.trim()).filter(Boolean)
+            : (Array.isArray(data.skills) ? data.skills : []);
+        const softArr = typeof softSkills === 'string'
+            ? softSkills.split(',').map(s => s.trim()).filter(Boolean)
+            : [];
+        const allTags = [...skillsArr, ...softArr].slice(0, 14);
+
+        if (allTags.length > 0) {
+            body += sectionHeader('Strengths');
+            body += `<div style="margin:6pt 0;">`
+            body += allTags.map(t => `<span style="display:inline-block;background:${TAG_BG};color:${TAG_TXT};padding:3pt 10pt;border-radius:4pt;font-size:9pt;margin:0 5pt 5pt 0;font-family:'Segoe UI',Arial,sans-serif;">${t}</span>`).join('');
+            body += `</div>`;
+            body += divider;
+        }
+
+        // Certifications
+        const certsArr = Array.isArray(data.certifications) ? data.certifications : [];
+        if (certsArr.length > 0) {
+            body += sectionHeader('Certificates');
+            certsArr.forEach(cert => {
+                const nm = typeof cert === 'string' ? cert : (cert.name || cert.title || '');
+                const iss = typeof cert === 'object' ? (cert.issuer || '') : '';
+                const dt = typeof cert === 'object' ? (cert.date || cert.year || '') : '';
+                body += `
+                <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom:8pt;">
+                    <tr>
+                        <td width="120" valign="top" style="font-size:8.5pt;color:${LIGHT};font-family:'Segoe UI',Arial,sans-serif;padding-top:2pt;">${dt}</td>
+                        <td valign="top" style="padding-left:14pt;font-family:'Segoe UI',Arial,sans-serif;">
+                            <div style="font-size:10.5pt;font-weight:bold;color:${DARK};">${nm}</div>
+                            ${iss ? `<div style="font-size:9.5pt;font-weight:bold;color:${DARK};">${iss}</div>` : ''}
+                        </td>
+                    </tr>
+                </table>`;
+            });
+            body += divider;
+        }
+
+        // Hobbies
+        if (hobbies) {
+            const hobArr = typeof hobbies === 'string' ? hobbies.split(',').map(s => s.trim()).filter(Boolean) : (Array.isArray(hobbies) ? hobbies : []);
+            if (hobArr.length > 0) {
+                body += sectionHeader('Hobbies');
+                body += `<table width="100%" border="0" cellspacing="0" cellpadding="0"><tr>`;
+                hobArr.slice(0, 5).forEach(h => {
+                    body += `<td align="center" style="font-family:'Segoe UI',Arial,sans-serif;font-size:9pt;color:${MED};padding:8pt;">
+                        <div style="width:28px;height:28px;background:${LINE_CLR};border-radius:14px;margin:0 auto 6pt;"></div>
+                        ${h}
+                    </td>`;
+                });
+                body += `</tr></table>`;
+            }
+        }
+
+        return `
+        <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+        <head><meta charset='utf-8'><title>Resume</title>
+        <style>
+            @page { size: 8.5in 11in; margin: 0.5in; }
+            body { font-family: 'Segoe UI', Arial, sans-serif; background-color: ${BG}; color: ${DARK}; margin: 0; padding: 0; }
+            table { border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+            td { padding: 0; }
+        </style>
+        </head>
+        <body style="background-color:${BG};">
+            <!-- HEADER -->
+            <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom:12pt;">
+                <tr>
+                    <td valign="top">
+                        <div style="font-size:26pt;font-weight:bold;color:#1A1A1A;font-family:'Times New Roman',serif;margin-bottom:8pt;">${personalInfo.fullName || 'Your Name'}</div>
+                        ${contactItems}
+                    </td>
+                    <td width="100" align="right" valign="top">${photoHtml}</td>
+                </tr>
+            </table>
+
+            <div style="height:1pt;background:${LINE_CLR};margin-bottom:12pt;"></div>
+
+            ${body}
+        </body>
+        </html>`;
+    }
+
+    if (template === 'hiero-premium' || template === 'premium') {
         const BG_COLOR = '#F4F5F7';
         const CARD_BG = '#FFFFFF';
         const PEACH_ACCENT = '#F2B66D';
@@ -452,10 +806,10 @@ function generateWordHTML(data) {
                                 <!-- LEFT COLUMN: 35% -->
                                 <td width="35%" valign="top">
                                     <div style="text-align: center; margin-bottom: 20pt;">
-                                        ${personalInfo.profilePhoto ? 
-                                            `<!--[if gte vml 1]><v:oval style="position:relative;width:110px;height:110px;" strokecolor="${BG_COLOR}" strokeweight="1pt"><v:fill type="frame" src="${personalInfo.profilePhoto}" /></v:oval><![endif]--><![if !vml]><img src="${personalInfo.profilePhoto}" width="110" height="110" style="border-radius: 55px;"><![endif]>` : 
-                                            `<div style="width: 110px; height: 110px; border-radius: 55px; background-color: #d0d0d0; margin: 0 auto;"></div>`
-                                        }
+                                        ${personalInfo.profilePhoto ?
+                `<!--[if gte vml 1]><v:oval style="position:relative;width:110px;height:110px;" strokecolor="${BG_COLOR}" strokeweight="1pt"><v:fill type="frame" src="${personalInfo.profilePhoto}" /></v:oval><![endif]--><![if !vml]><img src="${personalInfo.profilePhoto}" width="110" height="110" style="border-radius: 55px;"><![endif]>` :
+                `<div style="width: 110px; height: 110px; border-radius: 55px; background-color: #d0d0d0; margin: 0 auto;"></div>`
+            }
                                     </div>
                                     
                                     <table class="card-outer" width="100%"><tr><td class="card-inner-table">
@@ -503,9 +857,9 @@ function generateWordHTML(data) {
                                         <div class="card-header">EDUCATION</div>
                                         ${data.education.map(edu => `
                                             <div style="margin-bottom:12pt;">
-                                                <div style="font-size:11pt; font-weight:bold; color:${TEXT_PRI};">${edu.school||''}</div>
-                                                <div style="font-size:10pt; color:${TEXT_SEC}; margin-top:2pt;">${edu.degree||''}</div>
-                                                <div style="font-size:9.5pt; color:${TEXT_SEC}; margin-top:2pt;">${edu.startDate||''} - ${edu.endDate||''}</div>
+                                                <div style="font-size:11pt; font-weight:bold; color:${TEXT_PRI};">${edu.school || ''}</div>
+                                                <div style="font-size:10pt; color:${TEXT_SEC}; margin-top:2pt;">${edu.degree || ''}</div>
+                                                <div style="font-size:9.5pt; color:${TEXT_SEC}; margin-top:2pt;">${edu.startDate || ''} - ${edu.endDate || ''}</div>
                                                 ${edu.gpa ? `<div style="font-size:9.5pt; color:${TEXT_SEC};">GPA: ${edu.gpa}</div>` : ''}
                                             </div>
                                         `).join('')}
@@ -517,12 +871,12 @@ function generateWordHTML(data) {
                                         <div class="card-header">WORK EXPERIENCE</div>
                                         ${data.experience.map(exp => `
                                             <div style="margin-bottom:15pt;">
-                                                <div style="font-size:10.5pt; font-weight:bold; color:${TEXT_PRI};">${exp.company ? exp.company+', ' : ''}${exp.jobTitle||''}</div>
-                                                <div style="font-size:9.5pt; color:${TEXT_SEC}; margin-top:2pt; margin-bottom:5pt;">${exp.startDate||''} - ${exp.endDate||'Present'}</div>
+                                                <div style="font-size:10.5pt; font-weight:bold; color:${TEXT_PRI};">${exp.company ? exp.company + ', ' : ''}${exp.jobTitle || ''}</div>
+                                                <div style="font-size:9.5pt; color:${TEXT_SEC}; margin-top:2pt; margin-bottom:5pt;">${exp.startDate || ''} - ${exp.endDate || 'Present'}</div>
                                                 ${exp.description ? `
                                                     <div style="font-size:9.5pt; color:${TEXT_SEC}; line-height:1.4;">
                                                         ${!exp.description.includes('Main responsibilities:') ? 'Main responsibilities:<br>' : ''}
-                                                        ${exp.description.split('\n').filter(Boolean).map(l => `<div>- ${l.replace(/^[-•]\s*/,'')}</div>`).join('')}
+                                                        ${exp.description.split('\n').filter(Boolean).map(l => `<div>- ${l.replace(/^[-•]\s*/, '')}</div>`).join('')}
                                                     </div>
                                                 ` : ''}
                                             </div>
@@ -535,11 +889,11 @@ function generateWordHTML(data) {
                                         <div class="card-header">PROJECTS</div>
                                         ${data.projects.map(proj => `
                                             <div style="margin-bottom:15pt;">
-                                                <div style="font-size:10.5pt; font-weight:bold; color:${TEXT_PRI};">${proj.title||''}</div>
+                                                <div style="font-size:10.5pt; font-weight:bold; color:${TEXT_PRI};">${proj.title || ''}</div>
                                                 ${proj.tech ? `<div style="font-size:9.5pt; color:${PEACH_ACCENT}; margin-top:2pt;">${proj.tech}</div>` : ''}
                                                 ${proj.description ? `
                                                     <div style="font-size:9.5pt; color:${TEXT_SEC}; line-height:1.4; margin-top:5pt;">
-                                                        ${proj.description.split('\n').filter(Boolean).map(l => `<div>- ${l.replace(/^[-•]\s*/,'')}</div>`).join('')}
+                                                        ${proj.description.split('\n').filter(Boolean).map(l => `<div>- ${l.replace(/^[-•]\s*/, '')}</div>`).join('')}
                                                     </div>
                                                 ` : ''}
                                             </div>
@@ -551,13 +905,13 @@ function generateWordHTML(data) {
                                     <table class="card-outer" width="100%"><tr><td class="card-inner-table">
                                         <div class="card-header">CERTIFICATIONS</div>
                                         ${data.certifications.map(cert => {
-                                            const name = typeof cert === 'string' ? cert : (cert.name || cert.title || '');
-                                            return `
+                const name = typeof cert === 'string' ? cert : (cert.name || cert.title || '');
+                return `
                                             <div style="margin-bottom:8pt;">
                                                 <div style="font-size:10.5pt; font-weight:bold; color:${TEXT_PRI};">• ${name}</div>
                                             </div>
                                             `;
-                                        }).join('')}
+            }).join('')}
                                     </td></tr></table>
                                     ` : ''}
                                     
@@ -565,15 +919,15 @@ function generateWordHTML(data) {
                                     <table class="card-outer" width="100%"><tr><td class="card-inner-table">
                                         <div class="card-header">ACTIVITIES</div>
                                         ${activitiesArr.map(act => {
-                                            const t = typeof act === 'string' ? act : (act.title || act.name || '');
-                                            const r = typeof act === 'string' ? '' : (act.role || act.description || '');
-                                            return `
+                const t = typeof act === 'string' ? act : (act.title || act.name || '');
+                const r = typeof act === 'string' ? '' : (act.role || act.description || '');
+                return `
                                             <div style="margin-bottom:10pt;">
                                                 <div style="font-size:10.5pt; font-weight:bold; color:${TEXT_PRI};">${t}</div>
                                                 ${r ? `<div style="font-size:9.5pt; color:${TEXT_SEC}; margin-top:2pt;">${r}</div>` : ''}
                                             </div>
                                             `;
-                                        }).join('')}
+            }).join('')}
                                     </td></tr></table>
                                     ` : ''}
 

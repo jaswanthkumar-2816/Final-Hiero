@@ -250,12 +250,21 @@ const TEMPLATE_COLORS = {
         sidebarBg: '#2e2e2e',
         sidebarText: '#ffffff',
         light: '#e0e0e0'
+    },
+    'hiero-royal': {
+        primary: '#1a1a1a',      // Deep black for name/titles
+        secondary: '#3a3a3a',    // Dark grey for text
+        accent: '#8B7D6B',       // Warm brown/tan for section icons
+        background: '#EDE8D9',  // Warm beige background
+        light: '#BFAF9A'         // Light warm beige
     }
 };
 
 // Map template IDs to their internal keys
 const TEMPLATE_MAP = {
     'template-4': 'template-4',
+    'template4': 'template-4',
+    'hiero-academic': 'template-4',
     'hiero-studio': 'hiero-studio',
     'hiero-monethon': 'hiero-monethon',
     'monethon': 'hiero-monethon',
@@ -276,7 +285,9 @@ const TEMPLATE_MAP = {
     'hiero-premium': 'hiero-premium',
     'premium': 'hiero-premium',
     'hiero-prestige': 'hiero-prestige',
-    'prestige': 'hiero-prestige'
+    'prestige': 'hiero-prestige',
+    'hiero-royal': 'hiero-royal',
+    'royal': 'hiero-royal'
 
 };
 
@@ -1321,6 +1332,17 @@ async function generateUnifiedResume(data, templateId, outStream, customOptions 
                     }
                     return;
 
+                case 'hiero-urban':
+                    await renderTemplate_HieroUrban(doc, data);
+                    doc.end();
+                    if (outStream && outStream.on) {
+                        outStream.on('finish', () => resolve(true));
+                        outStream.on('error', reject);
+                    } else {
+                        resolve(doc);
+                    }
+                    return;
+
                 case 'hiero-studio':
                     // Studio uses a completely custom full-page layout
                     await renderTemplate_StudioRightSidebar(doc, data, colors, spacing);
@@ -1353,7 +1375,16 @@ async function generateUnifiedResume(data, templateId, outStream, customOptions 
                         resolve(doc);
                     }
                     return;
-                case 'template-4': renderHeader_Academic(doc, data, colors); break;
+                case 'template-4':
+                    await renderTemplate_HieroAcademic(doc, data);
+                    doc.end();
+                    if (outStream && outStream.on) {
+                        outStream.on('finish', () => resolve(true));
+                        outStream.on('error', reject);
+                    } else {
+                        resolve(doc);
+                    }
+                    return;
                 case 'hiero-monethon':
                     renderTemplate_HieroMonethon(doc, data, options);
                     doc.end();
@@ -1409,6 +1440,17 @@ async function generateUnifiedResume(data, templateId, outStream, customOptions 
                     return;
                 case 'hiero-prestige':
                     await renderTemplate_HieroPrestige(doc, data, colors, spacing);
+                    doc.end();
+                    if (outStream && outStream.on) {
+                        outStream.on('finish', () => resolve(true));
+                        outStream.on('error', reject);
+                    } else {
+                        resolve(doc);
+                    }
+                    return;
+
+                case 'hiero-royal':
+                    await renderTemplate_HieroRoyal(doc, data);
                     doc.end();
                     if (outStream && outStream.on) {
                         outStream.on('finish', () => resolve(true));
@@ -5039,6 +5081,814 @@ async function renderTemplate_HieroPremium(doc, rawData, colors, spacing) {
             });
             return cyy - cy;
         }, true, 'Activities');
+    }
+}
+
+// ==================== HIERO ROYAL (KickResume-Style Beige) ====================
+async function renderTemplate_HieroRoyal(doc, rawData) {
+    const data = normalizeData(rawData);
+    // Prevent paginating
+    doc.addPage = function () { return doc; };
+
+    const PAGE_W = 595.28;
+    const PAGE_H = 841.89;
+    const MARGIN = 36;
+    const CONTENT_W = PAGE_W - MARGIN * 2;
+
+    // Colors from image
+    const BG = '#EDE8D9';   // warm beige background
+    const ICON_BG = '#B8AC98';   // the round icon circle color
+    const ICON_FG = '#FFFFFF';   // icon glyph color
+    const BLACK = '#1A1A1A';   // name
+    const DARK = '#2C2C2C';   // section titles, bold text
+    const MED = '#4A4A4A';   // body text
+    const LIGHT = '#6A6A6A';   // dates, secondary
+    const BULLET = '#7A7060';   // bullet dots in contact row
+    const LINE_CLR = '#C5BC9E';   // horizontal divider lines
+    const TAG_BG = '#D8D2C0';   // strength tag pill background
+    const TAG_TXT = '#3A3A2A';   // strength tag text
+
+    // Fill beige background
+    doc.rect(0, 0, PAGE_W, PAGE_H).fill(BG);
+
+    let y = MARGIN;
+
+    // ======= HEADER =======
+    const PHOTO_SIZE = 88;
+    const PHOTO_X = PAGE_W - MARGIN - PHOTO_SIZE;
+    const HEADER_TEXT_W = PHOTO_X - MARGIN - 10;
+
+    // Name
+    const fullName = data.personalInfo.fullName || 'Your Name';
+    doc.font('Helvetica-Bold').fontSize(28).fillColor(BLACK);
+    doc.text(fullName, MARGIN, y, { width: HEADER_TEXT_W });
+    y += 36;
+
+    // Contact line — each item prefixed with a filled bullet dot
+    const contactItems = [
+        data.personalInfo.nationality ? `Nationality: ${data.personalInfo.nationality}` : null,
+        data.personalInfo.address ? `Address: ${data.personalInfo.address}` : null,
+        data.personalInfo.email ? `Email address: ${data.personalInfo.email}` : null,
+        data.personalInfo.phone ? `Phone: ${data.personalInfo.phone}` : null,
+        data.personalInfo.linkedin ? `LinkedIn: ${data.personalInfo.linkedin}` : null,
+    ].filter(Boolean);
+
+    doc.font('Helvetica').fontSize(9).fillColor(MED);
+    contactItems.forEach((item, i) => {
+        // bullet
+        doc.fillColor(BULLET).circle(MARGIN + 4, y + 3.5, 2.5).fill();
+        doc.fillColor(MED).text(item, MARGIN + 12, y, { width: HEADER_TEXT_W - 12 });
+        y += 14;
+    });
+
+    // Profile photo – positioned at top right
+    const PHOTO_Y = MARGIN;
+    if (data.personalInfo.profilePhoto) {
+        try {
+            const buf = base64ToBuffer(data.personalInfo.profilePhoto);
+            if (buf) {
+                doc.save();
+                doc.rect(PHOTO_X, PHOTO_Y, PHOTO_SIZE, PHOTO_SIZE).clip();
+                doc.image(buf, PHOTO_X, PHOTO_Y, { width: PHOTO_SIZE, height: PHOTO_SIZE, cover: [PHOTO_SIZE, PHOTO_SIZE] });
+                doc.restore();
+            }
+        } catch (e) {
+            // placeholder grey box
+            doc.rect(PHOTO_X, PHOTO_Y, PHOTO_SIZE, PHOTO_SIZE).fill('#C0B8A8');
+        }
+    } else {
+        doc.rect(PHOTO_X, PHOTO_Y, PHOTO_SIZE, PHOTO_SIZE).fill('#C0B8A8');
+    }
+
+    // Horizontal divider after header
+    y = Math.max(y, PHOTO_Y + PHOTO_SIZE) + 10;
+    doc.moveTo(MARGIN, y).lineTo(PAGE_W - MARGIN, y).strokeColor(LINE_CLR).lineWidth(0.8).stroke();
+    y += 14;
+
+    // ======= SECTION RENDERER =======
+    // Icon radius and dimensions
+    const ICON_R = 12;
+    const DATE_COL_W = 105;   // left: dates / location
+    const BODY_X = MARGIN + ICON_R * 2 + 14 + DATE_COL_W + 14;
+    const BODY_W = PAGE_W - MARGIN - BODY_X;
+
+    function drawSectionHeader(title) {
+        // Icon circle with simple text glyph shorthand
+        doc.circle(MARGIN + ICON_R, y + ICON_R, ICON_R).fill(ICON_BG);
+        // For icon text, use a simple single letter or symbol
+        const icons = {
+            'Resume summary': 'R',
+            'Work experience': 'W',
+            'Education': 'E',
+            'Strengths': 'S',
+            'Certificates': 'C',
+            'Hobbies': 'H'
+        };
+        const glyph = icons[title] || title.charAt(0);
+        doc.font('Helvetica-Bold').fontSize(9).fillColor(ICON_FG);
+        const gW = doc.widthOfString(glyph);
+        doc.text(glyph, MARGIN + ICON_R - gW / 2, y + ICON_R - 4.5);
+
+        doc.font('Helvetica-Bold').fontSize(12).fillColor(DARK);
+        doc.text(title, MARGIN + ICON_R * 2 + 10, y + ICON_R - 6.5, { width: 180 });
+
+        // Horizontal rule extending from right of title to right margin
+        const ruleStartX = MARGIN + ICON_R * 2 + 10 + doc.widthOfString(title) + 10;
+        doc.moveTo(ruleStartX, y + ICON_R).lineTo(PAGE_W - MARGIN, y + ICON_R).strokeColor(LINE_CLR).lineWidth(0.7).stroke();
+
+        y += ICON_R * 2 + 10;
+    }
+
+    // ======= SUMMARY =======
+    if (data.summary) {
+        drawSectionHeader('Resume summary');
+        doc.font('Helvetica').fontSize(9.5).fillColor(MED);
+        doc.text(data.summary, MARGIN, y, { width: CONTENT_W, align: 'justify', lineGap: 1.5 });
+        y += doc.heightOfString(data.summary, { width: CONTENT_W }) + 16;
+
+        doc.moveTo(MARGIN, y).lineTo(PAGE_W - MARGIN, y).strokeColor(LINE_CLR).lineWidth(0.6).stroke();
+        y += 14;
+    }
+
+    // ======= WORK EXPERIENCE =======
+    const exps = data.experience || [];
+    if (exps.length > 0) {
+        drawSectionHeader('Work experience');
+
+        exps.forEach(exp => {
+            // Date + location left column
+            const dateStr = `${exp.startDate || ''} – ${exp.endDate || 'present'}`;
+            const locStr = exp.location || '';
+            doc.font('Helvetica').fontSize(9).fillColor(LIGHT);
+            doc.text(dateStr, MARGIN, y, { width: DATE_COL_W + ICON_R * 2 + 14 });
+            if (locStr) {
+                y += 12;
+                doc.text(locStr, MARGIN, y, { width: DATE_COL_W + ICON_R * 2 + 14 });
+                y -= 12;
+            }
+
+            // Job title + company
+            doc.font('Helvetica-Bold').fontSize(10.5).fillColor(DARK);
+            doc.text(exp.jobTitle || '', BODY_X, y, { width: BODY_W });
+            y += 14;
+
+            const company = exp.company || '';
+            if (company) {
+                doc.font('Helvetica-Bold').fontSize(9.5).fillColor(DARK);
+                doc.text(company, BODY_X, y, { width: BODY_W });
+                y += 13;
+            }
+
+            // Bullet points
+            if (exp.description) {
+                const lines = exp.description.split('\n').filter(l => l.trim());
+                lines.forEach(line => {
+                    const clean = line.replace(/^[\*\-•]\s*/, '');
+                    doc.font('Helvetica').fontSize(9.5).fillColor(MED);
+                    const txt = '• ' + clean;
+                    const lh = doc.heightOfString(txt, { width: BODY_W - 4 });
+                    doc.text(txt, BODY_X, y, { width: BODY_W - 4, lineGap: 1 });
+                    y += lh + 3;
+                });
+            }
+            y += 12;
+        });
+
+        doc.moveTo(MARGIN, y).lineTo(PAGE_W - MARGIN, y).strokeColor(LINE_CLR).lineWidth(0.6).stroke();
+        y += 14;
+    }
+
+    // ======= EDUCATION =======
+    const edus = data.education || [];
+    if (edus.length > 0) {
+        drawSectionHeader('Education');
+
+        edus.forEach(edu => {
+            const dateStr = edu.gradYear ? edu.gradYear : '';
+            doc.font('Helvetica').fontSize(9).fillColor(LIGHT);
+            doc.text(dateStr, MARGIN, y, { width: DATE_COL_W + ICON_R * 2 + 14 });
+
+            doc.font('Helvetica-Bold').fontSize(10.5).fillColor(DARK);
+            doc.text(edu.degree || '', BODY_X, y, { width: BODY_W });
+            y += 14;
+
+            doc.font('Helvetica-Bold').fontSize(9.5).fillColor(DARK);
+            doc.text(edu.school || '', BODY_X, y, { width: BODY_W });
+            y += 13;
+
+            if (edu.gpa) {
+                doc.font('Helvetica').fontSize(9).fillColor(MED);
+                doc.text(edu.gpa, BODY_X, y, { width: BODY_W });
+                y += 12;
+            }
+            y += 8;
+        });
+
+        doc.moveTo(MARGIN, y).lineTo(PAGE_W - MARGIN, y).strokeColor(LINE_CLR).lineWidth(0.6).stroke();
+        y += 14;
+    }
+
+    // ======= STRENGTHS / SKILLS =======
+    const allSkills = [
+        ...(data.skills || []),
+        ...(data.softSkills || []),
+        ...(typeof data.technicalSkills === 'string' ? data.technicalSkills.split(',').map(s => s.trim()).filter(Boolean) : [])
+    ].filter(Boolean).slice(0, 14); // cap to avoid overflow
+
+    if (allSkills.length > 0) {
+        drawSectionHeader('Strengths');
+        // Tag pills – wrapping
+        let tagX = MARGIN;
+        const TAG_H = 22;
+        const TAG_PAD = 10;
+        const TAG_GAP = 8;
+        const TAG_ROW_GAP = 8;
+
+        allSkills.forEach(skill => {
+            const label = typeof skill === 'string' ? skill : String(skill);
+            doc.font('Helvetica').fontSize(9);
+            const tagW = Math.min(doc.widthOfString(label) + TAG_PAD * 2, 160);
+
+            if (tagX + tagW > PAGE_W - MARGIN) {
+                tagX = MARGIN;
+                y += TAG_H + TAG_ROW_GAP;
+            }
+            doc.roundedRect(tagX, y, tagW, TAG_H, 4).fill(TAG_BG);
+            doc.fillColor(TAG_TXT).text(label, tagX + TAG_PAD, y + 6, { width: tagW - TAG_PAD * 2, ellipsis: true });
+            tagX += tagW + TAG_GAP;
+        });
+        y += TAG_H + 16;
+
+        doc.moveTo(MARGIN, y).lineTo(PAGE_W - MARGIN, y).strokeColor(LINE_CLR).lineWidth(0.6).stroke();
+        y += 14;
+    }
+
+    // ======= CERTIFICATIONS =======
+    const certs = data.certifications || [];
+    if (certs.length > 0) {
+        drawSectionHeader('Certificates');
+
+        certs.forEach(cert => {
+            const name = typeof cert === 'string' ? cert : (cert.name || cert.title || '');
+            const date = typeof cert === 'object' ? (cert.date || cert.year || '') : '';
+
+            if (date) {
+                doc.font('Helvetica').fontSize(9).fillColor(LIGHT);
+                doc.text(date, MARGIN, y, { width: DATE_COL_W + ICON_R * 2 + 14 });
+            }
+
+            doc.font('Helvetica-Bold').fontSize(10.5).fillColor(DARK);
+            doc.text(name, BODY_X, y, { width: BODY_W });
+            y += 14;
+
+            if (typeof cert === 'object' && cert.issuer) {
+                doc.font('Helvetica-Bold').fontSize(9.5).fillColor(DARK);
+                doc.text(cert.issuer, BODY_X, y, { width: BODY_W });
+                y += 13;
+            }
+            y += 6;
+        });
+
+        doc.moveTo(MARGIN, y).lineTo(PAGE_W - MARGIN, y).strokeColor(LINE_CLR).lineWidth(0.6).stroke();
+        y += 14;
+    }
+
+    // ======= HOBBIES =======
+    const hobbies = data.hobbies || data.interests || [];
+    if (hobbies.length > 0) {
+        drawSectionHeader('Hobbies');
+
+        // Display as row of labeled groups (like the image icons row)
+        const hobbyArr = Array.isArray(hobbies)
+            ? hobbies.map(h => typeof h === 'string' ? h : String(h))
+            : [String(hobbies)];
+
+        doc.font('Helvetica').fontSize(9.5).fillColor(MED);
+        const hobbyIconSymbols = ['📷', '📚', '🎸', '⚽', '🎨', '🏃', '🍳', '✈️'];
+        const colW = Math.floor(CONTENT_W / Math.min(hobbyArr.length, 5));
+
+        hobbyArr.slice(0, 5).forEach((hobby, i) => {
+            const hx = MARGIN + i * colW;
+            // draw a simple circle icon placeholder
+            doc.circle(hx + colW / 2, y + 16, 14).fillColor(LINE_CLR).fill();
+            doc.font('Helvetica').fontSize(8).fillColor(MED);
+            doc.text(hobby, hx, y + 36, { width: colW, align: 'center' });
+        });
+        y += 60;
+    }
+}
+
+// ==================== HIERO ACADEMIC (Dark / Yellow — KickResume Pixel-Perfect) ====================
+async function renderTemplate_HieroAcademic(doc, rawData) {
+    const data = normalizeData(rawData);
+    doc.addPage = function () { return doc; };  // strict single page
+
+    const PW = 595.28;
+    const PH = 841.89;
+
+    const DARK = '#222222';
+    const YEL = '#F0D03D';
+    const WHITE = '#FFFFFF';
+    const LGRAY = '#D0D0D0';
+    const BLACK = '#111111';
+
+    const LEFT_W = 230;
+    const RIGHT_X = 230;
+    const RIGHT_W = PW - RIGHT_X;
+
+    // 1. Base dark background
+    doc.rect(0, 0, PW, PH).fill(DARK);
+
+    // 2. Top yellow polygon on right side
+    doc.moveTo(RIGHT_X, 0)
+        .lineTo(PW, 0)
+        .lineTo(PW, 140)
+        .lineTo(RIGHT_X, 200)
+        .closePath()
+        .fill(YEL);
+
+    // 3. Bottom yellow polygon on right side
+    doc.moveTo(RIGHT_X, PH - 60)
+        .lineTo(PW, PH - 120)
+        .lineTo(PW, PH)
+        .lineTo(RIGHT_X, PH)
+        .closePath()
+        .fill(YEL);
+
+    const PI = data.personalInfo || {};
+
+    // ---------------- RIGHT HEADER ELEMENTS ----------------
+    // Profile Picture
+    const PR = 45;
+    const PCX = 310;
+    const PCY = 85;
+
+    doc.save();
+    doc.circle(PCX, PCY, PR).clip();
+    let photoDrawn = false;
+    if (PI.profilePhoto) {
+        try {
+            const buf = base64ToBuffer(PI.profilePhoto);
+            if (buf) {
+                doc.image(buf, PCX - PR, PCY - PR, { width: PR * 2, height: PR * 2, cover: [PR * 2, PR * 2] });
+                photoDrawn = true;
+            }
+        } catch (e) { }
+    }
+    if (!photoDrawn) {
+        doc.rect(PCX - PR, PCY - PR, PR * 2, PR * 2).fill('#444444');
+    }
+    doc.restore();
+
+    // Contact Info (Top Right - black text on yellow)
+    let detY = 40;
+    const detX = 390;
+    doc.font('Helvetica').fontSize(9).fillColor(BLACK);
+    const detailItems = [
+        PI.dob ? PI.dob : null,
+        PI.nationality ? PI.nationality : null,
+        PI.phone ? PI.phone : null,
+        PI.email ? PI.email : null,
+        PI.linkedin ? PI.linkedin : null
+    ].filter(Boolean);
+
+    detailItems.forEach(txt => {
+        doc.circle(detX + 4, detY + 4, 3).stroke(BLACK).lineWidth(1);
+        doc.circle(detX + 4, detY + 4, 1.5).fill(BLACK);
+        doc.text(txt, detX + 12, detY, { width: PW - detX - 20, lineBreak: false });
+        detY += 15;
+    });
+
+    // Footer Text (Bottom Right - black text on yellow)
+    const fX = PW - 180;
+    const fY = PH - 40;
+    doc.font('Helvetica').fontSize(9).fillColor(BLACK);
+    if (PI.address) {
+        doc.circle(fX - 8, fY + 4, 3).stroke(BLACK).lineWidth(1);
+        doc.circle(fX - 8, fY + 4, 1.5).fill(BLACK);
+        doc.text(PI.address, fX, fY, { width: 160 });
+    }
+    if (PI.website) {
+        doc.circle(fX - 8, fY + 19, 3).stroke(BLACK).lineWidth(1);
+        doc.circle(fX - 8, fY + 19, 1.5).fill(BLACK);
+        doc.text(PI.website, fX, fY + 15, { width: 160 });
+    }
+
+    // ---------------- LEFT COLUMN ELEMENTS ----------------
+    let ly = 40;
+
+    // Name
+    const fullName = (PI.fullName || 'YOUR NAME').trim();
+    const nameParts = fullName.split(' ');
+    const firstName = nameParts[0] || '';
+    const lastName = nameParts.slice(1).join(' ') || '';
+
+    doc.font('Helvetica-Bold').fontSize(34).fillColor(WHITE).text(firstName.toUpperCase(), 30, ly);
+    ly += 34;
+    doc.font('Helvetica-Bold').fontSize(34).fillColor(LGRAY).text(lastName.toUpperCase(), 30, ly);
+    ly += 50;
+
+    // Objective
+    if (data.summary) {
+        doc.rect(30, ly + 2, 8, 8).stroke(YEL).lineWidth(1.5);
+        doc.font('Helvetica-Bold').fontSize(11).fillColor(YEL).text('RESUME OBJECTIVE', 45, ly);
+        ly += 22;
+        doc.font('Helvetica').fontSize(8.5).fillColor(LGRAY);
+        const summH = doc.heightOfString(data.summary, { width: 170, lineGap: 2 });
+        doc.text(data.summary, 30, ly, { width: 170, lineGap: 2 });
+        ly += summH + 20;
+    }
+
+    // Experience
+    const exps = data.experience || [];
+    if (exps.length > 0) {
+        doc.rect(30, ly + 2, 8, 8).stroke(YEL).lineWidth(1.5);
+        doc.font('Helvetica-Bold').fontSize(11).fillColor(YEL).text('WORK EXPERIENCE', 45, ly);
+        ly += 25;
+
+        exps.forEach(exp => {
+            if (ly > PH - 40) return;
+            const startD = exp.startDate || '';
+            const endD = exp.endDate || 'Present';
+            const loc = exp.location || '';
+            let dateLoc = `${startD} - ${endD}`;
+            if (loc) dateLoc += `    ${loc}`;
+            doc.font('Helvetica').fontSize(7.5).fillColor(YEL).text(dateLoc.toUpperCase(), 30, ly);
+            ly += 12;
+
+            doc.font('Helvetica-Bold').fontSize(10).fillColor(WHITE).text(exp.jobTitle || '', 30, ly);
+            ly += 13;
+
+            if (exp.company) {
+                doc.font('Helvetica-Bold').fontSize(9).fillColor(LGRAY).text(exp.company, 30, ly);
+                ly += 12;
+            }
+
+            if (exp.description) {
+                const lines = exp.description.split('\n').filter(l => l.trim());
+                doc.font('Helvetica').fontSize(8).fillColor(LGRAY);
+                lines.forEach(line => {
+                    if (ly > PH - 30) return;
+                    const clean = line.replace(/^[\*\-•]\s*/, '');
+                    const txt = '•  ' + clean;
+                    const h = doc.heightOfString(txt, { width: 170, lineGap: 1.5 });
+                    doc.text(txt, 30, ly, { width: 170, lineGap: 1.5 });
+                    ly += h + 2;
+                });
+            }
+            ly += 15;
+        });
+    }
+
+    // ---------------- RIGHT COLUMN ELEMENTS ----------------
+    let ry = 230; // Starts below the top yellow polygon
+
+    // Education
+    const edus = data.education || [];
+    if (edus.length > 0) {
+        doc.rect(RIGHT_X + 20, ry + 2, 8, 8).stroke(YEL).lineWidth(1.5);
+        doc.font('Helvetica-Bold').fontSize(11).fillColor(YEL).text('EDUCATION', RIGHT_X + 35, ry);
+        ry += 25;
+
+        edus.forEach(edu => {
+            if (ry > PH - 100) return;
+            const d = edu.gradYear || '';
+            const loc = edu.location || '';
+            let dateLoc = d;
+            if (loc) dateLoc += (d ? '    ' : '') + loc;
+            if (dateLoc) {
+                doc.font('Helvetica').fontSize(7.5).fillColor(YEL).text(dateLoc.toUpperCase(), RIGHT_X + 20, ry);
+                ry += 12;
+            }
+
+            doc.font('Helvetica-Bold').fontSize(10).fillColor(WHITE).text(edu.degree || '', RIGHT_X + 20, ry);
+            ry += 13;
+
+            if (edu.school) {
+                doc.font('Helvetica-Bold').fontSize(9).fillColor(LGRAY).text(edu.school, RIGHT_X + 20, ry);
+                ry += 12;
+            }
+            if (edu.gpa) {
+                doc.font('Helvetica').fontSize(8.5).fillColor(LGRAY).text(edu.gpa, RIGHT_X + 20, ry);
+                ry += 12;
+            }
+            ry += 15;
+        });
+    }
+
+    // Skills
+    const techSkills = typeof data.technicalSkills === 'string' ? data.technicalSkills.split(',').map(s => s.trim()).filter(Boolean) : (data.technicalSkills || []);
+    const extSkills = data.skills ? data.skills : techSkills;
+
+    if (extSkills.length > 0) {
+        doc.rect(RIGHT_X + 20, ry + 2, 8, 8).stroke(YEL).lineWidth(1.5);
+        doc.font('Helvetica-Bold').fontSize(11).fillColor(YEL).text('SKILLS', RIGHT_X + 35, ry);
+        ry += 20;
+
+        doc.font('Helvetica-Bold').fontSize(8).fillColor(WHITE).text('SOFTWARE', RIGHT_X + 20, ry);
+        ry += 15;
+
+        extSkills.slice(0, 5).forEach((sk, i) => {
+            if (ry > PH - 90) return;
+            doc.font('Helvetica').fontSize(8.5).fillColor(LGRAY).text(sk, RIGHT_X + 20, ry);
+            const barX = RIGHT_X + 110;
+            const percentages = [0.95, 0.85, 0.75, 0.65, 0.55];
+            const pct = percentages[i] || 0.6;
+            doc.rect(barX, ry + 3, RIGHT_W - 140, 4).fill('#444444');
+            doc.rect(barX, ry + 3, (RIGHT_W - 140) * pct, 4).fill(YEL);
+            ry += 14;
+        });
+        ry += 10;
+    }
+
+    // Languages
+    const langs = typeof data.languages === 'string' ? data.languages.split(',').map(s => s.trim()).filter(Boolean) : (data.languages || []);
+    if (langs.length > 0 && ry < PH - 140) {
+        doc.font('Helvetica-Bold').fontSize(8).fillColor(WHITE).text('LANGUAGES', RIGHT_X + 20, ry);
+        ry += 15;
+        langs.slice(0, 3).forEach((lang, i) => {
+            if (ry > PH - 100) return;
+            doc.font('Helvetica').fontSize(8.5).fillColor(LGRAY).text(lang, RIGHT_X + 20, ry);
+            const profs = ['Native', 'Professional', 'Limited'];
+            const lvl = profs[i] || 'Limited';
+            doc.font('Helvetica-Bold').fontSize(8.5).fillColor(YEL).text(lvl, RIGHT_X + 110, ry);
+            ry += 14;
+        });
+        ry += 10;
+    }
+
+    // Special Skills
+    const soft = typeof data.softSkills === 'string' ? data.softSkills.split(',').map(s => s.trim()).filter(Boolean) : (data.softSkills || []);
+    if (soft.length > 0 && ry < PH - 140) {
+        doc.rect(RIGHT_X + 20, ry + 2, 8, 8).stroke(YEL).lineWidth(1.5);
+        doc.font('Helvetica-Bold').fontSize(11).fillColor(YEL).text('SPECIAL SKILLS', RIGHT_X + 35, ry);
+        ry += 20;
+
+        soft.slice(0, 5).forEach(sk => {
+            if (ry > PH - 100) return;
+            const txt = '•  ' + sk;
+            doc.font('Helvetica').fontSize(8.5).fillColor(LGRAY);
+            const h = doc.heightOfString(txt, { width: RIGHT_W - 50 });
+            doc.text(txt, RIGHT_X + 20, ry, { width: RIGHT_W - 50 });
+            ry += h + 3;
+        });
+    }
+}
+
+
+// ==================== HIERO CLASSIC (Specific Layout) ====================
+async function renderTemplate_HieroUrban(doc, rawData) {
+    const data = normalizeData(rawData);
+    doc.addPage = function () { return doc; };  // strict single page
+
+    const PW = 595.28;
+    const PH = 841.89;
+
+    const DARK = '#1E293B';      // Deep Slate Blue for dark sections
+    const LIGHT = '#F8FAFC';     // Very Soft Slate for background
+    const WHITE = '#FFFFFF';
+    const GRAY_TEXT = '#475569'; // Slate 600 for body text
+    const BLACK = '#0F172A';     // Darker Slate for headings
+    const ACCENT = '#0284C7';    // Vibrant Sky Blue for highlights
+
+    const LEFT_W = 205;
+    const RIGHT_X = 230;
+    const RIGHT_W = PW - RIGHT_X - 30;
+    const HDR_H = 160;
+
+    // 1. Base background (Light Gray)
+    doc.rect(0, 0, PW, PH).fill(LIGHT);
+
+    // 2. Header Left Dark Box
+    doc.rect(0, 0, LEFT_W, HDR_H).fill(DARK);
+
+    const PI = data.personalInfo || {};
+
+    // ---------------- HEADER ELEMENTS ----------------
+    // Profile Picture
+    const PR = 50;
+    const PCX = LEFT_W / 2;
+    const PCY = HDR_H / 2;
+
+    doc.save();
+    doc.circle(PCX, PCY, PR).clip();
+    let photoDrawn = false;
+    if (PI.profilePhoto) {
+        try {
+            const buf = base64ToBuffer(PI.profilePhoto);
+            if (buf) {
+                doc.image(buf, PCX - PR, PCY - PR, { width: PR * 2, height: PR * 2, cover: [PR * 2, PR * 2] });
+                photoDrawn = true;
+            }
+        } catch (e) { }
+    }
+    if (!photoDrawn) {
+        doc.rect(PCX - PR, PCY - PR, PR * 2, PR * 2).fill('#555555');
+    }
+    doc.restore();
+
+    // Name and Title
+    let ry = 40;
+    const fullName = (PI.fullName || 'YOUR NAME').trim();
+    doc.font('Helvetica-Bold').fontSize(34).fillColor(BLACK).text(fullName.toUpperCase(), RIGHT_X, ry);
+    ry += 40;
+
+    // Title Box
+    const title = PI.jobTitle || 'Professional';
+    doc.rect(RIGHT_X, ry, PW - RIGHT_X - 30, 20).fill(ACCENT);
+    doc.font('Helvetica').fontSize(10).fillColor(WHITE).text(title, RIGHT_X + 10, ry + 6);
+
+    // ---------------- LEFT COLUMN ELEMENTS ----------------
+    let ly = HDR_H + 20;
+
+    // Contact Info
+    const contacts = [
+        { icon: 'p', txt: PI.phone || '' },
+        { icon: 'e', txt: PI.email || '' },
+        { icon: 'w', txt: PI.website || PI.linkedin || '' },
+        { icon: 'a', txt: PI.address || '' }
+    ];
+
+    doc.lineWidth(1);
+    contacts.forEach(c => {
+        if (!c.txt) return;
+        doc.moveTo(25, ly).lineTo(LEFT_W - 25, ly).strokeColor('#CCCCCC').stroke();
+        ly += 10;
+
+        // Use a generic rectangle/polygon as "Icon placeholder" 
+        doc.circle(35, ly + 5, 6).fill(ACCENT);
+        doc.font('Helvetica-Bold').fontSize(8).fillColor(WHITE).text(c.icon.toUpperCase(), 32.5, ly + 1.5, { lineBreak: false });
+
+        doc.font('Helvetica').fontSize(9).fillColor(DARK).text(c.txt, 55, ly + 0.5, { width: 120, lineBreak: false });
+        ly += 15;
+    });
+    // Final contact line
+    doc.moveTo(25, ly).lineTo(LEFT_W - 25, ly).strokeColor('#CCCCCC').stroke();
+    ly += 20;
+
+    // Dark Bottom Box
+    doc.rect(0, ly, LEFT_W, PH - ly).fill(DARK);
+
+    // Education
+    ly += 25;
+    if (data.education && data.education.length > 0) {
+        doc.font('Helvetica-Bold').fontSize(12).fillColor(ACCENT).text('EDUCATION', 25, ly, { characterSpacing: 1.5 });
+        doc.moveTo(25, ly + 16).lineTo(100, ly + 16).strokeColor(ACCENT).stroke();
+        ly += 30;
+
+        data.education.forEach(edu => {
+            if (ly > PH - 40) return;
+            doc.font('Helvetica-Bold').fontSize(9).fillColor(WHITE).text(edu.degree || '', 25, ly);
+            ly += 12;
+            doc.font('Helvetica').fontSize(8).fillColor('#CCCCCC').text(edu.school || '', 25, ly);
+            ly += 11;
+            const dates = edu.gradYear || '';
+            if (dates) {
+                doc.font('Helvetica').fontSize(8).fillColor('#CCCCCC').text(dates, 25, ly);
+                ly += 11;
+            }
+            ly += 8;
+        });
+    }
+
+    // Skills
+    const techSkills = typeof data.technicalSkills === 'string' ? data.technicalSkills.split(',').map(s => s.trim()).filter(Boolean) : (data.technicalSkills || []);
+    const extSkills = data.skills ? data.skills : techSkills;
+
+    if (extSkills.length > 0) {
+        ly += 10;
+        doc.font('Helvetica-Bold').fontSize(12).fillColor(ACCENT).text('SKILLS', 25, ly, { characterSpacing: 1.5 });
+        doc.moveTo(25, ly + 16).lineTo(80, ly + 16).strokeColor(ACCENT).stroke();
+        ly += 30;
+
+        extSkills.slice(0, 5).forEach((sk, i) => {
+            if (ly > PH - 40) return;
+            doc.font('Helvetica').fontSize(8.5).fillColor(WHITE).text(sk, 25, ly);
+            const percentages = [0.95, 0.85, 0.75, 0.65, 0.55];
+            const pct = percentages[i] || 0.6;
+
+            // Outer rectangle
+            doc.rect(95, ly + 2, 75, 5).strokeColor(ACCENT).stroke();
+            // Inner filled
+            doc.rect(95, ly + 2, 75 * pct, 5).fill(ACCENT);
+
+            ly += 16;
+        });
+    }
+
+    // Interests
+    const hobbies = typeof data.hobbies === 'string' ? data.hobbies.split(',').map(s => s.trim()).filter(Boolean) : (data.hobbies || []);
+    if (hobbies.length > 0) {
+        ly += 15;
+        doc.font('Helvetica-Bold').fontSize(12).fillColor(ACCENT).text('INTERESTS', 25, ly, { characterSpacing: 1.5 });
+        doc.moveTo(25, ly + 16).lineTo(100, ly + 16).strokeColor(ACCENT).stroke();
+        ly += 30;
+
+        let col1 = [], col2 = [];
+        hobbies.slice(0, 6).forEach((h, i) => { i % 2 === 0 ? col1.push(h) : col2.push(h); });
+
+        let tempy = ly;
+        col1.forEach(h => {
+            if (tempy > PH - 20) return;
+            doc.font('Helvetica').fontSize(8.5).fillColor('#CCCCCC').text(h, 25, tempy);
+            tempy += 14;
+        });
+        tempy = ly;
+        col2.forEach(h => {
+            if (tempy > PH - 20) return;
+            doc.font('Helvetica').fontSize(8.5).fillColor('#CCCCCC').text(h, 95, tempy);
+            tempy += 14;
+        });
+    }
+
+    // ---------------- RIGHT COLUMN ELEMENTS ----------------
+    ry = HDR_H + 20;
+
+    function renderSectionTitleR(title, y) {
+        doc.font('Helvetica-Bold').fontSize(12).fillColor(BLACK).text(title.toUpperCase(), RIGHT_X, y, { characterSpacing: 1 });
+        doc.moveTo(RIGHT_X, y + 16).lineTo(PW - 30, y + 16).strokeColor(ACCENT).stroke();
+        return y + 30;
+    }
+
+    // Statement
+    if (data.summary) {
+        ry = renderSectionTitleR('STATEMENT', ry);
+        doc.font('Helvetica').fontSize(9).fillColor(GRAY_TEXT);
+        const sh = doc.heightOfString(data.summary, { width: RIGHT_W, lineGap: 2 });
+        doc.text(data.summary, RIGHT_X, ry, { width: RIGHT_W, lineGap: 2 });
+        ry += sh + 25;
+    }
+
+    // Experience
+    const exps = data.experience || [];
+    if (exps.length > 0) {
+        ry = renderSectionTitleR('EXPERIENCE', ry);
+
+        exps.forEach(exp => {
+            if (ry > PH - 80) return;
+            const startD = exp.startDate || '';
+            const endD = exp.endDate || 'Present';
+            const dateStr = `${startD}-${endD}`;
+
+            // Date Box (Right aligned box like in image)
+            const dateW = 60;
+            doc.rect(PW - 30 - dateW, ry, dateW, 14).fill('#E0F2FE');
+            doc.font('Helvetica-Bold').fontSize(7.5).fillColor(ACCENT).text(dateStr.toUpperCase(), PW - 30 - dateW, ry + 3, { width: dateW, align: 'center' });
+
+            // Job Title
+            doc.font('Helvetica-Bold').fontSize(10).fillColor(DARK).text(exp.jobTitle ? exp.jobTitle.toUpperCase() : '', RIGHT_X, ry);
+            ry += 15;
+
+            // Company/Location
+            const loc = exp.location ? `/${exp.location}` : '';
+            doc.font('Helvetica').fontSize(8.5).fillColor(GRAY_TEXT).text(`${exp.company || ''}${loc}`, RIGHT_X, ry);
+            ry += 15;
+
+            // Description
+            if (exp.description) {
+                const lines = exp.description.split('\n').filter(l => l.trim());
+                doc.font('Helvetica').fontSize(8.5).fillColor(GRAY_TEXT);
+                lines.forEach(line => {
+                    if (ry > PH - 30) return;
+                    const clean = line.replace(/^[\*\-•]\s*/, '');
+                    const txt = '• ' + clean;
+                    const h = doc.heightOfString(txt, { width: RIGHT_W, lineGap: 2 });
+                    doc.text(txt, RIGHT_X, ry, { width: RIGHT_W, lineGap: 2 });
+                    ry += h + 2;
+                });
+            }
+            ry += 15;
+        });
+    }
+
+    // References
+    const refs = data.references || [];
+    if (refs.length > 0 && ry < PH - 80) {
+        ry = renderSectionTitleR('REFERENCE', ry);
+
+        // Calculate available width for boxes
+        const spaceW = PW - RIGHT_X - 30; // approx 335
+        const refW = (spaceW - 15) / 2;
+        let rx = RIGHT_X;
+
+        refs.slice(0, 2).forEach((ref, index) => {
+            // Draw Box
+            doc.rect(rx, ry, refW, 60).fillAndStroke('#F1F5F9', '#CBD5E1');
+
+            let tryy = ry + 8;
+            doc.font('Helvetica-Bold').fontSize(9).fillColor(DARK).text(ref.name || 'Reference Name', rx + 10, tryy);
+            tryy += 12;
+            doc.font('Helvetica').fontSize(8).fillColor(GRAY_TEXT).text(ref.title || 'Role', rx + 10, tryy);
+            tryy += 12;
+            if (ref.phone) {
+                doc.font('Helvetica').fontSize(8).fillColor(DARK).text(`T : ${ref.phone}`, rx + 10, tryy);
+                tryy += 10;
+            }
+            if (ref.email) {
+                doc.font('Helvetica').fontSize(8).fillColor(DARK).text(`E : ${ref.email}`, rx + 10, tryy);
+            }
+            rx += refW + 15; // Move X over for next reference
+        });
     }
 }
 

@@ -49,5 +49,23 @@
     "password": "$2a$10$k48afuhMJ8WdKcNgh62.iuc3egnP54NWxwStPNBSZYAGYzlrPQLA.",
     "emailVerified": false,
     "signupMethod": "email"
+  },
+  {
+    "id": 7,
+    "googleId": "103679468073735149667",
+    "email": "aravindaariv0904@gmail.com",
+    "name": "Aravind Aariv",
+    "emailVerified": true,
+    "signupMethod": "google",
+    "picture": "https://lh3.googleusercontent.com/a/ACg8ocJR1LBHwFaw4Hck6lEYp6d8MjfJwlP2mRtLRlOMvjoQ2MDdFCY=s96-c"
+  },
+  {
+    "id": 8,
+    "googleId": "114876158997910682101",
+    "email": "crazzyidea017@gmail.com",
+    "name": "Crazzy idea",
+    "emailVerified": true,
+    "signupMethod": "google",
+    "picture": "https://lh3.googleusercontent.com/a/ACg8ocJ3dRujwhYbCJDx5wVBZlmPGFvNVyAGndfT0RrA0xpwUDJ3Iw=s96-c"
   }
 ]
