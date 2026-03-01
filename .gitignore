@@ -23,6 +23,15 @@ test_*.js
 *.png
 *.jpeg
 *.jpg
+
+# Allow essential branding
+!*logohiero*.png
+!Screenshot*.png
+!WhatsApp*.jpeg
+!favicon*.png
+!favicon.ico
+!test-photo.png
+
 *.backup
 *.backup.*
 !README.md
