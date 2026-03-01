@@ -1,0 +1,24 @@
+Full Stack Developer Position
+
+COMPANY: TechCorp Inc.
+POSITION: Senior Full Stack Developer
+
+REQUIREMENTS:
+• 3+ years of experience in web development
+• Strong proficiency in JavaScript, React, Node.js
+• Experience with MongoDB or other NoSQL databases
+• Knowledge of AWS cloud services
+• Familiarity with Docker and containerization
+• Experience with TypeScript is a plus
+• Understanding of REST APIs and GraphQL
+• Knowledge of testing frameworks (Jest, Cypress)
+
+RESPONSIBILITIES:
+• Design and develop scalable web applications
+• Collaborate with cross-functional teams
+• Implement best practices for code quality
+• Deploy and maintain cloud infrastructure
+• Mentor junior developers
+
+SALARY: $120,000 - $150,000
+LOCATION: San Francisco, CA (Remote possible)

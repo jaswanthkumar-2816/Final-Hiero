@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hiero – AI Career Assistant</title>
+
+  <!-- Meta Tags -->
+  <meta name="description"
+    content="Hiero is an AI-powered career platform that helps you build modern resumes, analyze job descriptions, and learn missing skills with curated projects, videos, and mock interviews.">
+  <meta name="keywords"
+    content="Hiero, AI career assistant, resume builder, resume analysis, job matching, interview preparation, skills learning" />
+  <meta name="robots" content="index, follow" />
+
+  <!-- Site Name SEO for Google -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Hiero",
+    "alternateName": ["Hiero AI", "Hiero App"],
+    "url": "https://hiero.in/"
+  }
+  </script>
+
+  <!-- Open Graph / Brand Branding -->
+  <meta property="og:title" content="Hiero – AI Career Assistant">
+  <meta property="og:description" content="Analyze resumes, match jobs, learn missing skills.">
+  <meta property="og:image" content="https://hiero.in/logohiero.png">
+  <meta property="og:url" content="https://hiero.in/">
+  <meta property="og:site_name" content="Hiero">
+  <meta property="og:type" content="website">
+
+  <!-- Application Name -->
+  <meta name="application-name" content="Hiero">
+  <meta name="apple-mobile-web-app-title" content="Hiero">
+
+  <!-- Favicon & Icons -->
+  <link rel="icon" href="/logohiero.png">
+  <link rel="apple-touch-icon" href="/logohiero.png">
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: #111;
+      color: #fff;
+      min-height: 100vh;
+    }
+
+    /* Splash screen */
+    .splash-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      animation: fadeOut 1s ease-in-out 2.5s forwards;
+      z-index: 9999;
+    }
+
+    .logo-animated {
+      width: 180px;
+      animation: glow 2s infinite alternate;
+    }
+
+    @keyframes glow {
+      from {
+        filter: drop-shadow(0 0 8px #00ff00);
+      }
+
+      to {
+        filter: drop-shadow(0 0 20px #00ff00);
+      }
+    }
+
+    @keyframes fadeOut {
+      to {
+        opacity: 0;
+        visibility: hidden;
+      }
+    }
+
+    .main-container {
+      display: none;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px;
+      text-align: center;
+    }
+
+    .app-title {
+      font-size: 48px;
+      font-weight: 700;
+      margin-bottom: 60px;
+      background: linear-gradient(45deg, #fff, #00ff00);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -1px;
+    }
+
+    .content-section {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 40px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .content-section h2 {
+      font-size: 32px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      background: linear-gradient(45deg, #fff, #00ff00);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .content-section p {
+      font-size: 18px;
+      line-height: 1.6;
+      color: #ccc;
+      margin-bottom: 30px;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      margin-top: 40px;
+    }
+
+    .button-group button {
+      background: #00ff00a7;
+      color: #000;
+      border: none;
+      padding: 14px 32px;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .button-group button:hover {
+      background: #00ff00;
+      transform: scale(1.05);
+    }
+
+    @media (max-width: 768px) {
+      .app-title {
+        font-size: 36px;
+        margin-bottom: 40px;
+      }
+
+      .content-section {
+        padding: 30px 20px;
+      }
+
+      .button-group {
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .button-group button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Splash Screen -->
+  <div class="splash-screen" id="splash-screen">
+    <img src="logohiero.png" alt="Hiero Logo" class="logo-animated" />
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-container" id="main-content">
+    <h1 class="app-title">HIERO</h1>
+    <div class="content-section">
+      <h2>Welcome to Your Career Journey</h2>
+      <p>Build your resume, analyze job descriptions, learn missing skills, and launch your career with AI-powered tools
+        designed to help you succeed.</p>
+      <div class="button-group" style="justify-content: center;">
+        <button style="margin: 0 auto; display: block;" onclick="window.location.href='dashboard.html'">Get
+          Started</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Splash screen logic
+    window.addEventListener("DOMContentLoaded", () => {
+      setTimeout(() => {
+        document.getElementById("splash-screen").style.display = "none";
+        document.getElementById("main-content").style.display = "block";
+      }, 3000);
+    });
+  </script>
+</body>
+
+</html>

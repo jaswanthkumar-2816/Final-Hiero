@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hiero Frontend</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#1D4ED8',
+            secondary: '#6B7280',
+          },
+        },
+      },
+    }
+  </script>
+</head>
+<body class="bg-gray-100 font-sans">
+  <div id="root" class="min-h-screen"></div>
+
+  <!-- CDN Dependencies -->
+  <script src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.6.2/dist/axios.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-router-dom@6.22.0/dist/umd/react-router-dom.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7.23.6/babel.min.js"></script>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+    const { BrowserRouter, Routes, Route, Link, useNavigate, useLocation } = ReactRouterDOM;
+
+    const basePath = window.location.pathname.startsWith('/auth') ? '/auth' : '';
+
+    // Axios Configuration
+    const api = axios.create({
+      baseURL: '', // use current origin (works on 2816 via gateway or 3000 directly)
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    // Add JWT to requests if available
+    api.interceptors.request.use((config) => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+      return config;
+    });
+
+    // Navigation Component
+    const Navbar = ({ isAuthenticated, setIsAuthenticated }) => {
+      const navigate = useNavigate();
+
+      const handleLogout = () => {
+        localStorage.removeItem('token');
+        setIsAuthenticated(false);
+        navigate('/');
+      };
+
+      return (
+        <nav class="bg-primary text-white p-4">
+          <div class="container mx-auto flex justify-between items-center">
+            <Link to="/" class="text-xl font-bold">Hiero</Link>
+            <div>
+              {isAuthenticated ? (
+                <>
+                  <Link to="/profile" class="mx-2 hover:underline">Profile</Link>
+                  <Link to="/resume" class="mx-2 hover:underline">Resume</Link>
+                  <button onClick={handleLogout} class="mx-2 hover:underline">Logout</button>
+                </>
+              ) : (
+                <>
+                  <Link to="/login" class="mx-2 hover:underline">Login</Link>
+                  <Link to="/signup" class="mx-2 hover:underline">Signup</Link>
+                </>
+              )}
+            </div>
+          </div>
+        </nav>
+      );
+    };
+
+    // Signup Component
+    const Signup = () => {
+      const [formData, setFormData] = useState({ name: '', email: '', password: '' });
+      const [message, setMessage] = useState('');
+      const [loading, setLoading] = useState(false);
+      const navigate = useNavigate();
+
+      const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+      };
+
+      const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setMessage('');
+        
+        try {
+          const res = await api.post('/signup', formData);
+          setMessage('✅ ' + res.data.message);
+          setTimeout(() => navigate('/login'), 3000);
+        } catch (err) {
+          setMessage(`❌ ${err.response?.data?.error || 'Signup failed'}`);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      return (
+        <div className="container mx-auto p-4 max-w-md">
+          <h2 className="text-2xl font-bold mb-4">Create Account</h2>
+          {message && (
+            <div className={`p-3 mb-4 rounded ${message.startsWith('✅') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+              {message}
+            </div>
+          )}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <input
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              placeholder="Full Name"
+              className="w-full p-2 border rounded focus:border-primary focus:outline-none"
+              required
+              disabled={loading}
+            />
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="Email Address"
+              className="w-full p-2 border rounded focus:border-primary focus:outline-none"
+              required
+              disabled={loading}
+            />
+            <input
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="Password"
+              className="w-full p-2 border rounded focus:border-primary focus:outline-none"
+              required
+              disabled={loading}
+              minLength="6"
+            />
+            <button 
+              type="submit" 
+              className="w-full bg-primary text-white p-2 rounded hover:bg-blue-700 disabled:opacity-50"
+              disabled={loading}
+            >
+              {loading ? 'Creating Account...' : 'Create Account'}
+            </button>
+          </form>
+          <div className="mt-6 text-center">
+            <p className="text-gray-600 mb-3">Or signup with:</p>
+            <a 
+              href="http://localhost:2816/auth/google" 
+              className="block bg-red-500 text-white p-2 rounded mt-2 hover:bg-red-600 transition-colors"
+            >
+              Continue with Google
+            </a>
+            <a 
+              href="http://localhost:2816/auth/github" 
+              className="block bg-gray-800 text-white p-2 rounded mt-2 hover:bg-gray-700 transition-colors"
+            >
+              Continue with GitHub
+            </a>
+          </div>
+          <div className="mt-4 text-center">
+            <p className="text-gray-600">
+              Already have an account? <Link to="/login" className="text-primary hover:underline">Sign in</Link>
+            </p>
+          </div>
+        </div>
+      );
+    };
+
+    // Login Component
+    const Login = ({ setIsAuthenticated }) => {
+      const [formData, setFormData] = useState({ email: '', password: '' });
+      const [message, setMessage] = useState('');
+      const [loading, setLoading] = useState(false);
+      const navigate = useNavigate();
+      const location = useLocation();
+
+      useEffect(() => {
+        // Check for verification success
+        const params = new URLSearchParams(location.search);
+        if (params.get('verified') === 'true') {
+          setMessage('✅ Email verified successfully! You can now login.');
+        }
+      }, [location]);
+
+      const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+      };
+
+      const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setMessage('');
+        
+        try {
+          const res = await api.post('/login', formData);
+          localStorage.setItem('token', res.data.token);
+          setIsAuthenticated(true);
+          setMessage('✅ Login successful! Redirecting...');
+          setTimeout(() => navigate('/profile'), 1000);
+        } catch (err) {
+          setMessage(`❌ ${err.response?.data?.error || 'Login failed'}`);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      return (
+        <div className="container mx-auto p-4 max-w-md">
+          <h2 className="text-2xl font-bold mb-4">Login</h2>
+          {message && (
+            <div className={`p-3 mb-4 rounded ${message.startsWith('✅') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+              {message}
+            </div>
+          )}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="Email"
+              className="w-full p-2 border rounded focus:border-primary focus:outline-none"
+              required
+              disabled={loading}
+            />
+            <input
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="Password"
+              className="w-full p-2 border rounded focus:border-primary focus:outline-none"
+              required
+              disabled={loading}
+            />
+            <button 
+              type="submit" 
+              className="w-full bg-primary text-white p-2 rounded hover:bg-blue-700 disabled:opacity-50"
+              disabled={loading}
+            >
+              {loading ? 'Signing in...' : 'Login'}
+            </button>
+          </form>
+          <div className="mt-6 text-center">
+            <p className="text-gray-600 mb-3">Or login with:</p>
+            <a 
+              href="http://localhost:2816/auth/google" 
+              className="block bg-red-500 text-white p-2 rounded mt-2 hover:bg-red-600 transition-colors"
+            >
+              Continue with Google
+            </a>
+            <a 
+              href="http://localhost:2816/auth/github" 
+              className="block bg-gray-800 text-white p-2 rounded mt-2 hover:bg-gray-700 transition-colors"
+            >
+              Continue with GitHub
+            </a>
+          </div>
+          <div className="mt-4 text-center">
+            <p className="text-gray-600">
+              Don't have an account? <Link to="/signup" className="text-primary hover:underline">Sign up</Link>
+            </p>
+          </div>
+        </div>
+      );
+    };
+
+    // Profile Component
+    const Profile = () => {
+      const [profile, setProfile] = useState(null);
+      const [formData, setFormData] = useState({ name: '', bio: '', career: '' });
+      const [profilePic, setProfilePic] = useState(null);
+      const [message, setMessage] = useState('');
+      const [verificationDoc, setVerificationDoc] = useState(null);
+
+      useEffect(() => {
+        const fetchProfile = async () => {
+          try {
+            const res = await api.get('/profile');
+            setProfile(res.data);
+            setFormData({ name: res.data.name, bio: res.data.bio, career: res.data.career });
+          } catch (err) {
+            setMessage('Failed to load profile');
+          }
+        };
+        fetchProfile();
+      }, []);
+
+      const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+      };
+
+      const handleFileChange = (e) => {
+        setProfilePic(e.target.files[0]);
+      };
+
+      const handleVerificationDocChange = (e) => {
+        setVerificationDoc(e.target.files[0]);
+      };
+
+      const handleSubmit = async (e) => {
+        e.preventDefault();
+        const formDataToSend = new FormData();
+        formDataToSend.append('name', formData.name);
+        formDataToSend.append('bio', formData.bio);
+        formDataToSend.append('career', formData.career);
+        if (profilePic) formDataToSend.append('profilePic', profilePic);
+
+        try {
+          await api.post('/profile', formDataToSend, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+          });
+          setMessage('Profile updated successfully');
+          const res = await api.get('/profile');
+          setProfile(res.data);
+        } catch (err) {
+          setMessage(err.response?.data?.error || 'Failed to update profile');
+        }
+      };
+
+      const handleVerifyDocument = async (e) => {
+        e.preventDefault();
+        if (!verificationDoc) {
+          setMessage('Please select a document');
+          return;
+        }
+        const formDataToSend = new FormData();
+        formDataToSend.append('verificationDoc', verificationDoc);
+
+        try {
+          await api.post('/verify-document', formDataToSend, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+          });
+          setMessage('Document submitted for verification');
+          const res = await api.get('/profile');
+          setProfile(res.data);
+        } catch (err) {
+          setMessage(err.response?.data?.error || 'Failed to submit document');
+        }
+      };
+
+      if (!profile) return <div class="container mx-auto p-4">Loading...</div>;
+
+      return (
+        <div class="container mx-auto p-4 max-w-md">
+          <h2 class="text-2xl font-bold mb-4">Profile</h2>
+          {message && <p class="text-red-500 mb-4">{message}</p>}
+          <div class="mb-4">
+            <p><strong>Email:</strong> {profile.email}</p>
+            <p><strong>Email Verified:</strong> {profile.emailVerified ? 'Yes' : 'No'}</p>
+            <p><strong>Account Verified:</strong> {profile.isVerified ? 'Yes' : 'No'}</p>
+            <p><strong>Verification Status:</strong> {profile.verificationStatus}</p>
+            {profile.profilePic && (
+              <img src={`http://localhost:3000${profile.profilePic}`} alt="Profile" class="w-32 h-32 rounded-full mt-2" />
+            )}
+          </div>
+          <form onSubmit={handleSubmit} class="space-y-4">
+            <input
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              placeholder="Name"
+              class="w-full p-2 border rounded"
+            />
+            <textarea
+              name="bio"
+              value={formData.bio}
+              onChange={handleChange}
+              placeholder="Bio"
+              class="w-full p-2 border rounded"
+            ></textarea>
+            <input
+              type="text"
+              name="career"
+              value={formData.career}
+              onChange={handleChange}
+              placeholder="Career"
+              class="w-full p-2 border rounded"
+            />
+            <input
+              type="file"
+              name="profilePic"
+              onChange={handleFileChange}
+              class="w-full p-2 border rounded"
+            />
+            <button type="submit" class="w-full bg-primary text-white p-2 rounded">
+              Update Profile
+            </button>
+          </form>
+          <form onSubmit={handleVerifyDocument} class="mt-4 space-y-4">
+            <input
+              type="file"
+              name="verificationDoc"
+              onChange={handleVerificationDocChange}
+              class="w-full p-2 border rounded"
+            />
+            <button type="submit" class="w-full bg-secondary text-white p-2 rounded">
+              Submit Verification Document
+            </button>
+          </form>
+        </div>
+      );
+    };
+
+    // Resume Component
+    const Resume = () => {
+      const [formData, setFormData] = useState({ title: '', description: '' });
+      const [resume, setResume] = useState(null);
+      const [message, setMessage] = useState('');
+      const [resumeId, setResumeId] = useState(1); // For testing, assumes resume ID 1
+
+      const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+      };
+
+      const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+          const res = await api.post('/resume', formData);
+          setMessage('Resume saved successfully');
+          setResumeId(res.data.resumeId);
+          fetchResume(res.data.resumeId);
+        } catch (err) {
+          setMessage(err.response?.data?.error || 'Failed to save resume');
+        }
+      };
+
+      const fetchResume = async (id) => {
+        try {
+          const res = await api.get(`/resume/${id}`);
+          setResume(res.data);
+        } catch (err) {
+          setMessage('Failed to load resume');
+        }
+      };
+
+      useEffect(() => {
+        fetchResume(resumeId);
+      }, []);
+
+      return (
+        <div class="container mx-auto p-4 max-w-md">
+          <h2 class="text-2xl font-bold mb-4">Resume</h2>
+          {message && <p class="text-red-500 mb-4">{message}</p>}
+          <form onSubmit={handleSubmit} class="space-y-4">
+            <input
+              type="text"
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+              placeholder="Resume Title"
+              class="w-full p-2 border rounded"
+              required
+            />
+            <textarea
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              placeholder="Resume Description"
+              class="w-full p-2 border rounded"
+              required
+            ></textarea>
+            <button type="submit" class="w-full bg-primary text-white p-2 rounded">
+              Save Resume
+            </button>
+          </form>
+          {resume && (
+            <div class="mt-4">
+              <h3 class="text-xl font-bold">Saved Resume</h3>
+              <p><strong>Title:</strong> {resume.title}</p>
+              <p><strong>Description:</strong> {resume.description}</p>
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    // Email Verification Component
+    const VerifyEmail = () => {
+      const [message, setMessage] = useState('Verifying email...');
+      const location = useLocation();
+      const navigate = useNavigate();
+
+      useEffect(() => {
+        const verify = async () => {
+          const params = new URLSearchParams(location.search);
+          const token = params.get('token');
+          if (!token) {
+            setMessage('Invalid verification link');
+            return;
+          }
+          try {
+            await api.get(`/verify-email?token=${token}`);
+            setMessage('Email verified successfully! Redirecting to login...');
+            setTimeout(() => navigate('/login'), 2000);
+          } catch (err) {
+            setMessage(err.response?.data?.error || 'Verification failed');
+          }
+        };
+        verify();
+      }, [location, navigate]);
+
+      return (
+        <div class="container mx-auto p-4 max-w-md">
+          <h2 class="text-2xl font-bold mb-4">Email Verification</h2>
+          <p>{message}</p>
+        </div>
+      );
+    };
+
+    // OAuth Callback Handler
+    const OAuthCallback = ({ setIsAuthenticated }) => {
+      const location = useLocation();
+      const navigate = useNavigate();
+
+      useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        const token = params.get('token');
+        const error = params.get('error');
+
+        if (error) {
+          navigate('/login', { state: { message: 'Authentication failed' } });
+        } else if (token) {
+          localStorage.setItem('token', token);
+          setIsAuthenticated(true);
+          navigate('/profile');
+        }
+      }, [location, navigate, setIsAuthenticated]);
+
+      return <div class="container mx-auto p-4">Processing...</div>;
+    };
+
+    // Main App Component
+    const App = () => {
+      const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('token'));
+      const location = useLocation();
+
+      useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        const error = params.get('error');
+        if (error) {
+          alert('Authentication failed');
+        }
+      }, [location]);
+
+      return (
+        <div class="min-h-screen">
+          <Navbar isAuthenticated={isAuthenticated} setIsAuthenticated={setIsAuthenticated} />
+          <Routes>
+            <Route path="/" element={<div class="container mx-auto p-4"><h2 class="text-2xl">Welcome to Hiero</h2></div>} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/login" element={<Login setIsAuthenticated={setIsAuthenticated} />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/resume" element={<Resume />} />
+            <Route path="/verify-email" element={<VerifyEmail />} />
+            <Route path="/auth/callback" element={<OAuthCallback setIsAuthenticated={setIsAuthenticated} />} />
+          </Routes>
+        </div>
+      );
+    };
+
+    // Render the App
+    ReactDOM.render(
+      <BrowserRouter basename={basePath}>
+        <App />
+      </BrowserRouter>,
+      document.getElementById('root')
+    );
+  </script>
+</body>
+</html>

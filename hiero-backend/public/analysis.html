@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resume Analysis - Hiero</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'Open Sans', sans-serif;
+      background: linear-gradient(135deg, #030e04 0%, #011104 50%, #09c006 100%);
+      min-height: 100vh;
+      color: #333333;
+      position: relative;
+      overflow-x: hidden;
+    }
+    
+    .logo-fixed {
+      position: fixed;
+      top: 25px;
+      right: 32px;
+      display: flex;
+      align-items: center;
+      z-index: 100;
+      background: rgba(8, 164, 8, 0.805);
+      border-radius: 12px;
+      padding: 6px 16px 6px 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.959), 0 0 15px rgb(17, 173, 17), 0 0 10px rgba(212, 160, 23, 0.3);
+    }
+    
+    .logo-fixed img {
+      height: 38px;
+      width: 38px;
+      min-width: 38px;
+      min-height: 38px;
+      object-fit: contain;
+      filter: drop-shadow(0 0 15px rgba(17, 173, 17, 0.6));
+    }
+    
+    .logo-fixed span {
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      font-size: 1.2rem;
+      margin-left: 6px;
+      color: white;
+    }
+    
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+    
+    .card {
+      background: rgb(3, 3, 3);
+      border-radius: 15px;
+      border: 1px solid rgba(241, 246, 241, 0.955);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1), 0 0 15px rgb(17, 173, 17), 0 0 10px rgba(212, 160, 23, 0.3);
+      padding: 40px;
+      max-width: 600px;
+      width: 100%;
+      animation: slideUp 0.6s ease-out;
+    }
+    
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    h1 {
+      font-family: 'Lora', serif;
+      font-size: 2rem;
+      color: #169f04;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+    
+    .subtitle {
+      font-size: 0.95rem;
+      color: #09c006;
+      text-align: center;
+      margin-bottom: 30px;
+      opacity: 0.9;
+    }
+    
+    .form-group {
+      margin-bottom: 25px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #2ae023;
+      font-size: 0.95rem;
+    }
+    
+    .file-input-wrapper {
+      position: relative;
+      display: inline-block;
+      width: 100%;
+    }
+    
+    .file-input-label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 20px;
+      border: 2px dashed rgba(42, 224, 35, 0.5);
+      border-radius: 10px;
+      background: rgba(42, 224, 35, 0.05);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      color: #2ae023;
+      font-weight: 500;
+    }
+    
+    .file-input-label:hover {
+      border-color: #2ae023;
+      background: rgba(42, 224, 35, 0.1);
+    }
+    
+    input[type="file"] {
+      display: none;
+    }
+    
+    .file-name {
+      font-size: 0.9rem;
+      color: #08c108;
+      margin-top: 8px;
+      padding: 8px;
+      background: rgba(8, 193, 8, 0.1);
+      border-radius: 5px;
+      border-left: 3px solid #08c108;
+    }
+    
+    textarea {
+      width: 100%;
+      padding: 15px;
+      border: 2px solid rgba(42, 224, 35, 0.3);
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.3);
+      color: #fff;
+      font-family: 'Open Sans', sans-serif;
+      font-size: 0.95rem;
+      resize: vertical;
+      min-height: 120px;
+      transition: border-color 0.3s ease;
+    }
+    
+    textarea:focus {
+      outline: none;
+      border-color: #2ae023;
+      box-shadow: 0 0 10px rgba(42, 224, 35, 0.2);
+    }
+    
+    textarea::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+    
+    .button-group {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      margin-top: 30px;
+      flex-wrap: wrap;
+    }
+    
+    .btn {
+      padding: 14px 32px;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #2ae023, #169f04);
+      color: white;
+      box-shadow: 0 2px 10px rgba(42, 224, 35, 0.3);
+      flex: 1;
+      min-width: 150px;
+    }
+    
+    .btn-primary:hover:not(:disabled) {
+      background: linear-gradient(135deg, #169f04, #0d6b00);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px rgba(42, 224, 35, 0.5);
+    }
+    
+    .btn-secondary {
+      background: transparent;
+      color: #2ae023;
+      border: 2px solid #2ae023;
+      flex: 1;
+      min-width: 150px;
+    }
+    
+    .btn-secondary:hover {
+      background: rgba(42, 224, 35, 0.1);
+      transform: translateY(-2px);
+    }
+    
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    
+    .loading-spinner {
+      display: inline-block;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    
+    .error-message {
+      background: rgba(220, 53, 69, 0.9);
+      color: white;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      border-left: 4px solid #ff6b6b;
+      display: none;
+      animation: slideDown 0.3s ease;
+    }
+    
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .success-message {
+      background: rgba(75, 192, 75, 0.9);
+      color: white;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      border-left: 4px solid #4bc74b;
+      display: none;
+      animation: slideDown 0.3s ease;
+    }
+    
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 25px;
+      border-bottom: 2px solid rgba(42, 224, 35, 0.2);
+    }
+    
+    .tab-btn {
+      padding: 10px 20px;
+      background: transparent;
+      border: none;
+      color: #2ae023;
+      font-weight: 600;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: all 0.3s ease;
+      position: relative;
+      bottom: -2px;
+    }
+    
+    .tab-btn.active {
+      border-color: #2ae023;
+      color: #fff;
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="logo-fixed">
+    <img src="logohiero.png" alt="Hiero Logo">
+    <span>HIERO</span>
+  </div>
+  
+  <div class="container">
+    <div class="card">
+      <h1><i class="fas fa-chart-line"></i> Resume Analysis</h1>
+      <p class="subtitle">Get AI-powered insights on your resume against job descriptions</p>
+      
+      <div class="error-message" id="errorMessage"></div>
+      <div class="success-message" id="successMessage"></div>
+      
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="file-upload">Upload PDF</button>
+        <button class="tab-btn" data-tab="text-input">Paste Text</button>
+      </div>
+      
+      <form id="analysisForm">
+        <!-- File Upload Tab -->
+        <div class="tab-content active" id="file-upload">
+          <div class="form-group">
+            <label for="jdFile"><i class="fas fa-briefcase"></i> Job Description (PDF)</label>
+            <div class="file-input-wrapper">
+              <label for="jdFile" class="file-input-label">
+                <i class="fas fa-cloud-upload-alt"></i>
+                Click to upload or drag & drop
+              </label>
+              <input type="file" id="jdFile" accept=".pdf" data-label="jdFileLabel">
+            </div>
+            <div class="file-name" id="jdFileLabel" style="display: none;"></div>
+          </div>
+          
+          <div class="form-group">
+            <label for="resumeFile"><i class="fas fa-file-alt"></i> Your Resume (PDF)</label>
+            <div class="file-input-wrapper">
+              <label for="resumeFile" class="file-input-label">
+                <i class="fas fa-cloud-upload-alt"></i>
+                Click to upload or drag & drop
+              </label>
+              <input type="file" id="resumeFile" accept=".pdf" data-label="resumeFileLabel">
+            </div>
+            <div class="file-name" id="resumeFileLabel" style="display: none;"></div>
+          </div>
+        </div>
+        
+        <!-- Text Input Tab -->
+        <div class="tab-content" id="text-input">
+          <div class="form-group">
+            <label for="jdText"><i class="fas fa-briefcase"></i> Job Description (Text)</label>
+            <textarea id="jdText" placeholder="Paste the job description here..."></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label for="resumeText"><i class="fas fa-file-alt"></i> Your Resume (Text)</label>
+            <textarea id="resumeText" placeholder="Paste your resume content here..."></textarea>
+          </div>
+        </div>
+        
+        <div class="button-group">
+          <button type="button" class="btn btn-secondary" onclick="resetForm()">
+            <i class="fas fa-redo"></i> Reset
+          </button>
+          <button type="submit" class="btn btn-primary" id="analyzeBtn">
+            <i class="fas fa-search"></i> Analyze Resume
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const ANALYSIS_BACKEND_URL = "https://hiero-analysis-part.onrender.com";
+    console.log("🔍 Analysis backend in use:", ANALYSIS_BACKEND_URL);
+    
+    // Tab switching
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const tabName = e.target.dataset.tab;
+        
+        // Update active tab button
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        
+        // Update active tab content
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+        document.getElementById(tabName).classList.add('active');
+      });
+    });
+    
+    // File input handling
+    document.getElementById('jdFile').addEventListener('change', handleFileSelect);
+    document.getElementById('resumeFile').addEventListener('change', handleFileSelect);
+    
+    function handleFileSelect(e) {
+      const input = e.target;
+      const labelId = input.dataset.label;
+      const fileLabel = document.getElementById(labelId);
+      
+      if (input.files.length > 0) {
+        const file = input.files[0];
+        fileLabel.textContent = `✅ ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
+        fileLabel.style.display = 'block';
+      } else {
+        fileLabel.style.display = 'none';
+      }
+    }
+    
+    // Form submission
+    document.getElementById('analysisForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const errorDiv = document.getElementById('errorMessage');
+      const successDiv = document.getElementById('successMessage');
+      const analyzeBtn = document.getElementById('analyzeBtn');
+      
+      // Hide messages
+      errorDiv.style.display = 'none';
+      successDiv.style.display = 'none';
+      
+      const activeTab = document.querySelector('.tab-content.active').id;
+      
+      try {
+        let jdText = '';
+        let resumeText = '';
+        let hasFiles = false;
+        
+        if (activeTab === 'file-upload') {
+          const jdFile = document.getElementById('jdFile').files[0];
+          const resumeFile = document.getElementById('resumeFile').files[0];
+          
+          if (!jdFile || !resumeFile) {
+            showError('Please select both Job Description and Resume PDFs');
+            return;
+          }
+          
+          hasFiles = true;
+          
+          // Show loading state
+          analyzeBtn.disabled = true;
+          analyzeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
+          
+          // Send files
+          const formData = new FormData();
+          formData.append('jd', jdFile);
+          formData.append('resume', resumeFile);
+          
+          const analyzeUrl = ANALYSIS_BACKEND_URL + '/api/analyze';
+          console.log("📤 Sending to backend:", analyzeUrl);
+          
+          const response = await fetch(analyzeUrl, {
+            method: 'POST',
+            body: formData
+          });
+          
+          if (!response.ok) {
+            const error = await response.json();
+            showError(error.error || 'Analysis failed. Please try again.');
+            analyzeBtn.disabled = false;
+            analyzeBtn.innerHTML = '<i class="fas fa-search"></i> Analyze Resume';
+            return;
+          }
+          
+          const result = await response.json();
+          handleAnalysisResult(result);
+          
+        } else {
+          jdText = document.getElementById('jdText').value.trim();
+          resumeText = document.getElementById('resumeText').value.trim();
+          
+          if (!jdText || !resumeText) {
+            showError('Please enter both Job Description and Resume text');
+            return;
+          }
+          
+          // Show loading state
+          analyzeBtn.disabled = true;
+          analyzeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
+          
+          // Send text
+          const analyzeUrl = ANALYSIS_BACKEND_URL + '/api/analyze';
+          console.log("📤 Sending to backend:", analyzeUrl);
+          
+          const response = await fetch(analyzeUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              jdText,
+              resumeText
+            })
+          });
+          
+          if (!response.ok) {
+            const error = await response.json();
+            showError(error.error || 'Analysis failed. Please try again.');
+            analyzeBtn.disabled = false;
+            analyzeBtn.innerHTML = '<i class="fas fa-search"></i> Analyze Resume';
+            return;
+          }
+          
+          const result = await response.json();
+          handleAnalysisResult(result);
+        }
+        
+      } catch (error) {
+        console.error('Analysis error:', error);
+        showError(error.message || 'An error occurred during analysis. Please try again.');
+        analyzeBtn.disabled = false;
+        analyzeBtn.innerHTML = '<i class="fas fa-search"></i> Analyze Resume';
+      }
+    });
+    
+    function handleAnalysisResult(result) {
+      console.log('📊 Analysis result received:', result);
+      
+      // Transform backend response to match result.html format
+      const transformedResult = {
+        score: result.score || 0,
+        missingSkills: result.missing || [],
+        matchedSkills: result.matched || [],
+        projectSuggestions: generateProjectSuggestions(result),
+        skillToLearnFirst: (result.missing && result.missing[0]) || 'JavaScript',
+        domain: result.domain,
+        jdSkills: result.jdSkills,
+        resumeSkills: result.resumeSkills,
+        extraSkills: result.extraSkills
+      };
+      
+      console.log('✅ Transformed result:', transformedResult);
+      
+      // Save to localStorage
+      localStorage.setItem('analysisResult', JSON.stringify(transformedResult));
+      
+      // Show success message
+      showSuccess(`Analysis complete! Score: ${result.score}%`);
+      
+      // Redirect to results page after 2 seconds
+      setTimeout(() => {
+        window.location.href = 'result.html';
+      }, 2000);
+    }
+    
+    function generateProjectSuggestions(result) {
+      const domain = result.domain || 'it';
+      const projectMap = {
+        'it': [
+          'Build a Web Application with React & Node.js',
+          'Create a REST API with Python Flask',
+          'Deploy a Machine Learning Model'
+        ],
+        'data': [
+          'Build a Data Analysis Dashboard',
+          'Create a Predictive ML Model',
+          'Analyze Large Datasets with Python'
+        ],
+        'default': [
+          'Build a Full-Stack Web Application',
+          'Create a Portfolio Project',
+          'Contribute to Open Source'
+        ]
+      };
+      
+      const projects = projectMap[domain] || projectMap['default'];
+      return projects.slice(0, 3);
+    }
+    
+    function showError(message) {
+      const errorDiv = document.getElementById('errorMessage');
+      errorDiv.textContent = message;
+      errorDiv.style.display = 'block';
+      window.scrollTo(0, 0);
+    }
+    
+    function showSuccess(message) {
+      const successDiv = document.getElementById('successMessage');
+      successDiv.textContent = message;
+      successDiv.style.display = 'block';
+    }
+    
+    function resetForm() {
+      document.getElementById('analysisForm').reset();
+      document.getElementById('jdFileLabel').style.display = 'none';
+      document.getElementById('resumeFileLabel').style.display = 'none';
+      document.getElementById('jdText').value = '';
+      document.getElementById('resumeText').value = '';
+      document.getElementById('errorMessage').style.display = 'none';
+      document.getElementById('successMessage').style.display = 'none';
+    }
+    
+    // Test backend on page load
+    (async () => {
+      try {
+        const response = await fetch(BACKEND_URL + '/api/health');
+        if (response.ok) {
+          console.log('✅ Backend is accessible');
+        } else {
+          console.warn('⚠️ Backend health check returned:', response.status);
+        }
+      } catch (error) {
+        console.error('❌ Backend is not accessible:', error.message);
+      }
+    })();
+  </script>
+</body>
+</html>

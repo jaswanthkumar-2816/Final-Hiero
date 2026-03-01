@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Builder Test - Skip Functionality</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .test-section { 
+            background: #f5f5f5; 
+            padding: 20px; 
+            margin: 20px 0; 
+            border-radius: 8px;
+            border: 2px solid #ddd;
+        }
+        .skip-btn {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        .skip-btn:hover { background: #e55555; }
+        .debug-info {
+            background: #e8f4f8;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Skip Functionality Test</h1>
+    
+    <div class="debug-info">
+        <strong>Debug Information:</strong><br>
+        <div id="debugOutput">Click the buttons below to test skip functionality...</div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test Skip Section Functionality</h2>
+        <p>This will test if skip functionality works properly:</p>
+        
+        <button class="skip-btn" onclick="testSkipSection()">Test Skip Section</button>
+        <button class="skip-btn" onclick="openResumeBuilder()">Open Resume Builder</button>
+        <button class="skip-btn" onclick="testLocalStorage()">Test localStorage</button>
+    </div>
+
+    <iframe id="resumeFrame" src="" width="100%" height="600" style="border: 2px solid #ccc; margin-top: 20px; display: none;"></iframe>
+
+    <script>
+        function log(message) {
+            const output = document.getElementById('debugOutput');
+            output.innerHTML += new Date().toLocaleTimeString() + ': ' + message + '<br>';
+        }
+
+        function testSkipSection() {
+            log('Testing skip functionality...');
+            
+            // Test if we can access the resume builder functions
+            try {
+                // Test basic JavaScript functionality
+                const testEl = document.createElement('div');
+                testEl.id = 'section-test';
+                testEl.className = 'form-section';
+                testEl.innerHTML = '<span class="skip-link">Skip this section</span><div class="form-content">Test content</div>';
+                document.body.appendChild(testEl);
+                
+                // Test toggle function
+                const link = testEl.querySelector('.skip-link');
+                if (link) {
+                    const isSkipped = testEl.classList.toggle('skipped');
+                    link.textContent = isSkipped ? 'Show section' : 'Skip this section';
+                    log('✅ Skip toggle works: ' + (isSkipped ? 'SKIPPED' : 'SHOWN'));
+                    
+                    // Test again to toggle back
+                    setTimeout(() => {
+                        const isSkipped2 = testEl.classList.toggle('skipped');
+                        link.textContent = isSkipped2 ? 'Show section' : 'Skip this section';
+                        log('✅ Toggle back works: ' + (isSkipped2 ? 'SKIPPED' : 'SHOWN'));
+                    }, 1000);
+                } else {
+                    log('❌ Skip link not found');
+                }
+                
+            } catch (error) {
+                log('❌ Error: ' + error.message);
+            }
+        }
+
+        function testLocalStorage() {
+            log('Testing localStorage...');
+            
+            try {
+                // Test localStorage functionality
+                localStorage.setItem('test_skip', 'true');
+                const retrieved = localStorage.getItem('test_skip');
+                log('✅ localStorage works: ' + retrieved);
+                
+                // Clean up
+                localStorage.removeItem('test_skip');
+                log('✅ localStorage cleanup complete');
+                
+            } catch (error) {
+                log('❌ localStorage error: ' + error.message);
+            }
+        }
+
+        function openResumeBuilder() {
+            log('Opening resume builder...');
+            const frame = document.getElementById('resumeFrame');
+            frame.src = 'http://localhost:8082/resume-builder.html';
+            frame.style.display = 'block';
+            
+            // Add event listener to check if frame loads
+            frame.onload = function() {
+                log('✅ Resume builder loaded successfully');
+                
+                // Try to access the frame content (may be blocked by CORS)
+                try {
+                    const frameDoc = frame.contentDocument || frame.contentWindow.document;
+                    if (frameDoc) {
+                        log('✅ Frame content accessible');
+                        
+                        // Look for skip links
+                        const skipLinks = frameDoc.querySelectorAll('.skip-link');
+                        log('Found ' + skipLinks.length + ' skip links');
+                        
+                        if (skipLinks.length > 0) {
+                            log('✅ Skip links found in resume builder');
+                        } else {
+                            log('❌ No skip links found');
+                        }
+                    }
+                } catch (error) {
+                    log('⚠️ Cannot access frame content (CORS): ' + error.message);
+                }
+            };
+            
+            frame.onerror = function() {
+                log('❌ Failed to load resume builder');
+            };
+        }
+
+        // Initial log
+        log('Skip functionality test page loaded');
+        log('Testing environment ready');
+    </script>
+</body>
+</html>

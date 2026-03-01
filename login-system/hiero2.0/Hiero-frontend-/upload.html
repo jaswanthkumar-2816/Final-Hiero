@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hiero - Upload Resume</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="screen">
+    <div class="card">
+      <h2>Upload Resume & Job Description</h2>
+      <p id="upload-error" class="error"></p>
+      <form id="analyze-form">
+        <div id="connection-status" style="display: none; padding: 10px; margin-bottom: 15px; border-radius: 5px;">
+          <span id="status-text"></span>
+        </div>
+        
+        <label for="resume">Resume (PDF)</label>
+        <input type="file" id="resume" accept=".pdf" required>
+        
+        <div style="margin: 20px 0;">
+          <label>Job Description Mode:</label>
+          <div style="margin: 10px 0;">
+            <label><input type="radio" name="jd_mode" value="file" checked> Upload File</label>
+            <label style="margin-left: 20px;"><input type="radio" name="jd_mode" value="text"> Paste Text</label>
+          </div>
+        </div>
+        
+        <div id="jd-file-section">
+          <label for="jd">Job Description (PDF or Text)</label>
+          <input type="file" id="jd" accept=".pdf,.txt">
+        </div>
+        
+        <div id="jd-text-section" style="display: none;">
+          <label for="jd-text">Job Description Text</label>
+          <textarea id="jd-text" rows="10" placeholder="Paste the job description here..."></textarea>
+        </div>
+        
+        <button type="submit" id="analyze-btn" disabled>Analyze</button>
+      </form>
+    </div>
+  </div>
+  <script src="script.js"></script>
+  <script>
+    // Handle JD mode switching
+    document.addEventListener('DOMContentLoaded', () => {
+      const jdModeRadios = document.querySelectorAll('input[name="jd_mode"]');
+      const jdFileSection = document.getElementById('jd-file-section');
+      const jdTextSection = document.getElementById('jd-text-section');
+      
+      jdModeRadios.forEach(radio => {
+        radio.addEventListener('change', () => {
+          if (radio.value === 'file') {
+            jdFileSection.style.display = 'block';
+            jdTextSection.style.display = 'none';
+          } else {
+            jdFileSection.style.display = 'none';
+            jdTextSection.style.display = 'block';
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>

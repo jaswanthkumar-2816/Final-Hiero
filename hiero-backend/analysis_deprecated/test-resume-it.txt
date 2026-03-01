@@ -1,0 +1,5 @@
+Name: Sample Developer
+Summary: Full-stack engineer with 3 years experience building scalable web applications.
+Skills: Python, JavaScript, React, Node.js, REST API development, SQL, Git, Docker, Unit Testing, Data Analysis basics.
+Projects: Built an analytics dashboard, implemented authentication, optimized SQL queries.
+Tools: GitHub Actions, Jest, PostgreSQL, MongoDB (basic), AWS EC2 (basic).

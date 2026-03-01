@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Analysis Connection</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #1a1a1a; color: #fff; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #333; border-radius: 10px; }
+        button { background: #0dff00; color: #000; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin: 5px; }
+        .result { background: #333; padding: 10px; border-radius: 5px; margin-top: 10px; }
+        .error { color: #ff6b6b; }
+        .success { color: #0dff00; }
+        textarea { width: 100%; height: 100px; background: #333; color: #fff; border: 1px solid #555; padding: 10px; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Debug Analysis Connection</h1>
+    
+    <div class="test-section">
+        <h3>1. Test Backend Health</h3>
+        <button onclick="testHealth()">Test Health Endpoint</button>
+        <div id="health-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>2. Test Analysis (JSON)</h3>
+        <button onclick="testAnalysisJSON()">Test with JSON Data</button>
+        <div id="json-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>3. Test Analysis (Form Data)</h3>
+        <textarea id="resume-text" placeholder="Enter resume text...">Software engineer with Python, JavaScript, React experience. Built web applications.</textarea>
+        <textarea id="jd-text" placeholder="Enter job description...">Looking for Python developer with machine learning and data science skills.</textarea>
+        <button onclick="testAnalysisForm()">Test with Form Data</button>
+        <div id="form-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>4. Console Logs</h3>
+        <div id="console-logs" class="result"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5001';
+        
+        function log(message, type = 'info') {
+            console.log(message);
+            const logsDiv = document.getElementById('console-logs');
+            const timestamp = new Date().toLocaleTimeString();
+            logsDiv.innerHTML += `<div class="${type}">[${timestamp}] ${message}</div>`;
+            logsDiv.scrollTop = logsDiv.scrollHeight;
+        }
+        
+        async function testHealth() {
+            const resultDiv = document.getElementById('health-result');
+            try {
+                log('Testing health endpoint...', 'info');
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                resultDiv.innerHTML = `<div class="success">✅ Health OK: ${JSON.stringify(data)}</div>`;
+                log('Health test successful', 'success');
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Health Error: ${error.message}</div>`;
+                log(`Health test failed: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testAnalysisJSON() {
+            const resultDiv = document.getElementById('json-result');
+            try {
+                log('Testing analysis with JSON...', 'info');
+                const response = await fetch(`${API_BASE}/api/analyze-full`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        resumeText: 'Software engineer with Python experience',
+                        jdText: 'Looking for Python developer with ML skills'
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                resultDiv.innerHTML = `<div class="success">✅ Analysis Success!</div>
+                    <pre>Session ID: ${data.sessionId}
+Score: ${data.analysis.score}%
+Missing Skills: ${JSON.stringify(data.analysis.missingSkills)}</pre>`;
+                log('JSON analysis test successful', 'success');
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Analysis Error: ${error.message}</div>`;
+                log(`JSON analysis test failed: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testAnalysisForm() {
+            const resultDiv = document.getElementById('form-result');
+            try {
+                log('Testing analysis with FormData...', 'info');
+                const formData = new FormData();
+                formData.append('resumeText', document.getElementById('resume-text').value);
+                formData.append('jdText', document.getElementById('jd-text').value);
+                
+                const response = await fetch(`${API_BASE}/api/analyze-full`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                resultDiv.innerHTML = `<div class="success">✅ Form Analysis Success!</div>
+                    <pre>Session ID: ${data.sessionId}
+Score: ${data.analysis.score}%
+Missing Skills: ${JSON.stringify(data.analysis.missingSkills)}
+Videos Available: ${Object.keys(data.videosBySkill).length} skills</pre>`;
+                log('Form analysis test successful', 'success');
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Form Analysis Error: ${error.message}</div>`;
+                log(`Form analysis test failed: ${error.message}`, 'error');
+            }
+        }
+        
+        // Auto-test health on load
+        window.addEventListener('load', () => {
+            log('Debug page loaded', 'info');
+            testHealth();
+        });
+    </script>
+</body>
+</html>

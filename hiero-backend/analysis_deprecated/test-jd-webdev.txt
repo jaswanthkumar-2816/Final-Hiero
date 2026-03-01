@@ -1,0 +1,21 @@
+Full Stack Web Developer
+
+Required Skills:
+- JavaScript (ES6+) and TypeScript
+- React.js or Angular frontend framework
+- Node.js backend development
+- HTML5, CSS3, responsive design
+- RESTful API development
+- Git version control
+- Database design (SQL/NoSQL)
+- Web development best practices
+
+Experience Required:
+- 3+ years web development
+- Frontend and backend experience
+- Modern JavaScript frameworks
+- API integration experience
+
+Education:
+- Bachelor's in Computer Science or related field
+- Web development portfolio required

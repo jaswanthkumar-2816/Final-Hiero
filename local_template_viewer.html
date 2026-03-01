@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hiero Resume Templates - Local Preview</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #000000 0%, #0a0a0a 50%, #111111 100%);
+            color: #ffffff;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .title {
+            font-size: 3rem;
+            background: linear-gradient(45deg, #45c604, #7ed321);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: rgba(255,255,255,0.7);
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+        
+        .templates-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .template-card {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(15px);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(69, 198, 4, 0.3);
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .template-card:hover {
+            transform: translateY(-5px);
+            border-color: #45c604;
+            box-shadow: 0 10px 30px rgba(69, 198, 4, 0.2);
+        }
+        
+        .template-name {
+            color: #45c604;
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .template-id {
+            color: rgba(255,255,255,0.6);
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+        
+        .template-description {
+            color: rgba(255,255,255,0.8);
+            line-height: 1.5;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+        }
+        
+        .open-btn {
+            background: linear-gradient(45deg, #45c604, #7ed321);
+            color: #000000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        .open-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(69, 198, 4, 0.4);
+        }
+        
+        .info-box {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(15px);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(69, 198, 4, 0.3);
+            margin-bottom: 30px;
+        }
+        
+        .info-box h3 {
+            color: #45c604;
+            margin-bottom: 15px;
+        }
+        
+        .file-list {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        
+        .file-list ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .file-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(69, 198, 4, 0.2);
+            color: rgba(255,255,255,0.8);
+        }
+        
+        .file-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .filename {
+            color: #45c604;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">Hiero Resume Templates</h1>
+            <p class="subtitle">Local Preview - All 7 Templates with Full Data</p>
+        </div>
+        
+        <div class="info-box">
+            <h3>📋 Sample Profile: Alexandra Johnson</h3>
+            <p><strong>Position:</strong> Senior Full-Stack Developer</p>
+            <p><strong>Experience:</strong> 5+ years in React, Node.js, and cloud technologies</p>
+            <p><strong>Education:</strong> MS Computer Science (Stanford), BS Computer Engineering (UC Berkeley)</p>
+            <p><strong>Data:</strong> Complete professional resume with 2 education entries, 3 work positions, 3 projects, certifications, achievements, skills, and more</p>
+            
+            <div class="file-list">
+                <h4 style="color: #45c604; margin-bottom: 10px;">📁 PDF Files Location:</h4>
+                <ul>
+                    <li><span class="filename">01_Classic_Professional.pdf</span> - Traditional corporate design</li>
+                    <li><span class="filename">02_Modern_Corporate.pdf</span> - Clean two-column layout</li>
+                    <li><span class="filename">03_Creative_Design.pdf</span> - Colorful with design elements</li>
+                    <li><span class="filename">04_ATS_Friendly.pdf</span> - Text-optimized for scanners</li>
+                    <li><span class="filename">05_Student_Fresher.pdf</span> - Project and education focused</li>
+                    <li><span class="filename">06_Executive_Managerial.pdf</span> - Sophisticated senior-level</li>
+                    <li><span class="filename">07_Functional_Skills_Based.pdf</span> - Competency-focused layout</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="templates-grid">
+            <div class="template-card">
+                <div class="template-name">Classic Professional</div>
+                <div class="template-id">ID: professionalcv</div>
+                <div class="template-description">
+                    Clean, minimal design perfect for corporate roles, finance, and consulting. Traditional layout with emphasis on professional experience.
+                </div>
+                <button class="open-btn" onclick="openPDF('01_Classic_Professional.pdf')">
+                    📄 Open Classic Professional PDF
+                </button>
+            </div>
+            
+            <div class="template-card">
+                <div class="template-name">Modern Corporate</div>
+                <div class="template-id">ID: modernsimple</div>
+                <div class="template-description">
+                    Two-column layout with organized sections for mid-level professionals. Modern design with clean typography.
+                </div>
+                <button class="open-btn" onclick="openPDF('02_Modern_Corporate.pdf')">
+                    📄 Open Modern Corporate PDF
+                </button>
+            </div>
+            
+            <div class="template-card">
+                <div class="template-name">Creative Design</div>
+                <div class="template-id">ID: awesomecv</div>
+                <div class="template-description">
+                    Accent colors and icons for marketing, design, and creative industries. Eye-catching design that stands out.
+                </div>
+                <button class="open-btn" onclick="openPDF('03_Creative_Design.pdf')">
+                    📄 Open Creative Design PDF
+                </button>
+            </div>
+            
+            <div class="template-card">
+                <div class="template-name">ATS-Friendly</div>
+                <div class="template-id">ID: altacv</div>
+                <div class="template-description">
+                    Text-only format optimized for ATS scanners and job portals. Maximum compatibility with automated systems.
+                </div>
+                <button class="open-btn" onclick="openPDF('04_ATS_Friendly.pdf')">
+                    📄 Open ATS-Friendly PDF
+                </button>
+            </div>
+            
+            <div class="template-card">
+                <div class="template-name">Student/Fresher</div>
+                <div class="template-id">ID: deedycv</div>
+                <div class="template-description">
+                    Emphasizes projects, education, and skills for early career applicants. Perfect for students and recent graduates.
+                </div>
+                <button class="open-btn" onclick="openPDF('05_Student_Fresher.pdf')">
+                    📄 Open Student/Fresher PDF
+                </button>
+            </div>
+            
+            <div class="template-card">
+                <div class="template-name">Executive/Managerial</div>
+                <div class="template-id">ID: elegant</div>
+                <div class="template-description">
+                    Elegant design for senior roles focusing on leadership and achievements. Sophisticated layout for executives.
+                </div>
+                <button class="open-btn" onclick="openPDF('06_Executive_Managerial.pdf')">
+                    📄 Open Executive/Managerial PDF
+                </button>
+            </div>
+            
+            <div class="template-card">
+                <div class="template-name">Functional (Skills-Based)</div>
+                <div class="template-id">ID: functional</div>
+                <div class="template-description">
+                    Highlights competencies and achievements before chronology. Ideal for role/industry switches.
+                </div>
+                <button class="open-btn" onclick="openPDF('07_Functional_Skills_Based.pdf')">
+                    📄 Open Functional PDF
+                </button>
+            </div>
+        </div>
+        
+        <div style="text-align: center; padding: 20px; color: rgba(255,255,255,0.6);">
+            <p>🎉 All templates generated successfully with comprehensive sample data!</p>
+            <p>Click any button above to open the PDF in your default PDF viewer.</p>
+            <p>Each template showcases the same professional profile with different layouts and styling.</p>
+            <p><strong>Files are located in:</strong> /Users/jaswanthkumar/Desktop/shared folder/resume_previews/</p>
+        </div>
+    </div>
+    
+    <script>
+        function openPDF(filename) {
+            const pdfPath = './resume_previews/' + filename;
+            window.open(pdfPath, '_blank');
+        }
+        
+        // Alternative: Show file path for manual opening
+        function showPath(filename) {
+            const fullPath = '/Users/jaswanthkumar/Desktop/shared folder/resume_previews/' + filename;
+            alert('PDF Location:\\n' + fullPath + '\\n\\nDouble-click the file in Finder to open it.');
+        }
+    </script>
+</body>
+</html>

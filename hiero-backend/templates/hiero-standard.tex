@@ -1,0 +1,134 @@
+% Hiero Standard Resume Template
+% Clean, professional format for all users
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\usepackage{helvet}
+\geometry{margin=1in}
+\usepackage{parskip}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\definecolor{navyblue}{RGB}{0,0,128}
+
+\begin{document}
+
+% Header with Name and Contact Info
+{\color{navyblue}\Huge \textbf{{{FULL_NAME}}}}\\[8pt]
+\large
+\textbf{Email:} {{EMAIL}} $|$ \textbf{Phone:} {{PHONE}}\\
+{{#LINKEDIN}}\textbf{LinkedIn:} \href{{{LINKEDIN}}}{LinkedIn Profile}\\{{/LINKEDIN}}
+{{#WEBSITE}}\textbf{Website:} \href{{{WEBSITE}}}{{{WEBSITE}}}\\{{/WEBSITE}}
+{{#ADDRESS}}\textbf{Address:} {{ADDRESS}}\\{{/ADDRESS}}
+
+\vspace{8pt}
+
+% Career Objective/Summary
+{{#CAREER_OBJECTIVE}}
+\section*{\color{navyblue}Professional Summary}
+{{CAREER_OBJECTIVE}}
+{{/CAREER_OBJECTIVE}}
+
+% Education Section
+{{#EDUCATION}}
+\section*{\color{navyblue}Education}
+{{#EDUCATION_LIST}}
+\textbf{{{DEGREE}}} \\
+{{INSTITUTION}} \hfill {{GRADUATION_YEAR}}{{#GPA}} \\
+GPA: {{GPA}}{{/GPA}}{{#DETAILS}} \\
+{{DETAILS}}{{/DETAILS}}
+
+{{/EDUCATION_LIST}}
+{{/EDUCATION}}
+
+% Experience Section
+{{#EXPERIENCE}}
+\section*{\color{navyblue}Professional Experience}
+{{#EXPERIENCE_LIST}}
+\textbf{{{POSITION}}} \hfill {{DURATION}} \\
+\textit{{{COMPANY}}}{{#LOCATION}} -- {{LOCATION}}{{/LOCATION}}
+{{#RESPONSIBILITIES}}
+\begin{itemize}[leftmargin=*]
+{{#RESP_LIST}}
+\item {{.}}
+{{/RESP_LIST}}
+\end{itemize}
+{{/RESPONSIBILITIES}}
+
+{{/EXPERIENCE_LIST}}
+{{/EXPERIENCE}}
+
+% Projects Section
+{{#PROJECTS}}
+\section*{\color{navyblue}Key Projects}
+{{#PROJECT_LIST}}
+\textbf{{{NAME}}} \hfill {{YEAR}}{{#DURATION}} -- {{DURATION}}{{/DURATION}} \\
+{{DESCRIPTION}}{{#TECHNOLOGIES}} \\
+\textbf{Technologies:} {{TECHNOLOGIES}}{{/TECHNOLOGIES}}{{#LINK}} \\
+\textbf{Link:} \href{{{LINK}}}{Project Repository}{{/LINK}}
+
+{{/PROJECT_LIST}}
+{{/PROJECTS}}
+
+% Skills Section
+{{#SKILLS}}
+\section*{\color{navyblue}Skills}
+{{#TECHNICAL_SKILLS}}\textbf{Technical Skills:} {{TECHNICAL_SKILLS}} \\{{/TECHNICAL_SKILLS}}
+{{#MANAGEMENT_SKILLS}}\textbf{Management Skills:} {{MANAGEMENT_SKILLS}} \\{{/MANAGEMENT_SKILLS}}
+{{#SOFT_SKILLS}}\textbf{Soft Skills:} {{SOFT_SKILLS}} \\{{/SOFT_SKILLS}}
+{{/SKILLS}}
+
+% Certifications Section
+{{#CERTIFICATIONS}}
+\section*{\color{navyblue}Certifications}
+{{#CERT_LIST}}
+\textbf{{{NAME}}} -- {{ISSUER}} \hfill {{YEAR}}{{#DETAILS}} \\
+{{DETAILS}}{{/DETAILS}}
+
+{{/CERT_LIST}}
+{{/CERTIFICATIONS}}
+
+% Achievements Section
+{{#ACHIEVEMENTS}}
+\section*{\color{navyblue}Achievements \& Awards}
+{{#ACHIEVEMENT_LIST}}
+\textbf{{{TITLE}}} \hfill {{YEAR}} \\
+{{DESCRIPTION}}{{#ORGANIZATION}} \\
+\textit{{{ORGANIZATION}}}{{/ORGANIZATION}}
+
+{{/ACHIEVEMENT_LIST}}
+{{/ACHIEVEMENTS}}
+
+% Languages Section
+{{#LANGUAGES}}
+\section*{\color{navyblue}Languages}
+{{LANGUAGES_TEXT}}
+{{/LANGUAGES}}
+
+% Hobbies Section
+{{#HOBBIES}}
+\section*{\color{navyblue}Interests \& Hobbies}
+{{HOBBIES_TEXT}}
+{{/HOBBIES}}
+
+% Personal Details Section
+{{#PERSONAL_DETAILS}}
+\section*{\color{navyblue}Personal Information}
+{{#DOB}}\textbf{Date of Birth:} {{DOB}} \\{{/DOB}}
+{{#GENDER}}\textbf{Gender:} {{GENDER}} \\{{/GENDER}}
+{{#NATIONALITY}}\textbf{Nationality:} {{NATIONALITY}} \\{{/NATIONALITY}}
+{{#ADDRESS}}\textbf{Address:} {{ADDRESS}} \\{{/ADDRESS}}
+{{/PERSONAL_DETAILS}}
+
+% References Section
+{{#REFERENCES}}
+\section*{\color{navyblue}References}
+{{#REF_LIST}}
+\textbf{{{NAME}}} ({{RELATIONSHIP}}) \\
+{{CONTACT}}{{#ORGANIZATION}} -- {{ORGANIZATION}}{{/ORGANIZATION}}
+
+{{/REF_LIST}}
+{{/REFERENCES}}
+
+\end{document}

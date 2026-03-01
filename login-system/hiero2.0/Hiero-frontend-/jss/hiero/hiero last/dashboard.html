@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard | Hiero</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: #111;
+      color: #fff;
+      min-height: 100vh;
+    }
+    .dashboard {
+      display: flex;
+      min-height: 80vh;
+      align-items: stretch;
+      justify-content: center;
+      margin: 0 auto;
+      max-width: 1200px;
+      border-left: 1px solid #222;
+      border-right: 1px solid #222;
+    }
+    .dashboard-section {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 40px 40px 40px;
+      border-right: 1px solid #222;
+      text-align: center;
+      background: rgba(255,255,255,0.02);
+    }
+    .dashboard-section:last-child {
+      border-right: none;
+    }
+    .section-label {
+      display: inline-block;
+      background: #00ff00;
+      color: #111;
+      font-size: 0.95rem;
+      font-weight: 700;
+      border-radius: 20px;
+      padding: 4px 18px;
+      margin-bottom: 18px;
+      letter-spacing: 1px;
+    }
+    .dashboard-section h2 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      margin: 0 0 18px 0;
+      color: #fff;
+      background: none;
+      -webkit-background-clip: initial;
+      background-clip: initial;
+      -webkit-text-fill-color: initial;
+    }
+    .dashboard-section h2 em {
+      font-style: normal;
+      font-weight: 700;
+      color: inherit;
+    }
+    .dashboard-section p {
+      font-size: 1.15rem;
+      color: #ccc;
+      margin-bottom: 36px;
+      line-height: 1.6;
+    }
+    .dashboard-section .login-btn {
+      background: #00ff00;
+      color: #111;
+      border: none;
+      padding: 14px 40px;
+      font-size: 1.1rem;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 32px;
+      transition: background 0.2s, color 0.2s;
+    }
+    .dashboard-section .login-btn:hover {
+      background: #00b140;
+      color: #fff;
+    }
+    .dashboard-section .signup-link {
+      font-size: 1rem;
+      color: #aaa;
+    }
+    .dashboard-section .signup-link a {
+      color: #00ff00;
+      font-weight: 600;
+      text-decoration: none;
+      margin-left: 4px;
+      transition: color 0.2s;
+    }
+    .dashboard-section .signup-link a:hover {
+      color: #00b140;
+    }
+    @media (max-width: 900px) {
+      .dashboard {
+        flex-direction: column;
+        border: none;
+      }
+      .dashboard-section {
+        border-right: none;
+        border-bottom: 1px solid #222;
+        padding: 40px 20px;
+      }
+      .dashboard-section:last-child {
+        border-bottom: none;
+      }
+    }
+    @media (max-width: 600px) {
+      .dashboard-section {
+        padding: 30px 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard">
+    <div class="dashboard-section">
+      <span class="section-label">STUDENT</span>
+      <h2>For <em>Students</em></h2>
+      <p>Build your resume, analyze job descriptions, learn missing skills, and launch your career with AI-powered tools designed to help you succeed.</p>
+      <button class="login-btn" onclick="window.location.href='signup.html?type=student'">Sign up</button>
+      <div class="signup-link">
+        Already have an account?
+        <a href="login.html">Log in</a>.
+      </div>
+    </div>
+    <div class="dashboard-section">
+      <span class="section-label">JOB SEEKER</span>
+      <h2>For <em>Job Seekers</em></h2>
+      <p>Enhance your resume with AI, explore top templates, and improve your job match score. Prepare for interviews and get hired faster.</p>
+      <button class="login-btn" onclick="window.location.href='signup.html?type=job_seeker'">Sign up</button>
+      <div class="signup-link">
+        Already have an account?
+        <a href="login.html">Log in</a>.
+      </div>
+    </div>
+  </div>
+</body>
+</html>

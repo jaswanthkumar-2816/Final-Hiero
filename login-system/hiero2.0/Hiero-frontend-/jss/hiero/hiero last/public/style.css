@@ -1,0 +1,234 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(to right, #000000, #0f0f0f);
+  color: #fff;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.container {
+  background: #181818;
+  padding: 32px 24px;
+  border-radius: 12px;
+  box-shadow: 0 0 24px rgba(0,255,0,0.08);
+  width: 100%;
+  max-width: 480px;
+  min-height: 80vh;
+}
+.step-form {
+  display: none;
+  animation: fadeIn 0.5s;
+}
+
+.step-form.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px);}
+  to { opacity: 1; transform: translateY(0);}
+}form > div {
+  margin-bottom: 18px;
+}
+
+label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+  color: #b0ffb0;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="file"],
+textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #222;
+  border-radius: 6px;
+  background: #232323;
+  color: #fff;
+  font-size: 1rem;
+  margin-bottom: 4px;
+  transition: border 0.2s;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+textarea:focus {
+  border: 1.5px solid #00ff00;
+  outline: none;
+}
+
+textarea {
+  min-height: 60px;
+  resize: vertical;
+}.btn {
+  background: #00ff00;
+  color: #000;
+  padding: 10px 22px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+  margin-top: 10px;
+}
+
+.btn:hover, .btn:focus {
+  background: #00cc00;
+  transform: scale(1.03);
+  outline: none;
+}
+
+.skip-btn {
+  background: transparent;
+  color: #aaa;
+  border: 1px solid #444;
+  margin-left: 10px;
+}
+
+.skip-btn:hover {
+  color: #fff;
+  border-color: #00ff00;
+}.template-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin: 18px 0;
+}
+
+.template-option {
+  border: 2px solid #333;
+  border-radius: 8px;
+  padding: 12px 18px;
+  background: #232323;
+  cursor: pointer;
+  transition: border 0.2s, background 0.2s;
+}
+
+.template-option:hover,
+input[type="radio"]:checked + label {
+  border-color: #00ff00;
+  background: #1a1a1a;
+}
+
+input[type="radio"] {
+  accent-color: #00ff00;
+  margin-right: 8px;
+}.resume-preview {
+  background: #111;
+  border-radius: 8px;
+  padding: 18px;
+  margin: 18px 0;
+  color: #fff;
+  font-family: 'Roboto Mono', monospace;
+  font-size: 0.95rem;
+  overflow-x: auto;
+  max-height: 320px;
+}.status {
+  margin-top: 12px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.98rem;
+  min-height: 24px;
+}
+
+.status-success {
+  background: #0f3;
+  color: #000;
+}
+
+.status-error {
+  background: #f33;
+  color: #fff;
+}
+
+#loading-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.7);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  flex-direction: column;
+}
+
+#loading-overlay.visible {
+  display: flex;
+}
+
+.spinner {
+  border: 4px solid #222;
+  border-top: 4px solid #00ff00;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 12px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg);}
+}@media (max-width: 600px) {
+  .container {
+    padding: 12px 4px;
+    max-width: 98vw;
+  }
+  .resume-preview {
+    font-size: 0.85rem;
+    padding: 8px;
+  }
+  .template-options {
+    flex-direction: column;
+    gap: 10px;
+  }
+}.skip-btn:focus {
+  outline: 2px solid #00ff00;
+}.photo-preview {
+  margin-top: 10px;
+  max-width: 120px;
+  border-radius: 8px;
+  border: 1px solid #333;
+}.step-indicator {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+.step-indicator .step {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #232323;
+  color: #00ff00;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+.step-indicator .step.active {
+  background: #00ff00;
+  color: #000;
+}@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px);}
+  to { opacity: 1; transform: translateY(0);}
+}
+
+form > div {
+  margin-bottom: 18px;
+}
+.logo {
+  width: 80px;
+  display: block;
+  margin: 0 auto 16px auto;
+}

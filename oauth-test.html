@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OAuth Test - Hiero</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #000;
+            color: #fff;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            margin: 10px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+        .google-btn {
+            background: #4285F4;
+            color: white;
+        }
+        .github-btn {
+            background: #333;
+            color: white;
+        }
+        .result {
+            background: #222;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        .token {
+            word-break: break-all;
+            background: #111;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>OAuth Test for Hiero Resume Builder</h1>
+    
+    <div id="auth-section">
+        <h2>Test OAuth Authentication</h2>
+        <a href="http://localhost:3000/auth/google" class="btn google-btn">Test Google OAuth</a>
+        <a href="http://localhost:3000/auth/github" class="btn github-btn">Test GitHub OAuth</a>
+        <button onclick="useTestToken()" class="btn" style="background: #00ff00; color: #000;">Use Test Token</button>
+    </div>
+
+    <div id="result-section" class="result" style="display: none;">
+        <h2>Authentication Result</h2>
+        <div id="token-display"></div>
+        <div id="user-display"></div>
+        <button onclick="testResumeAPI()">Test Resume API with Token</button>
+        <a href="/public/resume-builder.html" class="btn" style="background: #45c604; color: #000; margin: 10px;">Open Resume Builder</a>
+        <div id="api-result"></div>
+    </div>
+
+    <script>
+        // Check if we got a token from OAuth redirect
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token');
+        const userData = urlParams.get('user');
+
+        if (token) {
+            showTokenResult(token, userData);
+        }
+
+        function useTestToken() {
+            const testToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsIm5hbWUiOiJUZXN0IFVzZXIiLCJlbWFpbCI6InRlc3RAZXhhbXBsZS5jb20iLCJwaWN0dXJlIjpudWxsLCJpYXQiOjE3NTg2MDU5MjAsImV4cCI6MTc1OTIxMDcyMH0.VMJpox_dBsRovzHk8dnQ0woJk0wIq_rvBUQ0iKpzDfk';
+            const testUserData = JSON.stringify({
+                userId: 1,
+                name: 'Test User',
+                email: 'test@example.com',
+                picture: null
+            });
+            showTokenResult(testToken, testUserData);
+        }
+
+        function showTokenResult(token, userData) {
+            document.getElementById('auth-section').style.display = 'none';
+            document.getElementById('result-section').style.display = 'block';
+            
+            document.getElementById('token-display').innerHTML = `
+                <h3>JWT Token:</h3>
+                <div class="token">${token}</div>
+            `;
+            
+            if (userData) {
+                try {
+                    const user = typeof userData === 'string' ? JSON.parse(userData) : userData;
+                    document.getElementById('user-display').innerHTML = `
+                        <h3>User Data:</h3>
+                        <pre>${JSON.stringify(user, null, 2)}</pre>
+                    `;
+                } catch (e) {
+                    console.error('Failed to parse user data:', e);
+                }
+            }
+
+            // Store token for API testing
+            localStorage.setItem('jwtToken', token);
+        }
+
+        async function testResumeAPI() {
+            const token = localStorage.getItem('jwtToken') || urlParams.get('token');
+            if (!token) {
+                alert('No token available');
+                return;
+            }
+
+            try {
+                // Test the resume templates endpoint
+                const response = await fetch('http://localhost:5003/api/resume/templates', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+                
+                document.getElementById('api-result').innerHTML = `
+                    <h3>Resume API Test Result:</h3>
+                    <p>Status: ${response.status}</p>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                document.getElementById('api-result').innerHTML = `
+                    <h3>API Test Error:</h3>
+                    <p>${error.message}</p>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

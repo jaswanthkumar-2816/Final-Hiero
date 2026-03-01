@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hiero Dashboard</title>
+  <link rel="stylesheet" href="/dashboard/styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="theme.css">
+  <script src="theme.js"></script>
+  <style>
+    /* User Profile Styles */
+    .user-profile {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 25px;
+      padding: 8px 16px;
+      color: white;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .avatar-initials {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #3a4433 0%, #07e219 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .user-info h3 {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .user-info p {
+      margin: 0;
+      font-size: 12px;
+      opacity: 0.8;
+    }
+
+    .logout-btn {
+      background: rgba(255, 59, 59, 0.8);
+      border: none;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 15px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .logout-btn:hover {
+      background: rgba(255, 59, 59, 1);
+      transform: translateY(-1px);
+    }
+
+    /* Review Section Styles */
+    .review-section {
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 20px 20px 16px;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(7, 226, 25, 0.3);
+      border-radius: 16px;
+      text-align: center;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      max-height: 340px;
+      /* prevent whole frame growing */
+      overflow: hidden;
+      /* contain inner scroll areas */
+    }
+
+    .review-section-inner {
+      max-height: 280px;
+      /* scrollable area inside card */
+      overflow-y: auto;
+      padding-right: 4px;
+      /* space for scrollbar */
+    }
+
+    .review-section h3 {
+      color: #07e219;
+      margin-bottom: 8px;
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .star-rating {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin: 10px 0 14px;
+      font-size: 30px;
+      /* slightly smaller on all */
+    }
+
+    .star {
+      cursor: pointer;
+      color: #666;
+      transition: all 0.3s ease;
+      user-select: none;
+    }
+
+    .star:hover,
+    .star.active {
+      color: #ffd700;
+      text-shadow: 0 0 10px #ffd700;
+      transform: scale(1.2);
+    }
+
+    .review-input {
+      width: 100%;
+      min-height: 80px;
+      max-height: 140px;
+      /* don't let textarea grow too big */
+      padding: 10px 12px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(7, 226, 25, 0.3);
+      border-radius: 10px;
+      color: white;
+      font-family: 'Poppins', sans-serif;
+      font-size: 13px;
+      resize: vertical;
+      margin: 10px 0 6px;
+      overflow-y: auto;
+    }
+
+    .review-input:focus {
+      outline: none;
+      border-color: #07e219;
+      box-shadow: 0 0 15px rgba(7, 226, 25, 0.3);
+    }
+
+    .submit-review-btn {
+      background: linear-gradient(135deg, #07e219 0%, #05a313 100%);
+      color: white;
+      border: none;
+      padding: 10px 26px;
+      border-radius: 25px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(7, 226, 25, 0.3);
+      margin-top: 8px;
+    }
+
+    .submit-review-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(7, 226, 25, 0.5);
+    }
+
+    .submit-review-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .review-status {
+      margin-top: 8px;
+      padding: 8px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .review-status.success {
+      background: rgba(7, 226, 25, 0.2);
+      color: #07e219;
+      border: 1px solid #07e219;
+    }
+
+    .review-status.error {
+      background: rgba(255, 59, 59, 0.2);
+      color: #ff3b3b;
+      border: 1px solid #ff3b3b;
+    }
+
+    .existing-review {
+      margin-top: 10px;
+      padding: 12px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 10px;
+      border: 1px solid rgba(7, 226, 25, 0.2);
+      max-height: 140px;
+      /* scroll only this box if long */
+      overflow-y: auto;
+    }
+
+    .existing-review p {
+      color: white;
+      margin: 6px 0;
+      text-align: left;
+      font-size: 13px;
+    }
+
+    .existing-review strong {
+      color: #07e219;
+    }
+
+    .edit-review-btn {
+      background: rgba(7, 226, 25, 0.2);
+      color: #07e219;
+      border: 1px solid #07e219;
+      padding: 8px 24px;
+      border-radius: 20px;
+      font-size: 14px;
+      cursor: pointer;
+      margin-top: 15px;
+      transition: all 0.3s ease;
+    }
+
+    .edit-review-btn:hover {
+      background: rgba(7, 226, 25, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .admin-link {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 25px;
+      text-decoration: none;
+      font-weight: 600;
+      box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+      transition: all 0.3s ease;
+      display: none;
+    }
+
+    .admin-link:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 107, 107, 0.6);
+    }
+
+    /* Anti-gravity Background */
+    #antigravity-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      pointer-events: none;
+      filter: blur(1px);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .user-profile {
+        position: relative;
+        top: 0;
+        right: 0;
+        margin: 0 auto 20px;
+        width: fit-content;
+      }
+
+      .user-info {
+        display: none;
+      }
+
+      .review-section {
+        margin: 24px 16px;
+        padding: 16px 16px 12px;
+        max-height: 300px;
+      }
+
+      .review-section-inner {
+        max-height: 240px;
+      }
+
+      .star-rating {
+        font-size: 26px;
+        gap: 6px;
+      }
+
+      .review-input {
+        font-size: 12px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="theme-toggle" onclick="toggleTheme()" title="Toggle Light/Dark Mode">
+    <i class="fas fa-sun"></i>
+  </div>
+  <canvas id="antigravity-bg"></canvas>
+  <div class="dashboard-wrapper">
+
+    <!-- User Profile Section -->
+    <div class="user-profile" id="userProfile" style="display: none;">
+      <img id="userAvatar" src="" alt="Profile" class="user-avatar" />
+      <div class="user-info">
+        <h3 id="userName">Loading...</h3>
+        <p id="userEmail">Loading...</p>
+      </div>
+      <button id="logoutBtn" class="logout-btn">Logout</button>
+    </div>
+
+    <!-- Logo & Greeting -->
+    <div class="dashboard-header">
+      <img src="/logohiero copy.png" alt="Hiero Logo" class="logo-glow" />
+      <h1> <span class="brand" id="welcomeMessage">Welcome to Hiero</span></h1>
+      <p class="subtext">Your Career Assistant</p>
+    </div>
+
+    <!-- Buttons -->
+    <div class="dashboard-actions">
+      <a href="/resume-builder.html" class="glow-button">Create Resume</a>
+      <a href="/analysis.html" class="glow-button">Analyze Resume</a>
+    </div>
+
+    <!-- Admin Link (only visible to admin users) -->
+    <a href="/admin-dashboard.html" class="admin-link" id="adminLink">
+      🎛️ Admin Dashboard
+    </a>
+
+    <!-- Review Section (appears below user profile) -->
+    <div class="review-section" id="reviewSection" style="display: none;">
+      <h3>⭐ Rate Your Experience</h3>
+      <div class="review-section-inner">
+        <!-- Star Rating -->
+        <div class="star-rating" id="starRating">
+          <span class="star" data-rating="1">★</span>
+          <span class="star" data-rating="2">★</span>
+          <span class="star" data-rating="3">★</span>
+          <span class="star" data-rating="4">★</span>
+          <span class="star" data-rating="5">★</span>
+        </div>
+
+        <!-- Review Input -->
+        <textarea id="reviewText" class="review-input"
+          placeholder="Share your feedback or suggestions for improvement..." maxlength="1000"></textarea>
+        <div style="text-align: right; color: #999; font-size: 12px; margin-top: -4px;">
+          <span id="charCount">0</span>/1000
+        </div>
+
+        <!-- Submit Button -->
+        <button id="submitReviewBtn" class="submit-review-btn">Submit Review</button>
+
+        <!-- Status Message -->
+        <div id="reviewStatus" class="review-status" style="display: none;"></div>
+
+        <!-- Existing Review Display -->
+        <div id="existingReview" class="existing-review" style="display: none;">
+          <p><strong>Your Rating:</strong> <span id="userRatingDisplay"></span></p>
+          <p><strong>Your Review:</strong> <span id="userReviewDisplay"></span></p>
+          <button id="editReviewBtn" class="edit-review-btn">Edit Review</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    let selectedRating = 0;
+    let hasExistingReview = false;
+
+    // ✅ Enhanced authentication and user profile loading
+    async function initializeDashboard() {
+      const params = new URLSearchParams(window.location.search);
+      const tokenFromUrl = params.get("token");
+      const userFromUrl = params.get("user");
+
+      if (tokenFromUrl) {
+        localStorage.setItem("token", tokenFromUrl);
+        // Also save user data from URL if provided
+        if (userFromUrl) {
+          try {
+            const userData = JSON.parse(decodeURIComponent(userFromUrl));
+            localStorage.setItem('user', JSON.stringify(userData));
+          } catch (e) {
+            console.error('Error parsing user data from URL:', e);
+          }
+        }
+        // Clean URL after saving token
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+
+      const token = localStorage.getItem('token');
+
+      if (!token) {
+        window.location.href = '/login';
+        return;
+      }
+
+      // JWT expiry check
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        if (payload.exp && Date.now() > payload.exp * 1000) {
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          window.location.href = '/login';
+          return;
+        }
+      } catch (e) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+        return;
+      }
+
+      // Try to load user from localStorage first (saved from OAuth redirect)
+      const savedUser = localStorage.getItem('user');
+      if (savedUser) {
+        try {
+          const userData = JSON.parse(savedUser);
+          displayUserProfile(userData);
+          await loadUserReview(); // Load existing review
+          await trackLogin(); // Track login
+          await checkAdminAccess(); // Check if user is admin
+          return; // Successfully loaded from localStorage, no need to fetch
+        } catch (e) {
+          console.error('Error parsing saved user data:', e);
+        }
+      }
+
+      // Fetch user profile from backend (fallback if not in localStorage)
+      try {
+        const response = await fetch('/dashboard', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.ok) {
+          const userData = await response.json();
+          displayUserProfile(userData);
+          localStorage.setItem('user', JSON.stringify(userData));
+          await loadUserReview(); // Load existing review
+          await trackLogin(); // Track login
+          await checkAdminAccess(); // Check if user is admin
+        } else {
+          throw new Error('Failed to fetch user data');
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+      }
+    }
+
+    function displayUserProfile(userData) {
+      const userProfile = document.getElementById('userProfile');
+      const userName = document.getElementById('userName');
+      const userEmail = document.getElementById('userEmail');
+      const userAvatar = document.getElementById('userAvatar');
+      const welcomeMessage = document.getElementById('welcomeMessage');
+      const reviewSection = document.getElementById('reviewSection');
+
+      // Show user profile section
+      userProfile.style.display = 'flex';
+      // reviewSection visibility is handled in loadUserReview
+
+      // Update user info
+      userName.textContent = userData.name || 'User';
+      userEmail.textContent = userData.email || '';
+
+      // Set avatar (use profile picture if available, otherwise use initials)
+      if (userData.picture) {
+        userAvatar.src = userData.picture;
+        userAvatar.style.display = 'block';
+      } else {
+        // Create initials avatar
+        const initials = userData.name ? userData.name.split(' ').map(n => n[0]).join('').toUpperCase() : 'U';
+        userAvatar.style.display = 'none';
+        // We'll create a text-based avatar instead
+        const avatarText = document.createElement('div');
+        avatarText.className = 'avatar-initials';
+        avatarText.textContent = initials;
+        userAvatar.parentNode.replaceChild(avatarText, userAvatar);
+      }
+
+      // Personalize welcome message
+      const firstName = userData.name ? userData.name.split(' ')[0] : 'there';
+      welcomeMessage.textContent = `Welcome back, ${firstName}!`;
+    }
+
+    // ⭐ Track user login
+    async function trackLogin() {
+      try {
+        const token = localStorage.getItem('token');
+        await fetch('/api/login-track', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+      } catch (error) {
+        console.error('Error tracking login:', error);
+      }
+    }
+
+    // 🎛️ Check if user has admin access
+    async function checkAdminAccess() {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('/api/admin/check', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.isAdmin) {
+            document.getElementById('adminLink').style.display = 'block';
+          }
+        }
+      } catch (error) {
+        console.error('Error checking admin access:', error);
+      }
+    }
+
+    // ⭐ Load user's existing review
+    async function loadUserReview() {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('/api/review', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        const reviewSection = document.getElementById('reviewSection');
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.hasReview && data.review) {
+            hasExistingReview = true;
+            // User has ALREADY reviewed -> Hide section
+            reviewSection.style.display = 'none';
+          } else {
+            // User has NOT reviewed -> Show section to collect feedback
+            hasExistingReview = false;
+            reviewSection.style.display = 'block';
+          }
+        }
+      } catch (error) {
+        console.error('Error loading review:', error);
+      }
+    }
+
+    // Display existing review
+    function displayExistingReview(review) {
+      const existingReview = document.getElementById('existingReview');
+      const userRatingDisplay = document.getElementById('userRatingDisplay');
+      const userReviewDisplay = document.getElementById('userReviewDisplay');
+      const starRating = document.getElementById('starRating');
+      const reviewText = document.getElementById('reviewText');
+      const submitBtn = document.getElementById('submitReviewBtn');
+
+      // Show existing review
+      existingReview.style.display = 'block';
+
+      // Display rating as stars
+      const stars = '⭐'.repeat(review.rating);
+      userRatingDisplay.textContent = stars + ` (${review.rating}/5)`;
+      userReviewDisplay.textContent = review.reviewText;
+
+      // Disable editing initially
+      starRating.style.pointerEvents = 'none';
+      starRating.style.opacity = '0.5';
+      reviewText.disabled = true;
+      reviewText.style.opacity = '0.5';
+      submitBtn.disabled = true;
+      submitBtn.style.display = 'none';
+    }
+
+    // ⭐ Star rating functionality
+    document.addEventListener('DOMContentLoaded', function () {
+      const stars = document.querySelectorAll('.star');
+      const reviewText = document.getElementById('reviewText');
+      const submitBtn = document.getElementById('submitReviewBtn');
+      const reviewStatus = document.getElementById('reviewStatus');
+      const charCount = document.getElementById('charCount');
+      const editReviewBtn = document.getElementById('editReviewBtn');
+
+      // Star rating interaction
+      stars.forEach(star => {
+        star.addEventListener('click', function () {
+          if (hasExistingReview && reviewText.disabled) return;
+
+          selectedRating = parseInt(this.dataset.rating);
+          updateStars();
+        });
+
+        star.addEventListener('mouseenter', function () {
+          if (hasExistingReview && reviewText.disabled) return;
+
+          const rating = parseInt(this.dataset.rating);
+          highlightStars(rating);
+        });
+      });
+
+      document.getElementById('starRating').addEventListener('mouseleave', function () {
+        updateStars();
+      });
+
+      function updateStars() {
+        stars.forEach((star, index) => {
+          if (index < selectedRating) {
+            star.classList.add('active');
+          } else {
+            star.classList.remove('active');
+          }
+        });
+      }
+
+      function highlightStars(rating) {
+        stars.forEach((star, index) => {
+          if (index < rating) {
+            star.classList.add('active');
+          } else {
+            star.classList.remove('active');
+          }
+        });
+      }
+
+      // Character counter
+      reviewText.addEventListener('input', function () {
+        charCount.textContent = this.value.length;
+      });
+
+      // Edit review button
+      editReviewBtn.addEventListener('click', function () {
+        const starRating = document.getElementById('starRating');
+        const existingReview = document.getElementById('existingReview');
+
+        // Enable editing
+        starRating.style.pointerEvents = 'auto';
+        starRating.style.opacity = '1';
+        reviewText.disabled = false;
+        reviewText.style.opacity = '1';
+        submitBtn.disabled = false;
+        submitBtn.style.display = 'block';
+        submitBtn.textContent = 'Update Review';
+
+        // Hide existing review display
+        existingReview.style.display = 'none';
+      });
+
+      // Submit review
+      submitBtn.addEventListener('click', async function () {
+        if (selectedRating === 0) {
+          showStatus('Please select a rating', 'error');
+          return;
+        }
+
+        if (!reviewText.value.trim()) {
+          showStatus('Please write a review', 'error');
+          return;
+        }
+
+        try {
+          submitBtn.disabled = true;
+          submitBtn.textContent = 'Submitting...';
+
+          const token = localStorage.getItem('token');
+          const response = await fetch('/api/review', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              rating: selectedRating,
+              reviewText: reviewText.value.trim()
+            })
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            showStatus(hasExistingReview ? 'Review updated successfully! 🎉' : 'Thank you for your review! 🎉', 'success');
+            hasExistingReview = true;
+
+            // Reload review after short delay
+            setTimeout(() => {
+              loadUserReview();
+            }, 1500);
+          } else {
+            showStatus(data.error || 'Failed to submit review', 'error');
+            submitBtn.disabled = false;
+            submitBtn.textContent = hasExistingReview ? 'Update Review' : 'Submit Review';
+          }
+        } catch (error) {
+          console.error('Error submitting review:', error);
+          showStatus('Network error. Please try again.', 'error');
+          submitBtn.disabled = false;
+          submitBtn.textContent = hasExistingReview ? 'Update Review' : 'Submit Review';
+        }
+      });
+
+      function showStatus(message, type) {
+        reviewStatus.textContent = message;
+        reviewStatus.className = `review-status ${type}`;
+        reviewStatus.style.display = 'block';
+
+        setTimeout(() => {
+          reviewStatus.style.display = 'none';
+        }, 5000);
+      }
+
+      // Logout functionality
+      const logoutBtn = document.getElementById('logoutBtn');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', async function () {
+          try {
+            const token = localStorage.getItem('token');
+
+            // Call backend logout endpoint
+            await fetch('/logout', {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              }
+            });
+          } catch (error) {
+            console.error('Logout error:', error);
+          } finally {
+            // Clear local storage and redirect
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/login';
+          }
+        });
+      }
+    });
+
+    // Initialize dashboard when page loads
+    window.addEventListener('load', initializeDashboard);
+
+
+
+    // --- Premium Interactive Neural Linking System ---
+    (function () {
+      const canvas = document.getElementById('antigravity-bg');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      let particles = [];
+      const mouse = { x: -1000, y: -1000, radius: 250 };
+
+      window.addEventListener('mousemove', (e) => {
+        mouse.x = e.clientX;
+        mouse.y = e.clientY;
+      });
+
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        initParticles();
+      }
+
+      class Particle {
+        constructor() {
+          this.init();
+        }
+
+        init() {
+          this.x = Math.random() * canvas.width;
+          this.y = Math.random() * canvas.height;
+          this.baseX = this.x;
+          this.baseY = this.y;
+          this.size = Math.random() * 2 + 1;
+          this.baseSize = this.size;
+          this.density = (Math.random() * 30) + 10;
+          this.opacity = Math.random() * 0.4 + 0.2;
+          this.velocity = (Math.random() - 0.5) * 0.5; // Slight drift
+        }
+
+        draw() {
+          const isLight = document.body.classList.contains('light-mode');
+          // Dark Mode: Green (#07e219), Light Mode: Dark Carbon (#444)
+          ctx.fillStyle = isLight ? `rgba(60, 60, 60, ${this.opacity})` : `rgba(7, 226, 25, ${this.opacity})`;
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        update() {
+          // Slow ambient drift
+          this.baseX += this.velocity;
+          this.baseY += this.velocity;
+
+          if (this.baseX > canvas.width) this.baseX = 0;
+          if (this.baseX < 0) this.baseX = canvas.width;
+          if (this.baseY > canvas.height) this.baseY = 0;
+          if (this.baseY < 0) this.baseY = canvas.height;
+
+          let dx = mouse.x - this.x;
+          let dy = mouse.y - this.y;
+          let distance = Math.sqrt(dx * dx + dy * dy);
+
+          if (distance < mouse.radius) {
+            let force = (mouse.radius - distance) / mouse.radius;
+            let dirX = dx / distance;
+            let dirY = dy / distance;
+
+            // Push away logic (anti-gravity)
+            this.x -= dirX * force * this.density;
+            this.y -= dirY * force * this.density;
+
+            // Interaction: Grow near mouse
+            this.size = this.baseSize * (1 + force * 1.5);
+          } else {
+            // Smooth return to base drift position
+            this.x += (this.baseX - this.x) * 0.05;
+            this.y += (this.baseY - this.y) * 0.05;
+            this.size = this.baseSize;
+          }
+        }
+      }
+
+      function initParticles() {
+        particles = [];
+        let count = (canvas.width * canvas.height) / 8000; // Denser linking
+        for (let i = 0; i < count; i++) {
+          particles.push(new Particle());
+        }
+      }
+
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        for (let i = 0; i < particles.length; i++) {
+          particles[i].update();
+          particles[i].draw();
+        }
+
+        connect();
+        requestAnimationFrame(animate);
+      }
+
+      function connect() {
+        const isLight = document.body.classList.contains('light-mode');
+        // Colors for linking
+        const linkBase = isLight ? 'rgba(80, 80, 80, ' : 'rgba(7, 226, 25, ';
+        const linkActive = isLight ? 'rgba(0, 0, 0, ' : 'rgba(180, 255, 180, ';
+
+        for (let a = 0; a < particles.length; a++) {
+          // 1. Link particles to each other
+          for (let b = a + 1; b < particles.length; b++) {
+            let dx = particles[a].x - particles[b].x;
+            let dy = particles[a].y - particles[b].y;
+            let distSq = dx * dx + dy * dy;
+
+            if (distSq < 15000) {
+              let distance = Math.sqrt(distSq);
+              let opacity = 1 - (distance / 122);
+
+              // Interaction: highlight lines near the mouse
+              let mDx = mouse.x - (particles[a].x + particles[b].x) / 2;
+              let mDy = mouse.y - (particles[a].y + particles[b].y) / 2;
+              let mDist = Math.sqrt(mDx * mDx + mDy * mDy);
+
+              ctx.beginPath();
+              if (mDist < 120) {
+                let mForce = 1 - (mDist / 120);
+                // Glow into active color
+                ctx.strokeStyle = `${linkActive}${opacity * (0.3 + mForce * 0.7)})`;
+                ctx.lineWidth = 0.5 + mForce * 2;
+              } else {
+                ctx.strokeStyle = `${linkBase}${opacity * 0.15})`;
+                ctx.lineWidth = 0.5;
+              }
+
+              ctx.moveTo(particles[a].x, particles[a].y);
+              ctx.lineTo(particles[b].x, particles[b].y);
+              ctx.stroke();
+            }
+          }
+
+          // 2. EXTRA: Link CURSOR directly to particles for that "Neural Connection" feel
+          let mDx = mouse.x - particles[a].x;
+          let mDy = mouse.y - particles[a].y;
+          let mDist = Math.sqrt(mDx * mDx + mDy * mDy);
+
+          if (mDist < 180) {
+            let mForce = 1 - (mDist / 180);
+            ctx.strokeStyle = `${linkActive}${mForce * 0.4})`;
+            ctx.lineWidth = mForce * 1.5;
+            ctx.beginPath();
+            ctx.moveTo(mouse.x, mouse.y);
+            ctx.lineTo(particles[a].x, particles[a].y);
+            ctx.stroke();
+          }
+        }
+      }
+
+      window.addEventListener('resize', resize);
+      resize();
+      animate();
+    })();
+  </script>
+</body>
+
+</html>

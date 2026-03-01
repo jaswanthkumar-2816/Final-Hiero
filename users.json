@@ -1,0 +1,80 @@
+[
+  {
+    "id": 1,
+    "name": "Test User",
+    "email": "test@example.com",
+    "password": "$2a$10$MOpr..icHp8o3FQBbbKqwepYoCblA/Wrdzx4fGZUWesGjNqkqQL0a",
+    "emailVerified": true,
+    "signupMethod": "email"
+  },
+  {
+    "id": 2,
+    "googleId": "111669549098836605427",
+    "email": "jaswanthkumarmuthoju@gmail.com",
+    "name": "Jaswanth Kumar",
+    "emailVerified": true,
+    "signupMethod": "google",
+    "picture": "https://lh3.googleusercontent.com/a/ACg8ocL3ajwWFzPTsUQb4QH6Z1DuNGq9Xot5wdUnSI4Q-cRLBDrN94IDSQ=s96-c"
+  },
+  {
+    "id": 3,
+    "name": "Jaswanth kumar",
+    "email": "jas@123",
+    "password": "$2a$10$pQ3pB4.PBLLdERmOE2gEX.BLbL5076L485LG6xLxH281IpWiB9/NS",
+    "emailVerified": false,
+    "signupMethod": "email"
+  },
+  {
+    "id": 4,
+    "googleId": "107912609514858711010",
+    "email": "souvikkhaitan@gmail.com",
+    "name": "Souvik Khaitan",
+    "emailVerified": true,
+    "signupMethod": "google",
+    "picture": "https://lh3.googleusercontent.com/a/ACg8ocKo9GP2ePWPjtnnIzeF9kk0FHgVMO3YP87v7jx7nNxeSPs3hQ=s96-c"
+  },
+  {
+    "id": 5,
+    "googleId": "100023808388688175188",
+    "email": "aayushsharma80359@gmail.com",
+    "name": "AAYUSH SHARMA",
+    "emailVerified": true,
+    "signupMethod": "google",
+    "picture": "https://lh3.googleusercontent.com/a/ACg8ocLQ9Bf3f85XMRjeuQHhSQp0EcO-xas68S1_8Aw4dC76CPvjZFc0=s96-c"
+  },
+  {
+    "id": 6,
+    "name": "Test User",
+    "email": "test@test.com",
+    "password": "$2a$10$k48afuhMJ8WdKcNgh62.iuc3egnP54NWxwStPNBSZYAGYzlrPQLA.",
+    "emailVerified": false,
+    "signupMethod": "email"
+  },
+  {
+    "id": 7,
+    "googleId": "103679468073735149667",
+    "email": "aravindaariv0904@gmail.com",
+    "name": "Aravind Aariv",
+    "emailVerified": true,
+    "signupMethod": "google",
+    "picture": "https://lh3.googleusercontent.com/a/ACg8ocJR1LBHwFaw4Hck6lEYp6d8MjfJwlP2mRtLRlOMvjoQ2MDdFCY=s96-c"
+  },
+  {
+    "id": 8,
+    "googleId": "114876158997910682101",
+    "email": "crazzyidea017@gmail.com",
+    "name": "Crazzy idea",
+    "emailVerified": true,
+    "signupMethod": "google",
+    "picture": "https://lh3.googleusercontent.com/a/ACg8ocJ3dRujwhYbCJDx5wVBZlmPGFvNVyAGndfT0RrA0xpwUDJ3Iw=s96-c"
+  },
+  {
+    "id": 9,
+    "googleId": "101268208284939283465",
+    "email": "chatterjeesaswata5@gmail.com",
+    "name": "Saswata Chatterjee",
+    "emailVerified": true,
+    "signupMethod": "google",
+    "picture": "https://lh3.googleusercontent.com/a/ACg8ocJQ56-ls04RB6vtmL55REDp5wuZBoAj5__l0UpBCfBVCIbWtUga=s96-c"
+  }
+]

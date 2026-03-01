@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frontend Test</title>
+    <style>
+        body { background: #0a0a0a; color: #fff; font-family: Arial, sans-serif; padding: 20px; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #0dff00; border-radius: 10px; }
+        .video-item { color: #0dff00; text-decoration: none; display: block; margin: 5px 0; }
+        .problem-item { background: rgba(13, 255, 0, 0.1); padding: 5px; margin: 3px 0; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Frontend Data Processing Test</h1>
+    
+    <div id="test-results"></div>
+    
+    <script>
+        // Mock analysis data with videos and problems
+        const testData = {
+            score: 50,
+            missingSkills: ["Machine Learning", "Python"],
+            presentSkills: ["Data Analysis", "JavaScript"],
+            projectSuggestions: ["Build ML Model", "Create Dashboard"],
+            videos: {
+                english: [
+                    { title: "Python Tutorial", url: "https://youtube.com/embed/abc", duration: "1:30:00" },
+                    { title: "ML Basics", url: "https://youtube.com/embed/def", duration: "2:00:00" }
+                ],
+                hindi: [
+                    { title: "Python सीखें", url: "https://youtube.com/embed/ghi", duration: "1:45:00" }
+                ]
+            },
+            problems: {
+                easy: ["Basic Syntax", "Variables", "Loops"],
+                medium: ["Functions", "Classes", "File I/O"],
+                hard: ["Decorators", "Generators", "Async Programming"]
+            }
+        };
+
+        function testDataProcessing() {
+            const resultsDiv = document.getElementById('test-results');
+            let html = '';
+
+            // Test basic data
+            html += `<div class="section">
+                <h3>📊 Basic Analysis</h3>
+                <p>Score: ${testData.score}%</p>
+                <p>Missing Skills: ${testData.missingSkills.join(', ')}</p>
+                <p>Present Skills: ${testData.presentSkills.join(', ')}</p>
+            </div>`;
+
+            // Test videos processing
+            html += `<div class="section">
+                <h3>🎥 Videos Processing Test</h3>`;
+            
+            if (testData.videos && Object.keys(testData.videos).length) {
+                html += `<p>✅ Videos found: ${Object.keys(testData.videos).length} languages</p>`;
+                for (const [lang, videoList] of Object.entries(testData.videos)) {
+                    html += `<h4>${lang.toUpperCase()}</h4>`;
+                    if (Array.isArray(videoList)) {
+                        videoList.forEach(video => {
+                            html += `<a href="${video.url}" target="_blank" class="video-item">
+                                ▶️ ${video.title} (${video.duration})
+                            </a>`;
+                        });
+                    }
+                }
+            } else {
+                html += `<p>❌ No videos found</p>`;
+            }
+            html += `</div>`;
+
+            // Test problems processing
+            html += `<div class="section">
+                <h3>🧠 Problems Processing Test</h3>`;
+            
+            if (testData.problems) {
+                const problemLevels = ['easy', 'medium', 'hard'];
+                let problemsFound = false;
+                
+                problemLevels.forEach(level => {
+                    if (testData.problems[level] && Array.isArray(testData.problems[level])) {
+                        problemsFound = true;
+                        html += `<h4>${level.toUpperCase()} (${testData.problems[level].length})</h4>`;
+                        testData.problems[level].forEach(problem => {
+                            html += `<div class="problem-item">${problem}</div>`;
+                        });
+                    }
+                });
+                
+                if (problemsFound) {
+                    html += `<p>✅ Problems processed successfully</p>`;
+                } else {
+                    html += `<p>❌ No problems found in expected format</p>`;
+                }
+            } else {
+                html += `<p>❌ No problems data found</p>`;
+            }
+            html += `</div>`;
+
+            // Storage simulation
+            html += `<div class="section">
+                <h3>💾 Storage Simulation</h3>`;
+            
+            try {
+                localStorage.setItem('testAnalysisResult', JSON.stringify(testData));
+                const retrieved = JSON.parse(localStorage.getItem('testAnalysisResult'));
+                
+                if (retrieved && retrieved.videos && retrieved.problems) {
+                    html += `<p>✅ Data stored and retrieved successfully</p>`;
+                    html += `<p>Videos keys: ${Object.keys(retrieved.videos).join(', ')}</p>`;
+                    html += `<p>Problems keys: ${Object.keys(retrieved.problems).join(', ')}</p>`;
+                } else {
+                    html += `<p>❌ Data storage/retrieval failed</p>`;
+                }
+            } catch (e) {
+                html += `<p>❌ Storage error: ${e.message}</p>`;
+            }
+            html += `</div>`;
+
+            resultsDiv.innerHTML = html;
+        }
+
+        // Run test when page loads
+        window.addEventListener('load', testDataProcessing);
+    </script>
+</body>
+</html>

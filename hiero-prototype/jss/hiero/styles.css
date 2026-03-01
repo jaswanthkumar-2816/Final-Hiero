@@ -1,0 +1,153 @@
+/* Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background-color: #000;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Container */
+.container {
+  background-color: #111;
+  padding: 50px 35px;
+  border-radius: 16px;
+  box-shadow: 0 0 25px rgba(0, 255, 0, 0.15);
+  text-align: center;
+  max-width: 400px;
+  width: 100%;
+}
+
+/* Logo */
+.logo {
+  width: 80px;
+  margin-bottom: 15px;
+  filter: drop-shadow(0 0 10px #00ff00);
+}
+
+/* Title */
+h1 {
+  color: #00ff00;
+  font-size: 1.8rem;
+  margin-bottom: 30px;
+  text-shadow: 0 0 8px #00ff00;
+}
+
+/* Form */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+label {
+  font-size: 0.95rem;
+  text-align: left;
+  margin-bottom: 5px;
+}
+
+input {
+  padding: 12px;
+  background-color: #222;
+  color: #fff;
+  border: 1px solid #333;
+  border-radius: 8px;
+  font-size: 1rem;
+  outline: none;
+}
+
+input:focus {
+  border-color: #00ff00;
+}
+
+/* Buttons */
+.btn {
+  background-color: #00ff00;
+  color: #000;
+  font-weight: 600;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.btn:hover {
+  background-color: #00cc00;
+  transform: scale(1.03);
+}
+
+/* OAuth Section */
+.oauth-buttons {
+  margin-top: 20px;
+}
+
+.oauth-buttons p {
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+}
+
+.oauth-buttons a {
+  display: block;
+  margin-bottom: 10px;
+  padding: 10px;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.google-btn {
+  background-color: #db4437;
+  color: white;
+}
+
+.google-btn:hover {
+  background-color: #c4302b;
+}
+
+.github-btn {
+  background-color: #333;
+  color: white;
+}
+
+.github-btn:hover {
+  background-color: #222;
+}
+
+/* Sign up link */
+.signup-link {
+  font-size: 0.95rem;
+  margin-top: 20px;
+}
+
+.signup-link a {
+  color: #00ff00;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.signup-link a:hover {
+  text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .container {
+    padding: 30px 20px;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+  }
+}

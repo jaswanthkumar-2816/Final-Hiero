@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coming Soon - Hiero</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700;900&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary: #06e506;
+            --primary-glow: rgba(6, 229, 6, 0.4);
+            --bg-dark: #000000;
+            --card-bg: rgba(6, 25, 6, 0.45);
+            --border-glow: rgba(6, 229, 6, 0.15);
+            --text-main: #ffffff;
+            --text-muted: #888888;
+            --transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* 1. Deep Space Aurora & Nebula - More Active Layers */
+        .cosmic-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -3;
+            overflow: hidden;
+            background: #000;
+        }
+
+        .nebula {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.15;
+            animation: nebula-morph 20s infinite alternate ease-in-out;
+        }
+
+        .nebula-1 {
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, var(--primary) 0%, transparent 70%);
+            top: -10%;
+            left: -10%;
+        }
+
+        .nebula-2 {
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, #004d00 0%, transparent 70%);
+            bottom: -10%;
+            right: -10%;
+            animation-delay: -5s;
+        }
+
+        .nebula-3 {
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, var(--primary) 0%, transparent 70%);
+            top: 40%;
+            left: 30%;
+            animation-delay: -10s;
+        }
+
+        @keyframes nebula-morph {
+            0% {
+                transform: translate(0, 0) scale(1);
+                opacity: 0.15;
+            }
+
+            50% {
+                transform: translate(100px, 50px) scale(1.1);
+                opacity: 0.25;
+            }
+
+            100% {
+                transform: translate(-50px, 100px) scale(0.9);
+                opacity: 0.15;
+            }
+        }
+
+        /* 2. Twinkling Starfield */
+        .stars-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.5;
+            animation: twinkle var(--duration) infinite ease-in-out;
+        }
+
+        @keyframes twinkle {
+
+            0%,
+            100% {
+                opacity: 0.3;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+        }
+
+        /* 3. Autonomous Shooting Stars */
+        .shooting-star {
+            position: absolute;
+            width: 150px;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary), transparent);
+            opacity: 0;
+            z-index: -1;
+            pointer-events: none;
+            animation: shoot var(--speed) infinite linear;
+            animation-delay: var(--delay);
+            top: var(--top);
+            left: -150px;
+        }
+
+        @keyframes shoot {
+            0% {
+                transform: translateX(0) rotate(var(--angle));
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 0.8;
+            }
+
+            90% {
+                opacity: 0.8;
+            }
+
+            100% {
+                transform: translateX(120vw) rotate(var(--angle));
+                opacity: 0;
+            }
+        }
+
+        /* 4. Glass Orbs - More active floating */
+        .glass-orb {
+            position: absolute;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), transparent);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            z-index: 1;
+            animation: float-orb 25s infinite alternate ease-in-out;
+            pointer-events: none;
+        }
+
+        .orb-1 {
+            width: 450px;
+            height: 450px;
+            top: -150px;
+            left: 5%;
+        }
+
+        .orb-2 {
+            width: 350px;
+            height: 350px;
+            bottom: -100px;
+            right: 10%;
+            animation-delay: -7s;
+        }
+
+        @keyframes float-orb {
+            0% {
+                transform: translateY(0) rotate(0deg) scale(1);
+            }
+
+            50% {
+                transform: translateY(-50px) rotate(15deg) scale(1.05);
+            }
+
+            100% {
+                transform: translateY(50px) rotate(-10deg) scale(0.95);
+            }
+        }
+
+        /* 5. Autonomous Particle Canvas - Stardust and Plexus */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.8;
+            pointer-events: none;
+        }
+
+        /* Main UI Container */
+        .hero-card {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 80px 40px;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            text-align: center;
+            animation: fadeIn 2s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Status Badge Improvements */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 28px;
+            background: rgba(6, 229, 6, 0.1);
+            border: 1px solid rgba(6, 229, 6, 0.5);
+            border-radius: 100px;
+            color: var(--primary);
+            font-size: 0.85rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            margin-bottom: 40px;
+            box-shadow: 0 0 30px rgba(6, 229, 6, 0.2);
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            background: var(--primary);
+            border-radius: 50%;
+            box-shadow: 0 0 20px var(--primary);
+            animation: pulse-dot 2s infinite ease-in-out;
+        }
+
+        @keyframes pulse-dot {
+
+            0%,
+            100% {
+                opacity: 0.4;
+                transform: scale(0.8);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1.3);
+            }
+        }
+
+        .logo-container {
+            position: relative;
+            width: 180px;
+            height: 180px;
+            margin: 0 auto 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-pulse {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: var(--primary);
+            border-radius: 50%;
+            opacity: 0.25;
+            animation: pulse-ring 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse-ring {
+            0% {
+                transform: scale(0.7);
+                opacity: 0.4;
+            }
+
+            100% {
+                transform: scale(2);
+                opacity: 0;
+            }
+        }
+
+        .main-icon-el {
+            font-size: 100px;
+            filter: drop-shadow(0 0 40px var(--primary-glow));
+            z-index: 2;
+            animation: float-main 6s ease-in-out infinite;
+        }
+
+        @keyframes float-main {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        h1 {
+            font-size: 6rem;
+            font-weight: 950;
+            margin-bottom: 20px;
+            letter-spacing: -4px;
+            line-height: 0.85;
+            background: linear-gradient(135deg, #fff 40%, var(--primary) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+        }
+
+        .tagline {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary);
+            letter-spacing: 10px;
+            margin-bottom: 50px;
+            text-transform: uppercase;
+            opacity: 0.9;
+        }
+
+        .description {
+            font-size: 1.2rem;
+            color: #ccc;
+            line-height: 1.8;
+            margin-bottom: 60px;
+            max-width: 650px;
+            margin-left: auto;
+            margin-right: auto;
+            font-weight: 300;
+        }
+
+        .launching-soon-text {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            display: inline-block;
+            background: rgba(6, 229, 6, 0.15);
+            padding: 16px 45px;
+            border-radius: 14px;
+            border: 1px solid rgba(6, 229, 6, 0.6);
+            box-shadow: 0 0 50px rgba(6, 229, 6, 0.2);
+            animation: highlight-pulse 3s infinite alternate ease-in-out;
+            margin-bottom: 60px;
+        }
+
+        @keyframes highlight-pulse {
+            0% {
+                transform: scale(1);
+                border-color: rgba(6, 229, 6, 0.4);
+                box-shadow: 0 0 30px rgba(6, 229, 6, 0.1);
+            }
+
+            100% {
+                transform: scale(1.05);
+                border-color: var(--primary);
+                box-shadow: 0 0 60px rgba(6, 229, 6, 0.3);
+            }
+        }
+
+        .email-form {
+            display: flex;
+            width: 100%;
+            max-width: 580px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 28px;
+            transition: var(--transition);
+        }
+
+        .email-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 0 30px;
+            color: #fff;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.2rem;
+            outline: none;
+        }
+
+        .cta-btn {
+            background: #fff;
+            color: #000;
+            border: none;
+            padding: 20px 45px;
+            border-radius: 20px;
+            font-weight: 800;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .cta-btn:hover {
+            background: var(--primary);
+            box-shadow: 0 0 40px var(--primary-glow);
+            transform: scale(1.05);
+        }
+
+        .return-btn {
+            margin-top: 40px;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.2rem;
+            opacity: 0.6;
+            transition: 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .return-btn:hover {
+            opacity: 1;
+            transform: translateX(-8px);
+        }
+
+        .footer-tag {
+            margin-top: 70px;
+            font-size: 0.85rem;
+            color: #555;
+            letter-spacing: 5px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 4rem;
+            }
+
+            .tagline {
+                font-size: 1.2rem;
+                letter-spacing: 5px;
+            }
+
+            .email-form {
+                flex-direction: column;
+                gap: 15px;
+                background: transparent;
+                border: none;
+            }
+
+            .email-input {
+                background: rgba(255, 255, 255, 0.05);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                padding: 22px;
+                border-radius: 20px;
+            }
+
+            .cta-btn {
+                width: 100%;
+                padding: 22px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="cosmic-container">
+        <div class="nebula nebula-1"></div>
+        <div class="nebula nebula-2"></div>
+        <div class="nebula nebula-3"></div>
+    </div>
+
+    <div class="stars-container" id="stars-field"></div>
+
+    <div class="shooting-stars-container" id="shooting-stars"></div>
+
+    <div class="glass-orb orb-1"></div>
+    <div class="glass-orb orb-2"></div>
+
+    <canvas id="bg-canvas"></canvas>
+
+    <div class="hero-card">
+        <div class="status-badge">
+            <span class="status-dot"></span>
+            SYSTEM ACCESS: PENDING
+        </div>
+
+        <div class="logo-container">
+            <div class="logo-pulse"></div>
+            <div id="main-icon" class="main-icon-el"></div>
+        </div>
+
+        <h1 id="main-title">Projects Portal</h1>
+        <div class="tagline">Build. Showcase. Dominate.</div>
+
+        <p class="description" id="main-desc">
+            The core engine is powering up. We're finalizing a high-performance workspace designed to amplify your
+            creative output and showcase technical excellence.
+        </p>
+
+        <div class="launch-status">
+            <div class="launching-soon-text">Launching Soon</div>
+        </div>
+
+        <div class="action-container">
+            <form class="email-form"
+                onsubmit="event.preventDefault(); alert('Transmission Received. You are on the early access list.'); this.reset();">
+                <input type="email" placeholder="Connect your email" class="email-input" required>
+                <button type="submit" class="cta-btn">Claim Access</button>
+            </form>
+            <a href="#" class="return-btn" onclick="history.back()">← Return to Base</a>
+        </div>
+
+        <div class="footer-tag">Crafted for builders ⚡</div>
+    </div>
+
+    <script>
+        // 1. Starfield Generation
+        const starsField = document.getElementById('stars-field');
+        for (let i = 0; i < 200; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            const size = Math.random() * 2 + 0.5;
+            star.style.width = size + 'px'; star.style.height = size + 'px';
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * 100 + '%';
+            star.style.setProperty('--duration', Math.random() * 3 + 2 + 's');
+            star.style.animationDelay = Math.random() * 5 + 's';
+            starsField.appendChild(star);
+        }
+
+        // 2. Shooting Stars Generation
+        const shootingStarsContainer = document.getElementById('shooting-stars');
+        function createShootingStar() {
+            const s = document.createElement('div');
+            s.className = 'shooting-star';
+            s.style.setProperty('--top', Math.random() * 100 + '%');
+            s.style.setProperty('--delay', Math.random() * 5 + 's');
+            s.style.setProperty('--speed', Math.random() * 2 + 1 + 's');
+            s.style.setProperty('--angle', (Math.random() * 30 - 15) + 'deg');
+            shootingStarsContainer.appendChild(s);
+            setTimeout(() => s.remove(), 4000);
+        }
+        setInterval(createShootingStar, 2000);
+
+        // 3. Autonomous Particle System (Canvas)
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        const particleCount = 60;
+        const maxDist = 180;
+
+        function initCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = (Math.random() - 0.5) * 0.4;
+                this.vy = (Math.random() - 0.5) * 0.4;
+                this.size = Math.random() * 1.5 + 0.5;
+            }
+            update() {
+                this.x += this.vx; this.y += this.vy;
+                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+            }
+            draw() {
+                ctx.fillStyle = 'rgba(6, 229, 6, 0.4)';
+                ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill();
+            }
+        }
+
+        function createParticles() {
+            particles = [];
+            for (let i = 0; i < particleCount; i++) particles.push(new Particle());
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => { p.update(); p.draw(); });
+
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < maxDist) {
+                        ctx.strokeStyle = `rgba(6, 229, 6, ${0.15 * (1 - dist / maxDist)})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.beginPath(); ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y); ctx.stroke();
+                    }
+                }
+            }
+            requestAnimationFrame(animate);
+        }
+
+        window.addEventListener('resize', () => { initCanvas(); createParticles(); });
+        initCanvas(); createParticles(); animate();
+
+        // 4. Dynamic Content Logic
+        const urlParams = new URLSearchParams(window.location.search);
+        const type = urlParams.get('type') || (window.location.pathname.includes('interview') ? 'interview' : 'project');
+        const titleEl = document.getElementById('main-title');
+        const descEl = document.getElementById('main-desc');
+        const iconEl = document.getElementById('main-icon');
+
+        if (type === 'interview') {
+            titleEl.textContent = 'Voice Interview';
+            descEl.textContent = "Your dedicated AI Interview Coach is undergoing final model training. Real-time conversational intelligence for ultimate career preparation.";
+            iconEl.textContent = '🎙️';
+            document.title = 'Voice AI - Hiero';
+        } else {
+            iconEl.innerHTML = '<img src="logohiero copy.png" style="width: 140px; height: 140px; object-fit: contain;">';
+        }
+
+        // 5. Interactive Tilt (Very subtle)
+        const card = document.querySelector('.hero-card');
+        document.addEventListener('mousemove', (e) => {
+            const x = (window.innerWidth / 2 - e.pageX) / 60;
+            const y = (window.innerHeight / 2 - e.pageY) / 60;
+            card.style.transform = `perspective(1000px) rotateX(${y}deg) rotateY(${x}deg)`;
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,30 @@
+handleOAuthToken();
+// Common Login Handler
+function handleLogin(role) {
+  // Save the role in localStorage
+  localStorage.setItem('role', role);
+
+  // Redirect to the backend authentication endpoint
+  window.location.href = `http://localhost:3000/auth/login?role=${role}`;
+}
+
+// Add event listeners for both buttons
+document.getElementById('student-btn').addEventListener('click', () => {
+  handleLogin('student');
+});
+
+document.getElementById('job-seeker-btn').addEventListener('click', () => {
+  handleLogin('job_seeker');
+});
+
+// Handle OAuth Token (if redirected back with a token)
+function handleOAuthToken() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const token = urlParams.get('token');
+  if (token) {
+    localStorage.setItem('token', token);
+    window.history.replaceState({}, document.title, window.location.pathname);
+    console.log('Token saved:', token);
+  }
+}
+handleOAuthToken();

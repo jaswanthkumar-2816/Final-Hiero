@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hiero Resume Templates - Full Data Preview</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #000000 0%, #0a0a0a 50%, #111111 100%);
+            color: #ffffff;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .title {
+            font-size: 3rem;
+            background: linear-gradient(45deg, #45c604, #7ed321);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: rgba(255,255,255,0.7);
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+        
+        .profile-info {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(15px);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(69, 198, 4, 0.3);
+        }
+        
+        .templates-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .template-card {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(15px);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(69, 198, 4, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .template-card:hover {
+            transform: translateY(-5px);
+            border-color: #45c604;
+            box-shadow: 0 10px 30px rgba(69, 198, 4, 0.2);
+        }
+        
+        .template-name {
+            color: #45c604;
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .template-category {
+            color: rgba(255,255,255,0.6);
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+        
+        .template-description {
+            color: rgba(255,255,255,0.8);
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+        
+        .template-features {
+            margin-bottom: 20px;
+        }
+        
+        .feature-tag {
+            display: inline-block;
+            background: rgba(69, 198, 4, 0.2);
+            color: #45c604;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            margin: 2px;
+        }
+        
+        .download-btn {
+            background: linear-gradient(45deg, #45c604, #7ed321);
+            color: #000000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            width: 100%;
+            text-align: center;
+            box-sizing: border-box;
+        }
+        
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(69, 198, 4, 0.4);
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #45c604;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .data-summary {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(15px);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(69, 198, 4, 0.3);
+            margin-bottom: 30px;
+        }
+        
+        .data-summary h3 {
+            color: #45c604;
+            margin-bottom: 15px;
+        }
+        
+        .data-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .data-item {
+            color: rgba(255,255,255,0.8);
+            padding: 5px 0;
+            border-left: 2px solid #45c604;
+            padding-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">Hiero Resume Templates</h1>
+            <p class="subtitle">Full Data Preview - All 7 Templates Generated</p>
+        </div>
+        
+        <div class="profile-info">
+            <h3 style="color: #45c604; margin-bottom: 15px;">📋 Sample Profile: Alexandra Johnson</h3>
+            <p><strong>Position:</strong> Senior Full-Stack Developer</p>
+            <p><strong>Experience:</strong> 5+ years in React, Node.js, and cloud technologies</p>
+            <p><strong>Education:</strong> MS Computer Science (Stanford), BS Computer Engineering (UC Berkeley)</p>
+            <p><strong>Location:</strong> San Francisco, CA</p>
+        </div>
+        
+        <div class="data-summary">
+            <h3>📊 Comprehensive Resume Data Included</h3>
+            <div class="data-list">
+                <div class="data-item">✅ Complete Contact Information</div>
+                <div class="data-item">✅ Professional Career Objective</div>
+                <div class="data-item">✅ 2 Education Entries (Masters + Bachelors)</div>
+                <div class="data-item">✅ 3 Work Experience Positions</div>
+                <div class="data-item">✅ 3 Technical Projects</div>
+                <div class="data-item">✅ 18+ Technical Skills</div>
+                <div class="data-item">✅ 7+ Management Skills</div>
+                <div class="data-item">✅ 3 Professional Certifications</div>
+                <div class="data-item">✅ 3 Major Achievements</div>
+                <div class="data-item">✅ 4 Languages (Proficiency Levels)</div>
+                <div class="data-item">✅ 8 Personal Hobbies</div>
+                <div class="data-item">✅ Complete Personal Details</div>
+                <div class="data-item">✅ 3 Professional References</div>
+            </div>
+        </div>
+        
+        <div class="templates-grid">
+            <div class="template-card">
+                <div class="template-name">
+                    <span class="status-indicator"></span>Classic Professional
+                </div>
+                <div class="template-category">Professional & Corporate • ID: professionalcv</div>
+                <div class="template-description">
+                    Clean, minimal design perfect for corporate roles, finance, and consulting. Traditional layout with emphasis on professional experience and education.
+                </div>
+                <div class="template-features">
+                    <span class="feature-tag">Corporate</span>
+                    <span class="feature-tag">Finance</span>
+                    <span class="feature-tag">Consulting</span>
+                    <span class="feature-tag">Traditional</span>
+                </div>
+                <a href="http://localhost:5003/api/resume/download?file=Frontend-fast-190a34f9-2a5f-4cc4-9edb-8570ebfc3b32.pdf" 
+                   class="download-btn" target="_blank">
+                    📄 Download Classic Professional PDF
+                </a>
+            </div>
+            
+            <div class="template-card">
+                <div class="template-name">
+                    <span class="status-indicator"></span>Modern Corporate
+                </div>
+                <div class="template-category">Modern & Clean • ID: modernsimple</div>
+                <div class="template-description">
+                    Two-column layout with organized sections for mid-level professionals. Modern design with clean typography and efficient space usage.
+                </div>
+                <div class="template-features">
+                    <span class="feature-tag">Mid-Level</span>
+                    <span class="feature-tag">Tech</span>
+                    <span class="feature-tag">Two-Column</span>
+                    <span class="feature-tag">Modern</span>
+                </div>
+                <a href="http://localhost:5003/api/resume/download?file=Frontend-fast-927bc015-68e6-4ca4-9ebc-292fce5a4950.pdf" 
+                   class="download-btn" target="_blank">
+                    📄 Download Modern Corporate PDF
+                </a>
+            </div>
+            
+            <div class="template-card">
+                <div class="template-name">
+                    <span class="status-indicator"></span>Creative Design
+                </div>
+                <div class="template-category">Creative & Colorful • ID: awesomecv</div>
+                <div class="template-description">
+                    Accent colors and icons for marketing, design, and creative industries. Eye-catching design that stands out from traditional resumes.
+                </div>
+                <div class="template-features">
+                    <span class="feature-tag">Marketing</span>
+                    <span class="feature-tag">Design</span>
+                    <span class="feature-tag">Creative</span>
+                    <span class="feature-tag">Colorful</span>
+                </div>
+                <a href="http://localhost:5003/api/resume/download?file=Frontend-fast-fc4f901a-d200-45a9-8805-b5d8fa391615.pdf" 
+                   class="download-btn" target="_blank">
+                    📄 Download Creative Design PDF
+                </a>
+            </div>
+            
+            <div class="template-card">
+                <div class="template-name">
+                    <span class="status-indicator"></span>ATS-Friendly
+                </div>
+                <div class="template-category">ATS-Optimized • ID: altacv</div>
+                <div class="template-description">
+                    Text-only format optimized for ATS scanners and job portals. Ensures maximum compatibility with automated screening systems.
+                </div>
+                <div class="template-features">
+                    <span class="feature-tag">ATS</span>
+                    <span class="feature-tag">Tech Companies</span>
+                    <span class="feature-tag">Job Portals</span>
+                    <span class="feature-tag">Scannable</span>
+                </div>
+                <a href="http://localhost:5003/api/resume/download?file=Frontend-fast-7662ae00-ac70-452f-8b67-9296a92e8c53.pdf" 
+                   class="download-btn" target="_blank">
+                    📄 Download ATS-Friendly PDF
+                </a>
+            </div>
+            
+            <div class="template-card">
+                <div class="template-name">
+                    <span class="status-indicator"></span>Student/Fresher
+                </div>
+                <div class="template-category">Student & Entry-Level • ID: deedycv</div>
+                <div class="template-description">
+                    Emphasizes projects, education, and skills for early career applicants. Perfect for students and recent graduates.
+                </div>
+                <div class="template-features">
+                    <span class="feature-tag">Students</span>
+                    <span class="feature-tag">Freshers</span>
+                    <span class="feature-tag">Entry-Level</span>
+                    <span class="feature-tag">Projects</span>
+                </div>
+                <a href="http://localhost:5003/api/resume/download?file=Frontend-fast-fd619494-0d3c-4f28-aeed-a54500c26a9c.pdf" 
+                   class="download-btn" target="_blank">
+                    📄 Download Student/Fresher PDF
+                </a>
+            </div>
+            
+            <div class="template-card">
+                <div class="template-name">
+                    <span class="status-indicator"></span>Executive/Managerial
+                </div>
+                <div class="template-category">Executive & Senior • ID: elegant</div>
+                <div class="template-description">
+                    Elegant design for senior roles focusing on leadership and achievements. Sophisticated layout for executive positions.
+                </div>
+                <div class="template-features">
+                    <span class="feature-tag">Executives</span>
+                    <span class="feature-tag">Managers</span>
+                    <span class="feature-tag">Senior Roles</span>
+                    <span class="feature-tag">Leadership</span>
+                </div>
+                <a href="http://localhost:5003/api/resume/download?file=Frontend-fast-01943d44-e42c-4c17-8489-ce32097b6607.pdf" 
+                   class="download-btn" target="_blank">
+                    📄 Download Executive/Managerial PDF
+                </a>
+            </div>
+            
+            <div class="template-card">
+                <div class="template-name">
+                    <span class="status-indicator"></span>Functional (Skills-Based)
+                </div>
+                <div class="template-category">Functional/Skills • ID: functional</div>
+                <div class="template-description">
+                    Highlights competencies and achievements before chronology; ideal for role/industry switches and skills-focused presentation.
+                </div>
+                <div class="template-features">
+                    <span class="feature-tag">Career Switch</span>
+                    <span class="feature-tag">Skills-Based</span>
+                    <span class="feature-tag">Achievements</span>
+                    <span class="feature-tag">Functional</span>
+                </div>
+                <a href="http://localhost:5003/api/resume/download?file=Frontend-fast-1b4630e8-9c6a-4ac8-bd88-31f134a1fd1c.pdf" 
+                   class="download-btn" target="_blank">
+                    📄 Download Functional PDF
+                </a>
+            </div>
+        </div>
+        
+        <div style="text-align: center; padding: 20px; color: rgba(255,255,255,0.6);">
+            <p>🎉 All templates generated successfully with comprehensive sample data!</p>
+            <p>Click any download button above to view the PDF in your browser or download it.</p>
+            <p>Each template showcases the same professional profile with different layouts and styling.</p>
+        </div>
+    </div>
+</body>
+</html>

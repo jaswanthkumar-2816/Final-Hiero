@@ -1,0 +1,21 @@
+Senior Python Developer Position
+
+Required Skills:
+- Python programming (5+ years)
+- Machine Learning frameworks (TensorFlow, PyTorch)
+- Data Analysis and Visualization
+- SQL and database management
+- Statistical analysis
+- Deep learning
+- Natural Language Processing
+- Big Data technologies (Spark, Hadoop)
+
+Experience Required:
+- 5+ years Python development
+- 3+ years Machine Learning experience
+- Data science project portfolio
+- Experience with cloud platforms (AWS, GCP)
+
+Education:
+- MS in Computer Science or related field
+- PhD in AI/ML preferred

@@ -1,0 +1,21 @@
+John Doe
+Software Engineer
+
+EXPERIENCE:
+• 3 years at Google as Frontend Developer
+• Built web applications using React, JavaScript, Node.js
+• Experience with MongoDB, Express.js
+• Worked on large-scale distributed systems
+
+SKILLS:
+Technical: JavaScript, React, Node.js, MongoDB, Express.js, HTML, CSS, Git
+Soft Skills: Team collaboration, Problem solving, Project management
+
+EDUCATION:
+Bachelor of Technology in Computer Science
+XYZ University (2018-2022)
+
+PROJECTS:
+• E-commerce Platform: Built using React, Node.js, MongoDB
+• Chat Application: Real-time messaging with Socket.io
+• Data Visualization Dashboard: React with D3.js

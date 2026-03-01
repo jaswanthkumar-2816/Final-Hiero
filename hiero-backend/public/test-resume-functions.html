@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resume Builder Test - Cache Busted</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #1a1a2e;
+      color: white;
+    }
+    .test-section {
+      background: #16213e;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 10px;
+      border: 2px solid #2ae023;
+    }
+    button {
+      background: linear-gradient(135deg, #2ae023 0%, #06a529 100%);
+      color: white;
+      padding: 15px 30px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      margin: 10px 5px;
+    }
+    button:hover {
+      opacity: 0.9;
+    }
+    .result {
+      margin-top: 15px;
+      padding: 15px;
+      background: rgba(42, 224, 35, 0.1);
+      border-radius: 8px;
+      border-left: 4px solid #2ae023;
+    }
+    .error {
+      background: rgba(239, 68, 68, 0.1);
+      border-left: 4px solid #ef4444;
+      color: #ef4444;
+    }
+    .success {
+      background: rgba(42, 224, 35, 0.1);
+      border-left: 4px solid #2ae023;
+      color: #2ae023;
+    }
+    code {
+      background: #0f0f23;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+    }
+    h2 {
+      color: #2ae023;
+      margin-top: 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔍 Resume Builder - Function Test</h1>
+  <p>This page tests if the <code>getTemplateName</code> function works correctly.</p>
+  <p><strong>Version:</strong> 2024-11-26-v3 (Cache Busted)</p>
+
+  <div class="test-section">
+    <h2>Test 1: Check if Function Exists</h2>
+    <button onclick="testFunctionExists()">Run Test</button>
+    <div id="test1-result"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>Test 2: Test Function with Template IDs</h2>
+    <button onclick="testFunctionCalls()">Run Test</button>
+    <div id="test2-result"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>Test 3: Simulate "No Resume" Button Click</h2>
+    <button onclick="testNoResumeButton()">Simulate Button Click</button>
+    <div id="test3-result"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>Console Output</h2>
+    <p>Open Developer Console (F12) to see detailed logs</p>
+    <button onclick="console.clear()">Clear Console</button>
+  </div>
+
+  <script>
+    // Version: 2024-11-26-v3 - Standalone test file
+    console.log('%c🚀 Test Page Loaded - Version 2024-11-26-v3', 'color: #2ae023; font-size: 16px; font-weight: bold;');
+    
+    let selectedTemplate = 'rishi'; // Default template for testing
+
+    // THE ACTUAL FUNCTION FROM resume-builder.html
+    function getTemplateName(templateId) {
+      const names = {
+        'classic': 'Classic Professional',
+        'minimal': 'Minimal',
+        'modern-pro': 'Modern Professional',
+        'tech-focus': 'Tech Focus',
+        'creative-bold': 'Creative Bold',
+        'portfolio-style': 'Portfolio Style',
+        'ats-optimized': 'ATS Optimized',
+        'corporate-ats': 'Corporate ATS',
+        'elegant-gradient': 'Elegant Gradient',
+        'minimalist-mono': 'Minimalist Mono',
+        'rishi': 'Rishi Tech Modern',
+        'priya': 'Priya Elegant'
+      };
+      return names[templateId] || 'Selected';
+    }
+
+    function proceedToForm() {
+      console.log('🔵 Moving from Step 1 → Step 2');
+      console.log('🔵 Selected template:', selectedTemplate);
+      
+      try {
+        // This is where the error was happening
+        const templateName = getTemplateName(selectedTemplate);
+        console.log('✅ Template name:', templateName);
+        return templateName;
+      } catch (error) {
+        console.error('❌ Error in proceedToForm:', error);
+        throw error;
+      }
+    }
+
+    function proceedToFormWithoutImport() {
+      console.log('🔵 proceedToFormWithoutImport called');
+      try {
+        const result = proceedToForm();
+        console.log('✅ Success! Template name:', result);
+        return result;
+      } catch (error) {
+        console.error('❌ Error in proceedToFormWithoutImport:', error);
+        throw error;
+      }
+    }
+
+    // TEST FUNCTIONS
+    function testFunctionExists() {
+      const resultDiv = document.getElementById('test1-result');
+      console.log('🧪 Test 1: Checking if getTemplateName exists...');
+      
+      const exists = typeof getTemplateName === 'function';
+      
+      if (exists) {
+        resultDiv.innerHTML = `
+          <div class="result success">
+            <strong>✅ PASS</strong><br>
+            Function <code>getTemplateName</code> exists!<br>
+            Type: <code>${typeof getTemplateName}</code>
+          </div>
+        `;
+        console.log('✅ Test 1 PASSED: Function exists');
+      } else {
+        resultDiv.innerHTML = `
+          <div class="result error">
+            <strong>❌ FAIL</strong><br>
+            Function <code>getTemplateName</code> not found!<br>
+            Type: <code>${typeof getTemplateName}</code>
+          </div>
+        `;
+        console.error('❌ Test 1 FAILED: Function does not exist');
+      }
+    }
+
+    function testFunctionCalls() {
+      const resultDiv = document.getElementById('test2-result');
+      console.log('🧪 Test 2: Testing function with different template IDs...');
+      
+      const tests = [
+        { id: 'rishi', expected: 'Rishi Tech Modern' },
+        { id: 'priya', expected: 'Priya Elegant' },
+        { id: 'classic', expected: 'Classic Professional' },
+        { id: 'modern-pro', expected: 'Modern Professional' },
+        { id: 'unknown', expected: 'Selected' }
+      ];
+      
+      let allPassed = true;
+      let html = '<div class="result">';
+      
+      tests.forEach(test => {
+        try {
+          const result = getTemplateName(test.id);
+          const passed = result === test.expected;
+          
+          if (passed) {
+            html += `✅ <code>getTemplateName('${test.id}')</code> → "${result}"<br>`;
+            console.log(`✅ Test passed: ${test.id} → ${result}`);
+          } else {
+            html += `❌ <code>getTemplateName('${test.id}')</code> → "${result}" (expected "${test.expected}")<br>`;
+            console.error(`❌ Test failed: ${test.id} → ${result} (expected ${test.expected})`);
+            allPassed = false;
+          }
+        } catch (error) {
+          html += `❌ <code>getTemplateName('${test.id}')</code> → ERROR: ${error.message}<br>`;
+          console.error(`❌ Test error: ${test.id}`, error);
+          allPassed = false;
+        }
+      });
+      
+      html += '</div>';
+      resultDiv.innerHTML = html;
+      
+      if (allPassed) {
+        console.log('✅ Test 2 PASSED: All function calls work correctly');
+      } else {
+        console.error('❌ Test 2 FAILED: Some function calls failed');
+      }
+    }
+
+    function testNoResumeButton() {
+      const resultDiv = document.getElementById('test3-result');
+      console.log('🧪 Test 3: Simulating "No, I\'ll Fill It Manually" button click...');
+      
+      try {
+        const result = proceedToFormWithoutImport();
+        
+        resultDiv.innerHTML = `
+          <div class="result success">
+            <strong>✅ PASS</strong><br>
+            Button simulation successful!<br>
+            Template: <code>${selectedTemplate}</code><br>
+            Display Name: <code>${result}</code><br>
+            <br>
+            <strong>Check console for detailed logs</strong>
+          </div>
+        `;
+        console.log('✅ Test 3 PASSED: Button click simulation successful');
+      } catch (error) {
+        resultDiv.innerHTML = `
+          <div class="result error">
+            <strong>❌ FAIL</strong><br>
+            Error: <code>${error.message}</code><br>
+            <br>
+            <strong>Check console for details</strong>
+          </div>
+        `;
+        console.error('❌ Test 3 FAILED:', error);
+      }
+    }
+
+    // Auto-run test 1 on load
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        console.log('🔄 Auto-running Test 1...');
+        testFunctionExists();
+      }, 500);
+    });
+  </script>
+</body>
+</html>

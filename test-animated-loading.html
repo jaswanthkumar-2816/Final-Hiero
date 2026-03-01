@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Animated Loading Page</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: #f0f0f0;
+    }
+    .test-container {
+      background: white;
+      padding: 40px;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    h1 {
+      color: #2ae023;
+      margin-bottom: 20px;
+    }
+    button {
+      background: linear-gradient(135deg, #2ae023, #1a8b17);
+      color: white;
+      border: none;
+      padding: 15px 40px;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: transform 0.2s;
+    }
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(42, 224, 35, 0.4);
+    }
+    button:active {
+      transform: translateY(0);
+    }
+    .instructions {
+      margin-top: 30px;
+      padding: 20px;
+      background: #f9f9f9;
+      border-radius: 8px;
+      text-align: left;
+    }
+    .instructions h3 {
+      color: #2ae023;
+      margin-bottom: 10px;
+    }
+    .instructions ul {
+      margin-left: 20px;
+    }
+    .instructions li {
+      margin: 5px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="test-container">
+    <h1>🚀 Test Animated Loading Page</h1>
+    <p>Click the button below to test the animated loading page</p>
+    <button onclick="testLoadingPage()">Test Loading Animation</button>
+    
+    <div class="instructions">
+      <h3>What to Expect:</h3>
+      <ul>
+        <li>✨ New window opens with animated logo</li>
+        <li>🎯 Logo fills from bottom to top</li>
+        <li>⭕ Progress ring animates around logo</li>
+        <li>📊 Progress bar shows 6 stages</li>
+        <li>⬇️ PDF downloads automatically (simulated)</li>
+        <li>✅ Success checkmark appears</li>
+        <li>🔄 Window closes automatically</li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    function testLoadingPage() {
+      // Simulate resume data
+      const mockData = {
+        personalInfo: {
+          fullName: 'John Doe',
+          email: 'john@example.com',
+          phone: '+1 234-567-8900'
+        },
+        template: 'modern',
+        experience: [],
+        education: []
+      };
+
+      // Save to localStorage for the loading page
+      localStorage.setItem('resumeData', JSON.stringify(mockData));
+
+      const templateName = mockData.template;
+      const userName = mockData.personalInfo.fullName || 'resume';
+      
+      // Open generation page in new window
+      const generationWindow = window.open('', '_blank', 'width=800,height=600');
+      
+      // Write the loading HTML to the new window
+      generationWindow.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Generating Your Resume...</title>');
+      generationWindow.document.write('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">');
+      generationWindow.document.write('<style>');
+      generationWindow.document.write('* { margin: 0; padding: 0; box-sizing: border-box; }');
+      generationWindow.document.write('body { font-family: "Inter", -apple-system, sans-serif; background: linear-gradient(135deg, #000501 0%, #2cc42c 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; color: white; overflow: hidden; }');
+      generationWindow.document.write('.container { text-align: center; padding: 40px; max-width: 600px; }');
+      generationWindow.document.write('.logo-container { width: 200px; height: 200px; margin: 0 auto 40px; position: relative; }');
+      generationWindow.document.write('.logo { width: 100%; height: 100%; background: linear-gradient(135deg, #2ae023, #1a8b17); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 64px; font-weight: bold; color: white; position: relative; overflow: hidden; box-shadow: 0 20px 60px rgba(42, 224, 35, 0.3); }');
+      generationWindow.document.write('.logo::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(180deg, transparent 0%, rgba(42, 224, 35, 0.3) 100%); transform: translateY(100%); animation: fillLogo 3s ease-in-out infinite; }');
+      generationWindow.document.write('@keyframes fillLogo { 0% { transform: translateY(100%); } 50% { transform: translateY(0%); } 100% { transform: translateY(-100%); } }');
+      generationWindow.document.write('.logo-text { position: relative; z-index: 2; text-shadow: 2px 2px 10px rgba(0,0,0,0.3); }');
+      generationWindow.document.write('.progress-ring { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 220px; height: 220px; }');
+      generationWindow.document.write('.progress-ring circle { fill: none; stroke: #2ae023; stroke-width: 4; stroke-linecap: round; transform: rotate(-90deg); transform-origin: 50% 50%; stroke-dasharray: 690; stroke-dashoffset: 690; animation: progressRing 3s ease-in-out infinite; }');
+      generationWindow.document.write('@keyframes progressRing { 0% { stroke-dashoffset: 690; } 50% { stroke-dashoffset: 0; } 100% { stroke-dashoffset: -690; } }');
+      generationWindow.document.write('h1 { font-size: 32px; margin-bottom: 20px; font-weight: 700; }');
+      generationWindow.document.write('.status { font-size: 18px; color: #2ae023; margin-bottom: 10px; min-height: 30px; }');
+      generationWindow.document.write('.substatus { font-size: 14px; color: rgba(255,255,255,0.7); margin-bottom: 30px; min-height: 20px; }');
+      generationWindow.document.write('.progress-bar { width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; margin-top: 20px; }');
+      generationWindow.document.write('.progress-fill { height: 100%; background: linear-gradient(90deg, #2ae023, #1a8b17); width: 0%; transition: width 0.3s ease; box-shadow: 0 0 20px rgba(42, 224, 35, 0.5); }');
+      generationWindow.document.write('.checkmark { display: none; width: 80px; height: 80px; margin: 20px auto; border-radius: 50%; background: #2ae023; position: relative; animation: scaleIn 0.3s ease; }');
+      generationWindow.document.write('@keyframes scaleIn { 0% { transform: scale(0); } 100% { transform: scale(1); } }');
+      generationWindow.document.write('.checkmark::after { content: "✓"; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 48px; font-weight: bold; }');
+      generationWindow.document.write('.success-message { display: none; font-size: 24px; color: #2ae023; margin-top: 20px; font-weight: 600; }');
+      generationWindow.document.write('.particles { position: fixed; width: 100%; height: 100%; top: 0; left: 0; pointer-events: none; }');
+      generationWindow.document.write('.particle { position: absolute; width: 4px; height: 4px; background: #2ae023; border-radius: 50%; animation: float 3s infinite; opacity: 0; }');
+      generationWindow.document.write('@keyframes float { 0%, 100% { opacity: 0; transform: translateY(0) scale(0); } 50% { opacity: 1; transform: translateY(-100px) scale(1); } }');
+      generationWindow.document.write('</style></head><body>');
+      generationWindow.document.write('<div class="particles" id="particles"></div>');
+      generationWindow.document.write('<div class="container">');
+      generationWindow.document.write('<div class="logo-container">');
+      generationWindow.document.write('<svg class="progress-ring"><circle cx="110" cy="110" r="110"></circle></svg>');
+      generationWindow.document.write('<div class="logo"><span class="logo-text">H</span></div>');
+      generationWindow.document.write('</div>');
+      generationWindow.document.write('<h1>Generating Your Resume</h1>');
+      generationWindow.document.write('<div class="status" id="status">Preparing your data...</div>');
+      generationWindow.document.write('<div class="substatus" id="substatus">This will only take a moment</div>');
+      generationWindow.document.write('<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>');
+      generationWindow.document.write('<div class="checkmark" id="checkmark"></div>');
+      generationWindow.document.write('<div class="success-message" id="successMessage">Resume Generated Successfully!</div>');
+      generationWindow.document.write('</div>');
+      generationWindow.document.write('<script>');
+      generationWindow.document.write('const particlesContainer = document.getElementById("particles");');
+      generationWindow.document.write('for (let i = 0; i < 20; i++) { const particle = document.createElement("div"); particle.className = "particle"; particle.style.left = Math.random() * 100 + "%"; particle.style.animationDelay = Math.random() * 3 + "s"; particlesContainer.appendChild(particle); }');
+      generationWindow.document.write('const status = document.getElementById("status");');
+      generationWindow.document.write('const substatus = document.getElementById("substatus");');
+      generationWindow.document.write('const progressFill = document.getElementById("progressFill");');
+      generationWindow.document.write('const checkmark = document.getElementById("checkmark");');
+      generationWindow.document.write('const successMessage = document.getElementById("successMessage");');
+      generationWindow.document.write('const stages = [');
+      generationWindow.document.write('{ text: "Preparing your data...", subtext: "Collecting information", progress: 10 },');
+      generationWindow.document.write('{ text: "Validating information...", subtext: "Ensuring data quality", progress: 25 },');
+      generationWindow.document.write('{ text: "Applying template...", subtext: "Using ' + templateName + ' template", progress: 40 },');
+      generationWindow.document.write('{ text: "Generating HTML...", subtext: "Creating document structure", progress: 60 },');
+      generationWindow.document.write('{ text: "Creating PDF...", subtext: "Converting to PDF format", progress: 80 },');
+      generationWindow.document.write('{ text: "Finalizing...", subtext: "Almost there!", progress: 95 }];');
+      generationWindow.document.write('let currentStage = 0;');
+      generationWindow.document.write('function updateStage() { if (currentStage < stages.length) { const stage = stages[currentStage]; status.textContent = stage.text; substatus.textContent = stage.subtext; progressFill.style.width = stage.progress + "%"; currentStage++; setTimeout(updateStage, 600); } }');
+      generationWindow.document.write('updateStage();');
+      
+      // For testing, simulate PDF generation without actual backend call
+      generationWindow.document.write('setTimeout(() => {');
+      generationWindow.document.write('progressFill.style.width = "100%";');
+      generationWindow.document.write('status.textContent = "Complete!";');
+      generationWindow.document.write('substatus.textContent = "Your resume is ready (TEST MODE - No actual PDF)";');
+      generationWindow.document.write('setTimeout(() => {');
+      generationWindow.document.write('document.querySelector(".logo-container").style.display = "none";');
+      generationWindow.document.write('checkmark.style.display = "block";');
+      generationWindow.document.write('successMessage.style.display = "block";');
+      generationWindow.document.write('status.textContent = "Test Complete!";');
+      generationWindow.document.write('substatus.textContent = "In real use, PDF would download here";');
+      generationWindow.document.write('setTimeout(() => {');
+      generationWindow.document.write('status.textContent = "Closing in 5 seconds...";');
+      generationWindow.document.write('substatus.textContent = "You can close this window manually";');
+      generationWindow.document.write('let countdown = 5;');
+      generationWindow.document.write('const countInterval = setInterval(() => {');
+      generationWindow.document.write('countdown--;');
+      generationWindow.document.write('status.textContent = "Closing in " + countdown + " seconds...";');
+      generationWindow.document.write('if (countdown <= 0) { clearInterval(countInterval); window.close(); }');
+      generationWindow.document.write('}, 1000);');
+      generationWindow.document.write('}, 2000);');
+      generationWindow.document.write('}, 500);');
+      generationWindow.document.write('}, 4000);');
+      
+      generationWindow.document.write('</script></body></html>');
+      generationWindow.document.close();
+    }
+  </script>
+</body>
+</html>

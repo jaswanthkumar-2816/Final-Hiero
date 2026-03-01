@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resume Builder Test</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+  <div class="max-w-4xl mx-auto">
+    <h1 class="text-3xl font-bold mb-8 text-center">Resume Builder Test</h1>
+    
+    <!-- Status Display -->
+    <div id="status" class="mb-4 text-center"></div>
+    
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+      <div class="bg-white p-6 rounded-lg">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <p class="mt-2">Loading...</p>
+      </div>
+    </div>
+
+    <!-- Basic Information Form -->
+    <div id="basic" class="bg-white p-6 rounded-lg shadow-md">
+      <h2 class="text-xl font-semibold mb-4">Basic Information</h2>
+      <form id="basicForm">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium mb-1">Full Name</label>
+            <input type="text" id="basicName" class="w-full p-2 border rounded" placeholder="John Doe" required>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Email</label>
+            <input type="email" id="basicEmail" class="w-full p-2 border rounded" placeholder="john@example.com" required>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Phone</label>
+            <input type="tel" id="basicPhone" class="w-full p-2 border rounded" placeholder="123-456-7890" required>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Website</label>
+            <input type="url" id="basicWebsite" class="w-full p-2 border rounded" placeholder="https://johndoe.com">
+          </div>
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium mb-1">Career Objective</label>
+            <textarea id="basicCareerObjective" class="w-full p-2 border rounded" rows="3" placeholder="Your career objective"></textarea>
+          </div>
+        </div>
+        <div class="mt-4 flex gap-2">
+          <button type="button" onclick="submitStep('basic')" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+            Save & Continue
+          </button>
+          <button type="button" onclick="skipStep('basic')" class="px-4 py-2 bg-gray-400 text-white rounded hover:bg-gray-500">
+            Skip
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Test Results -->
+    <div class="mt-8 bg-white p-6 rounded-lg shadow-md">
+      <h2 class="text-xl font-semibold mb-4">Test Results</h2>
+      <div id="testResults" class="space-y-2">
+        <p>Fill out the form above and click "Save & Continue" to test the backend integration.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Include the clean build.js script -->
+  <script src="build.js"></script>
+  
+  <script>
+    // Override the switchStep function for testing
+    function switchStep(step) {
+      document.getElementById('testResults').innerHTML += `<p class="text-green-600">✓ Successfully saved ${step} data</p>`;
+    }
+    
+    // Override skipStep for testing
+    function skipStep(step) {
+      document.getElementById('testResults').innerHTML += `<p class="text-yellow-600">→ Skipped ${step} step</p>`;
+    }
+  </script>
+</body>
+</html>

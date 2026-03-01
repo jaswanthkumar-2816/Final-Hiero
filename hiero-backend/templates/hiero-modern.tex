@@ -1,0 +1,220 @@
+% Hiero Modern Resume Template
+% Professional, clean, and comprehensive format
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{fontawesome}
+\usepackage{array}
+\usepackage{tabularx}
+
+% Page setup
+\geometry{margin=0.75in}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0pt}
+
+% Colors
+\definecolor{primary}{RGB}{47, 79, 79}
+\definecolor{secondary}{RGB}{70, 130, 180}
+\definecolor{accent}{RGB}{95, 158, 160}
+\definecolor{textgray}{RGB}{64, 64, 64}
+
+% Hyperlink setup
+\hypersetup{
+    colorlinks=true,
+    linkcolor=secondary,
+    urlcolor=secondary,
+    citecolor=secondary
+}
+
+% Section formatting
+\titleformat{\section}
+{\color{primary}\Large\bfseries}
+{}
+{0em}
+{}[\titlerule]
+
+\titleformat{\subsection}
+{\color{secondary}\large\bfseries}
+{}
+{0em}
+{}
+
+% Custom commands
+\newcommand{\resumeItem}[1]{\item\small{#1}}
+\newcommand{\resumeSubHeading}[4]{
+  \vspace{-1pt}\item
+    \begin{tabular*}{0.97\textwidth}[t]{l@{\extracolsep{\fill}}r}
+      \textbf{#1} & #2 \\
+      \textit{\small#3} & \textit{\small #4} \\
+    \end{tabular*}\vspace{-5pt}
+}
+
+\newcommand{\resumeProjectHeading}[2]{
+  \vspace{-1pt}\item
+    \begin{tabular*}{0.97\textwidth}{l@{\extracolsep{\fill}}r}
+      \textbf{#1} & #2 \\
+    \end{tabular*}\vspace{-5pt}
+}
+
+\newcommand{\resumeSubItem}[1]{\resumeItem{#1}\vspace{-4pt}}
+\renewcommand{\labelitemii}{$\circ$}
+\newcommand{\resumeSubHeadingListStart}{\begin{itemize}[leftmargin=*]}
+\newcommand{\resumeSubHeadingListEnd}{\end{itemize}}
+\newcommand{\resumeItemListStart}{\begin{itemize}}
+\newcommand{\resumeItemListEnd}{\end{itemize}\vspace{-5pt}}
+
+\begin{document}
+
+%----------HEADING-----------------
+\begin{center}
+    {\Huge \textbf{\color{primary}{{{FULL_NAME}}}}} \\
+    \vspace{8pt}
+    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+        \faEnvelope\ {{EMAIL}} & \faPhone\ {{PHONE}} \\
+        {{#LINKEDIN}}\faLinkedin\ \href{{{LINKEDIN}}}{LinkedIn Profile} & {{/LINKEDIN}}{{#WEBSITE}}\faGlobe\ \href{{{WEBSITE}}}{{{WEBSITE}}}{{/WEBSITE}} \\
+    \end{tabular*}
+    {{#ADDRESS}}
+    \vspace{2pt}
+    \faMapMarker\ {{ADDRESS}}
+    {{/ADDRESS}}
+\end{center}
+
+%----------SUMMARY-----------------
+{{#CAREER_OBJECTIVE}}
+\section{Professional Summary}
+\small{{{CAREER_OBJECTIVE}}}
+\vspace{8pt}
+{{/CAREER_OBJECTIVE}}
+
+%----------EDUCATION-----------------
+{{#EDUCATION}}
+\section{Education}
+\resumeSubHeadingListStart
+{{#EDUCATION_LIST}}
+\resumeSubHeading
+{{{DEGREE}}}{{{GRADUATION_YEAR}}}
+{{{INSTITUTION}}}{{#GPA}} {GPA: {{GPA}}}{{/GPA}}{{#DETAILS}} {{{DETAILS}}}{{/DETAILS}}
+{{/EDUCATION_LIST}}
+\resumeSubHeadingListEnd
+\vspace{4pt}
+{{/EDUCATION}}
+
+%----------EXPERIENCE-----------------
+{{#EXPERIENCE}}
+\section{Professional Experience}
+\resumeSubHeadingListStart
+{{#EXPERIENCE_LIST}}
+\resumeSubHeading
+{{{POSITION}}}{{{DURATION}}}
+{{{COMPANY}}}{{#LOCATION}} {{{LOCATION}}}{{/LOCATION}}
+{{#RESPONSIBILITIES}}
+\resumeItemListStart
+{{#RESP_LIST}}
+\resumeItem{{{.}}}
+{{/RESP_LIST}}
+\resumeItemListEnd
+{{/RESPONSIBILITIES}}
+{{/EXPERIENCE_LIST}}
+\resumeSubHeadingListEnd
+\vspace{4pt}
+{{/EXPERIENCE}}
+
+%----------PROJECTS-----------------
+{{#PROJECTS}}
+\section{Key Projects}
+\resumeSubHeadingListStart
+{{#PROJECT_LIST}}
+\resumeProjectHeading
+{\textbf{{{NAME}}}{{#LINK}} $|$ \href{{{LINK}}}{\underline{Project Link}}{{/LINK}}}{{{YEAR}}{{#DURATION}} -- {{DURATION}}{{/DURATION}}}
+\resumeItemListStart
+\resumeItem{{{DESCRIPTION}}}
+{{#TECHNOLOGIES}}\resumeItem{\textbf{Technologies:} {{TECHNOLOGIES}}}{{/TECHNOLOGIES}}
+\resumeItemListEnd
+{{/PROJECT_LIST}}
+\resumeSubHeadingListEnd
+\vspace{4pt}
+{{/PROJECTS}}
+
+%----------TECHNICAL SKILLS-----------------
+{{#SKILLS}}
+\section{Technical Skills}
+\begin{itemize}[leftmargin=*]
+{{#TECHNICAL_SKILLS}}
+\item \textbf{Technical Skills:} {{TECHNICAL_SKILLS}}
+{{/TECHNICAL_SKILLS}}
+{{#MANAGEMENT_SKILLS}}
+\item \textbf{Management \& Leadership:} {{MANAGEMENT_SKILLS}}
+{{/MANAGEMENT_SKILLS}}
+{{#SOFT_SKILLS}}
+\item \textbf{Soft Skills:} {{SOFT_SKILLS}}
+{{/SOFT_SKILLS}}
+\end{itemize}
+\vspace{4pt}
+{{/SKILLS}}
+
+%----------CERTIFICATIONS-----------------
+{{#CERTIFICATIONS}}
+\section{Certifications}
+\resumeSubHeadingListStart
+{{#CERT_LIST}}
+\item \textbf{{{NAME}}} -- {{ISSUER}} \hfill {{YEAR}}{{#DETAILS}} \\ \small{{{DETAILS}}}{{/DETAILS}}
+{{/CERT_LIST}}
+\resumeSubHeadingListEnd
+\vspace{4pt}
+{{/CERTIFICATIONS}}
+
+%----------ACHIEVEMENTS-----------------
+{{#ACHIEVEMENTS}}
+\section{Achievements \& Awards}
+\resumeSubHeadingListStart
+{{#ACHIEVEMENT_LIST}}
+\item \textbf{{{TITLE}}} \hfill {{YEAR}}{{#ORGANIZATION}} \\ \textit{{{ORGANIZATION}}}{{/ORGANIZATION}}
+{{#DESCRIPTION}} \\ \small{{{DESCRIPTION}}}{{/DESCRIPTION}}
+{{/ACHIEVEMENT_LIST}}
+\resumeSubHeadingListEnd
+\vspace{4pt}
+{{/ACHIEVEMENTS}}
+
+%----------LANGUAGES-----------------
+{{#LANGUAGES}}
+\section{Languages}
+\small{{{LANGUAGES_TEXT}}}
+\vspace{4pt}
+{{/LANGUAGES}}
+
+%----------PERSONAL DETAILS-----------------
+{{#PERSONAL_DETAILS}}
+\section{Personal Information}
+\begin{itemize}[leftmargin=*]
+{{#DOB}}\item \textbf{Date of Birth:} {{DOB}}{{/DOB}}
+{{#GENDER}}\item \textbf{Gender:} {{GENDER}}{{/GENDER}}
+{{#NATIONALITY}}\item \textbf{Nationality:} {{NATIONALITY}}{{/NATIONALITY}}
+{{#ADDRESS}}\item \textbf{Address:} {{ADDRESS}}{{/ADDRESS}}
+\end{itemize}
+\vspace{4pt}
+{{/PERSONAL_DETAILS}}
+
+%----------INTERESTS & HOBBIES-----------------
+{{#HOBBIES}}
+\section{Interests \& Hobbies}
+\small{{{HOBBIES_TEXT}}}
+\vspace{4pt}
+{{/HOBBIES}}
+
+%----------REFERENCES-----------------
+{{#REFERENCES}}
+\section{References}
+\resumeSubHeadingListStart
+{{#REF_LIST}}
+\item \textbf{{{NAME}}} ({{RELATIONSHIP}}) \\
+\small{{{CONTACT}}}{{#ORGANIZATION}} $|$ {{ORGANIZATION}}{{/ORGANIZATION}}
+{{/REF_LIST}}
+\resumeSubHeadingListEnd
+{{/REFERENCES}}
+
+\end{document}

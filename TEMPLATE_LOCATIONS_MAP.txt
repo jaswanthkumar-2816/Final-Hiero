@@ -1,0 +1,148 @@
+╔══════════════════════════════════════════════════════════════════╗
+║              📁 TEMPLATE LOCATIONS MAP                           ║
+╚══════════════════════════════════════════════════════════════════╝
+
+Your project has templates in THREE locations:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1️⃣  HIERO BACKEND TEMPLATES (ACTIVE - Currently Used)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📍 Location: /Users/jaswanthkumar/Desktop/shared folder/hiero backend/templates/
+
+✅ HTML/JavaScript Templates (WORKING NOW):
+   ├── classic.js          ← Classic Professional template
+   ├── minimal.js          ← Minimal template
+   ├── modernPro.js        ← Modern Professional template
+   └── index.js            ← Template router/exporter
+
+📄 LaTeX Templates (OLD - not used in current system):
+   ├── alatacv.tex
+   ├── altacv.tex
+   ├── awesomece.tex
+   ├── awesomecv.tex
+   ├── deedycv.tex
+   ├── elegant.tex
+   ├── functional.tex
+   ├── hiero-modern.tex
+   ├── hiero-standard.tex
+   ├── moddernsimple.tex
+   ├── modernsimple.tex
+   └── professionalcv.tex
+
+Status: ✅ ACTIVE - Backend server uses these
+Used by: server.js → /preview-resume, /download-resume, /generate-resume
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+2️⃣  LOGIN SYSTEM TEMPLATES (More complete, but not active)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📍 Location: /Users/jaswanthkumar/Desktop/shared folder/login system/templates/
+
+✨ HTML/JavaScript Templates (COMPLETE):
+   ├── classic.js           ← ✅ Complete implementation
+   ├── minimal.js           ← ✅ Complete implementation
+   ├── modernPro.js         ← ✅ Complete implementation
+   ├── techFocus.js         ← ✅ Complete implementation
+   ├── elegantGradient.js   ← ✅ Complete implementation
+   ├── minimalistMono.js    ← ✅ Complete implementation
+   ├── atsOptimized.js      ← ⚠️  Stub (needs implementation)
+   ├── corporateATS.js      ← ⚠️  Stub (needs implementation)
+   ├── creativeBold.js      ← ⚠️  Stub (needs implementation)
+   ├── portfolioStyle.js    ← ⚠️  Stub (needs implementation)
+   └── index.js             ← Template router (exports all)
+
+Status: ⚠️  INACTIVE - Not currently used by backend
+Note: These are MORE COMPLETE templates with better styling
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+3️⃣  ROOT TEMPLATES FOLDER (Empty)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📍 Location: /Users/jaswanthkumar/Desktop/shared folder/templates/
+
+Status: ❌ EMPTY - No templates here
+Purpose: Unknown - possibly created by mistake
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📊 SUMMARY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Current Backend Uses:     hiero backend/templates/ (3 templates)
+Better Templates in:      login system/templates/ (10 templates)
+Frontend Expects:         10 templates (classic, minimal, modern-pro, 
+                          tech-focus, creative-bold, portfolio-style, 
+                          ats-optimized, corporate-ats, elegant-gradient, 
+                          minimalist-mono)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔧 RECOMMENDED ACTION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Option 1: Copy Complete Templates (RECOMMENDED)
+  Copy all templates from "login system/templates/" to 
+  "hiero backend/templates/" to have all 10 templates working.
+
+  Command:
+  cp -r "login system/templates/"*.js "hiero backend/templates/"
+
+Option 2: Point Backend to Login System Templates
+  Update server.js import to use login system templates:
+  
+  Change:
+    import { generateTemplateHTML } from './templates/index.js';
+  
+  To:
+    import { generateTemplateHTML } from '../login system/templates/index.js';
+
+Option 3: Keep Current (NOT RECOMMENDED)
+  Only 3 templates work (classic, minimal, modern-pro)
+  Other 7 templates will fail when users try to preview/download
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📋 TEMPLATE STATUS COMPARISON
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Template Name       │ Hiero Backend │ Login System  │ Frontend
+────────────────────┼───────────────┼───────────────┼──────────
+classic             │      ✅       │      ✅       │    ✅
+minimal             │      ✅       │      ✅       │    ✅
+modern-pro          │      ✅       │      ✅       │    ✅
+tech-focus          │      ❌       │      ✅       │    ✅
+elegant-gradient    │      ❌       │      ✅       │    ✅
+minimalist-mono     │      ❌       │      ✅       │    ✅
+ats-optimized       │      ❌       │      ⚠️       │    ✅
+corporate-ats       │      ❌       │      ⚠️       │    ✅
+creative-bold       │      ❌       │      ⚠️       │    ✅
+portfolio-style     │      ❌       │      ⚠️       │    ✅
+
+Legend:
+  ✅ = Fully implemented
+  ⚠️  = Stub (placeholder)
+  ❌ = Missing
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎯 NEXT STEPS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Copy complete templates to hiero backend
+2. Test all 10 templates with preview endpoint
+3. Complete stub templates (ats-optimized, corporate-ats, etc.)
+4. Update frontend to handle all template types
+5. Test end-to-end flow: select → preview → download
+
+Would you like me to:
+  A) Copy the complete templates from login system to hiero backend?
+  B) Show you the code differences between the two sets?
+  C) Help you complete the stub templates?
+
+╔══════════════════════════════════════════════════════════════════╗
+║  Let me know which option you prefer!                            ║
+╚══════════════════════════════════════════════════════════════════╝
