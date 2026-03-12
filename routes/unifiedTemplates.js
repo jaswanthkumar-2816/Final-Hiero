@@ -320,32 +320,35 @@ const TEMPLATE_MAP = {
 
 // Standardized font sizes (Refined for a 'Perfect' look)
 const FONT_SIZES = {
-    name: 20,            // Slightly smaller for better fit
-    sectionTitle: 12,
-    jobTitle: 10.5,
-    body: 10,            // Standard compact professional size
-    contact: 9.5,
-    small: 8.5
+    name: 18,            // Slightly smaller for better fit
+    sectionTitle: 11,
+    jobTitle: 10,
+    body: 9.5,           // Standard compact professional size
+    contact: 9,
+    small: 8
 };
 
 // Standardized spacing (Ultra-Compact for One-Page perfection)
 const SPACING = {
-    lineHeight: 1.15,    // Tighter for better content density
-    sectionGap: 7,       // Reduced
-    itemGap: 3,          // Minimal gaps
+    lineHeight: 1.1,     // Tighter for better content density
+    sectionGap: 6,       // Reduced
+    itemGap: 2,          // Minimal gaps
     paragraphGap: 2,
-    bulletIndent: 12
+    bulletIndent: 10
 };
 
 // Helper to get per-template spacing overrides (Now Unified for density)
 function getTemplateSpacing(template) {
-    if (template === 'priya-analytics' || template === 'rishi' || template === 'template-4') {
+    const t = (template || '').toLowerCase();
+
+    // Extra compact spacing for high-density templates to ensure single-page fit
+    if (t.includes('analytics') || t.includes('rishi') || t.includes('tech') || t.includes('velocity') || t.includes('modern') || t === 'template-4') {
         return {
-            lineHeight: 1.15,
-            sectionGap: 7,
-            itemGap: 3,
-            paragraphGap: 3,
-            bulletIndent: 12
+            lineHeight: 1.08,    // Tighter than 1.15
+            sectionGap: 6,       // Reduced from 7
+            itemGap: 2,          // Reduced from 3
+            paragraphGap: 2,     // Reduced from 3
+            bulletIndent: 10
         };
     }
     return SPACING;
@@ -1315,8 +1318,20 @@ async function generateUnifiedResume(data, templateId, outStream, customOptions 
             const spacing = getTemplateSpacing(template);
             const options = customOptions || {};
 
+            // Update page config if single page is forced to save vertical space
+            const pageConfig = { ...PAGE_CONFIG };
+            if (options.forceSinglePage) {
+                pageConfig.margin = 35; // Tighter margins
+            }
+
             // Create PDF document
-            const doc = new PDFDocument(PAGE_CONFIG);
+            const doc = new PDFDocument(pageConfig);
+
+            // Force single page logic - override addPage if requested
+            if (options.forceSinglePage) {
+                doc._originalAddPage = doc.addPage;
+                doc.addPage = function () { return doc; };
+            }
 
             // Pipe to the provided writable stream
             if (outStream && typeof outStream.pipe === 'function') {
@@ -1328,15 +1343,28 @@ async function generateUnifiedResume(data, templateId, outStream, customOptions 
 
             // Render header based on template
             switch (template) {
-                case 'rishi': renderHeader_Rishi(doc, data, colors); break;
+                case 'rishi':
+                case 'hiero-modern': renderHeader_Rishi(doc, data, colors); break;
                 case 'minimal': renderHeader_Minimal(doc, data, colors); break;
                 case 'modern-pro':
                 case 'portfolio-style':
                 case 'creative-bold': renderHeader_Modern(doc, data, colors); break;
-                case 'tech-focus': renderHeader_Tech(doc, data, colors); break;
+                case 'tech-focus':
+                case 'hiero-tech': renderHeader_Tech(doc, data, colors); break;
                 case 'ats-optimized':
                 case 'corporate-ats': renderHeader_ATS(doc, data, colors); break;
-                case 'priya-analytics': renderHeader_PriyaAnalytics(doc, data, colors); break;
+                case 'priya-analytics':
+                case 'hiero-analytics': renderHeader_PriyaAnalytics(doc, data, colors); break;
+                case 'hiero-velocity':
+                    await renderTemplate_HieroPremium(doc, data, TEMPLATE_COLORS['hiero-premium'] || colors, spacing);
+                    doc.end();
+                    if (outStream && outStream.on) {
+                        outStream.on('finish', () => resolve(true));
+                        outStream.on('error', reject);
+                    } else {
+                        resolve(doc);
+                    }
+                    return;
                 case 'hiero-elite':
                     renderTemplate_HieroElite(doc, data);
                     doc.end();
@@ -2365,7 +2393,7 @@ function renderTemplate_HieroElite(doc, originalData) {
     };
 
     const data = {
-        name: originalData.name || originalData.personalInfo?.fullName || "Your Name",
+        name: originalData.name || originalData.personalInfo?.fullName || "John Doe",
         role: originalData.role || originalData.personalInfo?.roleTitle || (originalData.experience && originalData.experience[0] && originalData.experience[0].jobTitle) || "Executive Manager",
         address: originalData.address || originalData.personalInfo?.address || "",
         phone: originalData.phone || originalData.personalInfo?.phone || "",
@@ -2750,6 +2778,7 @@ function renderTemplate_HieroMonethon(doc, data, options = {}) {
     // Neutral background for photo area
     doc.rect(MARGIN, photoY, photoWidth, photoHeight).fill('#EEEEEE');
 
+    let photoDrawn = false;
     if (personal && personal.profilePhoto) {
         try {
             const photoBuffer = base64ToBuffer(personal.profilePhoto);
@@ -2758,16 +2787,15 @@ function renderTemplate_HieroMonethon(doc, data, options = {}) {
                     width: photoWidth,
                     height: photoHeight
                 });
-            } else {
-                doc.fillColor('#CCCCCC').font('Helvetica-Bold').fontSize(14).text('PHOTO', MARGIN, photoY + 60, { width: photoWidth, align: 'center' });
+                photoDrawn = true;
             }
         } catch (e) {
             console.error('Monethon Photo Error:', e);
-            doc.fillColor('#CCCCCC').font('Helvetica-Bold').fontSize(14).text('PHOTO', MARGIN, photoY + 60, { width: photoWidth, align: 'center' });
         }
-    } else {
-        doc.rect(MARGIN, photoY, photoWidth, photoHeight).strokeColor('#CCCCCC').lineWidth(1).stroke();
-        doc.fillColor('#999999').font('Helvetica').fontSize(12).text('PHOTO', MARGIN, photoY + 65, { width: photoWidth, align: 'center' });
+    }
+
+    if (!photoDrawn) {
+        renderInitials(doc, personal.fullName || 'John Doe', MARGIN + photoWidth / 2, photoY + photoHeight / 2, Math.min(photoWidth, photoHeight) / 2);
     }
     doc.restore();
 
@@ -3085,6 +3113,11 @@ async function renderTemplate_HieroNova(doc, rawData) {
     doc.rect(0, headerHeight, sidebarWidth, PAGE_HEIGHT - headerHeight).fill(dark);
 
     // 2. Profile Photo
+    let photoDrawn = false;
+    const pSize = 135;
+    const pX = (sidebarWidth - pSize) / 2;
+    const pY = (headerHeight - pSize) / 2;
+
     if (pInfo.profilePhoto) {
         try {
             let imgData = pInfo.profilePhoto;
@@ -3092,23 +3125,25 @@ async function renderTemplate_HieroNova(doc, rawData) {
                 const parts = imgData.split(',');
                 if (parts.length > 1) imgData = Buffer.from(parts[1], 'base64');
             }
-            const pSize = 135;
-            const pX = (sidebarWidth - pSize) / 2;
-            const pY = (headerHeight - pSize) / 2;
-
             doc.save();
             doc.circle(pX + pSize / 2, pY + pSize / 2, pSize / 2).clip();
             doc.image(imgData, pX, pY, { width: pSize, height: pSize, cover: [pSize, pSize] });
             doc.restore();
 
             doc.circle(pX + pSize / 2, pY + pSize / 2, pSize / 2 + 3).lineWidth(3).strokeColor(white).stroke();
+            photoDrawn = true;
         } catch (e) { }
+    }
+
+    if (!photoDrawn) {
+        renderCircularInitials(doc, pInfo.fullName || 'John Doe', pX, pY, pSize);
+        doc.circle(pX + pSize / 2, pY + pSize / 2, pSize / 2 + 3).lineWidth(3).strokeColor(white).stroke();
     }
 
     // 3. Header Text
     const nameX = sidebarWidth + 45;
     let nameY = 65;
-    const fullName = (pInfo.fullName || data.name || "YOUR NAME").toUpperCase();
+    const fullName = (pInfo.fullName || data.name || "John Doe").toUpperCase();
     const nameParts = fullName.split(' ');
     const firstName = nameParts[0] || "";
     const lastName = nameParts.slice(1).join(' ') || "";
@@ -3249,6 +3284,7 @@ async function renderTemplate_HieroLegion(doc, rawData) {
     doc.rect(0, 0, sidebarWidth, PAGE_HEIGHT).fill(dark);
 
     // 2. Shield Profile Mask
+    let photoDrawn = false;
     if (pInfo.profilePhoto) {
         try {
             let imgData = base64ToBuffer(pInfo.profilePhoto);
@@ -3257,22 +3293,21 @@ async function renderTemplate_HieroLegion(doc, rawData) {
             const pY = 40;
 
             doc.save();
-            // Shield Path
             const cx = pX + pSize / 2;
             const cy = pY + pSize / 2;
             const r = pSize / 2;
 
-            doc.moveTo(cx, pY) // Top center
+            doc.moveTo(cx, pY)
                 .bezierCurveTo(cx + r, pY, cx + r, cy, cx + r, cy + 10)
-                .bezierCurveTo(cx + r, cy + r, cx, cy + r + 15, cx, cy + r + 25) // Pointed bottom
+                .bezierCurveTo(cx + r, cy + r, cx, cy + r + 15, cx, cy + r + 25)
                 .bezierCurveTo(cx, cy + r + 15, cx - r, cy + r, cx - r, cy + 10)
                 .bezierCurveTo(cx - r, cy, cx - r, pY, cx, pY)
                 .closePath().clip();
 
             doc.image(imgData, pX, pY, { width: pSize, height: (pSize * 1.2), cover: [pSize, pSize] });
             doc.restore();
+            photoDrawn = true;
 
-            // Border
             doc.save();
             doc.moveTo(cx, pY)
                 .bezierCurveTo(cx + r, pY, cx + r, cy, cx + r, cy + 10)
@@ -3282,6 +3317,12 @@ async function renderTemplate_HieroLegion(doc, rawData) {
                 .closePath().lineWidth(3).strokeColor(white).stroke();
             doc.restore();
         } catch (e) { }
+    }
+    if (!photoDrawn) {
+        const pSize = 130;
+        const pX = (sidebarWidth - pSize) / 2;
+        const pY = 40;
+        renderInitials(doc, pInfo.fullName || 'John Doe', pX + pSize / 2, pY + pSize / 2, pSize / 2);
     }
 
     // 3. Main Content Rendering (White Area)
@@ -4147,18 +4188,29 @@ function renderTemplate_HieroRetail(doc, rawData) {
     const rightX = 260;
 
     // Profile Image
-    if (data.profileImage && data.profileImage.startsWith('data:image')) {
+    let photoDrawn = false;
+    if (data.profileImage) {
         try {
+            let imgData = data.profileImage;
+            if (imgData.startsWith('data:image')) {
+                const parts = imgData.split(',');
+                if (parts.length > 1) imgData = Buffer.from(parts[1], 'base64');
+            }
             // Circle crop image
             doc.save();
             doc.circle(startX + 60, leftY + 60, 60).clip();
-            doc.image(data.profileImage, startX, leftY, { width: 120, height: 120 });
+            doc.image(imgData, startX, leftY, { width: 120, height: 120 });
             doc.restore();
-            leftY += 130 + 15;
+            photoDrawn = true;
         } catch (e) {
             console.error('Error rendering image in Hiero Retail', e);
         }
     }
+
+    if (!photoDrawn) {
+        renderCircularInitials(doc, data.name || 'John Doe', startX, leftY, 120);
+    }
+    leftY += 130 + 15;
 
     // CONTACT Header
     doc.font('Helvetica-Bold').fontSize(14).fillColor('#1f2a6b').text('Contact', startX, leftY);
@@ -4370,24 +4422,33 @@ function renderTemplate_HieroSignature(doc, rawData) {
     const sidebarInnerW = SIDEBAR_W - 50;
     let sidebarY = 35;
 
-    // Photo
+    // Photo Area
     const photoFrameH = 220;
+    const photoW = SIDEBAR_W - 70;
+    const photoX = SIDEBAR_X + 35;
+    let photoDrawn = false;
+
     doc.save();
-    doc.fillColor('#1a1a1a').rect(SIDEBAR_X + 35, sidebarY, SIDEBAR_W - 70, photoFrameH).fill();
-    if (data.personalInfo?.profilePhoto) {
+    doc.fillColor('#1a1a1a').rect(photoX, sidebarY, photoW, photoFrameH).fill();
+    if (pInfo.profilePhoto) {
         try {
-            const buffer = base64ToBuffer(data.personalInfo.profilePhoto);
+            const buffer = base64ToBuffer(pInfo.profilePhoto);
             if (buffer) {
-                doc.image(buffer, SIDEBAR_X + 35, sidebarY, { width: SIDEBAR_W - 70, height: photoFrameH, fit: [SIDEBAR_W - 70, photoFrameH], align: 'center', valign: 'center' });
+                doc.image(buffer, photoX, sidebarY, { width: photoW, height: photoFrameH, fit: [photoW, photoFrameH], align: 'center', valign: 'center' });
+                photoDrawn = true;
             }
         } catch (e) {
             console.error('Signature Photo Error:', e);
         }
     }
+
+    if (!photoDrawn) {
+        renderRectangularInitials(doc, pInfo.fullName || 'John Doe', photoX, sidebarY, photoW, photoFrameH);
+    }
     doc.restore();
 
-    // Initials Circle
-    const initials = (data.personalInfo.fullName || 'UN').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    // Initials Circle (Legacy Accent Circle)
+    const initials = (pInfo.fullName || 'JD').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
     doc.save();
     doc.fillColor(colors.accent).circle(SIDEBAR_X + 24, sidebarY + 35, 24).fill();
     doc.fillColor('#FFFFFF').font('Helvetica-Bold').fontSize(14).text(initials, SIDEBAR_X, sidebarY + 35 - 7, { width: 48, align: 'center' });
@@ -4396,7 +4457,7 @@ function renderTemplate_HieroSignature(doc, rawData) {
     sidebarY += photoFrameH + 30;
 
     // Name
-    const fullName = (data.personalInfo.fullName || 'User Name').toUpperCase();
+    const fullName = (data.personalInfo.fullName || 'John Doe').toUpperCase();
     const nameParts = fullName.split(/\s+/).filter(Boolean);
     const firstName = nameParts[0] || 'USER';
     const lastName = nameParts.slice(1).join(' ') || 'NAME';
@@ -4556,6 +4617,7 @@ async function renderTemplate_HieroPrestige(doc, rawData, colors, spacing) {
     // const headerBottom = doc.y;
 
     // Profile Photo on the right - Centered 'Cover' logic
+    let photoDrawn = false;
     if (pInfo.profilePhoto) {
         try {
             const buffer = base64ToBuffer(pInfo.profilePhoto);
@@ -4577,10 +4639,17 @@ async function renderTemplate_HieroPrestige(doc, rawData, colors, spacing) {
                 doc.image(buffer, photoX + offX, finalPhotoY + offY, { width: finalW, height: finalH });
                 doc.restore();
                 doc.save().lineWidth(2).strokeColor(COLORS.sectionBar).circle(photoX + (photoSize / 2), finalPhotoY + (photoSize / 2), photoSize / 2).stroke().restore();
+                photoDrawn = true;
             }
         } catch (e) {
             console.error('Prestige PDF Photo Error:', e);
         }
+    }
+
+    if (!photoDrawn) {
+        const finalPhotoY = headerTop;
+        renderCircularInitials(doc, pInfo.fullName || 'John Doe', photoX, finalPhotoY, photoSize);
+        doc.save().lineWidth(2).strokeColor(COLORS.sectionBar).circle(photoX + (photoSize / 2), finalPhotoY + (photoSize / 2), photoSize / 2).stroke().restore();
     }
 
     mainY = Math.max(headerBottom, headerTop + photoSize) + 15; // Tightened from 20
@@ -4725,18 +4794,26 @@ async function renderTemplate_HieroVision(doc, rawData, colors, spacing) {
     const IMG_CX = SIDEBAR_W / 2;
     const IMG_CY = sideY + IMG_R;
 
+    let photoDrawn = false;
     if (data.personalInfo.profilePhoto) {
         doc.save();
         doc.circle(IMG_CX, IMG_CY, IMG_R).clip();
         try {
             const buf = base64ToBuffer(data.personalInfo.profilePhoto);
-            doc.image(buf, IMG_CX - IMG_R, IMG_CY - IMG_R, { width: IMG_R * 2, height: IMG_R * 2, cover: [IMG_R * 2, IMG_R * 2] });
+            if (buf) {
+                doc.image(buf, IMG_CX - IMG_R, IMG_CY - IMG_R, { width: IMG_R * 2, height: IMG_R * 2, cover: [IMG_R * 2, IMG_R * 2] });
+                photoDrawn = true;
+            }
         } catch (e) { }
         doc.restore();
-        // white ring
-        doc.circle(IMG_CX, IMG_CY, IMG_R).lineWidth(4).strokeColor(WHITE).stroke();
-    } else {
-        doc.circle(IMG_CX, IMG_CY, IMG_R).fill(TERRA_DARK);
+        if (photoDrawn) {
+            // white ring
+            doc.circle(IMG_CX, IMG_CY, IMG_R).lineWidth(4).strokeColor(WHITE).stroke();
+        }
+    }
+
+    if (!photoDrawn) {
+        renderCircularInitials(doc, data.personalInfo.fullName || 'John Doe', IMG_CX - IMG_R, IMG_CY - IMG_R, IMG_R * 2);
         doc.circle(IMG_CX, IMG_CY, IMG_R).lineWidth(4).strokeColor(WHITE).stroke();
     }
 
@@ -4975,19 +5052,24 @@ async function renderTemplate_HieroPremium(doc, rawData, colors, spacing) {
     let leftY = MARGIN;
     let rightY = MARGIN;
 
-    // --- DRAW HEADER AREA ---
     // Profile Image
     const IMG_SIZE = 110;
+    let photoDrawn = false;
     if (data.personalInfo.profilePhoto) {
         doc.save();
         doc.circle(LEFT_X + IMG_SIZE / 2, leftY + IMG_SIZE / 2, IMG_SIZE / 2).clip();
         try {
             const imgBuffer = base64ToBuffer(data.personalInfo.profilePhoto);
-            doc.image(imgBuffer, LEFT_X, leftY, { width: IMG_SIZE, height: IMG_SIZE, cover: [IMG_SIZE, IMG_SIZE] });
+            if (imgBuffer) {
+                doc.image(imgBuffer, LEFT_X, leftY, { width: IMG_SIZE, height: IMG_SIZE, cover: [IMG_SIZE, IMG_SIZE] });
+                photoDrawn = true;
+            }
         } catch (e) { }
         doc.restore();
-    } else {
-        doc.circle(LEFT_X + IMG_SIZE / 2, leftY + IMG_SIZE / 2, IMG_SIZE / 2).fill('#CCCCCC');
+    }
+
+    if (!photoDrawn) {
+        renderInitials(doc, data.personalInfo.fullName || 'John Doe', LEFT_X + IMG_SIZE / 2, leftY + IMG_SIZE / 2, IMG_SIZE / 2);
     }
 
     // Name & Title
@@ -5316,7 +5398,7 @@ async function renderTemplate_HieroRoyal(doc, rawData) {
     const HEADER_TEXT_W = PHOTO_X - MARGIN - 10;
 
     // Name
-    const fullName = data.personalInfo.fullName || 'Your Name';
+    const fullName = data.personalInfo.fullName || 'John Doe';
     doc.font('Helvetica-Bold').fontSize(28).fillColor(BLACK);
     doc.text(fullName, MARGIN, y, { width: HEADER_TEXT_W });
     y += 36;
@@ -5340,6 +5422,7 @@ async function renderTemplate_HieroRoyal(doc, rawData) {
 
     // Profile photo – positioned at top right
     const PHOTO_Y = MARGIN;
+    let photoDrawn = false;
     if (data.personalInfo.profilePhoto) {
         try {
             const buf = base64ToBuffer(data.personalInfo.profilePhoto);
@@ -5348,13 +5431,13 @@ async function renderTemplate_HieroRoyal(doc, rawData) {
                 doc.rect(PHOTO_X, PHOTO_Y, PHOTO_SIZE, PHOTO_SIZE).clip();
                 doc.image(buf, PHOTO_X, PHOTO_Y, { width: PHOTO_SIZE, height: PHOTO_SIZE, cover: [PHOTO_SIZE, PHOTO_SIZE] });
                 doc.restore();
+                photoDrawn = true;
             }
-        } catch (e) {
-            // placeholder grey box
-            doc.rect(PHOTO_X, PHOTO_Y, PHOTO_SIZE, PHOTO_SIZE).fill('#C0B8A8');
-        }
-    } else {
-        doc.rect(PHOTO_X, PHOTO_Y, PHOTO_SIZE, PHOTO_SIZE).fill('#C0B8A8');
+        } catch (e) { }
+    }
+
+    if (!photoDrawn) {
+        renderInitials(doc, data.personalInfo.fullName || 'John Doe', PHOTO_X + PHOTO_SIZE / 2, PHOTO_Y + PHOTO_SIZE / 2, PHOTO_SIZE / 2);
     }
 
     // Horizontal divider after header
@@ -5633,7 +5716,7 @@ async function renderTemplate_HieroAcademic(doc, rawData) {
         } catch (e) { }
     }
     if (!photoDrawn) {
-        doc.rect(PCX - PR, PCY - PR, PR * 2, PR * 2).fill('#444444');
+        renderInitials(doc, PI.fullName || 'John Doe', PCX, PCY, PR);
     }
     doc.restore();
 
@@ -5880,7 +5963,7 @@ async function renderTemplate_HieroUrban(doc, rawData) {
         } catch (e) { }
     }
     if (!photoDrawn) {
-        doc.rect(PCX - PR, PCY - PR, PR * 2, PR * 2).fill('#555555');
+        renderInitials(doc, PI.fullName || 'John Doe', PCX, PCY, PR);
     }
     doc.restore();
 
@@ -6126,19 +6209,21 @@ function renderTemplate_HieroCool(doc, data) {
     doc.save();
     doc.roundedRect(photoX, photoY, photoSize, photoSize, 15).clip();
     const photoSource = pInfo.profilePhoto || data.photo;
+    let photoDrawn = false;
     if (photoSource) {
         try {
             const photoBuffer = typeof base64ToBuffer === 'function' ? base64ToBuffer(photoSource) : photoSource;
             if (photoBuffer) {
                 doc.image(photoBuffer, photoX, photoY, { width: photoSize, height: photoSize });
-            } else {
-                doc.rect(photoX, photoY, photoSize, photoSize).fill('#222222');
+                photoDrawn = true;
             }
         } catch (e) {
-            doc.rect(photoX, photoY, photoSize, photoSize).fill('#222222');
+            console.error("Hiero Cool: Photo render failed", e);
         }
-    } else {
-        doc.rect(photoX, photoY, photoSize, photoSize).fill('#222222');
+    }
+
+    if (!photoDrawn) {
+        renderInitials(doc, pInfo.fullName || 'John Doe', photoX + photoSize / 2, photoY + photoSize / 2, photoSize / 2);
     }
     doc.restore();
 
@@ -6350,7 +6435,7 @@ function renderTemplate_HieroVertex(doc, data) {
     let headerY = 35;
 
     // Name
-    const fullName = (pInfo.fullName || data.name || 'LOTHER SMITH').toUpperCase();
+    const fullName = (pInfo.fullName || data.name || 'John Doe').toUpperCase();
     doc.fillColor(colors.textDark).font('Helvetica-Bold').fontSize(32).text(fullName, 0, headerY, { align: 'center', width: pageWidth, characterSpacing: 2 });
 
     // Title

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -214,6 +214,7 @@
       color: inherit;
       transition: none;
     }
+
 
     .template-card.premium .template-preview i {
       color: #ffd700;
@@ -900,7 +901,7 @@
     }
 
     .photo-upload-info li:before {
-      content: "✓";
+      content: "âœ“";
       position: absolute;
       left: 0;
       color: #2ae023;
@@ -1123,6 +1124,30 @@
       transform: scale(1.05);
     }
 
+    /* Custom scrollbar for template previews */
+    .preview-scroll-container::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .preview-scroll-container::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 10px;
+    }
+
+    .preview-scroll-container::-webkit-scrollbar-thumb {
+      background: rgba(42, 224, 35, 0.3);
+      border-radius: 10px;
+    }
+
+    .preview-scroll-container::-webkit-scrollbar-thumb:hover {
+      background: rgba(42, 224, 35, 0.6);
+    }
+
+    .preview-scroll-container {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(42, 224, 35, 0.3) rgba(0, 0, 0, 0.2);
+    }
+
     @media (max-width:768px) {
       .main-layout {
         grid-template-columns: 1fr;
@@ -1269,6 +1294,7 @@
         <!-- Hiero Pro Template (formerly Rishi) -->
         <div class="template-card" data-category="modern" data-template="rishi" data-type="free">
           <div class="template-preview" onclick="previewTemplate('rishi')">
+
             <i class="fas fa-laptop-code"></i>
             <div class="preview-overlay">
               <button class="preview-btn">Preview Template</button>
@@ -1395,6 +1421,7 @@
         <!-- Priya Analytics Single-Column Template (matches Priya Sharma PDF) -->
         <div class="template-card" data-category="analytics" data-template="priya-analytics" data-type="free">
           <div class="template-preview" onclick="previewTemplate('priya-analytics')">
+
             <i class="fas fa-chart-line"></i>
             <div class="preview-overlay">
               <button class="preview-btn">Preview Template</button>
@@ -1488,6 +1515,7 @@
         <!-- Hiero Tech Template (Template 8) -->
         <div class="template-card" data-category="creative" data-template="hiero-tech" data-type="free">
           <div class="template-preview" onclick="previewTemplate('hiero-tech')">
+
             <i class="fas fa-code"></i>
             <div class="preview-overlay">
               <button class="preview-btn">Preview Template</button>
@@ -1749,6 +1777,7 @@
         <div class="template-card premium" data-category="premium" data-template="hiero-velocity" data-type="premium">
           <div class="premium-badge">Premium</div>
           <div class="template-preview" onclick="previewTemplate('hiero-velocity')">
+
             <i class="fas fa-bolt"></i>
             <div class="preview-overlay">
               <button class="preview-btn">Preview Template</button>
@@ -1837,7 +1866,7 @@
                         onclick="window.location.href='ai-photo-formalizer.html'"
                         style="justify-content: center; width: 100%; border: 1px solid #2ae023;">
                         <span class="btn-shine"></span>
-                        <i class="fas fa-wand-magic-sparkles"></i> ✨ Generate Executive Photo
+                        <i class="fas fa-wand-magic-sparkles"></i> âœ¨ Generate Executive Photo
                       </button>
                       <p style="font-size: 11px; color: #2ae023; text-align: center; margin-top: 5px; opacity: 0.8;">
                         <i class="fas fa-crown"></i> Hiero Executive AI (Premium)
@@ -2338,8 +2367,8 @@
     // Last updated: 2026-02-21 20:15
     // CACHE BUSTER: If you see broken code, hard refresh: Ctrl+Shift+R (Windows) or Cmd+Shift+R (Mac)
 
-    console.log('🔥 Resume Builder v5 Loaded - 2026-02-21 20:15');
-    console.log('✅ fillFormWithImportedData function: COMPLETE AND WORKING');
+    console.log('ðŸ”¥ Resume Builder v5 Loaded - 2026-02-21 20:15');
+    console.log('âœ… fillFormWithImportedData function: COMPLETE AND WORKING');
 
     // Global state
     let selectedTemplate = null;
@@ -2348,21 +2377,21 @@
     // Point to the integrated Gateway's Resume API
     const BACKEND_URL = window.location.origin + '/api/resume';
 
-    console.log('🌐 Backend URL:', BACKEND_URL);
-    console.log('🔧 Mode: Using Integrated Gateway');
+    console.log('ðŸŒ Backend URL:', BACKEND_URL);
+    console.log('ðŸ”§ Mode: Using Integrated Gateway');
 
     // Add quick backend health ping (non-blocking, silent failure)
     // Only run if page is loaded via http/https (not file://)
     (async () => {
       // Skip health check if opened via file:// protocol (CORS will fail)
       if (window.location.protocol === 'file:') {
-        console.log('ℹ️ Skipping health check (file:// protocol)');
+        console.log('â„¹ï¸ Skipping health check (file:// protocol)');
         return;
       }
 
       try {
         const backendUrl = BACKEND_URL;
-        console.log('🔍 Checking backend health at:', backendUrl + '/health');
+        console.log('ðŸ” Checking backend health at:', backendUrl + '/health');
 
         const r = await fetch(backendUrl + '/health', {
           cache: 'no-store',
@@ -2375,15 +2404,15 @@
 
         if (r.ok) {
           const data = await r.json();
-          console.log('✅ Backend health check passed:', backendUrl, data);
+          console.log('âœ… Backend health check passed:', backendUrl, data);
         } else {
-          console.warn('⚠️ Health endpoint returned:', r.status, 'for', backendUrl);
+          console.warn('âš ï¸ Health endpoint returned:', r.status, 'for', backendUrl);
         }
       } catch (e) {
         // Silent failure - don't show error if backend is not accessible yet
         // This is just a health check, not critical for functionality
         // Common reasons: CORS, network error, server not running
-        console.debug('ℹ️ Backend health check skipped (non-critical):', e.message);
+        console.debug('â„¹ï¸ Backend health check skipped (non-critical):', e.message);
       }
     })();
 
@@ -2598,7 +2627,7 @@
           grid.appendChild(cards[j]);
         }
 
-        console.log('🎲 Templates shuffled randomly');
+        console.log('ðŸŽ² Templates shuffled randomly');
 
         // Add a nice animation effect
         cards.forEach(card => {
@@ -2864,7 +2893,7 @@
         'hiero-apollo': {
           name: 'Hiero Apollo',
           description: 'Academic excellence and research-focused layout for scholars.',
-          style: 'Traditional学术 (academic) structure, refined serif type.'
+          style: 'Traditionalå­¦æœ¯ (academic) structure, refined serif type.'
         },
         'hiero-orion': {
           name: 'Hiero Orion',
@@ -2915,9 +2944,9 @@
                     style="position: absolute; top: 20px; right: 20px; background: #222; 
                            border: none; font-size: 20px; cursor: pointer; color: #fff; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: all 0.2s;"
                     onmouseover="this.style.background='#ff4d4d';"
-                    onmouseout="this.style.background='#222';">×</button>
+                    onmouseout="this.style.background='#222';">Ã—</button>
             <h2 style="margin: 0 0 5px 0; color: #fff; font-size: 24px; font-weight: 700; letter-spacing: -0.5px;">${template.name}</h2>
-            <p style="margin: 0; color: #888; font-size: 14px;">Premium Design • High Fidelity Preview</p>
+            <p style="margin: 0; color: #888; font-size: 14px;">Premium Design â€¢ High Fidelity Preview</p>
           </div>
           <div id="preview-content" style="flex: 1; overflow-y: auto; padding: 40px; display: flex; justify-content: center; align-items: flex-start; background: #0a0a0a; min-height: 500px; scrollbar-width: thin; scrollbar-color: #333 #0a0a0a;">
             <div style="text-align: center; color: #888; padding: 80px 20px;">
@@ -2951,7 +2980,7 @@
       let previewLoaded = false;
 
       try {
-        console.log('🔍 Fetching preview for template:', templateId);
+        console.log('ðŸ” Fetching preview for template:', templateId);
 
         // Sample data tailored for different templates
         let sampleData = {
@@ -2970,14 +2999,14 @@
               company: 'Tech Innovations Inc.',
               startDate: '2022-01',
               endDate: 'Present',
-              description: '• Led development of microservices architecture serving 1M+ users\n• Improved system performance by 40% through optimization\n• Mentored team of 5 junior developers'
+              description: 'â€¢ Led development of microservices architecture serving 1M+ users\nâ€¢ Improved system performance by 40% through optimization\nâ€¢ Mentored team of 5 junior developers'
             },
             {
               jobTitle: 'Software Engineer',
               company: 'StartupXYZ',
               startDate: '2020-06',
               endDate: '2021-12',
-              description: '• Developed full-stack web applications using React and Node.js\n• Implemented RESTful APIs and database optimization\n• Collaborated with cross-functional teams in Agile environment'
+              description: 'â€¢ Developed full-stack web applications using React and Node.js\nâ€¢ Implemented RESTful APIs and database optimization\nâ€¢ Collaborated with cross-functional teams in Agile environment'
             }
           ],
           education: [
@@ -3116,7 +3145,7 @@
         const controller = new AbortController();
         const timeoutId = setTimeout(() => {
           controller.abort();
-          console.warn('⏱️ Preview request timeout after 90 seconds');
+          console.warn('â±ï¸ Preview request timeout after 90 seconds');
         }, 90000); // 90 seconds for ngrok
 
         const response = await fetch(`${BACKEND_URL}/preview-resume`, {
@@ -3138,7 +3167,7 @@
         const blob = await response.blob();
         const previewUrl = URL.createObjectURL(blob);
 
-        console.log('✅ Preview blob created for:', templateId);
+        console.log('âœ… Preview blob created for:', templateId);
 
         // Update preview content with iframe
         const previewContent = modal.querySelector('#preview-content');
@@ -3165,7 +3194,7 @@
           // Create iframe element for desktop
           const iframe = document.createElement('iframe');
           iframe.style.cssText = 'width: 100%; height: 650px; border: none; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); background: white;';
-          iframe.src = previewUrl;
+          iframe.src = previewUrl + '#toolbar=0&navpanes=0&scrollbar=0';
           previewContent.appendChild(iframe);
 
           // Add a fallback link below the iframe just in case
@@ -3185,7 +3214,7 @@
         };
 
       } catch (error) {
-        console.error('❌ Error fetching preview:', error, 'URL:', BACKEND_URL + '/preview-resume');
+        console.error('âŒ Error fetching preview:', error, 'URL:', BACKEND_URL + '/preview-resume');
 
         const previewContent = modal.querySelector('#preview-content');
 
@@ -3225,9 +3254,9 @@
                   <h3 style="margin: 0 0 5px 0; color: #2c3e50; font-size: 16px; font-weight: 600;">Job Title</h3>
                   <p style="margin: 0 0 5px 0; color: #7f8c8d; font-size: 14px;">Company Name | 2020 - Present</p>
                   <p style="margin: 0; color: #555; font-size: 14px; line-height: 1.5;">
-                    • Your key responsibilities and achievements<br>
-                    • Measurable results and impacts<br>
-                    • Technologies and skills used
+                    â€¢ Your key responsibilities and achievements<br>
+                    â€¢ Measurable results and impacts<br>
+                    â€¢ Technologies and skills used
                   </p>
                 </div>
               </div>
@@ -3251,7 +3280,7 @@
             ${isNetworkError ? `
             <div style="margin-top: 20px; padding: 15px; background: #e8f5e9; border-radius: 6px; border-left: 4px solid #2ae023;">
               <p style="margin: 0 0 8px 0; color: #2c5e2e; font-size: 13px; font-weight: 600;">
-                💡 To see the actual template preview:
+                ðŸ’¡ To see the actual template preview:
               </p>
               <p style="margin: 0; color: #2c5e2e; font-size: 12px; line-height: 1.5;">
                 Make sure the backend server is running. You can still select this template to continue building your resume.
@@ -3268,7 +3297,7 @@
 
     // ========== Auto-fill imported resume data into form ==========
     function fillFormWithImportedData(data) {
-      console.log("🎯 Filling form with imported data:", data);
+      console.log("ðŸŽ¯ Filling form with imported data:", data);
 
       // Personal Info
       document.getElementById("fullName").value = data.personalInfo?.fullName || "";
@@ -3363,7 +3392,7 @@
       document.getElementById("achievements").value = data.achievements || "";
       document.getElementById("hobbies").value = data.hobbies || "";
 
-      console.log("✔️ Auto-fill completed successfully");
+      console.log("âœ”ï¸ Auto-fill completed successfully");
     }
 
     // Start building with selected template
@@ -3373,7 +3402,7 @@
       // Save selected template to localStorage (for PDF generation)
       localStorage.setItem('selectedTemplate', templateId);
 
-      console.log('✅ Template selected:', templateId);
+      console.log('âœ… Template selected:', templateId);
 
       // Show import resume modal first
       showImportResumeModal();
@@ -3457,14 +3486,14 @@
       // Close modal when clicking the backdrop (outside the content box)
       modal.addEventListener('click', function (e) {
         if (e.target === modal) {
-          console.log('🔵 Backdrop clicked, closing modal...');
+          console.log('ðŸ”µ Backdrop clicked, closing modal...');
           closeImportModal();
         }
       });
 
       // Handle "No, I'll Fill It Manually" button click
       document.getElementById('proceedWithoutImportBtn').addEventListener('click', function (e) {
-        console.log('🟢 "No, I\'ll Fill It Manually" button clicked');
+        console.log('ðŸŸ¢ "No, I\'ll Fill It Manually" button clicked');
         e.preventDefault();
         e.stopPropagation();
         proceedToFormWithoutImport();
@@ -3473,7 +3502,7 @@
       // Handle ESC key to close modal
       const escHandler = function (e) {
         if (e.key === 'Escape') {
-          console.log('🔵 ESC pressed, closing modal...');
+          console.log('ðŸ”µ ESC pressed, closing modal...');
           closeImportModal();
           document.removeEventListener('keydown', escHandler);
         }
@@ -3503,7 +3532,7 @@
           // Use LOCAL backend for import to get "Perfect Extraction" logic
           // The production backend doesn't have the new AI logic yet.
           const IMPORT_URL = `${BACKEND_URL}/import`;
-          console.log('🚀 Importing resume via:', IMPORT_URL);
+          console.log('ðŸš€ Importing resume via:', IMPORT_URL);
 
           const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
           const response = await fetch(IMPORT_URL, {
@@ -3599,26 +3628,26 @@
 
     // Close import modal
     function closeImportModal() {
-      console.log('🔵 Attempting to close import modal...');
+      console.log('ðŸ”µ Attempting to close import modal...');
       const modal = document.getElementById('importResumeModal');
       if (modal) {
-        console.log('✅ Modal found, removing...');
+        console.log('âœ… Modal found, removing...');
         modal.remove();
-        console.log('✅ Modal removed successfully');
+        console.log('âœ… Modal removed successfully');
       } else {
-        console.warn('⚠️ Modal not found with id "importResumeModal"');
+        console.warn('âš ï¸ Modal not found with id "importResumeModal"');
       }
     }
 
     // Proceed to form without importing
     function proceedToFormWithoutImport() {
-      console.log('🔵 proceedToFormWithoutImport called');
+      console.log('ðŸ”µ proceedToFormWithoutImport called');
       try {
         closeImportModal();
-        console.log('🔵 Modal closed, proceeding to form...');
+        console.log('ðŸ”µ Modal closed, proceeding to form...');
         proceedToForm();
       } catch (error) {
-        console.error('❌ Error in proceedToFormWithoutImport:', error);
+        console.error('âŒ Error in proceedToFormWithoutImport:', error);
         alert('Error: ' + error.message);
       }
     }
@@ -3693,19 +3722,19 @@
 
     // Show the form (Step 2)
     function proceedToForm() {
-      console.log('🔵 Moving from Step 1 → Step 2');
-      console.log('🔵 Selected template:', selectedTemplate);
+      console.log('ðŸ”µ Moving from Step 1 â†’ Step 2');
+      console.log('ðŸ”µ Selected template:', selectedTemplate);
 
       try {
         // Check if template is selected
         if (!selectedTemplate) {
           // Try to recover from localStorage
           selectedTemplate = localStorage.getItem('selectedTemplate');
-          console.log('🔄 Recovered template from localStorage:', selectedTemplate);
+          console.log('ðŸ”„ Recovered template from localStorage:', selectedTemplate);
         }
 
         if (!selectedTemplate) {
-          console.error('❌ No template selected!');
+          console.error('âŒ No template selected!');
           alert('Please select a template first');
           // Fallback: show template selection
           document.getElementById('templateSelection').style.display = 'block';
@@ -3716,34 +3745,34 @@
         const templateSelection = document.getElementById('templateSelection');
         if (templateSelection) {
           templateSelection.style.display = 'none';
-          console.log('✅ Template selection hidden');
+          console.log('âœ… Template selection hidden');
         } else {
-          console.error('❌ templateSelection element not found');
+          console.error('âŒ templateSelection element not found');
         }
 
         // Show form step indicator and form (Step 2)
         const formStepIndicator = document.getElementById('formStepIndicator');
         if (formStepIndicator) {
           formStepIndicator.style.display = 'block';
-          console.log('✅ Form step indicator shown');
+          console.log('âœ… Form step indicator shown');
         } else {
-          console.error('❌ formStepIndicator element not found');
+          console.error('âŒ formStepIndicator element not found');
         }
 
         const mainLayout = document.querySelector('.main-layout');
         if (mainLayout) {
           mainLayout.style.display = 'grid';
-          console.log('✅ Main layout shown');
+          console.log('âœ… Main layout shown');
         } else {
-          console.error('❌ main-layout element not found');
+          console.error('âŒ main-layout element not found');
         }
 
         const bottomActions = document.querySelector('.bottom-actions');
         if (bottomActions) {
           bottomActions.style.display = 'flex';
-          console.log('✅ Bottom actions shown');
+          console.log('âœ… Bottom actions shown');
         } else {
-          console.error('❌ bottom-actions element not found');
+          console.error('âŒ bottom-actions element not found');
         }
 
         // Initialize photo if previously uploaded
@@ -3751,45 +3780,45 @@
 
         // Update step indicator with template info
         const templateName = getTemplateName(selectedTemplate);
-        console.log('✅ Template name:', templateName);
+        console.log('âœ… Template name:', templateName);
 
         const stepText = document.querySelector('#formStepIndicator .step-text');
         if (stepText) {
           stepText.textContent = `Step 2: Fill Your Information (Using ${templateName} template)`;
-          console.log('✅ Step text updated');
+          console.log('âœ… Step text updated');
         } else {
-          console.error('❌ step-text element not found');
+          console.error('âŒ step-text element not found');
         }
 
         // Add a back button to return to Step 1
         addBackToTemplatesButton();
-        console.log('✅ Back button added');
+        console.log('âœ… Back button added');
 
         // Push history state for Step 2 (enables proper back button behavior)
         history.pushState({ step: 2, template: selectedTemplate }, '', '');
-        console.log('✅ History state pushed');
+        console.log('âœ… History state pushed');
 
         // Scroll to form
         setTimeout(() => {
           const mainLayoutScroll = document.querySelector('.main-layout');
           if (mainLayoutScroll) {
             mainLayoutScroll.scrollIntoView({ behavior: 'smooth' });
-            console.log('✅ Scrolled to form');
+            console.log('âœ… Scrolled to form');
           }
         }, 100);
 
-        console.log('✅✅✅ proceedToForm completed successfully!');
+        console.log('âœ…âœ…âœ… proceedToForm completed successfully!');
 
       } catch (error) {
-        console.error('❌ Error in proceedToForm:', error);
+        console.error('âŒ Error in proceedToForm:', error);
         alert('Error proceeding to form: ' + error.message);
       }
     }
 
-    // Fill form with imported resume data (Auto-fill) — v2025-12-02
+    // Fill form with imported resume data (Auto-fill) â€” v2025-12-02
     function fillFormWithImportedData(data) {
       try {
-        console.log("🎯 Filling form with imported data", data);
+        console.log("ðŸŽ¯ Filling form with imported data", data);
 
         // Preserve selected template before clearing form
         const preservedTemplate = selectedTemplate || localStorage.getItem('selectedTemplate');
@@ -3800,7 +3829,7 @@
         if (preservedTemplate) {
           selectedTemplate = preservedTemplate;
           localStorage.setItem('selectedTemplate', preservedTemplate);
-          console.log("✅ Fixed: Preserved template during import:", selectedTemplate);
+          console.log("âœ… Fixed: Preserved template during import:", selectedTemplate);
         }
 
         const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ""; };
@@ -3995,7 +4024,7 @@
         if (data.customSections && Array.isArray(data.customSections) && data.customSections.length > 0) {
           const first = data.customSections[0];
           setVal('customSectionTitle', first.title || 'Custom Section');
-          setVal('customSectionContent', Array.isArray(first.items) ? first.items.join('\n• ') : (first.items || ''));
+          setVal('customSectionContent', Array.isArray(first.items) ? first.items.join('\nâ€¢ ') : (first.items || ''));
 
           if (data.customSections.length > 1) {
             const others = data.customSections.slice(1).map(s => `${s.title}:\n${Array.isArray(s.items) ? s.items.join(', ') : s.items}`).join('\n\n');
@@ -4061,8 +4090,8 @@
           }
         });
 
-        console.log("✔️ Auto-fill completed successfully");
-        alert('✅ Imported resume data has been filled into the form. Review and generate your resume.');
+        console.log("âœ”ï¸ Auto-fill completed successfully");
+        alert('âœ… Imported resume data has been filled into the form. Review and generate your resume.');
 
         // 11. Final UI Update
         const templateSelection = document.getElementById('templateSelection');
@@ -4079,8 +4108,8 @@
         localStorage.setItem('resumeData', JSON.stringify(data));
 
       } catch (err) {
-        console.error('❌ Error in fillFormWithImportedData:', err);
-        alert('❌ Failed to auto-fill form: ' + err.message);
+        console.error('âŒ Error in fillFormWithImportedData:', err);
+        alert('âŒ Failed to auto-fill form: ' + err.message);
       }
     }
 
@@ -4196,7 +4225,7 @@
       // Validate file type
       const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
       if (!validTypes.includes(file.type)) {
-        photoStatus.textContent = '❌ Invalid format. Please upload JPG or PNG only.';
+        photoStatus.textContent = 'âŒ Invalid format. Please upload JPG or PNG only.';
         photoStatus.classList.add('error');
         event.target.value = ''; // Clear the input
         return;
@@ -4205,7 +4234,7 @@
       // Validate file size (minimum 50KB)
       const minSize = 50 * 1024; // 50KB in bytes
       if (file.size < minSize) {
-        photoStatus.textContent = `❌ Photo too small. Minimum ${Math.round(minSize / 1024)}KB required.`;
+        photoStatus.textContent = `âŒ Photo too small. Minimum ${Math.round(minSize / 1024)}KB required.`;
         photoStatus.classList.add('error');
         event.target.value = '';
         return;
@@ -4214,7 +4243,7 @@
       // Maximum size check (5MB)
       const maxSize = 5 * 1024 * 1024; // 5MB
       if (file.size > maxSize) {
-        photoStatus.textContent = '❌ Photo too large. Maximum 5MB allowed.';
+        photoStatus.textContent = 'âŒ Photo too large. Maximum 5MB allowed.';
         photoStatus.classList.add('error');
         event.target.value = '';
         return;
@@ -4240,7 +4269,7 @@
 
         // Show success message
         const fileSizeKB = Math.round(file.size / 1024);
-        photoStatus.textContent = `✓ Photo uploaded successfully (${fileSizeKB}KB)`;
+        photoStatus.textContent = `âœ“ Photo uploaded successfully (${fileSizeKB}KB)`;
         photoStatus.classList.add('success');
 
         // Show AI Button and Badge
@@ -4252,7 +4281,7 @@
       };
 
       reader.onerror = function () {
-        photoStatus.textContent = '❌ Failed to load photo. Please try again.';
+        photoStatus.textContent = 'âŒ Failed to load photo. Please try again.';
         photoStatus.classList.add('error');
       };
 
@@ -4477,7 +4506,7 @@
           return;
         }
 
-        console.log('🔄 Starting to fill sample data...');
+        console.log('ðŸ”„ Starting to fill sample data...');
 
         // Personal Information
         const fullNameEl = document.getElementById('fullName');
@@ -4485,7 +4514,7 @@
         const phoneEl = document.getElementById('phone');
 
         if (!fullNameEl || !emailEl || !phoneEl) {
-          console.error('❌ Required form elements not found');
+          console.error('âŒ Required form elements not found');
           alert('Error: Form elements not found. Please refresh the page and try again.');
           return;
         }
@@ -4607,7 +4636,7 @@
             start: '2023-01',
             end: '',
             current: true,
-            description: '• Analyzed large datasets (50M+ rows) to identify trends and build predictive dashboards\n• Developed machine learning models (classification & regression) improving customer churn prediction by 18%\n• Performed feature engineering, model tuning, and evaluation using precision, recall, and ROC-AUC\n• Implemented A/B testing frameworks to measure product improvements; increased conversion rate by 6.5%\n• Built visualization dashboards using Matplotlib, Seaborn, and Tableau to support decision-making'
+            description: 'â€¢ Analyzed large datasets (50M+ rows) to identify trends and build predictive dashboards\nâ€¢ Developed machine learning models (classification & regression) improving customer churn prediction by 18%\nâ€¢ Performed feature engineering, model tuning, and evaluation using precision, recall, and ROC-AUC\nâ€¢ Implemented A/B testing frameworks to measure product improvements; increased conversion rate by 6.5%\nâ€¢ Built visualization dashboards using Matplotlib, Seaborn, and Tableau to support decision-making'
           },
           {
             title: 'Junior Data Analyst',
@@ -4615,7 +4644,7 @@
             start: '2021-08',
             end: '2022-12',
             current: false,
-            description: '• Conducted exploratory data analysis (EDA) and identified business insights\n• Automated data cleaning and transformation pipelines using Python and SQL\n• Contributed to clustering models for customer segmentation'
+            description: 'â€¢ Conducted exploratory data analysis (EDA) and identified business insights\nâ€¢ Automated data cleaning and transformation pipelines using Python and SQL\nâ€¢ Contributed to clustering models for customer segmentation'
           }
         ];
 
@@ -4798,8 +4827,8 @@
 
         // Show success message
         setTimeout(() => {
-          console.log('✅ Sample data filled successfully');
-          alert('✅ Sample data has been loaded successfully!\n\nYou can now preview or generate your resume with any template to see how it looks with comprehensive data.');
+          console.log('âœ… Sample data filled successfully');
+          alert('âœ… Sample data has been loaded successfully!\n\nYou can now preview or generate your resume with any template to see how it looks with comprehensive data.');
 
           // Scroll to top of form
           const mainLayout = document.querySelector('.main-layout');
@@ -4809,8 +4838,8 @@
         }, 2000);
 
       } catch (error) {
-        console.error('❌ Error filling sample data:', error);
-        alert('❌ Error filling sample data: ' + error.message + '\n\nPlease check the browser console for details.');
+        console.error('âŒ Error filling sample data:', error);
+        alert('âŒ Error filling sample data: ' + error.message + '\n\nPlease check the browser console for details.');
       }
     }
 
@@ -4859,7 +4888,7 @@
       }
 
       if (!valid) {
-        alert('Please fix the following errors:\n• ' + errors.join('\n• '));
+        alert('Please fix the following errors:\nâ€¢ ' + errors.join('\nâ€¢ '));
         return;
       }
 
@@ -4880,7 +4909,7 @@
       data.template = selectedTemplate;
       localStorage.setItem('resumeData', JSON.stringify(data));
 
-      console.log('🚀 Starting resume generation with in-page animation:', data);
+      console.log('ðŸš€ Starting resume generation with in-page animation:', data);
       console.log('Backend URL:', BACKEND_URL);
 
       // Show beautiful loading overlay in same window (no popup!)
@@ -4947,16 +4976,16 @@
         const controller = new AbortController();
         const timeoutId = setTimeout(() => {
           controller.abort();
-          console.error('⏱️ Request timeout after 120 seconds');
-          statusEl.textContent = '❌ Request Timeout';
+          console.error('â±ï¸ Request timeout after 120 seconds');
+          statusEl.textContent = 'âŒ Request Timeout';
           statusEl.style.color = '#ff6b6b';
           substatusEl.textContent = 'The server took too long to respond. Please try again or check your connection.';
           progressBar.style.background = 'linear-gradient(90deg, #ff6b6b, #c92a2a)';
         }, 120000); // 120 seconds for ngrok
 
         const downloadUrl = BACKEND_URL + '/download-resume';
-        console.log('📡 Generating resume at:', downloadUrl);
-        console.log('📦 Request data:', {
+        console.log('ðŸ“¡ Generating resume at:', downloadUrl);
+        console.log('ðŸ“¦ Request data:', {
           template: data.template,
           name: data.personalInfo?.fullName,
           dataSize: JSON.stringify(data).length
@@ -4970,12 +4999,12 @@
             cache: 'no-store'
           });
           if (healthCheck.ok) {
-            console.log('✅ Backend health check passed before download');
+            console.log('âœ… Backend health check passed before download');
           } else {
-            console.warn('⚠️ Backend health check returned:', healthCheck.status);
+            console.warn('âš ï¸ Backend health check returned:', healthCheck.status);
           }
         } catch (healthError) {
-          console.error('❌ Backend health check failed:', healthError.message);
+          console.error('âŒ Backend health check failed:', healthError.message);
           console.error('   This might indicate the backend is not accessible');
           throw new Error(`Backend server not accessible at ${BACKEND_URL}. Please check if the server is running.`);
         }
@@ -5008,16 +5037,16 @@
 
         // Check if response is actually PDF
         const contentType = response.headers.get('content-type');
-        console.log('📄 Response Content-Type:', contentType);
+        console.log('ðŸ“„ Response Content-Type:', contentType);
 
         if (!contentType || !contentType.includes('application/pdf')) {
           const text = await response.text();
-          console.error('❌ Response is not PDF! Content:', text.substring(0, 200));
+          console.error('âŒ Response is not PDF! Content:', text.substring(0, 200));
           throw new Error('Server returned non-PDF response. Check console for details.');
         }
 
         const blob = await response.blob();
-        console.log('✅ PDF blob received, size:', blob.size, 'bytes');
+        console.log('âœ… PDF blob received, size:', blob.size, 'bytes');
 
         // Verify blob is actually PDF
         if (blob.size === 0) {
@@ -5026,7 +5055,7 @@
 
         // Check if blob type is correct
         if (!blob.type || !blob.type.includes('pdf')) {
-          console.warn('⚠️ Blob type is not PDF:', blob.type);
+          console.warn('âš ï¸ Blob type is not PDF:', blob.type);
           // Try to read first bytes to verify
           const firstBytes = await blob.slice(0, 4).text();
           console.log('First 4 bytes:', firstBytes);
@@ -5043,16 +5072,16 @@
         // Download the file with proper error handling
         try {
           // Manual download disabled in generation - choice modal will handle it
-          console.log('✅ Generation successful - showing choice modal');
+          console.log('âœ… Generation successful - showing choice modal');
           // skip a.click()
         } catch (downloadError) {
 
-          console.error('❌ Download error:', downloadError);
+          console.error('âŒ Download error:', downloadError);
           throw new Error('Failed to trigger download: ' + downloadError.message);
         }
 
         progressBar.style.width = '100%';
-        statusEl.textContent = '✅ Analysis Complete!';
+        statusEl.textContent = 'âœ… Analysis Complete!';
         statusEl.style.color = '#2ae023';
         substatusEl.textContent = 'Preparing your download options...';
 
@@ -5083,8 +5112,8 @@
 
 
       } catch (error) {
-        console.error('❌ Generation error:', error);
-        console.error('❌ Error details:', {
+        console.error('âŒ Generation error:', error);
+        console.error('âŒ Error details:', {
           name: error.name,
           message: error.message,
           stack: error.stack,
@@ -5096,15 +5125,15 @@
         const substatusEl = document.getElementById('overlaySubstatus');
         const progressBar = document.getElementById('overlayProgressBar');
 
-        statusEl.textContent = '❌ Generation Failed';
+        statusEl.textContent = 'âŒ Generation Failed';
         statusEl.style.color = '#ff6b6b';
         progressBar.style.background = 'linear-gradient(90deg, #ff6b6b, #c92a2a)';
 
         if (error.name === 'AbortError') {
-          substatusEl.textContent = '⚠️ Request timed out - server took too long. This may be due to slow network or ngrok connection.';
+          substatusEl.textContent = 'âš ï¸ Request timed out - server took too long. This may be due to slow network or ngrok connection.';
         } else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError') || error.message.includes('ERR_CONNECTION_REFUSED')) {
-          substatusEl.textContent = `⚠️ Cannot connect to backend at ${BACKEND_URL}. Check console for details.`;
-          console.error('🔍 Connection troubleshooting:');
+          substatusEl.textContent = `âš ï¸ Cannot connect to backend at ${BACKEND_URL}. Check console for details.`;
+          console.error('ðŸ” Connection troubleshooting:');
           console.error('   1. Is backend server running? Check: curl ' + BACKEND_URL + '/health');
           console.error('   2. Is CORS configured correctly?');
           console.error('   3. Is firewall blocking port 5003?');
@@ -5118,9 +5147,9 @@
         setTimeout(() => {
           overlay.remove();
           const errorMsg = error.name === 'AbortError'
-            ? 'Request timed out. The server took too long to respond. This may be due to:\n• Slow network connection\n• ngrok tunnel issues\n• Server overload\n\nPlease try again or check your connection.'
+            ? 'Request timed out. The server took too long to respond. This may be due to:\nâ€¢ Slow network connection\nâ€¢ ngrok tunnel issues\nâ€¢ Server overload\n\nPlease try again or check your connection.'
             : `Failed to generate resume: \n\n${error.message} \n\nPlease ensure the integrated gateway is running.`;
-          alert('❌ ' + errorMsg);
+          alert('âŒ ' + errorMsg);
         }, 3000);
       }
     }
@@ -5321,7 +5350,7 @@
 
         // UI Reset
         initializePage();
-        console.log('🧹 Form cleared successfully');
+        console.log('ðŸ§¹ Form cleared successfully');
       }
     }
 
@@ -5395,7 +5424,7 @@
         }
 
         const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
-        console.log('📡 POST', `${BACKEND_URL}/download-resume`);
+        console.log('ðŸ“¡ POST', `${BACKEND_URL}/download-resume`);
         const response = await fetch(`${BACKEND_URL}/download-resume`, {
           method: 'POST',
           headers: {
@@ -5408,22 +5437,22 @@
 
         if (!response.ok) {
           const errorText = await response.text();
-          console.error('❌ Server error:', errorText);
+          console.error('âŒ Server error:', errorText);
           throw new Error(`Download failed: ${response.status} ${response.statusText}`);
         }
 
         // Check content type
         const contentType = response.headers.get('content-type');
-        console.log('📄 Response Content-Type:', contentType);
+        console.log('ðŸ“„ Response Content-Type:', contentType);
 
         if (!contentType || !contentType.includes('application/pdf')) {
           const text = await response.text();
-          console.error('❌ Response is not PDF!', text.substring(0, 200));
+          console.error('âŒ Response is not PDF!', text.substring(0, 200));
           throw new Error('Server returned non-PDF response');
         }
 
         const blob = await response.blob();
-        console.log('✅ PDF blob received, size:', blob.size, 'bytes, type:', blob.type);
+        console.log('âœ… PDF blob received, size:', blob.size, 'bytes, type:', blob.type);
 
         if (blob.size === 0) {
           throw new Error('Received empty PDF file');
@@ -5529,6 +5558,95 @@
         btn.disabled = false;
       }
     }
+    document.addEventListener('DOMContentLoaded', async () => {
+      const targetTemplates = Array.from(new Set(Array.from(document.querySelectorAll('.template-card'))
+        .map(card => card.getAttribute('data-template'))
+        .filter(id => id)));
+
+      const sampleData = {
+        personalInfo: {
+          fullName: 'John Doe',
+          email: 'john.doe@example.com',
+          phone: '+1 555 123 4567',
+          address: 'New York, USA',
+          linkedin: 'linkedin.com/in/jaswanth',
+          website: 'hiero-resume.com',
+          roleTitle: 'SENIOR SOFTWARE ARCHITECT'
+        },
+        summary: 'Experienced Software Architect with over 8 years in full-stack development. Specialist in building high-scale distributed systems and beautiful user interfaces. Proven track record of leading teams and delivering complex projects on time.',
+        experience: [
+          {
+            jobTitle: 'Lead Developer',
+            company: 'Innovation Labs',
+            startDate: '2021-01',
+            endDate: 'Present',
+            description: '• Architected a microservices platform serving 1M+ users.\n• Improved deployment efficiency by 50% using CI/CD.\n• Managed a team of 15 engineers across three timezones.'
+          },
+          {
+            jobTitle: 'Senior Engineer',
+            company: 'Global Tech',
+            startDate: '2018-05',
+            endDate: '2020-12',
+            description: '• Developed core features for a flagship SaaS product.\n• Optimized database queries, reducing latency by 30%.\n• Mentored junior developers and conducted code reviews.'
+          }
+        ],
+        education: [
+          { degree: 'Master of Technology', school: 'IIT Bombay', gradYear: '2018', gpa: '9.2/10.0' },
+          { degree: 'Bachelor of Technology', school: 'NIT Warangal', gradYear: '2016', gpa: '8.8/10.0' }
+        ],
+        technicalSkills: ['JavaScript', 'React', 'Node.js', 'Python', 'AWS', 'Docker', 'Kubernetes'],
+        softSkills: ['Leadership', 'System Design', 'Public Speaking', 'Agile Management'],
+        projects: [
+          { title: 'Hiero Resume Builder', description: 'A state-of-the-art resume builder platform.', tech: 'Next.js, Node.js, PDFKit' },
+          { title: 'AI Chat System', description: 'Intelligent customer support bot.', tech: 'OpenAI API, socket.io' }
+        ]
+      };
+
+      // Load all previews in parallel
+      await Promise.all(targetTemplates.map(async (templateId) => {
+        const previewAreas = document.querySelectorAll(`.template-card[data-template="${templateId}"] .template-preview`);
+        if (previewAreas.length === 0) return;
+
+        try {
+          const res = await fetch(`${BACKEND_URL}/preview-resume`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...sampleData, template: templateId })
+          });
+
+          if (res.ok) {
+            const blob = await res.blob();
+            const previewUrl = URL.createObjectURL(blob);
+
+            previewAreas.forEach(area => {
+              area.innerHTML = `
+                <div class="preview-scroll-container" style="width: 100%; height: 100%; overflow-y: auto; overflow-x: hidden; position: relative;">
+                   <iframe src="${previewUrl}#view=FitH&toolbar=0&navpanes=0&scrollbar=0" 
+                           style="width: 100%; height: 1400px; border: none; pointer-events: none; z-index: 1; display: block;"></iframe>
+                </div>
+                <div class="preview-overlay" style="z-index: 10; pointer-events: none; opacity: 0; background: rgba(0,0,0,0.4); position: absolute; inset: 0; transition: opacity 0.3s;">
+                  <button class="preview-btn" style="pointer-events: auto; transform: scale(0.8); margin-top: 180px;">Preview Template</button>
+                </div>
+              `;
+
+              area.style.overflow = "hidden";
+              area.style.position = "relative";
+
+              area.onmouseenter = () => {
+                const overlay = area.querySelector('.preview-overlay');
+                if (overlay) overlay.style.opacity = "1";
+              };
+              area.onmouseleave = () => {
+                const overlay = area.querySelector('.preview-overlay');
+                if (overlay) overlay.style.opacity = "0";
+              };
+            });
+          }
+        } catch (e) {
+          console.error(`Failed to load live preview for ${templateId}:`, e);
+        }
+      }));
+    });
   </script>
 </body>
 
