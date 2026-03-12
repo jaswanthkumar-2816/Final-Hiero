@@ -5,152 +5,235 @@ const pdfParse = require('pdf-parse');
 const fs = require('fs');
 const path = require('path');
 const dotenv = require('dotenv');
+const { Groq } = require('groq-sdk');
+const authObj = require('./auth'); // For personalization
+const { normalizeResponse } = require('../utils/normalizeResponse');
 
 dotenv.config();
 
 const router = express.Router();
 
 // Env vars
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
+const GROQ_API_KEY = process.env.GROQ_API_KEY;
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
-const AI_MODEL = process.env.OPENROUTER_MODEL || 'mistralai/mistral-7b-instruct';
+const AI_MODEL = process.env.AI_MODEL || 'llama-3.3-70b-versatile';
+
+// Initialize Groq
+const groq = new Groq({ apiKey: GROQ_API_KEY });
+
+// Load Curriculum
+let CURRICULUM = {};
+try {
+    const curPath = path.join(__dirname, '..', 'data', 'curriculum.json');
+    if (fs.existsSync(curPath)) {
+        CURRICULUM = JSON.parse(fs.readFileSync(curPath, 'utf8'));
+    }
+} catch (e) { console.error("Curriculum Load Error:", e); }
 
 // Problems DB
 const problems = {
     "Data Mining and Pattern Recognition": {
         easy: [
-            { id: 1, title: "Basic Data Filtering", description: "Filter a dataset based on specific criteria.", hint: "Use pandas or SQL queries." },
-            { id: 2, title: "Simple Pattern Matching", description: "Identify patterns in text data.", hint: "Try regular expressions." },
-            { id: 3, title: "Data Visualization", description: "Create a simple chart from data.", hint: "Use matplotlib or seaborn." }
+            { id: 1, title: "Basic Data Filtering", description: "Filter a large dataset based on specific temporal and categorical criteria.", hint: "Use pandas `.query()` or SQL `WHERE` clauses." },
+            { id: 2, title: "Pattern Identification", description: "Implement a script to identify recurring character patterns in log files.", hint: "Regular expressions (regex) are your best friend here." },
+            { id: 3, title: "Interactive Dashboards", description: "Create a simple dashboard showing categorical distributions.", hint: "Use plotly or seaborn for quick interactive charts." }
         ],
         medium: [
-            { id: 4, title: "K-Means Clustering", description: "Implement K-Means clustering on a dataset.", hint: "Use scikit-learn's KMeans." },
-            { id: 5, title: "Association Rules Mining", description: "Find association rules in transaction data.", hint: "Use the Apriori algorithm." },
-            { id: 6, title: "Decision Tree Implementation", description: "Build a decision tree classifier.", hint: "Use scikit-learn's DecisionTreeClassifier." }
+            { id: 4, title: "Unsupervised Clustering", description: "Apply K-Means clustering to segment customers based on purchasing behavior.", hint: "Normalize your data before fitting the model." },
+            { id: 5, title: "Apriori Association", description: "Find frequent itemsets in transaction data to discover buying rules.", hint: "Look into the 'mlxtend' library for Python." },
+            { id: 6, title: "Neural Logic Implementation", description: "Design a decision tree to predict loan eligibility from user profiles.", hint: "Visualize the tree to understand feature importance." }
         ],
         hard: [
-            { id: 7, title: "Neural Network Pattern Recognition", description: "Build a neural network for pattern recognition.", hint: "Use TensorFlow or PyTorch." },
-            { id: 8, title: "Advanced Clustering Algorithms", description: "Implement DBSCAN or hierarchical clustering.", hint: "Compare with K-Means results." },
-            { id: 9, title: "Time Series Pattern Analysis", description: "Analyze patterns in time series data.", hint: "Use ARIMA or LSTM models." }
+            { id: 7, title: "Deep Pattern Recognition", description: "Build an Image Recognition model to detect patterns in medical scans.", hint: "Convolutional Neural Networks (CNN) are suited for spatial pattern detection." },
+            { id: 8, title: "Anomaly Detection System", description: "Implement a real-time anomaly detector for network traffic.", hint: "Isolation Forest or One-Class SVM can be very effective." },
+            { id: 9, title: "Time-Series Forecasting", description: "Develop a model to predict stock market trends using historical patterns.", hint: "Combine ARIMA with LSTM for better temporal capture." }
         ]
     },
     "Deep Learning": {
         easy: [
-            { id: 1, title: "Build a Perceptron", description: "Create a simple perceptron model.", hint: "Use numpy for calculations." },
-            { id: 2, title: "MNIST Digit Classification", description: "Classify handwritten digits using a neural network.", hint: "Use Keras or TensorFlow." },
-            { id: 3, title: "Image Augmentation", description: "Apply data augmentation to images.", hint: "Use ImageDataGenerator in Keras." }
+            { id: 1, title: "The Neural Atom", description: "Create a mathematical model of a single neuron (Perceptron).", hint: "Recall the sigmoid activation function." },
+            { id: 2, title: "MNIST Benchmarking", description: "Achieve 95%+ accuracy on the MNIST digits dataset.", hint: "Start with a simple Feed-Forward Neural Network." },
+            { id: 3, title: "Data Augmentation", description: "Programmatically generate 10x more training data using rotations and flips.", hint: "Use Keras' ImageDataGenerator." }
         ],
         medium: [
-            { id: 4, title: "CNN for CIFAR-10", description: "Build a convolutional neural network for CIFAR-10.", hint: "Use multiple convolutional layers." },
-            { id: 5, title: "Transfer Learning on ResNet", description: "Fine-tune ResNet for a custom dataset.", hint: "Use pre-trained weights." },
-            { id: 6, title: "Sentiment Analysis with RNN", description: "Build an RNN for sentiment analysis.", hint: "Use LSTM or GRU layers." }
+            { id: 4, title: "Vision Transformers Intro", description: "Implement a simplified Vision Transformer (ViT) for object classification.", hint: "Focus on the self-attention mechanism for image patches." },
+            { id: 5, title: "Sentiment Analysis with RNNs", description: "Process 50,000 movie reviews to classify sentiment (Positive/Negative).", hint: "Use Word Embeddings like Word2Vec or GloVe." },
+            { id: 6, title: "Object Detection Pipeline", description: "Set up a YOLO-based object detection system on a custom dataset.", hint: "Use the ultralytics library for a fast start." }
         ],
         hard: [
-            { id: 7, title: "GAN for Image Generation", description: "Implement a Generative Adversarial Network.", hint: "Start with a simple DCGAN." },
-            { id: 8, title: "Attention Mechanism from Scratch", description: "Build an attention layer for NLP tasks.", hint: "Understand scaled dot-product attention." },
-            { id: 9, title: "Custom Transformer", description: "Implement a transformer model.", hint: "Use multi-head attention." }
+            { id: 7, title: "Generative Adversarial Design", description: "Train a GAN to generate realistic human faces from random noise.", hint: "Balance the loss between the Generator and Discriminator carefully." },
+            { id: 8, title: "Transformer from Scratch", description: "Write a multi-head attention layer without using external ML APIs.", hint: "Softmax on (QK^T / sqrt(dk)) * V is the core." },
+            { id: 9, title: "RL for Robotics", description: "Train an agent to solve a virtual physics environment using PPO.", hint: "Use the OpenAI Gym environment for simulation." }
         ]
     },
     "Machine Learning": {
         easy: [
-            { id: 1, title: "Linear Regression", description: "Implement basic linear regression.", hint: "Use scikit-learn's LinearRegression." },
-            { id: 2, title: "Basic Classification", description: "Create a simple classifier.", hint: "Try logistic regression on the iris dataset." },
-            { id: 3, title: "Data Preprocessing", description: "Clean and prepare data.", hint: "Handle missing values and normalize." }
+            { id: 1, title: "Predictive Analytics 101", description: "Predict house prices using multi-variable linear regression.", hint: "Check for colinearity between features." },
+            { id: 2, title: "Iris Species Classification", description: "Correctly label Iris species using K-Nearest Neighbors.", hint: "Experiment with different values of K." },
+            { id: 3, title: "Feature Scaling Lab", description: "Compare model performance before and after Min-Max scaling.", hint: "Notice the convergence speed of gradient descent." }
         ],
         medium: [
-            { id: 4, title: "Random Forest", description: "Build a random forest classifier.", hint: "Use scikit-learn's RandomForestClassifier." },
-            { id: 5, title: "SVM Implementation", description: "Implement Support Vector Machine.", hint: "Try different kernels." },
-            { id: 6, title: "Cross Validation", description: "Implement k-fold cross validation.", hint: "Use scikit-learn's cross_val_score." }
+            { id: 4, title: "Random Forest Ensemble", description: "Combat overfitting in a high-dimensional dataset using Bagging.", hint: "Tune the number of trees and max depth." },
+            { id: 5, title: "Kernel SVM Implementation", description: "Classify non-linearly separable data using the RBF kernel.", hint: "Use GridSearch to find the optimal gamma and C." },
+            { id: 6, title: "Principal Component Analysis", description: "Reduce 100 features down to 5 components while keeping 90% variance.", hint: "Look at the explained_variance_ratio_." }
         ],
         hard: [
-            { id: 7, title: "Ensemble Methods", description: "Combine multiple models.", hint: "Use voting or stacking." },
-            { id: 8, title: "Feature Engineering", description: "Create new features.", hint: "Try polynomial features." },
-            { id: 9, title: "Model Optimization", description: "Optimize model performance.", hint: "Use hyperparameter tuning." }
+            { id: 7, title: "Gradient Boosting Mastery", description: "Implement an XGBoost model for a Kaggle-level competition.", hint: "Focus on early stopping and learning rate decay." },
+            { id: 8, title: "Stacking Models", description: "Create a meta-classifier that learns from the predictions of 5 sub-models.", hint: "Use cross-validation to generate training data for the meta-learner." },
+            { id: 9, title: "Reinforcement Learning Gridworld", description: "Build a Q-Learning agent to find the shortest path in a maze.", hint: "Initialize your Q-table with zeros or small random values." }
         ]
     },
     "Python": {
         easy: [
-            { id: 1, title: "Variables and Data Types", description: "Learn about different data types in Python.", hint: "Start with integers, strings, and booleans." },
-            { id: 2, title: "Loops and Conditions", description: "Practice using for loops and if statements.", hint: "Try printing numbers from 1 to 10." },
-            { id: 3, title: "Functions", description: "Create your first function in Python.", hint: "Use the 'def' keyword." }
+            { id: 1, title: "Logic & Loops", description: "Create a script that calculates primes within a range.", hint: "Use a simple loop with a primality check." },
+            { id: 2, title: "File Structuring", description: "Organize directory contents based on file extensions.", hint: "The 'os' and 'shutil' modules are helpful." },
+            { id: 3, title: "List Comprehensions", description: "Filter and transform complex lists in a single line.", hint: "[item for item in list if condition]." }
         ],
         medium: [
-            { id: 4, title: "Object-Oriented Programming", description: "Create classes and objects.", hint: "Start with a simple class." },
-            { id: 5, title: "File Handling", description: "Read and write files.", hint: "Use 'open()' function." },
-            { id: 6, title: "Exception Handling", description: "Handle errors gracefully.", hint: "Use 'try' and 'except' blocks." }
+            { id: 4, title: "OOP Architecture", description: "Design a Library Management System with Inheritance and Polymorphism.", hint: "Think about base classes like 'Item' and subclasses like 'Book'." },
+            { id: 5, title: "Multithreaded Scraper", description: "Extract data from 50 pages simultaneously.", hint: "Compare 'threading' vs 'concurrent.futures'." },
+            { id: 6, title: "REST API Client", description: "Build a robust interface for a third-party weather API.", hint: "Handle HTTP errors and retry logic with 'requests'." }
         ],
         hard: [
-            { id: 7, title: "Decorators and Generators", description: "Advanced Python concepts.", hint: "Study function decorators first." },
-            { id: 8, title: "Multithreading", description: "Run multiple tasks simultaneously.", hint: "Use the 'threading' module." },
-            { id: 9, title: "Web Scraping", description: "Extract data from websites.", hint: "Use 'requests' and 'BeautifulSoup'." }
+            { id: 7, title: "Meta-Programming", description: "Write a custom decorator that logs execution time and memory usage.", hint: "Use 'functools.wraps' and the 'resource' module." },
+            { id: 8, title: "Asyncio Mastery", description: "Build a high-performance chat server using asynchronous sockets.", hint: "Use 'await asyncio.start_server()'." },
+            { id: 9, title: "Custom C-Extension", description: "Rewrite a bottleneck Python function in C/C++ to boost performance.", hint: "Look into 'Cython' or 'ctypes' for integration." }
         ]
     },
     "JavaScript": {
         easy: [
-            { id: 1, title: "DOM Manipulation", description: "Interact with HTML elements.", hint: "Use 'document.getElementById()'." },
-            { id: 2, title: "Event Handling", description: "Handle user interactions.", hint: "Use 'addEventListener()'." },
-            { id: 3, title: "Array Methods", description: "Practice array operations.", hint: "Try 'map()' and 'filter()'." }
+            { id: 1, title: "DOM Dynamics", description: "Build a dynamic to-do list that persists in localStorage.", hint: "JSON.stringify() and JSON.parse() are needed." },
+            { id: 2, title: "Asynchronous Flow", description: "Fetch user data from JSONPlaceholder and display it in cards.", hint: "Use the modern 'fetch' API with '.then' or 'async/await'." },
+            { id: 3, title: "Scope Puzzle", description: "Resolve a common 'this' context issue in a set of nested functions.", hint: "Arrow functions inherit 'this' from their parent scope." }
         ],
         medium: [
-            { id: 4, title: "Promises and Async/Await", description: "Handle asynchronous operations.", hint: "Start with basic promises." },
-            { id: 5, title: "ES6 Features", description: "Use modern JavaScript features.", hint: "Try arrow functions." },
-            { id: 6, title: "API Integration", description: "Fetch data from APIs.", hint: "Use 'fetch()' API." }
+            { id: 4, title: "Infinite Scroll Logic", description: "Implement efficient pagination that loads more items as you scroll.", hint: "Use IntersectionObserver for performance." },
+            { id: 5, title: "Functional JS", description: "Process a complex data tree using Recursion and Map/Reduce.", hint: "Avoid side effects and mutation." },
+            { id: 6, title: "State Machine", description: "Build a visual workflow editor using a finite state machine logic.", hint: "Define states and transitions explicitly." }
         ],
         hard: [
-            { id: 7, title: "Design Patterns", description: "Implement common design patterns.", hint: "Start with Singleton pattern." },
-            { id: 8, title: "Performance Optimization", description: "Optimize JavaScript code.", hint: "Use performance profiling." },
-            { id: 9, title: "Node.js Backend", description: "Build a backend server.", hint: "Use Express.js." }
+            { id: 7, title: "Custom VDOM Core", description: "Implement a minimal Virtual DOM diffing engine from scratch.", hint: "Contrast the previous and current trees to find the minimal patch." },
+            { id: 8, title: "Web Workers", description: "Offload heavy prime calculations to a background thread to keep UI smooth.", hint: "Use 'postMessage' to communicate between threads." },
+            { id: 9, title: "Micro-Frontend Shell", description: "Design a shell that dynamically loads different JS modules as iframes or containers.", hint: "SystemJS can help with dynamic imports." }
         ]
     },
     "React": {
         easy: [
-            { id: 1, title: "Components and JSX", description: "Create a simple React component.", hint: "Use functional components." },
-            { id: 2, title: "Props and State", description: "Manage component state.", hint: "Use useState hook." },
-            { id: 3, title: "Event Handling", description: "Handle user events.", hint: "Use onClick handlers." }
+            { id: 1, title: "Component Basics", description: "Create a reusable 'User Card' component with customized props.", hint: "Destructure your props for cleaner code." },
+            { id: 2, title: "State Hooks", description: "Build an interactive counter with 'undo' functionality.", hint: "Keep a history array in your state." },
+            { id: 3, title: "Form Synchronization", description: "Handle a multi-input form using a single change handler.", hint: "Use the 'name' attribute on inputs." }
         ],
         medium: [
-            { id: 4, title: "Hooks", description: "Use React hooks.", hint: "Start with useEffect." },
-            { id: 5, title: "Context API", description: "Manage global state.", hint: "Use createContext." },
-            { id: 6, title: "Routing", description: "Implement client-side routing.", hint: "Use react-router-dom." }
+            { id: 4, title: "Effect Lifecycle", description: "Sync a component with a WebSocket stream for real-time updates.", hint: "Remember to clean up effects to avoid memory leaks." },
+            { id: 5, title: "Custom Hook Design", description: "Create a 'useLocalStorage' hook for seamless data persistence.", hint: "Ensure it behaves like standard useState." },
+            { id: 6, title: "Compound Components", description: "Implement a flexible Accordion using the Compound Component pattern.", hint: "Use React.Children.map to inject props." }
         ],
         hard: [
-            { id: 7, title: "Performance Optimization", description: "Optimize React apps.", hint: "Use memo and useCallback." },
-            { id: 8, title: "Custom Hooks", description: "Create custom hooks.", hint: "Encapsulate reusable logic." },
-            { id: 9, title: "State Management", description: "Use Redux or Zustand.", hint: "Start with Redux Toolkit." }
+            { id: 7, title: "Advanced Performance", description: "Optimizing 1,000+ items list using virtualization and memoization.", hint: "React.memo and react-window are essential." },
+            { id: 8, title: "Global State Architecture", description: "Set up a Redux Toolkit slice with Thunks for complex async data.", hint: "Use createAsyncThunk for standardized loading states." },
+            { id: 9, title: "Hydration & SSR", description: "Implement Server Side Rendering with hydration for a Next.js-like feel.", hint: "ReactDOM.hydrate is used on the client." }
         ]
     },
-    "Data Analysis": {
+    "Cloud Computing": {
         easy: [
-            { id: 1, title: "Basic Statistics", description: "Calculate mean, median, and mode.", hint: "Use pandas." },
-            { id: 2, title: "Data Cleaning", description: "Clean a dataset.", hint: "Handle missing values." },
-            { id: 3, title: "Simple Plots", description: "Create basic visualizations.", hint: "Use matplotlib." }
+            { id: 1, title: "Cloud Storage Hosting", description: "Host a static website using an S3 bucket or GCP Storage.", hint: "Enable public access and set index.html as the entry point." },
+            { id: 2, title: "Serverless Function", description: "Deploy a basic HTTP Lambda/Cloud Function that returns a greeting.", hint: "Test it using the built-in console tester." },
+            { id: 3, title: "IAM Management", description: "Create a user with 'Least Privilege' permissions to access only one folder.", hint: "Use JSON-based IAM policies." }
         ],
         medium: [
-            { id: 4, title: "Pivot Tables", description: "Create pivot tables.", hint: "Use pandas pivot_table." },
-            { id: 5, title: "Correlation Analysis", description: "Analyze correlations.", hint: "Use pandas corr()." },
-            { id: 6, title: "Time Series", description: "Analyze time series data.", hint: "Use pandas for time indexing." }
+            { id: 4, title: "Auto-Scaling Setup", description: "Configure an Auto-Scaling Group that reacts to CPU utilization spikes.", hint: "Set up a Load Balancer to distribute the traffic." },
+            { id: 5, title: "Serverless Pipeline", description: "Connect an S3 trigger to a Lambda function to resize images automatically.", hint: "The trigger is an 'Object Created' event." },
+            { id: 6, title: "VPC Networking", description: "Design a private subnet for your database and a public one for your web server.", hint: "Use NAT Gateways for private subnet internet access." }
         ],
         hard: [
-            { id: 7, title: "Advanced Modeling", description: "Build predictive models.", hint: "Use scikit-learn." },
-            { id: 8, title: "Machine Learning", description: "Apply ML to data analysis.", hint: "Try regression models." },
-            { id: 9, title: "Big Data Processing", description: "Handle large datasets.", hint: "Use Dask or Spark." }
+            { id: 7, title: "Multi-Region Hub", description: "Architect a global application with latency-based routing across 3 regions.", hint: "Use Route53 or Global Server Load Balancing." },
+            { id: 8, title: "Infrastructure as Code", description: "Deploy a full 3-tier architecture using Terraform or CloudFormation.", hint: "Modularize your code for reuse." },
+            { id: 9, title: "Hybrid Cloud Bridge", description: "Set up a Site-to-Site VPN or Direct Connect between an on-prem server and AWS.", hint: "Configure BGP for dynamic routing." }
         ]
     },
-    "Web Development": {
+    "Cybersecurity": {
         easy: [
-            { id: 1, title: "HTML Structure", description: "Create a basic HTML page.", hint: "Use semantic tags." },
-            { id: 2, title: "CSS Styling", description: "Style a webpage.", hint: "Use Flexbox or Grid." },
-            { id: 3, title: "Basic JavaScript", description: "Add interactivity.", hint: "Use event listeners." }
+            { id: 1, title: "Honeypot 101", description: "Setup a basic honeypot to log unauthorized SSH attempts.", hint: "Tools like 'Cowrie' can simulate an SSH server." },
+            { id: 2, title: "Password Hashing Lab", description: "Compare security of MD5, SHA-1, and Argon2 for user passwords.", hint: "Observe why salting is mandatory." },
+            { id: 3, title: "XSS Defense", description: "Fix a vulnerable comment section that executes injected scripts.", hint: "Sanitize all user-generated HTML content." }
         ],
         medium: [
-            { id: 4, title: "Responsive Design", description: "Make a responsive webpage.", hint: "Use media queries." },
-            { id: 5, title: "Form Validation", description: "Validate form inputs.", hint: "Use JavaScript or HTML5." },
-            { id: 6, title: "AJAX Requests", description: "Fetch data asynchronously.", hint: "Use fetch API." }
+            { id: 4, title: "SQL Injection Probe", description: "Demonstrate a blind SQL injection attack on a test environment.", hint: "Try using '1=1' in the parameter string." },
+            { id: 5, title: "JWT Security Audit", description: "Crack a weakly signed JWT and modify its payload to become Admin.", hint: "The 'none' algorithm is a classic vulnerability." },
+            { id: 6, title: "Network Intrusion Analysis", description: "Identify a port scan attack from a Wireshark PCAP file.", hint: "Look for frequent SYN packets without ACK responses." }
         ],
         hard: [
-            { id: 7, title: "Full Stack Application", description: "Build a full-stack app.", hint: "Use MERN stack." },
-            { id: 8, title: "Database Integration", description: "Connect to a database.", hint: "Use MongoDB." },
-            { id: 9, title: "Deployment", description: "Deploy a web app.", hint: "Use Vercel or Heroku." }
+            { id: 7, title: "Zero Trust Architecture", description: "Implement per-request authentication and continuous verification in a network.", hint: "Use mTLS for all service-to-service communication." },
+            { id: 8, title: "Buffer Overflow Exploit", description: "Write a stack-based buffer overflow exploit to gain shell access.", hint: "Find the offset using patterns and overwrite the EIP." },
+            { id: 9, title: "SOC Dashboard Build", description: "Integrate ELK Stack with Suricata to monitor real-time network threats.", hint: "Create Kibana visualizations for high-risk alerts." }
+        ]
+    },
+    "DevOps and CI/CD": {
+        easy: [
+            { id: 1, title: "Docker Containerization", description: "Containerize a simple Node/Python app and run it locally.", hint: "Write a clean Dockerfile starting 'FROM' a base image." },
+            { id: 2, title: "GitHub Actions Lab", description: "Automate 'npm test' to run every time you push code.", hint: "The '.github/workflows/main.yml' file controls this." },
+            { id: 3, title: "Standard Logs", description: "Centralize application logs using a basic stdout/stderr capture.", hint: "Use 'docker logs' to verify." }
+        ],
+        medium: [
+            { id: 4, title: "Kubernetes Deployment", description: "Deploy a high-availability app with 3 replicas on a K8s cluster.", hint: "Use a 'Deployment' and 'Service' resource. Minikube works for local tests." },
+            { id: 5, title: "Jenkins Pipeline", description: "Build a multibranch pipeline with Build, Test, and Stage steps.", hint: "Use a Jenkinsfile for 'Pipeline-as-Code'." },
+            { id: 6, title: "Ansible Configuration", description: "Automate the setup of 5 Nginx servers using a single playbook.", hint: "Use inventories and SSH keys for communication." }
+        ],
+        hard: [
+            { id: 7, title: "GitOps Workflow", description: "Implement FluxCD or ArgoCD to sync K8s state with a Git repo.", hint: "Declare your desired state in Git, not via CLI." },
+            { id: 8, title: "Blue-Green Deployment", description: "Architect a zero-downtime deployment strategy switching between two environments.", hint: "Modify your Load Balancer target groups." },
+            { id: 9, title: "Service Mesh Intro", description: "Deploy Istio to manage traffic, security, and observability between microservices.", hint: "Look into the 'sidecar' pattern." }
+        ]
+    },
+    "Mobile Development": {
+        easy: [
+            { id: 1, title: "First Layout", description: "Create a simple screen with a centered image and a button.", hint: "Use Flexbox in React Native or Column/Row in Flutter." },
+            { id: 2, title: "Native Navigation", description: "Build a 2-screen app using Stack Navigation.", hint: "Understand how to pass parameters between screens." },
+            { id: 3, title: "Asset Management", description: "Correctly add and display localized images and custom fonts.", hint: "Add fonts to assets and update the config file." }
+        ],
+        medium: [
+            { id: 4, title: "API Synchronizer", description: "Fetch 1,000 JSON items and display them in a performant List view.", hint: "FlatList or ListView is crucial for memory efficiency." },
+            { id: 5, title: "Mobile Persistence", description: "Save user settings (Dark Mode, Language) using SQLite or Hive.", hint: "Ensure data persists even after force-closing the app." },
+            { id: 6, title: "Hardware Integration", description: "Access the phone's Camera or GPS to record a user's location/photo.", hint: "Handle permissions gracefully for both iOS and Android." }
+        ],
+        hard: [
+            { id: 7, title: "Offline-First Sync", description: "Implement background sync where data is saved locally and pushed when online.", hint: "Use a sync-queue with background tasks." },
+            { id: 8, title: "Custom Native Module", description: "Write a Java/Swift bridge for a feature not available in the cross-platform framework.", hint: "Use MethodChannels in Flutter or Native Modules in React Native." },
+            { id: 9, title: "App Store Deployment", description: "Generate production builds (APK/IPA) and configure CI/CD for stores.", hint: "Automate using Fastlane." }
+        ]
+    },
+    "UI/UX Design": {
+        easy: [
+            { id: 1, title: "Visual Hierarchy", description: "Redesign an 'About Us' page using the F-Pattern layout.", hint: "Prioritize the most important info in the top-left." },
+            { id: 2, title: "Accessibility Audit", description: "Fix a color-blind unfriendly dashboard using high-contrast patterns.", hint: "Check your contrast ratios with WCAG standards (4.5:1 min)." },
+            { id: 3, title: "Typography Lab", description: "Pair Serif and Sans-Serif fonts effectively for a blog interface.", hint: "Use one for headings and the other for body text." }
+        ],
+        medium: [
+            { id: 4, title: "Interactive Prototyping", description: "Create a high-fidelity prototype with complex conditional transitions in Figma.", hint: "Use 'Variables' and 'Advanced Prototyping' features." },
+            { id: 5, title: "Design System Build", description: "Develop a library of 10 reusable components focusing on Atomic Design.", hint: "Start with Atoms (buttons, inputs) work up to Organisms." },
+            { id: 6, title: "Information Architecture", description: "Sitemap and wireframe a complex E-commerce app with 20+ pages.", hint: "Focus on user flow and minimizing clicks to purchase." }
+        ],
+        hard: [
+            { id: 7, title: "Micro-Interaction Design", description: "Design a unique 'Success' animation for a checkout process using Lottie/Rive.", hint: "Subtle feedback makes the UX feel premium." },
+            { id: 8, title: "A/B Test Design", description: "Propose two distinct Landing Page designs to test a hypothesis on conversion.", hint: "Change only one variable (e.g., CTA button color or headline)." },
+            { id: 9, title: "Design System Ops", description: "Set up a shared variable library between Figma and a React codebase using tokens.", hint: "Use 'Design Tokens' to sync CSS and Figma styles." }
+        ]
+    },
+    "Project Management": {
+        easy: [
+            { id: 1, title: "Scrum Basics", description: "Create a task board (To Do, Doing, Done) for a 2-week sprint.", hint: "Keep tasks atomic so they can be finished in a few days." },
+            { id: 2, title: "Gantt Chart 101", description: "Plot a project timeline identifying the Critical Path.", hint: "Focus on task dependencies." },
+            { id: 3, title: "Meeting Excellence", description: "Draft a concise agenda and minutes for a stakeholder update.", hint: "Include Actions, Decisons, and Owners." }
+        ],
+        medium: [
+            { id: 4, title: "Risk Mitigation", description: "Identify 5 risks for a software launch and create a mitigation plan.", hint: "Classify by Probability and Impact." },
+            { id: 5, title: "Agile Estimation", description: "Conduct a Planning Poker session to estimate a backlog of 20 items.", hint: "Use the Fibonacci sequence (1, 2, 3, 5, 8...)." },
+            { id: 6, title: "Stakeholder Mapping", description: "Create a matrix to manage expectations of internal vs external stakeholders.", hint: "Map by Influence vs Interest." }
+        ],
+        hard: [
+            { id: 7, title: "Change Management", description: "Design a rollout plan for a major internal tool shift for 500+ employees.", hint: "Focus on communication, training, and 24/7 support phase." },
+            { id: 8, title: "Budget Optimization", description: "Analyze a $100k project budget to identify 15% cost savings without scope cut.", hint: "Look for redundant licenses or resource overallocation." },
+            { id: 9, title: "Project Recovery", description: "Take a 'Red' status project and draft a 4-week stabilization plan.", hint: "Re-baseline the scope and increase transparency." }
         ]
     }
 };
@@ -162,6 +245,11 @@ const langCodes = {
     tamil: 'ta',
     kannada: 'kn'
 };
+
+// Helper: Normalize any code-like data into markdown blocks (Wrapper for utility)
+function normalizeCodeBlock(data) {
+    return normalizeResponse(data);
+}
 
 // Skill extraction utils
 const TECH_SKILL_SET = new Set(['python', 'java', 'javascript', 'js', 'node', 'nodejs', 'react', 'angular', 'vue', 'html', 'css', 'docker', 'kubernetes', 'k8s', 'aws', 'gcp', 'azure', 'git', 'github', 'graphql', 'rest', 'api', 'mongodb', 'mysql', 'postgres', 'sql', 'redis', 'kafka', 'spark', 'pandas', 'numpy', 'tensorflow', 'keras', 'pytorch', 'machine learning', 'deep learning', 'nlp', 'flask', 'django', 'fastapi', 'express', 'typescript', 'c++', 'cpp', 'go', 'golang', 'rust', 'php', 'laravel', 'swift', 'kotlin', 'android', 'ios', 'flutter', 'selenium', 'jest', 'mocha', 'cypress', 'devops', 'microservices', 'oauth', 'jwt', 'security', 'etl', 'tableau', 'powerbi']);
@@ -217,11 +305,64 @@ async function safeExtractPdf(buffer, fileName = 'unknown') {
     return '';
 }
 
+// AI Problem fallback generator
+async function generateAIProblems(skill) {
+    if (!GROQ_API_KEY) return genericProblemSet(skill);
+    try {
+        const prompt = `Generate 9 unique practice problems for the skill "${skill}". 
+        Organize them into 3 difficulty tiers: easy, medium, and hard (3 each).
+        For each, provide: 
+        - title (catchy)
+        - description (clear, 1-2 sentences)
+        - hint (helpful technical clue)
+        Return ONLY a JSON object with keys "easy", "medium", "hard", each containing an array of {title, description, hint}. No extra text.`;
+
+        const res = await axios.post('https://api.groq.com/openai/v1/chat/completions', {
+            model: AI_MODEL,
+            messages: [
+                { role: 'system', content: 'You are a technical curriculum designer. Return strict JSON only.' },
+                { role: 'user', content: prompt }
+            ],
+            temperature: 0.6
+        }, {
+            headers: { 'Authorization': `Bearer ${GROQ_API_KEY}`, 'Content-Type': 'application/json' }
+        });
+
+        const raw = res.data.choices?.[0]?.message?.content || '';
+        const jsonMatch = raw.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+            const parsed = JSON.parse(jsonMatch[0]);
+            // Add IDs
+            ['easy', 'medium', 'hard'].forEach(tier => {
+                if (parsed[tier]) {
+                    parsed[tier] = parsed[tier].map((p, idx) => ({ id: idx + 1, ...p }));
+                }
+            });
+            return parsed;
+        }
+    } catch (e) {
+        console.warn(`AI Problem generation failed for ${skill}:`, e.message);
+    }
+    return genericProblemSet(skill);
+}
+
 function genericProblemSet(skill) {
     return {
-        easy: [{ id: 1, title: `Intro to ${skill}`, description: `Learn basics of ${skill}`, hint: 'Start with fundamentals.' }, { id: 2, title: `Syntax / Concepts`, description: `Core concepts of ${skill}`, hint: 'Cover terminology.' }, { id: 3, title: `Simple Task`, description: `Small exercise in ${skill}`, hint: 'Apply basics.' }],
-        medium: [{ id: 4, title: `Mini Project (${skill})`, description: `Build a small project using ${skill}`, hint: 'Combine concepts.' }, { id: 5, title: `Debug ${skill} Code`, description: 'Find & fix issues', hint: 'Systematic approach.' }, { id: 6, title: `Optimize ${skill} Use`, description: 'Improve performance/style', hint: 'Refactor.' }],
-        hard: [{ id: 7, title: `Advanced Project (${skill})`, description: `End-to-end solution with ${skill}`, hint: 'Architect first.' }, { id: 8, title: `Scale ${skill} Project`, description: 'Handle complexity & scaling', hint: 'Measure bottlenecks.' }, { id: 9, title: `Teach ${skill}`, description: 'Create tutorial / doc', hint: 'Deep understanding.' }]
+        easy: [
+            { id: 1, title: `Intro to ${skill}`, description: `Explore the fundamental building blocks and use cases of ${skill}.`, hint: 'Start with the most basic definitions and setup.' },
+            { id: 2, title: `Core Syntax & ${skill} Patterns`, description: `Master the essential syntax and common architectural patterns in ${skill}.`, hint: 'Focus on readability and standard conventions.' },
+            { id: 3, title: `Your First ${skill} Task`, description: `Apply what you've learned to solve a small, well-defined problem in ${skill}.`, hint: 'Keep it simple and focus on a single core feature.' }
+        ],
+        medium: [
+            { id: 4, title: `Intermediate ${skill} Project`, description: `Build a small application or module that utilizes multiple ${skill} concepts.`, hint: 'Think about how different parts of the skill interact.' },
+            { id: 5, title: `Debugging ${skill} Scenarios`, description: 'Identify and resolve logical errors in a pre-written piece of code.', hint: 'Use systematic testing and logging.' },
+            { id: 6, title: `Optimization Lab (${skill})`, description: 'Refactor an existing implementation to improve performance and maintainability.', hint: 'Look for bottlenecks and redundant operations.' }
+        ],
+        hard: [
+            { id: 7, title: `Advanced ${skill} Architecture`, description: `Design and implement a complex, scalable solution focusing on ${skill} best practices.`, hint: 'Focus on modularity and long-term maintenance.' },
+            { id: 8, title: `Distributed ${skill} Systems`, description: 'Scale your solution to handle large data volumes or high-concurrency environments.', hint: 'Consider asynchronous processing and resource management.' },
+            { id: 9, title: `Expert Level ${skill} Mastery`, description: 'Push the limits of the skill by solving an edge-case heavy and theoretically deep challenge.', hint: 'Deep dive into the underlying engine or theory.' }
+        ]
     };
 }
 
@@ -233,9 +374,27 @@ function suggestFallbackProjects(missing) {
 // YouTube video fetcher
 // YouTube video fetcher
 async function fetchVideos(query) {
+    const fallbackVideos = {
+        english: [
+            { title: `${query} for Beginners`, videoId: "rfscVS0vtbw", url: "https://www.youtube.com/embed/rfscVS0vtbw", duration: "PT15M", thumbnail: "https://img.youtube.com/vi/rfscVS0vtbw/hqdefault.jpg" },
+            { title: `Advanced ${query} Concepts`, videoId: "Ke90Tje7VS0", url: "https://www.youtube.com/embed/Ke90Tje7VS0", duration: "PT20M", thumbnail: "https://img.youtube.com/vi/Ke90Tje7VS0/hqdefault.jpg" }
+        ],
+        hindi: [
+            { title: `${query} Tutorial in Hindi`, videoId: "vLnPwxZdW4Y", url: "https://www.youtube.com/embed/vLnPwxZdW4Y", duration: "PT12M", thumbnail: "https://img.youtube.com/vi/vLnPwxZdW4Y/hqdefault.jpg" }
+        ],
+        telugu: [
+            { title: `${query} Full Course Telugu`, videoId: "XmifS2AzzP8", url: "https://www.youtube.com/embed/XmifS2AzzP8", duration: "PT45M", thumbnail: "https://img.youtube.com/vi/XmifS2AzzP8/hqdefault.jpg" }
+        ]
+    };
+
     if (!YOUTUBE_API_KEY) {
         console.warn('YOUTUBE_API_KEY missing. Returning placeholders.');
-        return {};
+        const languages = ["english", "hindi", "telugu", "tamil", "kannada"];
+        const results = {};
+        languages.forEach(lang => {
+            results[lang] = fallbackVideos[lang] || fallbackVideos['english'];
+        });
+        return results;
     }
 
     const languages = ["english", "hindi", "telugu", "tamil", "kannada"];
@@ -392,16 +551,16 @@ router.post(['/analyze', '/analyze-full'], upload.fields([{ name: 'resume' }, { 
 
         let aiResult, aiRaw;
 
-        if (strategy !== 'deterministic' && OPENROUTER_API_KEY) {
+        if (strategy !== 'deterministic' && GROQ_API_KEY) {
             try {
-                const aiRes = await axios.post('https://openrouter.ai/api/v1/chat/completions', {
+                const aiRes = await axios.post('https://api.groq.com/openai/v1/chat/completions', {
                     model: AI_MODEL,
                     messages: [
                         { role: 'system', content: 'Return strict JSON only.' },
                         { role: 'user', content: prompt }
                     ]
                 }, {
-                    headers: { 'Authorization': `Bearer ${OPENROUTER_API_KEY}` }
+                    headers: { 'Authorization': `Bearer ${GROQ_API_KEY}` }
                 });
 
                 aiRaw = aiRes.data.choices?.[0]?.message?.content || '';
@@ -435,7 +594,7 @@ router.post(['/analyze', '/analyze-full'], upload.fields([{ name: 'resume' }, { 
         const allProblems = {};
         for (const skill of missingUnion.slice(0, 6)) {
             try { allVideos[skill] = await fetchVideos(skill); } catch { allVideos[skill] = {}; }
-            allProblems[skill] = problems[skill] || genericProblemSet(skill);
+            allProblems[skill] = problems[skill] || await generateAIProblems(skill);
         }
 
         const payload = {
@@ -488,7 +647,7 @@ router.post('/get-videos', async (req, res) => {
 
     try {
         const videos = await fetchVideos(skill);
-        const skillProblems = problems[skill] || genericProblemSet(skill);
+        const skillProblems = problems[skill] || await generateAIProblems(skill);
         res.json({ success: true, data: { videos, problems: skillProblems } });
     } catch (error) {
         console.error('Error fetching videos:', error);
@@ -497,32 +656,265 @@ router.post('/get-videos', async (req, res) => {
 });
 
 router.post('/ask', async (req, res) => {
-    const { question, skill } = req.body;
+    const { question, skill, topic, difficulty, code, stream } = req.body;
     if (!question || !skill) return res.status(400).json({ success: false, error: 'Missing question or skill' });
 
-    if (!OPENROUTER_API_KEY) {
-        return res.json({ success: true, answer: "AI Chat is not configured (missing API Key)." });
+    if (!GROQ_API_KEY) {
+        return res.json({ answer: "Orbit is currently in Basic Mode. Please set GROQ_API_KEY to enable AI features." });
     }
 
+    // --- Personalized Learning: Fetch User Data ---
+    let userContext = "No user history found.";
     try {
-        const systemPrompt = `You are Hiero Tutor, a professional career coach and technical expert for ${skill}.
-        Keep your tone encouraging, professional, and highly structured.
-        Use bullet points for steps and bold text for key concepts.
-        If the user is solving a problem, provide hints before the full solution.
-        Always link concepts back to real-world career growth and professional excellence.`;
+        const authHeader = req.headers['authorization'];
+        if (authHeader) {
+            const token = authHeader.split(' ')[1];
+            const jwt = require('jsonwebtoken');
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            const user = authObj.users.find(u => u.id === decoded.userId);
+            if (user) {
+                userContext = `User History: Completed ${user.completedSkills?.length || 0} skills. Weak topics (missing skills from resume): ${user.analysisHistory?.[0]?.missingSkills?.join(', ') || 'None'}.`;
+            }
+        }
+    } catch (e) { /* silent fail for auth */ }
 
-        const aiRes = await axios.post('https://openrouter.ai/api/v1/chat/completions', {
+    try {
+        // --- Curriculum Injection (Safer Lookup) ---
+        let lessonData = "No specific curriculum docs found for this topic.";
+        const skillDocs = CURRICULUM[skill];
+        if (skillDocs) {
+            lessonData = skillDocs[topic] || Object.values(skillDocs)[0] || lessonData;
+        }
+
+        // Helper: Process and normalize AI response objects/tools
+        function processAIResponse(aiOutput) {
+            if (!aiOutput) return "";
+
+            // If AI returns a tool call / structured object
+            if (typeof aiOutput === "object") {
+                if (aiOutput.tool === "runCode" || aiOutput.name === "runCode") {
+                    const args = aiOutput.arguments || aiOutput;
+                    const code = args.code || "";
+                    const lang = args.language || "python";
+                    return "```" + lang + "\n" + code + "\n```";
+                }
+
+                if (aiOutput.implementation || aiOutput.content || aiOutput.code) {
+                    const lang = aiOutput.language || "python";
+                    const code = aiOutput.implementation?.content || aiOutput.content || aiOutput.code || "";
+                    return "```" + lang + "\n" + code + "\n```";
+                }
+
+                return "```json\n" + JSON.stringify(aiOutput, null, 2) + "\n```";
+            }
+
+            return String(aiOutput);
+        }
+
+
+        const systemPrompt = `You are Orbit Neural Assistant, a high-fidelity context-aware coding tutor for developers.
+
+Pedagogical Behavior & Rules:
+1. CODE-FIRST LAYOUT (CRITICAL): Developers prioritize implementation. For any technical request, always provide the solution code block FIRST (wrapped in markdown), followed by architectural explanations and key ideas.
+
+2. RESPONSE MODES:
+   - EXPLAIN LESSON MODE: Structure: Implementation Code, Concept Breakdown, Next Steps. 
+   - EXPLAIN CODE MODE: Structure: 
+     * Implementation Code: (Code block)
+     * Purpose: (Brief description)
+     * How It Works: (Bullet points)
+     * Key Idea: (Takeaway)
+   - DEBUG MODE: Structure: 
+     * Corrected Code: (Markdown code block first)
+     * Detected Issues: (Bullet points)
+     * Suggested Fix: (Short explanation)
+
+3. TECHNICAL ACCURACY:
+   - SHORT EXPLANATIONS: Limit single-step answers to ONE concise sentence.
+   - GAN SPECIALIZATION: Generate complete TensorFlow + Python architectures (Generator, Discriminator, Loss, Optimizer, Loop placeholder).
+   - DIFFICULTY-AWARE: Do NOT suggest concepts beyond '${difficulty}' level.
+
+4. TOOL ROUTING: Only call 'runCode' for "run", "execute", "test", or "fail". Otherwise, output code directly. 
+
+5. STRICT OUTPUT FORMAT:
+   - When the user asks for code (e.g., "give me code", "implement this"), generate the implementation directly using markdown.
+   - DO NOT call tools like 'runCode' unless the user specifically asks to "run", "execute", or "test" the code.
+   - All code MUST be returned inside standard markdown code blocks (e.g., \`\`\`javascript or \`\`\`python).
+   - NEVER, under any circumstances, return a raw JSON object to the user.
+   - NEVER output the string '[object Object]'.
+
+6. PERSONALIZATION: ${userContext} (Current Skill: ${skill}, Topic: ${topic})`;
+
+        // Tools definitions (Filtered based on intent to prevent over-routing)
+        const canRun = question.toLowerCase().match(/run|execute|test|error|fail|check/);
+        const tools = [
+            {
+                type: "function",
+                function: {
+                    name: "getLessonDoc",
+                    description: "Fetch comprehensive lesson documentation for a topic.",
+                    parameters: {
+                        type: "object",
+                        properties: { topic: { type: "string" } },
+                        required: ["topic"]
+                    }
+                }
+            },
+            ...(canRun ? [{
+                type: "function",
+                function: {
+                    name: "runCode",
+                    description: "Execute a snippet of code in a sandbox and return output.",
+                    parameters: {
+                        type: "object",
+                        properties: { code: { type: "string" }, language: { type: "string" } },
+                        required: ["code", "language"]
+                    }
+                }
+            }] : []),
+            {
+                type: "function",
+                function: {
+                    name: "recommendLesson",
+                    description: "Suggest the most logical next lesson based on current progress and topics.",
+                    parameters: {
+                        type: "object",
+                        properties: { currentSkill: { type: "string" } }
+                    }
+                }
+            },
+            ...(question.toLowerCase().includes('explain') ? [{
+                type: "function",
+                function: {
+                    name: "explainCode",
+                    description: "Provide a detailed walkthrough of a code snippet.",
+                    parameters: {
+                        type: "object",
+                        properties: { code: { type: "string" }, language: { type: "string" } }
+                    }
+                }
+            }] : []),
+            ...(question.toLowerCase().includes('debug') || question.toLowerCase().includes('fix') ? [{
+                type: "function",
+                function: {
+                    name: "debugCode",
+                    description: "Identify and fix errors in the provided code.",
+                    parameters: {
+                        type: "object",
+                        properties: { code: { type: "string" }, language: { type: "string" } }
+                    }
+                }
+            }] : [])
+        ];
+        // --- Handle Streaming or Non-Streaming ---
+        // --- unified Logic with Tool Support ---
+        const safeCode = (typeof code === 'string' ? code : JSON.stringify(code || 'None')).replace(/\[object Object\]/g, '// (Neural Leak Filtered)');
+
+        const completion = await groq.chat.completions.create({
             model: AI_MODEL,
             messages: [
                 { role: "system", content: systemPrompt },
-                { role: "user", content: `Student Question: ${question}` }
-            ]
-        }, { headers: { 'Authorization': `Bearer ${OPENROUTER_API_KEY}` } });
+                { role: "user", content: `Code: \n${safeCode} \n\nQuestion: ${question} ` }
+            ],
+            tools: tools,
+            tool_choice: "auto",
+            temperature: 0.5
+        });
 
-        res.json({ success: true, answer: aiRes.data.choices?.[0]?.message?.content || "No response." });
+        let responseMessage = completion.choices[0].message;
+        console.log("AI RESPONSE RAW:", responseMessage.content ? "String response" : "Tool call response");
+        if (typeof responseMessage.content === 'object') {
+            console.log("AI RESPONSE OBJECT DETECTED:", responseMessage.content);
+        }
+
+        if (responseMessage.tool_calls) {
+            let toolResults = [];
+            for (const toolCall of responseMessage.tool_calls) {
+                const funcName = toolCall.function.name;
+                const args = JSON.parse(toolCall.function.arguments);
+                let content = "";
+
+                // Instruction: Execute tool and return string
+                if (funcName === "getLessonDoc") {
+                    content = CURRICULUM[skill]?.[args.topic] || `No documentation for ${args.topic}.`;
+                } else if (funcName === "runCode") {
+                    const output = "Orbit Virtual Sandbox v2.0:\n" + (args.code.includes('print') || args.code.includes('console.log') ? "Execution successful." : "No output detected.");
+                    content = "```text\n" + output + "\n```";
+                } else if (funcName === "recommendLesson") {
+                    content = `I recommend exploring advanced architectural patterns for ** ${skill} ** next.`;
+                } else if (funcName === "explainCode" || funcName === "debugCode") {
+                    content = "```" + (args.language || "python") + "\n" + (args.code || "") + "\n```\n\nExplanation generated.";
+                }
+
+                // Final safety: ensure content is NOT an object before pushing
+                const safeContent = typeof content === 'object' ? JSON.stringify(content) : String(content || "No data.");
+                toolResults.push({ role: "tool", tool_call_id: toolCall.id, content: safeContent });
+            }
+
+            const secondCompletion = await groq.chat.completions.create({
+                model: AI_MODEL,
+                messages: [
+                    { role: "system", content: systemPrompt },
+                    { role: "user", content: `Code: \n${safeCode} \n\nQuestion: ${question} ` },
+                    responseMessage,
+                    ...toolResults
+                ],
+                stream: stream // Match user preference for the final leg
+            });
+
+            if (stream) {
+                res.setHeader('Content-Type', 'text/event-stream');
+                console.log("[GW] Streaming second leg (with tool context)...");
+                for await (const chunk of secondCompletion) {
+                    let token = chunk.choices[0]?.delta?.content || "";
+                    if (!token) continue;
+
+                    // Ensure token is strictly a string to prevent [object Object] in frontend
+                    if (typeof token !== "string") {
+                        token = JSON.stringify(token);
+                    }
+
+                    // Scrub any literal leaked object strings
+                    if (token === "[object Object]") {
+                        token = "(Orbit Signal Leak Scrubbed)";
+                    }
+
+                    res.write(`data: ${JSON.stringify({ token })}\n\n`);
+                }
+                res.write(`data: [DONE]\n\n`);
+                console.log("[GW] Stream complete.");
+                return res.end();
+            } else {
+                const answer = secondCompletion.choices[0].message.content;
+                res.json({ answer: normalizeResponse(answer) });
+                return;
+            }
+        }
+
+        // No tools, handle straight stream or JSON
+        if (stream) {
+            res.setHeader('Content-Type', 'text/event-stream');
+            console.log("[GW] Opening direct SSE stream...");
+            let token = responseMessage.content || "";
+            // Always normalize before sending to prevent [object Object]
+            token = normalizeResponse(token);
+
+            if (typeof token !== "string") {
+                token = JSON.stringify(token);
+            }
+
+            if (token) {
+                res.write(`data: ${JSON.stringify({ token })}\n\n`);
+            }
+            res.write(`data: [DONE]\n\n`);
+            res.end();
+        } else {
+            console.log("[GW] Sending direct JSON response");
+            res.json({ answer: normalizeResponse(responseMessage.content || "") });
+        }
     } catch (error) {
-        console.error('Chatbot error:', error);
-        res.json({ success: true, answer: "Sorry, I couldn't process your question." });
+        console.error('Groq AI Error:', error.message);
+        res.status(500).json({ error: 'Failed to get response from AI', details: error.message });
     }
 });
 

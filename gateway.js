@@ -154,6 +154,10 @@ app.use('/api/analysis', analysisRouter); // Supports /api/analysis/analyze
 const aiPhotoRouter = require('./routes/ai-photo');
 app.use('/api', aiPhotoRouter); // Handles /api/generate-executive-photo
 
+// Orbit Neural Assistant Chat API (New!)
+const chatRouter = require('./routes/chat');
+app.use('/api', chatRouter); // Handles /api/chat
+
 // Support legacy shortened paths
 app.use('/auth/signup', (req, res) => res.redirect(307, '/signup'));
 app.use('/auth/login', (req, res) => res.redirect(307, '/login'));

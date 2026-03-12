@@ -101,7 +101,7 @@
     <script>
         let sessionData = null;
         let currentLanguage = 'en';
-        const API_BASE = 'http://localhost:5001';
+        const API_BASE = '';
         
         // Get session ID from URL
         const urlParams = new URLSearchParams(window.location.search);
@@ -255,6 +255,10 @@
             const message = input.value.trim();
             if (!message) return;
             
+            // Extract tutorial titles from the page
+            const tutorialElements = document.querySelectorAll('.video-title');
+            const recommendedTutorials = Array.from(tutorialElements).map(el => el.innerText.trim());
+            
             input.value = '';
             addMessage(message, 'user');
             
@@ -262,7 +266,11 @@
                 const response = await fetch(`${API_BASE}/api/chat`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ sessionId, message })
+                    body: JSON.stringify({ 
+                        sessionId, 
+                        message,
+                        recommended_tutorials: recommendedTutorials
+                    })
                 });
                 
                 const data = await response.json();

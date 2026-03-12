@@ -10,31 +10,42 @@ const AI_MODEL = process.env.AI_MODEL || 'llama-3.3-70b-versatile';
 
 const groq = new Groq({ apiKey: GROQ_API_KEY });
 
-const ORBIT_SYSTEM_PROMPT = `You are Orbit Neural Assistant, a high-fidelity context-aware coding tutor for developers.
+const ORBIT_SYSTEM_PROMPT = `You are Orbit, the AI tutor inside Orbit Studio.
 
 Response Rules:
-1. CONCISE & FOCUSED: Keep your answer strictly to 3–5 sentences maximum unless the user explicitly asks for a "tutorial", "full implementation", or "step-by-step solution".
-2. DIRECT ANSWER: Respond only to what the user asked. Do not add unsolicited tutorials or extra implementations.
-3. STRUCTURE: 
-   - For explanations or questions, use the header "Short Answer:".
-   - For code requests, provide the code block FIRST, followed by a minimal (1-sentence) explanation if needed.
-   - For debugging, provide the fix FIRST, followed by a brief reason.
-   - ALWAYS end with a section titled "You can explore further:" containing 2–4 bulleted follow-up options.
-
-Specific Scenarios:
-- If user asks for code -> return ONLY code with minimal (1-sentence) explanation.
-- If user asks for explanation -> return only "Short Answer:" section (max 5 sentences).
-- If user asks for debugging -> give fix FIRST, then the reason.
-- If user asks for tutorial/full solution -> longer responses are allowed.
+1. Short answers only. Maximum 4 sentences per response. No exceptions.
+2. PREVENT CODE: If the user mentions "video", "tutorial", "learning", "where to start", or "watch", you MUST NOT generate any code blocks or snippets.
+3. PLATFORM CURATOR: You MUST ONLY recommend tutorials from the "Recommended Tutorials from Page" list provided in the context. 
+   - DO NOT invent tutorial names.
+   - DO NOT suggest external platforms like Coursera, edX, Kaggle, DataCamp, Udemy, YouTube, or Udacity.
+   - Response structure for videos/tutoring:
+     1. Recommend the best tutorial to start with from the provided list + 1-sentence explanation of why (e.g., "it introduces the programming fundamentals required...").
+     2. Suggest the logical next tutorial from the same list.
+     3. End with the exact question: "Would you like a quick summary before watching?"
+   - LENGTH: 2–4 sentences total.
 
 Standard Protocols:
-1. DIRECT GENERATION: Generate answers directly. Use markdown.
-2. RESPONSE FORMAT: Never return raw JSON or [object Object].
-3. EXECUTION RULE: Only call 'runCode' tool if explicitly asked to "run", "execute", "test", or "verify".
+- DIRECT GENERATION: Generate answers directly. Use markdown.
+- NO HALLUCINATIONS: If the tutorial list is empty, explain that you are specialized for this page's content and can't recommend external courses.
+- NO CODE: Never generate code blocks if the query is about learning resources.
 
 STRICT OUTPUT FORMAT:
-- All code must be inside standard markdown code blocks.
-- Suggest 2-4 follow-ups at the end of every response.`;
+- Markdown only.
+- 4 sentences max.`;
+
+const BLACKLIST = ['Coursera', 'DataCamp', 'edX', 'Kaggle', 'Udemy', 'Udacity'];
+
+function applySafetyFilter(text, tutorials) {
+    const hasBlacklisted = BLACKLIST.some(platform => text.toLowerCase().includes(platform.toLowerCase()));
+    if (hasBlacklisted) {
+        console.log("[Orbit] Safety filter triggered. Scrubbing external platforms.");
+        const tutorialList = Array.isArray(tutorials) && tutorials.length > 0 ? tutorials : ["Python in 4 hours", "Advanced Data Science Concepts"];
+        const start = tutorialList[0];
+        const next = tutorialList[1] || tutorialList[0];
+        return `You should start with **${start}** because it introduces the programming fundamentals required for data science. After that, move to **${next}** to see how those skills are used in real data analysis. Would you like a quick summary before watching?`;
+    }
+    return text;
+}
 
 /**
  * @route POST /api/chat
@@ -42,17 +53,19 @@ STRICT OUTPUT FORMAT:
  */
 router.post('/chat', async (req, res) => {
     try {
-        const { message, skill, lesson, code } = req.body;
+        const { message, skill, lesson, code, recommended_tutorials } = req.body;
         if (!message) return res.status(400).json({ error: 'Message required' });
 
         const safeSkill = typeof skill === 'string' ? skill : JSON.stringify(skill || 'General Coding');
         const safeLesson = typeof lesson === 'string' ? lesson : JSON.stringify(lesson || 'Personal Practice');
         const safeCode = (typeof code === 'string' ? code : JSON.stringify(code || '// Empty editor')).replace(/\[object Object\]/g, '// (Neural Leak Filtered)');
+        const safeTutorials = Array.isArray(recommended_tutorials) ? recommended_tutorials.join(', ') : 'None provided';
 
         const contextPrompt = `
 CURRENT EDITOR CONTEXT:
 - Skill: ${safeSkill}
 - Lesson: ${safeLesson}
+- Recommended Tutorials from Page: ${safeTutorials}
 - Code in Editor:
 \`\`\`
 ${safeCode}
@@ -111,10 +124,12 @@ ${safeCode}
                     ...toolResults
                 ]
             });
-            return res.json({ answer: normalizeResponse(secondCompletion.choices[0].message.content) });
+            const result = normalizeResponse(secondCompletion.choices[0].message.content);
+            return res.json({ success: true, answer: applySafetyFilter(result, recommended_tutorials) });
         }
 
-        res.json({ answer: normalizeResponse(responseMessage.content || "") });
+        const finalAnswer = applySafetyFilter(normalizeResponse(responseMessage.content || ""), recommended_tutorials);
+        res.json({ success: true, answer: finalAnswer });
 
     } catch (error) {
         console.error('Orbit Chat Error:', error.message);
@@ -127,12 +142,13 @@ ${safeCode}
  * @desc Stream Chat with Orbit Neural Assistant (SSE)
  */
 router.post('/chat/stream', async (req, res) => {
-    const { message, skill, lesson, code, conversationHistory } = req.body;
+    const { message, skill, lesson, code, conversationHistory, recommended_tutorials } = req.body;
     if (!message) return res.status(400).write('data: Error: Message required\n\n');
 
     const safeSkill = typeof skill === 'string' ? skill : JSON.stringify(skill || 'General Coding');
     const safeLesson = typeof lesson === 'string' ? lesson : JSON.stringify(lesson || 'Personal Practice');
     const safeCode = (typeof code === 'string' ? code : JSON.stringify(code || '// Empty editor')).replace(/\[object Object\]/g, '// (Neural Leak Filtered)');
+    const safeTutorials = Array.isArray(recommended_tutorials) ? recommended_tutorials.join(', ') : 'None provided';
 
     // Ensure safe history
     const safeHistory = Array.isArray(conversationHistory) ? conversationHistory.map(m => ({
@@ -144,6 +160,7 @@ router.post('/chat/stream', async (req, res) => {
 CURRENT EDITOR CONTEXT:
 - Skill: ${safeSkill}
 - Lesson: ${safeLesson}
+- Recommended Tutorials from Page: ${safeTutorials}
 - Code in Editor:
 \`\`\`
 ${safeCode}
@@ -176,7 +193,10 @@ ${safeCode}
                 token = JSON.stringify(token);
             }
 
-            // Scrub any literal leaked object strings from the AI (hallucinations or context leaks)
+            // Scrub any literal leaked object strings or blacklisted platforms from the AI
+            // This is a basic safety mechanism for streaming
+            token = token.replace(/Coursera|DataCamp|edX|Kaggle|Udemy|Udacity/gi, "Orbit Tutorials");
+
             if (token === "[object Object]") {
                 token = "(Orbit Signal Leak Scrubbed)";
             }
