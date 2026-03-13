@@ -440,14 +440,29 @@
       height: 0;
       background: #000;
       border-top: 2px solid var(--orbit-green);
-      overflow: hidden;
       transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
       z-index: 50;
+      display: flex;
+      flex-direction: column;
     }
 
-    .console-drawer.open {
-      height: 260px;
+    .console-drawer.resizing {
+      transition: none !important;
+      user-select: none;
     }
+
+    .resizer {
+      position: absolute;
+      top: -4px;
+      left: 0;
+      right: 0;
+      height: 8px;
+      cursor: row-resize;
+      z-index: 100;
+      background: transparent;
+    }
+
+
 
     .c-header {
       padding: 12px 24px;
@@ -456,13 +471,40 @@
       font-weight: 800;
       display: flex;
       justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .close-btn {
+      cursor: pointer;
+      color: var(--text-secondary);
+      transition: 0.2s;
+      display: flex;
+      align-items: center;
+      padding: 4px;
+      border-radius: 4px;
+    }
+
+    .close-btn:hover {
+      color: #ff3232;
+      background: rgba(255, 50, 50, 0.1);
     }
 
     .c-body {
-      padding: 20px 24px;
+      padding: 10px 24px;
+      padding-bottom: 40px;
       font-family: var(--font-code);
       font-size: 13px;
       color: #00ff66;
+      overflow-y: auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      gap: 8px;
+    }
+
+    #console-out {
       white-space: pre-wrap;
     }
 
@@ -715,11 +757,20 @@
       <textarea id="code-area" spellcheck="false"></textarea>
 
       <div class="console-drawer" id="console">
+        <div class="resizer" id="resizer"></div>
         <div class="c-header">
-          <span>VIRTUAL TERMINAL v1.4.0</span>
-          <span style="color: var(--orbit-green)">STABLE CONNECTION</span>
+          <div style="display: flex; align-items: center; gap: 16px;">
+            <span id="terminal-title">VIRTUAL TERMINAL v1.4.0</span>
+            <span id="connection-status" style="color: var(--orbit-green); font-size: 9px; opacity: 0.8;">STABLE CONNECTION</span>
+          </div>
+          <div class="close-btn" id="close-console" title="Close Panel (Esc)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M18 6L6 18M6 6l12 12"></path>
+            </svg>
+          </div>
         </div>
         <div class="c-body" id="console-out"></div>
+        <div class="c-body" id="test-cases-out" style="display: none;"></div>
       </div>
     </main>
 
@@ -768,13 +819,13 @@
 
   <footer class="footer-shelf">
     <div class="console-tab">
-      <div class="c-tab active" id="toggle-console">
+      <div class="c-tab active" id="tab-terminal">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <path d="M4 17l6-6-6-6M12 19h8" />
         </svg>
         TERMINAL
       </div>
-      <div class="c-tab">TEST CASES</div>
+      <div class="c-tab" id="tab-tests">TEST CASES</div>
     </div>
     <div class="master-btns">
       <button class="btn-run" id="btn-run">RUN LOGIC</button>
@@ -806,6 +857,7 @@
     let currentLesson = 'Neural Stream Analysis';
     let lessonDifficulty = 'intermediate';
     let conversationHistory = [];
+    let datasetSchema = null;
 
     function normalizeMessage(msg) {
       if (!msg) return "";
@@ -870,12 +922,15 @@
       document.getElementById('p-diff').innerText = lessonDifficulty.toUpperCase();
       document.getElementById('p-diff').className = `difficulty ${lessonDifficulty.toLowerCase()}`;
       document.getElementById('b-skill').innerText = currentSkill.toUpperCase();
+      
+      const pId = params.get('id');
+      if (pId) document.getElementById('p-id').innerText = pId;
 
       // Better dynamic boilerplate
       refreshBoilerplate();
 
       // Language mismatch detection
-      const isPythonSkill = currentSkill.toLowerCase().includes('python') || currentSkill.toLowerCase().includes('tensorflow') || currentSkill.toLowerCase().includes('learning');
+      const isPythonSkill = currentSkill.toLowerCase().includes('python') || currentSkill.toLowerCase().includes('tensorflow') || currentSkill.toLowerCase().includes('learning') || currentSkill.toLowerCase().includes('science');
       const isJSInEditor = editor.value.includes('function') || editor.value.includes('const');
 
       if (isPythonSkill && isJSInEditor) {
@@ -909,7 +964,7 @@
       });
 
       // Dynamic File Tab Name & Terminal Header
-      const isPython = currentSkill.toLowerCase().includes('python') || currentSkill.toLowerCase().includes('tensorflow') || currentSkill.toLowerCase().includes('learning');
+      const isPython = currentSkill.toLowerCase().includes('python') || currentSkill.toLowerCase().includes('tensorflow') || currentSkill.toLowerCase().includes('learning') || currentSkill.toLowerCase().includes('science');
       const tabName = isPython ? 'SOLUTIONS.PY' : 'SOLUTIONS.JS';
       document.getElementById('file-tab-name').innerText = tabName;
 
@@ -920,7 +975,7 @@
     }
 
     function refreshBoilerplate(forceLang = null) {
-      const lang = forceLang || (currentSkill.toLowerCase().includes('python') || currentSkill.toLowerCase().includes('tensorflow') || currentSkill.toLowerCase().includes('learning') ? 'python' : 'javascript');
+      const lang = forceLang || (currentSkill.toLowerCase().includes('python') || currentSkill.toLowerCase().includes('tensorflow') || currentSkill.toLowerCase().includes('learning') || currentSkill.toLowerCase().includes('science') ? 'python' : 'javascript');
       const commentMarker = lang === 'python' ? '#' : '//';
       const defaultComment = `${commentMarker} PRACTICE: ${currentLesson}\n${commentMarker} Domain: ${currentSkill}\n${commentMarker} Difficulty: ${lessonDifficulty.toUpperCase()}\n\n`;
 
@@ -1017,16 +1072,33 @@
       });
     }
 
+    function identifyIntent(msg) {
+      const m = msg.toLowerCase().trim();
+      const words = m.split(/\s+/);
+      const isGreeting = words.some(w => ['hi', 'hello', 'hey', 'greetings'].includes(w));
+      if (isGreeting || m.includes('hi orbit') || m.includes('good morning')) return 'greeting';
+      if (m.includes('video') || m.includes('tutorial') || m.includes('start learning')) return 'tutorial_request';
+      if (m.includes('explain') || m.includes('what is')) return 'lesson_explanation';
+      if (m.includes('debug my code') || m.includes('fix error')) return 'debug_code';
+      if (m.includes('write code') || m.includes('generate code')) return 'generate_code';
+      if (m.includes('hint')) return 'hint';
+      if (m.includes('run') || m.includes('execute')) return 'run_code';
+      return 'general_question';
+    }
+
     function setupOrbit() {
       const btn = document.getElementById('chat-send');
 
-      const handleSend = async () => {
-        const question = chatInp.value.trim();
+      window.handleSend = async (customText = null, extraData = {}) => {
+        const question = customText || chatInp.value.trim();
         if (!question) return;
+
+        // Intent classification (Preprocessing)
+        const user_intent = customText ? 'debug_code' : identifyIntent(question);
 
         // 1. Append User Bubble
         appendBubble('you', question);
-        chatInp.value = '';
+        if (!customText) chatInp.value = '';
 
         // 2. Show thinking bubble
         const thinkingBubble = appendBubble('orbit', 'Orbit is thinking...');
@@ -1037,17 +1109,32 @@
         const tutorialElements = document.querySelectorAll('.video-title');
         const recommendedTutorials = Array.from(tutorialElements).map(el => el.innerText.trim());
 
+        // Capture Workspace Context
+        const editorCode = editor.value;
+        const terminalOutput = consoleOut.innerText || "No terminal output yet.";
+        const cursorPosition = editor.selectionStart;
+        const cursorLine = editorCode.substring(0, cursorPosition).split("\n").length;
+
         try {
           const response = await fetch("/api/chat/stream", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               message: question,
+              intent: user_intent,
+              mode: "problem_solver",
               skill: currentSkill,
               lesson: currentLesson,
-              code: editor.value,
+              problem_title: currentLesson,
+              problem_description: document.getElementById('p-desc').innerText,
+              user_code: editorCode, // Legacy support
+              editor_code: editorCode,
+              cursor_line: cursorLine,
+              terminal_output: terminalOutput,
+              dataset_schema: datasetSchema,
               conversationHistory: conversationHistory,
-              recommended_tutorials: recommendedTutorials
+              recommended_tutorials: recommendedTutorials,
+              ...extraData
             })
           });
 
@@ -1078,12 +1165,28 @@
 
                 try {
                   const parsed = JSON.parse(data);
-                  let token = parsed.token || parsed.answer || "";
+                  
+                  // Step 5: Role-based filtering (Ignore internal system roles)
+                  if (['system', 'internal', 'router', 'tool_log'].includes(parsed.role)) continue;
+
+                  let token = parsed.token || parsed.answer || parsed.error || "";
                   if (typeof token === "object") token = JSON.stringify(token);
+
+                  // Step 2: Filter internal diagnostic content
+                  const internalTerms = ["Detected", "Router", "Tool activation", "High demand detected", "Switching to model", "Orbit Diagnostic"];
+                  if (internalTerms.some(term => String(token).includes(term))) {
+                    console.log(`[Orbit Privacy Filter] Suppressed internal message: ${token}`);
+                    continue;
+                  }
+
+                  if (parsed.error) {
+                    token = `Orbit is currently experiencing high load. Please try again in a moment.`;
+                  }
 
                   if (!hasTokens && token) {
                     hasTokens = true;
                     thinkingBubble.innerHTML = '';
+                    thinkingBubble.classList.remove('thinking');
                   }
 
                   fullAnswer += token;
@@ -1102,7 +1205,7 @@
 
           conversationHistory.push({ role: "user", content: question });
           conversationHistory.push({ role: "assistant", content: fullAnswer });
-          conversationHistory = conversationHistory.slice(-10);
+          conversationHistory = conversationHistory.slice(-6);
 
         } catch (error) {
           thinkingBubble.innerText = "System failure. Connection disrupted.";
@@ -1110,8 +1213,8 @@
         }
       };
 
-      btn.onclick = handleSend;
-      chatInp.onkeypress = (e) => { if (e.key === 'Enter') handleSend(); };
+      btn.onclick = () => window.handleSend();
+      chatInp.onkeypress = (e) => { if (e.key === 'Enter') window.handleSend(); };
     }
 
     function appendBubble(role, text) {
@@ -1143,13 +1246,186 @@
       element.innerHTML = marked.parse(text);
     }
 
-    document.getElementById('toggle-console').onclick = () => {
-      consoleDrawer.classList.toggle('open');
+    const tabTerminal = document.getElementById('tab-terminal');
+    const tabTests = document.getElementById('tab-tests');
+    const terminalOut = document.getElementById('console-out');
+    const testsOut = document.getElementById('test-cases-out');
+
+    let preferredConsoleHeight = 300;
+
+    function setConsoleOpen(isOpen) {
+      if (isOpen) {
+        consoleDrawer.classList.add('open');
+        consoleDrawer.style.height = preferredConsoleHeight + 'px';
+      } else {
+        consoleDrawer.classList.remove('open');
+        consoleDrawer.style.height = '0px';
+      }
+    }
+
+    function switchTab(target) {
+      setConsoleOpen(true);
+      if (target === 'terminal') {
+        tabTerminal.classList.add('active');
+        tabTests.classList.remove('active');
+        terminalOut.style.display = 'block';
+        testsOut.style.display = 'none';
+        document.getElementById('terminal-title').innerText = currentSkill.toLowerCase().includes('python') ? 'PYTHON KERNEL v3.10.x' : 'VIRTUAL TERMINAL v1.4.0';
+        document.getElementById('connection-status').style.display = 'inline';
+      } else {
+        tabTerminal.classList.remove('active');
+        tabTests.classList.add('active');
+        terminalOut.style.display = 'none';
+        testsOut.style.display = 'block';
+        document.getElementById('terminal-title').innerText = 'TEST CASE VALIDATOR';
+        document.getElementById('connection-status').style.display = 'none';
+      }
+    }
+
+    tabTerminal.onclick = () => switchTab('terminal');
+    tabTests.onclick = () => switchTab('tests');
+
+    document.getElementById('close-console').onclick = (e) => {
+      e.stopPropagation();
+      setConsoleOpen(false);
+      editor.focus();
     };
 
-    document.getElementById('btn-run').onclick = () => {
-      consoleDrawer.classList.add('open');
-      consoleOut.innerText = "> Initializing Neural Environment...\n> Running logic checks...\n> Processing Signal Stream [0...99]\n> Result: VIRTUAL STABILITY SECURED.\n\nReady for deployment.";
+    // Keyboard shortcut: Escape to close console if open
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && consoleDrawer.classList.contains('open')) {
+        setConsoleOpen(false);
+        editor.focus();
+      }
+    });
+
+    // 🏆 Draggable Resize Logic
+    const resizer = document.getElementById('resizer');
+    let isResizing = false;
+
+    resizer.onmousedown = (e) => {
+      e.preventDefault();
+      isResizing = true;
+      consoleDrawer.classList.add('resizing');
+      document.body.style.cursor = 'row-resize';
+      document.body.style.userSelect = 'none';
+    };
+
+    window.onmousemove = (e) => {
+      if (!isResizing) return;
+      
+      const windowHeight = window.innerHeight;
+      const mouseY = e.clientY;
+      const bottomAnchor = 72; // The fixed 'bottom' value from CSS
+      
+      // The height should be the distance from the bottom anchor to the mouse
+      let newHeight = windowHeight - mouseY - bottomAnchor;
+      
+      // Constraints
+      const minH = 150;
+      const maxH = windowHeight * 0.6;
+      
+      if (newHeight < minH) newHeight = minH;
+      if (newHeight > maxH) newHeight = maxH;
+      
+      consoleDrawer.style.height = newHeight + "px";
+      preferredConsoleHeight = newHeight;
+    };
+
+    window.onmouseup = () => {
+      if (isResizing) {
+        isResizing = false;
+        consoleDrawer.classList.remove('resizing');
+        document.body.style.cursor = 'default';
+        document.body.style.userSelect = 'auto';
+      }
+    };
+
+    document.getElementById('btn-run').onclick = async () => {
+      setConsoleOpen(true);
+      terminalOut.innerText = "> Initializing Neural Kernel...\n> Submitting code for execution...";
+      terminalOut.scrollTop = terminalOut.scrollHeight;
+      
+      const userCode = editor.value;
+
+      try {
+        const response = await fetch('/api/run', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            code: userCode,
+            problem_title: currentLesson,
+            problem_id: document.getElementById('p-id').innerText
+          })
+        });
+        
+        const result = await response.json();
+        datasetSchema = result.dataset_schema;
+        
+        if (result.success) {
+          terminalOut.innerText = `> Program Output:\n${result.output}`;
+          terminalOut.scrollTop = terminalOut.scrollHeight;
+          
+          // Render Test Results
+          if (result.tests && result.tests.length > 0) {
+            const totalTests = result.tests.length;
+            const passedTests = result.tests.filter(t => t.result && t.result.trim() === 'Passed').length;
+            
+            let testHtml = `
+              <div style="padding-bottom: 8px; border-bottom: 1px solid var(--border-glass); margin-bottom: 2px;">
+                <h2 style="color: var(--orbit-green); font-size: 15px; margin-bottom: 2px;">TEST RESULTS</h2>
+                <div style="font-size: 11px; color: var(--text-secondary); font-weight: 700;">
+                  Passed: <span style="color: ${passedTests === totalTests ? 'var(--orbit-green)' : '#ffaa00'}">${passedTests} / ${totalTests}</span>
+                </div>
+              </div>
+            `;
+
+            result.tests.forEach(t => {
+              const isPassed = (t.result && t.result.trim() === 'Passed');
+              const statusColor = isPassed ? 'var(--orbit-green)' : '#ff3232';
+              const icon = isPassed ? '✓' : '✗';
+              
+              testHtml += `<div style="font-size: 13px; line-height: 1.6; margin-bottom: 4px; display: flex; align-items: flex-start;">` +
+                `<span style="color: ${statusColor}; font-weight: 800; margin-right: 10px; font-size: 15px;">${icon}</span>` +
+                `<div>` +
+                  `<span style="color: var(--text-secondary); opacity: 0.8;">Case ${t.case} — </span>` +
+                  `<span style="color: ${isPassed ? 'var(--text-primary)' : statusColor}; font-weight: 500;">${t.name}</span>` +
+                `</div>` +
+              `</div>`;
+            });
+            testsOut.innerHTML = testHtml;
+          } else {
+            testsOut.innerHTML = `<div style="color: var(--text-secondary)">No test cases defined for this problem.</div>`;
+          }
+          
+          // Analyze result with Orbit (Requirement 5)
+          if (window.handleSend) {
+            window.handleSend("Explain this execution result", { 
+              problem_title: currentLesson,
+              problem_description: document.getElementById('p-desc').innerText,
+              execution_output: result.output,
+              test_results: result.tests,
+              user_code: userCode,
+              dataset_schema: datasetSchema
+            });
+          }
+        } else {
+          terminalOut.innerText = `> Execution Error:\n${result.error || "Unknown failure."}`;
+          terminalOut.scrollTop = terminalOut.scrollHeight;
+          // Analyze result with Orbit
+          if (window.handleSend) {
+            window.handleSend("Explain this execution error", { 
+              problem_title: currentLesson,
+              problem_description: document.getElementById('p-desc').innerText,
+              execution_output: result.error,
+              user_code: userCode
+            });
+          }
+        }
+      } catch (err) {
+        terminalOut.innerText = `> Transmission Error:\nCould not reach the execution engine.`;
+        console.error("Run Logic Failure:", err);
+      }
     };
 
     document.getElementById('btn-submit').onclick = () => {

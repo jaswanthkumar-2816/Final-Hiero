@@ -1,0 +1,16 @@
+{
+  "tests": [
+    {
+      "name": "Data loaded",
+      "condition": "'df' in locals() and len(df) > 0"
+    },
+    {
+      "name": "Column check",
+      "condition": "'visitors' in df.columns"
+    },
+    {
+      "name": "Mean calculated",
+      "condition": "'mean_visitors' in locals()"
+    }
+  ]
+}

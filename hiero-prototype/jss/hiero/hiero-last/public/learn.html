@@ -1215,25 +1215,73 @@
     const chatInput = document.getElementById('chat-input');
     const chatBody = document.getElementById('chat-container');
 
+    function identifyIntent(msg) {
+      const m = msg.toLowerCase().trim();
+      const words = m.split(/\s+/);
+      const isGreeting = words.some(w => ['hi', 'hello', 'hey', 'greetings'].includes(w));
+      if (isGreeting || m.includes('hi orbit') || m.includes('good morning')) return 'greeting';
+      if (m.includes('video') || m.includes('tutorial') || m.includes('start learning')) return 'tutorial_request';
+      if (m.includes('explain') || m.includes('what is')) return 'lesson_explanation';
+      if (m.includes('debug my code') || m.includes('fix error')) return 'debug_code';
+      if (m.includes('write code') || m.includes('generate code')) return 'generate_code';
+      if (m.includes('hint')) return 'hint';
+      if (m.includes('run') || m.includes('execute')) return 'run_code';
+      return 'general_question';
+    }
+
+    let conversationHistory = [];
+    let tutorState = { challenge: null, current_step: 0, steps_completed: [] };
+
     async function sendChat() {
       const text = chatInput.value.trim();
       if (!text) return;
 
+      const user_intent = identifyIntent(text);
       appendMessage('user', text);
       chatInput.value = '';
 
-      const loadingMsg = appendMessage('bot', '...');
+      const loadingMsg = appendMessage('bot', 'Orbit is thinking...');
+
+      // Step 1: Build Learning Context
+      const learning_context = {
+        page_type: "learning",
+        skill: currentSkill || 'Data Science',
+        language: currentLang || 'english',
+        tutorials: Array.from(document.querySelectorAll('.video-title')).map(el => el.innerText.trim()),
+        challenges: Array.from(document.querySelectorAll('.problem-item h4')).map(el => el.innerText.trim())
+      };
 
       try {
-        const res = await fetch('/api/analysis/ask', {
+        const res = await fetch('/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ question: text, skill: currentSkill })
+          body: JSON.stringify({ 
+            message: text,
+            context: learning_context,
+            // Keep existing fields for backward compatibility if needed, 
+            // but the prompt builder will prioritize context
+            conversationHistory: conversationHistory,
+            tutor_state: tutorState
+          })
         });
         const json = await res.json();
 
         loadingMsg.innerText = '';
-        await typeMessage(loadingMsg, json.answer || "I'm sorry, I couldn't process that. Try asking something else!");
+        const answer = json.answer || json.token || "I'm sorry, I couldn't process that. Try asking something else!";
+        
+        // Simple state update logic
+        if (text.toLowerCase().includes('pizza')) tutorState.challenge = "Predicting Pizza Prices";
+        if (answer.includes('Step 1')) tutorState.current_step = 1;
+        if (answer.includes('Step 2')) tutorState.current_step = 2;
+        if (answer.includes('Step 3')) tutorState.current_step = 3;
+        if (answer.includes('Step 4')) tutorState.current_step = 4;
+        if (answer.includes('Step 5')) tutorState.current_step = 5;
+
+        conversationHistory.push({ role: 'user', content: text });
+        conversationHistory.push({ role: 'assistant', content: answer });
+        conversationHistory = conversationHistory.slice(-6);
+
+        await typeMessage(loadingMsg, answer);
       } catch (err) {
         loadingMsg.innerText = "Error connecting to AI tutor. Please check your connection.";
       }

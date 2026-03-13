@@ -158,6 +158,10 @@ app.use('/api', aiPhotoRouter); // Handles /api/generate-executive-photo
 const chatRouter = require('./routes/chat');
 app.use('/api', chatRouter); // Handles /api/chat
 
+// Python Code Execution API (New!)
+const runRouter = require('./routes/run');
+app.use('/api', runRouter); // Handles /api/run
+
 // Support legacy shortened paths
 app.use('/auth/signup', (req, res) => res.redirect(307, '/signup'));
 app.use('/auth/login', (req, res) => res.redirect(307, '/login'));

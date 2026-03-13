@@ -376,8 +376,8 @@ function suggestFallbackProjects(missing) {
 async function fetchVideos(query) {
     const fallbackVideos = {
         english: [
-            { title: `${query} for Beginners`, videoId: "rfscVS0vtbw", url: "https://www.youtube.com/embed/rfscVS0vtbw", duration: "PT15M", thumbnail: "https://img.youtube.com/vi/rfscVS0vtbw/hqdefault.jpg" },
-            { title: `Advanced ${query} Concepts`, videoId: "Ke90Tje7VS0", url: "https://www.youtube.com/embed/Ke90Tje7VS0", duration: "PT20M", thumbnail: "https://img.youtube.com/vi/Ke90Tje7VS0/hqdefault.jpg" }
+            { title: `Python in 4 hours`, videoId: "rfscVS0vtbw", url: "https://www.youtube.com/embed/rfscVS0vtbw", duration: "PT15M", thumbnail: "https://img.youtube.com/vi/rfscVS0vtbw/hqdefault.jpg" },
+            { title: `Advanced data science Concepts`, videoId: "Ke90Tje7VS0", url: "https://www.youtube.com/embed/Ke90Tje7VS0", duration: "PT20M", thumbnail: "https://img.youtube.com/vi/Ke90Tje7VS0/hqdefault.jpg" }
         ],
         hindi: [
             { title: `${query} Tutorial in Hindi`, videoId: "vLnPwxZdW4Y", url: "https://www.youtube.com/embed/vLnPwxZdW4Y", duration: "PT12M", thumbnail: "https://img.youtube.com/vi/vLnPwxZdW4Y/hqdefault.jpg" }
@@ -658,6 +658,14 @@ router.post('/get-videos', async (req, res) => {
 router.post('/ask', async (req, res) => {
     const { question, skill, topic, difficulty, code, stream } = req.body;
     if (!question || !skill) return res.status(400).json({ success: false, error: 'Missing question or skill' });
+
+    // Intent routing for greetings (Fail-safe)
+    const lowerQ = question.toLowerCase().trim();
+    const words = lowerQ.split(/\s+/);
+    if (words.some(w => ['hi', 'hello', 'hey', 'greetings'].includes(w))) {
+        return res.json({ answer: "Hello! I'm Orbit, your AI learning guide.\n\nHow can I assist you today?" });
+    }
+
 
     if (!GROQ_API_KEY) {
         return res.json({ answer: "Orbit is currently in Basic Mode. Please set GROQ_API_KEY to enable AI features." });
