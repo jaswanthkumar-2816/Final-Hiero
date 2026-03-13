@@ -1124,28 +1124,16 @@
       transform: scale(1.05);
     }
 
-    /* Custom scrollbar for template previews */
+    /* Hide scrollbars for template previews while maintaining function */
     .preview-scroll-container::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    .preview-scroll-container::-webkit-scrollbar-track {
-      background: rgba(0, 0, 0, 0.2);
-      border-radius: 10px;
-    }
-
-    .preview-scroll-container::-webkit-scrollbar-thumb {
-      background: rgba(42, 224, 35, 0.3);
-      border-radius: 10px;
-    }
-
-    .preview-scroll-container::-webkit-scrollbar-thumb:hover {
-      background: rgba(42, 224, 35, 0.6);
+      display: none;
     }
 
     .preview-scroll-container {
-      scrollbar-width: thin;
-      scrollbar-color: rgba(42, 224, 35, 0.3) rgba(0, 0, 0, 0.2);
+      -ms-overflow-style: none;
+      /* IE and Edge */
+      scrollbar-width: none;
+      /* Firefox */
     }
 
     @media (max-width:768px) {
