@@ -2927,14 +2927,24 @@
       modal.innerHTML = `
         <div style="background: #111111; border: 1px solid #333; border-radius: 16px; max-width: 950px; width: 100%; 
                     max-height: 90vh; display: flex; flex-direction: column; position: relative; box-shadow: 0 30px 60px rgba(0,0,0,0.8);">
-          <div style="padding: 25px 30px; border-bottom: 1px solid #222; flex-shrink: 0; background: linear-gradient(to right, #111, #1a1a1a);">
+          <div style="padding: 25px 30px; border-bottom: 1px solid #222; flex-shrink: 0; background: linear-gradient(to right, #111, #1a1a1a); display: flex; align-items: center; justify-content: space-between;">
+            <div>
+              <h2 style="margin: 0 0 5px 0; color: #fff; font-size: 24px; font-weight: 700; letter-spacing: -0.5px;">${template.name}</h2>
+              <p style="margin: 0; color: #888; font-size: 14px;">Premium Design • High Fidelity Preview</p>
+            </div>
+            
+            <div class="zoom-controls" style="display: flex; gap: 10px; align-items: center; background: #1a1a1a; padding: 10px 15px; border-radius: 50px; border: 1px solid #333; margin-right: 50px;">
+              <button onclick="window.updatePreviewZoom(-0.1)" style="background: none; border: none; color: #aaa; cursor: pointer; display: flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 600; transition: all 0.2s;" onmouseover="this.style.color='#2ae023'" onmouseout="this.style.color='#aaa'"><i class="fas fa-search-minus"></i></button>
+              <div id="zoom-level-text" style="color: #2ae023; font-size: 12px; font-weight: 700; min-width: 45px; text-align: center; border-left: 1px solid #333; border-right: 1px solid #333; padding: 0 10px;">100%</div>
+              <button onclick="window.updatePreviewZoom(0.1)" style="background: none; border: none; color: #aaa; cursor: pointer; display: flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 600; transition: all 0.2s;" onmouseover="this.style.color='#2ae023'" onmouseout="this.style.color='#aaa'"><i class="fas fa-search-plus"></i></button>
+              <button onclick="window.updatePreviewZoom(0, true)" style="background: #2ae023; border: none; color: #000; cursor: pointer; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; margin-left: 5px;">RESET</button>
+            </div>
+
             <button onclick="this.closest('.preview-modal-overlay').remove()" 
                     style="position: absolute; top: 20px; right: 20px; background: #222; 
                            border: none; font-size: 20px; cursor: pointer; color: #fff; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: all 0.2s;"
                     onmouseover="this.style.background='#ff4d4d';"
-                    onmouseout="this.style.background='#222';">Ã—</button>
-            <h2 style="margin: 0 0 5px 0; color: #fff; font-size: 24px; font-weight: 700; letter-spacing: -0.5px;">${template.name}</h2>
-            <p style="margin: 0; color: #888; font-size: 14px;">Premium Design â€¢ High Fidelity Preview</p>
+                    onmouseout="this.style.background='#222';">×</button>
           </div>
           <div id="preview-content" style="flex: 1; overflow-y: auto; padding: 40px; display: flex; justify-content: center; align-items: flex-start; background: #0a0a0a; min-height: 500px; scrollbar-width: thin; scrollbar-color: #333 #0a0a0a;">
             <div style="text-align: center; color: #888; padding: 80px 20px;">
@@ -3181,9 +3191,27 @@
         } else {
           // Create iframe element for desktop
           const iframe = document.createElement('iframe');
-          iframe.style.cssText = 'width: 100%; aspect-ratio: 1/1.4142; height: auto; border: none; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); background: white;';
+          iframe.id = 'preview-iframe';
+          iframe.style.cssText = 'width: 100%; aspect-ratio: 1/1.4142; height: auto; border: none; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); background: white; transition: transform 0.2s ease; transform-origin: top center; transform: scale(1);';
           iframe.src = previewUrl + '#toolbar=0&navpanes=0&scrollbar=0';
           previewContent.appendChild(iframe);
+
+          let currentZoom = 1.0;
+          window.updatePreviewZoom = function (delta, reset = false) {
+            if (reset) currentZoom = 1.0;
+            else currentZoom = Math.max(0.3, Math.min(2.0, currentZoom + delta));
+
+            const iframe = document.getElementById('preview-iframe');
+            const zoomText = document.getElementById('zoom-level-text');
+            if (iframe) {
+              iframe.style.transform = `scale(${currentZoom})`;
+              // Adjust container height to avoid scroll issues when zoomed in
+              previewContent.style.minHeight = (previewContent.offsetHeight * currentZoom) + 'px';
+            }
+            if (zoomText) {
+              zoomText.innerText = Math.round(currentZoom * 100) + '%';
+            }
+          };
 
           // Add a fallback link below the iframe just in case
           const fallback = document.createElement('div');
