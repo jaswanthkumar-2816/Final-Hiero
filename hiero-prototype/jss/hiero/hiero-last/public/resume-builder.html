@@ -3213,6 +3213,15 @@
             }
           };
 
+          // Add Ctrl + Wheel zoom support
+          previewContent.addEventListener('wheel', function (e) {
+            if (e.ctrlKey) {
+              e.preventDefault();
+              const delta = e.deltaY > 0 ? -0.1 : 0.1;
+              window.updatePreviewZoom(delta);
+            }
+          }, { passive: false });
+
           // Add a fallback link below the iframe just in case
           const fallback = document.createElement('div');
           fallback.style.cssText = 'text-align: right; margin-top: 10px; font-size: 13px;';
