@@ -440,13 +440,21 @@
     .video-modal {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.95);
+      background: radial-gradient(circle at center, rgba(3, 40, 4, 0.95), rgba(0, 0, 0, 0.98));
       z-index: 10000;
       display: none;
       align-items: center;
       justify-content: center;
-      padding: 40px;
-      backdrop-filter: blur(20px);
+      padding: 30px;
+      backdrop-filter: blur(25px);
+      overflow: hidden;
+    }
+
+    .modal-bg-canvas {
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
     }
 
     .video-modal.active {
@@ -455,8 +463,35 @@
 
     .modal-wrap {
       width: 100%;
-      max-width: 1000px;
+      max-width: 1400px;
       position: relative;
+    }
+
+    .modal-container {
+      display: flex;
+      gap: 30px;
+      width: 100%;
+      align-items: center; /* Center video and chat vertically */
+      justify-content: center;
+    }
+
+    .modal-video-side {
+      flex: 1.6;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal-chat-side {
+      flex: 0.9;
+      background: var(--glass);
+      border: 2px solid var(--border);
+      border-radius: 28px;
+      height: 600px; /* Fixed height to prevent overflow */
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
     }
 
     .aspect-16-9 {
@@ -677,12 +712,12 @@
       display: flex;
       flex-direction: column;
       gap: 20px;
-      scrollbar-width: thin;
-      scrollbar-color: var(--primary) transparent;
+      scrollbar-width: none; /* Firefox */
+      -ms-overflow-style: none; /* IE/Edge */
     }
 
     .chat-body::-webkit-scrollbar {
-      width: 4px;
+      display: none; /* Chrome/Safari/Webkit */
     }
 
     .chat-body::-webkit-scrollbar-thumb {
@@ -1010,6 +1045,7 @@
 
   <!-- Video Modal -->
   <div class="video-modal" id="videoModal">
+    <canvas id="modal-bg-canvas" class="modal-bg-canvas"></canvas>
     <div class="modal-wrap">
       <div class="close-modal" id="closeModal">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
@@ -1018,8 +1054,41 @@
         </svg>
         CLOSE
       </div>
-      <div class="aspect-16-9" id="videoWrapper">
-        <!-- iframe injected here -->
+      
+      <div class="modal-container">
+        <!-- Video Side (Left) -->
+        <div class="modal-video-side">
+          <div class="aspect-16-9" id="videoWrapper">
+            <!-- iframe injected here -->
+          </div>
+        </div>
+
+        <!-- Orbit Side (Right) -->
+        <div class="modal-chat-side">
+          <div class="tutor-header">
+            <div class="tutor-avatar" style="width: 38px; height: 38px;">
+               <svg viewBox="0 0 24 24"><path d="M12,2A10,10,0,0,0,2,12a9.89,9.89,0,0,0,2.26,6.33l-2,2a1,1,0,0,0,-1 1.05A1,1,0,0,0,2.15,22h19.7a1,1,0,0,0,.85-1.52l-2-2A10,10,0,0,0,12,2Zm0,18a8,8,0,0,1,-5.55,-2.25l1.42,-1.42a1,1,0,0,0,-1.42,-1.42L5,16.33A8,8,0,1,1,12,20Z" /><circle cx="12" cy="11" r="3" /></svg>
+            </div>
+            <div class="tutor-header-text">
+               <h3 style="font-size: 16px;">Orbit AI Helper</h3>
+               <div class="online-status"><div class="status-dot"></div>Solving your doubts</div>
+            </div>
+          </div>
+          <div class="chat-body" id="modal-chat-container">
+            <div class="message bot">
+              I'm right here while you watch! Is there anything in this video you'd like me to explain further?
+            </div>
+          </div>
+          <div class="chat-footer">
+            <input type="text" class="chat-input" id="modal-chat-input" placeholder="Ask about the video...">
+            <button class="send-btn" id="modal-chat-send">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="22" y1="2" x2="11" y2="13"></line>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+              </svg>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -1122,7 +1191,7 @@
         card.style.animation = `fadeInUp 0.6s ease-out forwards ${i * 0.1}s`;
 
         // Use Modal Player instead of external link
-        card.onclick = () => openVideo(v.videoId);
+        card.onclick = () => openVideo(v.videoId, v.title);
 
         const duration = v.duration.replace('PT', '').replace('H', 'h ').replace('M', 'm ').replace('S', 's');
 
@@ -1153,10 +1222,22 @@
     const vWrapper = document.getElementById('videoWrapper');
     const vClose = document.getElementById('closeModal');
 
-    function openVideo(id) {
+    function openVideo(id, title) {
       vWrapper.innerHTML = `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+      
+      // Reset modal chat
+      const modalChatContainer = document.getElementById('modal-chat-container');
+      modalChatContainer.innerHTML = `
+        <div class="message bot">
+          I'm right here while you watch! I've prepped context for "<strong>${title || 'this video'}</strong>". Ask me anything!
+        </div>
+      `;
+      
       vModal.classList.add('active');
       document.body.style.overflow = 'hidden';
+      
+      // Auto-focus modal input
+      setTimeout(() => document.getElementById('modal-chat-input').focus(), 500);
     }
 
     function closeVideo() {
@@ -1232,15 +1313,17 @@
     let conversationHistory = [];
     let tutorState = { challenge: null, current_step: 0, steps_completed: [] };
 
-    async function sendChat() {
-      const text = chatInput.value.trim();
+    async function sendChat(isModal = false) {
+      const inputEl = isModal ? document.getElementById('modal-chat-input') : chatInput;
+      const bodyEl = isModal ? document.getElementById('modal-chat-container') : chatBody;
+      const text = inputEl.value.trim();
       if (!text) return;
 
       const user_intent = identifyIntent(text);
-      appendMessage('user', text);
-      chatInput.value = '';
+      appendMessage('user', text, bodyEl);
+      inputEl.value = '';
 
-      const loadingMsg = appendMessage('bot', 'Orbit is thinking...');
+      const loadingMsg = appendMessage('bot', 'Orbit is thinking...', bodyEl);
 
       // Step 1: Build Learning Context
       const learning_context = {
@@ -1281,36 +1364,33 @@
         conversationHistory.push({ role: 'assistant', content: answer });
         conversationHistory = conversationHistory.slice(-6);
 
-        await typeMessage(loadingMsg, answer);
+        await typeMessage(loadingMsg, answer, bodyEl);
       } catch (err) {
         loadingMsg.innerText = "Error connecting to AI tutor. Please check your connection.";
       }
     }
 
-    function appendMessage(role, text) {
+    function appendMessage(role, text, container = chatBody) {
       const div = document.createElement('div');
       div.className = `message ${role}`;
       div.innerText = text;
-      chatBody.appendChild(div);
-      chatBody.scrollTop = chatBody.scrollHeight;
+      container.appendChild(div);
+      container.scrollTop = container.scrollHeight;
       return div;
     }
 
-    function typeMessage(element, text) {
+    function typeMessage(element, text, container = chatBody) {
       return new Promise(resolve => {
         let i = 0;
         element.innerHTML = '';
-        // Fast processing for long messages
         const speed = text.length > 200 ? 5 : 15;
 
         function type() {
           if (i < text.length) {
             let char = text.charAt(i);
-            // Dynamic Markdown-ish parsing
             if (char === '\n') {
               element.innerHTML += '<br>';
             } else if (char === '*' && text.charAt(i + 1) === '*') {
-              // Simple Bold support
               let end = text.indexOf('**', i + 2);
               if (end !== -1) {
                 element.innerHTML += `<strong>${text.substring(i + 2, end)}</strong>`;
@@ -1322,7 +1402,6 @@
               element.innerHTML += char;
             }
             i++;
-            const container = document.getElementById('chat-container');
             container.scrollTop = container.scrollHeight;
             setTimeout(type, speed);
           } else {
@@ -1333,8 +1412,100 @@
       });
     }
 
-    chatBtn.onclick = sendChat;
-    chatInput.onkeypress = (e) => { if (e.key === 'Enter') sendChat(); };
+    chatBtn.onclick = () => sendChat(false);
+    chatInput.onkeypress = (e) => { if (e.key === 'Enter') sendChat(false); };
+
+    // Modal Chat Bindings
+    document.getElementById('modal-chat-send').onclick = () => sendChat(true);
+    document.getElementById('modal-chat-input').onkeypress = (e) => { if (e.key === 'Enter') sendChat(true); };
+
+    // ========== MODAL BACKGROUND ANIMATION (Neural Circuit) ==========
+    (function () {
+      const canvas = document.getElementById('modal-bg-canvas');
+      const ctx = canvas.getContext('2d');
+      let particles = [];
+      const mouse = { x: null, y: null, radius: 200 };
+
+      window.addEventListener('mousemove', (e) => {
+        mouse.x = e.x;
+        mouse.y = e.y;
+      });
+
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+      window.addEventListener('resize', resize);
+      resize();
+
+      class Particle {
+        constructor() {
+          this.x = Math.random() * canvas.width;
+          this.y = Math.random() * canvas.height;
+          this.size = Math.random() * 1.5 + 0.5;
+          this.speedX = (Math.random() * 0.6) - 0.3;
+          this.speedY = (Math.random() * 0.6) - 0.3;
+        }
+        update() {
+          this.x += this.speedX;
+          this.y += this.speedY;
+          if (this.x > canvas.width) this.x = 0; else if (this.x < 0) this.x = canvas.width;
+          if (this.y > canvas.height) this.y = 0; else if (this.y < 0) this.y = canvas.height;
+        }
+        draw() {
+          ctx.fillStyle = 'rgba(4, 255, 7, 0.4)';
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      function initM() {
+        particles = [];
+        for (let i = 0; i < 100; i++) particles.push(new Particle());
+      }
+
+      function animateM() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => {
+          p.update();
+          p.draw();
+        });
+        connectM();
+        requestAnimationFrame(animateM);
+      }
+
+      function connectM() {
+        for (let a = 0; a < particles.length; a++) {
+          for (let b = a + 1; b < particles.length; b++) {
+            let dx = particles[a].x - particles[b].x;
+            let dy = particles[a].y - particles[b].y;
+            let d = Math.sqrt(dx * dx + dy * dy);
+            if (d < 180) {
+              let opacity = 1 - (d / 180);
+              ctx.strokeStyle = `rgba(4, 255, 7, ${opacity * 0.15})`;
+              ctx.beginPath();
+              ctx.moveTo(particles[a].x, particles[a].y);
+              ctx.lineTo(particles[b].x, particles[b].y);
+              ctx.stroke();
+
+              // Interactive proximity effect
+              let mdx = mouse.x - particles[a].x;
+              let mdy = mouse.y - particles[a].y;
+              let md = Math.sqrt(mdx * mdx + mdy * mdy);
+              if (md < mouse.radius) {
+                ctx.strokeStyle = `rgba(4, 255, 7, ${(1 - md / mouse.radius) * 0.4})`;
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+                ctx.lineWidth = 1;
+              }
+            }
+          }
+        }
+      }
+      initM();
+      animateM();
+    })();
 
     // Animations
     document.write(`<style>
