@@ -59,12 +59,103 @@
         <input type="file" id="jd" name="jd" accept=".pdf,.txt">
       </div>
       <button type="submit" class="btn" id="analyze-btn">Analyze Resume</button>
+      <button type="button" class="btn" id="optimize-btn"
+        style="margin-top: 15px; background: linear-gradient(135deg, #0dff00 0%, #0ab300 100%); color: #000;">
+        <i class="fas fa-magic"></i> Generate ATS Optimized Resume
+      </button>
     </form>
+
+    <!-- Results Section (Initially Hidden) -->
+    <div id="optimizer-results"
+      style="display:none; margin-top:60px; border-top: 2px solid #0dff0033; padding-top:40px; animation: fadeInUp 0.8s ease-out;">
+      <h2
+        style="color:#0dff00; text-align:center; margin-bottom:40px; font-size:2.5rem; letter-spacing:-1px; text-shadow: 0 0 20px #0dff0066;">
+        <i class="fas fa-magic"></i> ATS Optimization Complete
+      </h2>
+
+      <div class="results-grid" style="display:grid; grid-template-columns: 350px 1fr; gap:30px;">
+        <!-- Section 1: Analysis Report -->
+        <div class="result-card"
+          style="background: rgba(10, 10, 10, 0.8); border: 1px solid #0dff0033; padding:30px; border-radius:20px; backdrop-filter: blur(10px); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+          <h3 style="color:#0dff00; margin-bottom:25px; display:flex; align-items:center; gap:10px; font-size:1.4rem;">
+            <i class="fas fa-chart-line"></i> Report
+          </h3>
+
+          <div id="match-score-container"
+            style="text-align:center; margin-bottom:30px; background:rgba(13, 255, 0, 0.05); padding:20px; border-radius:100px; border:1px solid #0dff0011;">
+            <div style="font-size:3.5rem; font-weight:900; color:#0dff00; line-height:1;" id="ats-score">0%</div>
+            <div style="color:#888; text-transform:uppercase; font-size:0.7rem; letter-spacing:2px; margin-top:5px;">ATS
+              Match Score</div>
+          </div>
+
+          <div style="margin-bottom:25px;">
+            <strong
+              style="color:#0dff00; display:flex; align-items:center; gap:8px; margin-bottom:12px; font-size:0.9rem; text-transform:uppercase; letter-spacing:1px;">
+              <i class="fas fa-key"></i> Missing Keywords
+            </strong>
+            <div id="missing-keywords" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
+          </div>
+
+          <div style="margin-bottom:25px;">
+            <strong
+              style="color:#0dff00; display:flex; align-items:center; gap:8px; margin-bottom:12px; font-size:0.9rem; text-transform:uppercase; letter-spacing:1px;">
+              <i class="fas fa-lightbulb"></i> Suggested Skills
+            </strong>
+            <div id="suggested-skills" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
+          </div>
+
+          <div>
+            <strong
+              style="color:#0dff00; display:flex; align-items:center; gap:8px; margin-bottom:12px; font-size:0.9rem; text-transform:uppercase; letter-spacing:1px;">
+              <i class="fas fa-check-circle"></i> Improvements
+            </strong>
+            <p id="improvements-text" style="font-size:0.95rem; color:#aaa; line-height:1.6;"></p>
+          </div>
+        </div>
+
+        <!-- Section 2: Optimized Resume Preview -->
+        <div class="result-card"
+          style="background: rgba(10, 10, 10, 0.8); border: 1px solid #0dff0033; padding:30px; border-radius:20px; backdrop-filter: blur(10px); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
+            <h3 style="color:#0dff00; margin:0; display:flex; align-items:center; gap:10px; font-size:1.4rem;">
+              <i class="fas fa-file-invoice"></i> Optimized Preview
+            </h3>
+            <span
+              style="background:#0dff0022; color:#0dff00; padding:4px 12px; border-radius:20px; font-size:0.7rem; font-weight:700; text-transform:uppercase;">
+              Live Editor
+            </span>
+          </div>
+          <div id="resume-preview-editor" contenteditable="true"
+            style="background:rgba(0,0,0,0.4); color:#eee; padding:30px; border-radius:12px; min-height:500px; max-height:700px; overflow-y:auto; font-family: 'Inter', sans-serif; white-space: pre-wrap; line-height:1.7; border:1px solid #222; font-size:0.95rem; box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);">
+            (Generation in progress...)
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 3: Download Options -->
+      <div
+        style="margin-top:50px; text-align:center; background:rgba(10, 10, 10, 0.5); padding:40px; border-radius:25px; border: 1px solid #0dff0011;">
+        <h3 style="color:#0dff00; margin-bottom:25px; font-size:1.5rem; letter-spacing:1px;">Export Your Optimized
+          Resume</h3>
+        <div style="display:flex; justify-content:center; gap:25px;">
+          <button id="download-optimized-pdf" class="btn"
+            style="background: linear-gradient(135deg, #ff416c, #ff4b2b); color:white; border:none; padding:18px 40px; border-radius:15px; font-weight:700; cursor:pointer; box-shadow: 0 10px 20px rgba(255, 65, 108, 0.3);">
+            <i class="fas fa-file-pdf"></i> Save as PDF
+          </button>
+          <button id="download-optimized-docx" class="btn"
+            style="background: linear-gradient(135deg, #2193b0, #6dd5ed); color:white; border:none; padding:18px 40px; border-radius:15px; font-weight:700; cursor:pointer; box-shadow: 0 10px 20px rgba(33, 147, 176, 0.3);">
+            <i class="fas fa-file-word"></i> Save as DOCX
+          </button>
+        </div>
+        <p style="margin-top:20px; color:#666; font-size:0.8rem;">Note: Changes made in the editor will be included in
+          the download.</p>
+      </div>
+    </div>
 
     <!-- ✅ Enhanced Loading Screen -->
     <div id="loading-overlay">
       <div class="loading-content">
-        <img src="/dashboard/logo-hiero.png" alt="Loading..." class="glow-logo"
+        <img src="/dashboard/logohiero copy.png" alt="Loading..." class="glow-logo"
           style="height:120px; width:120px; margin-bottom:32px;">
         <div class="spinner"></div>
         <p style="font-size:1.3rem; color:#0dff00; margin-top:18px;">Analyzing your resume...<br>This may take a few

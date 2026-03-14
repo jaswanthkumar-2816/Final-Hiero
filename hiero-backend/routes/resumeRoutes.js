@@ -42,6 +42,7 @@ router.post('/generate', auth, resumeController.generate);
 router.post('/generate-fast', auth, resumeController.generateFast); // Fast PDF generation
 router.get('/download', resumeController.download); // download is public
 router.get('/preview-pdf', resumeController.previewPdf); // preview PDF is public
+router.post('/optimize-resume', auth, upload.fields([{ name: 'resume', maxCount: 1 }, { name: 'jd', maxCount: 1 }]), resumeController.optimizeResume);
 router.post('/chat', auth, resumeChat);
 
 // ✅ All Available Templates

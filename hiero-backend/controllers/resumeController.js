@@ -10,6 +10,7 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt'; // Add for password hashing
 import { loadLatexTemplate } from '../utils/latexUtils.js';
 import PDFDocument from 'pdfkit';
+import { extractTextFromFile, optimizeResumeWithAI } from '../utils/optimizerUtils.js';
 
 const execPromise = promisify(exec);
 
@@ -827,6 +828,55 @@ export const experience = async (req, res) => {
   } catch (error) {
     winston.error(`Experience save error: userId=${req.userId}, error=${error.message}`);
     res.status(500).json({ success: false, error: 'Failed to save experience' });
+  }
+};
+
+export const optimizeResume = async (req, res) => {
+  try {
+    const resumeFile = req.files?.['resume']?.[0];
+    const jdFile = req.files?.['jd']?.[0];
+    const jdTextRaw = req.body.jd_text;
+
+    if (!resumeFile) {
+      return res.status(400).json({ success: false, error: 'Resume file is required' });
+    }
+
+    let resumeText = await extractTextFromFile(resumeFile.path, resumeFile.mimetype);
+    let jdText = '';
+
+    if (jdFile) {
+      jdText = await extractTextFromFile(jdFile.path, jdFile.mimetype);
+    } else if (jdTextRaw) {
+      jdText = jdTextRaw;
+    } else {
+      return res.status(400).json({ success: false, error: 'Job Description is required (file or text)' });
+    }
+
+    if (!resumeText) return res.status(400).json({ success: false, error: 'Could not extract text from resume' });
+    if (!jdText) return res.status(400).json({ success: false, error: 'Could not extract text from Job Description' });
+
+    winston.info(`🚀 Starting AI optimization for user ${req.userId}`);
+    const optimizationResult = await optimizeResumeWithAI(resumeText, jdText);
+
+    // Store the optimized data temporarily for preview/download if needed
+    // In this demo, we just return it to the frontend
+
+    res.json({
+      success: true,
+      ...optimizationResult
+    });
+
+    // Cleanup uploaded files
+    try {
+      if (resumeFile) fs.unlinkSync(resumeFile.path);
+      if (jdFile) fs.unlinkSync(jdFile.path);
+    } catch (cleanupErr) {
+      winston.warn('Cleanup error in optimizeResume:', cleanupErr.message);
+    }
+
+  } catch (error) {
+    winston.error(`Optimization error: ${error.message}`);
+    res.status(500).json({ success: false, error: error.message || 'Failed to optimize resume' });
   }
 };
 

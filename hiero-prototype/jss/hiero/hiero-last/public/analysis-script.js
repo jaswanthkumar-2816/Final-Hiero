@@ -7,6 +7,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const connectionStatus = document.getElementById("connection-status");
   const statusText = document.getElementById("status-text");
   const analyzeBtn = document.getElementById("analyze-btn");
+  const optimizeBtn = document.getElementById("optimize-btn");
+  const resultPanel = document.getElementById("optimizer-results");
   const validationBox = document.getElementById('validation-errors');
   const validationText = document.getElementById('validation-errors-text');
   const jdTextWrapper = document.getElementById('jd-text-wrapper');
@@ -144,9 +146,161 @@ document.addEventListener("DOMContentLoaded", () => {
         alert('Analysis failed: ' + error.message + '\nCheck console for details.');
       }
     });
-  } else {
-    console.warn('⚠️ analyze-form not found on this page');
   }
+
+  // === ATS Resume Optimizer Handler ===
+  if (optimizeBtn) {
+    optimizeBtn.addEventListener('click', async () => {
+      const resume = document.getElementById('resume').files[0];
+      const jdFile = document.getElementById('jd')?.files?.[0];
+      const jdTextEl = document.getElementById("jd-text");
+      const jdMode = document.querySelector('input[name="jd_mode"]:checked')?.value || 'file';
+
+      if (!resume) { alert("Please upload your resume PDF."); return; }
+      if (jdMode === 'file' && !jdFile) { alert("Please upload the job description file or switch to text mode."); return; }
+      if (jdMode === 'text' && (!jdTextEl || !jdTextEl.value.trim())) { alert("Please paste the job description text."); return; }
+
+      loadingOverlay.querySelector('p').innerHTML = "Generating ATS Optimized Resume...<br>This utilizes advanced AI and may take 10-15 seconds.";
+      loadingOverlay.classList.add("visible");
+
+      const formData = new FormData();
+      formData.append('resume', resume);
+      if (jdMode === 'file') {
+        formData.append('jd', jdFile);
+      } else {
+        formData.append('jd_text', jdTextEl.value.trim());
+      }
+
+      try {
+        const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
+        const optimizeUrl = `${BACKEND_URL}/api/resume/optimize-resume`;
+
+        const response = await fetch(optimizeUrl, {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'Authorization': token ? `Bearer ${token}` : ''
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error(`Optimization failed: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        console.log('✨ Optimization Result:', data);
+
+        // Update UI
+        document.getElementById('ats-score').textContent = `${data.analysis.ats_score}%`;
+
+        const keywordsCont = document.getElementById('missing-keywords');
+        keywordsCont.innerHTML = data.analysis.missing_keywords.map(k =>
+          `<span style="background:#222; color:#0dff00; padding:4px 10px; border-radius:15px; font-size:0.8rem; border:1px solid #0dff0033;">${k}</span>`
+        ).join('');
+
+        const skillsCont = document.getElementById('suggested-skills');
+        skillsCont.innerHTML = data.analysis.suggested_skills.map(s =>
+          `<span style="background:#0dff0011; color:#0dff00; padding:4px 10px; border-radius:15px; font-size:0.8rem; border:1px solid #0dff00;">${s}</span>`
+        ).join('');
+
+        document.getElementById('improvements-text').textContent = data.analysis.improvements_made;
+
+        // Populate Preview Editor
+        const editor = document.getElementById('resume-preview-editor');
+        editor.innerHTML = formatOptimizedResume(data.optimizedData);
+
+        // Show Results
+        resultPanel.style.display = 'block';
+        resultPanel.scrollIntoView({ behavior: 'smooth' });
+
+        // Store optimized data for download
+        window.currentOptimizedData = data.optimizedData;
+
+      } catch (error) {
+        console.error('Optimization error:', error);
+        alert('Failed to optimize resume: ' + error.message);
+      } finally {
+        loadingOverlay.classList.remove("visible");
+        loadingOverlay.querySelector('p').innerHTML = "Analyzing your resume...<br>This may take a few seconds.";
+      }
+    });
+  }
+
+  function formatOptimizedResume(data) {
+    let text = `${data.personalInfo.fullName}\n`;
+    text += `${data.personalInfo.email} | ${data.personalInfo.phone}\n`;
+    if (data.personalInfo.address) text += `${data.personalInfo.address}\n`;
+    if (data.personalInfo.linkedin) text += `${data.personalInfo.linkedin}\n`;
+    text += `\nPROFESSIONAL SUMMARY\n${data.summary}\n`;
+    text += `\nCORE SKILLS\n${data.skills}\n`;
+
+    text += `\nPROFESSIONAL EXPERIENCE\n`;
+    data.experience.forEach(exp => {
+      text += `${exp.jobTitle} | ${exp.company} | ${exp.startDate} - ${exp.endDate}\n`;
+      text += `${exp.description}\n\n`;
+    });
+
+    if (data.projects && data.projects.length > 0) {
+      text += `PROJECTS\n`;
+      data.projects.forEach(p => {
+        text += `${p.name} | ${p.tech} | ${p.duration}\n`;
+        text += `${p.description}\n\n`;
+      });
+    }
+
+    text += `EDUCATION\n`;
+    data.education.forEach(edu => {
+      text += `${edu.degree} | ${edu.school} | ${edu.gradYear}\n`;
+      if (edu.gpa) text += `GPA: ${edu.gpa}\n`;
+    });
+
+    return text;
+  }
+
+  // Handle Downloads
+  document.getElementById('download-optimized-pdf')?.addEventListener('click', async () => {
+    if (!window.currentOptimizedData) return;
+    try {
+      const response = await fetch(`${BACKEND_URL}/download-resume`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          template: 'hiero-standard',
+          personalInfo: window.currentOptimizedData.personalInfo,
+          summary: window.currentOptimizedData.summary,
+          experience: window.currentOptimizedData.experience,
+          education: window.currentOptimizedData.education,
+          projects: window.currentOptimizedData.projects,
+          technicalSkills: window.currentOptimizedData.skills
+        })
+      });
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = 'Optimized_Resume.pdf'; a.click();
+    } catch (e) { alert('Download failed'); }
+  });
+
+  document.getElementById('download-optimized-docx')?.addEventListener('click', async () => {
+    if (!window.currentOptimizedData) return;
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/resume/download-docx`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          template: 'classic',
+          personalInfo: window.currentOptimizedData.personalInfo,
+          summary: window.currentOptimizedData.summary,
+          experience: window.currentOptimizedData.experience,
+          education: window.currentOptimizedData.education,
+          projects: window.currentOptimizedData.projects,
+          skills: window.currentOptimizedData.skills
+        })
+      });
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = 'Optimized_Resume.doc'; a.click();
+    } catch (e) { alert('Download failed'); }
+  });
 
   function showValidationErrors(err) {
     if (!validationBox || !validationText) return;
