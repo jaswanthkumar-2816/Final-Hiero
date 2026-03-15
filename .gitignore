@@ -26,6 +26,7 @@ test_*.js
 
 # Allow essential branding
 !*logohiero*.png
+!*logo-hiero*.png
 !Screenshot*.png
 !WhatsApp*.jpeg
 !favicon*.png
