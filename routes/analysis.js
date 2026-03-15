@@ -252,13 +252,36 @@ function normalizeCodeBlock(data) {
 }
 
 // Skill extraction utils
-const TECH_SKILL_SET = new Set(['python', 'java', 'javascript', 'js', 'node', 'nodejs', 'react', 'angular', 'vue', 'html', 'css', 'docker', 'kubernetes', 'k8s', 'aws', 'gcp', 'azure', 'git', 'github', 'graphql', 'rest', 'api', 'mongodb', 'mysql', 'postgres', 'sql', 'redis', 'kafka', 'spark', 'pandas', 'numpy', 'tensorflow', 'keras', 'pytorch', 'machine learning', 'deep learning', 'nlp', 'flask', 'django', 'fastapi', 'express', 'typescript', 'c++', 'cpp', 'go', 'golang', 'rust', 'php', 'laravel', 'swift', 'kotlin', 'android', 'ios', 'flutter', 'selenium', 'jest', 'mocha', 'cypress', 'devops', 'microservices', 'oauth', 'jwt', 'security', 'etl', 'tableau', 'powerbi']);
-const SOFT_SKILL_SET = new Set(['communication', 'leadership', 'teamwork', 'management', 'strategic', 'planning', 'negotiation', 'presentation', 'stakeholder', 'coordination', 'problem solving', 'critical thinking', 'adaptability', 'collaboration', 'time management', 'organization', 'customer service', 'sales', 'marketing', 'budgeting', 'reporting', 'finance', 'recruitment', 'training', 'mentoring', 'analysis', 'operations', 'project management', 'agile', 'scrum']);
-const MULTI_WORD = ['machine learning', 'deep learning', 'data science', 'problem solving', 'critical thinking', 'time management', 'project management'];
+const TECH_SKILL_SET = new Set(['python', 'java', 'javascript', 'js', 'node', 'nodejs', 'react', 'angular', 'vue', 'html', 'css', 'docker', 'kubernetes', 'k8s', 'aws', 'gcp', 'azure', 'git', 'github', 'graphql', 'rest', 'api', 'mongodb', 'mysql', 'postgres', 'sql', 'redis', 'kafka', 'spark', 'pandas', 'numpy', 'tensorflow', 'keras', 'pytorch', 'machine learning', 'deep learning', 'nlp', 'flask', 'django', 'fastapi', 'express', 'typescript', 'c++', 'cpp', 'go', 'golang', 'rust', 'php', 'laravel', 'swift', 'kotlin', 'android', 'ios', 'flutter', 'selenium', 'jest', 'mocha', 'cypress', 'devops', 'microservices', 'oauth', 'jwt', 'security', 'etl', 'tableau', 'powerbi', 'salesforce', 'sap', 'oracle', 'c#', 'dotnet', 'asp.net', 'unity', 'unreal', 'figma', 'adobe', 'photoshop', 'illustrator', 'linux', 'bash', 'shell', 'terraform', 'ansible', 'jenkins', 'circleci', 'travis', 'graphql', 'apollo', 'redux', 'mobx', 'tailwind', 'bootstrap']);
+const SOFT_SKILL_SET = new Set(['communication', 'leadership', 'teamwork', 'management', 'strategic', 'planning', 'negotiation', 'presentation', 'stakeholder', 'coordination', 'problem solving', 'critical thinking', 'adaptability', 'collaboration', 'time management', 'organization', 'customer service', 'sales', 'marketing', 'budgeting', 'reporting', 'finance', 'recruitment', 'training', 'mentoring', 'analysis', 'operations', 'project management', 'agile', 'scrum', 'public speaking', 'emotional intelligence', 'conflict resolution', 'decision making', 'creativity', 'innovation', 'customer experience', 'cx', 'user experience', 'ux']);
+const MULTI_WORD = ['machine learning', 'deep learning', 'data science', 'problem solving', 'critical thinking', 'time management', 'project management', 'artificial intelligence', 'software engineering', 'full stack', 'front end', 'back end', 'cloud computing'];
 
 function normalizeSkill(s) { return s.toLowerCase().trim(); }
-function extractSkillsDeterministic(text = '') { const lower = text.toLowerCase(); const found = new Set(); for (const phrase of MULTI_WORD) { if (lower.includes(phrase)) found.add(phrase); } const tokens = lower.split(/[^a-z0-9+#.]+/).filter(t => t.length > 1); for (let t of tokens) { if (t === 'js') t = 'javascript'; if (t === 'ml') t = 'machine learning'; if (t === 'dl') t = 'deep learning'; if (TECH_SKILL_SET.has(t) || SOFT_SKILL_SET.has(t)) found.add(t); } return Array.from(found).sort(); }
-function classifyDomain(resumeSkills, jdSkills) { const tech = resumeSkills.filter(s => TECH_SKILL_SET.has(s)).length + jdSkills.filter(s => TECH_SKILL_SET.has(s)).length; const soft = resumeSkills.filter(s => SOFT_SKILL_SET.has(s)).length + jdSkills.filter(s => SOFT_SKILL_SET.has(s)).length; return tech >= soft ? 'tech' : 'non-tech'; }
+function extractSkillsDeterministic(text = '') {
+    if (!text) return [];
+    const lower = text.toLowerCase();
+    const found = new Set();
+    
+    // Check multi-word phrases first
+    for (const phrase of MULTI_WORD) {
+        if (lower.includes(phrase)) found.add(phrase);
+    }
+    
+    // Check individual tokens
+    const tokens = lower.split(/[^a-z0-9+#.]+/).filter(t => t.length > 1);
+    for (let t of tokens) {
+        if (t === 'js') t = 'javascript';
+        if (t === 'ml') t = 'machine learning';
+        if (t === 'dl') t = 'deep learning';
+        if (TECH_SKILL_SET.has(t) || SOFT_SKILL_SET.has(t)) found.add(t);
+    }
+    return Array.from(found).sort();
+}
+function classifyDomain(resumeSkills, jdSkills) {
+    const techCount = (resumeSkills || []).filter(s => TECH_SKILL_SET.has(s)).length + (jdSkills || []).filter(s => TECH_SKILL_SET.has(s)).length;
+    const softCount = (resumeSkills || []).filter(s => SOFT_SKILL_SET.has(s)).length + (jdSkills || []).filter(s => SOFT_SKILL_SET.has(s)).length;
+    return techCount >= softCount ? 'tech' : 'non-tech';
+}
 
 // PDF Helper using pdf-parse
 async function safeExtractPdf(buffer, fileName = 'unknown') {
@@ -513,14 +536,27 @@ router.get('/health', (req, res) => {
 
 // Analyze endpoint (supports both /analyze and legacy /analyze-full)
 router.post(['/analyze', '/analyze-full'], upload.fields([{ name: 'resume' }, { name: 'jd' }]), async (req, res) => {
+    console.log('[ANALYSIS] Request received');
+    console.log('[ANALYSIS] Files:', Object.keys(req.files || {}));
+    console.log('[ANALYSIS] Body keys:', Object.keys(req.body || {}));
+    
     let resumeFilePath, jdFilePath;
     try {
         const resumeFile = req.files?.resume?.[0];
         const jdFile = req.files?.jd?.[0];
-        const jdTextField = req.body.jd_text;
+        // Check multiple possible keys for jd_text
+        const jdTextField = req.body.jd_text || req.body.jd || req.body.description;
 
-        if (!resumeFile) return res.status(400).json({ success: false, error: 'Missing resume file' });
-        if (!jdFile && !jdTextField) return res.status(400).json({ success: false, error: 'Provide JD file or jd_text' });
+        console.log('[ANALYSIS] JD source detected:', jdFile ? 'file' : (jdTextField ? 'text' : 'none'));
+
+        if (!resumeFile) {
+            console.error('[ANALYSIS] Missing resume file');
+            return res.status(400).json({ success: false, error: 'Missing resume file' });
+        }
+        if (!jdFile && !jdTextField) {
+            console.error('[ANALYSIS] Missing JD file and jd_text');
+            return res.status(400).json({ success: false, error: 'Provide JD file or jd_text' });
+        }
 
         resumeFilePath = resumeFile.path;
         if (jdFile) jdFilePath = jdFile.path;
@@ -528,7 +564,7 @@ router.post(['/analyze', '/analyze-full'], upload.fields([{ name: 'resume' }, { 
         const resumeBuffer = fs.readFileSync(resumeFilePath);
         const resumeText = await safeExtractPdf(resumeBuffer, resumeFile.originalname);
 
-        if (resumeText.length < 10) {
+        if (!resumeText || resumeText.length < 10) {
             return res.status(400).json({ success: false, error: 'Unable to extract text from resume PDF.' });
         }
 
@@ -536,9 +572,12 @@ router.post(['/analyze', '/analyze-full'], upload.fields([{ name: 'resume' }, { 
         if (jdFile) {
             const jdBuffer = fs.readFileSync(jdFilePath);
             jdText = await safeExtractPdf(jdBuffer, jdFile.originalname);
-            if (jdText.length < 10) return res.status(400).json({ success: false, error: 'Unable to extract text from JD PDF.' });
+            if (!jdText || jdText.length < 10) {
+                return res.status(400).json({ success: false, error: 'Unable to extract text from JD PDF.' });
+            }
         } else if (jdTextField) {
             jdText = jdTextField;
+            console.log(`[ANALYSIS] Received JD Text from body: ${jdText.substring(0, 50)}...`);
         }
 
         const strategy = (req.query.strategy || process.env.ANALYSIS_STRATEGY || 'hybrid').toLowerCase();
@@ -564,7 +603,27 @@ router.post(['/analyze', '/analyze-full'], upload.fields([{ name: 'resume' }, { 
 
         // AI Extraction
         const ctxLimit = parseInt(process.env.ANALYSIS_TEXT_LIMIT || '4000', 10);
-        const prompt = `Compare this resume: ${resumeText.slice(0, ctxLimit)}\n\nwith this job description: ${jdText.slice(0, ctxLimit)}\n\nReturn ONLY JSON with keys missingSkills (array), score (0-100), skillToLearnFirst (string), projectSuggestions (array).`;
+        const prompt = `Task: Professional Resume vs Job Description Comparison.
+        
+        Resume Content:
+        ${resumeText.slice(0, ctxLimit)}
+        
+        Job Description Content:
+        ${jdText.slice(0, ctxLimit)}
+        
+        Instructions:
+        1. Identify missing skills (tech and soft).
+        2. Calculate a match score (0-100) based on requirements.
+        3. Identify the most critical skill to learn first.
+        4. Suggest 3 concrete projects to bridge the gap.
+        
+        Return ONLY a strict JSON object with these keys:
+        {
+          "missingSkills": ["skill1", "skill2"],
+          "score": 85,
+          "skillToLearnFirst": "Primary Missing Skill",
+          "projectSuggestions": ["Project 1 Description", "Project 2 Description", "Project 3 Description"]
+        }`;
 
         let aiResult, aiRaw;
 

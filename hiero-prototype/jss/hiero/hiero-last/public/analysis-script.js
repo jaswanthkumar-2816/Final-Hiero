@@ -87,11 +87,18 @@ document.addEventListener("DOMContentLoaded", () => {
       loadingOverlay.classList.add("visible");
 
       const formData = new FormData();
+      // Appending text fields BEFORE the file field can sometimes help Multer parse correctly on some platforms
+      if (jdMode === 'text') {
+        const text = jdTextEl.value.trim();
+        formData.append('jd_text', text);
+        formData.append('jd', text); // Duplicate as fallback
+        formData.append('description', text); // Duplicate as fallback
+      }
+      
       formData.append('resume', resume);
+      
       if (jdMode === 'file') {
         formData.append('jd', jdFile);
-      } else {
-        formData.append('jd_text', jdTextEl.value.trim()); // align with backend key jd_text
       }
 
       try {
