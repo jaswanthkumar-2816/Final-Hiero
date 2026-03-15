@@ -4300,6 +4300,24 @@ function renderTemplate_HieroRetail(doc, rawData) {
 
         rightY = Math.max(dateBottomY, contentY) + 12;
     });
+
+    // ACHIEVEMENTS Header
+    const achievements = Array.isArray(rawData.achievements) ? rawData.achievements : (rawData.achievements ? rawData.achievements.split(/[\n,]/).map(a => a.trim()).filter(Boolean) : []);
+    if (achievements.length > 0) {
+        doc.font('Helvetica-Bold').fontSize(16).fillColor('#1f2a6b').text('Achievements', rightX, rightY);
+        rightY = doc.y + 4;
+        doc.moveTo(rightX, rightY).lineTo(PAGE_WIDTH - 50, rightY).strokeColor('#d0d0d0').lineWidth(1).stroke();
+        rightY += 10;
+        
+        let contentY = rightY;
+        achievements.forEach(achievement => {
+            if (!achievement) return;
+            doc.circle(rightX + 3, contentY + 4, 1.5).fill('#333333');
+            doc.font('Helvetica').fontSize(10).fillColor('#333333').text(achievement, rightX + 12, contentY, { width: 200 + 80 - 12 });
+            contentY = doc.y + 4;
+        });
+        rightY = contentY + 12;
+    }
 }
 
 
@@ -4335,7 +4353,8 @@ function renderTemplate_HieroSignature(doc, rawData) {
         { id: 'summary', title: 'About Me', color: '#f7f7f7', textColor: '#000000' },
         { id: 'experience', title: 'Experience', color: '#FFFFFF', accent: true, textColor: '#FFFFFF' },
         { id: 'education', title: 'Education', color: '#FFFFFF', textColor: '#000000' },
-        { id: 'projects', title: 'Projects', color: '#FFFFFF', textColor: '#000000' }
+        { id: 'projects', title: 'Projects', color: '#FFFFFF', textColor: '#000000' },
+        { id: 'achievements', title: 'Achievements', color: '#f7f7f7', textColor: '#000000' }
     ];
 
     sections.forEach(sec => {
@@ -4406,6 +4425,11 @@ function renderTemplate_HieroSignature(doc, rawData) {
                 doc.fillColor('#000000').font('Helvetica-Bold').fontSize(11).text((proj.title || '').toUpperCase(), contentX, itemY);
                 itemY += 14;
                 doc.fillColor(colors.secondary).font('Helvetica').fontSize(10).text(proj.description || '', contentX, itemY, { width: contentW });
+                itemY = doc.y + 15;
+            });
+        } else if (sec.id === 'achievements') {
+            items.forEach(ach => {
+                doc.fillColor('#000000').font('Helvetica-Bold').fontSize(11).text(ach, contentX, itemY, { width: contentW });
                 itemY = doc.y + 15;
             });
         }

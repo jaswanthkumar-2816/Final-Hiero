@@ -2801,110 +2801,64 @@
           return;
         }
 
-        fullNameEl.value = 'Rahul Mehta';
-        emailEl.value = 'rahulmehta.ds@example.com';
-        phoneEl.value = '+91 9876543210';
+        fullNameEl.value = 'Mutthoju Naga Brahma Chari';
+        emailEl.value = 'chary.mai@gmail.com';
+        phoneEl.value = '7780600415';
 
         const addressEl = document.getElementById('address');
         const linkedinEl = document.getElementById('linkedin');
         const websiteEl = document.getElementById('website');
 
-        if (addressEl) addressEl.value = 'Bengaluru, India';
-        if (linkedinEl) linkedinEl.value = 'linkedin.com/in/rahulmehta-ds';
-        if (websiteEl) websiteEl.value = 'github.com/rahulmehta-ds';
+        if (addressEl) addressEl.value = 'D.No: 1-203-A-3-1A, Chenna Kesava Nagar, Markapur, Prakasham District, Andhra Pradesh – PIN: 523316';
+        if (linkedinEl) linkedinEl.value = '';
+        if (websiteEl) websiteEl.value = '';
 
         // Professional Summary
         const summaryEl = document.getElementById('summary');
         if (summaryEl) {
-          summaryEl.value = 'Data Scientist with 2+ years of experience in predictive modeling, machine learning, and data analytics. Skilled in analyzing complex datasets, building end-to-end ML models, and communicating insights to business teams. Strong expertise in Python, statistics, A/B testing, and data visualization. Passionate about solving business problems using data-driven approaches.';
+          summaryEl.value = 'To strive and evolve into a top-notch marketing professional through constant endeavour and excel in an organisation of proven standing. Total Experience: 24 Years. Proven track record of developing profitable new business, guiding distributors, and achieving assigned sales targets.';
         }
 
         // Technical Skills
         const technicalSkillsEl = document.getElementById('technicalSkills');
         if (technicalSkillsEl) {
-          technicalSkillsEl.value = 'Python, R, SQL, Regression, Classification, Clustering, Random Forest, XGBoost, Neural Networks, TensorFlow, PyTorch, scikit-learn, Pandas, NumPy, Matplotlib, Seaborn, Tableau, A/B Testing, Statistical Analysis, Hypothesis Testing, Data Mining, Data Visualization, Feature Engineering';
+          technicalSkillsEl.value = 'Business Development, Distributor Management, Sales & Target Achievement, Market Analysis, Team Building, Field Trials, Channel Partner Streamlining, MS Office';
         }
 
         // Soft Skills
         const softSkillsEl = document.getElementById('softSkills');
         if (softSkillsEl) {
-          softSkillsEl.value = 'Problem-solving, Communication, Analytical Thinking, Business Acumen, Data-driven Decision Making';
+          softSkillsEl.value = 'Communication, Leadership, Problem-Solving, Cross-Functional Collaboration';
         }
 
         // Certifications
         const certificationsEl = document.getElementById('certifications');
         if (certificationsEl) {
-          certificationsEl.value = 'IBM Data Science\nGoogle Data Analytics Professional Certificate\nTensorFlow Developer Certificate';
+          certificationsEl.value = '';
         }
 
         // Languages
         const languagesEl = document.getElementById('languages');
         if (languagesEl) {
-          languagesEl.value = 'English, Hindi, Telugu';
+          languagesEl.value = 'Telugu, English, Hindi';
         }
 
-        // Projects - Use new structured format
+        // Projects - Skip section
         const projectsSection = document.getElementById('section-projects');
-        if (projectsSection && projectsSection.classList.contains('skipped')) {
+        if (projectsSection && !projectsSection.classList.contains('skipped')) {
           toggleSection('projects');
         }
-
-        setTimeout(() => {
-          const projectsContainer = document.getElementById('projectsContainer');
-          if (projectsContainer) {
-            projectsContainer.innerHTML = '';
-
-            const sampleProjects = [
-              {
-                name: 'Customer Churn Prediction Model',
-                tech: 'Python, scikit-learn, Pandas, NumPy, Matplotlib',
-                duration: '3 months',
-                description: 'Built an end-to-end ML pipeline achieving 86% accuracy. Performed EDA, feature engineering, and hyperparameter tuning.',
-                link: 'https://github.com/rahulmehta-ds/churn-prediction',
-                achievement: '86% accuracy, improved customer retention by 18%'
-              },
-              {
-                name: 'Fraud Detection System',
-                tech: 'Python, scikit-learn, Clustering, Anomaly Detection',
-                duration: '4 months',
-                description: 'Implemented anomaly detection using clustering + supervised models. Reduced false positives by 12%.',
-                link: 'https://github.com/rahulmehta-ds/fraud-detection',
-                achievement: '12% reduction in false positives, improved detection accuracy'
-              }
-            ];
-
-            sampleProjects.forEach((project, index) => {
-              if (index > 0) addProject();
-
-              setTimeout(() => {
-                const allNames = document.querySelectorAll('input[name="projectName[]"]');
-                const allTechs = document.querySelectorAll('input[name="projectTech[]"]');
-                const allDurations = document.querySelectorAll('input[name="projectDuration[]"]');
-                const allDescriptions = document.querySelectorAll('textarea[name="projectDescription[]"]');
-                const allLinks = document.querySelectorAll('input[name="projectLink[]"]');
-                const allAchievements = document.querySelectorAll('input[name="projectAchievement[]"]');
-
-                if (allNames[index]) allNames[index].value = project.name;
-                if (allTechs[index]) allTechs[index].value = project.tech;
-                if (allDurations[index]) allDurations[index].value = project.duration;
-                if (allDescriptions[index]) allDescriptions[index].value = project.description;
-                if (allLinks[index]) allLinks[index].value = project.link;
-                if (allAchievements[index]) allAchievements[index].value = project.achievement;
-              }, 150 * index);
-            });
-          }
-        }, 300);
 
         // Achievements
         const achievementsEl = document.getElementById('achievements');
         if (achievementsEl) {
-          achievementsEl.value = 'Improved customer churn prediction by 18% through ML models\nIncreased conversion rate by 6.5% through A/B testing frameworks\nBuilt predictive dashboards analyzing 50M+ rows of data';
+          achievementsEl.value = '• Sold PLETHORA – 13 KL\n• Sold ACEMAIN – 39 MT (in 2022)\n• Sold ZAMIR – 5 KL\n• Secured 2nd place for ADAMA in the Markapur territory\n• Created strong brand awareness for Custodia, Barazide, Mainstar & Tapuz';
         }
 
         // Hobbies
         const hobbiesEl = document.getElementById('hobbies');
         if (hobbiesEl) {
-          hobbiesEl.value = 'Contributing to open-source data science projects, Reading research papers on ML, Participating in Kaggle competitions';
+          hobbiesEl.value = '';
         }
 
         // Experience - Unskip the section if it was hidden
@@ -2919,20 +2873,28 @@
 
         const experiences = [
           {
-            title: 'Data Scientist',
-            company: 'TechNova Analytics',
-            start: '2023-01',
+            title: 'Sr. Assistant Regional Manager',
+            company: 'ADAMA INDIA PVT LTD (Markapur)',
+            start: '2009-01',
             end: '',
             current: true,
-            description: '• Analyzed large datasets (50M+ rows) to identify trends and build predictive dashboards\n• Developed machine learning models (classification & regression) improving customer churn prediction by 18%\n• Performed feature engineering, model tuning, and evaluation using precision, recall, and ROC-AUC\n• Implemented A/B testing frameworks to measure product improvements; increased conversion rate by 6.5%\n• Built visualization dashboards using Matplotlib, Seaborn, and Tableau to support decision-making'
+            description: '• Grew business from Zero to ₹11.85 Crores within 14 years by streamlining channel partners\n• Conducting farmer meetings and field trials with newly released products\n• Regular follow-up of demonstration plots\n• Managing Sales & Collection in the territory\n• Keen analysis of competitor markets\n• Developing new markets through field trials of new molecules'
           },
           {
-            title: 'Junior Data Analyst',
-            company: 'DataWings Pvt Ltd',
-            start: '2021-08',
-            end: '2022-12',
+            title: 'Sales Officer',
+            company: 'Dhanuka Agri Tech Ltd (Markapur Territory)',
+            start: '2008-01',
+            end: '2009-01',
             current: false,
-            description: '• Conducted exploratory data analysis (EDA) and identified business insights\n• Automated data cleaning and transformation pipelines using Python and SQL\n• Contributed to clustering models for customer segmentation'
+            description: '• Developing profitable new business and growing existing client base\n• Guiding and training distributors and appointing new distributors\n• Achieving targeted order booking in assigned geography\n• Accessing market potential and setting up/achieving sales targets'
+          },
+          {
+            title: 'Sales Trainee',
+            company: 'Cheminova India Pvt Ltd (Vinukonda HQ)',
+            start: '1999-01',
+            end: '2007-12',
+            current: false,
+            description: '• Increasing distribution width and depth for stock availability\n• Developing a strong team for smooth business operations\n• Conducting field activations and generating product demand'
           }
         ];
 
@@ -2974,16 +2936,10 @@
 
         const education = [
           {
-            degree: 'M.Sc. in Data Science',
-            school: 'Christ University, Bengaluru',
-            year: '2021',
-            gpa: '3.9/4.0'
-          },
-          {
-            degree: 'B.Sc. in Computer Science',
-            school: 'Osmania University, Hyderabad',
-            year: '2019',
-            gpa: '3.8/4.0'
+            degree: 'BA (Bachelor of Arts)',
+            school: '',
+            year: '',
+            gpa: ''
           }
         ];
 
@@ -3003,97 +2959,29 @@
           }, 100 * index);
         });
 
-        // Add references (un-skip the section first if it's skipped)
+        // Add references (skip the section)
         const refSection = document.getElementById('section-references');
-        if (refSection && refSection.classList.contains('skipped')) {
+        if (refSection && !refSection.classList.contains('skipped')) {
           toggleSection('references');
         }
 
-        setTimeout(() => {
-          const refContainer = document.getElementById('referencesContainer');
-          refContainer.innerHTML = '';
-
-          const references = [
-            {
-              name: 'Dr. Michael Rodriguez',
-              title: 'Engineering Director',
-              company: 'TechCorp Solutions',
-              phone: '+1 (555) 234-5678',
-              email: 'michael.rodriguez@techcorp.com'
-            },
-            {
-              name: 'Sarah Johnson',
-              title: 'Senior Product Manager',
-              company: 'Digital Innovations Inc.',
-              phone: '+1 (555) 345-6789',
-              email: 'sarah.johnson@digitalinnovations.com'
-            }
-          ];
-
-          references.forEach((ref, index) => {
-            if (index > 0) addReference();
-
-            setTimeout(() => {
-              const allNames = document.querySelectorAll('input[name="refName[]"]');
-              const allTitles = document.querySelectorAll('input[name="refTitle[]"]');
-              const allCompanies = document.querySelectorAll('input[name="refCompany[]"]');
-              const allPhones = document.querySelectorAll('input[name="refPhone[]"]');
-              const allEmails = document.querySelectorAll('input[name="refEmail[]"]');
-
-              if (allNames[index]) allNames[index].value = ref.name;
-              if (allTitles[index]) allTitles[index].value = ref.title;
-              if (allCompanies[index]) allCompanies[index].value = ref.company;
-              if (allPhones[index]) allPhones[index].value = ref.phone;
-              if (allEmails[index]) allEmails[index].value = ref.email;
-            }, 100 * index);
-          });
-        }, 500);
-
-        // Add custom details (un-skip the section first if it's skipped)
+        // Add custom details (skip the section)
         const customSection = document.getElementById('section-custom');
-        if (customSection && customSection.classList.contains('skipped')) {
+        if (customSection && !customSection.classList.contains('skipped')) {
           toggleSection('custom');
         }
-
-        setTimeout(() => {
-          const customContainer = document.getElementById('customDetailsContainer');
-          customContainer.innerHTML = '';
-
-          const customDetails = [
-            {
-              heading: 'Publications & Speaking',
-              content: '"Building Scalable Microservices" - TechBlog Monthly, March 2023\n"The Future of Cloud Architecture" - CloudCon Conference, June 2023\nGuest lecturer at UC Berkeley on Modern Web Development (2022-Present)'
-            },
-            {
-              heading: 'Volunteer Work',
-              content: 'Code for Good - Teaching coding to underprivileged youth (2020-Present)\nTech Mentorship Program - Mentoring women in tech transitioning to software engineering\nOpen Source Community - Regular contributor and maintainer of popular JavaScript libraries'
-            }
-          ];
-
-          customDetails.forEach((detail, index) => {
-            if (index > 0) addCustomDetail();
-
-            setTimeout(() => {
-              const allHeadings = document.querySelectorAll('input[name="customHeading[]"]');
-              const allContents = document.querySelectorAll('textarea[name="customContent[]"]');
-
-              if (allHeadings[index]) allHeadings[index].value = detail.heading;
-              if (allContents[index]) allContents[index].value = detail.content;
-            }, 100 * index);
-          });
-        }, 700);
 
         // Show success message
         setTimeout(() => {
           console.log('✅ Sample data filled successfully');
-          alert('✅ Sample data has been loaded successfully!\n\nYou can now preview or generate your resume with any template to see how it looks with comprehensive data.');
+          alert('✅ Details have been loaded successfully!\n\nYou can now preview or generate your resume.');
 
           // Scroll to top of form
           const mainLayout = document.querySelector('.main-layout');
           if (mainLayout) {
             mainLayout.scrollIntoView({ behavior: 'smooth', block: 'start' });
           }
-        }, 2000);
+        }, 1500);
 
       } catch (error) {
         console.error('❌ Error filling sample data:', error);

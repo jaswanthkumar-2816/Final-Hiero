@@ -372,42 +372,48 @@ function suggestFallbackProjects(missing) {
 }
 
 // YouTube video fetcher
-// YouTube video fetcher
 async function fetchVideos(query) {
-    const fallbackVideos = {
-        english: [
-            { title: "Python in 4 hours", videoId: "rfscVS0vtbw", url: "https://www.youtube.com/embed/rfscVS0vtbw", duration: "PT4H0M", thumbnail: "https://img.youtube.com/vi/rfscVS0vtbw/hqdefault.jpg" },
-            { title: "React for Beginners", videoId: "SqcY0GlETPk", url: "https://www.youtube.com/embed/SqcY0GlETPk", duration: "PT20M", thumbnail: "https://img.youtube.com/vi/SqcY0GlETPk/hqdefault.jpg" },
-            { title: "Advanced Data Science Concepts", videoId: "Ke90Tje7VS0", url: "https://www.youtube.com/embed/Ke90Tje7VS0", duration: "PT30M", thumbnail: "https://img.youtube.com/vi/Ke90Tje7VS0/hqdefault.jpg" }
+    const skillFallbacks = {
+        "react": [
+            { title: "React JS Full Course 2024", videoId: "hQAHSlTtcmY", url: "https://www.youtube.com/embed/hQAHSlTtcmY", duration: "PT4H", thumbnail: "https://i.ytimg.com/vi/hQAHSlTtcmY/hqdefault.jpg" },
+            { title: "React Tutorial for Beginners", videoId: "SqcY0GlETPk", url: "https://www.youtube.com/embed/SqcY0GlETPk", duration: "PT20M", thumbnail: "https://i.ytimg.com/vi/SqcY0GlETPk/hqdefault.jpg" }
         ],
-        hindi: [
-            { title: "Full Python Course - Hindi", videoId: "vLnPwxZdW4Y", url: "https://www.youtube.com/embed/vLnPwxZdW4Y", duration: "PT10H", thumbnail: "https://img.youtube.com/vi/vLnPwxZdW4Y/hqdefault.jpg" }
+        "python": [
+            { title: "Python Tutorial for Beginners", videoId: "_uQrJ0TkZlc", url: "https://www.youtube.com/embed/_uQrJ0TkZlc", duration: "PT6H", thumbnail: "https://i.ytimg.com/vi/_uQrJ0TkZlc/hqdefault.jpg" },
+            { title: "Python Full Course for Beginners", videoId: "rfscVS0vtbw", url: "https://www.youtube.com/embed/rfscVS0vtbw", duration: "PT4H", thumbnail: "https://i.ytimg.com/vi/rfscVS0vtbw/hqdefault.jpg" }
         ],
-        telugu: [
-            { title: "Data Science Full Course Telugu", videoId: "XmifS2AzzP8", url: "https://www.youtube.com/embed/XmifS2AzzP8", duration: "PT4H", thumbnail: "https://img.youtube.com/vi/XmifS2AzzP8/hqdefault.jpg" }
+        "javascript": [
+            { title: "JavaScript Tutorial for Beginners", videoId: "W6NZfCO5SIk", url: "https://www.youtube.com/embed/W6NZfCO5SIk", duration: "PT1H", thumbnail: "https://i.ytimg.com/vi/W6NZfCO5SIk/hqdefault.jpg" },
+            { title: "Modern JavaScript Course", videoId: "H3XIJYEPdus", url: "https://www.youtube.com/embed/H3XIJYEPdus", duration: "PT7H", thumbnail: "https://i.ytimg.com/vi/H3XIJYEPdus/hqdefault.jpg" }
         ],
-        tamil: [
-            { title: "Introduction to Machine Learning", videoId: "8O6vA4C62I4", url: "https://www.youtube.com/embed/8O6vA4C62I4", duration: "PT1H", thumbnail: "https://img.youtube.com/vi/8O6vA4C62I4/hqdefault.jpg" }
+        "machine learning": [
+            { title: "Machine Learning Course for Beginners", videoId: "i_LwzRVP7bg", url: "https://www.youtube.com/embed/i_LwzRVP7bg", duration: "PT2H", thumbnail: "https://i.ytimg.com/vi/i_LwzRVP7bg/hqdefault.jpg" },
+            { title: "Machine Learning with Python", videoId: "7eh4d6sabA0", url: "https://www.youtube.com/embed/7eh4d6sabA0", duration: "PT3H", thumbnail: "https://i.ytimg.com/vi/7eh4d6sabA0/hqdefault.jpg" }
         ],
-        kannada: [
-             { title: "Coding Fundamentals in Kannada", videoId: "p_d3koy8o7I", url: "https://www.youtube.com/embed/p_d3koy8o7I", duration: "PT2H", thumbnail: "https://img.youtube.com/vi/p_d3koy8o7I/hqdefault.jpg" }
+        "data science": [
+            { title: "Data Science Full Course 2024", videoId: "0vT9FwzB2pg", url: "https://www.youtube.com/embed/0vT9FwzB2pg", duration: "PT10H", thumbnail: "https://i.ytimg.com/vi/0vT9FwzB2pg/hqdefault.jpg" },
+            { title: "Data Science Roadmap 2024", videoId: "7O4p7p6O-n0", url: "https://www.youtube.com/embed/7O4p7p6O-n0", duration: "PT15M", thumbnail: "https://i.ytimg.com/vi/7O4p7p6O-n0/hqdefault.jpg" }
+        ],
+        "sql": [
+            { title: "SQL Tutorial for Beginners", videoId: "HXV3zeQKqGY", url: "https://www.youtube.com/embed/HXV3zeQKqGY", duration: "PT4H", thumbnail: "https://i.ytimg.com/vi/HXV3zeQKqGY/hqdefault.jpg" }
         ]
+    };
+
+    const getFallbacks = (q) => {
+        const lowerQ = (q || "").toLowerCase();
+        const matchedKey = Object.keys(skillFallbacks).find(k => lowerQ.includes(k));
+        return skillFallbacks[matchedKey] || skillFallbacks["python"];
     };
 
     if (!YOUTUBE_API_KEY) {
         console.warn('YOUTUBE_API_KEY missing. Returning placeholders.');
-        const languages = ["english", "hindi", "telugu", "tamil", "kannada"];
-        const results = {};
-        languages.forEach(lang => {
-            results[lang] = fallbackVideos[lang] || fallbackVideos['english'];
-        });
-        return results;
+        return { english: getFallbacks(query) };
     }
 
     const languages = ["english", "hindi", "telugu", "tamil", "kannada"];
     const results = {};
-    const queryClean = query.replace(/ \(.+\)/g, '').trim();
-    const isAdvanced = query.toLowerCase().includes('advanced');
+    const queryClean = (query || "").replace(/ \(.+\)/g, '').trim();
+    const isAdvanced = (query || "").toLowerCase().includes('advanced');
 
     for (const lang of languages) {
         try {
@@ -476,6 +482,10 @@ async function fetchVideos(query) {
 
         } catch (error) {
             console.error(`❌ Error fetching videos for ${lang}:`, error.message);
+            // Fallback if API fails (Quota etc)
+            if (lang === 'english' && !results['english']) {
+                results['english'] = getFallbacks(query);
+            }
         }
     }
     return results;
@@ -655,14 +665,14 @@ router.post('/get-videos', async (req, res) => {
     try {
         console.log(`[Analysis] Fetching tutorials for: ${skill}`);
         const videos = await fetchVideos(skill);
-        
+
         // Ensure problems exists and matches structure
         let skillProblems = problems[skill];
         if (!skillProblems || !skillProblems.easy) {
             console.log(`[Analysis] No local problems for ${skill}, generating with AI/Fallback`);
             skillProblems = await generateAIProblems(skill);
         }
-        
+
         res.json({ success: true, data: { videos, problems: skillProblems } });
     } catch (error) {
         console.error('Error fetching videos:', error);

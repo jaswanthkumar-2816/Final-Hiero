@@ -203,6 +203,8 @@ const TEMPLATES = {
                     <div style="font-size:11pt;margin-top:2pt">${esc(pr.description).replace(/\n/g, '<br>')}</div>
                     ${pr.link ? `<div style="font-size:10pt;margin-top:2pt;color:#444">Link: ${esc(pr.link)}</div>` : ''}
                 </div>`).join('')}
+
+            ${d.achievements?.length ? `<h2>Achievements</h2><ul>${d.achievements.map(a => `<li>${esc(a)}</li>`).join('')}</ul>` : ''}
             
             ${d.softSkills.length > 0 ? `<h2>Personal Traits & Skills</h2><ul>${d.softSkills.map(s => `<li>${esc(s)}</li>`).join('')}</ul>` : ''}
         </body></html>`;
@@ -328,7 +330,7 @@ const TEMPLATES = {
   'hiero-elite': (data) => {
     const d = normalizeData(data);
     const p = d.personalInfo;
-    return `<!doctype html><html><head><style>@page{margin:30pt}body{font-family:'Inter',system-ui,sans-serif;color:#111827;line-height:1.5;margin:30px}.header{display:flex;justify-content:space-between;border-bottom:2px solid #0ea5e9;padding-bottom:10px;margin-bottom:20px}.name{font-size:24px;font-weight:700;letter-spacing:-0.02em}.role{font-size:13px;color:#0ea5e9;text-transform:uppercase;font-weight:700;letter-spacing:0.1em}.contact{font-size:10px;color:#4b5563;text-align:right}.sec-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.15em;margin:15px 0 5px;border-bottom:1px solid #e5e7eb;padding-bottom:3px}p{font-size:10px;margin:0 0 5px}.chip{font-size:9px;padding:2px 8px;background:#f0f9ff;color:#0369a1;border:1px solid #bae6fd;border-radius:12px;margin:2px;display:inline-block}</style></head><body><div class="header"><div><div class="name">${esc(p.fullName)}</div><div class="role">${esc(p.roleTitle)}</div></div><div class="contact">${esc(p.email)}<br/>${esc(p.phone)}<br/>${esc(p.address)}</div></div><section><div class="sec-title">Profile</div><p>${esc(d.summary)}</p></section><section><div class="sec-title">Experience</div>${d.experience.map(e => `<div><b>${esc(e.jobTitle)}</b>, ${esc(e.company)} <span style="float:right;font-weight:400;color:#6b7280">${esc(e.startDate)} - ${esc(e.endDate)}</span><p style="margin-top:2px">${esc(e.description).replace(/\n/g, '<br>')}</p></div>`).join('')}</section><section><div class="sec-title">Education</div>${d.education.map(e => `<div><b>${esc(e.degree)}</b>, ${esc(e.school)} <span style="float:right;font-weight:400;color:#6b7280">${esc(e.gradYear)}</span></div>`).join('')}</section><section><div class="sec-title">Skills</div>${d.skills.map(s => `<span class="chip">${esc(s)}</span>`).join('')}</section></body></html>`;
+    return `<!doctype html><html><head><style>@page{margin:30pt}body{font-family:'Inter',system-ui,sans-serif;color:#111827;line-height:1.5;margin:30px}.header{display:flex;justify-content:space-between;border-bottom:2px solid #0ea5e9;padding-bottom:10px;margin-bottom:20px}.name{font-size:24px;font-weight:700;letter-spacing:-0.02em}.role{font-size:13px;color:#0ea5e9;text-transform:uppercase;font-weight:700;letter-spacing:0.1em}.contact{font-size:10px;color:#4b5563;text-align:right}.sec-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.15em;margin:15px 0 5px;border-bottom:1px solid #e5e7eb;padding-bottom:3px}p{font-size:10px;margin:0 0 5px}.chip{font-size:9px;padding:2px 8px;background:#f0f9ff;color:#0369a1;border:1px solid #bae6fd;border-radius:12px;margin:2px;display:inline-block}</style></head><body><div class="header"><div><div class="name">${esc(p.fullName)}</div><div class="role">${esc(p.roleTitle)}</div></div><div class="contact">${esc(p.email)}<br/>${esc(p.phone)}<br/>${esc(p.address)}</div></div><section><div class="sec-title">Profile</div><p>${esc(d.summary)}</p></section><section><div class="sec-title">Experience</div>${d.experience.map(e => `<div><b>${esc(e.jobTitle)}</b>, ${esc(e.company)} <span style="float:right;font-weight:400;color:#6b7280">${esc(e.startDate)} - ${esc(e.endDate)}</span><p style="margin-top:2px">${esc(e.description).replace(/\n/g, '<br>')}</p></div>`).join('')}</section><section><div class="sec-title">Education</div>${d.education.map(e => `<div><b>${esc(e.degree)}</b>, ${esc(e.school)} <span style="float:right;font-weight:400;color:#6b7280">${esc(e.gradYear)}</span></div>`).join('')}</section><section><div class="sec-title">Skills</div>${d.skills.map(s => `<span class="chip">${esc(s)}</span>`).join('')}</section>${d.achievements?.length ? `<section><div class="sec-title">Achievements</div><ul>${d.achievements.map(a => `<li style="font-size:10px">${esc(a)}</li>`).join('')}</ul></section>` : ''}</body></html>`;
   },
   'hiero-essence': (data) => {
     const d = normalizeData(data);
@@ -513,6 +515,19 @@ const TEMPLATES = {
                     </div>
                     ${proj.tech ? `<div class="item-sub">${esc(proj.tech)}</div>` : ''}
                     <div class="item-desc">${esc(proj.description)}</div>
+                </div>
+            `).join('')}
+        ` : ''}
+
+        ${d.achievements?.length ? `
+            <div class="ribbon-container">
+                <div class="ribbon">Achievements</div>
+                <div class="fold"></div>
+            </div>
+            ${d.achievements.map(achieve => `
+                <div class="contact-item" style="margin-left: 20px;">
+                    <span class="bullet" style="font-size: 8pt;">●</span>
+                    <span class="item-desc" style="color: #fff;">${esc(achieve)}</span>
                 </div>
             `).join('')}
         ` : ''}
@@ -737,6 +752,21 @@ const TEMPLATES = {
               <div class="eyear">${esc(proj.duration)}</div>
               <h4>${esc(proj.title)}</h4>
               <div class="edesc">${esc(proj.description)}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>` : ''}
+
+      <!-- ACHIEVEMENTS SECTION -->
+      ${d.achievements.length > 0 ? `
+      <div class="section-container achievements-section">
+        <div class="section-title-vert">
+          <div class="rotated-text">Awards</div>
+        </div>
+        <div class="section-content">
+          ${d.achievements.map(achieve => `
+            <div class="entry" style="margin-bottom:15px;">
+              <h4 style="margin-bottom:2px;">${esc(achieve)}</h4>
             </div>
           `).join('')}
         </div>

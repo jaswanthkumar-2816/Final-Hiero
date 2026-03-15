@@ -191,6 +191,7 @@ app.get(['/learn', '/learn.html'], (req, res) => res.sendFile(path.join(resumeBu
 app.get(['/solve', '/solve.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'solve.html')));
 app.get(['/resume-builder', '/resume-builder.html', '/dashboard/resume-builder'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'resume-builder.html')));
 app.get(['/resume-form', '/resume-form.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'resume-form.html')));
+app.get(['/domain-selection', '/domain-selection.html', '/dashboard/domain-selection.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'domain-selection.html')));
 app.get(['/project', '/project.html', '/dashboard/project.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'coming-soon.html')));
 app.get(['/interview', '/interview.html', '/mock-interview', '/mock-interview.html', '/dashboard/mock-interview.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'coming-soon.html')));
 

@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hiero - Select Career Domain</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #050805;
+      --card-bg: rgba(20, 26, 20, 0.6);
+      --primary: #2ae023;
+      --primary-glow: rgba(42, 224, 35, 0.4);
+      --text: #ffffff;
+      --text-muted: #a0aab2;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, var(--bg-color), #0a110a);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 50px;
+      animation: fadeInDown 0.8s ease-out;
+    }
+
+    .header h1 {
+      font-size: 3rem;
+      font-weight: 700;
+      margin-bottom: 15px;
+      background: linear-gradient(135deg, #fff, var(--primary));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 30px var(--primary-glow);
+    }
+
+    .header p {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .domains-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 30px;
+      width: 100%;
+      max-width: 1200px;
+      padding: 20px;
+    }
+
+    .domain-card {
+      background: var(--card-bg);
+      border: 1px solid rgba(42, 224, 35, 0.1);
+      border-radius: 20px;
+      padding: 30px;
+      text-align: center;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+      position: relative;
+      overflow: hidden;
+      animation: fadeInUp 0.8s ease-out backwards;
+    }
+
+    .domain-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, var(--primary-glow) 0%, transparent 60%);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      pointer-events: none;
+    }
+
+    .domain-card:hover {
+      transform: translateY(-10px) scale(1.02);
+      border-color: var(--primary);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4), 0 0 20px var(--primary-glow);
+    }
+
+    .domain-card:hover::before {
+      opacity: 0.15;
+    }
+
+    .icon-wrapper {
+      width: 80px;
+      height: 80px;
+      background: rgba(42, 224, 35, 0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      font-size: 2rem;
+      color: var(--primary);
+      transition: all 0.3s ease;
+      box-shadow: inset 0 0 20px rgba(42, 224, 35, 0.05);
+    }
+
+    .domain-card:hover .icon-wrapper {
+      background: var(--primary);
+      color: var(--bg-color);
+      transform: scale(1.1) rotate(5deg);
+      box-shadow: 0 0 25px var(--primary-glow);
+    }
+
+    .domain-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .domain-desc {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal-content {
+      background: #111;
+      border: 1px solid rgba(42, 224, 35, 0.2);
+      border-radius: 24px;
+      padding: 40px;
+      width: 90%;
+      max-width: 600px;
+      transform: scale(0.9) translateY(20px);
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      position: relative;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(42, 224, 35, 0.1);
+    }
+
+    .modal-overlay.active .modal-content {
+      transform: scale(1) translateY(0);
+    }
+
+    .close-modal {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .close-modal:hover {
+      color: #ff4757;
+    }
+
+    .modal-header {
+      margin-bottom: 30px;
+      text-align: center;
+    }
+
+    .modal-header h2 {
+      font-size: 2rem;
+      color: var(--primary);
+      margin-bottom: 10px;
+    }
+
+    .subdomains-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 15px;
+    }
+
+    .subdomain-btn {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 15px 20px;
+      border-radius: 12px;
+      color: var(--text);
+      font-size: 1rem;
+      cursor: pointer;
+       transition: all 0.3s ease;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .subdomain-btn i {
+      opacity: 0;
+      transform: translateX(-10px);
+      transition: all 0.3s ease;
+      color: var(--primary);
+    }
+
+    .subdomain-btn:hover {
+      background: rgba(42, 224, 35, 0.1);
+      border-color: var(--primary);
+      transform: translateX(5px);
+    }
+
+    .subdomain-btn:hover i {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .back-btn {
+      position: absolute;
+      top: 30px;
+      left: 30px;
+      color: var(--text-muted);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 500;
+      transition: all 0.2s;
+      padding: 8px 16px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 20px;
+    }
+    
+    .back-btn:hover {
+      color: var(--text);
+      background: rgba(255,255,255,0.1);
+      transform: translateX(-3px);
+    }
+  </style>
+</head>
+<body>
+
+  <a href="/index.html" class="back-btn">
+    <i class="fas fa-arrow-left"></i> Dashboard
+  </a>
+
+  <div class="header">
+    <h1>Select Career Domain</h1>
+    <p>Choose your industry and specialization. Our AI will automatically tailor the resume format, suggested skills, and layout specifically for your exact field.</p>
+  </div>
+
+  <div class="domains-grid" id="domainsGrid">
+    <!-- Populated by JS -->
+  </div>
+
+  <div class="modal-overlay" id="subdomainModal">
+    <div class="modal-content">
+      <button class="close-modal" id="closeModal">
+        <i class="fas fa-times"></i>
+      </button>
+      <div class="modal-header">
+        <h2 id="modalTitle">Select Specialization</h2>
+        <p>Choose your specific focus area for more precision.</p>
+      </div>
+      <div class="subdomains-list" id="subdomainsList">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const domainsData = [
+      {
+        id: 'engineering',
+        title: 'Engineering & Tech',
+        icon: 'fa-laptop-code',
+        desc: 'Software Development, Architecture, IT Infrastructure, Data & AI',
+        subdomains: [
+          'Software Engineering',
+          'Data Science & AI',
+          'Cloud & DevOps',
+          'Cybersecurity',
+          'Network Administrator',
+          'Database Architect'
+        ]
+      },
+      {
+        id: 'business',
+        title: 'Business & Management',
+        icon: 'fa-chart-pie',
+        desc: 'Consulting, Operations, Strategy, HR and Enterprise Leadership',
+        subdomains: [
+          'Product Management',
+          'Business Analyst',
+          'Operations Manager',
+          'Human Resources (HR)',
+          'Management Consultant',
+          'Project Management'
+        ]
+      },
+      {
+        id: 'creative',
+        title: 'Creative & Design',
+        icon: 'fa-pen-nib',
+        desc: 'UI/UX, Graphic Design, Copywriting, Video Production',
+        subdomains: [
+          'UX/UI Design',
+          'Graphic Design',
+          'Product Design',
+          'Content Strategy',
+          'Video Editor'
+        ]
+      },
+      {
+        id: 'marketing',
+        title: 'Sales & Marketing',
+        icon: 'fa-bullhorn',
+        desc: 'Digital Marketing, Enterprise Sales, Public Relations, SEO',
+        subdomains: [
+          'Digital Marketing',
+          'B2B Sales / Enterprise',
+          'SEO Specialist',
+          'Brand Management',
+          'Public Relations'
+        ]
+      },
+      {
+        id: 'medical',
+        title: 'Healthcare & Medical',
+        icon: 'fa-stethoscope',
+        desc: 'Clinical practice, Healthcare Administration, Research',
+        subdomains: [
+          'Clinical Nurse',
+          'Healthcare Admin',
+          'Medical Research',
+          'Pharmacy',
+          'Public Health'
+        ]
+      },
+      {
+        id: 'finance',
+        title: 'Finance & Accounting',
+        icon: 'fa-wallet',
+        desc: 'Investment Banking, Auditing, Financial Planning, Taxes',
+        subdomains: [
+          'Investment Banking',
+          'Corporate Finance',
+          'Accountant / Auditor',
+          'Financial Analyst',
+          'Risk Management'
+        ]
+      }
+    ];
+
+    const grid = document.getElementById('domainsGrid');
+    const modal = document.getElementById('subdomainModal');
+    const closeBtn = document.getElementById('closeModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const subList = document.getElementById('subdomainsList');
+
+    let currentDomain = null;
+
+    // Render Domain Cards
+    domainsData.forEach((d, index) => {
+      const card = document.createElement('div');
+      card.className = 'domain-card';
+      card.style.animationDelay = `${index * 0.1}s`;
+      card.innerHTML = `
+        <div class="icon-wrapper">
+          <i class="fas ${d.icon}"></i>
+        </div>
+        <h3 class="domain-title">${d.title}</h3>
+        <p class="domain-desc">${d.desc}</p>
+      `;
+      
+      card.addEventListener('click', () => openModal(d));
+      grid.appendChild(card);
+    });
+
+    function openModal(domainObj) {
+      currentDomain = domainObj;
+      modalTitle.textContent = domainObj.title;
+      subList.innerHTML = '';
+
+      domainObj.subdomains.forEach((sub, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'subdomain-btn';
+        btn.style.animation = `fadeInUp 0.3s ease-out ${i * 0.05}s backwards`;
+        btn.innerHTML = `
+          <span>${sub}</span>
+          <i class="fas fa-chevron-right"></i>
+        `;
+        
+        btn.addEventListener('click', () => selectPath(domainObj.title, sub));
+        subList.appendChild(btn);
+      });
+
+      modal.classList.add('active');
+    }
+
+    function closeModal() {
+      modal.classList.remove('active');
+    }
+
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+      if(e.target === modal) closeModal();
+    });
+
+    // The core redirection function
+    function selectPath(domain, sub) {
+      const expertise = encodeURIComponent(`${domain} - ${sub}`);
+      // Redirect to builder and pass the domain as a query parameter
+      window.location.href = `/resume-builder.html?domain=${expertise}`;
+    }
+  </script>
+</body>
+</html>
