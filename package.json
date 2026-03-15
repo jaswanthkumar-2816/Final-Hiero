@@ -5,7 +5,7 @@
   "main": "gateway.js",
   "scripts": {
     "start": "node gateway.js",
-    "build": "echo 'Build complete'",
+    "build": "npm install",
     "dev": "nodemon gateway.js"
   },
   "dependencies": {
