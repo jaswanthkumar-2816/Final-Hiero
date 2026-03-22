@@ -13,7 +13,27 @@ const { generateUnifiedResume } = require('./unifiedTemplates');
 const router = express.Router();
 
 // Multer for uploads
-const upload = multer({ dest: '/tmp' });
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        const uploadDir = path.join(__dirname, '..', 'hiero-prototype/jss/hiero/hiero-last/public/uploads');
+        if (!fs.existsSync(uploadDir)) {
+            fs.mkdirSync(uploadDir, { recursive: true });
+        }
+        cb(null, uploadDir);
+    },
+    filename: (req, file, cb) => {
+        cb(null, `photo-${Date.now()}${path.extname(file.originalname)}`);
+    }
+});
+const upload = multer({ 
+    storage,
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+    fileFilter: (req, file, cb) => {
+        const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+        if (allowedTypes.includes(file.mimetype)) cb(null, true);
+        else cb(new Error('Only PNG and JPEG images are allowed'));
+    }
+});
 
 // Middleware to verify JWT token
 const authenticateToken = (req, res, next) => {
@@ -104,6 +124,109 @@ router.post('/skills', authenticateToken, async (req, res) => {
     }
 });
 
+router.post('/certifications', authenticateToken, async (req, res) => {
+    try {
+        const { certifications } = req.body;
+        const userId = req.user.userId || req.user.id;
+        let resume = await Resume.findOne({ userId });
+        if (!resume) resume = new Resume({ userId, data: {} });
+        resume.data.certifications = certifications;
+        resume.markModified('data');
+        await resume.save();
+        res.json({ success: true, message: 'Certifications saved' });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+router.post('/achievements', authenticateToken, async (req, res) => {
+    try {
+        const { achievements } = req.body;
+        const userId = req.user.userId || req.user.id;
+        let resume = await Resume.findOne({ userId });
+        if (!resume) resume = new Resume({ userId, data: {} });
+        resume.data.achievements = achievements;
+        resume.markModified('data');
+        await resume.save();
+        res.json({ success: true, message: 'Achievements saved' });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+router.post('/hobbies', authenticateToken, async (req, res) => {
+    try {
+        const { hobbies } = req.body;
+        const userId = req.user.userId || req.user.id;
+        let resume = await Resume.findOne({ userId });
+        if (!resume) resume = new Resume({ userId, data: {} });
+        resume.data.hobbies = hobbies;
+        resume.markModified('data');
+        await resume.save();
+        res.json({ success: true, message: 'Hobbies saved' });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+router.post('/personal_details', authenticateToken, async (req, res) => {
+    try {
+        const { personal_details } = req.body;
+        const userId = req.user.userId || req.user.id;
+        let resume = await Resume.findOne({ userId });
+        if (!resume) resume = new Resume({ userId, data: {} });
+        resume.data.personal_details = personal_details;
+        resume.markModified('data');
+        await resume.save();
+        res.json({ success: true, message: 'Personal details saved' });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+router.post('/references', authenticateToken, async (req, res) => {
+    try {
+        const { references } = req.body;
+        const userId = req.user.userId || req.user.id;
+        let resume = await Resume.findOne({ userId });
+        if (!resume) resume = new Resume({ userId, data: {} });
+        resume.data.references = references;
+        resume.markModified('data');
+        await resume.save();
+        res.json({ success: true, message: 'References saved' });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+router.post('/photo', authenticateToken, upload.single('photo'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ success: false, error: 'No photo uploaded' });
+        }
+        
+        const userId = req.user.userId || req.user.id;
+        let resume = await Resume.findOne({ userId });
+        if (!resume) resume = new Resume({ userId, data: {} });
+        
+        // Save relative path for easy serving via /public/uploads/xxx.jpg
+        const photoPath = `/public/uploads/${req.file.filename}`;
+        
+        resume.data.photo = photoPath;
+        resume.markModified('data');
+        await resume.save();
+        
+        res.json({ 
+            success: true, 
+            message: 'Photo uploaded successfully', 
+            imageUrl: photoPath 
+        });
+    } catch (error) {
+        console.error('Photo upload error:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
 router.post('/template', authenticateToken, async (req, res) => {
     try {
         const { template } = req.body;
@@ -153,7 +276,8 @@ router.post('/download-resume', async (req, res) => {
         }
 
         const templateId = data.template || 'classic';
-        const name = (data.personalInfo?.fullName || 'Resume').replace(/\s+/g, '_');
+        const name = (data.personalInfo?.fullName || data.basic?.full_name || 'Resume').replace(/\s+/g, '_');
+
 
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', `attachment; filename="${name}_Hiero.pdf"`);
@@ -167,7 +291,8 @@ router.post('/download-resume', async (req, res) => {
 router.post('/download-docx', authenticateToken, async (req, res) => {
     try {
         const data = req.body;
-        const name = (data.personalInfo?.fullName || 'Resume').replace(/\s+/g, '_');
+        const name = (data.personalInfo?.fullName || data.basic?.full_name || 'Resume').replace(/\s+/g, '_');
+
 
         // Generate Word session content (Word-compatible HTML)
         const html = generateWordHTML(data);
@@ -184,21 +309,38 @@ router.post('/download-docx', authenticateToken, async (req, res) => {
 // Helper for Word generation (Exact Hiero Minimal Replica)
 function generateWordHTML(data) {
     const {
-        personalInfo = {},
+        personalInfo: pi = {},
         experience = [],
         education = [],
         projects = [],
         technicalSkills: techSkillsRaw = '',
-        softSkills = '',
-        summary = '',
+        softSkills: softSkillsRaw = '',
+        summary: summaryRaw = '',
         languages = '',
         hobbies = '',
         references = []
     } = data;
 
+    const b = data.basic || {};
+    const c = b.contact_info || {};
+
+    const personalInfo = {
+        fullName: pi.fullName || pi.name || data.fullName || data.name || b.full_name || b.fullName || 'RESUME',
+        email: pi.email || data.email || c.email || b.email || '',
+        phone: pi.phone || data.phone || c.phone || b.phone || '',
+        address: pi.address || data.address || pi.location || data.location || c.address || b.address || '',
+        website: pi.website || data.website || b.website || c.website || '',
+        linkedin: pi.linkedin || data.linkedin || c.linkedin || b.linkedin || '',
+        profilePhoto: pi.profilePhoto || pi.picture || data.profilePhoto || data.picture || data.photoUrl || data.photo || b.photo || '',
+        dob: pi.dateOfBirth || pi.dob || b.dateOfBirth || b.dob || '',
+        nationality: pi.nationality || b.nationality || '',
+    };
+
     const technicalSkills = data.skills || data.technicalSkills || techSkillsRaw || '';
+    const softSkills = data.softSkills || softSkillsRaw || b.soft_skills || '';
+    const summary = summaryRaw || b.career_summary || '';
     const template = data.template || 'classic';
-    const roleTitle = (personalInfo.roleTitle || personalInfo.title || (experience[0]?.jobTitle || '') || 'Professional').toUpperCase();
+    const roleTitle = (pi.roleTitle || pi.title || (experience[0]?.jobTitle || '') || 'Professional').toUpperCase();
 
     const colors = {
         text: '#222222',
@@ -814,14 +956,16 @@ function generateWordHTML(data) {
                                     
                                     <table class="card-outer" width="100%"><tr><td class="card-inner-table">
                                         <div style="font-size:10pt; color:${TEXT_SEC}; line-height:1.6;">
-                                            ${[data.personalInfo.gender, data.personalInfo.dob, data.personalInfo.phone, data.personalInfo.email, data.personalInfo.linkedin, data.personalInfo.github, data.personalInfo.website, data.personalInfo.address].filter(Boolean).map(i => `<div><span style="color:${PEACH_ACCENT}">•</span> ${i}</div>`).join('')}
+                                            ${[personalInfo.gender, personalInfo.dob, personalInfo.phone, personalInfo.email, personalInfo.linkedin, personalInfo.github, personalInfo.website, personalInfo.address].filter(Boolean).map(i => `<div><span style="color:${PEACH_ACCENT}">•</span> ${i}</div>`).join('')}
+
                                         </div>
                                     </td></tr></table>
 
-                                    ${data.summary ? `
+                                    ${summary ? `
                                     <table class="card-outer" width="100%"><tr><td class="card-inner-table">
                                         <div class="card-header">OBJECTIVE</div>
-                                        <div style="font-size:9.5pt; color:${TEXT_SEC}; line-height:1.4;">${data.summary}</div>
+                                        <div style="font-size:9.5pt; color:${TEXT_SEC}; line-height:1.4;">${summary}</div>
+
                                     </td></tr></table>
                                     ` : ''}
 
@@ -834,10 +978,10 @@ function generateWordHTML(data) {
                                     </td></tr></table>
                                     ` : ''}
 
-                                    ${data.personalInfo.languagesKnown || data.languages ? `
+                                    ${personalInfo.languagesKnown || data.languages ? `
                                     <table class="card-outer" width="100%"><tr><td class="card-inner-table">
                                         <div class="card-header">LANGUAGES</div>
-                                        <div style="font-size:9.5pt; color:${TEXT_SEC}; line-height:1.4;">${data.personalInfo.languagesKnown || data.languages}</div>
+                                        <div style="font-size:9.5pt; color:${TEXT_SEC}; line-height:1.4;">${personalInfo.languagesKnown || data.languages}</div>
                                     </td></tr></table>
                                     ` : ''}
 
@@ -849,13 +993,14 @@ function generateWordHTML(data) {
                                     <div style="padding-top: 25pt; padding-bottom: 20pt;">
                                         <div style="font-size: 26pt; font-family: 'Helvetica', Arial, sans-serif; font-weight: bold; color: ${TEXT_PRI};">${nameText}</div>
                                         <div style="height: 1px; background-color: #CCCCCC; line-height: 1px; margin: 10pt 0;"></div>
-                                        <div style="font-size: 12pt; color: ${TEXT_SEC};">${data.personalInfo.jobTitle || data.experience?.[0]?.jobTitle || 'Sales Staff'}</div>
+                                        <div style="font-size: 12pt; color: ${TEXT_SEC};">${personalInfo.jobTitle || experience?.[0]?.jobTitle || 'Sales Staff'}</div>
+
                                     </div>
                                     
-                                    ${(data.education && data.education.length > 0) ? `
+                                    ${(education && education.length > 0) ? `
                                     <table class="card-outer" width="100%"><tr><td class="card-inner-table">
                                         <div class="card-header">EDUCATION</div>
-                                        ${data.education.map(edu => `
+                                        ${education.map(edu => `
                                             <div style="margin-bottom:12pt;">
                                                 <div style="font-size:11pt; font-weight:bold; color:${TEXT_PRI};">${edu.school || ''}</div>
                                                 <div style="font-size:10pt; color:${TEXT_SEC}; margin-top:2pt;">${edu.degree || ''}</div>
@@ -866,10 +1011,10 @@ function generateWordHTML(data) {
                                     </td></tr></table>
                                     ` : ''}
 
-                                    ${(data.experience && data.experience.length > 0) ? `
+                                    ${(experience && experience.length > 0) ? `
                                     <table class="card-outer" width="100%"><tr><td class="card-inner-table">
                                         <div class="card-header">WORK EXPERIENCE</div>
-                                        ${data.experience.map(exp => `
+                                        ${experience.map(exp => `
                                             <div style="margin-bottom:15pt;">
                                                 <div style="font-size:10.5pt; font-weight:bold; color:${TEXT_PRI};">${exp.company ? exp.company + ', ' : ''}${exp.jobTitle || ''}</div>
                                                 <div style="font-size:9.5pt; color:${TEXT_SEC}; margin-top:2pt; margin-bottom:5pt;">${exp.startDate || ''} - ${exp.endDate || 'Present'}</div>
@@ -884,10 +1029,10 @@ function generateWordHTML(data) {
                                     </td></tr></table>
                                     ` : ''}
 
-                                    ${(data.projects && data.projects.length > 0) ? `
+                                    ${(projects && projects.length > 0) ? `
                                     <table class="card-outer" width="100%"><tr><td class="card-inner-table">
                                         <div class="card-header">PROJECTS</div>
-                                        ${data.projects.map(proj => `
+                                        ${projects.map(proj => `
                                             <div style="margin-bottom:15pt;">
                                                 <div style="font-size:10.5pt; font-weight:bold; color:${TEXT_PRI};">${proj.title || ''}</div>
                                                 ${proj.tech ? `<div style="font-size:9.5pt; color:${PEACH_ACCENT}; margin-top:2pt;">${proj.tech}</div>` : ''}

@@ -293,7 +293,7 @@ export function loadLatexTemplate(template, data) {
   return latexTemplate;
 };
 
-// Process hiero-standard template with mustache-style placeholders
+// Process hiero-standard template with mustache-style placeholders and dynamic section reordering
 function processHieroStandardTemplate(template, data) {
   let content = template;
   
@@ -301,184 +301,165 @@ function processHieroStandardTemplate(template, data) {
   const basic = data.basic || {};
   const contact = basic.contact_info || {};
   
+  // 1. Process header (everything before the first section)
+  // We'll replace the main section blocks later, so we just do basic info first.
   content = content.replace(/\{\{\{FULL_NAME\}\}\}/g, sanitizeLatex(basic.full_name || ''));
   content = content.replace(/\{\{EMAIL\}\}/g, sanitizeLatex(contact.email || ''));
   content = content.replace(/\{\{PHONE\}\}/g, sanitizeLatex(contact.phone || ''));
   
-  // Optional contact fields with conditional rendering
   content = content.replace(/\{\{#LINKEDIN\}\}.*?\{\{\/LINKEDIN\}\}/gs, (match) => {
-    if (contact.linkedin) {
-      return match.replace(/\{\{\{LINKEDIN\}\}\}/g, sanitizeUrl(contact.linkedin));
-    }
+    if (contact.linkedin) return match.replace(/\{\{\{LINKEDIN\}\}\}/g, sanitizeUrl(contact.linkedin));
     return '';
   });
   
   content = content.replace(/\{\{#WEBSITE\}\}.*?\{\{\/WEBSITE\}\}/gs, (match) => {
-    if (basic.website) {
-      return match.replace(/\{\{\{WEBSITE\}\}\}/g, sanitizeUrl(basic.website));
-    }
+    if (basic.website) return match.replace(/\{\{\{WEBSITE\}\}\}/g, sanitizeUrl(basic.website));
     return '';
   });
   
   content = content.replace(/\{\{#ADDRESS\}\}.*?\{\{\/ADDRESS\}\}/gs, (match) => {
-    if (contact.address) {
-      return match.replace(/\{\{ADDRESS\}\}/g, sanitizeLatex(contact.address));
-    }
+    if (contact.address) return match.replace(/\{\{ADDRESS\}\}/g, sanitizeLatex(contact.address));
     return '';
   });
+
+  // Define section extraction patterns
+  const sectionPatterns = {
+    'summary': /\{\{#CAREER_OBJECTIVE\}\}.*?\{\{\/CAREER_OBJECTIVE\}\}/gs,
+    'education': /\{\{#EDUCATION\}\}.*?\{\{\/EDUCATION\}\}/gs,
+    'experience': /\{\{#EXPERIENCE\}\}.*?\{\{\/EXPERIENCE\}\}/gs,
+    'projects': /\{\{#PROJECTS\}\}.*?\{\{\/PROJECTS\}\}/gs,
+    'skills': /\{\{#SKILLS\}\}.*?\{\{\/SKILLS\}\}/gs,
+    'certifications': /\{\{#CERTIFICATIONS\}\}.*?\{\{\/CERTIFICATIONS\}\}/gs,
+    'achievements': /\{\{#ACHIEVEMENTS\}\}.*?\{\{\/ACHIEVEMENTS\}\}/gs,
+    'languages': /\{\{#LANGUAGES\}\}.*?\{\{\/LANGUAGES\}\}/gs,
+    'hobbies': /\{\{#HOBBIES\}\}.*?\{\{\/HOBBIES\}\}/gs,
+    'personal_details': /\{\{#PERSONAL_DETAILS\}\}.*?\{\{\/PERSONAL_DETAILS\}\}/gs,
+    'references': /\{\{#REFERENCES\}\}.*?\{\{\/REFERENCES\}\}/gs
+  };
+
+  // 2. Extract and fill all potential sections
+  const filledSections = {};
   
-  // Career objective
-  content = content.replace(/\{\{#CAREER_OBJECTIVE\}\}.*?\{\{\/CAREER_OBJECTIVE\}\}/gs, (match) => {
-    if (basic.career_objective || basic.career_summary) {
-      const objective = basic.career_objective || basic.career_summary;
-      return match.replace(/\{\{CAREER_OBJECTIVE\}\}/g, sanitizeLatex(objective));
+  // Career summary
+  const objectiveMatch = content.match(sectionPatterns.summary);
+  if (objectiveMatch && (basic.career_objective || basic.career_summary)) {
+    const objective = basic.career_objective || basic.career_summary;
+    filledSections.summary = objectiveMatch[0].replace(/\{\{CAREER_OBJECTIVE\}\}/g, sanitizeLatex(objective))
+      .replace(/\{\{#CAREER_OBJECTIVE\}\}/g, '').replace(/\{\{\/CAREER_OBJECTIVE\}\}/g, '');
+  }
+
+  // Education
+  const eduMatch = content.match(sectionPatterns.education);
+  const education = normalizeToArray(data.education);
+  if (eduMatch && education.length > 0) {
+    const eduList = education.map(edu => 
+      `\\item ${sanitizeLatex(edu.degree || '')} - ${sanitizeLatex(edu.institution || '')} (${sanitizeLatex(edu.graduation_year || edu.year || '')})${edu.gpa ? ` GPA: ${sanitizeLatex(edu.gpa)}` : ''}`
+    ).join('\n');
+    filledSections.education = eduMatch[0].replace(/\{\{#EDUCATION_LIST\}\}.*?\{\{\/EDUCATION_LIST\}\}/gs, eduList)
+      .replace(/\{\{#EDUCATION\}\}/g, '').replace(/\{\{\/EDUCATION\}\}/g, '');
+  }
+
+  // Experience
+  const expMatch = content.match(sectionPatterns.experience);
+  const experience = normalizeToArray(data.experience);
+  if (expMatch && experience.length > 0) {
+    const expList = experience.map(exp => {
+      let expItem = `\\item \\textbf{${sanitizeLatex(exp.position || exp.jobTitle || '')}} at ${sanitizeLatex(exp.company || '')} (${sanitizeLatex(exp.duration || (exp.startDate + ' - ' + exp.endDate) || '')})`;
+      const responsibilities = exp.responsibilities || (exp.description ? [exp.description] : []);
+      if (responsibilities.length > 0) {
+        const respList = responsibilities.map(resp => `\\item ${sanitizeLatex(resp)}`).join('\n');
+        expItem += `\n\\begin{itemize}\n${respList}\n\\end{itemize}`;
+      }
+      return expItem;
+    }).join('\n');
+    filledSections.experience = expMatch[0].replace(/\{\{#EXPERIENCE_LIST\}\}.*?\{\{\/EXPERIENCE_LIST\}\}/gs, expList)
+      .replace(/\{\{#EXPERIENCE\}\}/g, '').replace(/\{\{\/EXPERIENCE\}\}/g, '');
+  }
+
+  // Projects
+  const projMatch = content.match(sectionPatterns.projects);
+  const projects = normalizeToArray(data.projects);
+  if (projMatch && projects.length > 0) {
+    const projList = projects.map(proj => 
+      `\\item \\textbf{${sanitizeLatex(proj.name || '')}} (${sanitizeLatex(proj.year || proj.duration || '')}): ${sanitizeLatex(proj.description || '')}${proj.technologies ? ` -- Tech: ${sanitizeLatex(proj.technologies)}` : ''}`
+    ).join('\n');
+    filledSections.projects = projMatch[0].replace(/\{\{#PROJECT_LIST\}\}.*?\{\{\/PROJECT_LIST\}\}/gs, projList)
+      .replace(/\{\{#PROJECTS\}\}/g, '').replace(/\{\{\/PROJECTS\}\}/g, '');
+  }
+
+  // Skills
+  const skillsMatch = content.match(sectionPatterns.skills);
+  const skills = data.skills || {};
+  if (skillsMatch && Object.keys(skills).length > 0) {
+    const technical = Array.isArray(skills.technical) ? skills.technical.join(', ') : (skills.technical || (typeof skills === 'string' ? skills : ''));
+    const management = Array.isArray(skills.management) ? skills.management.join(', ') : (skills.management || '');
+    const soft = Array.isArray(skills.soft) ? skills.soft.join(', ') : (skills.soft || (data.softSkills || ''));
+    
+    let skillsContent = skillsMatch[0].replace(/\{\{#SKILLS\}\}/g, '').replace(/\{\{\/SKILLS\}\}/g, '');
+    skillsContent = skillsContent.replace(/\{\{#TECHNICAL_SKILLS\}\}.*?\{\{\/TECHNICAL_SKILLS\}\}/gs, technical ? `Technical: ${sanitizeLatex(technical)}` : '');
+    skillsContent = skillsContent.replace(/\{\{#MANAGEMENT_SKILLS\}\}.*?\{\{\/MANAGEMENT_SKILLS\}\}/gs, management ? `\\\\Management: ${sanitizeLatex(management)}` : '');
+    skillsContent = skillsContent.replace(/\{\{#SOFT_SKILLS\}\}.*?\{\{\/SOFT_SKILLS\}\}/gs, soft ? `\\\\Soft Skills: ${sanitizeLatex(soft)}` : '');
+    filledSections.skills = skillsContent;
+  }
+
+  // Certifications
+  const certMatch = content.match(sectionPatterns.certifications);
+  const certifications = normalizeToArray(data.certifications);
+  if (certMatch && certifications.length > 0) {
+    const certList = certifications.map(cert => 
+      `\\item ${sanitizeLatex(cert.name || cert || '')} - ${sanitizeLatex(cert.issuer || '')} (${sanitizeLatex(cert.year || '')})`
+    ).join('\n');
+    filledSections.certifications = certMatch[0].replace(/\{\{#CERT_LIST\}\}.*?\{\{\/CERT_LIST\}\}/gs, certList)
+      .replace(/\{\{#CERTIFICATIONS\}\}/g, '').replace(/\{\{\/CERTIFICATIONS\}\}/g, '');
+  }
+
+  // Achievements
+  const achMatch = content.match(sectionPatterns.achievements);
+  const achievements = normalizeToArray(data.achievements);
+  if (achMatch && achievements.length > 0) {
+    const achList = achievements.map(ach => 
+      `\\item \\textbf{${sanitizeLatex(ach.title || ach || '')}} (${sanitizeLatex(ach.year || '')}): ${sanitizeLatex(ach.description || '')}`
+    ).join('\n');
+    filledSections.achievements = achMatch[0].replace(/\{\{#ACHIEVEMENT_LIST\}\}.*?\{\{\/ACHIEVEMENT_LIST\}\}/gs, achList)
+      .replace(/\{\{#ACHIEVEMENTS\}\}/g, '').replace(/\{\{\/ACHIEVEMENTS\}\}/g, '');
+  }
+
+  // 3. Reorder Sections
+  // Determine order: use provided sequence or default
+  const defaultOrder = ['summary', 'experience', 'education', 'skills', 'projects', 'certifications', 'achievements', 'languages', 'hobbies', 'personal_details', 'references'];
+  const orderToUse = data.sectionOrder || defaultOrder;
+  
+  // Combine all filled sections in the correct order
+  let reorderedContent = '';
+  orderToUse.forEach(secId => {
+    if (filledSections[secId]) {
+      reorderedContent += filledSections[secId] + '\n\n';
     }
-    return '';
   });
-  
-  // Education section
-  content = content.replace(/\{\{#EDUCATION\}\}.*?\{\{\/EDUCATION\}\}/gs, (match) => {
-    const education = normalizeToArray(data.education);
-    if (education && education.length > 0) {
-      const eduList = education.map(edu => 
-        `\\item ${sanitizeLatex(edu.degree || '')} - ${sanitizeLatex(edu.institution || '')} (${sanitizeLatex(edu.graduation_year || '')})${edu.gpa ? ` GPA: ${sanitizeLatex(edu.gpa)}` : ''}${edu.details ? ` - ${sanitizeLatex(edu.details)}` : ''}`
-      ).join('\n');
-      return match.replace(/\{\{#EDUCATION_LIST\}\}.*?\{\{\/EDUCATION_LIST\}\}/gs, eduList);
-    }
-    return '';
+
+  // 4. Final Assemblage
+  // Remove all original section blocks from the content
+  Object.values(sectionPatterns).forEach(pat => {
+    content = content.replace(pat, '');
   });
+
+  // Split content at \begin{document}... content ... \end{document}
+  const beginDoc = '\\begin{document}';
+  const endDoc = '\\end{document}';
+  const parts = content.split(beginDoc);
   
-  // Experience section
-  content = content.replace(/\{\{#EXPERIENCE\}\}.*?\{\{\/EXPERIENCE\}\}/gs, (match) => {
-    const experience = normalizeToArray(data.experience);
-    if (experience && experience.length > 0) {
-      const expList = experience.map(exp => {
-        let expItem = `\\item \\textbf{${sanitizeLatex(exp.position || '')}} at ${sanitizeLatex(exp.company || '')} (${sanitizeLatex(exp.duration || '')})${exp.location ? ` - ${sanitizeLatex(exp.location)}` : ''}`;
-        if (exp.responsibilities && exp.responsibilities.length > 0) {
-          const respList = exp.responsibilities.map(resp => `\\item ${sanitizeLatex(resp)}`).join('\n');
-          expItem += `\n\\begin{itemize}\n${respList}\n\\end{itemize}`;
-        }
-        return expItem;
-      }).join('\n');
-      return match.replace(/\{\{#EXPERIENCE_LIST\}\}.*?\{\{\/EXPERIENCE_LIST\}\}/gs, expList);
-    }
-    return '';
-  });
-  
-  // Projects section
-  content = content.replace(/\{\{#PROJECTS\}\}.*?\{\{\/PROJECTS\}\}/gs, (match) => {
-    const projects = normalizeToArray(data.projects);
-    if (projects && projects.length > 0) {
-      const projList = projects.map(proj => 
-        `\\item \\textbf{${sanitizeLatex(proj.name || '')}} (${sanitizeLatex(proj.year || '')}${proj.duration ? `, ${sanitizeLatex(proj.duration)}` : ''}): ${sanitizeLatex(proj.description || '')}${proj.technologies ? ` - Technologies: ${sanitizeLatex(proj.technologies)}` : ''}${proj.link ? ` - \\href{${sanitizeUrl(proj.link)}}{Project Link}` : ''}`
-      ).join('\n');
-      return match.replace(/\{\{#PROJECT_LIST\}\}.*?\{\{\/PROJECT_LIST\}\}/gs, projList);
-    }
-    return '';
-  });
-  
-  // Skills section
-  content = content.replace(/\{\{#SKILLS\}\}.*?\{\{\/SKILLS\}\}/gs, (match) => {
-    const skills = data.skills || {};
-    if (Object.keys(skills).length > 0) {
-      const technical = Array.isArray(skills.technical) ? skills.technical.join(', ') : (skills.technical || '');
-      const management = Array.isArray(skills.management) ? skills.management.join(', ') : (skills.management || '');
-      const soft = Array.isArray(skills.soft) ? skills.soft.join(', ') : (skills.soft || '');
-      
-      let skillsContent = match;
-      skillsContent = skillsContent.replace(/\{\{#TECHNICAL_SKILLS\}\}.*?\{\{\/TECHNICAL_SKILLS\}\}/gs, technical ? `Technical: ${sanitizeLatex(technical)}` : '');
-      skillsContent = skillsContent.replace(/\{\{#MANAGEMENT_SKILLS\}\}.*?\{\{\/MANAGEMENT_SKILLS\}\}/gs, management ? `\\\\Management: ${sanitizeLatex(management)}` : '');
-      skillsContent = skillsContent.replace(/\{\{#SOFT_SKILLS\}\}.*?\{\{\/SOFT_SKILLS\}\}/gs, soft ? `\\\\Soft Skills: ${sanitizeLatex(soft)}` : '');
-      skillsContent = skillsContent.replace(/\{\{TECHNICAL_SKILLS\}\}/g, sanitizeLatex(technical));
-      skillsContent = skillsContent.replace(/\{\{MANAGEMENT_SKILLS\}\}/g, sanitizeLatex(management));
-      skillsContent = skillsContent.replace(/\{\{SOFT_SKILLS\}\}/g, sanitizeLatex(soft));
-      return skillsContent;
-    }
-    return '';
-  });
-  
-  // Certifications section
-  content = content.replace(/\{\{#CERTIFICATIONS\}\}.*?\{\{\/CERTIFICATIONS\}\}/gs, (match) => {
-    const certifications = normalizeToArray(data.certifications);
-    if (certifications && certifications.length > 0) {
-      const certList = certifications.map(cert => 
-        `\\item ${sanitizeLatex(cert.name || '')} - ${sanitizeLatex(cert.issuer || '')} (${sanitizeLatex(cert.year || cert.date || '')})${cert.details ? ` - ${sanitizeLatex(cert.details)}` : ''}`
-      ).join('\n');
-      return match.replace(/\{\{#CERT_LIST\}\}.*?\{\{\/CERT_LIST\}\}/gs, certList);
-    }
-    return '';
-  });
-  
-  // Achievements section
-  content = content.replace(/\{\{#ACHIEVEMENTS\}\}.*?\{\{\/ACHIEVEMENTS\}\}/gs, (match) => {
-    const achievements = normalizeToArray(data.achievements);
-    if (achievements && achievements.length > 0) {
-      const achList = achievements.map(ach => 
-        `\\item \\textbf{${sanitizeLatex(ach.title || '')}} (${sanitizeLatex(ach.year || ach.date || '')}): ${sanitizeLatex(ach.description || '')}${ach.organization ? ` - ${sanitizeLatex(ach.organization)}` : ''}`
-      ).join('\n');
-      return match.replace(/\{\{#ACHIEVEMENT_LIST\}\}.*?\{\{\/ACHIEVEMENT_LIST\}\}/gs, achList);
-    }
-    return '';
-  });
-  
-  // Languages
-  content = content.replace(/\{\{#LANGUAGES\}\}.*?\{\{\/LANGUAGES\}\}/gs, (match) => {
-    const languages = normalizeToArray(data.languages);
-    if (languages && languages.length > 0) {
-      const langText = languages.map(lang => 
-        typeof lang === 'object' ? `${lang.name} (${lang.proficiency})` : lang
-      ).join(', ');
-      return match.replace(/\{\{LANGUAGES_TEXT\}\}/g, sanitizeLatex(langText));
-    }
-    return '';
-  });
-  
-  // Hobbies
-  content = content.replace(/\{\{#HOBBIES\}\}.*?\{\{\/HOBBIES\}\}/gs, (match) => {
-    const hobbies = data.hobbies;
-    if (hobbies) {
-      const hobbiesText = Array.isArray(hobbies) ? hobbies.join(', ') : hobbies;
-      return match.replace(/\{\{HOBBIES_TEXT\}\}/g, sanitizeLatex(hobbiesText));
-    }
-    return '';
-  });
-  
-  // Personal details
-  content = content.replace(/\{\{#PERSONAL_DETAILS\}\}.*?\{\{\/PERSONAL_DETAILS\}\}/gs, (match) => {
-    const pd = data.personal_details || {};
-    if (Object.keys(pd).length > 0) {
-      let pdContent = match;
-      const dob = pd.date_of_birth || pd.dateOfBirth;
-      const gender = pd.gender;
-      const nationality = pd.nationality;
-      const address = pd.address;
-      
-      pdContent = pdContent.replace(/\{\{#DOB\}\}.*?\{\{\/DOB\}\}/gs, dob ? `Date of Birth: ${sanitizeLatex(dob)}\\\\` : '');
-      pdContent = pdContent.replace(/\{\{#GENDER\}\}.*?\{\{\/GENDER\}\}/gs, gender ? `Gender: ${sanitizeLatex(gender)}\\\\` : '');
-      pdContent = pdContent.replace(/\{\{#NATIONALITY\}\}.*?\{\{\/NATIONALITY\}\}/gs, nationality ? `Nationality: ${sanitizeLatex(nationality)}\\\\` : '');
-      pdContent = pdContent.replace(/\{\{#ADDRESS\}\}.*?\{\{\/ADDRESS\}\}/gs, address ? `Address: ${sanitizeLatex(address)}\\\\` : '');
-      pdContent = pdContent.replace(/\{\{DOB\}\}/g, sanitizeLatex(dob || ''));
-      pdContent = pdContent.replace(/\{\{GENDER\}\}/g, sanitizeLatex(gender || ''));
-      pdContent = pdContent.replace(/\{\{NATIONALITY\}\}/g, sanitizeLatex(nationality || ''));
-      pdContent = pdContent.replace(/\{\{ADDRESS\}\}/g, sanitizeLatex(address || ''));
-      return pdContent;
-    }
-    return '';
-  });
-  
-  // References
-  content = content.replace(/\{\{#REFERENCES\}\}.*?\{\{\/REFERENCES\}\}/gs, (match) => {
-    const references = normalizeToArray(data.references);
-    if (references && references.length > 0) {
-      const refList = references.map(ref => 
-        `\\item ${sanitizeLatex(ref.name || '')} (${sanitizeLatex(ref.relationship || '')}) - ${sanitizeLatex(ref.contact || '')}${ref.organization ? ` - ${sanitizeLatex(ref.organization)}` : ''}`
-      ).join('\n');
-      return match.replace(/\{\{#REF_LIST\}\}.*?\{\{\/REF_LIST\}\}/gs, refList);
-    }
-    return '';
-  });
-  
-  return content;
+  if (parts.length === 2) {
+    const headerPart = parts[0];
+    const footerPart = parts[1].split(endDoc)[0];
+    
+    // The footerPart here actually contains the header info (name/contact) 
+    // because that was after \begin{document} in the original template.
+    // Let's find the logical separation.
+    
+    return headerPart + beginDoc + footerPart + '\n' + reorderedContent + '\n' + endDoc;
+  }
+
+  return content + '\n' + reorderedContent; // Fallback
 }
 
 export { sanitizeLatex };

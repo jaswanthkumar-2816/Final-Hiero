@@ -4,56 +4,92 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Hiero - Select Career Domain</title>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="theme.css">
+  <script src="theme.js"></script>
   <style>
     :root {
-      --bg-color: #050805;
-      --card-bg: rgba(20, 26, 20, 0.6);
-      --primary: #2ae023;
-      --primary-glow: rgba(42, 224, 35, 0.4);
-      --text: #ffffff;
-      --text-muted: #a0aab2;
+      --primary: #07e219;
+      --bg-pure: #000000;
+      --nav-bg: rgba(0, 0, 0, 0.8);
+      --card-bg: rgba(255, 255, 255, 0.03);
+      --card-border: rgba(255, 255, 255, 0.1);
+      --card-hover-bg: rgba(255, 255, 255, 0.06);
+      --border-soft: rgba(255, 255, 255, 0.08);
+      --text-main: #ffffff;
+      --text-muted: #999999;
+      --dot-color: rgba(255, 255, 255, 0.05);
     }
-    
+
+    body.light-mode {
+      --bg-pure: #ffffff;
+      --nav-bg: rgba(255, 255, 255, 0.8);
+      --card-bg: rgba(0, 0, 0, 0.02);
+      --card-border: rgba(0, 0, 0, 0.06);
+      --card-hover-bg: rgba(0, 0, 0, 0.04);
+      --border-soft: rgba(0, 0, 0, 0.05);
+      --text-main: #111111;
+      --text-muted: #666666;
+      --dot-color: rgba(0, 0, 0, 0.05);
+    }
+
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: 'Inter', sans-serif;
+      font-family: 'Plus Jakarta Sans', sans-serif;
     }
 
     body {
-      background: linear-gradient(135deg, var(--bg-color), #0a110a);
-      color: var(--text);
+      background: var(--bg-pure);
+      color: var(--text-main);
       min-height: 100vh;
+      overflow-x: hidden;
+      width: 100%;
+    }
+
+    .dot-overlay {
+      position: fixed;
+      inset: 0;
+      background-image: radial-gradient(var(--dot-color) 1px, transparent 1px);
+      background-size: 30px 30px;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .content-wrapper {
+      position: relative;
+      z-index: 10;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 40px 20px;
+      padding: 60px 20px;
+      max-width: 1200px;
+      margin: 0 auto;
     }
 
     .header {
       text-align: center;
-      margin-bottom: 50px;
-      animation: fadeInDown 0.8s ease-out;
+      margin-top: 40px;
+      margin-bottom: 60px;
+      animation: entrance-slide 1s cubic-bezier(0.2, 0, 0.3, 1);
     }
 
     .header h1 {
-      font-size: 3rem;
-      font-weight: 700;
-      margin-bottom: 15px;
-      background: linear-gradient(135deg, #fff, var(--primary));
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-      text-shadow: 0 0 30px var(--primary-glow);
+      font-size: 52px;
+      font-weight: 950;
+      letter-spacing: -3px;
+      line-height: 1.05;
+      margin-bottom: 25px;
+      color: var(--text-main);
     }
 
     .header p {
       color: var(--text-muted);
-      font-size: 1.1rem;
-      max-width: 600px;
+      font-size: 18px;
+      line-height: 1.6;
+      max-width: 700px;
       margin: 0 auto;
     }
 
@@ -68,73 +104,79 @@
 
     .domain-card {
       background: var(--card-bg);
-      border: 1px solid rgba(42, 224, 35, 0.1);
-      border-radius: 20px;
-      padding: 30px;
+      border: 1px solid var(--card-border);
+      backdrop-filter: blur(20px) saturate(160%);
+      -webkit-backdrop-filter: blur(20px) saturate(160%);
+      border-radius: 24px;
+      padding: 40px;
       text-align: center;
-      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
       cursor: pointer;
-      backdrop-filter: blur(10px);
       position: relative;
       overflow: hidden;
-      animation: fadeInUp 0.8s ease-out backwards;
+      animation: entrance-slide 1s ease-out backwards;
     }
 
     .domain-card::before {
       content: '';
       position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: radial-gradient(circle, var(--primary-glow) 0%, transparent 60%);
+      inset: 0;
+      background: radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.05), transparent 70%);
       opacity: 0;
-      transition: opacity 0.4s ease;
-      pointer-events: none;
+      transition: opacity 0.5s;
     }
 
     .domain-card:hover {
-      transform: translateY(-10px) scale(1.02);
-      border-color: var(--primary);
-      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4), 0 0 20px var(--primary-glow);
+      background: var(--card-hover-bg);
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateY(-10px);
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
     }
 
     .domain-card:hover::before {
-      opacity: 0.15;
+      opacity: 1;
+    }
+
+    .light-mode .domain-card:hover {
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.08);
+      border-color: rgba(0, 0, 0, 0.1);
     }
 
     .icon-wrapper {
       width: 80px;
       height: 80px;
-      background: rgba(42, 224, 35, 0.1);
+      background: rgba(7, 226, 25, 0.1);
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin: 0 auto 20px;
-      font-size: 2rem;
+      margin: 0 auto 25px;
+      font-size: 2.2rem;
       color: var(--primary);
-      transition: all 0.3s ease;
-      box-shadow: inset 0 0 20px rgba(42, 224, 35, 0.05);
+      transition: all 0.4s cubic-bezier(0.2, 0, 0, 1);
+      border: 1px solid rgba(7, 226, 25, 0.2);
     }
 
     .domain-card:hover .icon-wrapper {
       background: var(--primary);
-      color: var(--bg-color);
-      transform: scale(1.1) rotate(5deg);
-      box-shadow: 0 0 25px var(--primary-glow);
+      color: black;
+      transform: scale(1.1);
+      box-shadow: 0 0 30px rgba(7, 226, 25, 0.3);
     }
 
     .domain-title {
-      font-size: 1.5rem;
-      font-weight: 600;
-      margin-bottom: 10px;
+      font-size: 1.6rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 12px;
+      color: var(--text-main);
     }
 
     .domain-desc {
       color: var(--text-muted);
       font-size: 0.95rem;
-      line-height: 1.5;
+      line-height: 1.6;
+      font-weight: 500;
     }
 
     /* Modal Styles */
@@ -161,16 +203,33 @@
     }
 
     .modal-content {
-      background: #111;
-      border: 1px solid rgba(42, 224, 35, 0.2);
-      border-radius: 24px;
+      background: var(--nav-bg);
+      backdrop-filter: blur(30px) saturate(150%);
+      border: 1px solid var(--border-soft);
+      border-radius: 32px;
       padding: 40px;
-      width: 90%;
-      max-width: 600px;
+      width: 95%;
+      max-width: 900px;
+      max-height: 85vh;
+      overflow-y: auto;
       transform: scale(0.9) translateY(20px);
-      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
       position: relative;
-      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(42, 224, 35, 0.1);
+      box-shadow: 0 40px 80px rgba(0, 0, 0, 0.8), 0 0 1px 1px rgba(255, 255, 255, 0.05);
+    }
+
+    .modal-content::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .modal-content::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+    }
+
+    .modal-content::-webkit-scrollbar-thumb {
+      background: var(--primary);
+      border-radius: 10px;
     }
 
     .modal-overlay.active .modal-content {
@@ -199,96 +258,229 @@
     }
 
     .modal-header h2 {
-      font-size: 2rem;
+      font-size: 2.2rem;
       color: var(--primary);
+      margin-bottom: 5px;
+      letter-spacing: -1px;
+    }
+
+    .modal-header p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 25px;
+    }
+
+    .search-container {
+      position: relative;
+      margin-bottom: 30px;
+    }
+
+    .modal-search {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-soft);
+      padding: 15px 20px 15px 50px;
+      border-radius: 16px;
+      color: var(--text-main);
+      font-size: 1rem;
+      transition: all 0.3s;
+    }
+
+    .modal-search:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 0 20px rgba(7, 226, 25, 0.1);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 1.1rem;
+    }
+
+    .subgroup-selection {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      margin-top: 10px;
+    }
+
+    .subgroup-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 30px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      text-align: center;
+    }
+
+    .subgroup-card:hover {
+      background: rgba(7, 226, 25, 0.06);
+      border-color: var(--primary);
+      transform: translateY(-5px);
+    }
+
+    .subgroup-card i {
+      font-size: 2.5rem;
+      color: var(--primary);
+      margin-bottom: 20px;
+      display: block;
+    }
+
+    .subgroup-card h4 {
+      font-size: 1.4rem;
+      font-weight: 800;
       margin-bottom: 10px;
+      color: var(--text-main);
+    }
+
+    .subgroup-card p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .modal-back-btn {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      background: none;
+      border: none;
+      color: var(--primary);
+      font-weight: 700;
+      cursor: pointer;
+      margin-bottom: 20px;
+      font-size: 0.9rem;
+      padding: 0;
+    }
+
+    .modal-back-btn:hover {
+      text-decoration: underline;
+    }
+
+    .subdomains-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+    }
+
+    .category-section h3 {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      margin-bottom: 15px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-weight: 800;
+      border-bottom: 1px solid var(--border-soft);
+      padding-bottom: 10px;
     }
 
     .subdomains-list {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 15px;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 12px;
     }
 
     .subdomain-btn {
       background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 15px 20px;
-      border-radius: 12px;
-      color: var(--text);
-      font-size: 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 14px 20px;
+      border-radius: 14px;
+      color: var(--text-main);
+      font-size: 0.95rem;
+      font-weight: 600;
       cursor: pointer;
-       transition: all 0.3s ease;
+      transition: all 0.3s cubic-bezier(0.2, 0, 0, 1);
       text-align: left;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 10px;
+    }
+
+    .subdomain-btn span {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .subdomain-btn i {
-      opacity: 0;
-      transform: translateX(-10px);
-      transition: all 0.3s ease;
-      color: var(--primary);
+      font-size: 0.8rem;
+      opacity: 0.5;
+      transition: transform 0.3s;
     }
 
     .subdomain-btn:hover {
-      background: rgba(42, 224, 35, 0.1);
+      background: rgba(7, 226, 25, 0.1);
       border-color: var(--primary);
-      transform: translateX(5px);
+      transform: translateY(-2px);
     }
 
     .subdomain-btn:hover i {
+      transform: translateX(4px);
       opacity: 1;
-      transform: translateX(0);
     }
 
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(30px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes fadeInDown {
-      from { opacity: 0; transform: translateY(-30px); }
-      to { opacity: 1; transform: translateY(0); }
+    @keyframes entrance-slide {
+      from { opacity: 0; transform: translateY(40px); filter: blur(10px); }
+      to { opacity: 1; transform: translateY(0); filter: blur(0); }
     }
     
     .back-btn {
-      position: absolute;
+      position: fixed;
       top: 30px;
       left: 30px;
       color: var(--text-muted);
       text-decoration: none;
       display: flex;
       align-items: center;
-      gap: 8px;
-      font-weight: 500;
-      transition: all 0.2s;
-      padding: 8px 16px;
-      background: rgba(255,255,255,0.05);
-      border-radius: 20px;
+      gap: 12px;
+      font-weight: 800;
+      font-size: 14px;
+      transition: all 0.3s;
+      padding: 12px 24px;
+      background: var(--card-bg);
+      border: 1px solid var(--border-soft);
+      border-radius: 100px;
+      z-index: 1000;
+      backdrop-filter: blur(10px);
     }
     
     .back-btn:hover {
-      color: var(--text);
-      background: rgba(255,255,255,0.1);
-      transform: translateX(-3px);
+      color: var(--primary);
+      border-color: var(--primary);
+      transform: translateX(-5px);
     }
   </style>
 </head>
 <body>
-
-  <a href="/index.html" class="back-btn">
-    <i class="fas fa-arrow-left"></i> Dashboard
-  </a>
-
-  <div class="header">
-    <h1>Select Career Domain</h1>
-    <p>Choose your industry and specialization. Our AI will automatically tailor the resume format, suggested skills, and layout specifically for your exact field.</p>
+  <div class="theme-toggle" onclick="toggleTheme()" title="Toggle Light/Dark Mode" style="position: absolute; top: 20px; right: 20px; z-index: 1000; cursor: pointer;">
+    <i class="fas fa-sun"></i>
   </div>
 
-  <div class="domains-grid" id="domainsGrid">
-    <!-- Populated by JS -->
+  <div class="dot-overlay"></div>
+
+  <div class="content-wrapper">
+    <a href="/index.html" class="back-btn">
+      <i class="fas fa-arrow-left"></i> DASHBOARD
+    </a>
+
+    <div class="header">
+      <a href="/" style="text-decoration: none; display: block; margin-bottom: 30px;">
+        <img src="logo-hiero.png" alt="Hiero" style="height: 60px;">
+      </a>
+      <h1>Select Career Domain</h1>
+      <p>Choose your industry and specialization. Our AI will automatically tailor the resume format, suggested skills, and layout specifically for your exact field.</p>
+    </div>
+
+    <div class="domains-grid" id="domainsGrid">
+      <!-- Populated by JS -->
+    </div>
   </div>
 
   <div class="modal-overlay" id="subdomainModal">
@@ -298,9 +490,19 @@
       </button>
       <div class="modal-header">
         <h2 id="modalTitle">Select Specialization</h2>
-        <p>Choose your specific focus area for more precision.</p>
+        <p id="modalSubtitle">Choose your specific focus area for more precision.</p>
       </div>
-      <div class="subdomains-list" id="subdomainsList">
+
+      <button class="modal-back-btn" id="modalBack">
+        <i class="fas fa-arrow-left"></i> BACK TO OPTIONS
+      </button>
+
+      <div class="search-container" id="searchContainer">
+        <i class="fas fa-search search-icon"></i>
+        <input type="text" class="modal-search" id="modalSearch" placeholder="Search for your role (e.g. Frontend, VLSI, HR)...">
+      </div>
+
+      <div class="subdomains-grid" id="subdomainsList">
         <!-- Populated by JS -->
       </div>
     </div>
@@ -312,81 +514,276 @@
         id: 'engineering',
         title: 'Engineering & Tech',
         icon: 'fa-laptop-code',
-        desc: 'Software Development, Architecture, IT Infrastructure, Data & AI',
-        subdomains: [
-          'Software Engineering',
-          'Data Science & AI',
-          'Cloud & DevOps',
-          'Cybersecurity',
-          'Network Administrator',
-          'Database Architect'
-        ]
+        desc: 'IT, Software, AI and Traditional Core Engineering Streams',
+        subgroups: {
+          'Software & Technology': {
+            'Software Development': [
+              'Software Engineer', 'Frontend Developer', 'Backend Developer', 
+              'Full Stack Developer', 'Mobile Developer', 'Game Developer', 
+              'Embedded Systems Engineer', 'QA / Test Engineer'
+            ],
+            'Data & AI': [
+              'Data Scientist', 'Data Analyst', 'ML Engineer', 'AI Engineer', 
+              'Data Engineer', 'Business Intelligence Analyst', 'NLP Engineer', 
+              'Computer Vision Engineer'
+            ],
+            'Infrastructure & Security': [
+              'Cloud Engineer', 'DevOps Engineer', 'Cybersecurity Analyst', 
+              'Network Engineer', 'Database Administrator', 'IT Support Engineer', 
+              'Site Reliability Engineer (SRE)'
+            ],
+            'Architecture & Management': [
+              'Solutions Architect', 'Enterprise Architect', 'IT Project Manager', 'CTO / Tech Lead'
+            ]
+          },
+          'Core Engineering (B.E / B.Tech)': {
+            'ECE — Electronics & Communication': [
+              'VLSI Design Engineer', 'Embedded Systems Engineer', 'Signal Processing Engineer', 
+              'RF / Microwave Engineer', 'PCB Design Engineer', 'IoT Engineer', 
+              'Telecom Engineer', 'Hardware Design Engineer', 'Semiconductor Engineer', 
+              'Communication Systems Engineer', 'Network Engineer', 'Antenna Design Engineer', 
+              'Consumer Electronics Engineer', 'Instrumentation Engineer'
+            ],
+            'Mechanical Engineering': [
+              'Design Engineer (CAD/CAM)', 'Manufacturing Engineer', 'Production Engineer', 
+              'Thermal Engineer', 'HVAC Engineer', 'Automobile Engineer', 
+              'Tool & Die Designer', 'Quality Control Engineer', 'Maintenance Engineer', 
+              'Industrial Engineer', 'Robotics Engineer', 'R&D Engineer (Mechanical)', 
+              'Materials Engineer', 'Welding Engineer'
+            ],
+            'Civil Engineering': [
+              'Structural Engineer', 'Site Engineer', 'Construction Manager', 
+              'Geotechnical Engineer', 'Transportation Engineer', 'Environmental Engineer', 
+              'Urban Planner', 'Quantity Surveyor', 'Project Manager (Construction)', 
+              'Water Resources Engineer', 'Highway Engineer', 'Bridge Engineer', 
+              'Building Inspector', 'Interior Designer (Civil)'
+            ],
+            'Electrical Engineering': [
+              'Electrical Design Engineer', 'Power Systems Engineer', 'Control Systems Engineer', 
+              'Automation Engineer', 'PLC / SCADA Engineer', 'Electrical Project Engineer', 
+              'Solar / Renewable Energy Engineer', 'Protection & Relay Engineer', 
+              'Switchgear Engineer', 'High Voltage Engineer', 'Electrical Maintenance Engineer', 
+              'Energy Auditor', 'Transformer Design Engineer'
+            ],
+            'Chemical Engineering': [
+              'Process Engineer', 'Chemical Plant Engineer', 'Refinery Engineer', 
+              'Petrochemical Engineer', 'Polymer Engineer', 'Paint & Coatings Technologist', 
+              'Food Processing Engineer', 'Pharmaceutical Process Engineer', 
+              'Water Treatment Engineer', 'Safety / HSE Engineer', 'R&D Chemist', 
+              'Formulation Scientist', 'Quality Assurance Engineer'
+            ],
+            'Aeronautical / Aerospace Engineering': [
+              'Aerospace Design Engineer', 'Avionics Engineer', 'Flight Test Engineer', 
+              'Structural Analysis Engineer', 'Propulsion Engineer', 'Navigation Systems Engineer', 
+              'UAV / Drone Engineer', 'Aircraft Maintenance Engineer (AME)', 'Space Systems Engineer', 
+              'Satellite Engineer', 'Defense Systems Engineer', 'Computational Fluid Dynamics (CFD) Engineer'
+            ],
+            'Production & Industrial Engineering': [
+              'Production Engineer', 'Industrial Engineer', 'Process Improvement Engineer', 
+              'Lean / Six Sigma Engineer', 'Operations Research Analyst', 'Supply Chain Engineer', 
+              'Quality Engineer', 'Ergonomics Engineer', 'Safety Engineer', 'Plant Manager'
+            ],
+            'Petroleum Engineering': [
+              'Drilling Engineer', 'Reservoir Engineer', 'Production Engineer (Oil & Gas)', 
+              'Petroleum Geologist', 'Pipeline Engineer', 'Offshore Engineer', 
+              'HSE Engineer (Oil & Gas)', 'Well Completion Engineer'
+            ],
+            'Marine Engineering': [
+              'Marine Engineer', 'Naval Architect', 'Ship Design Engineer', 
+              'Port Operations Engineer', 'Offshore Platform Engineer', 'Marine Surveyor', 
+              'Propulsion Systems Engineer'
+            ],
+            'Mining Engineering': [
+              'Mining Engineer', 'Geologist', 'Blast Design Engineer', 'Mine Safety Officer', 
+              'Mineral Processing Engineer', 'Surveyor (Mining)', 'Environmental Mining Engineer'
+            ],
+            'Biomedical Engineering': [
+              'Biomedical Equipment Technician', 'Clinical Engineer', 'Medical Device Design Engineer', 
+              'Biomechanics Engineer', 'Healthcare Technology Manager', 'Prosthetics & Orthotics Engineer', 
+              'R&D Engineer (Medical Devices)'
+            ],
+            'Environmental Engineering': [
+              'Environmental Consultant', 'Pollution Control Engineer', 'Waste Management Engineer', 
+              'EIA Specialist', 'Water & Wastewater Engineer', 'Sustainability Engineer', 
+              'Climate Change Analyst', 'Green Building Consultant'
+            ],
+            'Instrumentation Engineering': [
+              'Instrumentation Engineer', 'Process Control Engineer', 'Calibration Engineer', 
+              'DCS / PLC Engineer', 'Field Instrumentation Engineer', 'Metrologist', 
+              'Automation & Control Engineer'
+            ]
+          }
+        }
       },
       {
         id: 'business',
         title: 'Business & Management',
         icon: 'fa-chart-pie',
-        desc: 'Consulting, Operations, Strategy, HR and Enterprise Leadership',
-        subdomains: [
-          'Product Management',
-          'Business Analyst',
-          'Operations Manager',
-          'Human Resources (HR)',
-          'Management Consultant',
-          'Project Management'
-        ]
+        desc: 'Strategy, Operations, HR and Supply Chain Management',
+        subdomains: {
+          'Management & Strategy': [
+            'Business Analyst', 'Product Manager', 'Project Manager', 
+            'Program Manager', 'Management Consultant', 'Strategy Analyst', 
+            'Operations Manager', 'Chief of Staff'
+          ],
+          'HR & People': [
+            'HR Manager', 'Talent Acquisition Specialist', 'L&D Manager', 
+            'HR Business Partner', 'Compensation & Benefits Manager'
+          ],
+          'Supply Chain & Ops': [
+            'Supply Chain Manager', 'Logistics Manager', 'Procurement Manager', 
+            'Business Development Manager', 'General Manager'
+          ]
+        }
       },
       {
         id: 'creative',
         title: 'Creative & Design',
         icon: 'fa-pen-nib',
-        desc: 'UI/UX, Graphic Design, Copywriting, Video Production',
-        subdomains: [
-          'UX/UI Design',
-          'Graphic Design',
-          'Product Design',
-          'Content Strategy',
-          'Video Editor'
-        ]
+        desc: 'UI/UX, Product Design, Content Creation and Media',
+        subdomains: {
+          'Design': [
+            'UI Designer', 'UX Designer', 'Product Designer', 'Graphic Designer', 
+            'Brand Designer', 'Illustrator', 'Motion Designer', '3D Designer'
+          ],
+          'Content & Media': [
+            'Copywriter', 'Content Writer', 'Video Editor', 'Photographer', 
+            'Podcast Producer', 'Content Creator', 'Social Media Creator', 'Animator'
+          ]
+        }
       },
       {
         id: 'marketing',
         title: 'Sales & Marketing',
         icon: 'fa-bullhorn',
-        desc: 'Digital Marketing, Enterprise Sales, Public Relations, SEO',
-        subdomains: [
-          'Digital Marketing',
-          'B2B Sales / Enterprise',
-          'SEO Specialist',
-          'Brand Management',
-          'Public Relations'
-        ]
+        desc: 'Digital Marketing, Growth, PR and Market Research',
+        subdomains: {
+          'Marketing': [
+            'Digital Marketer', 'SEO Specialist', 'SEM / PPC Specialist', 
+            'Social Media Manager', 'Email Marketer', 'Performance Marketer', 
+            'Brand Manager', 'Marketing Analyst'
+          ],
+          'Sales & Growth': [
+            'Sales Executive', 'Sales Manager', 'Business Development Executive', 
+            'Growth Hacker', 'Account Manager', 'PR Manager', 
+            'E-Commerce Manager', 'Market Research Analyst'
+          ]
+        }
       },
       {
         id: 'medical',
         title: 'Healthcare & Medical',
         icon: 'fa-stethoscope',
-        desc: 'Clinical practice, Healthcare Administration, Research',
-        subdomains: [
-          'Clinical Nurse',
-          'Healthcare Admin',
-          'Medical Research',
-          'Pharmacy',
-          'Public Health'
-        ]
+        desc: 'Clinical Practice, Medical Research and Administration',
+        subdomains: {
+          'Clinical': [
+            'Doctor / Physician', 'General Surgeon', 'Nurse', 'Pharmacist', 
+            'Dentist', 'Physiotherapist', 'Psychiatrist / Psychologist', 'Radiologist'
+          ],
+          'Research & Administration': [
+            'Medical Researcher', 'Clinical Trial Manager', 'Healthcare Administrator', 
+            'Public Health Officer', 'Biomedical Engineer', 'Lab Technician', 
+            'Hospital Administrator', 'Health Informatician'
+          ]
+        }
       },
       {
         id: 'finance',
         title: 'Finance & Accounting',
         icon: 'fa-wallet',
-        desc: 'Investment Banking, Auditing, Financial Planning, Taxes',
-        subdomains: [
-          'Investment Banking',
-          'Corporate Finance',
-          'Accountant / Auditor',
-          'Financial Analyst',
-          'Risk Management'
-        ]
+        desc: 'Banking, Investment, Accounting and Tax Advisory',
+        subdomains: {
+          'Banking & Investment': [
+            'Investment Banker', 'Equity Research Analyst', 'Financial Analyst', 
+            'Portfolio Manager', 'Risk Manager', 'Wealth Manager', 
+            'Credit Analyst', 'Retail Banker'
+          ],
+          'Accounting & Tax': [
+            'Chartered Accountant (CA)', 'Auditor', 'Tax Consultant', 
+            'Financial Planner', 'Insurance Advisor', 'Fintech Analyst', 
+            'Cost Accountant', 'CFO / Finance Manager'
+          ]
+        }
+      },
+      {
+        id: 'education',
+        title: 'Education & Research',
+        icon: 'fa-graduation-cap',
+        desc: 'Teaching, Academic Research and EdTech Development',
+        subdomains: {
+          'Teaching & Training': [
+            'School Teacher', 'College / University Professor', 'Corporate Trainer', 
+            'Instructional Designer', 'Curriculum Developer', 'Special Education Teacher', 
+            'Online Tutor', 'EdTech Specialist'
+          ],
+          'Research & Administration': [
+            'Academic Researcher', 'Research Analyst', 'School Principal / Administrator', 
+            'E-Learning Developer', 'Education Policy Analyst', 'Library Scientist'
+          ]
+        }
+      },
+      {
+        id: 'legal',
+        title: 'Legal & Compliance',
+        icon: 'fa-gavel',
+        desc: 'Legal Practice, Corporate Law and Risk Compliance',
+        subdomains: {
+          'Legal Practice': [
+            'Corporate Lawyer', 'Criminal Lawyer', 'Civil Litigator', 
+            'Contract Lawyer', 'Intellectual Property Lawyer', 'Real Estate Lawyer', 
+            'Family Lawyer', 'Tax Lawyer'
+          ],
+          'Compliance & Advisory': [
+            'Compliance Officer', 'Legal Advisor', 'Paralegal', 
+            'Legal Researcher', 'Arbitrator / Mediator', 'Risk & Compliance Manager', 
+            'Company Secretary', 'Legal Tech Specialist'
+          ]
+        }
+      },
+      {
+        id: 'agriculture',
+        title: 'Agriculture & Agri-Business',
+        icon: 'fa-wheat-awn',
+        desc: 'Agrochemicals, Seeds, Agri Sales and AgriTech Services',
+        subdomains: {
+          'Agrochemicals & Crop Protection': [
+            'Agrochemical Sales Officer', 'Crop Protection Specialist', 
+            'Pesticide Technical Manager', 'Field Application Specialist', 
+            'Territory Sales Manager (Agri)', 'Product Development Scientist', 
+            'Regulatory Affairs Officer', 'Agri Input Marketing Executive'
+          ],
+          'Seeds & Plant Science': [
+            'Seed Production Officer', 'Plant Breeder', 'Agronomist', 
+            'Crop Scientist', 'Horticulturist', 'Plant Pathologist', 
+            'Soil Scientist', 'Seed Quality Analyst'
+          ],
+          'Agri Sales & Marketing': [
+            'Agri Sales Representative', 'Agri Business Development Manager', 
+            'Agri Product Manager', 'Field Marketing Executive', 
+            'Key Account Manager (Agri)', 'Agri Brand Manager', 
+            'Dealer Manager', 'Rural Sales Executive'
+          ],
+          'Research & Development': [
+            'Agricultural Researcher', 'Agri R&D Scientist', 'Food Technologist', 
+            'Agricultural Biotechnologist', 'Farm Trials Coordinator', 
+            'Quality Control Analyst', 'Formulation Scientist', 'Regulatory Scientist'
+          ],
+          'Supply Chain & Operations': [
+            'Agri Supply Chain Manager', 'Warehouse Manager', 'Procurement Officer', 
+            'Cold Chain Manager', 'Logistics Coordinator', 'Import / Export Officer', 
+            'Quality Assurance Manager'
+          ],
+          'Government & Extension Services': [
+            'Agricultural Extension Officer', 'Agricultural Development Officer', 
+            'KVK Scientist', 'NABARD Officer', 'Agricultural Inspector', 
+            'District Agriculture Officer', 'Field Assistant'
+          ],
+          'AgriTech & Digital Agriculture': [
+            'AgriTech Sales Specialist', 'Precision Agriculture Consultant', 
+            'Drone Agriculture Specialist', 'Farm Software Specialist', 
+            'AgriTech Business Analyst', 'Remote Sensing Analyst', 'IoT Specialist'
+          ]
+        }
       }
     ];
 
@@ -395,46 +792,128 @@
     const closeBtn = document.getElementById('closeModal');
     const modalTitle = document.getElementById('modalTitle');
     const subList = document.getElementById('subdomainsList');
+    const modalSubtitle = document.getElementById('modalSubtitle');
+    const modalBack = document.getElementById('modalBack');
+    const modalSearch = document.getElementById('modalSearch');
+    const searchContainer = document.getElementById('searchContainer');
 
     let currentDomain = null;
+    let currentFilteredData = null;
 
     // Render Domain Cards
-    domainsData.forEach((d, index) => {
-      const card = document.createElement('div');
-      card.className = 'domain-card';
-      card.style.animationDelay = `${index * 0.1}s`;
-      card.innerHTML = `
-        <div class="icon-wrapper">
-          <i class="fas ${d.icon}"></i>
-        </div>
-        <h3 class="domain-title">${d.title}</h3>
-        <p class="domain-desc">${d.desc}</p>
-      `;
-      
-      card.addEventListener('click', () => openModal(d));
-      grid.appendChild(card);
-    });
+    function renderDomainCards() {
+      grid.innerHTML = '';
+      domainsData.forEach((d, index) => {
+        const card = document.createElement('div');
+        card.className = 'domain-card';
+        card.style.animationDelay = `${index * 0.1}s`;
+        card.innerHTML = `
+          <div class="icon-wrapper">
+            <i class="fa-solid ${d.icon}"></i>
+          </div>
+          <h3 class="domain-title">${d.title}</h3>
+          <p class="domain-desc">${d.desc}</p>
+        `;
+        
+        card.addEventListener('click', () => openModal(d));
+        grid.appendChild(card);
+      });
+    }
+
+    renderDomainCards();
 
     function openModal(domainObj) {
       currentDomain = domainObj;
       modalTitle.textContent = domainObj.title;
+      modalSubtitle.textContent = "Choose your specific focus area for more precision.";
+      modalBack.style.display = 'none';
+      searchContainer.style.display = 'none';
       subList.innerHTML = '';
+      modalSearch.value = '';
 
-      domainObj.subdomains.forEach((sub, i) => {
-        const btn = document.createElement('button');
-        btn.className = 'subdomain-btn';
-        btn.style.animation = `fadeInUp 0.3s ease-out ${i * 0.05}s backwards`;
-        btn.innerHTML = `
-          <span>${sub}</span>
-          <i class="fas fa-chevron-right"></i>
-        `;
-        
-        btn.addEventListener('click', () => selectPath(domainObj.title, sub));
-        subList.appendChild(btn);
-      });
+      // Check if it has subgroups (like Tech vs Core)
+      if (domainObj.subgroups) {
+        renderSubgroups(domainObj.subgroups);
+      } else {
+        searchContainer.style.display = 'block';
+        currentFilteredData = domainObj.subdomains;
+        renderSubdomains(domainObj.subdomains);
+      }
 
       modal.classList.add('active');
     }
+
+    function renderSubgroups(subgroups) {
+      modalSubtitle.textContent = "Select your engineering path to see specialized roles.";
+      searchContainer.style.display = 'none';
+      subList.innerHTML = '<div class="subgroup-selection"></div>';
+      const container = subList.querySelector('.subgroup-selection');
+
+      Object.entries(subgroups).forEach(([name, data]) => {
+        const div = document.createElement('div');
+        div.className = 'subgroup-card';
+        const icon = name.includes('Software') ? 'fa-code-branch' : 'fa-cog';
+        div.innerHTML = `
+          <i class="fas ${icon}"></i>
+          <h4>${name}</h4>
+          <p>Discover specialized roles in ${name.toLowerCase()}.</p>
+        `;
+        div.addEventListener('click', () => {
+          modalBack.style.display = 'flex';
+          searchContainer.style.display = 'block';
+          modalSubtitle.textContent = `Specialized roles in ${name}`;
+          currentFilteredData = data;
+          renderSubdomains(data);
+        });
+        container.appendChild(div);
+      });
+    }
+
+    function renderSubdomains(subdomains, filter = '') {
+      subList.innerHTML = '';
+      const filterLower = filter.toLowerCase();
+
+      Object.entries(subdomains).forEach(([category, list]) => {
+        const filteredList = list.filter(item => item.toLowerCase().includes(filterLower));
+        
+        if (filteredList.length > 0) {
+          const section = document.createElement('div');
+          section.className = 'category-section';
+          section.innerHTML = `<h3>${category}</h3>`;
+          
+          const listDiv = document.createElement('div');
+          listDiv.className = 'subdomains-list';
+          
+          filteredList.forEach((sub) => {
+            const btn = document.createElement('button');
+            btn.className = 'subdomain-btn';
+            btn.innerHTML = `
+              <span>${sub}</span>
+              <i class="fas fa-chevron-right"></i>
+            `;
+            btn.addEventListener('click', () => selectPath(currentDomain.title, sub));
+            listDiv.appendChild(btn);
+          });
+          
+          section.appendChild(listDiv);
+          subList.appendChild(section);
+        }
+      });
+
+      if (subList.innerHTML === '') {
+        subList.innerHTML = `<div style="text-align:center; padding: 40px; color: var(--text-muted);">No roles found matching "${filter}"</div>`;
+      }
+    }
+
+    // Search functionality
+    modalSearch.addEventListener('input', (e) => {
+      renderSubdomains(currentFilteredData, e.target.value);
+    });
+
+    // Back to subgroups
+    modalBack.addEventListener('click', () => {
+      openModal(currentDomain);
+    });
 
     function closeModal() {
       modal.classList.remove('active');
@@ -448,6 +927,13 @@
     // The core redirection function
     function selectPath(domain, sub) {
       const expertise = encodeURIComponent(`${domain} - ${sub}`);
+      
+      // Save the clean subdomain key for the builder to use
+      const subKey = sub.toLowerCase().replace(/[^a-z0-9]/g, '-');
+      localStorage.setItem('selectedSubdomain', subKey);
+      
+      console.log(`Selected Subdomain: ${subKey}`);
+      
       // Redirect to builder and pass the domain as a query parameter
       window.location.href = `/resume-builder.html?domain=${expertise}`;
     }

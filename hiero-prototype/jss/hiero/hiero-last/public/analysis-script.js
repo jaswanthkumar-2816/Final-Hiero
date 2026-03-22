@@ -38,10 +38,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const response = await fetch(`${BACKEND_URL}/api/analysis/health`);
       const data = await response.json();
       if (response.ok && data.status === 'ok') {
-        connectionStatus.style.display = "block";
-        connectionStatus.style.backgroundColor = "black";
-        connectionStatus.style.color = "#00ff00";
-        statusText.textContent = "Welcome to Hiero";
+        connectionStatus.style.display = "flex";
+        statusText.textContent = "";
         analyzeBtn.disabled = false;
       } else {
         throw new Error("Health check failed");
@@ -72,31 +70,26 @@ document.addEventListener("DOMContentLoaded", () => {
       const jdMode = document.querySelector('input[name="jd_mode"]:checked')?.value || 'file';
 
       console.log('📝 Form submitted');
-      console.log('Resume file:', resume ? `${resume.name} (${resume.size} bytes)` : 'NONE');
-      console.log('JD mode:', jdMode);
-      console.log('JD file:', jdFile ? `${jdFile.name} (${jdFile.size} bytes)` : 'NONE');
-      console.log('JD text length:', jdMode === 'text' ? jdTextEl.value.length : 0);
 
       // Validation
       if (!resume) { alert("Please upload your resume PDF."); return; }
       if (jdMode === 'file' && !jdFile) { alert("Please upload the job description file or switch to text mode."); return; }
       if (jdMode === 'text' && (!jdTextEl || !jdTextEl.value.trim())) { alert("Please paste the job description text."); return; }
 
-      if (!loadingOverlay) { console.error("Loading overlay not found."); alert("Loading animation failed to start."); return; }
-      // Show loading overlay
-      loadingOverlay.classList.add("visible");
+      if (!loadingOverlay) { console.error("Loading overlay not found."); return; }
+      
+      // Start dynamic animation
+      const animationState = startLoadingAnimation();
 
       const formData = new FormData();
-      // Appending text fields BEFORE the file field can sometimes help Multer parse correctly on some platforms
       if (jdMode === 'text') {
         const text = jdTextEl.value.trim();
         formData.append('jd_text', text);
-        formData.append('jd', text); // Duplicate as fallback
-        formData.append('description', text); // Duplicate as fallback
+        formData.append('jd', text); 
+        formData.append('description', text); 
       }
       
       formData.append('resume', resume);
-      
       if (jdMode === 'file') {
         formData.append('jd', jdFile);
       }
@@ -105,27 +98,25 @@ document.addEventListener("DOMContentLoaded", () => {
         const analyzeUrl = `${BACKEND_URL}/api/analysis/analyze`;
         console.log('📤 Sending to backend:', analyzeUrl);
         const response = await fetch(analyzeUrl, { method: 'POST', body: formData, headers: { 'Accept': 'application/json' } });
-        console.log('✅ Response received:', response.status, response.statusText);
-
-        // Handle validation errors (422)
+        
         if (response.status === 422) {
           const errJson = await response.json().catch(() => ({}));
-          console.warn('⚠️ Validation error from backend:', errJson);
           showValidationErrors(errJson);
           loadingOverlay.classList.remove('visible');
+          animationState.stop();
           return;
         }
 
         if (!response.ok) {
           const errorText = await response.text();
-          console.error('❌ Server error response:', errorText);
           throw new Error(`HTTP ${response.status}: ${errorText}`);
         }
 
         const result = await response.json();
-        console.log('📊 RAW Backend Response:', result);
 
-        // Transform backend response to match result.html expectations
+        // Finish animation before redirect
+        await finishLoadingAnimation(animationState, result.score || 0);
+
         const transformedData = {
           score: Math.min(Math.max(parseInt(result.score) || 0, 0), 100),
           domain: result.domain || 'it',
@@ -138,21 +129,98 @@ document.addEventListener("DOMContentLoaded", () => {
           projectSuggestions: generateProjectSuggestions(result)
         };
 
-        // Store in localStorage with transformed data + full learning plan
         const storageData = { success: true, data: transformedData, rawData: result, learningPlan: result.learningPlan || [], timestamp: new Date().toISOString() };
         localStorage.setItem('analysisResult', JSON.stringify(storageData));
         localStorage.setItem('hieroLearningPlan', JSON.stringify(result.learningPlan || []));
 
-        console.log('⏳ Redirecting in 1.2 seconds...');
-        setTimeout(() => { window.location.href = 'result.html'; }, 1200);
+        setTimeout(() => { window.location.href = 'result.html'; }, 800);
       } catch (error) {
         console.error('❌ Error during analysis:', error.message);
+        animationState.stop();
         if (loadingOverlay) loadingOverlay.classList.remove('visible');
-        alert('Analysis failed: ' + error.message + '\nCheck console for details.');
+        alert('Analysis failed: ' + error.message);
       }
     });
   } else {
     console.warn('⚠️ analyze-form not found on this page');
+  }
+
+  function startLoadingAnimation() {
+    const overlay = document.getElementById('loading-overlay');
+    const logo = document.getElementById('manifesting-logo');
+    const beam = document.getElementById('manifest-beam');
+    const titleEl = document.getElementById('loader-title');
+    
+    overlay.classList.add('visible');
+    
+    let progress = 0;
+    const stages = [
+      { id: 'stage-1', threshold: 0 },
+      { id: 'stage-2', threshold: 35 },
+      { id: 'stage-3-real', threshold: 70 }
+    ];
+
+    const interval = setInterval(() => {
+      if (progress < 95) {
+        // To reach 95% in ~30s with 200ms interval:
+        // 30,000 / 200 = 150 increments.
+        // 95 / 150 = 0.63 average increment.
+        progress += Math.random() * 0.8; 
+        updateUI(progress);
+      }
+    }, 200);
+
+    function updateUI(p) {
+      if (logo) {
+        const opacity = Math.min(p / 100, 1);
+        const blur = 10 - (p / 100 * 10);
+        const scale = 0.9 + (p / 100 * 0.1);
+        logo.style.opacity = opacity;
+        logo.style.filter = `blur(${blur}px) brightness(${0.5 + (p/100*0.5)}) drop-shadow(0 0 ${p/8}px var(--primary-accent))`;
+        logo.style.transform = `scale(${scale})`;
+      }
+
+      stages.forEach(s => {
+        const el = document.getElementById(s.id);
+        if (!el) return;
+        if (p >= s.threshold) {
+          if (p >= s.threshold + 30 || p >= 90) {
+            el.classList.add('completed');
+            el.classList.remove('active');
+          } else {
+            el.classList.add('active');
+          }
+        }
+      });
+    }
+
+    return {
+      stop: () => clearInterval(interval),
+      updateFinal: (p) => updateUI(p),
+      container: overlay,
+      title: titleEl
+    };
+  }
+
+  async function finishLoadingAnimation(state, score) {
+    state.stop();
+    state.updateFinal(100);
+    
+    // Mark all as completed
+    ['stage-1', 'stage-2', 'stage-3-real'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.classList.remove('active');
+        el.classList.add('completed');
+        const icon = el.querySelector('.stage-icon i');
+        if (icon) icon.className = 'fa-solid fa-check';
+      }
+    });
+
+    state.title.innerHTML = 'Analysis <span>Complete!</span>';
+    document.getElementById('loader-subtitle').textContent = `Match Score: ${score}% - Generating report...`;
+    
+    return new Promise(r => setTimeout(r, 1000));
   }
 
   function showValidationErrors(err) {
@@ -181,11 +249,8 @@ document.addEventListener("DOMContentLoaded", () => {
     return div.innerHTML;
   }
 
-  // Helper function to generate project suggestions based on missing skills
   function generateProjectSuggestions(result) {
     const projects = [];
-
-    // 1. Prioritize projects directly from backend (enhanced rule-based engine)
     if (result.projectSuggestions && Array.isArray(result.projectSuggestions)) {
       result.projectSuggestions.forEach(p => {
         if (typeof p === 'string' && p.trim()) projects.push(p);
@@ -193,8 +258,6 @@ document.addEventListener("DOMContentLoaded", () => {
         else if (typeof p === 'object' && p.name) projects.push(p.name);
       });
     }
-
-    // 2. Fallback to learning plan projects if backend list was empty
     if (projects.length === 0 && result.learningPlan && Array.isArray(result.learningPlan)) {
       result.learningPlan.forEach(plan => {
         if (plan.miniProjects && Array.isArray(plan.miniProjects)) {
@@ -204,30 +267,16 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
     }
-
-    // 3. Final fallback (hardcoded) if still empty
     if (projects.length === 0) {
       const domain = result.domain || 'it';
       const suggestions = {
-        it: [
-          'Build a REST API service',
-          'Create a Full-Stack Web App',
-          'Develop a Data Visualization Dashboard'
-        ],
-        hr: [
-          'HR Analytics Dashboard',
-          'Recruitment Tracker System',
-          'Employee Engagement Portal'
-        ],
-        finance: [
-          'Personal Expense Tracker',
-          'Investment Portfolio Manager',
-          'Budget Planning Tool'
-        ]
+        it: ['Build a REST API service', 'Create a Full-Stack Web App', 'Develop a Data Visualization Dashboard'],
+        hr: ['HR Analytics Dashboard', 'Recruitment Tracker System', 'Employee Engagement Portal'],
+        finance: ['Personal Expense Tracker', 'Investment Portfolio Manager', 'Budget Planning Tool'],
+        agriculture: ['Agri-Supply Chain Tracker', 'Crop Yield Prediction Model', 'Smart Farm Management System']
       };
       return (suggestions[domain] || suggestions.it).slice(0, 3);
     }
-
     return projects.slice(0, 6);
   }
 });

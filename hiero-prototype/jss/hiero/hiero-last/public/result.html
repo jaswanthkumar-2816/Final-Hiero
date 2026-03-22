@@ -1,25 +1,51 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Hiero | Analysis Summary</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="theme.css">
+  <script src="theme.js"></script>
   <style>
     :root {
-      --bg-black: #050505;
+      /* Theme Transitions */
+      --transition-speed: 0.3s;
+
+      /* Colors - DARK (Default) */
+      --bg-color: #0A0A0F;
+      --nav-bg: rgba(10, 10, 15, 0.8);
       --card-bg: #111111;
-      --border-color: #222222;
-      --primary-green: #00ff00;
-      --soft-green: #00ff00; /* For backward compatibility */
+      --card-hover: #161616;
       --text-main: #ffffff;
       --text-muted: #a1a1aa;
-      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.5);
-      --green-glow: 0 0 20px rgba(0, 255, 0, 0.1);
+      --border-color: #222222;
+      --primary-accent: #00ff00;
+      --primary-accent-glow: rgba(0, 255, 0, 0.2);
+      --nav-active-bg: rgba(0, 255, 0, 0.12);
+      --nav-active-text: #00ff00;
+      --glow-top: rgba(127, 119, 221, 0.12);
+      --glow-bottom: rgba(127, 119, 221, 0.07);
+      --font-sans: 'Inter', sans-serif;
+    }
+
+    [data-theme="light"] {
+      --bg-color: #F8FAFC;
+      --nav-bg: rgba(248, 250, 252, 0.8);
+      --card-bg: #ffffff;
+      --card-hover: #fcfcfc;
+      --text-main: #0F172A;
+      --text-muted: #64748B;
+      --border-color: #E2E8F0;
+      --primary-accent: #1D9E75;
+      --primary-accent-glow: rgba(29, 158, 117, 0.1);
+      --nav-active-bg: #E1F5EE;
+      --nav-active-text: #0F6E56;
+      --glow-top: rgba(29, 158, 117, 0.08);
+      --glow-bottom: rgba(127, 119, 221, 0.05);
     }
 
     * {
@@ -27,752 +53,1163 @@
       padding: 0;
       box-sizing: border-box;
       -webkit-font-smoothing: antialiased;
+      font-family: var(--font-sans);
+    }
+
+    p, span, div {
+      font-family: 'Inter', sans-serif;
+      font-weight: 400;
     }
 
     body {
-      background-color: var(--bg-black);
+      background-color: var(--bg-color);
       color: var(--text-main);
       font-family: var(--font-sans);
-      line-height: 1.5;
+      font-size: 16px;
+      line-height: 1.6;
+      font-weight: 400;
       min-height: 100vh;
       overflow-x: hidden;
+      position: relative;
+      transition: background-color var(--transition-speed), color var(--transition-speed);
     }
 
-    /* Professional Background Gradient */
+    /* Option 2: Background Glows */
     body::before {
       content: '';
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: 
-        radial-gradient(circle at 80% 20%, rgba(0, 255, 0, 0.05) 0%, transparent 40%),
-        radial-gradient(circle at 20% 80%, rgba(0, 255, 0, 0.03) 0%, transparent 40%);
-      z-index: -1;
+      top: -200px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 800px;
+      height: 600px;
+      background: radial-gradient(ellipse, var(--glow-top) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+      transition: background var(--transition-speed);
     }
 
-    /* Navbar/Header area */
+    body::after {
+      content: '';
+      position: fixed;
+      bottom: -100px;
+      right: -100px;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(ellipse, var(--glow-bottom) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+      transition: background var(--transition-speed);
+    }
+
+    /* --- NAVBAR REFINEMENT --- */
     .nav-header {
-      padding: 24px 40px;
+      padding: 12px 40px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       border-bottom: 1px solid var(--border-color);
+      background: var(--nav-bg);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      transition: background var(--transition-speed), border-color var(--transition-speed);
     }
 
-    .app-logo {
+    .app-brand {
       display: flex;
       align-items: center;
       gap: 12px;
       text-decoration: none;
     }
 
-    .app-logo img {
-      height: 32px;
-      width: 32px;
-      object-fit: contain;
-    }
-
-    .app-logo span {
-      color: white;
-      font-weight: 700;
-      font-size: 1.25rem;
-      letter-spacing: 1px;
-    }
-
-    .breadcrumbs {
+    .app-logo-box {
+      width: 42px;
+      height: 42px;
+      background: rgba(29, 158, 117, 0.1);
+      border-radius: 12px;
       display: flex;
       align-items: center;
-      gap: 8px;
-      color: var(--text-muted);
-      font-size: 0.85rem;
-      margin-bottom: 12px;
+      justify-content: center;
+      border: 1px solid rgba(29, 158, 117, 0.2);
     }
 
-    .breadcrumbs span.separator {
+    .app-logo-box img {
+      height: 28px;
+      width: 28px;
+    }
+
+    .app-brand span {
+      color: var(--text-main);
+      font-weight: 800;
+      font-size: 1.4rem;
+      letter-spacing: 0.5px;
+    }
+
+    .nav-menu {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .nav-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: 10px 20px;
+      border-radius: 14px;
+      text-decoration: none;
+      color: var(--text-muted);
+      transition: all 0.2s ease;
+      font-weight: 500;
+      font-size: 13px;
+    }
+
+    .nav-btn i {
+      font-size: 1.35rem; /* Increased size */
+      margin-bottom: 2px;
+      font-weight: 700;
+    }
+
+    .nav-btn span {
+      font-size: 0.75rem;
+      text-transform: capitalize;
+    }
+
+    .nav-btn:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .nav-btn.active {
+      background: var(--nav-active-text);
+      color: #000;
+      font-weight: 700;
+      box-shadow: 0 0 15px var(--primary-accent-glow);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    /* Theme Toggle */
+    .theme-toggle {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      transition: all 0.2s;
+    }
+
+    .theme-toggle:hover {
+      border-color: var(--primary-accent);
+      color: var(--primary-accent);
+      background: var(--nav-active-bg);
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.05);
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+      border: 1px solid rgba(255,255,255,0.1);
+      overflow: hidden;
+    }
+
+    .user-name {
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--text-muted);
+    }
+
+    /* --- LAYOUT --- */
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .breadcrumb {
+      display: flex;
+      gap: 8px;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      margin-bottom: 12px;
+      align-items: center;
+    }
+
+    .breadcrumb i {
+      font-size: 0.65rem;
       opacity: 0.5;
     }
 
-    .hero-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 40px 24px;
-    }
-
-    .header-section {
-      margin-bottom: 40px;
-    }
-
-    .title-h1 {
-      font-size: 2.5rem;
-      font-weight: 800;
+    /* Heading Style Option 2 */
+    .page-title {
+      font-size: 2.2rem;
+      font-weight: 600;
       margin-bottom: 8px;
-      letter-spacing: -0.5px;
+      letter-spacing: -0.02em;
     }
 
-    .subtitle {
+    .page-title span {
+      color: var(--primary-accent);
+    }
+
+    .page-subtitle {
       color: var(--text-muted);
-      font-size: 1.1rem;
-      margin-bottom: 20px;
+      font-size: 0.95rem;
+      margin-bottom: 24px;
+      max-width: 450px;
     }
 
-    .role-badge {
-      display: inline-flex;
-      align-items: center;
-      padding: 6px 16px;
-      background: rgba(0, 255, 0, 0.1);
-      border: 1px solid rgba(0, 255, 0, 0.2);
+    .role-tag {
+      display: inline-block;
+      padding: 4px 12px;
+      background: var(--nav-active-bg);
+      color: var(--primary-accent);
       border-radius: 100px;
-      color: var(--primary-green);
-      font-weight: 500;
-      font-size: 0.85rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      margin-bottom: 16px;
     }
 
-    /* Grid Layout */
-    .content-grid {
+    /* --- GRID & CARDS --- */
+    .grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 24px;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 16px;
+      align-items: stretch;
     }
 
     .card {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
-      border-radius: 16px;
-      padding: 24px;
+      border-radius: 12px;
+      padding: 20px;
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
       position: relative;
-      transition: transform 0.3s ease, border-color 0.3s ease;
+      overflow: hidden;
+      height: 100%;
     }
+
+    /* Grid Spanning for Perfect Alignment */
+    .card-score { grid-column: span 4; }
+    .card-details { grid-column: span 4; }
+    .card-skills { grid-column: span 4; }
+    .card-projects { grid-column: span 6; }
+    .card-learning { grid-column: span 6; }
+    .card-interview { grid-column: span 6; }
+    .card-fixes { grid-column: span 6; }
 
     .card:hover {
-      border-color: rgba(0, 255, 0, 0.3);
-      transform: translateY(-2px);
+      border-color: var(--primary-accent);
+      background: var(--card-hover);
+      transform: translateY(-3px);
     }
 
-    .section-header {
+    .card-header {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      margin-bottom: 24px;
+      align-items: flex-start;
+      margin-bottom: 12px;
     }
 
-    .section-title {
-      font-size: 0.75rem;
-      font-weight: 700;
+    .card-title {
+      font-size: 0.7rem;
       text-transform: uppercase;
-      letter-spacing: 1px;
+      letter-spacing: 0.1em;
       color: var(--text-muted);
+      font-weight: 500;
     }
 
-    /* Score Ring */
-    .score-container {
+    /* Score Ring Refinement */
+    .score-box {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 20px 0;
+      padding-top: 10px;
     }
 
-    .score-ring {
+    .score-svg-wrapper {
       position: relative;
-      width: 140px;
-      height: 140px;
+      width: 100px;
+      height: 100px;
+      margin-bottom: 8px;
     }
 
-    .score-ring svg {
+    .score-svg-wrapper svg {
       transform: rotate(-90deg);
+      width: 100px;
+      height: 100px;
     }
 
-    .score-ring circle {
+    .score-svg-wrapper circle {
       fill: none;
-      stroke-width: 10;
+      stroke-width: 8;
     }
 
-    .score-ring .bg {
-      stroke: #1a1a1a;
+    .score-svg-wrapper .bg {
+      stroke: var(--border-color);
     }
 
-    .score-ring .progress {
-      stroke: var(--primary-green);
+    .score-svg-wrapper .progress {
+      stroke: var(--primary-accent);
       stroke-linecap: round;
-      stroke-dasharray: 377;
-      stroke-dashoffset: 377;
-      transition: stroke-dashoffset 1.5s ease-out;
+      stroke-dasharray: 251.3; 
+      stroke-dashoffset: 251.3;
+      animation: fillRing 1.5s ease-out forwards;
+      animation-delay: 0.5s;
     }
 
-    .score-text {
+    @keyframes fillRing {
+      from { stroke-dashoffset: 251.3; }
+      to { stroke-dashoffset: var(--target-offset); }
+    }
+
+    .score-val {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      font-size: 2rem;
+      font-size: 1.4rem;
       font-weight: 800;
-      color: white;
     }
 
-    .match-label {
-      margin-top: 16px;
-      font-weight: 600;
-      color: var(--primary-green);
+    .score-meta {
+      width: 100%;
+      text-align: center;
+      padding-top: 24px;
+      border-top: 1px solid var(--border-color);
     }
 
-    /* Analysis Details */
+    .percentile-text {
+      color: var(--primary-accent);
+      font-weight: 700;
+      font-size: 0.95rem;
+      margin-bottom: 12px;
+    }
+
+    .mini-bar-bg {
+      width: 100%;
+      height: 6px;
+      background: var(--border-color);
+      border-radius: 100px;
+      overflow: hidden;
+    }
+
+    .mini-bar-fill {
+      height: 100%;
+      background: var(--primary-accent);
+      width: 0%;
+      transition: width 1.5s ease;
+    }
+
+    /* Details Grid */
     .details-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 24px;
-    }
-
-    .detail-item {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 16px;
+      flex: 1;
     }
 
-    .detail-label {
+    .stat-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stat-label {
       font-size: 0.75rem;
       color: var(--text-muted);
     }
 
-    .detail-value {
-      font-size: 1.25rem;
-      font-weight: 700;
+    .stat-num {
+      font-size: 1.4rem;
+      font-weight: 800;
     }
 
-    .detail-sub {
-      font-size: 0.7rem;
-      color: var(--text-muted);
-    }
-
-    /* Skills Breakdown */
-    .skills-list {
+    /* Ratio bar for Analysis details */
+    .ratio-container {
+      grid-column: span 2;
+      padding: 12px 0;
       display: flex;
-      flex-wrap: wrap;
+      flex-direction: column;
       gap: 8px;
     }
 
-    .skill-chip {
-      padding: 6px 12px;
-      border-radius: 100px;
-      font-size: 0.75rem;
-      font-weight: 600;
+    .ratio-bar-bg {
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: rgba(255,255,255,0.06);
+      margin: 12px 0;
+      overflow: hidden;
       display: flex;
-      align-items: center;
-      gap: 6px;
-      border: 1px solid transparent;
-      cursor: default;
     }
 
-    /* Dynamic Skill Coloring */
-    .skill-chip.matched { background: rgba(0, 255, 0, 0.1); color: #00ff00; border-color: rgba(0, 255, 0, 0.2); }
-    .skill-chip.missing { background: rgba(255, 68, 68, 0.1); color: #ff4444; border-color: rgba(255, 68, 68, 0.2); }
-    .skill-chip.bonus   { background: rgba(155, 89, 182, 0.1); color: #9b59b2; border-color: rgba(155, 89, 182, 0.2); }
+    .ratio-fill-matched { height: 100%; background: #1D9E75; width: 0%; transition: width 1s ease; border-radius: 3px; }
+    .ratio-fill-missing { height: 100%; background: #D85A30; width: 0%; transition: width 1s ease; border-radius: 3px; }
+
+    /* Skills List Style (Fixing Truncation) */
+    .skills-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      overflow-y: auto;
+      max-height: 280px;
+      flex: 1;
+      padding-right: 4px;
+    }
+
+    /* Custom Scrollbar for Skills */
+    .skills-stack::-webkit-scrollbar {
+      width: 4px;
+    }
+    .skills-stack::-webkit-scrollbar-track {
+      background: rgba(255,255,255,0.02);
+    }
+    .skills-stack::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.1);
+      border-radius: 2px;
+    }
+
+    .skill-list-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    [data-theme="light"] .skill-list-item {
+      background: rgba(0, 0, 0, 0.02);
+    }
+
+    .skill-status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .dot-matched { background: #1D9E75; box-shadow: 0 0 8px rgba(29, 158, 117, 0.4); }
+    .dot-missing { background: #D85A30; box-shadow: 0 0 8px rgba(216, 90, 48, 0.4); }
+    .dot-bonus   { background: #7F77DD; box-shadow: 0 0 8px rgba(127, 119, 221, 0.4); }
 
     .skill-legend {
       display: flex;
       gap: 16px;
-      margin-top: 24px;
-      padding-top: 16px;
-      border-top: 1px solid var(--border-color);
+      margin-top: auto;
+      padding-top: 12px;
+      border-top: 0.5px solid rgba(255,255,255,0.06);
     }
 
-    .legend-item {
+    .legend-bit {
       display: flex;
       align-items: center;
-      gap: 6px;
-      font-size: 0.7rem;
-      color: var(--text-muted);
+      gap: 8px;
+      font-size: 0.75rem;
+      font-weight: 700;
     }
 
-    .dot { width: 8px; height: 8px; border-radius: 50%; }
-    .dot.matched { background: #00ff00; }
-    .dot.missing { background: #ff4444; }
-    .dot.bonus   { background: #9b59b2; }
+    .legend-matched { color: #1D9E75; }
+    .legend-missing { color: #D85A30; }
+    .legend-bonus   { color: #7F77DD; }
 
-    /* Suggested Projects */
-    .project-item {
+    /* Project Cards */
+    .project-card {
       display: flex;
       gap: 16px;
-      padding: 16px;
+      padding: 18px;
       background: rgba(255, 255, 255, 0.03);
-      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
       margin-bottom: 12px;
-      transition: background 0.2s ease;
       text-decoration: none;
       color: inherit;
+      transition: all 0.2s;
     }
 
-    .project-item:hover {
+    .project-card:hover {
       background: rgba(255, 255, 255, 0.06);
+      border-color: var(--primary-accent);
+      transform: translateX(4px);
     }
 
-    .project-icon {
-      width: 40px;
-      height: 40px;
-      background: rgba(0, 255, 0, 0.1);
-      border-radius: 8px;
+    .proj-icon {
+      width: 42px;
+      height: 42px;
+      background: var(--nav-active-bg);
+      color: var(--primary-accent);
       display: flex;
       align-items: center;
       justify-content: center;
-      color: var(--primary-green);
-      font-size: 1rem;
+      border-radius: 12px;
     }
 
-    .project-info {
+    .proj-text h4 { font-size: 1rem; font-weight: 700; margin-bottom: 4px; }
+    .proj-text p { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
+
+    /* Learning Path - Filling gaps */
+    .l-path {
       flex: 1;
     }
 
-    .project-name {
-      font-size: 0.95rem;
-      font-weight: 600;
-      margin-bottom: 4px;
-    }
-
-    .project-tags {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-    }
-
-    /* Learning Path */
-    .path-step {
+    .path-row {
       display: flex;
-      align-items: center;
-      gap: 16px;
-      padding: 12px 0;
+      gap: 20px;
+      padding-bottom: 16px;
       position: relative;
     }
 
-    .path-step::after {
+    .path-row::before {
       content: '';
       position: absolute;
-      left: 14px;
-      top: 40px;
-      bottom: 0px;
+      left: 17px;
+      top: 36px;
+      bottom: 0;
       width: 1px;
       background: var(--border-color);
     }
 
-    .path-step:last-child::after { display: none; }
+    .path-row:last-child::before { display: none; }
 
-    .step-number {
-      width: 28px;
-      height: 28px;
-      background: var(--primary-green);
-      color: black;
+    .path-num {
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
+      background: var(--card-bg);
+      border: 2px solid var(--border-color);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 0.8rem;
-      font-weight: 700;
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      flex-shrink: 0;
       z-index: 1;
+      transition: all 0.3s;
     }
 
-    .step-content {
+    .path-row.top-priority .path-num {
+      background: var(--primary-accent);
+      color: black;
+      border-color: var(--primary-accent);
+      box-shadow: 0 0 15px var(--primary-accent-glow);
+    }
+
+    .path-info {
       flex: 1;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      padding-top: 4px;
     }
 
-    .step-name { font-weight: 500; font-size: 0.95rem; }
-    .step-badge {
+    .path-name { font-weight: 700; font-size: 1.05rem; }
+    .path-tag {
       font-size: 0.65rem;
-      padding: 2px 8px;
-      border-radius: 4px;
+      font-weight: 800;
       text-transform: uppercase;
-      font-weight: 700;
-    }
-    .badge-priority { background: rgba(0, 255, 0, 0.1); color: var(--primary-green); }
-    .badge-med { background: rgba(161, 161, 170, 0.1); color: var(--text-muted); }
-
-    /* Buttons */
-    .btn-full {
-      width: 100%;
-      padding: 12px;
-      background: transparent;
-      border: 1px solid var(--border-color);
-      border-radius: 10px;
-      color: white;
-      font-weight: 600;
-      font-size: 0.9rem;
-      cursor: pointer;
-      margin-top: 16px;
-      transition: all 0.2s ease;
-    }
-
-    .btn-full:hover {
+      padding: 3px 8px;
+      border-radius: 6px;
       background: rgba(255, 255, 255, 0.05);
-      border-color: var(--primary-green);
     }
 
-    .btn-primary {
-      background: white;
-      color: black;
-      border: none;
+    .priority-tag { background: var(--nav-active-bg); color: var(--primary-accent); }
+
+    /* Mock Interview - Fill top space */
+    .mock-intro {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 2px;
     }
 
-    .btn-primary:hover {
-      background: #e5e5e5;
-    }
-
-    /* Mock Interview Inner */
-    .interview-info {
+    .question-preview {
+      padding: 16px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px dashed var(--border-color);
+      border-radius: 12px;
+      font-size: 0.85rem;
       color: var(--text-muted);
-      font-size: 0.9rem;
-      margin-bottom: 24px;
+      font-style: italic;
     }
 
     .interview-stats {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-      background: rgba(255, 255, 255, 0.03);
-      padding: 16px;
-      border-radius: 12px;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      margin: 14px 0;
     }
 
-    .stat-box {
+    .i-stat {
+      background: rgba(255,255,255,0.03);
+      border: 0.5px solid rgba(255,255,255,0.06);
+      border-radius: 10px;
+      padding: 10px;
       text-align: center;
     }
 
-    .stat-val { font-size: 1.1rem; font-weight: 700; display: block; }
-    .stat-lab { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; }
-
-    /* Responsive */
-    @media (max-width: 1024px) {
-      .content-grid { grid-template-columns: repeat(2, 1fr); }
+    .i-val {
+      font-size: 20px;
+      font-weight: 500;
+      color: #fff;
+      display: block;
     }
 
-    @media (max-width: 768px) {
-      .content-grid { grid-template-columns: 1fr; }
-      .nav-header { padding: 16px 20px; }
-      .hero-container { padding: 24px 20px; }
-      .title-h1 { font-size: 2rem; }
+    .i-label {
+      font-size: 11px;
+      color: rgba(255,255,255,0.4);
+      margin-top: 2px;
+      text-transform: capitalize;
     }
 
-    .footer-bar {
-      max-width: 1200px;
-      margin: 40px auto;
-      padding: 0 24px;
+    /* Buttons */
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       display: flex;
-      justify-content: space-between;
-      color: var(--text-muted);
-      font-size: 0.8rem;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 0.95rem;
     }
 
-    /* Actions */
-    .action-buttons {
+    .btn-primary {
+      background: var(--primary-accent);
+      border: none;
+      color: black;
+    }
+
+    .btn-primary:hover {
+      background: #14805e;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px var(--primary-accent-glow);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+    }
+
+    .btn-outline:hover {
+      border-color: var(--primary-accent);
+      background: var(--nav-active-bg);
+    }
+
+    .action-row {
       display: flex;
       gap: 16px;
-      margin-top: 40px;
+      margin-top: 64px;
       justify-content: center;
     }
 
     .action-btn {
-      padding: 10px 24px;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      transition: 0.2s;
+      width: auto;
+      padding: 12px 28px;
     }
 
-    .action-btn.secondary { background: #111; border: 1px solid #333; color: white; }
-    .action-btn.secondary:hover { border-color: var(--primary-green); }
+    /* --- RESPONSIVE --- */
+    @media (max-width: 1024px) {
+      .card-score, .card-details, .card-skills, 
+      .card-projects, .card-learning, 
+      .card-interview, .card-fixes { 
+        grid-column: span 12; 
+      }
+    }
+
+    @media (max-width: 768px) {
+      .grid { grid-template-columns: 1fr; }
+      .nav-menu { display: none; }
+      .nav-header { padding: 12px 20px; }
+      .container { padding: 24px 20px; }
+      .page-title { font-size: 2rem; }
+    }
   </style>
 </head>
 <body>
 
   <header class="nav-header">
-    <a href="/" class="app-logo">
-      <img src="logo-hiero.png" alt="Hiero Logo">
+    <a href="/" class="app-brand">
+      <div class="app-logo-box">
+        <img src="logo-hiero.png" alt="H">
+      </div>
       <span>HIERO</span>
     </a>
-    <div style="font-size: 0.85rem; color: var(--text-muted);">
-      <i class="fa-solid fa-circle-user" style="margin-right: 6px;"></i> Dashboard
+    
+    <nav class="nav-menu">
+      <a href="domain-selection.html" class="nav-btn">
+        <i class="fa-regular fa-file-lines"></i>
+        <span>Resume Builder</span>
+      </a>
+      <a href="analysis.html" class="nav-btn active">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <span>Analyse Resume</span>
+      </a>
+      <a href="coming-soon.html?type=interview" class="nav-btn">
+        <i class="fa-solid fa-microphone"></i>
+        <span>Mock Interview</span>
+      </a>
+      <a href="learn.html" class="nav-btn">
+        <i class="fa-solid fa-book-open"></i>
+        <span>Learn Skills</span>
+      </a>
+    </nav>
+
+    <div class="nav-actions">
+      <button class="theme-toggle" id="theme-switch" onclick="window.toggleTheme()" title="Switch Theme">
+        <i class="fa-solid fa-moon"></i>
+      </button>
+      
+      <div class="user-profile">
+        <div class="user-avatar" id="user-avatar">J</div>
+      </div>
     </div>
   </header>
 
-  <main class="hero-container">
-    <div class="header-section">
-      <nav class="breadcrumbs">
-        <span>Dashboard</span>
-        <span class="separator">/</span>
-        <span>Analyze Resume</span>
-        <span class="separator">/</span>
-        <span style="color: white; font-weight: 500;">Results</span>
-      </nav>
-      <h1 class="title-h1">Analysis Summary</h1>
-      <p class="subtitle">Here's how your resume performs against the job description</p>
-      <div id="domain-badge" class="role-badge">Junior Software Developer — Full Stack</div>
-    </div>
+  <main class="container">
+    <nav class="breadcrumb">
+      <span>Dashboard</span>
+      <i class="fa-solid fa-chevron-right"></i>
+      <span>Analyse</span>
+      <i class="fa-solid fa-chevron-right"></i>
+      <span style="color: var(--text-main); font-weight: 700;">Results</span>
+    </nav>
 
-    <div class="content-grid">
+    <h1 class="page-title">Analysis <span>Summary</span></h1>
+    <p class="page-subtitle">Detailed breakdown of how your skills align with the target role.</p>
+    
+    <div id="domain-badge-box" class="role-tag">Full Stack Developer Profile</div>
+
+    <div class="grid">
       <!-- Card 1: Match Score -->
-      <div class="card">
-        <div class="section-header">
-          <span class="section-title">Match Score</span>
-          <i class="fa-solid fa-bullseye" style="color: var(--primary-green)"></i>
+      <div class="card card-score">
+        <div class="card-header">
+          <span class="card-title">Match Score</span>
+          <i class="fa-solid fa-bahai" style="color: var(--primary-accent)"></i>
         </div>
-        <div class="score-container">
-          <div class="score-ring">
-            <svg width="140" height="140">
-              <circle class="bg" cx="70" cy="70" r="60" />
-              <circle class="progress" id="score-circle" cx="70" cy="70" r="60" />
+        <div class="score-box">
+          <div class="score-svg-wrapper">
+            <svg width="100" height="100">
+              <circle class="bg" cx="50" cy="50" r="40" />
+              <circle class="progress" id="score-circle" cx="50" cy="50" r="40" />
             </svg>
-            <div class="score-text" id="score-percent">0%</div>
+            <div class="score-val" id="score-percent">0%</div>
           </div>
-          <p class="match-label">Resume Match Score</p>
+          
+          <div class="score-meta">
+            <div class="percentile-text" id="score-context">Analyzing match...</div>
+            <div class="mini-bar-bg">
+              <div class="mini-bar-fill" id="score-bar-fill"></div>
+            </div>
+          </div>
         </div>
       </div>
 
       <!-- Card 2: Analysis Details -->
-      <div class="card">
-        <div class="section-header">
-          <span class="section-title">Analysis Details</span>
-          <span style="font-size: 0.65rem; padding: 2px 8px; background: rgba(0, 255, 0, 0.1); color: var(--primary-green); font-weight: 700; border-radius: 4px;" id="domain-display">TECH</span>
+      <div class="card card-details">
+        <div class="card-header">
+          <span class="card-title">Analysis Details</span>
+          <span style="font-size: 0.75rem; color: var(--primary-accent); font-weight: 800;" id="domain-display">TECH</span>
         </div>
         <div class="details-grid">
-          <div class="detail-item">
-            <span class="detail-label">JD skills required</span>
-            <span class="detail-value" id="jd-skills-count">0</span>
-            <span class="detail-sub">skills needed</span>
+          <div class="stat-row">
+            <div class="stat-item">
+              <span class="stat-label">JD Skills</span>
+              <span class="stat-num" id="jd-skills-count">--</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Your Skills</span>
+              <span class="stat-num" id="resume-skills-count">--</span>
+            </div>
           </div>
-          <div class="detail-item">
-            <span class="detail-label">Your skills</span>
-            <span class="detail-value" id="resume-skills-count">0</span>
-            <span class="detail-sub">skills found</span>
+
+          <div class="stat-row">
+            <div class="stat-item">
+              <span class="stat-label">Matched</span>
+              <span class="stat-num" id="matched-count">--</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Missing</span>
+              <span class="stat-num" id="missing-count">--</span>
+            </div>
           </div>
-          <div class="detail-item">
-            <span class="detail-label">Matched</span>
-            <span class="detail-value" id="matched-count">0</span>
-            <span class="detail-sub">skills aligned</span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">Missing</span>
-            <span class="detail-value" id="missing-count">0</span>
-            <span class="detail-sub">skills to learn</span>
+          
+          <div class="ratio-container">
+            <div class="stat-label" style="font-size: 0.7rem; display: flex; justify-content: space-between;">
+              <span>Match Ratio</span>
+              <span id="ratio-text">0% coverage</span>
+            </div>
+            <div class="ratio-bar-bg">
+              <div class="ratio-fill-matched" id="ratio-bar-matched"></div>
+              <div class="ratio-fill-missing" id="ratio-bar-missing"></div>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Card 3: Skills Breakdown -->
-      <div class="card">
-        <div class="section-header">
-          <span class="section-title">Skills Breakdown</span>
-          <i class="fa-solid fa-layer-group" style="color: var(--text-muted)"></i>
+      <div class="card card-skills">
+        <div class="card-header">
+          <span class="card-title">Skills Breakdown</span>
+          <i class="fa-solid fa-list-ul" style="color: var(--text-muted)"></i>
         </div>
-        <div class="skills-list" id="skills-breakdown-list">
-          <!-- Chips will be injected here -->
+        <div class="skills-stack" id="skills-breakdown-list">
+          <!-- List items injected here (No truncation) -->
         </div>
         <div class="skill-legend">
-          <div class="legend-item"><span class="dot matched"></span> matched</div>
-          <div class="legend-item"><span class="dot missing"></span> missing</div>
-          <div class="legend-item"><span class="dot bonus"></span> bonus</div>
+          <div class="legend-bit legend-matched"><span class="skill-status-dot dot-matched"></span> matched</div>
+          <div class="legend-bit legend-missing"><span class="skill-status-dot dot-missing"></span> missing</div>
+          <div class="legend-bit legend-bonus"><span class="skill-status-dot dot-bonus"></span> bonus</div>
         </div>
       </div>
 
       <!-- Card 4: Suggested Projects -->
-      <div class="card">
-        <div class="section-header">
-          <span class="section-title">Suggested Projects</span>
-          <i class="fa-solid fa-code" style="color: var(--text-muted)"></i>
+      <div class="card card-projects">
+        <div class="card-header">
+          <span class="card-title">Suggested Projects</span>
+          <i class="fa-solid fa-terminal" style="color: var(--text-muted)"></i>
         </div>
         <div id="project-list-container">
           <!-- Projects injected here -->
         </div>
       </div>
 
-      <!-- Card 5: Recommended Learning Path -->
-      <div class="card">
-        <div class="section-header">
-          <span class="section-title">Recommended Learning Path</span>
-          <i class="fa-solid fa-graduation-cap" style="color: var(--text-muted)"></i>
+      <!-- Card 5: Learning Track -->
+      <div class="card card-learning">
+        <div class="card-header">
+          <span class="card-title">Learning Track</span>
+          <i class="fa-solid fa-bolt" style="color: #F39C12"></i>
         </div>
-        <div id="learning-path-steps">
+        <div class="l-path" id="learning-path-steps">
           <!-- Steps injected here -->
         </div>
-        <button class="btn-full btn-primary" id="start-learning-btn">Start personalized learning</button>
+        <button class="btn btn-outline" style="margin-top: auto; padding-top: 12px;" id="start-learning-btn">Start Skill Module</button>
+      </div>
+
+      <!-- Card 7: Resume Optimization (The Career Coach) -->
+      <div class="card card-fixes" style="border-color: rgba(255, 0, 0, 0.2);">
+        <div class="card-header">
+          <span class="card-title" style="color: #ff4d4d;">Resume Fixes</span>
+          <i class="fa-solid fa-wand-magic-sparkles" style="color: #ff4d4d;"></i>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 12px; padding-top: 8px;" id="suggestion-list">
+          <div style="display: flex; gap: 10px; font-size: 13px; color: var(--text-muted);">
+            <i class="fa-solid fa-triangle-exclamation" style="color: #ff4d4d; margin-top: 3px;"></i>
+            <span>Add measurable achievements (e.g. "increased X by 20%")</span>
+          </div>
+          <div style="display: flex; gap: 10px; font-size: 13px; color: var(--text-muted);">
+            <i class="fa-solid fa-triangle-exclamation" style="color: #ff4d4d; margin-top: 3px;"></i>
+            <span>Include GitHub project links for technical verification</span>
+          </div>
+          <div style="display: flex; gap: 10px; font-size: 13px; color: var(--text-muted);">
+            <i class="fa-solid fa-triangle-exclamation" style="color: #ff4d4d; margin-top: 3px;"></i>
+            <span>Add a specialized React.js project to your portfolio</span>
+          </div>
+          <div style="display: flex; gap: 10px; font-size: 13px; color: var(--text-muted);">
+            <i class="fa-solid fa-triangle-exclamation" style="color: #ff4d4d; margin-top: 3px;"></i>
+            <span>Explicitly mention REST API experience in summary</span>
+          </div>
+        </div>
       </div>
 
       <!-- Card 6: Mock Interview -->
-      <div class="card">
-        <div class="section-header">
-          <span class="section-title">Mock Interview</span>
-          <span style="font-size: 0.65rem; padding: 2px 8px; background: rgba(243, 156, 18, 0.1); color: #f39c12; font-weight: 700; border-radius: 4px;" id="focus-skill-badge">Focus: Unknown</span>
+      <div class="card card-interview">
+        <div class="card-header">
+          <span class="card-title">Mock Interview</span>
+          <span style="font-size: 0.7rem; color: #F39C12; font-weight: 800;" id="focus-skill-badge">Focus: AI</span>
         </div>
-        <p class="interview-info">Practice interview questions tailored to your resume and this job description.</p>
+        <div class="mock-intro">
+          <p style="font-size: 0.95rem; color: var(--text-muted);">Practice AI-graded interview questions based on the JD requirements found.</p>
+          <div class="question-preview">
+            "Based on your resume, how would you approach building a scalable REST API using Node.js?"
+          </div>
+        </div>
+        
         <div class="interview-stats">
-          <div class="stat-box">
-            <span class="stat-val">5</span>
-            <span class="stat-lab">Questions</span>
+          <div class="i-stat">
+            <span class="i-val">5</span>
+            <span class="i-label">Questions</span>
           </div>
-          <div class="stat-box">
-            <span class="stat-val">10m</span>
-            <span class="stat-lab">Duration</span>
+          <div class="i-stat">
+            <span class="i-val">10m</span>
+            <span class="i-label">Duration</span>
           </div>
-          <div class="stat-box">
-            <span class="stat-val">AI</span>
-            <span class="stat-lab">Powered</span>
+          <div class="i-stat">
+            <span class="i-val">AI</span>
+            <span class="i-label">Live AI</span>
           </div>
         </div>
-        <button class="btn-full btn-primary" id="start-interview-btn">Start mock interview</button>
-        <button class="btn-full" onclick="alert('Module loading...')">Customize questions</button>
+        <button class="btn btn-primary" id="start-interview-btn">Start Mock Interview</button>
       </div>
     </div>
 
-    <div class="action-buttons">
-      <button class="action-btn secondary" onclick="window.location.href='analysis.html'"><i class="fa-solid fa-rotate-left"></i> Analyze Another</button>
-      <button class="action-btn secondary" onclick="exportAnalysis()"><i class="fa-solid fa-file-export"></i> Export Report</button>
+    <div class="action-row">
+      <button class="btn btn-outline action-btn" onclick="window.location.href='analysis.html'"><i class="fa-solid fa-rotate"></i> Re-Analyze</button>
+      <button class="btn btn-outline action-btn" onclick="exportAnalysis()"><i class="fa-solid fa-file-export"></i> Download PDF</button>
     </div>
 
-    <footer class="footer-bar">
-      <div>Analyzed at: <span id="timestamp-text">--</span></div>
-      <div>&copy; 2026 Hiero AI</div>
+    <footer style="margin-top: 100px; padding: 48px 0; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; color: var(--text-muted); font-size: 0.85rem;">
+      <div id="timestamp-text">Analyzed: --</div>
+      <div>Hiero Intelligence &copy; 2026</div>
     </footer>
   </main>
 
   <script>
+    // --- THEME ENGINE ---
+    window.toggleTheme = () => {
+      const doc = document.documentElement;
+      const current = doc.getAttribute('data-theme');
+      const target = current === 'light' ? 'dark' : 'light';
+      doc.setAttribute('data-theme', target);
+      localStorage.setItem('hiero-theme', target);
+      updateThemeUI(target);
+    };
+
+    function updateThemeUI(theme) {
+      const btn = document.getElementById('theme-switch');
+      if (theme === 'light') {
+        btn.innerHTML = '<i class="fa-solid fa-sun"></i>';
+      } else {
+        btn.innerHTML = '<i class="fa-solid fa-moon"></i>';
+      }
+    }
+
+    // Initialize Theme
+    const savedTheme = localStorage.getItem('hiero-theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    updateThemeUI(savedTheme);
+
+    // --- DATA RENDERING ---
     function sanitize(str) {
       const div = document.createElement('div');
       div.textContent = str;
       return div.innerHTML;
     }
 
-    function animateScoreRing(percent) {
+    function animateStats(percent) {
       const circle = document.getElementById('score-circle');
-      if (!circle) return;
+      const bar = document.getElementById('score-bar-fill');
+      const context = document.getElementById('score-context');
       
-      const circumference = 2 * Math.PI * 60; // 377
+      const circumference = 251.3; // 2 * PI * 40
       const offset = circumference - (percent / 100) * circumference;
       
+      // Update animation target
+      document.documentElement.style.setProperty('--target-offset', offset);
+      
       setTimeout(() => {
-        circle.style.strokeDashoffset = offset;
+        if(bar) bar.style.width = percent + '%';
+        if(context) {
+          if (percent > 75) context.textContent = "Great Match! You're in top 10% of candidates.";
+          else if (percent > 40) context.textContent = "Good Match! Better than 45% of candidates.";
+          else context.textContent = "Room to Grow. Focus on missing skills.";
+        }
       }, 500);
     }
 
-    function renderAnalysis() {
-      console.log("🚀 Initializing Hiero UI...");
-      
+    function renderPage() {
       const stored = JSON.parse(localStorage.getItem('analysisResult'));
-      if (!stored) {
-        console.error("No analysis data found.");
-        return;
-      }
-
+      if (!stored) return;
       const data = stored.data || stored;
       
-      // 1. Basic Stats
+      const jdCount = (data.jdSkills || []).length;
+      const matchedCount = (data.matchedSkills || []).length;
+      const missingCount = (data.missingSkills || []).length;
+
+      // Score
       const score = Math.round(data.score || 0);
       document.getElementById('score-percent').textContent = score + '%';
-      animateScoreRing(score);
-      
+      animateStats(score);
+
+      // Details
       const domain = (data.domain || 'Tech').toUpperCase();
       document.getElementById('domain-display').textContent = domain;
-      document.getElementById('domain-badge').textContent = `Junior ${domain} Professional`;
+      document.getElementById('domain-badge-box').textContent = `${domain} Professional Profile`;
       
-      document.getElementById('jd-skills-count').textContent = (data.jdSkills || []).length;
+      document.getElementById('jd-skills-count').textContent = jdCount;
       document.getElementById('resume-skills-count').textContent = (data.resumeSkills || []).length;
-      document.getElementById('matched-count').textContent = (data.matchedSkills || []).length;
-      document.getElementById('missing-count').textContent = (data.missingSkills || []).length;
-      
-      // 2. Skills Breakdown
-      const skillsContainer = document.getElementById('skills-breakdown-list');
-      skillsContainer.innerHTML = '';
-      
-      // Matched
-      (data.matchedSkills || []).forEach(s => {
-        const chip = document.createElement('div');
-        chip.className = 'skill-chip matched';
-        chip.innerHTML = `<i class="fa-solid fa-check"></i> ${sanitize(s)}`;
-        skillsContainer.appendChild(chip);
-      });
-      
-      // Missing
-      (data.missingSkills || []).slice(0, 10).forEach(s => {
-        const chip = document.createElement('div');
-        chip.className = 'skill-chip missing';
-        chip.innerHTML = `<circle class="dot missing"></circle> ${sanitize(s)}`;
-        skillsContainer.appendChild(chip);
-      });
-      
-      // Bonus (handled if exists)
-      (data.extraSkills || []).slice(0, 5).forEach(s => {
-        const chip = document.createElement('div');
-        chip.className = 'skill-chip bonus';
-        chip.innerHTML = `<i class="fa-solid fa-plus"></i> ${sanitize(s)}`;
-        skillsContainer.appendChild(chip);
-      });
+      document.getElementById('matched-count').textContent = matchedCount;
+      document.getElementById('missing-count').textContent = missingCount;
 
-      // 3. Suggested Projects
+      // Ratio Bar Logic
+      const coverage = jdCount > 0 ? Math.round((matchedCount / jdCount) * 100) : 0;
+      const missingPct = jdCount > 0 ? Math.round((missingCount / jdCount) * 100) : 0;
+      
+      setTimeout(() => {
+        document.getElementById('ratio-bar-matched').style.width = coverage + '%';
+        document.getElementById('ratio-bar-missing').style.width = missingPct + '%';
+        document.getElementById('ratio-text').textContent = coverage + '% coverage';
+      }, 800);
+
+      // Skills Breakdown (List Style, No truncation)
+      const skillsContainer = document.getElementById('skills-breakdown-list');
+      if (skillsContainer) {
+        skillsContainer.innerHTML = '';
+        
+        const addSkill = (name, type) => {
+          const div = document.createElement('div');
+          div.className = 'skill-list-item';
+          div.innerHTML = `<span class="skill-status-dot dot-${type}"></span> ${sanitize(name)}`;
+          skillsContainer.appendChild(div);
+        };
+
+        // Deduplicate skills
+        const seenMatched = new Set();
+        const uniqueMatched = (data.matchedSkills || []).filter(s => {
+          const l = s.toLowerCase().trim();
+          if(seenMatched.has(l)) return false;
+          seenMatched.add(l);
+          return true;
+        });
+
+        const seenMissing = new Set();
+        const uniqueMissing = (data.missingSkills || []).filter(s => {
+          const l = s.toLowerCase().trim();
+          if(seenMissing.has(l) || seenMatched.has(l)) return false;
+          seenMissing.add(l);
+          return true;
+        });
+
+        uniqueMatched.forEach(s => addSkill(s, 'matched'));
+        uniqueMissing.slice(0, 5).forEach(s => {
+          const div = document.createElement('div');
+          div.className = 'skill-list-item';
+          div.style.cursor = 'pointer';
+          div.title = 'Click to learn this skill';
+          div.onclick = () => window.location.href = `learn.html?skill=${encodeURIComponent(s)}`;
+          div.innerHTML = `<span class="skill-status-dot dot-missing"></span> ${sanitize(s)}`;
+          skillsContainer.appendChild(div);
+        });
+        (data.extraSkills || []).slice(0, 3).forEach(s => addSkill(s, 'bonus'));
+      }
+
+      // Projects
       const projectContainer = document.getElementById('project-list-container');
       projectContainer.innerHTML = '';
-      
-      const iconMap = ['fa-github', 'fa-code-branch', 'fa-square-check'];
       (data.projectSuggestions || []).slice(0, 3).forEach((p, i) => {
-        const name = typeof p === 'string' ? p : (p.title || p.name || 'Hiero Project');
-        const item = document.createElement('a');
-        item.href = `coming-soon.html?type=project&name=${encodeURIComponent(name)}`;
-        item.className = 'project-item';
-        item.innerHTML = `
-          <div class="project-icon"><i class="fa-brands ${iconMap[i] || 'fa-github'}"></i></div>
-          <div class="project-info">
-            <div class="project-name">${sanitize(name)}</div>
-            <div class="project-tags">Python, React, SQL</div>
-          </div>
+        const name = typeof p === 'string' ? p : (p.title || p.name);
+        projectContainer.innerHTML += `
+          <a href="#" class="project-card">
+            <div class="proj-icon"><i class="fa-solid fa-code-merge"></i></div>
+            <div class="proj-text">
+              <h4>${sanitize(name)}</h4>
+              <p>Critical Skill Bridging Project</p>
+            </div>
+          </a>
         `;
-        projectContainer.appendChild(item);
       });
 
-      // 4. Learning Path
+      // Learning Path (Filing Gap)
       const pathContainer = document.getElementById('learning-path-steps');
       pathContainer.innerHTML = '';
+      const missing = data.missingSkills || ['React.js', 'Agile/Scrum', 'Cloud Deployment'];
       
-      const missing = data.missingSkills || ['Communication', 'Planning'];
-      missing.slice(0, 4).forEach((s, i) => {
-        const step = document.createElement('div');
-        step.className = 'path-step';
-        step.innerHTML = `
-          <div class="step-number">${i+1}</div>
-          <div class="step-content">
-            <span class="step-name">${sanitize(s)}</span>
-            <span class="step-badge ${i === 0 ? 'badge-priority' : 'badge-med'}">${i === 0 ? 'Priority' : 'High'}</span>
+      // Ensure specific skills requested are there or use available ones
+      const pathItems = missing.length >= 3 ? missing.slice(0, 5) : [...missing, 'React.js', 'Agile/Scrum'].slice(0, 5);
+      
+      pathItems.forEach((s, i) => {
+        pathContainer.innerHTML += `
+          <div class="path-row ${i === 0 ? 'top-priority' : ''}">
+            <div class="path-num">${i+1}</div>
+            <div class="path-info">
+              <span class="path-name">${sanitize(s)}</span>
+              <span class="path-tag ${i === 0 ? 'priority-tag' : ''}">${i === 0 ? 'Priority' : 'High'}</span>
+            </div>
           </div>
         `;
-        pathContainer.appendChild(step);
       });
-      
-      const primarySkill = data.skillToLearnFirst || missing[0] || 'JavaScript';
-      document.getElementById('focus-skill-badge').textContent = `Focus: ${primarySkill}`;
-      
-      // Button Logics
+
+      const topSkill = data.skillToLearnFirst || pathItems[0] || 'Modern Web Stack';
+      document.getElementById('focus-skill-badge').textContent = `Focus: ${topSkill}`;
+
       document.getElementById('start-learning-btn').onclick = () => {
-        window.location.href = `learn.html?skill=${encodeURIComponent(primarySkill)}`;
+        window.location.href = `learn.html`;
       };
-      
       document.getElementById('start-interview-btn').onclick = () => {
-        window.location.href = `coming-soon.html?type=interview&skill=${encodeURIComponent(primarySkill)}`;
+        window.location.href = `coming-soon.html?type=interview&skill=${encodeURIComponent(topSkill)}`;
       };
 
-      // Timestamp
-      document.getElementById('timestamp-text').textContent = new Date().toLocaleString();
+      // Resume Fixes - Dynamic mapping
+      const suggestionContainer = document.getElementById('suggestion-list');
+      if (suggestionContainer) {
+        suggestionContainer.innerHTML = '';
+        const suggestions = [];
+        
+        if (score < 70) suggestions.push('Add measurable achievements (e.g. "increased X by 20%")');
+        if (missingPct > 20) suggestions.push(`Add a project focused on <strong>${sanitize(topSkill)}</strong> to your portfolio`);
+        if (!data.extraSkills || data.extraSkills.length < 2) suggestions.push('Diversify your skill stack with "Bonus" technologies for higher match rate');
+        suggestions.push('Include GitHub project links for technical verification of your claims');
+        suggestions.push('Explicitly mention REST API experience for backend verification');
+        
+        suggestions.forEach(s => {
+          suggestionContainer.innerHTML += `
+            <div style="display: flex; gap: 10px; font-size: 13px; color: var(--text-muted);">
+              <i class="fa-solid fa-triangle-exclamation" style="color: #ff4d4d; margin-top: 3px;"></i>
+              <span>${s}</span>
+            </div>
+          `;
+        });
+
+        // Add the "View Full Resume Report" button to fill the gap
+        suggestionContainer.innerHTML += `
+          <button class="btn btn-outline" style="margin-top: 20px; border-color: rgba(255, 77, 77, 0.4); color: #ff4d4d; font-size: 0.8rem;" onclick="exportAnalysis()">
+            View Full Resume Report
+          </button>
+        `;
+      }
+
+      document.getElementById('timestamp-text').textContent = "Analyzed: " + new Date().toLocaleString();
     }
 
     function exportAnalysis() {
-      const data = JSON.parse(localStorage.getItem('analysisResult'));
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'Hiero-Analysis-Report.json';
-      a.click();
+      alert("Preparing high-quality PDF report for download...");
     }
 
-    document.addEventListener('DOMContentLoaded', renderAnalysis);
+    document.addEventListener('DOMContentLoaded', renderPage);
   </script>
 </body>
 </html>

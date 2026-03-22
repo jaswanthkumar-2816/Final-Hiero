@@ -5,304 +5,442 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Hiero Dashboard</title>
-  <link rel="stylesheet" href="/dashboard/styles.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="theme.css">
   <script src="theme.js"></script>
   <style>
-    /* User Profile Styles */
-    .user-profile {
-      position: absolute;
-      top: 20px;
-      right: 20px;
+    :root {
+      --primary: #07e219;
+      --bg-pure: #000000;
+      --nav-bg: rgba(0, 0, 0, 0.8);
+      --card-bg: rgba(255, 255, 255, 0.03);
+      --card-border: rgba(255, 255, 255, 0.1);
+      --card-hover-bg: rgba(255, 255, 255, 0.06);
+      --border-soft: rgba(255, 255, 255, 0.08);
+      --text-main: #ffffff;
+      --text-muted: #999999;
+      --dot-color: rgba(255, 255, 255, 0.05);
+      --icon-color: #ffffff;
+    }
+
+    body.light-mode {
+      --bg-pure: #ffffff;
+      --nav-bg: rgba(255, 255, 255, 0.8);
+      --card-bg: rgba(0, 0, 0, 0.02);
+      --card-border: rgba(0, 0, 0, 0.06);
+      --card-hover-bg: rgba(0, 0, 0, 0.04);
+      --border-soft: rgba(0, 0, 0, 0.05);
+      --text-main: #111111;
+      --text-muted: #666666;
+      --dot-color: rgba(0, 0, 0, 0.05);
+      --icon-color: var(--primary);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    body {
+      background: var(--bg-pure);
+      color: white;
+      min-height: 100vh;
+      overflow-x: hidden;
+      width: 100%;
+    }
+
+    /* --- DASHBOARD WRAPPER --- */
+    .dashboard-shell {
+      position: relative;
+      width: 100%;
+      min-height: 100vh;
+      background-color: transparent; /* Let the canvas show through */
+      display: flex;
+      flex-direction: column;
+      z-index: 2;
+    }
+
+    /* The Dot Grid as a separate layer */
+    .dot-overlay {
+      position: fixed;
+      inset: 0;
+      background-image: radial-gradient(var(--dot-color) 1px, transparent 1px);
+      background-size: 30px 30px;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    #antigravity-bg {
+      position: fixed;
+      inset: 0;
+      z-index: -1; /* Behind everything */
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    /* --- NAV BAR --- */
+    .top-nav {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      padding: 30px 60px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--nav-bg);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-soft);
+    }
+
+    .brand-group {
       display: flex;
       align-items: center;
       gap: 12px;
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 25px;
+    }
+
+    .brand-dot {
+      width: 12px;
+      height: 12px;
+      background: var(--primary);
+      border-radius: 50%;
+      box-shadow: 0 0 15px var(--primary);
+    }
+
+    .brand-name {
+      font-size: 24px;
+      font-weight: 900;
+      letter-spacing: 1.5px;
+      color: var(--text-main);
+    }
+
+    .user-access-pill {
+      display: flex;
+      align-items: center;
+      gap: 15px;
       padding: 8px 16px;
-      color: white;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      background: var(--card-bg);
+      border: 1px solid var(--border-soft);
+      border-radius: 100px;
+      cursor: pointer;
+      position: relative;
     }
 
-    .user-avatar {
-      width: 40px;
-      height: 40px;
+    .user-avatar-initial {
+      width: 36px;
+      height: 36px;
+      background: rgba(7, 226, 25, 0.1);
       border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid rgba(255, 255, 255, 0.3);
-    }
-
-    .avatar-initials {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #3a4433 0%, #07e219 100%);
       display: flex;
       align-items: center;
       justify-content: center;
-      color: white;
-      font-weight: 600;
-      font-size: 16px;
-      border: 2px solid rgba(255, 255, 255, 0.3);
-    }
-
-    .user-info h3 {
-      margin: 0;
-      font-size: 14px;
-      font-weight: 600;
-    }
-
-    .user-info p {
-      margin: 0;
-      font-size: 12px;
-      opacity: 0.8;
-    }
-
-    .logout-btn {
-      background: rgba(255, 59, 59, 0.8);
-      border: none;
-      color: white;
-      padding: 6px 12px;
-      border-radius: 15px;
-      font-size: 12px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .logout-btn:hover {
-      background: rgba(255, 59, 59, 1);
-      transform: translateY(-1px);
-    }
-
-    /* Review Section Styles */
-    .review-section {
-      max-width: 600px;
-      margin: 40px auto;
-      padding: 20px 20px 16px;
-      background: rgba(255, 255, 255, 0.05);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(7, 226, 25, 0.3);
-      border-radius: 16px;
-      text-align: center;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-      max-height: 340px;
-      /* prevent whole frame growing */
-      overflow: hidden;
-      /* contain inner scroll areas */
-    }
-
-    .review-section-inner {
-      max-height: 280px;
-      /* scrollable area inside card */
-      overflow-y: auto;
-      padding-right: 4px;
-      /* space for scrollbar */
-    }
-
-    .review-section h3 {
-      color: #07e219;
-      margin-bottom: 8px;
-      font-size: 20px;
-      font-weight: 600;
-    }
-
-    .star-rating {
-      display: flex;
-      justify-content: center;
-      gap: 8px;
-      margin: 10px 0 14px;
-      font-size: 30px;
-      /* slightly smaller on all */
-    }
-
-    .star {
-      cursor: pointer;
-      color: #666;
-      transition: all 0.3s ease;
-      user-select: none;
-    }
-
-    .star:hover,
-    .star.active {
-      color: #ffd700;
-      text-shadow: 0 0 10px #ffd700;
-      transform: scale(1.2);
-    }
-
-    .review-input {
-      width: 100%;
-      min-height: 80px;
-      max-height: 140px;
-      /* don't let textarea grow too big */
-      padding: 10px 12px;
-      background: rgba(0, 0, 0, 0.3);
-      border: 1px solid rgba(7, 226, 25, 0.3);
-      border-radius: 10px;
-      color: white;
-      font-family: 'Poppins', sans-serif;
-      font-size: 13px;
-      resize: vertical;
-      margin: 10px 0 6px;
-      overflow-y: auto;
-    }
-
-    .review-input:focus {
-      outline: none;
-      border-color: #07e219;
-      box-shadow: 0 0 15px rgba(7, 226, 25, 0.3);
-    }
-
-    .submit-review-btn {
-      background: linear-gradient(135deg, #07e219 0%, #05a313 100%);
-      color: white;
-      border: none;
-      padding: 10px 26px;
-      border-radius: 25px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 15px rgba(7, 226, 25, 0.3);
-      margin-top: 8px;
-    }
-
-    .submit-review-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(7, 226, 25, 0.5);
-    }
-
-    .submit-review-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    .review-status {
-      margin-top: 8px;
-      padding: 8px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 500;
-    }
-
-    .review-status.success {
-      background: rgba(7, 226, 25, 0.2);
-      color: #07e219;
-      border: 1px solid #07e219;
-    }
-
-    .review-status.error {
-      background: rgba(255, 59, 59, 0.2);
-      color: #ff3b3b;
-      border: 1px solid #ff3b3b;
-    }
-
-    .existing-review {
-      margin-top: 10px;
-      padding: 12px;
-      background: rgba(0, 0, 0, 0.3);
-      border-radius: 10px;
+      font-weight: 800;
+      color: var(--primary);
       border: 1px solid rgba(7, 226, 25, 0.2);
-      max-height: 140px;
-      /* scroll only this box if long */
-      overflow-y: auto;
     }
 
-    .existing-review p {
-      color: white;
-      margin: 6px 0;
-      text-align: left;
-      font-size: 13px;
-    }
-
-    .existing-review strong {
-      color: #07e219;
-    }
-
-    .edit-review-btn {
-      background: rgba(7, 226, 25, 0.2);
-      color: #07e219;
-      border: 1px solid #07e219;
-      padding: 8px 24px;
-      border-radius: 20px;
+    .user-name-label {
       font-size: 14px;
-      cursor: pointer;
-      margin-top: 15px;
-      transition: all 0.3s ease;
-    }
-
-    .edit-review-btn:hover {
-      background: rgba(7, 226, 25, 0.3);
-      transform: translateY(-1px);
-    }
-
-    .admin-link {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
-      color: white;
-      padding: 12px 24px;
-      border-radius: 25px;
-      text-decoration: none;
       font-weight: 600;
-      box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
-      transition: all 0.3s ease;
-      display: none;
+      color: var(--text-muted);
     }
 
-    .admin-link:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(255, 107, 107, 0.6);
-    }
-
-    /* Anti-gravity Background */
-    #antigravity-bg {
-      position: fixed;
-      top: 0;
-      left: 0;
+    /* --- MAIN AREA --- */
+    .content-stage {
+      position: relative;
+      z-index: 5;
       width: 100%;
-      height: 100%;
-      z-index: -1;
-      pointer-events: none;
-      filter: blur(1px);
+      max-width: 1200px;
+      margin: 80px auto;
+      padding: 0 40px;
     }
 
-    /* Responsive adjustments */
-    @media (max-width: 768px) {
-      .user-profile {
-        position: relative;
-        top: 0;
-        right: 0;
-        margin: 0 auto 20px;
-        width: fit-content;
-      }
+    .hero-greeting {
+      margin-bottom: 50px;
+      animation: entrance-slide 1s cubic-bezier(0.2, 0, 0.3, 1);
+    }
 
-      .user-info {
-        display: none;
-      }
+    .greet-label {
+      color: var(--primary);
+      text-transform: uppercase;
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      margin-bottom: 12px;
+      display: block;
+    }
 
-      .review-section {
-        margin: 24px 16px;
-        padding: 16px 16px 12px;
-        max-height: 300px;
-      }
+    .hero-h1 {
+      font-size: 56px;
+      font-weight: 950;
+      letter-spacing: -3px;
+      line-height: 1.05;
+      margin-bottom: 25px;
+    }
 
-      .review-section-inner {
-        max-height: 240px;
-      }
+    .hero-h1 span {
+      color: var(--primary);
+    }
 
-      .star-rating {
-        font-size: 26px;
-        gap: 6px;
-      }
+    .hero-p {
+      color: #888;
+      max-width: 650px;
+      font-size: 18px;
+      line-height: 1.6;
+    }
 
-      .review-input {
-        font-size: 12px;
-      }
+    .pills-track {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 60px;
+      animation: entrance-fade 1.2s ease-out;
+    }
+
+    .skill-pill {
+      padding: 10px 24px;
+      border: 1px solid rgba(7, 226, 25, 0.2);
+      border-radius: 100px;
+      color: var(--primary);
+      font-size: 14px;
+      font-weight: 700;
+      background: rgba(7, 226, 25, 0.02);
+      transition: all 0.3s;
+    }
+
+    .skill-pill:hover {
+      background: rgba(7, 226, 25, 0.1);
+      border-color: var(--primary);
+    }
+
+    /* --- ACTION GRID --- */
+    .grid-layout {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      width: 100%;
+    }
+
+    .grid-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      backdrop-filter: blur(20px) saturate(160%);
+      -webkit-backdrop-filter: blur(20px) saturate(160%);
+      border-radius: 24px;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      text-decoration: none;
+      color: var(--text-main);
+      animation: entrance-slide 1s ease-out both;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .grid-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.05), transparent 70%);
+      opacity: 0;
+      transition: opacity 0.5s;
+    }
+
+    .grid-card:hover {
+      background: var(--card-hover-bg);
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateY(-10px);
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+    }
+
+    .grid-card:hover::before {
+      opacity: 1;
+    }
+
+    .light-mode .grid-card:hover {
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.08);
+      border-color: rgba(0, 0, 0, 0.1);
+    }
+
+    .grid-card.special {
+      border: 1px solid rgba(7, 226, 25, 0.15);
+      box-shadow: inset 0 0 20px rgba(7, 226, 25, 0.02);
+    }
+
+    .grid-card.special:hover {
+      border-color: var(--primary);
+      box-shadow: 0 20px 50px rgba(7, 226, 25, 0.1), inset 0 0 20px rgba(7, 226, 25, 0.05);
+    }
+
+    .grid-card h3 {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 4px;
+      color: var(--text-main);
+    }
+
+    .grid-card p {
+      font-size: 15px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    .card-act-btn {
+      margin-top: auto;
+      width: fit-content;
+      padding: 12px 28px;
+      border-radius: 100px;
+      font-weight: 800;
+      font-size: 15px;
+      transition: all 0.3s;
+    }
+
+    .card-act-btn.primary-solid { background: var(--primary); color: black; }
+    .card-act-btn.ghost-outline { border: 1px solid #222; color: #888; }
+
+    .grid-card:hover .ghost-outline { border-color: #555; color: white; }
+
+    /* --- DROPDOWN --- */
+    .logout-box {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      margin-top: 10px;
+      background: #111;
+      border: 1px solid #222;
+      border-radius: 12px;
+      padding: 8px;
+      display: none;
+      z-index: 100;
+    }
+
+    .logout-box.show { display: block; }
+    .logout-trigger { padding: 10px 20px; color: #ff3b3b; font-weight: 700; font-size: 13px; text-align: center; }
+    .logout-trigger:hover { background: rgba(255, 59, 59, 0.1); border-radius: 8px; }
+
+    @keyframes entrance-slide {
+      from { opacity: 0; transform: translateY(40px); filter: blur(10px); }
+      to { opacity: 1; transform: translateY(0); filter: blur(0); }
+    }
+
+    @keyframes entrance-fade {
+      from { opacity: 0; filter: blur(10px); }
+      to { opacity: 1; filter: blur(0); }
+    }
+
+    @media (max-width: 1000px) {
+      .grid-layout { grid-template-columns: 1fr; }
+      .hero-h1 { font-size: 42px; }
+      .top-nav { padding: 20px 30px; }
+    }
+
+    .action-card:hover {
+      transform: translateY(-8px);
+      border-color: rgba(255,255,255,0.2);
+    }
+
+    .action-card.primary {
+      background: rgba(2, 4, 2, 0.6);
+      border-color: var(--primary);
+      box-shadow: 0 0 40px rgba(7, 226, 25, 0.15);
+    }
+
+    .action-card.primary:hover {
+      box-shadow: 0 0 60px rgba(7, 226, 25, 0.4);
+      transform: translateY(-10px) scale(1.02);
+    }
+
+    .card-icon {
+      font-size: 28px;
+      color: var(--primary);
+    }
+
+    .action-card h3 {
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .action-card p {
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--text-muted);
+    }
+
+    .card-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 12px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 14px;
+      transition: all 0.3s;
+      margin-top: auto;
+    }
+
+    .primary .card-button {
+      background: var(--primary);
+      color: black;
+    }
+
+    .secondary-btn {
+      background: rgba(255, 255, 255, 0.05);
+      color: white;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .action-card:hover .secondary-btn {
+      background: white;
+      color: black;
+    }
+
+    .logout-dropdown {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      margin-top: 10px;
+      background: #111;
+      border: 1px solid #222;
+      border-radius: 12px;
+      padding: 8px;
+      display: none;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    .logout-dropdown.visible {
+      display: block;
+    }
+
+    .logout-item {
+      padding: 10px 20px;
+      border-radius: 8px;
+      color: #ff4d4d;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .logout-item:hover {
+      background: rgba(255, 77, 77, 0.1);
+    }
+
+    @media (max-width: 1100px) {
+      .cards-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 600px) {
+      .cards-grid { grid-template-columns: 1fr; }
+      .hero-title { font-size: 32px; }
+      .nav-header { padding: 20px; }
+      .dashboard-container { padding: 0 20px; }
+      .stats-row { flex-direction: column; gap: 15px; }
     }
   </style>
 </head>
@@ -311,72 +449,69 @@
   <div class="theme-toggle" onclick="toggleTheme()" title="Toggle Light/Dark Mode">
     <i class="fas fa-sun"></i>
   </div>
+  <div class="dot-overlay"></div>
   <canvas id="antigravity-bg"></canvas>
-  <div class="dashboard-wrapper">
 
-    <!-- User Profile Section -->
-    <div class="user-profile" id="userProfile" style="display: none;">
-      <img id="userAvatar" src="" alt="Profile" class="user-avatar" />
-      <div class="user-info">
-        <h3 id="userName">Loading...</h3>
-        <p id="userEmail">Loading...</p>
+  <div class="dashboard-shell">
+    <nav class="top-nav">
+      <div class="brand-group">
+        <img src="/logo-hiero.png" alt="Hiero Logo" style="width: 28px; height: 28px; object-fit: contain;">
+        <span class="brand-name">HIERO</span>
       </div>
-      <button id="logoutBtn" class="logout-btn">Logout</button>
-    </div>
 
-    <!-- Logo & Greeting -->
-    <div class="dashboard-header">
-      <img src="/logo-hiero.png" alt="Hiero Logo" class="logo-glow" />
-      <h1> <span class="brand" id="welcomeMessage">Welcome to Hiero</span></h1>
-      <p class="subtext">Your Career Assistant</p>
-    </div>
-
-    <!-- Buttons -->
-    <div class="dashboard-actions">
-      <a href="/domain-selection.html" class="glow-button">Create Resume</a>
-      <a href="/analysis.html" class="glow-button">Analyze Resume</a>
-    </div>
-
-    <!-- Admin Link (only visible to admin users) -->
-    <a href="/admin-dashboard.html" class="admin-link" id="adminLink">
-      🎛️ Admin Dashboard
-    </a>
-
-    <!-- Review Section (appears below user profile) -->
-    <div class="review-section" id="reviewSection" style="display: none;">
-      <h3>⭐ Rate Your Experience</h3>
-      <div class="review-section-inner">
-        <!-- Star Rating -->
-        <div class="star-rating" id="starRating">
-          <span class="star" data-rating="1">★</span>
-          <span class="star" data-rating="2">★</span>
-          <span class="star" data-rating="3">★</span>
-          <span class="star" data-rating="4">★</span>
-          <span class="star" data-rating="5">★</span>
-        </div>
-
-        <!-- Review Input -->
-        <textarea id="reviewText" class="review-input"
-          placeholder="Share your feedback or suggestions for improvement..." maxlength="1000"></textarea>
-        <div style="text-align: right; color: #999; font-size: 12px; margin-top: -4px;">
-          <span id="charCount">0</span>/1000
-        </div>
-
-        <!-- Submit Button -->
-        <button id="submitReviewBtn" class="submit-review-btn">Submit Review</button>
-
-        <!-- Status Message -->
-        <div id="reviewStatus" class="review-status" style="display: none;"></div>
-
-        <!-- Existing Review Display -->
-        <div id="existingReview" class="existing-review" style="display: none;">
-          <p><strong>Your Rating:</strong> <span id="userRatingDisplay"></span></p>
-          <p><strong>Your Review:</strong> <span id="userReviewDisplay"></span></p>
-          <button id="editReviewBtn" class="edit-review-btn">Edit Review</button>
+      <div class="user-access-pill" onclick="toggleUserDropdown()" id="userPill">
+        <div class="user-avatar-initial" id="userAvatarContainer">U</div>
+        <span class="user-name-label" id="userNameLabel">User Profile</span>
+        
+        <div class="logout-box" id="userDropdown">
+          <div class="logout-trigger" onclick="handleLogout()">Logout</div>
         </div>
       </div>
-    </div>
+    </nav>
 
+    <main class="content-stage">
+      <div class="hero-greeting">
+        <span class="greet-label">WELCOME BACK, <span id="userGreetName">USER</span></span>
+        <h1 class="hero-h1">
+          Your AI-powered <span>Career Assistant</span>
+        </h1>
+        <p class="hero-p">
+          Hiero helps students and job seekers get shortlisted faster. We combine 
+          resume optimization, job match scoring, and AI mock interviews — 
+          so you don't just apply for jobs, you get them.
+        </p>
+      </div>
+
+      <div class="pills-track">
+        <div class="skill-pill">Resume Builder</div>
+        <div class="skill-pill">Resume Match Score</div>
+        <div class="skill-pill">AI Mock Interviews</div>
+        <div class="skill-pill">Skill Learning</div>
+      </div>
+
+      <div class="grid-layout">
+        <a href="/domain-selection.html" class="grid-card special">
+          <i class="fa-solid fa-file-lines" style="font-size: 28px; color: var(--icon-color); margin-bottom: 12px;"></i>
+          <h3>Create Resume</h3>
+          <p>Build a professional resume with smart templates</p>
+          <div class="card-act-btn primary-solid">Start <i class="fa-solid fa-arrow-right"></i></div>
+        </a>
+
+        <a href="/analysis.html" class="grid-card">
+          <i class="fa-solid fa-magnifying-glass" style="font-size: 28px; color: var(--icon-color); margin-bottom: 12px;"></i>
+          <h3>Analyse Resume</h3>
+          <p>Get your match score against any job description</p>
+          <div class="card-act-btn ghost-outline">Analyse <i class="fa-solid fa-arrow-right"></i></div>
+        </a>
+
+        <a href="/mock-interview.html" class="grid-card">
+          <i class="fa-solid fa-comments" style="font-size: 28px; color: var(--icon-color); margin-bottom: 12px;"></i>
+          <h3>Mock Interview</h3>
+          <p>Practice AI Interviews tailored to your resume</p>
+          <div class="card-act-btn ghost-outline">Practice <i class="fa-solid fa-arrow-right"></i></div>
+        </a>
+      </div>
+    </main>
   </div>
 
   <script>
@@ -470,40 +605,55 @@
     }
 
     function displayUserProfile(userData) {
-      const userProfile = document.getElementById('userProfile');
-      const userName = document.getElementById('userName');
-      const userEmail = document.getElementById('userEmail');
-      const userAvatar = document.getElementById('userAvatar');
-      const welcomeMessage = document.getElementById('welcomeMessage');
-      const reviewSection = document.getElementById('reviewSection');
+      const nameLabel = document.getElementById('userNameLabel');
+      const greetName = document.getElementById('userGreetName');
+      const avatarContainer = document.getElementById('userAvatarContainer');
 
-      // Show user profile section
-      userProfile.style.display = 'flex';
-      // reviewSection visibility is handled in loadUserReview
+      const nameStr = userData.name || 'User';
+      const firstName = nameStr.split(' ')[0];
+      
+      nameLabel.textContent = nameStr;
+      greetName.textContent = firstName.toUpperCase();
 
-      // Update user info
-      userName.textContent = userData.name || 'User';
-      userEmail.textContent = userData.email || '';
-
-      // Set avatar (use profile picture if available, otherwise use initials)
+      const initials = nameStr.split(' ').map(n => n[0]).join('').toUpperCase();
+      avatarContainer.innerHTML = initials;
+      
       if (userData.picture) {
-        userAvatar.src = userData.picture;
-        userAvatar.style.display = 'block';
-      } else {
-        // Create initials avatar
-        const initials = userData.name ? userData.name.split(' ').map(n => n[0]).join('').toUpperCase() : 'U';
-        userAvatar.style.display = 'none';
-        // We'll create a text-based avatar instead
-        const avatarText = document.createElement('div');
-        avatarText.className = 'avatar-initials';
-        avatarText.textContent = initials;
-        userAvatar.parentNode.replaceChild(avatarText, userAvatar);
+        const img = document.createElement('img');
+        img.src = userData.picture;
+        img.style.width = '100%';
+        img.style.height = '100%';
+        img.style.objectFit = 'cover';
+        img.style.borderRadius = '50%';
+        img.onerror = () => {
+          avatarContainer.innerHTML = initials; // Fallback to initials if image fails
+        };
+        avatarContainer.innerHTML = '';
+        avatarContainer.appendChild(img);
       }
-
-      // Personalize welcome message
-      const firstName = userData.name ? userData.name.split(' ')[0] : 'there';
-      welcomeMessage.textContent = `Welcome back, ${firstName}!`;
     }
+
+    function toggleUserDropdown() {
+      document.getElementById('userDropdown').classList.toggle('show');
+    }
+
+    function handleLogout() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
+    }
+
+    // Close dropdown on outside click
+    window.addEventListener('click', (e) => {
+      const pill = document.getElementById('userPill');
+      const dropdown = document.getElementById('userDropdown');
+      if (pill && !pill.contains(e.target)) {
+        dropdown.classList.remove('show');
+      }
+    });
+
+    // Handle review section visibility separately if needed
+    // (Old review logic can stay or be removed based on requirements)
 
     // ⭐ Track user login
     async function trackLogin() {

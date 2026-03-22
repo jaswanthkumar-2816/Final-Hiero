@@ -1,26 +1,47 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Hiero Resume Builder</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="theme.css">
+  <script src="theme.js"></script>
+  <script src="domain-mapping.js"></script>
   <style>
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    :root {
+      --primary: #07e219;
+      --primary-glow: rgba(42, 224, 35, 0.4);
+      --bg-pure: #000000;
+      --text-main: #ffffff;
+      --text-dim: #b0b0b0;
+      --card-bg: rgba(15, 15, 15, 0.6);
+      --border-color: rgba(42, 224, 35, 0.1);
     }
 
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       margin: 0;
       padding: 0;
       min-height: 100vh;
-      color: #0b0a0a;
+      color: var(--text-main, #fff);
       line-height: 1.6;
-      background-color: #020202;
+      background-color: var(--bg-pure, #000);
+    }
+
+    /* Fix for Font Awesome icons being overridden by theme.js */
+    i.fas, i.fab, i.far, i.fal, i.fad {
+        font-family: "Font Awesome 6 Free" !important;
+        font-weight: 900 !important;
     }
 
     body::before {
@@ -666,6 +687,22 @@
       border: 1px solid rgba(42, 224, 35, .3);
     }
 
+    /* Theme-aware icon colors as requested */
+    body.light-mode .section-icon {
+        color: #05a313 !important;
+    }
+    
+    body:not(.light-mode) .section-icon {
+        color: white !important;
+    }
+    
+    /* Ensure all badges and tags are visible */
+    .premium-badge, .tag, .photo-status, .step-text {
+        opacity: 1 !important;
+        visibility: visible !important;
+        display: inline-flex !important;
+    }
+
     .skip-link {
       font-size: 0.85rem;
       color: #75ea66;
@@ -896,16 +933,15 @@
       padding: 6px 0;
       font-size: 13px;
       color: #aaa;
-      position: relative;
-      padding-left: 20px;
+      display: flex;
+      align-items: start;
+      gap: 10px;
     }
 
-    .photo-upload-info li:before {
-      content: "âœ“";
-      position: absolute;
-      left: 0;
-      color: #2ae023;
-      font-weight: bold;
+    .photo-upload-info li i {
+        color: var(--primary);
+        font-size: 11px;
+        margin-top: 3px;
     }
 
     .photo-status {
@@ -1218,6 +1254,22 @@
         font-size: 1.5rem;
         width: 40px;
         height: 40px;
+        color: var(--primary) !important;
+      }
+      
+      /* Theme-aware icon colors as requested */
+      body.light-mode .section-icon {
+          color: #05a313 !important;
+      }
+      
+      body:not(.light-mode) .section-icon {
+          color: white !important;
+      }
+      
+      /* Badge overrides */
+      .premium-badge, .tag {
+          opacity: 1 !important;
+          display: inline-block !important;
       }
 
       /* Mobile template grid */
@@ -1854,23 +1906,24 @@
                         onclick="window.location.href='ai-photo-formalizer.html'"
                         style="justify-content: center; width: 100%; border: 1px solid #2ae023;">
                         <span class="btn-shine"></span>
-                        <i class="fas fa-wand-magic-sparkles"></i> âœ¨ Generate Executive Photo
+                        <i class="fas fa-wand-magic-sparkles"></i> ✨ Generate Executive Photo
                       </button>
-                      <p style="font-size: 11px; color: #2ae023; text-align: center; margin-top: 5px; opacity: 0.8;">
+                      <p style="font-size: 11px; color: var(--primary); text-align: center; margin-top: 5px; opacity: 0.8;">
                         <i class="fas fa-crown"></i> Hiero Executive AI (Premium)
                       </p>
                     </div>
                   </div>
                   <div class="photo-upload-info">
-                    <p><i class="fas fa-info-circle"></i> <strong>Photo Required:</strong></p>
+                    <p style="color: var(--primary); font-weight: 800; font-size: 15px; margin-bottom: 10px;">
+                      <i class="fas fa-camera"></i> Photo Required
+                    </p>
                     <ul>
-                      <li>Format: JPG or PNG</li>
-                      <li>Recommended: Square headshot</li>
+                      <li><i class="fas fa-check"></i> Format: JPG or PNG</li>
+                      <li><i class="fas fa-check"></i> Recommended: Square headshot</li>
                     </ul>
                     <div id="aiPhotoBadge"
-                      style="display: none; margin-top: 10px; background: rgba(42, 224, 35, 0.1); border: 1px solid #2ae023; padding: 10px; border-radius: 8px; font-size: 11px; color: #2ae023;">
-                      <i class="fas fa-check-circle"></i> <strong>AI POWERED:</strong> Your photo can be automatically
-                      converted to a professional executive headshot.
+                      style="display: none; margin-top: 10px; background: rgba(42, 224, 35, 0.1); border: 1px solid var(--primary); padding: 10px; border-radius: 8px; font-size: 11px; color: var(--primary);">
+                      <i class="fas fa-crown"></i> <strong>EXECUTIVE AI:</strong> Ready to formalize
                     </div>
                     <span class="photo-status" id="photoStatus"></span>
                   </div>
@@ -2472,6 +2525,74 @@
       }
     }
 
+    /**
+     * Applies domain-specific reordering and template suggestions
+     */
+    function applyDomainConfig() {
+      const selectedSubdomain = localStorage.getItem('selectedSubdomain');
+      if (!selectedSubdomain || !window.DOMAIN_CONFIG) return;
+
+      const config = window.DOMAIN_CONFIG[selectedSubdomain];
+      if (!config) {
+        console.log(`No specific config for subdomain: ${selectedSubdomain}`);
+        return;
+      }
+
+      console.log(`Applying domain config for: ${selectedSubdomain}`, config);
+
+      // 1. Store the section order globally for collectFormData to use
+      window.currentSectionOrder = config.sectionOrder;
+
+      // 2. Reorder Form Sections in the UI (for a tailored feel)
+      const reorderPane = (paneSelector, sections) => {
+        const pane = document.querySelector(paneSelector);
+        if (!pane) return;
+
+        sections.forEach(secKey => {
+          const sectionId = window.SECTION_ID_MAP[secKey];
+          if (!sectionId) return;
+
+          const sectionEl = document.getElementById(sectionId);
+          if (sectionEl && sectionEl.parentElement === pane) {
+            pane.appendChild(sectionEl); // Moving to the end of the pane in order
+          }
+        });
+      };
+
+      // Reorder within both panes if they exist
+      reorderPane('.left-pane .form-content-inner', config.sectionOrder);
+      reorderPane('.left-pane', config.sectionOrder);
+      reorderPane('.right-pane #resumeFormPart2', config.sectionOrder);
+      reorderPane('.right-pane', config.sectionOrder);
+
+      // 3. Suggest/Pre-select Template if on Step 1
+      if (config.templateStyle) {
+        // Find the button and click it to filter
+        const categoryBtn = document.querySelector(`.category-btn[data-category="${config.templateStyle}"]`);
+        if (categoryBtn) {
+          categoryBtn.click();
+        }
+      }
+
+      // 4. Highlight specific section
+      if (config.highlight) {
+        const targetId = window.SECTION_ID_MAP[config.highlight];
+        const targetEl = document.getElementById(targetId);
+        if (targetEl) {
+          targetEl.style.borderLeft = '6px solid var(--primary)';
+          targetEl.style.paddingLeft = '20px';
+          
+          const label = targetEl.querySelector('h2');
+          if (label) {
+            const badge = document.createElement('span');
+            badge.style.cssText = 'background: var(--primary); color: black; font-size: 10px; padding: 2px 8px; border-radius: 10px; margin-left: 10px; vertical-align: middle; text-transform: uppercase; font-weight: 800;';
+            badge.innerHTML = '<i class="fas fa-star"></i> Essential';
+            label.appendChild(badge);
+          }
+        }
+      }
+    }
+
     // Template selection functionality
     document.addEventListener('DOMContentLoaded', function () {
       // Check if user is logged in
@@ -2481,6 +2602,9 @@
 
       // Initialize page to Step 1
       initializePage();
+
+      // Apply domain-specific logic if redirected from domain selection
+      applyDomainConfig();
 
       // ==================== BROWSER BACK BUTTON HANDLING ====================
       // Push initial state to prevent direct back to index.html
@@ -4294,7 +4418,7 @@
 
         // Show success message
         const fileSizeKB = Math.round(file.size / 1024);
-        photoStatus.textContent = `âœ“ Photo uploaded successfully (${fileSizeKB}KB)`;
+        photoStatus.textContent = `✓ Photo uploaded successfully (${fileSizeKB}KB)`;
         photoStatus.classList.add('success');
 
         // Show AI Button and Badge
@@ -5137,8 +5261,8 @@
 
 
       } catch (error) {
-        console.error('âŒ Generation error:', error);
-        console.error('âŒ Error details:', {
+        console.error('❌ Generation error:', error);
+        console.error('❌ Error details:', {
           name: error.name,
           message: error.message,
           stack: error.stack,
@@ -5150,15 +5274,15 @@
         const substatusEl = document.getElementById('overlaySubstatus');
         const progressBar = document.getElementById('overlayProgressBar');
 
-        statusEl.textContent = 'âŒ Generation Failed';
+        statusEl.textContent = '❌ Generation Failed';
         statusEl.style.color = '#ff6b6b';
         progressBar.style.background = 'linear-gradient(90deg, #ff6b6b, #c92a2a)';
 
         if (error.name === 'AbortError') {
-          substatusEl.textContent = 'âš ï¸ Request timed out - server took too long. This may be due to slow network or ngrok connection.';
+          substatusEl.textContent = '⚠️ Request timed out - server took too long. This may be due to slow network or ngrok connection.';
         } else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError') || error.message.includes('ERR_CONNECTION_REFUSED')) {
-          substatusEl.textContent = `âš ï¸ Cannot connect to backend at ${BACKEND_URL}. Check console for details.`;
-          console.error('ðŸ” Connection troubleshooting:');
+          substatusEl.textContent = `⚠️ Cannot connect to backend at ${BACKEND_URL}. Check console for details.`;
+          console.error('🔍 Connection troubleshooting:');
           console.error('   1. Is backend server running? Check: curl ' + BACKEND_URL + '/health');
           console.error('   2. Is CORS configured correctly?');
           console.error('   3. Is firewall blocking port 5003?');
@@ -5338,6 +5462,11 @@
         data.additionalInfo = addInfo.value.trim();
       }
 
+      // ADDED: Include the section order for the backend to respect
+      if (window.currentSectionOrder) {
+        data.sectionOrder = window.currentSectionOrder;
+      }
+
       return data;
     }
 
@@ -5477,7 +5606,7 @@
         }
 
         const blob = await response.blob();
-        console.log('âœ… PDF blob received, size:', blob.size, 'bytes, type:', blob.type);
+        console.log('✅ PDF blob received, size:', blob.size);
 
         if (blob.size === 0) {
           throw new Error('Received empty PDF file');
