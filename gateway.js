@@ -5,6 +5,7 @@ const dotenv = require('dotenv');
 const path = require('path');
 const mongoose = require('mongoose');
 const compression = require('compression');
+const axios = require('axios');
 const { createProxyMiddleware } = require('http-proxy-middleware');
 
 dotenv.config();
@@ -35,11 +36,9 @@ app.set('trust proxy', 1);
 app.use(compression());
 app.use(express.json({ limit: '20mb' }));
 
-// Debug log for auth/OAuth routes
+// Debug log for all routes
 app.use((req, res, next) => {
-    if (req.path.startsWith('/auth') || req.path.startsWith('/api')) {
-        console.log(`[GW] ${req.method} ${req.originalUrl}`);
-    }
+    console.log(`[GW DEBUG] ${req.method} ${req.path}`);
     next();
 });
 
@@ -102,13 +101,6 @@ if (process.env.MONGODB_URI) {
 const authObj = require('./routes/auth');
 app.use('/', authObj.router);
 
-// Profile endpoint
-app.get('/dashboard', authObj.authenticateToken, (req, res) => {
-    const user = authObj.users.find(u => u.id === req.user.id);
-    if (!user) return res.status(404).json({ error: 'User not found' });
-    res.json({ id: user.id, name: user.name, email: user.email, picture: user.picture });
-});
-
 // ======================
 // PROXIES & INTEGRATED ROUTES
 // ======================
@@ -118,6 +110,24 @@ app.get('/dashboard', authObj.authenticateToken, (req, res) => {
 app.use('/dashboard', express.static(resumeBuilderPath));
 app.use('/dashboard', express.static(landingDirPath));
 app.use('/public/dashboard', express.static(resumeBuilderPath)); // Fix for nested paths
+
+// Profile endpoint (Integrated)
+app.get('/api/me', authObj.authenticateToken, (req, res) => {
+    const user = authObj.users.find(u => u.id === req.user.id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    res.json({ id: user.id, name: user.name, email: user.email, picture: user.picture });
+});
+
+// Legacy API (for frontend compat)
+app.get('/dashboard', authObj.authenticateToken, (req, res, next) => {
+    // If request accepts JSON, handle as API. If not, it's probably a navigation (allow static to take over)
+    if (req.accepts('json')) {
+        const user = authObj.users.find(u => u.id === req.user.id);
+        if (!user) return res.status(404).json({ error: 'User not found' });
+        return res.json({ id: user.id, name: user.name, email: user.email, picture: user.picture });
+    }
+    next();
+});
 
 
 // 📄 Resume API (Integrated!)
@@ -166,6 +176,7 @@ app.get('/get-started', (req, res) => {
     res.sendFile(path.join(landingDirPath, 'role-selection.html'));
 });
 
+app.get(['/mock-interview', '/mock-interview.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'mock-interview.html')));
 app.get('/sitemap.xml', (req, res) => res.sendFile(path.join(landingDirPath, 'sitemap.xml')));
 app.get('/robots.txt', (req, res) => res.sendFile(path.join(landingDirPath, 'robots.txt')));
 
@@ -198,6 +209,36 @@ app.get('*', (req, res, next) => {
 
 // Final fallback for legacy /api/analyze if not caught by reviewRouter
 app.use('/api', analysisRouter);
+
+// --- Groq AI Interview Chat ---
+app.post('/api/interview/chat', async (req, res) => {
+    try {
+        const { messages } = req.body;
+        if (!process.env.GROQ_API_KEY) {
+            return res.status(500).json({ error: 'Groq API Key not configured' });
+        }
+
+        const response = await axios.post('https://api.groq.com/openai/v1/chat/completions', {
+            model: process.env.AI_MODEL || 'grok-beta',
+            messages: messages,
+            temperature: 0.7,
+            max_tokens: 150
+        }, {
+            headers: {
+                'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        res.json(response.data);
+    } catch (error) {
+        console.error('Groq API Error:', error.response ? error.response.data : error.message);
+        res.status(500).json({
+            error: 'AI service error',
+            details: error.response ? error.response.data : error.message
+        });
+    }
+});
 
 // ======================
 // START SERVER

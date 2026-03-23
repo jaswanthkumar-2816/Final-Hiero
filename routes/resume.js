@@ -304,6 +304,17 @@ router.get('/preview-pdf', async (req, res) => {
     }
 });
 
+router.get('/data', authenticateToken, async (req, res) => {
+    try {
+        const userId = req.user.userId || req.user.id;
+        const resume = await Resume.findOne({ userId });
+        if (!resume) return res.status(404).json({ error: 'Resume not found' });
+        res.json({ success: true, data: resume.data });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
 router.get('/download', authenticateToken, async (req, res) => {
     try {
         const userId = req.user.userId || req.user.id;
@@ -317,7 +328,6 @@ router.get('/download', authenticateToken, async (req, res) => {
         if (!res.headersSent) res.status(500).json({ error: 'Failed to generate PDF' });
     }
 });
-
 
 router.get('/templates', (req, res) => {
     const templates = [

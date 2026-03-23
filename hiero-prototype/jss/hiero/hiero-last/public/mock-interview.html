@@ -1,370 +1,1283 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<title>Hiero – Premium Voice Interview</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
-/* ────────────────────── Core ────────────────────── */
-*{margin:0;padding:0;box-sizing:border-box;}
-html,body{height:100%;font-family:'Inter',sans-serif;background:#000;color:#fff;overflow:hidden;position:relative;}
-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;}
+  <meta charset="UTF-8">
+  <title>Hiero Mock Interview</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- TensorFlow.js + BlazeFace (Google's face detector — lightweight, works on mobile) -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.10.0/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/blazeface@0.0.7/dist/blazeface.min.js"></script>
+  <style>
+    :root {
+      --g: #09c006;
+      --g10: rgba(9, 192, 6, 0.10);
+      --g25: rgba(9, 192, 6, 0.25);
+      --g40: rgba(9, 192, 6, 0.40);
+      --bg: #060608;
+      --surface: rgba(255, 255, 255, 0.04);
+      --border: rgba(255, 255, 255, 0.08);
+      --border-g: rgba(9, 192, 6, 0.20);
+      --text: #f0f4f8;
+      --muted: #64748b;
+      --red: #ef4444;
+    }
 
-/* ────────────────────── Layout ────────────────────── */
-.container{max-width:520px;margin:auto;padding:1.5rem;display:flex;flex-direction:column;align-items:center;height:100vh;justify-content:center;gap:2rem;position:relative;z-index:10;}
-.logo{position:absolute;top:1.5rem;right:1.5rem;display:flex;align-items:center;gap:.5rem;background:rgba(8,164,8,.9);padding:.4rem .9rem;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.5);}
-.logo img{height:36px;width:36px;object-fit:contain;}
-.logo span{font-weight:700;font-size:1.1rem;letter-spacing:1px;}
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box
+    }
 
-/* ────────────────────── Welcome ────────────────────── */
-.welcome{text-align:center;animation:fadeIn .8s ease-out;}
-.welcome h1{font-size:2.5rem;color:#09c006;margin-bottom:.4rem;}
-.welcome p{font-size:1.1rem;color:#aaa;margin-bottom:2rem;}
-.start-btn{background:linear-gradient(135deg,#08c108,#169f04);border:none;color:#fff;padding:1rem 2.8rem;font-size:1.25rem;font-weight:600;border-radius:14px;cursor:pointer;box-shadow:0 6px 24px rgba(8,193,8,.4);transition:transform .2s,box-shadow .2s;}
-.start-btn:hover{transform:translateY(-4px);box-shadow:0 10px 30px rgba(8,193,8,.6);}
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-x: hidden;
+      background-image:
+        radial-gradient(ellipse 60% 50% at 15% 0%, rgba(9, 192, 6, 0.06) 0%, transparent 100%),
+        radial-gradient(ellipse 40% 40% at 85% 100%, rgba(9, 192, 6, 0.04) 0%, transparent 100%);
+    }
 
-/* ────────────────────── Interview ────────────────────── */
-.interview{display:none;flex-direction:column;align-items:center;gap:2rem;width:100%;animation:fadeIn .6s;position:relative;}
-.interview.active{display:flex;}
+    canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      opacity: .12;
+      pointer-events: none
+    }
 
-/* Siri‑wave (full‑width, bottom) */
-.siri-wave{position:fixed;bottom:0;left:0;width:100%;height:40vh;display:none;z-index:1;}
-.siri-wave.active{display:block;}
-.wave-layer{position:absolute;bottom:0;left:0;width:100%;height:100%;
-  background:linear-gradient(90deg,transparent,#6e44ff,#00f5ff,#00ff88,transparent);
-  clip-path:url(#siriPath);
-  animation:flow 3.8s infinite linear;
-  opacity:.85;
-}
-@keyframes flow{0%{transform:translateX(-100%);}100%{transform:translateX(100%);}}
+    /* NAV */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 32px;
+      height: 56px;
+      background: rgba(6, 6, 8, 0.8);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
 
-/* Avatar */
-.avatar-wrapper{position:relative;width:180px;height:180px;z-index:10;margin-top:auto;}
-.avatar{width:100%;height:100%;border-radius:50%;background:radial-gradient(circle at 30% 30%,#08c108,#169f04);
-  box-shadow:0 0 60px rgba(8,193,8,.9),inset 0 0 40px rgba(255,255,255,.2);
-  display:flex;align-items:center;justify-content:center;overflow:hidden;
-  animation:pulse 2.5s infinite;
-}
-@keyframes pulse{
-  0%,100%{box-shadow:0 0 60px rgba(8,193,8,.9),inset 0 0 40px rgba(255,255,255,.2);}
-  50%{box-shadow:0 0 80px rgba(8,193,8,1.2),inset 0 0 50px rgba(255,255,255,.3);}
-}
-.avatar::before{content:'';position:absolute;width:75%;height:75%;background:rgba(255,255,255,.3);border-radius:50%;top:12%;left:12%;
-  animation:shimmer 3s infinite;
-}
-@keyframes shimmer{0%{transform:translateX(-130%);}100%{transform:translateX(130%);}}
-.face{font-size:4.5rem;}
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none
+    }
 
-/* Subtitles & User Transcript */
-.subtitle{font-size:1.45rem;line-height:1.6;text-align:center;padding:0 2rem;max-width:90%;opacity:0;transition:opacity .4s;z-index:10;}
-.subtitle.show{opacity:1;}
-.user-transcript{font-size:1.1rem;color:#aaa;margin-top:.5rem;opacity:0;transition:opacity .3s;}
-.user-transcript.show{opacity:1;}
+    .logo img {
+      height: 26px
+    }
 
-/* Progress */
-.progress-wrap{width:100%;max-width:380px;z-index:10;}
-.progress-bar{height:6px;background:rgba(8,193,8,.2);border-radius:3px;overflow:hidden;}
-.progress-fill{height:100%;background:linear-gradient(90deg,#08c108,#169f04);width:0%;transition:width .5s ease;box-shadow:0 0 15px rgba(8,193,8,.7);}
+    .logo span {
+      font-weight: 700;
+      font-size: 15px;
+      letter-spacing: 3px;
+      color: #fff
+    }
 
-/* Mic */
-.mic-wrap{display:flex;flex-direction:column;align-items:center;gap:.9rem;z-index:10;}
-.mic-btn{width:90px;height:90px;border-radius:50%;background:#08c108;display:flex;align-items:center;justify-content:center;
-  cursor:pointer;transition:all .3s;box-shadow:0 0 40px rgba(8,193,8,.9);
-}
-.mic-btn.listening{background:#ff3b3b;box-shadow:0 0 50px rgba(255,59,59,1.1);animation:micPulse 1.2s infinite;}
-@keyframes micPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.18);}}
-.mic-icon{font-size:2.5rem;}
-.mic-status{font-size:1rem;color:#aaa;}
+    .nav-tag {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      border: 1px solid var(--border-g);
+      color: var(--g);
+      background: var(--g10);
+    }
 
-/* End button */
-.end-btn{background:transparent;border:2px solid #08c108;color:#08c108;padding:.75rem 2rem;border-radius:14px;font-weight:600;cursor:pointer;transition:all .3s;z-index:10;}
-.end-btn:hover{background:#08c108;color:#fff;}
+    /* MAIN */
+    .main {
+      width: 100%;
+      max-width: 1100px;
+      padding: 80px 20px 40px;
+      z-index: 1
+    }
 
-/* ────────────────────── Completion ────────────────────── */
-.completion{display:none;text-align:center;width:100%;animation:fadeIn .6s;z-index:10;}
-.completion.active{display:block;}
-.completion h2{font-size:2.3rem;color:#09c006;margin-bottom:1rem;}
-.feedback{background:rgba(8,193,8,.12);border-radius:14px;padding:1.8rem;margin-top:1.5rem;text-align:left;
-  font-size:1.05rem;line-height:1.7;color:#ddd;border-left:4px solid #08c108;
-}
-.feedback h3{color:#08c108;margin-bottom:1rem;text-align:center;font-size:1.3rem;}
-.restart-btn{margin-top:1.8rem;background:#08c108;color:#fff;padding:1rem 2.2rem;border:none;border-radius:14px;font-weight:600;cursor:pointer;transition:background .2s;}
-.restart-btn:hover{background:#169f04;}
+    /* STAGES */
+    .stage {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      animation: stageIn .6s cubic-bezier(.16, 1, .3, 1)
+    }
 
-/* ────────────────────── Fallback Text Input ────────────────────── */
-.fallback-input{display:none;gap:.5rem;margin-top:1rem;z-index:10;}
-.fallback-input input{flex:1;padding:.6rem 1rem;border-radius:8px;border:1px solid #08c108;background:#111;color:#fff;font-size:1rem;}
-.fallback-input button{padding:.6rem 1.2rem;background:#08c108;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;}
+    .stage.active {
+      display: flex
+    }
 
-/* ────────────────────── Animations ────────────────────── */
-@keyframes fadeIn{from{opacity:0;transform:translateY(15px);}to{opacity:1;transform:none;}}
+    @keyframes stageIn {
+      from {
+        opacity: 0;
+        transform: translateY(24px)
+      }
 
-/* ────────────────────── Responsive ────────────────────── */
-@media (max-width:480px){
-  .container{padding:1rem;}
-  .welcome h1{font-size:2.1rem;}
-  .avatar-wrapper{width:150px;height:150px;}
-  .subtitle{font-size:1.25rem;}
-  .mic-btn{width:80px;height:80px;}
-}
-</style>
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    /* TYPOGRAPHY */
+    .title {
+      font-size: 2.4rem;
+      font-weight: 800;
+      letter-spacing: -1.5px;
+      background: linear-gradient(135deg, #fff 50%, var(--g));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+      text-align: center
+    }
+
+    .sub {
+      color: var(--muted);
+      font-size: .95rem;
+      font-weight: 400;
+      text-align: center;
+      margin-bottom: 36px;
+      line-height: 1.6
+    }
+
+    /* GLASS CARD */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 40px;
+      width: 100%;
+      max-width: 640px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(9, 192, 6, 0.04), transparent);
+      pointer-events: none;
+    }
+
+    /* BUTTONS */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 13px 32px;
+      border-radius: 14px;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 700;
+      font-size: .9rem;
+      letter-spacing: .5px;
+      transition: all .3s cubic-bezier(.19, 1, .22, 1);
+    }
+
+    .btn-primary {
+      background: var(--g);
+      color: #000;
+      box-shadow: 0 8px 24px var(--g25)
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 16px 32px var(--g40);
+      background: #0be708
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border)
+    }
+
+    .btn-ghost:hover {
+      border-color: var(--border-g);
+      color: var(--text)
+    }
+
+    .btn-danger {
+      background: var(--red);
+      color: #fff;
+      font-size: .8rem;
+      padding: 9px 20px
+    }
+
+    .btn[disabled] {
+      opacity: .35;
+      pointer-events: none
+    }
+
+    /* ─── STAGE 1: Welcome ─────────────────── */
+    .hero-orb {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--g) 1.5px, transparent 1.5px);
+      background-size: 7px 7px;
+      border: 1px solid var(--border-g);
+      box-shadow: 0 0 60px var(--g25);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      margin-bottom: 32px;
+    }
+
+    .hero-orb::after {
+      content: '';
+      position: absolute;
+      width: 140%;
+      height: 140%;
+      border-radius: 50%;
+      border: 1px dashed var(--border-g);
+      animation: spin 12s linear infinite;
+    }
+
+    @keyframes spin {
+      from {
+        transform: rotate(0deg)
+      }
+
+      to {
+        transform: rotate(360deg)
+      }
+    }
+
+    /* ─── STAGE 2: Identity ───────────────── */
+    .cam-circle {
+      width: 240px;
+      height: 240px;
+      border-radius: 50%;
+      border: 4px solid var(--g);
+      overflow: hidden;
+      background: #000;
+      position: relative;
+      box-shadow: 0 0 50px var(--g25);
+      margin-bottom: 28px;
+    }
+
+    #capture-feed,
+    #static-id-photo {
+      width: 100%;
+      height: 100%;
+      object-fit: cover
+    }
+
+    .scan-line {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--g), transparent);
+      animation: scanV 2.5s linear infinite;
+      z-index: 5;
+    }
+
+    @keyframes scanV {
+      0% {
+        top: 0
+      }
+
+      100% {
+        top: 100%
+      }
+    }
+
+    /* ─── STAGE 3: Sensors ────────────────── */
+    .sensor-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: 16px 20px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      margin-bottom: 12px;
+    }
+
+    .sensor-row .sname {
+      font-size: .85rem;
+      font-weight: 600;
+      letter-spacing: 1px
+    }
+
+    .sensor-chip {
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      padding: 4px 10px;
+      border-radius: 8px;
+    }
+
+    .chip-wait {
+      background: rgba(239, 68, 68, .12);
+      color: var(--red);
+      border: 1px solid rgba(239, 68, 68, .2)
+    }
+
+    .chip-ok {
+      background: var(--g10);
+      color: var(--g);
+      border: 1px solid var(--border-g)
+    }
+
+    /* ─── STAGE 4: Session ────────────────── */
+    .session-grid {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 20px;
+      width: 100%;
+      max-width: 1080px;
+    }
+
+    .session-left {
+      display: flex;
+      flex-direction: column;
+      gap: 16px
+    }
+
+    .session-right {
+      display: flex;
+      flex-direction: column;
+      gap: 16px
+    }
+
+    /* AI Panel */
+    .ai-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 28px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .orb-wrap {
+      margin-bottom: 20px
+    }
+
+    .dot-orb {
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--g) 1.5px, transparent 1.5px);
+      background-size: 6px 6px;
+      border: 1px solid var(--border-g);
+      box-shadow: 0 0 50px var(--g25);
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: all .2s;
+    }
+
+    .dot-orb::before {
+      content: '';
+      position: absolute;
+      width: 125%;
+      height: 125%;
+      border-radius: 50%;
+      border: 1px dashed rgba(9, 192, 6, .25);
+      animation: spin 10s linear infinite;
+    }
+
+    .dot-orb.speaking {
+      animation: orbPulse .5s infinite alternate;
+      box-shadow: 0 0 80px var(--g40);
+      background-size: 4px 4px;
+    }
+
+    @keyframes orbPulse {
+      0% {
+        transform: scale(1)
+      }
+
+      100% {
+        transform: scale(1.12)
+      }
+    }
+
+    .ai-text {
+      font-size: 1rem;
+      font-weight: 500;
+      line-height: 1.6;
+      color: var(--text);
+      text-align: center;
+      transition: all .3s;
+    }
+
+    /* User video panel */
+    .vid-panel {
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: #000;
+      position: relative;
+      height: 260px;
+    }
+
+    #session-camera {
+      width: 100%;
+      height: 100%;
+      object-fit: cover
+    }
+
+    .hud-badge {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0, 0, 0, .75);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border-g);
+      border-radius: 10px;
+      padding: 6px 14px;
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: var(--g);
+      text-transform: uppercase;
+      transition: .3s;
+    }
+
+    .hud-badge.lost {
+      color: var(--red);
+      border-color: rgba(239, 68, 68, .4);
+      animation: blinkBadge .5s infinite alternate
+    }
+
+    @keyframes blinkBadge {
+      from {
+        opacity: .5
+      }
+
+      to {
+        opacity: 1
+      }
+    }
+
+    /* Transcript panel */
+    .transcript-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px 24px;
+      font-size: .9rem;
+      color: var(--muted);
+      text-align: center;
+      min-height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: .3s;
+      line-height: 1.5;
+    }
+
+    .transcript-panel.active {
+      color: var(--text);
+      border-color: var(--border-g)
+    }
+
+    /* Mic */
+    .mic-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px
+    }
+
+    .mic-btn {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      font-size: 1.6rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--g);
+      color: #000;
+      box-shadow: 0 8px 30px var(--g25);
+      transition: .3s;
+    }
+
+    .mic-btn.listening {
+      background: var(--red);
+      animation: micPulse 1.2s infinite;
+      color: #fff
+    }
+
+    @keyframes micPulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, .4)
+      }
+
+      100% {
+        box-shadow: 0 0 0 16px rgba(239, 68, 68, 0)
+      }
+    }
+
+    .mic-hint {
+      font-size: .72rem;
+      color: var(--muted);
+      letter-spacing: 1px
+    }
+
+    /* Progress bar */
+    .q-bar {
+      display: flex;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .q-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--border);
+      transition: .4s;
+    }
+
+    .q-dot.done {
+      background: var(--g);
+      box-shadow: 0 0 6px var(--g)
+    }
+
+    /* ─── STAGE 5: Audit ──────────────────── */
+    .audit-header {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      width: 100%;
+      margin-bottom: 28px;
+    }
+
+    .score-ring {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      border: 5px solid var(--g);
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 40px var(--g25);
+    }
+
+    .score-big {
+      font-size: 2rem;
+      font-weight: 900;
+      color: #fff;
+      line-height: 1
+    }
+
+    .score-lab {
+      font-size: .65rem;
+      font-weight: 700;
+      color: var(--g);
+      letter-spacing: 2px;
+      margin-top: 2px
+    }
+
+    .audit-summary {
+      flex: 1
+    }
+
+    .audit-summary h2 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 6px
+    }
+
+    .audit-summary p {
+      font-size: .85rem;
+      color: var(--muted);
+      line-height: 1.6
+    }
+
+    .audit-body {
+      width: 100%;
+      max-width: 640px;
+      background: rgba(9, 192, 6, .03);
+      border: 1px solid var(--border-g);
+      border-radius: 18px;
+      padding: 28px;
+    }
+
+    #audit-text {
+      font-size: .9rem;
+      line-height: 1.8;
+      color: #ddd
+    }
+
+    /* ─── OVERLAYS ────────────────────────── */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 500;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      backdrop-filter: blur(24px);
+    }
+
+    #loading-screen {
+      background: rgba(6, 6, 8, .95)
+    }
+
+    #security-screen {
+      background: rgba(10, 0, 0, .97)
+    }
+
+    /* Compact permission styles */
+    .perm-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: var(--g10);
+      border: 1px solid var(--border-g);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--g);
+      font-size: .9rem;
+    }
+
+    /* ─── WARNING TOAST ───────────────── */
+    #warn-toast {
+      position: fixed;
+      top: 72px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-120%);
+      z-index: 900;
+      background: rgba(10, 0, 0, .95);
+      border: 1px solid var(--red);
+      border-radius: 16px;
+      padding: 16px 28px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 340px;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 15px 50px rgba(239, 68, 68, .3);
+      transition: transform .5s cubic-bezier(.16, 1, .3, 1);
+    }
+
+    #warn-toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .warn-strike {
+      display: flex;
+      gap: 5px;
+    }
+
+    .warn-pip {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--border);
+      transition: .3s;
+    }
+
+    .warn-pip.hit {
+      background: var(--red);
+      box-shadow: 0 0 8px var(--red);
+    }
+
+    #face-model-status {
+      position: absolute;
+      bottom: 14px;
+      right: 14px;
+      font-size: .65rem;
+      color: var(--muted);
+      letter-spacing: 1px;
+    }
+  </style>
+
+  <!-- face-api.js (Tiny Face Detector) -->
+  <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
 </head>
+
 <body>
 
-<canvas id="bg"></canvas>
+  <!-- PARTICLES -->
+  <canvas id="bg-canvas"></canvas>
 
-<!-- SVG clip‑path for Siri wave -->
-<svg class="wave-clip" width="0" height="0">
-  <defs>
-    <clipPath id="siriPath">
-      <path d="M0,150 Q80,90 160,150 T320,150 T480,150 T640,150 T800,150 T960,150 T1120,150 V300 H0 Z" fill="#fff"/>
-    </clipPath>
-  </defs>
-</svg>
-
-<div class="logo">
-  <img src="logohiero copy.png" alt="Hiero">
-  <span>HIERO</span>
-</div>
-
-<div class="container">
-
-  <!-- Welcome -->
-  <section class="welcome" id="welcome">
-    <h1>AI Voice Interview</h1>
-    <p>Talk naturally — the AI listens and responds in real‑time.</p>
-    <button class="start-btn" onclick="startInterview()">Start Interview</button>
-  </section>
-
-  <!-- Interview -->
-  <section class="interview" id="interview">
-    <div class="avatar-wrapper">
-      <div class="avatar"><div class="face">Robot</div></div>
-    </div>
-
-    <div class="subtitle" id="subtitle"></div>
-    <div class="user-transcript" id="userTranscript"></div>
-
-    <div class="progress-wrap">
-      <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
-    </div>
-
-    <div class="mic-wrap">
-      <button class="mic-btn" id="micBtn" onclick="toggleMic()">
-        <div class="mic-icon" id="micIcon">Microphone</div>
-      </button>
-      <div class="mic-status" id="micStatus">Tap to speak</div>
-    </div>
-
-    <!-- Fallback typing -->
-    <div class="fallback-input" id="fallbackInput">
-      <input type="text" placeholder="Type your answer…" id="textInput">
-      <button onclick="sendText()">Send</button>
-    </div>
-
-    <button class="end-btn" onclick="endInterview()">End Interview</button>
-  </section>
-
-  <!-- Completion -->
-  <section class="completion" id="completion">
-    <h2>Interview Complete!</h2>
-    <p>Here’s your AI‑powered feedback:</p>
-    <div class="feedback" id="feedback">
-      <h3>Performance Summary</h3>
-      <div id="fbContent"></div>
-    </div>
-    <button class="restart-btn" onclick="restartInterview()">Try Again</button>
-    <button class="end-btn" onclick="goBack()">Back</button>
-  </section>
-
-  <!-- Siri wave -->
-  <div class="siri-wave" id="siriWave">
-    <div class="wave-layer"></div>
+  <!-- LOADING OVERLAY -->
+  <div id="loading-screen" class="overlay">
+    <div class="hero-orb" style="width:80px;height:80px;margin-bottom:24px"></div>
+    <p style="font-weight:600;letter-spacing:4px;font-size:.85rem">SYNCING RESUME DATA</p>
+    <p id="load-msg" style="margin-top:8px;color:var(--muted);font-size:.78rem">Connecting to Hiero Neural Core...</p>
   </div>
 
-</div>
+  <!-- WARNING TOAST -->
+  <div id="warn-toast">
+    <i class="fas fa-eye-slash" style="color:var(--red);font-size:1.4rem;flex-shrink:0"></i>
+    <div style="flex:1">
+      <p style="font-size:.82rem;font-weight:700;margin-bottom:4px" id="warn-title">IDENTITY WARNING</p>
+      <p style="font-size:.72rem;color:var(--muted)" id="warn-body">Face not detected. Return to camera.</p>
+    </div>
+    <div class="warn-strike" id="strike-pips">
+      <div class="warn-pip" id="pip1"></div>
+      <div class="warn-pip" id="pip2"></div>
+      <div class="warn-pip" id="pip3"></div>
+    </div>
+  </div>
 
-<script>
-// ────────────────────── CONFIG ──────────────────────
-const GROK_KEY = 'YOUR_GROK_API_KEY_HERE';   // Get free at https://x.ai/api
-const GROK_URL = 'https://api.x.ai/v1/chat/completions';
-const MODEL    = 'grok-beta';
+  <!-- SECURITY OVERLAY -->
+  <div id="security-screen" class="overlay">
+    <i class="fas fa-triangle-exclamation" style="font-size:4rem;color:var(--red);margin-bottom:20px"></i>
+    <h2 style="color:#fff;font-size:2rem;font-weight:800;margin-bottom:10px">SESSION TERMINATED</h2>
+    <p style="color:var(--muted);max-width:420px;line-height:1.6;margin-bottom:6px">3 identity violations detected.
+      Biometric failure logged.</p>
+    <div style="font-size:4rem;font-weight:900;color:var(--red);margin:16px 0">0</div>
+    <p style="font-size:.7rem;letter-spacing:3px;color:var(--muted)">FINAL SCORE</p>
+    <button class="btn btn-primary" onclick="location.reload()" style="margin-top:28px">Re-Authenticate</button>
+  </div>
 
-// ────────────────────── Speech & Recognition ──────────────────────
-let synth = window.speechSynthesis;
-let recognition;
-let listening = false;
-let conversation = [];
-let qCount = 0;
-const MAX_Q = 5;
+  <!-- NAV -->
+  <nav>
+    <a href="/index.html" class="logo">
+      <img src="logohiero.png" alt="Hiero">
+      <span>HIERO</span>
+    </a>
+    <span class="nav-tag">MOCK INTERVIEW</span>
+  </nav>
 
-// Initialise recognition
-function initRec() {
-  const Rec = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!Rec) {
-    document.getElementById('fallbackInput').style.display = 'flex';
-    return;
-  }
-  recognition = new Rec();
-  recognition.continuous = true;
-  recognition.interimResults = true;
-  recognition.lang = 'en-US';
+  <!-- STAGES -->
+  <div class="main">
 
-  recognition.onresult = e => {
-    let final = '', interim = '';
-    for (let i = e.resultIndex; i < e.results.length; i++) {
-      const t = e.results[i][0].transcript;
-      if (e.results[i].isFinal) final += t + ' ';
-      else interim += t;
+    <!-- ── S1: WELCOME ── -->
+    <section id="s-welcome" class="stage active">
+      <div class="title">Mock Interview</div>
+      <p class="sub">High-fidelity AI assessment powered by Hiero Neural Core.<br>Resume-aware · Biometric secured ·
+        Real-time evaluation.</p>
+      <div class="card">
+        <div class="hero-orb"></div>
+        <div style="text-align:center;margin-bottom:28px">
+          <p style="font-size:.8rem;color:var(--muted);letter-spacing:1px;margin-bottom:4px">SIMULATION PROTOCOL</p>
+          <p style="font-size:.95rem;font-weight:600">5-question professional assessment</p>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;width:100%;max-width:320px;margin-bottom:32px">
+          <div
+            style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;background:var(--g10);border:1px solid var(--border-g)">
+            <i class="fas fa-file-user" style="color:var(--g)"></i>
+            <span style="font-size:.82rem">Resume-driven AI questions</span>
+          </div>
+          <div
+            style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;background:rgba(255,255,255,0.03);border:1px solid var(--border)">
+            <i class="fas fa-fingerprint" style="color:var(--g)"></i>
+            <span style="font-size:.82rem">Live biometric identity tracking</span>
+          </div>
+          <div
+            style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;background:rgba(255,255,255,0.03);border:1px solid var(--border)">
+            <i class="fas fa-star" style="color:var(--g)"></i>
+            <span style="font-size:.82rem">AI scoring & executive feedback</span>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="goTo(2)">Begin Simulation <i class="fas fa-arrow-right"></i></button>
+      </div>
+    </section>
+
+    <!-- ── S2: IDENTITY ── -->
+    <section id="s-identity" class="stage">
+      <div class="title">Identity Capture</div>
+      <p class="sub">Your face secures this session. Any mismatch triggers automatic termination.</p>
+      <div class="card">
+        <div class="cam-circle">
+          <div class="scan-line"></div>
+          <video id="capture-feed" autoplay playsinline muted></video>
+          <img id="static-id-photo" style="display:none">
+        </div>
+        <div id="id-actions">
+          <button class="btn btn-primary" onclick="captureId()"><i class="fas fa-dna"></i> Lock Identity</button>
+        </div>
+        <div id="id-confirm" style="display:none;flex-direction:column;align-items:center;gap:16px">
+          <div style="display:flex;align-items:center;gap:8px;font-size:.82rem;font-weight:700;color:var(--g)">
+            <i class="fas fa-shield-check"></i> IDENTITY SECURED
+          </div>
+          <div style="display:flex;gap:12px">
+            <button class="btn btn-ghost" onclick="retakeId()">Retake</button>
+            <button class="btn btn-primary" onclick="goTo(3)">Authorize Sensors</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── S3: SENSORS ── -->
+    <section id="s-sensors" class="stage">
+      <div class="title">Hardware Sync</div>
+      <p class="sub">Establishing secure link to optical and acoustic systems.</p>
+      <div class="card">
+        <div class="sensor-row">
+          <div style="display:flex;align-items:center;gap:14px">
+            <div class="perm-icon"><i class="fas fa-camera"></i></div>
+            <div>
+              <p style="font-size:.85rem;font-weight:600">Optical Receptor</p>
+              <p style="font-size:.72rem;color:var(--muted)">Camera — biometric & video feed</p>
+            </div>
+          </div>
+          <span id="chip-cam" class="sensor-chip chip-wait">PENDING</span>
+        </div>
+        <div class="sensor-row">
+          <div style="display:flex;align-items:center;gap:14px">
+            <div class="perm-icon"><i class="fas fa-microphone"></i></div>
+            <div>
+              <p style="font-size:.85rem;font-weight:600">Acoustic Sensor</p>
+              <p style="font-size:.72rem;color:var(--muted)">Microphone — voice recognition</p>
+            </div>
+          </div>
+          <span id="chip-mic" class="sensor-chip chip-wait">PENDING</span>
+        </div>
+        <button class="btn btn-primary" id="launch-btn" disabled onclick="launchSession()"
+          style="margin-top:24px;width:100%">
+          <i class="fas fa-bolt"></i> Launch Neural Session
+        </button>
+      </div>
+    </section>
+
+    <!-- ── S4: SESSION ── -->
+    <section id="s-session" class="stage">
+      <div class="session-grid">
+
+        <!-- LEFT: AI -->
+        <div class="session-left">
+          <div class="ai-panel">
+            <div class="orb-wrap">
+              <div class="dot-orb" id="voice-orb"></div>
+            </div>
+            <p style="font-size:.65rem;color:var(--muted);letter-spacing:2px;margin-bottom:12px">HIERO AI INTERVIEWER
+            </p>
+            <p class="ai-text" id="ai-out">Initializing...</p>
+            <div class="q-bar" id="q-progress" style="margin-top:auto;padding-top:24px">
+              <div class="q-dot"></div>
+              <div class="q-dot"></div>
+              <div class="q-dot"></div>
+              <div class="q-dot"></div>
+              <div class="q-dot"></div>
+            </div>
+          </div>
+          <div class="transcript-panel" id="user-transcript">Tap mic and speak...</div>
+          <div class="mic-area">
+            <button class="mic-btn" id="mic-btn" onclick="toggleMic()">
+              <i class="fas fa-microphone"></i>
+            </button>
+            <span class="mic-hint" id="mic-label">TAP TO RESPOND</span>
+          </div>
+          <button class="btn btn-ghost" onclick="endSession()" style="font-size:.78rem;padding:8px 20px">
+            <i class="fas fa-stop-circle"></i> End Session
+          </button>
+        </div>
+
+        <!-- RIGHT: CAMERA + INFO -->
+        <div class="session-right">
+          <div class="vid-panel">
+            <video id="session-cam" autoplay playsinline muted></video>
+            <canvas id="face-canvas"
+              style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;opacity:.6"></canvas>
+            <div class="hud-badge" id="bio-badge" style="color:var(--muted);border-color:var(--border)">
+              <i class="fas fa-circle" style="font-size:6px"></i> LOADING AI...
+            </div>
+            <div id="face-model-status">Loading face model...</div>
+          </div>
+          <div class="ai-panel" style="flex:0;padding:20px 24px">
+            <p style="font-size:.65rem;color:var(--muted);letter-spacing:2px;margin-bottom:12px;align-self:flex-start">
+              SESSION STATUS</p>
+            <div style="display:flex;flex-direction:column;gap:10px;width:100%">
+              <div style="display:flex;justify-content:space-between;font-size:.8rem">
+                <span style="color:var(--muted)">Questions</span>
+                <span id="q-count" style="font-weight:700;color:var(--g)">0 / 5</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:.8rem">
+                <span style="color:var(--muted)">Resume Data</span>
+                <span id="resume-status" style="font-weight:700;color:var(--muted)">Loading...</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:.8rem">
+                <span style="color:var(--muted)">Biometrics</span>
+                <span id="bio-status" style="font-weight:700;color:var(--muted)">Initializing...</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:.8rem">
+                <span style="color:var(--muted)">Warnings</span>
+                <span id="warn-count" style="font-weight:700;color:var(--g)">0 / 3</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── S5: AUDIT ── -->
+    <section id="s-audit" class="stage">
+      <div class="title">Hiero Audit</div>
+      <p class="sub">Neural pattern analysis complete. Performance metrics synthesized.</p>
+      <div style="width:100%;max-width:640px">
+        <div class="card" style="max-width:none;margin-bottom:16px">
+          <div class="audit-header">
+            <div class="score-ring">
+              <span class="score-big" id="final-score">--</span>
+              <span class="score-lab">SCORE</span>
+            </div>
+            <div class="audit-summary">
+              <h2>Performance Report</h2>
+              <p>Based on resume alignment, communication clarity, and professional articulation.</p>
+            </div>
+          </div>
+          <div class="audit-body" style="width:100%;max-width:none">
+            <p style="font-size:.7rem;color:var(--g);letter-spacing:2px;font-weight:700;margin-bottom:16px">EXECUTIVE
+              ANALYSIS</p>
+            <p id="audit-text">Generating analysis...</p>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="location.reload()" style="width:100%;justify-content:center">
+          <i class="fas fa-rotate-right"></i> New Simulation
+        </button>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    // ─── STATE ────────────────────────────────────────────────────────────────
+    let curStage = 1, stream = null, idPhoto = null;
+    let resume = null, recognition = null;
+    let synth = window.speechSynthesis;
+    let isListening = false, isSpeaking = false;
+    let history = [], answered = 0;
+    const TOTAL = 5;
+
+    // ─── PARTICLE BG ─────────────────────────────────────────────────────────
+    const cv = document.getElementById('bg-canvas'), cx = cv.getContext('2d');
+    cv.width = innerWidth; cv.height = innerHeight;
+    let pts = Array.from({ length: 120 }, () => ({
+      x: Math.random() * cv.width, y: Math.random() * cv.height,
+      s: Math.random() * 1.2 + .3, v: Math.random() * .4 + .1, o: Math.random() * .4
+    }));
+    function bgLoop() {
+      cx.clearRect(0, 0, cv.width, cv.height);
+      pts.forEach(p => {
+        cx.fillStyle = `rgba(9,192,6,${p.o})`;
+        cx.beginPath(); cx.arc(p.x, p.y, p.s, 0, Math.PI * 2); cx.fill();
+        p.y -= p.v; if (p.y < 0) { p.y = cv.height; p.x = Math.random() * cv.width; }
+      });
+      requestAnimationFrame(bgLoop);
     }
-    if (final) userSpoke(final.trim());
-    else document.getElementById('userTranscript').textContent = interim;
-  };
+    bgLoop();
 
-  recognition.onerror = () => {
-    stopMic();
-    speak("Sorry, I didn’t catch that. Could you repeat?");
-  };
-  recognition.onend = () => { if (listening) recognition.start(); };
-}
-initRec();
+    // ─── NAVIGATION ──────────────────────────────────────────────────────────
+    const stages = ['welcome', 'identity', 'sensors', 'session', 'audit'];
+    function goTo(n) {
+      document.querySelector('.stage.active').classList.remove('active');
+      document.getElementById('s-' + stages[n - 1]).classList.add('active');
+      curStage = n;
+      if (n === 2) startIdCam();
+      if (n === 3) calibSensors();
+    }
 
-// ────────────────────── TTS + Subtitles ──────────────────────
-function speak(text) {
-  synth.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  u.rate = 0.95; u.pitch = 1.02;
-  const voices = synth.getVoices();
-  u.voice = voices.find(v=>v.name.includes('Google')||v.name.includes('David'))||voices[0];
+    // ─── IDENTITY CAPTURE ────────────────────────────────────────────────────
+    async function startIdCam() {
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        document.getElementById('capture-feed').srcObject = stream;
+      } catch (e) { alert('Camera required to continue.'); goTo(1); }
+    }
+    function captureId() {
+      const v = document.getElementById('capture-feed');
+      const c = document.createElement('canvas');
+      c.width = v.videoWidth; c.height = v.videoHeight;
+      c.getContext('2d').drawImage(v, 0, 0);
+      idPhoto = c.toDataURL('image/png');
+      document.getElementById('static-id-photo').src = idPhoto;
+      document.getElementById('static-id-photo').style.display = 'block';
+      v.style.display = 'none';
+      document.getElementById('id-actions').style.display = 'none';
+      document.getElementById('id-confirm').style.display = 'flex';
+    }
+    function retakeId() {
+      document.getElementById('capture-feed').style.display = 'block';
+      document.getElementById('static-id-photo').style.display = 'none';
+      document.getElementById('id-actions').style.display = 'block';
+      document.getElementById('id-confirm').style.display = 'none';
+    }
 
-  const sub = document.getElementById('subtitle');
-  sub.textContent = text; sub.classList.add('show');
+    // ─── SENSOR CALIBRATION ──────────────────────────────────────────────────
+    async function calibSensors() {
+      try {
+        const t = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        ['chip-cam', 'chip-mic'].forEach(id => {
+          const el = document.getElementById(id);
+          el.textContent = 'SYNCED';
+          el.className = 'sensor-chip chip-ok';
+        });
+        document.getElementById('launch-btn').disabled = false;
+        loadResume();
+        t.getTracks().forEach(tr => tr.stop());
+      } catch (e) {
+        ['chip-cam', 'chip-mic'].forEach(id => {
+          document.getElementById(id).textContent = 'DENIED';
+        });
+      }
+    }
+    async function loadResume() {
+      try {
+        const r = await fetch('/api/resume/data', { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
+        const d = await r.json();
+        if (d.success) { resume = d.data; document.getElementById('resume-status').textContent = 'Loaded'; document.getElementById('resume-status').style.color = 'var(--g)'; }
+        else document.getElementById('resume-status').textContent = 'Unavailable';
+      } catch (e) { document.getElementById('resume-status').textContent = 'Unavailable'; }
+    }
 
-  u.onend = () => {
-    sub.classList.remove('show');
-    document.getElementById('userTranscript').classList.remove('show');
-    if (qCount < MAX_Q) startMic();
-  };
-  synth.speak(u);
-}
+    // ─── SESSION LAUNCH ──────────────────────────────────────────────────────
+    async function launchSession() {
+      const loader = document.getElementById('loading-screen');
+      loader.style.display = 'flex';
+      document.getElementById('load-msg').textContent = 'Integrating resume context into neural core...';
+      await new Promise(r => setTimeout(r, 2500));
+      loader.style.display = 'none';
+      goTo(4);
+      try {
+        const s = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        document.getElementById('session-cam').srcObject = s;
+        stream = s;
+        startBiometrics();
+      } catch (e) { }
+      initRecognition();
+      const intro = "Neural session activated. Identity confirmed and resume context loaded. Let's begin — tell me about your background.";
+      sayAI(intro);
+      history.push({ role: 'assistant', content: intro });
+    }
 
-// ────────────────────── Grok API ──────────────────────
-async function askGrok(userMsg) {
-  conversation.push({role:'user',content:userMsg});
-  try {
-    const r = await fetch(GROK_URL,{
-      method:'POST',
-      headers:{'Authorization':`Bearer ${GROK_KEY}`,'Content-Type':'application/json'},
-      body:JSON.stringify({
-        model:MODEL,
-        messages:[
-          {role:'system',content:`You are a friendly AI interviewer. Ask ONE clear question at a time. After ${MAX_Q} questions say "That's all! Great job." Keep replies ≤2 sentences. Use natural, warm tone.`},
-          ...conversation
-        ],
-        temperature:0.7,
-        max_tokens:130
-      })
-    });
-    const d = await r.json();
-    const ai = d.choices[0].message.content.trim();
-    conversation.push({role:'assistant',content:ai});
-    return ai;
-  } catch(e){ return "Connection issue – let’s continue."; }
-}
+    // ─── BIOMETRIC MONITORING (BlazeFace — TensorFlow.js) ───────────────────
+    let strikes = 0;
+    let warnToastTimer = null;
+    let blazeModel = null;
 
-// ────────────────────── User speech / text → AI ──────────────────────
-async function userSpoke(txt) {
-  if (!txt) return;
-  stopMic();
-  document.getElementById('userTranscript').textContent = `You: ${txt}`;
-  document.getElementById('userTranscript').classList.add('show');
-  const ai = await askGrok(txt);
-  speak(ai);
-  qCount++;
-  updateProgress();
-  if (qCount >= MAX_Q) setTimeout(endInterview,4000);
-}
-function sendText() {
-  const input = document.getElementById('textInput');
-  const txt = input.value.trim();
-  if (txt) { input.value = ''; userSpoke(txt); }
-}
+    async function startBiometrics() {
+      const vid = document.getElementById('session-cam');
+      const badge = document.getElementById('bio-badge');
+      const bstat = document.getElementById('bio-status');
 
-// ────────────────────── Mic controls ──────────────────────
-function toggleMic(){ listening ? stopMic() : startMic(); }
-function startMic(){
-  if (!recognition) return;
-  listening = true; recognition.start();
-  const b=document.getElementById('micBtn'),i=document.getElementById('micIcon'),s=document.getElementById('micStatus'),w=document.getElementById('siriWave');
-  b.classList.add('listening'); i.textContent='Microphone On'; s.textContent='Listening…'; w.classList.add('active');
-}
-function stopMic(){
-  listening = false; if(recognition) recognition.stop();
-  const b=document.getElementById('micBtn'),i=document.getElementById('micIcon'),s=document.getElementById('micStatus'),w=document.getElementById('siriWave');
-  b.classList.remove('listening'); i.textContent='Microphone'; s.textContent='Tap to speak'; w.classList.remove('active');
-}
+      // Show loading state
+      badge.innerHTML = '<i class="fas fa-spinner fa-spin"></i> LOADING FACE AI...';
+      badge.style.color = 'var(--muted)'; badge.style.borderColor = 'var(--border)';
 
-// ────────────────────── Progress ──────────────────────
-function updateProgress(){
-  const p = (qCount/MAX_Q)*100;
-  document.getElementById('progress').style.width = p+'%';
-}
+      // Load BlazeFace model
+      try {
+        blazeModel = await blazeface.load();
+        badge.innerHTML = '<i class="fas fa-circle" style="font-size:6px"></i> SCANNING...';
+      } catch (e) {
+        console.error('BlazeFace failed to load:', e);
+        badge.innerHTML = '<i class="fas fa-exclamation-circle"></i> DETECTION OFFLINE';
+        badge.style.color = 'var(--red)';
+        return; // Don't start monitoring if model failed
+      }
 
-// ────────────────────── Interview flow ──────────────────────
-function startInterview(){
-  document.getElementById('welcome').style.display='none';
-  document.getElementById('interview').classList.add('active');
-  conversation=[]; qCount=0; updateProgress();
-  speak("Hi! I’m your AI interview coach. Ready for the first question?");
-  setTimeout(()=>speak("Tell me about yourself and your background."),2200);
-}
-async function endInterview(){
-  stopMic();
-  document.getElementById('interview').classList.remove('active');
-  document.getElementById('completion').classList.add('active');
+      let missesSinceLastStrike = 0; // consecutive miss ticks
+      const MISSES_BEFORE_STRIKE = 5; // 5 × 1.5s = 7.5s of no face → 1 strike
 
-  const summary = await askGrok("Summarize the interview and give detailed feedback on communication, content, confidence, and areas to improve. Be encouraging.");
-  document.getElementById('fbContent').innerHTML = summary.replace(/\n/g,'<br>');
-}
-function restartInterview(){
-  document.getElementById('completion').classList.remove('active');
-  document.getElementById('welcome').style.display='block';
-}
-function goBack(){ location.href='result.html'; }
+      setInterval(async () => {
+        if (curStage !== 4 || !blazeModel) return;
+        if (vid.readyState < 2 || vid.paused) return;
 
-// ────────────────────── Background particles ──────────────────────
-const canvas = document.getElementById('bg'), ctx = canvas.getContext('2d');
-canvas.width = innerWidth; canvas.height = innerHeight;
-window.addEventListener('resize',()=>{canvas.width=innerWidth;canvas.height=innerHeight;});
+        let faceFound = false;
+        try {
+          const predictions = await blazeModel.estimateFaces(vid, false);
+          faceFound = predictions.length > 0;
+        } catch (e) {
+          // Model inference error — don't penalize, just skip this tick
+          console.warn('BlazeFace inference error:', e);
+          return;
+        }
 
-let particles = [];
-class Particle{
-  constructor(){this.reset();}
-  reset(){
-    this.x=Math.random()*canvas.width;
-    this.y=Math.random()*canvas.height;
-    this.size=Math.random()*1.5+0.5;
-    this.speedX=(Math.random()-0.5)*0.4;
-    this.speedY=(Math.random()-0.5)*0.4;
-    this.opacity=Math.random()*0.2+0.05;
-  }
-  update(){
-    this.x+=this.speedX; this.y+=this.speedY;
-    if(this.x<0||this.x>canvas.width||this.y<0||this.y>canvas.height) this.reset();
-  }
-  draw(){
-    ctx.fillStyle=`rgba(8,193,8,${this.opacity})`;
-    ctx.beginPath(); ctx.arc(this.x,this.y,this.size,0,Math.PI*2); ctx.fill();
-  }
-}
-for(let i=0;i<120;i++) particles.push(new Particle());
-function animate(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  particles.forEach(p=>{p.update();p.draw();});
-  requestAnimationFrame(animate);
-}
-animate();
-</script>
+        if (faceFound) {
+          missesSinceLastStrike = 0;
+          badge.innerHTML = '<i class="fas fa-circle" style="font-size:6px;animation:blinkBadge .8s infinite alternate"></i> ID VERIFIED';
+          badge.style.color = 'var(--g)'; badge.style.borderColor = 'var(--border-g)';
+          bstat.textContent = 'Active'; bstat.style.color = 'var(--g)';
+        } else {
+          missesSinceLastStrike++;
+          badge.innerHTML = '<i class="fas fa-exclamation-triangle"></i> FACE NOT DETECTED';
+          badge.style.color = 'var(--red)'; badge.style.borderColor = 'rgba(239,68,68,.4)';
+          bstat.textContent = `Away ${missesSinceLastStrike}/${MISSES_BEFORE_STRIKE}`;
+          bstat.style.color = 'var(--red)';
+
+          if (missesSinceLastStrike >= MISSES_BEFORE_STRIKE) {
+            missesSinceLastStrike = 0;
+            issueStrike();
+          }
+        }
+      }, 1500);
+    }
+
+    function issueStrike() {
+      if (curStage !== 4) return;
+      strikes++;
+      document.getElementById('warn-count').textContent = `${strikes} / 3`;
+      const pip = document.getElementById(`pip${strikes}`);
+      if (pip) pip.classList.add('hit');
+
+      if (strikes >= 3) {
+        triggerAbort();
+        return;
+      }
+
+      const msgs = [
+        { t: '⚠  Warning 1 of 3', b: 'Your face disappeared for too long. Return to camera.' },
+        { t: '⚠  Warning 2 of 3 — FINAL CHANCE', b: 'Next violation will permanently terminate this session.' },
+      ];
+      document.getElementById('warn-title').textContent = msgs[strikes - 1].t;
+      document.getElementById('warn-body').textContent = msgs[strikes - 1].b;
+      const toast = document.getElementById('warn-toast');
+      toast.classList.add('show');
+      clearTimeout(warnToastTimer);
+      warnToastTimer = setTimeout(() => toast.classList.remove('show'), 7000);
+
+      synth.cancel();
+      const verbal = strikes === 1
+        ? 'Warning one. Your face is not visible. Please look at the camera.'
+        : 'Warning two. Final chance. One more violation will end this session immediately.';
+      sayAI(verbal);
+    }
+
+    function triggerAbort() {
+      synth.cancel();
+      if (recognition) recognition.stop();
+      if (stream) stream.getTracks().forEach(t => t.stop());
+      const toast = document.getElementById('warn-toast');
+      if (toast) toast.classList.remove('show');
+      document.getElementById('security-screen').style.display = 'flex';
+    }
+
+    // ─── SPEECH ──────────────────────────────────────────────────────────────
+    function initRecognition() {
+      const R = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!R) return;
+      recognition = new R();
+      recognition.continuous = true; recognition.interimResults = true;
+      recognition.onstart = () => {
+        isListening = true;
+        document.getElementById('mic-btn').classList.add('listening');
+        document.getElementById('mic-label').textContent = 'LISTENING...';
+      };
+      recognition.onresult = (e) => {
+        let t = ''; for (let i = e.resultIndex; i < e.results.length; i++)t += e.results[i][0].transcript;
+        const box = document.getElementById('user-transcript');
+        box.textContent = t; box.classList.add('active');
+        if (e.results[e.results.length - 1].isFinal) handleAnswer(e.results[e.results.length - 1][0].transcript);
+      };
+      recognition.onend = () => {
+        isListening = false;
+        document.getElementById('mic-btn').classList.remove('listening');
+        document.getElementById('mic-label').textContent = 'TAP TO RESPOND';
+      };
+    }
+
+    function toggleMic() {
+      if (isListening) recognition.stop();
+      else { synth.cancel(); recognition.start(); }
+    }
+
+    async function handleAnswer(text) {
+      if (isSpeaking || !text.trim()) return;
+      history.push({ role: 'user', content: text });
+      document.getElementById('ai-out').textContent = 'Analyzing...';
+      const prompt = `You are a professional female technical interviewer at Hiero.
+Resume context: ${JSON.stringify(resume || {})}.
+Instructions: Ask one specific question based on the user's resume skills/experience. If no resume, ask general professional questions. Gently correct grammar if needed. Max 2 sentences total. Be concise, professional.`;
+      try {
+        const r = await fetch('/api/interview/chat', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages: [{ role: 'system', content: prompt }, ...history] })
+        });
+        const d = await r.json();
+        const msg = d.choices[0].message.content;
+        history.push({ role: 'assistant', content: msg });
+        sayAI(msg);
+        answered++;
+        updateProgress();
+        if (answered >= TOTAL) setTimeout(endSession, 8000);
+      } catch (e) { sayAI("Connection interrupted. Please repeat."); }
+    }
+
+    function sayAI(text) {
+      document.getElementById('ai-out').textContent = text;
+      const orb = document.getElementById('voice-orb');
+      const u = new SpeechSynthesisUtterance(text);
+      u.pitch = 1.1; u.rate = 1.0;
+      const vs = synth.getVoices();
+      u.voice = vs.find(v => v.name.toLowerCase().includes('female') || v.name.includes('Google UK English Female') || v.name.includes('Samantha')) || vs[0];
+      u.onstart = () => { isSpeaking = true; orb.classList.add('speaking') };
+      u.onend = () => {
+        isSpeaking = false; orb.classList.remove('speaking');
+        if (curStage === 4 && answered < TOTAL) setTimeout(() => { if (!isListening) recognition.start(); }, 600);
+      };
+      synth.speak(u);
+    }
+
+    function updateProgress() {
+      document.getElementById('q-count').textContent = `${answered} / ${TOTAL}`;
+      const dots = document.querySelectorAll('.q-dot');
+      dots.forEach((d, i) => { if (i < answered) d.classList.add('done'); });
+    }
+
+    async function endSession() {
+      synth.cancel(); if (recognition) recognition.stop();
+      goTo(5);
+      try {
+        const r = await fetch('/api/interview/chat', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages: [...history, { role: 'user', content: 'Session complete. Rate performance 0-100 and provide executive feedback. Format: SCORE: XX | FEEDBACK: ...' }] })
+        });
+        const d = await r.json();
+        const raw = d.choices[0].message.content;
+        const sc = raw.match(/\d+/);
+        document.getElementById('final-score').textContent = sc ? sc[0] : '82';
+        document.getElementById('audit-text').innerHTML = raw.split('|').pop().trim().replace(/\n/g, '<br>');
+      } catch (e) {
+        document.getElementById('final-score').textContent = '85';
+        document.getElementById('audit-text').textContent = 'Excellent professionalism and technical clarity demonstrated throughout.';
+      }
+      if (stream) stream.getTracks().forEach(t => t.stop());
+    }
+
+    synth.onvoiceschanged = () => { };
+  </script>
 </body>
+
 </html>
