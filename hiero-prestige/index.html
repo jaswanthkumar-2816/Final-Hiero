@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hiero Prestige - Professional Resume</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --sidebar-bg: #1e293b;
+            --main-bg: #ffffff;
+            --accent-color: #3b82f6;
+            --text-dark: #0f172a;
+            --text-light: #f8fafc;
+            --text-muted: #64748b;
+            --section-bar-bg: #f1f5f9;
+            --timeline-line: #e2e8f0;
+            --skill-bg: #e2e8f0;
+            --skill-fill: #3b82f6;
+            /* Changed to accent color */
+        }
+
+        @page {
+            size: A4;
+            margin: 0;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9;
+            color: var(--text-dark);
+            line-height: 1.5;
+        }
+
+        .resume-container {
+            width: 210mm;
+            height: 297mm;
+            display: flex;
+            overflow: hidden;
+            background: white;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+            margin: 0 auto;
+        }
+
+        @media print {
+            .resume-container {
+                box-shadow: none;
+                margin: 0;
+            }
+        }
+
+        /* --- LEFT SIDEBAR (32%) --- */
+        .sidebar {
+            width: 32%;
+            background-color: var(--sidebar-bg);
+            color: var(--text-light);
+            padding: 50px 30px;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .sidebar-section {
+            margin-bottom: 40px;
+        }
+
+        .sidebar-title {
+            font-family: 'Playfair Display', serif;
+            /* Changed font */
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            margin-bottom: 25px;
+            color: #ffffff;
+            text-transform: uppercase;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 8px;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            font-size: 12.5px;
+            color: #ffffff;
+        }
+
+        .contact-icon {
+            width: 18px;
+            height: 18px;
+            margin-right: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .contact-icon svg {
+            width: 16px;
+            height: 16px;
+            fill: #ffffff;
+        }
+
+        .contact-text {
+            word-break: break-all;
+            line-height: 1.4;
+        }
+
+        .reference-entry {
+            margin-bottom: 25px;
+        }
+
+        .reference-name {
+            font-family: 'Playfair Display', serif;
+            /* Changed font */
+            font-weight: 700;
+            display: block;
+            margin-bottom: 4px;
+            color: white;
+            font-size: 13px;
+        }
+
+        .reference-title {
+            font-size: 11px;
+            display: block;
+            margin-bottom: 8px;
+            color: #cbd5e1;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .reference-info {
+            display: block;
+            margin-bottom: 4px;
+            color: #ffffff;
+            font-size: 11.5px;
+        }
+
+        /* --- RIGHT MAIN CONTENT (68%) --- */
+        .main-content {
+            width: 68%;
+            background-color: var(--main-bg);
+            padding: 50px 45px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 45px;
+            gap: 30px;
+        }
+
+        .name-job {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .header h1 {
+            font-family: 'Playfair Display', serif;
+            /* Changed font */
+            font-size: 38px;
+            /* Reduced slightly */
+            font-weight: 800;
+            color: var(--text-dark);
+            margin: 0 0 10px 0;
+            text-transform: uppercase;
+            letter-spacing: -0.5px;
+            line-height: 1;
+            word-wrap: break-word;
+        }
+
+        .header .job-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            color: var(--accent-color);
+        }
+
+        .profile-photo {
+            width: 115px;
+            height: 115px;
+            border-radius: 50%;
+            border: 4px solid var(--section-bar-bg);
+            flex-shrink: 0;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8fafc;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .profile-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #cbd5e1;
+            /* Darkened from light grey */
+            padding-bottom: 10px;
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            /* Changed font */
+            font-size: 17px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-dark);
+            margin: 0;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 20px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 5px;
+            bottom: 5px;
+            width: 2px;
+            background-color: var(--timeline-line);
+        }
+
+        .timeline-entry {
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        .timeline-node {
+            position: absolute;
+            left: -24px;
+            top: 5px;
+            width: 10px;
+            height: 10px;
+            background-color: white;
+            border: 2.5px solid var(--accent-color);
+            border-radius: 50%;
+            z-index: 1;
+        }
+
+        .entry-year {
+            font-weight: 700;
+            font-size: 12px;
+            margin-bottom: 6px;
+            color: var(--accent-color);
+            letter-spacing: 0.5px;
+        }
+
+        .entry-company {
+            font-family: 'Playfair Display', serif;
+            /* Changed font */
+            font-size: 17px;
+            font-weight: 700;
+            margin-bottom: 3px;
+            color: var(--text-dark);
+        }
+
+        .entry-position {
+            font-weight: 500;
+            font-size: 13.5px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+
+        .entry-description {
+            margin: 0;
+            padding-left: 18px;
+            font-size: 12.5px;
+            color: var(--text-dark);
+            opacity: 0.85;
+            list-style-type: disc;
+        }
+
+        .entry-description li {
+            margin-bottom: 6px;
+        }
+
+        /* Skills Layout */
+        .skills-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px 40px;
+            /* Reduced gap */
+            padding-top: 5px;
+        }
+
+        .skill-item {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            /* Reduced gap */
+        }
+
+        .skill-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+
+        .skill-name {
+            font-size: 10px;
+            /* Reduced font size */
+            font-weight: 500;
+            /* Unbolded */
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-dark);
+        }
+
+        .skill-percentage {
+            font-size: 9px;
+            /* Reduced font size */
+            font-weight: 700;
+            color: var(--accent-color);
+        }
+
+        .progress-bar {
+            height: 5px;
+            /* Thinner bar */
+            background-color: var(--skill-bg);
+            width: 100%;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--skill-fill);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="resume-container">
+        <!-- LEFT SIDEBAR -->
+        <div class="sidebar">
+            <div class="sidebar-section">
+                <h2 class="sidebar-title">Information</h2>
+                <div class="contact-item">
+                    <div class="contact-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path
+                                d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+                        </svg>
+                    </div>
+                    <span class="contact-text">San Francisco, CA</span>
+                </div>
+                <div class="contact-item">
+                    <div class="contact-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path
+                                d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
+                        </svg>
+                    </div>
+                    <span class="contact-text">(555) 123-4567</span>
+                </div>
+                <div class="contact-item">
+                    <div class="contact-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path
+                                d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+                        </svg>
+                    </div>
+                    <span class="contact-text">john.doe@example.com</span>
+                </div>
+                <div class="contact-item">
+                    <div class="contact-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path
+                                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" />
+                        </svg>
+                    </div>
+                    <span class="contact-text">linkedin.com/in/johndoe</span>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <h2 class="sidebar-title">References</h2>
+                <div class="reference-entry">
+                    <span class="reference-name">DR. MICHAEL RODRIGUEZ</span>
+                    <span class="reference-title">Engineering Director</span>
+                    <span class="reference-info">+1 (555) 234-5678</span>
+                    <span class="reference-info">michael.rodriguez@techcorp.com</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT MAIN CONTENT -->
+        <div class="main-content">
+            <div class="header">
+                <div class="name-job">
+                    <h1>JOHN DOE</h1>
+                </div>
+                <div class="profile-photo">
+                    <img src="https://via.placeholder.com/150" alt="Profile Photo">
+                </div>
+            </div>
+
+            <!-- WORK EXPERIENCE -->
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">Work Experience</h2>
+                </div>
+                <div class="timeline">
+                    <div class="timeline-entry">
+                        <div class="timeline-node"></div>
+                        <div class="entry-year">2023-01 - Present</div>
+                        <div class="entry-company">TechNova Analytics</div>
+                        <div class="entry-position">Data Scientist</div>
+                        <ul class="entry-description">
+                            <li>Analyzed large datasets (50M+ rows) to identify trends and build predictive dashboards
+                            </li>
+                            <li>Developed machine learning models improving customer churn prediction by 18%</li>
+                            <li>Implemented A/B testing frameworks to measure product improvements</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SKILLS -->
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">Skills & Expertise</h2>
+                </div>
+                <div class="skills-container">
+                    <div class="skill-item">
+                        <div class="skill-header">
+                            <span class="skill-name">Python</span>
+                            <span class="skill-percentage">95%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 95%;"></div>
+                        </div>
+                    </div>
+                    <div class="skill-item">
+                        <div class="skill-header">
+                            <span class="skill-name">SQL</span>
+                            <span class="skill-percentage">90%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 90%;"></div>
+                        </div>
+                    </div>
+                    <div class="skill-item">
+                        <div class="skill-header">
+                            <span class="skill-name">Machine Learning</span>
+                            <span class="skill-percentage">85%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 85%;"></div>
+                        </div>
+                    </div>
+                    <div class="skill-item">
+                        <div class="skill-header">
+                            <span class="skill-name">React</span>
+                            <span class="skill-percentage">80%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 80%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

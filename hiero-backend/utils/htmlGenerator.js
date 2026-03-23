@@ -1,6 +1,7 @@
 // Fast HTML Resume Generator
 // This generates instant HTML previews without LaTeX compilation
 
+import { generateHieroSignatureTemplate } from '../templates/hieroSignatureTemplate.js';
 import fs from 'fs';
 import path from 'path';
 
@@ -14,11 +15,33 @@ export function generateHTMLPreview(templateId, resumeData) {
     elegant: generateExecutiveHTML,
     functional: generateFunctionalHTML,
     rishi: generateModernHTML,
-    'priya-analytics': generateProfessionalHTML
+    'priya-analytics': generateProfessionalHTML,
+    'hiero-signature': (data) => generateHieroSignatureTemplate(convertToModernSchema(data))
   };
 
   const generator = templates[templateId] || templates.professionalcv;
   return generator(resumeData);
+}
+
+function convertToModernSchema(data) {
+  if (data.personalInfo) return data; // Already in modern schema
+
+  return {
+    personalInfo: {
+      fullName: data.basic?.full_name,
+      email: data.basic?.contact_info?.email,
+      phone: data.basic?.contact_info?.phone,
+      address: data.basic?.contact_info?.address,
+      website: data.basic?.website,
+      summary: data.basic?.career_summary
+    },
+    experience: data.experience || [],
+    education: data.education || [],
+    skills: Array.isArray(data.skills) ? data.skills :
+      (data.skills && typeof data.skills === 'object' ?
+        [...(data.skills.technical || []), ...(data.skills.management || [])] :
+        data.skills || [])
+  };
 }
 
 function sanitizeHTML(text) {
@@ -36,6 +59,7 @@ function formatContact(contact) {
   const parts = [];
   if (contact.email) parts.push(`<a href="mailto:${contact.email}" style="color: #45c604;">${contact.email}</a>`);
   if (contact.phone) parts.push(contact.phone);
+  if (contact.linkedin) parts.push(`<a href="${contact.linkedin}" target="_blank" style="color: #45c604;">LinkedIn</a>`);
   if (contact.address) parts.push(contact.address);
   return parts.join(' | ');
 }
@@ -70,24 +94,33 @@ function generateProfessionalHTML(data) {
 <body>
     <div class="header">
         <div class="name">${sanitizeHTML(basic.full_name || 'Your Name')}</div>
+        <div style="font-size: 14px; font-weight: bold; margin-bottom: 10px; color: #45c604;">${sanitizeHTML(basic.roleTitle || basic.headline || 'IoT ENGINEER')}</div>
         <div class="contact">${formatContact(contact)}</div>
         ${basic.website ? `<div style="margin-top: 5px;"><a href="${basic.website}" style="color: #45c604;">${sanitizeHTML(basic.website)}</a></div>` : ''}
     </div>
     
-    ${basic.career_summary ? `
-    <div class="section">
-        <div class="section-title">Professional Summary</div>
-        <p>${sanitizeHTML(basic.career_summary)}</p>
-    </div>
-    ` : ''}
-    
-    ${generateEducationHTML(data.education)}
-    ${generateProjectsHTML(data.projects)}
-    ${generateSkillsHTML(data.skills)}
-    ${generateCertificationsHTML(data.certifications)}
-    ${generateAchievementsHTML(data.achievements)}
-    ${generateHobbiesHTML(data.hobbies)}
-    ${generateReferencesHTML(data.references)}
+    ${(data.sectionOrder || ['summary', 'education', 'projects', 'skills', 'certifications', 'achievements']).map(sectionId => {
+        if (sectionId === 'summary' && basic.career_summary) {
+            return `<div class="section"><div class="section-title">Professional Summary</div><p>${sanitizeHTML(basic.career_summary)}</p></div>`;
+        }
+        if (sectionId === 'education') return generateEducationHTML(data.education);
+        if (sectionId === 'projects') return generateProjectsHTML(data.projects);
+        if (sectionId === 'skills') return generateSkillsHTML(data.skills);
+        if (sectionId === 'certifications') return generateCertificationsHTML(data.certifications);
+        if (sectionId === 'achievements') return generateAchievementsHTML(data.achievements);
+        if (sectionId === 'experience') {
+            const exp = data.experience || [];
+            if (exp.length === 0) return '';
+            return `<div class="section"><div class="section-title">Experience</div>${exp.map(e => `
+                <div class="item">
+                    <div class="item-title">${sanitizeHTML(e.jobTitle || '')}</div>
+                    <div class="item-subtitle">${sanitizeHTML(e.company || '')} | ${sanitizeHTML(e.startDate || '')} - ${sanitizeHTML(e.endDate || 'Present')}</div>
+                    <div class="item-details" style="white-space: pre-line;">${sanitizeHTML(e.description || '')}</div>
+                </div>
+            `).join('')}</div>`;
+        }
+        return '';
+    }).join('')}
 </body>
 </html>`;
 }
@@ -186,8 +219,8 @@ function generateProjectsHTML(projects) {
             <div class="item">
                 <div class="item-title">${sanitizeHTML(project.name || project.title || '')}</div>
                 <div class="item-subtitle">${project.year ? `${sanitizeHTML(project.year)}` : ''} ${project.duration ? `(${sanitizeHTML(project.duration)})` : ''}</div>
-                ${project.description ? `<div class="item-details">${sanitizeHTML(project.description)}</div>` : ''}
-                ${project.technologies ? `<div class="item-details"><strong>Technologies:</strong> ${sanitizeHTML(project.technologies)}</div>` : ''}
+                ${project.description ? `<div class="item-details" style="white-space: pre-line;">${sanitizeHTML(project.description)}</div>` : ''}
+                ${project.technologies || project.tech ? `<div class="item-details"><strong>Technologies:</strong> ${sanitizeHTML(project.technologies || project.tech)}</div>` : ''}
             </div>
         `).join('')}
     </div>
@@ -197,39 +230,26 @@ function generateProjectsHTML(projects) {
 function generateSkillsHTML(skills, layout = 'main') {
   if (!skills) return '';
 
-  const technical = Array.isArray(skills.technical) ? skills.technical : [];
-  const management = Array.isArray(skills.management) ? skills.management : [];
-  const allSkills = [...technical, ...management];
-
-  if (allSkills.length === 0) return '';
-
-  if (layout === 'sidebar') {
-    return `
-      <div class="section">
-          <div class="section-title">Skills</div>
-          ${allSkills.map(skill => `
-              <div class="item">
-                  <div>${sanitizeHTML(skill)}</div>
-                  <div class="skill-bar"><div class="skill-progress"></div></div>
-              </div>
-          `).join('')}
-      </div>
-    `;
+  let skillList = [];
+  if (Array.isArray(skills)) {
+    skillList = skills;
+  } else if (typeof skills === 'string') {
+    skillList = skills.split(/[\n,;]/).map(s => s.trim()).filter(Boolean);
+  } else if (typeof skills === 'object') {
+    const tech = Array.isArray(skills.technical) ? skills.technical : [];
+    const soft = Array.isArray(skills.soft) ? skills.soft : [];
+    const mgmt = Array.isArray(skills.management) ? skills.management : [];
+    skillList = [...tech, ...soft, ...mgmt];
   }
+
+  if (skillList.length === 0) return '';
 
   return `
     <div class="section">
         <div class="section-title">Skills</div>
-        ${technical.length > 0 ? `
-            <div class="skill-category">
-                <strong>Technical Skills:</strong> ${technical.map(skill => sanitizeHTML(skill)).join(', ')}
-            </div>
-        ` : ''}
-        ${management.length > 0 ? `
-            <div class="skill-category">
-                <strong>Management Skills:</strong> ${management.map(skill => sanitizeHTML(skill)).join(', ')}
-            </div>
-        ` : ''}
+        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+            ${skillList.map(skill => `<span style="background: #f0f0f0; padding: 4px 10px; border-radius: 4px; font-size: 13px; border-bottom: 2px solid #45c604;">${sanitizeHTML(skill)}</span>`).join('')}
+        </div>
     </div>
   `;
 }
@@ -240,12 +260,16 @@ function generateCertificationsHTML(certifications, layout = 'main') {
   return `
     <div class="section">
         <div class="section-title">Certifications</div>
-        ${certifications.map(cert => `
+        ${certifications.map(cert => {
+            const name = sanitizeHTML(cert.name || cert.title || '');
+            const issuer = sanitizeHTML(cert.issuer || cert.provider || '');
+            const year = sanitizeHTML(cert.year || '');
+            return `
             <div class="item">
-                <div class="item-title">${sanitizeHTML(cert.name || cert.title || '')}</div>
-                <div class="item-subtitle">${sanitizeHTML(cert.issuer || cert.provider || '')} ${cert.year ? `(${sanitizeHTML(cert.year)})` : ''}</div>
-            </div>
-        `).join('')}
+                <div class="item-title">${name}</div>
+                <div class="item-subtitle">${issuer}${year ? ` — ${year}` : ''}</div>
+            </div>`;
+        }).join('')}
     </div>
   `;
 }
@@ -257,9 +281,11 @@ function generateAchievementsHTML(achievements) {
     <div class="section">
         <div class="section-title">Achievements</div>
         <ul>
-            ${achievements.map(achievement => `
-                <li>${sanitizeHTML(achievement.title || achievement.name || achievement)} ${achievement.year ? `(${sanitizeHTML(achievement.year)})` : ''}</li>
-            `).join('')}
+            ${achievements.map(a => {
+                const val = typeof a === 'string' ? a : (a.title || a.name || '');
+                const sublines = val.split(';').map(s => s.trim()).filter(Boolean);
+                return sublines.map(line => `<li>${sanitizeHTML(line)}</li>`).join('');
+            }).join('')}
         </ul>
     </div>
   `;

@@ -343,16 +343,24 @@ export const generate = async (req, res) => {
             doc.fontSize(10).text(basic.career_summary);
             doc.moveDown();
           }
-          const sections = [
-            ['Experience', resumeData.data.experience],
-            ['Education', resumeData.data.education],
-            ['Projects', resumeData.data.projects],
-            ['Skills', resumeData.data.skills],
-            ['Certifications', resumeData.data.certifications],
-            ['Achievements', resumeData.data.achievements],
-            ['Hobbies', resumeData.data.hobbies],
-            ['References', resumeData.data.references]
-          ];
+          // Use dynamic section order if provided, otherwise fallback to default
+          const defaultOrder = ['experience', 'education', 'projects', 'skills', 'certifications', 'achievements', 'hobbies', 'references'];
+          const orderToUse = resumeData.data.sectionOrder || defaultOrder;
+
+          const sectionMapping = {
+            'experience': ['Experience', resumeData.data.experience],
+            'education': ['Education', resumeData.data.education],
+            'projects': ['Projects', resumeData.data.projects],
+            'skills': ['Skills', resumeData.data.skills],
+            'certifications': ['Certifications', resumeData.data.certifications],
+            'achievements': ['Achievements', resumeData.data.achievements],
+            'hobbies': ['Hobbies', resumeData.data.hobbies],
+            'references': ['References', resumeData.data.references],
+            'internships': ['Internships', resumeData.data.internships],
+            'summary': ['Summary', resumeData.data.summary] // Summary at the top usually, but respect order
+          };
+
+          const sections = orderToUse.map(key => sectionMapping[key]).filter(Boolean);
           sections.forEach(([label, content]) => {
             if (!content || (Array.isArray(content) && content.length === 0)) return;
             doc.moveDown(0.5);
@@ -486,16 +494,24 @@ export const previewPdf = async (req, res) => {
         doc.fontSize(10).text(basic.career_summary);
         doc.moveDown();
       }
-      const sections = [
-        ['Experience', resumeData.data.experience],
-        ['Education', resumeData.data.education],
-        ['Projects', resumeData.data.projects],
-        ['Skills', resumeData.data.skills],
-        ['Certifications', resumeData.data.certifications],
-        ['Achievements', resumeData.data.achievements],
-        ['Hobbies', resumeData.data.hobbies],
-        ['References', resumeData.data.references]
-      ];
+      // Use dynamic section order if provided, otherwise fallback to default
+      const defaultOrder = ['experience', 'education', 'projects', 'skills', 'certifications', 'achievements', 'hobbies', 'references'];
+      const orderToUse = resumeData.data.sectionOrder || defaultOrder;
+
+      const sectionMapping = {
+        'experience': ['Experience', resumeData.data.experience],
+        'education': ['Education', resumeData.data.education],
+        'projects': ['Projects', resumeData.data.projects],
+        'skills': ['Skills', resumeData.data.skills],
+        'certifications': ['Certifications', resumeData.data.certifications],
+        'achievements': ['Achievements', resumeData.data.achievements],
+        'hobbies': ['Hobbies', resumeData.data.hobbies],
+        'references': ['References', resumeData.data.references],
+        'internships': ['Internships', resumeData.data.internships],
+        'summary': ['Summary', resumeData.data.summary]
+      };
+
+      const sections = orderToUse.map(key => sectionMapping[key]).filter(Boolean);
       sections.forEach(([label, content]) => {
         if (!content || (Array.isArray(content) && content.length === 0)) return;
         doc.moveDown(0.5);

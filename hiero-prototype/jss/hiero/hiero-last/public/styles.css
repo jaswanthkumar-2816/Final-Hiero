@@ -30,60 +30,61 @@ body {
 .logo-glow {
   width: 100px;
   margin-bottom: 20px;
-  filter: drop-shadow(0 0 10px #00ff00a5);
-  animation: glow 2s ease-in-out infinite alternate;
+  filter: drop-shadow(0 0 10px #07e219);
 }
 
 @keyframes glow {
   from {
     transform: scale(1);
-    filter: drop-shadow(0 0 8px #00ff00);
+    filter: drop-shadow(0 0 8px #07e219);
   }
   to {
-    transform: scale(1.05);
-    filter: drop-shadow(0 0 20px #00ff00);
+    transform: scale(1.02);
+    filter: drop-shadow(0 0 15px #07e219);
   }
 }
 
 h1 {
-  font-size: 1.5rem;
+  font-size: 1.8rem; /* slightly larger */
   margin-bottom: 8px;
-  font-family: 'Poppins', sans-serif; /* Fixed typo: sans-serif' -> 'Poppins' */
+  font-family: 'Poppins', sans-serif;
 }
 
 .brand-glow {
-  color: #00ff00;
-  text-shadow: 0 0 8px #00ff00a5;
+  color: #07e219;
+  text-shadow: 0 0 8px rgba(7, 226, 25, 0.5);
 }
 
 .subtext {
-  font-size: 0.9rem;
+  font-size: 0.95rem; /* slightly larger */
   color: #ccc;
-  margin-bottom: 20px;
+  margin-bottom: 30px; /* more space */
 }
 
 .dashboard-actions {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 15px; /* more gap */
+  width: 100%;
 }
 
 .glow-button {
-  padding: 10px;
-  background-color: #00ff00c9;
-  color: #000;
-  font-weight: bold;
+  padding: 14px 28px; /* taller and wider */
+  background: linear-gradient(135deg, #07e219 0%, #05a313 100%);
+  color: #000; /* or white? screenshot shows black text on green */
+  font-weight: 600;
   text-decoration: none;
-  border-radius: 8px;
+  border-radius: 25px; /* pill shape */
   transition: all 0.3s ease;
-  box-shadow: 0 0 10px rgba(0, 255, 0, 0.4);
-  font-size: 0.9rem;
-  cursor: pointer; /* Ensure clickable */
+  box-shadow: 0 4px 15px rgba(7, 226, 25, 0.4);
+  font-size: 1rem;
+  cursor: pointer;
+  display: inline-block;
 }
 
 .glow-button:hover {
-  background-color: #00cc00;
-  transform: scale(1.03);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(7, 226, 25, 0.6);
 }
 
 .logout-button {

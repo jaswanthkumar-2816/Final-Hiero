@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hiero Admin | Command Center</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #00ff00;
+      --primary-dim: rgba(0, 255, 0, 0.1);
+      --primary-glow: rgba(0, 255, 0, 0.4);
+      --cyan: #00d9ff;
+      --cyan-glow: rgba(0, 217, 255, 0.3);
+      --purple: #a855f7;
+      --purple-glow: rgba(168, 85, 247, 0.3);
+      --orange: #ff6b35;
+      --orange-glow: rgba(255, 107, 53, 0.3);
+      --pink: #ff006e;
+      --pink-glow: rgba(255, 0, 110, 0.3);
+      --yellow: #ffd60a;
+      --yellow-glow: rgba(255, 214, 10, 0.3);
+      --bg-dark: #050505;
+      --bg-card: rgba(18, 18, 18, 0.6);
+      --text-main: #ffffff;
+      --text-muted: #888888;
+      --border: rgba(255, 255, 255, 0.08);
+      --glass: rgba(255, 255, 255, 0.02);
+      --glass-border: rgba(255, 255, 255, 0.05);
+      --card-radius: 16px;
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-dark);
+      background-image:
+        radial-gradient(circle at 10% 20%, rgba(0, 255, 0, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 90% 10%, rgba(0, 217, 255, 0.04) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(168, 85, 247, 0.04) 0%, transparent 40%),
+        radial-gradient(circle at 10% 80%, rgba(255, 107, 53, 0.03) 0%, transparent 40%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg-dark);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--primary);
+    }
+
+    /* Container */
+    .container {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      width: 100%;
+      flex: 1;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 40px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand h1 {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .brand span {
+      color: var(--primary);
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      color: var(--text-main);
+      padding: 10px 20px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn:hover {
+      background: var(--primary-dim);
+      border-color: var(--primary);
+      color: var(--primary);
+      transform: translateY(-2px);
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #000;
+      border: none;
+    }
+
+    .btn-primary:hover {
+      background: #00cc00;
+      color: #000;
+      box-shadow: 0 0 15px var(--primary-glow);
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--card-radius);
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+      transition: var(--transition);
+    }
+
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0.05;
+      transition: var(--transition);
+    }
+
+    .stat-card:hover::before {
+      opacity: 0.1;
+    }
+
+    /* Individual stat card colors */
+    .stat-card:nth-child(1) {
+      border-color: rgba(0, 217, 255, 0.3);
+    }
+
+    .stat-card:nth-child(1)::before {
+      background: linear-gradient(135deg, var(--cyan), transparent);
+    }
+
+    .stat-card:nth-child(1):hover {
+      border-color: var(--cyan);
+      box-shadow: 0 10px 30px var(--cyan-glow);
+    }
+
+    .stat-card:nth-child(1) .stat-icon {
+      color: var(--cyan);
+    }
+
+    .stat-card:nth-child(1) .stat-value {
+      color: var(--cyan);
+    }
+
+    .stat-card:nth-child(2) {
+      border-color: rgba(168, 85, 247, 0.3);
+    }
+
+    .stat-card:nth-child(2)::before {
+      background: linear-gradient(135deg, var(--purple), transparent);
+    }
+
+    .stat-card:nth-child(2):hover {
+      border-color: var(--purple);
+      box-shadow: 0 10px 30px var(--purple-glow);
+    }
+
+    .stat-card:nth-child(2) .stat-icon {
+      color: var(--purple);
+    }
+
+    .stat-card:nth-child(2) .stat-value {
+      color: var(--purple);
+    }
+
+    .stat-card:nth-child(3) {
+      border-color: rgba(255, 107, 53, 0.3);
+    }
+
+    .stat-card:nth-child(3)::before {
+      background: linear-gradient(135deg, var(--orange), transparent);
+    }
+
+    .stat-card:nth-child(3):hover {
+      border-color: var(--orange);
+      box-shadow: 0 10px 30px var(--orange-glow);
+    }
+
+    .stat-card:nth-child(3) .stat-icon {
+      color: var(--orange);
+    }
+
+    .stat-card:nth-child(3) .stat-value {
+      color: var(--orange);
+    }
+
+    .stat-card:nth-child(4) {
+      border-color: rgba(255, 214, 10, 0.3);
+    }
+
+    .stat-card:nth-child(4)::before {
+      background: linear-gradient(135deg, var(--yellow), transparent);
+    }
+
+    .stat-card:nth-child(4):hover {
+      border-color: var(--yellow);
+      box-shadow: 0 10px 30px var(--yellow-glow);
+    }
+
+    .stat-card:nth-child(4) .stat-icon {
+      color: var(--yellow);
+    }
+
+    .stat-card:nth-child(4) .stat-value {
+      color: var(--yellow);
+    }
+
+    .stat-card:nth-child(5) {
+      border-color: rgba(255, 0, 110, 0.3);
+    }
+
+    .stat-card:nth-child(5)::before {
+      background: linear-gradient(135deg, var(--pink), transparent);
+    }
+
+    .stat-card:nth-child(5):hover {
+      border-color: var(--pink);
+      box-shadow: 0 10px 30px var(--pink-glow);
+    }
+
+    .stat-card:nth-child(5) .stat-icon {
+      color: var(--pink);
+    }
+
+    .stat-card:nth-child(5) .stat-value {
+      color: var(--pink);
+    }
+
+    .stat-icon {
+      font-size: 28px;
+      margin-bottom: 16px;
+      filter: drop-shadow(0 0 8px currentColor);
+    }
+
+    .stat-value {
+      font-size: 36px;
+      font-weight: 700;
+      margin-bottom: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      text-shadow: 0 0 20px currentColor;
+    }
+
+    .stat-label {
+      font-size: 14px;
+      color: var(--text-muted);
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    /* Two Column Layout */
+    .dual-panel-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 1200px) {
+      .dual-panel-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Sections */
+    .section {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--card-radius);
+      padding: 30px;
+      backdrop-filter: blur(10px);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--cyan), var(--purple), var(--orange), var(--pink));
+      opacity: 0.6;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-title {
+      font-size: 20px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: linear-gradient(90deg, var(--cyan), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .section-title i {
+      color: var(--cyan);
+      filter: drop-shadow(0 0 10px var(--cyan-glow));
+      -webkit-text-fill-color: var(--cyan);
+    }
+
+    .count-badge {
+      background: rgba(0, 255, 0, 0.1);
+      color: var(--primary);
+      padding: 4px 12px;
+      border-radius: 99px;
+      font-size: 12px;
+      font-weight: 700;
+      border: 1px solid rgba(0, 255, 0, 0.2);
+    }
+
+    /* Reviews List */
+    .reviews-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      overflow-y: auto;
+      max-height: 600px;
+      padding-right: 8px;
+    }
+
+    .review-card {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .review-card::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: linear-gradient(180deg, var(--cyan), var(--purple));
+      opacity: 0;
+      transition: var(--transition);
+    }
+
+    .review-card:hover::before {
+      opacity: 1;
+    }
+
+    .review-card:nth-child(odd) {
+      border-color: rgba(0, 217, 255, 0.2);
+    }
+
+    .review-card:nth-child(odd):hover {
+      border-color: var(--cyan);
+      background: rgba(0, 217, 255, 0.05);
+      transform: translateX(4px);
+      box-shadow: 0 4px 20px var(--cyan-glow);
+    }
+
+    .review-card:nth-child(even) {
+      border-color: rgba(168, 85, 247, 0.2);
+    }
+
+    .review-card:nth-child(even):hover {
+      border-color: var(--purple);
+      background: rgba(168, 85, 247, 0.05);
+      transform: translateX(4px);
+      box-shadow: 0 4px 20px var(--purple-glow);
+    }
+
+    .review-card:nth-child(even)::before {
+      background: linear-gradient(180deg, var(--purple), var(--pink));
+    }
+
+    .review-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+
+    .review-user {
+      font-weight: 600;
+      background: linear-gradient(90deg, var(--cyan), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 4px;
+      font-size: 15px;
+    }
+
+    .review-date {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .review-rating {
+      color: #ffd700;
+      font-size: 14px;
+      background: rgba(255, 215, 0, 0.1);
+      padding: 4px 8px;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+
+    .review-text {
+      color: #ccc;
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    /* Users List */
+    .users-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow-y: auto;
+      max-height: 600px;
+      padding-right: 8px;
+    }
+
+    .user-card {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      transition: var(--transition);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .user-card::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: linear-gradient(180deg, var(--orange), var(--pink));
+      opacity: 0;
+      transition: var(--transition);
+    }
+
+    .user-card:hover::before {
+      opacity: 1;
+    }
+
+    .user-card:nth-child(odd) {
+      border-color: rgba(255, 107, 53, 0.2);
+    }
+
+    .user-card:nth-child(odd):hover {
+      border-color: var(--orange);
+      background: rgba(255, 107, 53, 0.05);
+      transform: translateX(4px);
+    }
+
+    .user-info {
+      flex: 1;
+    }
+
+    .user-name {
+      font-weight: 600;
+      background: linear-gradient(90deg, var(--orange), var(--pink));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 4px;
+      font-size: 15px;
+    }
+
+    .user-email {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .user-meta {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      margin-top: 8px;
+    }
+
+    .user-stat {
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .user-stat i {
+      color: var(--orange);
+      font-size: 10px;
+      filter: drop-shadow(0 0 4px var(--orange-glow));
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: 99px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .badge.active {
+      background: rgba(0, 255, 0, 0.1);
+      color: var(--primary);
+      border: 1px solid rgba(0, 255, 0, 0.2);
+    }
+
+    .badge.inactive {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+
+    /* Loading / Error / Empty States */
+    .state-message {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+      font-size: 16px;
+    }
+
+    .spinner {
+      margin: 0 auto 20px;
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(0, 255, 0, 0.1);
+      border-radius: 50%;
+      border-top-color: var(--primary);
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Password Gate */
+    .gate-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--bg-dark);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .gate-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 40px;
+      width: 100%;
+      max-width: 420px;
+      text-align: center;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    }
+
+    .gate-icon {
+      font-size: 48px;
+      color: var(--primary);
+      margin-bottom: 24px;
+      filter: drop-shadow(0 0 20px var(--primary-glow));
+    }
+
+    .gate-input-wrapper {
+      position: relative;
+      margin: 30px 0;
+    }
+
+    .gate-input {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      color: var(--primary);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 24px;
+      text-align: center;
+      letter-spacing: 8px;
+      outline: none;
+      transition: var(--transition);
+    }
+
+    .gate-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 1px var(--primary-dim);
+    }
+
+    .gate-btn {
+      width: 100%;
+      padding: 16px;
+      font-size: 16px;
+      margin-bottom: 12px;
+    }
+
+    .gate-error {
+      color: #ff4444;
+      font-size: 13px;
+      margin-top: 12px;
+      min-height: 20px;
+    }
+
+    @media (max-width: 768px) {
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .header {
+        flex-direction: column;
+        gap: 20px;
+        align-items: flex-start;
+      }
+
+      .header-actions {
+        width: 100%;
+      }
+
+      .header-actions .btn {
+        flex: 1;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Password Gate -->
+  <div id="passwordGate" class="gate-overlay">
+    <div class="gate-card">
+      <div class="gate-icon">
+        <i class="fas fa-fingerprint"></i>
+      </div>
+      <h2>Security Access</h2>
+      <p style="color: var(--text-muted); margin-top: 8px;">Enter Admin PIN or use Biometrics</p>
+
+      <div class="gate-input-wrapper">
+        <input type="password" id="adminPinInput" class="gate-input" maxlength="4" placeholder="••••"
+          inputmode="numeric">
+        <div id="passwordError" class="gate-error"></div>
+      </div>
+
+      <button id="passwordSubmit" class="btn btn-primary gate-btn">
+        Unlock Dashboard
+      </button>
+
+      <button id="fingerprintBtn" class="btn gate-btn" style="justify-content: center;">
+        <i class="fas fa-fingerprint"></i> Use Biometrics
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div id="dashboardContent" class="container" style="display: none;">
+    <!-- Header -->
+    <header class="header">
+      <div class="brand">
+        <h1>HIERO <span>ADMIN</span></h1>
+      </div>
+      <div class="header-actions">
+        <button id="refreshBtn" class="btn">
+          <i class="fas fa-sync-alt"></i> Refresh Data
+        </button>
+        <a href="/" class="btn" style="text-decoration: none;">
+          <i class="fas fa-external-link-alt"></i> Live Site
+        </a>
+      </div>
+    </header>
+
+    <!-- Loading State -->
+    <div id="loadingState" class="state-message" style="display: none;">
+      <div class="spinner"></div>
+      <p>Fetching secure data...</p>
+    </div>
+
+    <!-- Error State -->
+    <div id="errorState" class="state-message" style="display: none;">
+      <div style="font-size: 40px; margin-bottom: 16px;">⚠️</div>
+      <h3 style="margin-bottom: 8px;">Connection Failed</h3>
+      <p id="errorMessage" style="color: #ff4444;"></p>
+      <button onclick="location.reload()" class="btn btn-primary"
+        style="margin: 20px auto; display: inline-flex;">Retry</button>
+    </div>
+
+    <!-- Data Content -->
+    <div id="dataView" style="display: none;">
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-header">
+            <i class="fas fa-users stat-icon"></i>
+            <div class="stat-value" id="totalUsers">0</div>
+            <div class="stat-label">Total Users</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-header">
+            <i class="fas fa-user-check stat-icon"></i>
+            <div class="stat-value" id="uniqueUsers">0</div>
+            <div class="stat-label">Unique Visitors</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-header">
+            <i class="fas fa-door-open stat-icon"></i>
+            <div class="stat-value" id="totalVisits">0</div>
+            <div class="stat-label">Total Logins</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-header">
+            <i class="fas fa-star stat-icon"></i>
+            <div class="stat-value" id="avgRating">0.0</div>
+            <div class="stat-label">Average Rating</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-header">
+            <i class="fas fa-comment-alt stat-icon"></i>
+            <div class="stat-value" id="totalReviews">0</div>
+            <div class="stat-label">Total Reviews</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Two Column Layout: Reviews Left, User Logins Right -->
+      <div class="dual-panel-grid">
+        <!-- LEFT: User Reviews -->
+        <section class="section">
+          <div class="section-header">
+            <div class="section-title">
+              <i class="fas fa-star-half-alt"></i> User Reviews
+            </div>
+            <span class="count-badge" id="reviewCount">0</span>
+          </div>
+          <div id="reviewsContainer" class="reviews-list">
+            <div class="state-message">No reviews yet</div>
+          </div>
+        </section>
+
+        <!-- RIGHT: User Logins -->
+        <section class="section">
+          <div class="section-header">
+            <div class="section-title">
+              <i class="fas fa-users-cog"></i> Recent Logins
+            </div>
+            <span class="count-badge" id="userCount">0</span>
+          </div>
+          <div id="usersContainer" class="users-list">
+            <div class="state-message">No users found</div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const ADMIN_PIN = '2816';
+    const ADMIN_EMAIL = 'jaswanth'; // Filter out admin email
+
+    // UI Elements
+    const gate = document.getElementById('passwordGate');
+    const dashboard = document.getElementById('dashboardContent');
+    const loading = document.getElementById('loadingState');
+    const error = document.getElementById('errorState');
+    const dataView = document.getElementById('dataView');
+    const errorMsg = document.getElementById('errorMessage');
+    const pinInput = document.getElementById('adminPinInput');
+    const pinBtn = document.getElementById('passwordSubmit');
+    const bioBtn = document.getElementById('fingerprintBtn');
+    const pinError = document.getElementById('passwordError');
+    const refreshBtn = document.getElementById('refreshBtn');
+
+    // --- Auth Logic ---
+
+    function unlockDashboard() {
+      gate.style.display = 'none';
+      dashboard.style.display = 'block';
+      loadData();
+    }
+
+    function checkPin() {
+      if (pinInput.value === ADMIN_PIN) {
+        unlockDashboard();
+      } else {
+        pinError.textContent = 'Invalid PIN - Access Denied';
+        pinInput.classList.add('shake');
+        setTimeout(() => pinInput.classList.remove('shake'), 500);
+        pinInput.value = '';
+      }
+    }
+
+    pinBtn.addEventListener('click', checkPin);
+    pinInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') checkPin();
+    });
+
+    // Biometrics
+    async function handleBiometrics() {
+      try {
+        bioBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Scanning...';
+
+        if (!window.PublicKeyCredential) {
+          throw new Error('Biometrics not supported');
+        }
+
+        const storedId = localStorage.getItem('adminFingerprintId');
+
+        if (!storedId) {
+          await registerBiometric();
+        } else {
+          await verifyBiometric(storedId);
+        }
+      } catch (err) {
+        console.error(err);
+        pinError.textContent = 'Biometric Auth Failed. Use PIN.';
+        bioBtn.innerHTML = '<i class="fas fa-fingerprint"></i> Use Biometrics';
+      }
+    }
+
+    async function registerBiometric() {
+      const challenge = new Uint8Array(32);
+      crypto.getRandomValues(challenge);
+
+      let rpId = window.location.hostname;
+      if (rpId === '127.0.0.1') rpId = 'localhost';
+
+      const cred = await navigator.credentials.create({
+        publicKey: {
+          challenge,
+          rp: { name: "Hiero Admin", id: rpId },
+          user: {
+            id: new Uint8Array(16),
+            name: "admin@hiero.com",
+            displayName: "Admin"
+          },
+          pubKeyCredParams: [{ type: "public-key", alg: -7 }],
+          authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required" },
+          timeout: 60000
+        }
+      });
+
+      const id = btoa(String.fromCharCode(...new Uint8Array(cred.rawId)));
+      localStorage.setItem('adminFingerprintId', id);
+      pinError.style.color = '#00ff00';
+      pinError.textContent = 'Fingerprint Registered!';
+      setTimeout(unlockDashboard, 1000);
+    }
+
+    async function verifyBiometric(storedId) {
+      const challenge = new Uint8Array(32);
+      crypto.getRandomValues(challenge);
+      const idBuffer = Uint8Array.from(atob(storedId), c => c.charCodeAt(0));
+
+      const assertion = await navigator.credentials.get({
+        publicKey: {
+          challenge,
+          allowCredentials: [{
+            id: idBuffer.buffer,
+            type: 'public-key',
+            transports: ['internal']
+          }],
+          userVerification: "required"
+        }
+      });
+
+      if (assertion) {
+        pinError.style.color = '#00ff00';
+        pinError.textContent = 'Authenticated!';
+        setTimeout(unlockDashboard, 500);
+      }
+    }
+
+    bioBtn.addEventListener('click', handleBiometrics);
+
+    // --- Data Logic ---
+
+    async function loadData() {
+      loading.style.display = 'block';
+      dataView.style.display = 'none';
+      error.style.display = 'none';
+
+      try {
+        const backend = 'https://hiero-resume-backend.onrender.com';
+        const res = await fetch(`${backend}/api/admin/dashboard`);
+
+        if (!res.ok) throw new Error(`Server returned ${res.status}`);
+
+        const data = await res.json();
+        renderDashboard(data);
+
+        loading.style.display = 'none';
+        dataView.style.display = 'block';
+      } catch (err) {
+        console.error(err);
+        loading.style.display = 'none';
+        error.style.display = 'block';
+        errorMsg.textContent = err.message + '. Is the backend running?';
+      }
+    }
+
+    function renderDashboard(data) {
+      // Stats
+      const stats = data.analytics || {};
+      document.getElementById('totalUsers').textContent = stats.totalUsers || 0;
+      document.getElementById('uniqueUsers').textContent = stats.uniqueUsersCount || 0;
+      document.getElementById('totalVisits').textContent = stats.totalVisits || 0;
+      document.getElementById('avgRating').textContent = stats.averageRating || '0.0';
+      document.getElementById('totalReviews').textContent = stats.totalReviews || 0;
+
+      // Users - Filter out admin email
+      const usersContainer = document.getElementById('usersContainer');
+      const users = (data.users || []).filter(u => !u.email.toLowerCase().includes(ADMIN_EMAIL.toLowerCase()));
+
+      document.getElementById('userCount').textContent = users.length;
+
+      if (users.length === 0) {
+        usersContainer.innerHTML = '<div class="state-message">No users found</div>';
+      } else {
+        usersContainer.innerHTML = users.map(u => {
+          const isActive = u.lastLogin && (Date.now() - new Date(u.lastLogin).getTime()) < 604800000;
+          return `
+                <div class="user-card">
+                    <div class="user-info">
+                        <div class="user-name">${u.username || 'User'}</div>
+                        <div class="user-email">${u.email}</div>
+                        <div class="user-meta">
+                            <div class="user-stat">
+                                <i class="fas fa-sign-in-alt"></i>
+                                ${u.loginCount || 0} logins
+                            </div>
+                            <div class="user-stat">
+                                <i class="fas fa-clock"></i>
+                                ${u.lastLogin ? new Date(u.lastLogin).toLocaleDateString() : 'Never'}
+                            </div>
+                        </div>
+                    </div>
+                    <span class="badge ${isActive ? 'active' : 'inactive'}">
+                        ${isActive ? 'Active' : 'Inactive'}
+                    </span>
+                </div>`;
+        }).join('');
+      }
+
+      // Reviews - Filter out admin email
+      const reviewContainer = document.getElementById('reviewsContainer');
+      const reviews = (data.reviews || []).filter(r => !r.userEmail.toLowerCase().includes(ADMIN_EMAIL.toLowerCase()));
+
+      document.getElementById('reviewCount').textContent = reviews.length;
+
+      if (reviews.length === 0) {
+        reviewContainer.innerHTML = '<div class="state-message">No reviews yet</div>';
+      } else {
+        reviewContainer.innerHTML = reviews.map(r => `
+                <div class="review-card">
+                    <div class="review-header">
+                        <div>
+                            <div class="review-user">${r.userName || r.userEmail}</div>
+                            <div class="review-date">${new Date(r.createdAt).toLocaleDateString()}</div>
+                        </div>
+                        <div class="review-rating">⭐ ${r.rating}/5</div>
+                    </div>
+                    <div class="review-text">"${r.reviewText}"</div>
+                </div>
+            `).join('');
+      }
+    }
+
+    refreshBtn.addEventListener('click', () => {
+      refreshBtn.innerHTML = '<i class="fas fa-sync-alt fa-spin"></i> Refreshing...';
+      loadData().then(() => {
+        refreshBtn.innerHTML = '<i class="fas fa-check"></i> Updated';
+        setTimeout(() => {
+          refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh Data';
+        }, 1500);
+      });
+    });
+
+    window.addEventListener('load', () => {
+      document.getElementById('passwordGate').style.display = 'flex';
+    });
+
+  </script>
+</body>
+
+</html>

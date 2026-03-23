@@ -133,6 +133,14 @@ const availableTemplates = [
     description: 'A premium, high-fidelity template with a specialized two-column layout and blue accents. Perfect for Data Scientists and Analytical roles.',
     preview: '/templates/previews/hiero-blue.png',
     recommended: ['Data Scientist', 'Business Analyst', 'Engineer']
+  },
+  {
+    id: 'hiero-signature',
+    name: 'Hiero Signature',
+    category: 'premium',
+    description: 'Modern minimalist A4 portrait with a bold two-column split layout. Features a grayscale aesthetic with bold orange accents and a vertical timeline.',
+    preview: '/templates/previews/hiero-signature.png',
+    recommended: ['Graphic Designer', 'UI/UX Designer', 'Creative Lead']
   }
 ];
 

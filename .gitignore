@@ -4,6 +4,7 @@ node_modules/
 *.log
 uploads/
 temp/
+.cache/
 .DS_Store
 *.pdf
 all_templates_test_*/
@@ -22,7 +23,21 @@ test_*.js
 *.png
 *.jpeg
 *.jpg
+
+# Allow essential branding
+!*logohiero*.png
+!*logo-hiero*.png
+!Screenshot*.png
+!WhatsApp*.jpeg
+!favicon*.png
+!favicon.ico
+!test-photo.png
+
 *.backup
 *.backup.*
 !README.md
 !📌_READ_ME_FIRST.md
+
+# Allow mock interview workspace
+!mock_interview/
+!mock_interview/**

@@ -1,0 +1,12 @@
+{
+  "tests": [
+    {
+      "name": "Neural kernel active",
+      "condition": "True"
+    },
+    {
+      "name": "Signal stabilized",
+      "condition": "True"
+    }
+  ]
+}

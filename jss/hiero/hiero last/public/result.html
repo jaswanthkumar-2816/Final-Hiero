@@ -906,7 +906,7 @@
               Practice common interview questions for <strong id="interview-skill-name">your top skill</strong>
             </p>
             <button class="btn"
-              onclick="window.location.href='mock-interview.html?skill=' + encodeURIComponent(document.getElementById('interview-skill-name').textContent)"
+              onclick="window.location.href='coming-soon.html?type=interview&skill=' + encodeURIComponent(document.getElementById('interview-skill-name').textContent)"
               style="width: 100%; padding: 12px 20px;">
               Start Mock Interview
             </button>
@@ -1156,11 +1156,11 @@
           li.setAttribute('aria-label', `View project: ${projectLabel}`);
           li.tabIndex = 0;
           li.innerHTML = `<span class="icon">🌱</span> ${sanitize(projectLabel)}`;
-          li.onclick = () => window.location.href = `project.html?name=${encodeURIComponent(projectName)}`;
+          li.onclick = () => window.location.href = `coming-soon.html?type=project&name=${encodeURIComponent(projectName)}`;
           li.onkeydown = (e) => {
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault();
-              window.location.href = `project.html?name=${encodeURIComponent(projectName)}`;
+              window.location.href = `coming-soon.html?type=project&name=${encodeURIComponent(projectName)}`;
             }
           };
           projectsBox.appendChild(li);

@@ -76,20 +76,20 @@ body.light-mode .existing-review p {
 /* THEME TOGGLE BUTTON */
 .theme-toggle {
     position: fixed;
-    top: 20px;
-    left: 20px;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    bottom: 24px;
+    left: 24px;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     color: white;
-    font-size: 18px;
-    backdrop-filter: blur(10px);
+    font-size: 14px;
+    backdrop-filter: blur(5px);
     transition: all 0.3s ease;
     z-index: 1000;
 }
@@ -168,4 +168,183 @@ body.light-mode .splash-screen {
 body.light-mode .splash-screen img {
   filter: drop-shadow(0 0 10px rgba(0,0,0,0.2));
   animation: none; /* simple logo for light mode */
+}
+
+/* Premium Analysis Page Overrides */
+body.light-mode .header {
+    background: rgba(255, 255, 255, 0.9);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+body.light-mode .logo-text {
+    color: #1a1a1a;
+}
+
+body.light-mode .right-section {
+    background: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1) !important;
+}
+
+body.light-mode .hero-title, 
+body.light-mode .hero-title span {
+    color: #1a1a1a !important;
+    text-shadow: none !important;
+}
+
+body.light-mode .hero-title span {
+    color: #05a313 !important;
+}
+
+body.light-mode .hero-desc,
+body.light-mode .status-indicator,
+body.light-mode .form-header h3,
+body.light-mode .footer-note {
+    color: #555 !important;
+}
+
+body.light-mode .match-preview-card {
+    background: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05) !important;
+    color: #1a1a1a !important;
+}
+
+body.light-mode .card-info p {
+    color: #666 !important;
+}
+
+body.light-mode .gauge-circle-bg {
+    stroke: rgba(0, 0, 0, 0.05) !important;
+}
+
+body.light-mode .mode-toggle {
+    background: #f0f0f0 !important;
+}
+
+body.light-mode .mode-btn.active {
+    background: #ffffff !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+    color: #1a1a1a !important;
+}
+
+body.light-mode .upload-box {
+    background: #f9f9f9 !important;
+    border-color: #ddd !important;
+}
+
+body.light-mode .upload-icon {
+    background: #eee !important;
+    color: #888 !important;
+}
+
+body.light-mode .upload-text h5 {
+    color: #1a1a1a !important;
+}
+
+body.light-mode .upload-text p {
+    color: #777 !important;
+}
+
+body.light-mode .upload-btn-mini {
+    background: #eee !important;
+    color: #333 !important;
+}
+
+body.light-mode .pasted-text-area {
+    background: #f9f9f9 !important;
+    border-color: #ddd !important;
+    color: #333 !important;
+}
+
+body.light-mode .analyser-pill {
+    background: rgba(5, 163, 19, 0.1) !important;
+    border-color: rgba(5, 163, 19, 0.2) !important;
+    color: #05a313 !important;
+}
+
+body.light-mode .stat-box h5 {
+    color: #05a313 !important;
+}
+
+/* Learn & Result Page Navigation Overrides */
+body.light-mode .nav-header {
+    background: rgba(255, 255, 255, 0.9) !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+    backdrop-filter: blur(12px);
+}
+
+body.light-mode .app-brand span {
+    color: #1a1a1a !important;
+}
+
+body.light-mode .nav-btn {
+    color: #555 !important;
+}
+
+body.light-mode .nav-btn:hover {
+    background: rgba(0, 0, 0, 0.04) !important;
+    color: #000 !important;
+}
+
+body.light-mode .nav-btn.active {
+    background: rgba(5, 163, 19, 0.1) !important;
+    color: #05a313 !important;
+    box-shadow: none !important;
+}
+
+body.light-mode .theme-toggle-btn,
+body.light-mode .theme-toggle {
+    background: rgba(0, 0, 0, 0.05) !important;
+    border-color: rgba(0, 0, 0, 0.1) !important;
+    color: #555 !important;
+}
+
+body.light-mode .user-avatar,
+body.light-mode .user-avatar-small,
+body.light-mode .user-avatar-nav {
+    background: rgba(0, 0, 0, 0.05) !important;
+    border-color: rgba(0, 0, 0, 0.1) !important;
+    color: #333 !important;
+}
+
+/* Learn Content Overrides */
+body.light-mode .hero h1 span,
+body.light-mode #skill-display span {
+    color: #05a313 !important;
+}
+
+body.light-mode .video-card {
+    background: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05) !important;
+}
+
+body.light-mode .video-title {
+    color: #1a1a1a !important;
+}
+
+body.light-mode .tutor-card {
+    background: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08) !important;
+}
+
+body.light-mode .chat-body {
+    background: #f8f9fa !important;
+}
+
+body.light-mode .message.bot {
+    background: #ffffff !important;
+    color: #333 !important;
+    border: 1px solid rgba(0,0,0,0.05) !important;
+}
+
+body.light-mode .chat-footer {
+    border-top: 1px solid rgba(0,0,0,0.05) !important;
+}
+
+body.light-mode .chat-input {
+    background: #f1f3f5 !important;
+    color: #333 !important;
 }

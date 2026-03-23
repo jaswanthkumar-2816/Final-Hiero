@@ -101,7 +101,7 @@
     <script>
         let sessionData = null;
         let currentLanguage = 'en';
-        const API_BASE = 'http://localhost:5001';
+        const API_BASE = '';
         
         // Get session ID from URL
         const urlParams = new URLSearchParams(window.location.search);
@@ -250,10 +250,31 @@
             }
         }
         
+        function identifyIntent(msg) {
+            const m = msg.toLowerCase().trim();
+            const words = m.split(/\s+/);
+            const isGreeting = words.some(w => ['hi', 'hello', 'hey', 'greetings'].includes(w));
+            if (isGreeting || m.includes('hi orbit') || m.includes('good morning')) return 'greeting';
+            if (m.includes('video') || m.includes('tutorial') || m.includes('start learning')) return 'tutorial_request';
+            if (m.includes('explain') || m.includes('what is')) return 'lesson_explanation';
+            if (m.includes('debug my code') || m.includes('fix error')) return 'debug_code';
+            if (m.includes('write code') || m.includes('generate code')) return 'generate_code';
+            if (m.includes('hint')) return 'hint';
+            if (m.includes('run') || m.includes('execute')) return 'run_code';
+            return 'general_question';
+        }
+
         async function sendMessage() {
             const input = document.getElementById('chatInput');
             const message = input.value.trim();
             if (!message) return;
+            
+            // Intent classification (Preprocessing)
+            const user_intent = identifyIntent(message);
+
+            // Extract tutorial titles from the page
+            const tutorialElements = document.querySelectorAll('.video-title');
+            const recommendedTutorials = Array.from(tutorialElements).map(el => el.innerText.trim());
             
             input.value = '';
             addMessage(message, 'user');
@@ -262,7 +283,15 @@
                 const response = await fetch(`${API_BASE}/api/chat`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ sessionId, message })
+                    body: JSON.stringify({ 
+                        sessionId, 
+                        message,
+                        intent: user_intent,
+                        skill: sessionData ? sessionData.skill : 'General Coding',
+                        lesson: sessionData ? sessionData.title : 'Learning Hub',
+                        lesson_description: sessionData ? (sessionData.description || '') : 'Curated content for missing skills.',
+                        recommended_tutorials: recommendedTutorials
+                    })
                 });
                 
                 const data = await response.json();

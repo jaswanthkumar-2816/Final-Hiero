@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -160,9 +161,17 @@
       font-size: 1.1rem;
     }
 
-    .rank-1 { color: #FFD700; }
-    .rank-2 { color: #C0C0C0; }
-    .rank-3 { color: #CD7F32; }
+    .rank-1 {
+      color: #FFD700;
+    }
+
+    .rank-2 {
+      color: #C0C0C0;
+    }
+
+    .rank-3 {
+      color: #CD7F32;
+    }
 
     .current-user {
       background: rgba(6, 229, 6, 0.1) !important;
@@ -212,6 +221,7 @@
         opacity: 0;
         transform: translateY(30px);
       }
+
       to {
         opacity: 1;
         transform: translateY(0);
@@ -223,6 +233,7 @@
         opacity: 0;
         transform: translateY(-30px);
       }
+
       to {
         opacity: 1;
         transform: translateY(0);
@@ -271,6 +282,7 @@
     }
   </style>
 </head>
+
 <body>
   <div class="container">
     <div class="header">
@@ -281,7 +293,7 @@
     <div class="nav-buttons">
       <a href="dashboard.html" class="btn">← Dashboard</a>
       <a href="learn.html" class="btn">Continue Learning</a>
-      <a href="project.html" class="btn">Projects</a>
+      <a href="coming-soon.html" class="btn">Projects</a>
     </div>
 
     <div class="stats-overview" id="stats-overview">
@@ -305,7 +317,7 @@
   <script>
     // Backend API configuration
     const API_BASE_URL = 'http://localhost:5005/api';
-    
+
     // Global variables
     let currentUser = null;
     let userStats = null;
@@ -316,13 +328,13 @@
       try {
         // Get current user info
         await getCurrentUser();
-        
+
         // Fetch user stats and leaderboard
         await Promise.all([
           fetchUserStats(),
           fetchLeaderboard()
         ]);
-        
+
         // Render all components
         renderStatsOverview();
         renderUserRank();
@@ -341,7 +353,7 @@
           window.location.href = 'index.html';
           return;
         }
-        
+
         // Decode token to get user info (basic implementation)
         const payload = JSON.parse(atob(token.split('.')[1]));
         currentUser = { id: payload.userId, username: payload.username };
@@ -360,7 +372,7 @@
             'Authorization': `Bearer ${token}`
           }
         });
-        
+
         if (response.ok) {
           const data = await response.json();
           userStats = data.stats;
@@ -382,7 +394,7 @@
             'Authorization': `Bearer ${token}`
           }
         });
-        
+
         if (response.ok) {
           const data = await response.json();
           leaderboardData = data.leaderboard;
@@ -398,7 +410,7 @@
     // Render stats overview
     function renderStatsOverview() {
       if (!userStats) return;
-      
+
       const container = document.getElementById('stats-overview');
       container.innerHTML = `
         <div class="stat-card">
@@ -427,10 +439,10 @@
     // Render user's rank
     function renderUserRank() {
       if (!leaderboardData.length || !currentUser) return;
-      
+
       const userEntry = leaderboardData.find(entry => entry.username === currentUser.username);
       const container = document.getElementById('your-rank');
-      
+
       if (userEntry) {
         container.style.display = 'block';
         container.innerHTML = `
@@ -456,12 +468,12 @@
     // Render leaderboard table
     function renderLeaderboard() {
       const container = document.getElementById('leaderboard-content');
-      
+
       if (!leaderboardData.length) {
         container.innerHTML = '<div class="error">No leaderboard data available</div>';
         return;
       }
-      
+
       const tableHTML = `
         <table class="leaderboard-table">
           <thead>
@@ -488,7 +500,7 @@
           </tbody>
         </table>
       `;
-      
+
       container.innerHTML = tableHTML;
     }
 
@@ -507,10 +519,10 @@
       const errorDiv = document.createElement('div');
       errorDiv.className = 'error';
       errorDiv.textContent = message;
-      
+
       const container = document.querySelector('.container');
       container.insertBefore(errorDiv, container.firstChild);
-      
+
       setTimeout(() => {
         errorDiv.remove();
       }, 5000);
@@ -520,4 +532,5 @@
     initializeApp();
   </script>
 </body>
+
 </html>

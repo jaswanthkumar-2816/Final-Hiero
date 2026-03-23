@@ -10,6 +10,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
     rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
     :root {
       --orbit-green: #00ff66;
@@ -153,7 +154,7 @@
     .workspace {
       flex: 1;
       display: grid;
-      grid-template-columns: 420px 1fr 380px;
+      grid-template-columns: 420px 1fr 520px;
       overflow: hidden;
     }
 
@@ -294,11 +295,11 @@
     }
 
     .bubble {
-      max-width: 90%;
-      padding: 14px 18px;
-      border-radius: 18px;
-      font-size: 14px;
-      line-height: 1.5;
+      max-width: 95%;
+      padding: 16px 20px;
+      border-radius: 20px;
+      font-size: 15px;
+      line-height: 1.6;
     }
 
     .bubble.orbit {
@@ -310,12 +311,12 @@
     }
 
     .bubble.you {
-      background: var(--orbit-green);
-      color: #000;
-      font-weight: 600;
+      background: rgba(0, 255, 102, 0.05);
+      border: 1px solid var(--orbit-green);
+      color: var(--text-primary);
       align-self: flex-end;
       border-bottom-right-radius: 4px;
-      box-shadow: 0 4px 12px var(--orbit-green-glow);
+      box-shadow: 0 4px 15px rgba(0, 255, 102, 0.1);
     }
 
     .chat-footer {
@@ -435,18 +436,33 @@
       position: absolute;
       bottom: 72px;
       left: 420px;
-      right: 380px;
+      right: 520px;
       height: 0;
       background: #000;
       border-top: 2px solid var(--orbit-green);
-      overflow: hidden;
       transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
       z-index: 50;
+      display: flex;
+      flex-direction: column;
     }
 
-    .console-drawer.open {
-      height: 260px;
+    .console-drawer.resizing {
+      transition: none !important;
+      user-select: none;
     }
+
+    .resizer {
+      position: absolute;
+      top: -4px;
+      left: 0;
+      right: 0;
+      height: 8px;
+      cursor: row-resize;
+      z-index: 100;
+      background: transparent;
+    }
+
+
 
     .c-header {
       padding: 12px 24px;
@@ -455,13 +471,40 @@
       font-weight: 800;
       display: flex;
       justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .close-btn {
+      cursor: pointer;
+      color: var(--text-secondary);
+      transition: 0.2s;
+      display: flex;
+      align-items: center;
+      padding: 4px;
+      border-radius: 4px;
+    }
+
+    .close-btn:hover {
+      color: #ff3232;
+      background: rgba(255, 50, 50, 0.1);
     }
 
     .c-body {
-      padding: 20px 24px;
+      padding: 10px 24px;
+      padding-bottom: 40px;
       font-family: var(--font-code);
       font-size: 13px;
       color: #00ff66;
+      overflow-y: auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      gap: 8px;
+    }
+
+    #console-out {
       white-space: pre-wrap;
     }
 
@@ -530,6 +573,114 @@
       margin-bottom: 40px;
     }
 
+    /* AI Code Blocks Styling */
+    .chat-stream pre {
+      background: #0d0d0d;
+      padding: 12px;
+      border-radius: 8px;
+      margin: 10px 0;
+      overflow-x: auto;
+      border: 1px solid var(--border-glass);
+    }
+
+    .chat-stream code {
+      font-family: var(--font-code);
+      font-size: 13px;
+      color: var(--orbit-green);
+    }
+
+    .chat-stream p {
+      margin-bottom: 8px;
+    }
+
+    .chat-stream ul,
+    .chat-stream ol {
+      margin-left: 20px;
+      margin-bottom: 8px;
+    }
+
+    /* Suggested Prompts */
+    .suggested-prompts {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .prompt-chip {
+      background: rgba(0, 255, 102, 0.03);
+      border: 1px solid var(--border-glass);
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      white-space: nowrap;
+      backdrop-filter: blur(5px);
+    }
+
+    .prompt-chip:hover {
+      background: rgba(0, 255, 102, 0.1);
+      color: var(--orbit-green);
+      border-color: var(--orbit-green);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0, 255, 102, 0.2);
+    }
+
+    /* Code Block Copy Button */
+    .code-block-wrapper {
+      position: relative;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid var(--border-glass);
+      color: var(--text-secondary);
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      cursor: pointer;
+      transition: 0.2s;
+      opacity: 0;
+      backdrop-filter: blur(4px);
+    }
+
+    .code-block-wrapper:hover .copy-btn {
+      opacity: 1;
+    }
+
+    .copy-btn:hover {
+      background: var(--orbit-green-dim);
+      color: var(--orbit-green);
+      border-color: var(--orbit-green);
+    }
+
+    /* Clear Chat Button */
+    .clear-chat {
+      cursor: pointer;
+      opacity: 0.5;
+      transition: 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .clear-chat:hover {
+      opacity: 1;
+      color: #ff3232;
+    }
+
+    /* AI Bubble Link Styling */
+    .chat-stream a {
+      color: var(--orbit-green);
+      text-decoration: underline;
+    }
+
     /* Responsive Fixes */
     @media (max-width: 1200px) {
       .workspace {
@@ -552,7 +703,7 @@
 
   <nav>
     <div class="nav-logo" onclick="location.href='/'">
-      <img src="logohiero copy.png" alt="Orbit">
+      <img src="logo-hiero.png" alt="Orbit">
       <span>ORBIT.STUDIO</span>
     </div>
     <div class="breadcrumb">
@@ -600,25 +751,42 @@
             <path
               d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm4.24 16L12 15.45 7.77 18l1.12-4.81-3.73-3.23 4.92-.42L12 5l1.92 4.53 4.92.42-3.73 3.23L16.23 18z" />
           </svg>
-          SOLUTIONS.JS
+          <span id="file-tab-name">SOLUTIONS.JS</span>
         </div>
       </div>
       <textarea id="code-area" spellcheck="false"></textarea>
 
       <div class="console-drawer" id="console">
+        <div class="resizer" id="resizer"></div>
         <div class="c-header">
-          <span>VIRTUAL TERMINAL v1.4.0</span>
-          <span style="color: var(--orbit-green)">STABLE CONNECTION</span>
+          <div style="display: flex; align-items: center; gap: 16px;">
+            <span id="terminal-title">VIRTUAL TERMINAL v1.4.0</span>
+            <span id="connection-status" style="color: var(--orbit-green); font-size: 9px; opacity: 0.8;">STABLE CONNECTION</span>
+          </div>
+          <div class="close-btn" id="close-console" title="Close Panel (Esc)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M18 6L6 18M6 6l12 12"></path>
+            </svg>
+          </div>
         </div>
         <div class="c-body" id="console-out"></div>
+        <div class="c-body" id="test-cases-out" style="display: none;"></div>
       </div>
     </main>
 
     <aside class="panel ai-panel">
       <div class="panel-header">
         <span>Orbit Neural Assistant</span>
-        <div
-          style="width: 8px; height: 8px; background: var(--orbit-green); border-radius: 50%; box-shadow: 0 0 10px var(--orbit-green);">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div class="clear-chat" onclick="clearChat()" title="Clear Conversation">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+            </svg>
+            <span style="font-size: 9px; font-weight: 800;">CLEAR</span>
+          </div>
+          <div
+            style="width: 8px; height: 8px; background: var(--orbit-green); border-radius: 50%; box-shadow: 0 0 10px var(--orbit-green);">
+          </div>
         </div>
       </div>
       <div class="chat-stream" id="chat-msgs">
@@ -635,19 +803,29 @@
             </svg>
           </div>
         </div>
+        <div class="suggested-prompts" id="suggested-prompts">
+          <span
+            style="font-size: 11px; color: var(--text-secondary); width: 100%; margin-bottom: 4px; font-weight: 700;">QUICK
+            ACTIONS:</span>
+          <!-- Prompts dynamically injected -->
+          <div class="prompt-chip" onclick="handlePromptClick('Explain this lesson')">Explain this lesson</div>
+          <div class="prompt-chip" onclick="handlePromptClick('Debug my code')">Debug my code</div>
+          <div class="prompt-chip" onclick="handlePromptClick('Give me a hint')">Give me a hint</div>
+          <div class="prompt-chip" onclick="handlePromptClick('Show example')">Show example</div>
+        </div>
       </div>
     </aside>
   </div>
 
   <footer class="footer-shelf">
     <div class="console-tab">
-      <div class="c-tab active" id="toggle-console">
+      <div class="c-tab active" id="tab-terminal">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <path d="M4 17l6-6-6-6M12 19h8" />
         </svg>
         TERMINAL
       </div>
-      <div class="c-tab">TEST CASES</div>
+      <div class="c-tab" id="tab-tests">TEST CASES</div>
     </div>
     <div class="master-btns">
       <button class="btn-run" id="btn-run">RUN LOGIC</button>
@@ -675,90 +853,579 @@
     const consoleOut = document.getElementById('console-out');
     const chatInp = document.getElementById('chat-inp');
     const chatMsgs = document.getElementById('chat-msgs');
+    let currentSkill = 'React';
+    let currentLesson = 'Neural Stream Analysis';
+    let lessonDifficulty = 'intermediate';
+    let conversationHistory = [];
+    let datasetSchema = null;
+
+    function normalizeMessage(msg) {
+      if (!msg) return "";
+
+      // 1. Scrub string representation of leaked objects
+      if (typeof msg === "string" && (msg === "[object Object]" || msg.includes("[object Object]"))) {
+        return "⚠️ (Orbit Signal Restored from Object Hole)\n```json\n" + JSON.stringify({ raw: msg }, null, 2) + "\n```";
+      }
+
+      if (typeof msg === "string") {
+        return msg;
+      }
+
+      if (typeof msg === "object") {
+        // If it contains code (Direct from User instruction)
+        if (msg.language && (msg.content || msg.code)) {
+          let codePart = msg.content || msg.code;
+          if (typeof codePart === 'object') codePart = JSON.stringify(codePart, null, 2);
+          return "```" + msg.language + "\n" + codePart + "\n```";
+        }
+
+        if (msg.code) {
+          let codePart = msg.code;
+          if (typeof codePart === 'object') codePart = JSON.stringify(codePart, null, 2);
+          return "```python\n" + codePart + "\n```";
+        }
+
+        // Handle implementation/explanation blocks
+        let output = "";
+        if (msg.implementation) {
+          const impl = msg.implementation;
+          if (typeof impl === "string") output += impl;
+          else if (typeof impl === "object") {
+            const lang = impl.language || "python";
+            let code = impl.content || impl.code || "";
+            if (typeof code === 'object') code = JSON.stringify(code, null, 2);
+            output += "\n\n```" + lang + "\n" + code + "\n```\n\n";
+          }
+        }
+        if (msg.explanation) {
+          output += (typeof msg.explanation === 'string' ? msg.explanation : "\n" + JSON.stringify(msg.explanation, null, 2));
+        }
+
+        if (output) return output;
+
+        // Final fallback JSON
+        return "```json\n" + JSON.stringify(msg, null, 2) + "\n```";
+      }
+
+      return String(msg);
+    }
 
     function initialize() {
       const params = new URLSearchParams(window.location.search);
-      const skill = params.get('skill') || 'React';
-      const title = params.get('title') || 'Neural Link Strategy';
+      currentSkill = params.get('skill') || 'React';
+      currentLesson = params.get('title') || 'Neural Link Strategy';
       const desc = params.get('description') || 'Implement a synchronized data processing pipeline to stabilize the orbital signal stream.';
-      const diff = params.get('difficulty') || 'intermediate';
+      lessonDifficulty = params.get('difficulty') || 'intermediate';
 
-      document.getElementById('p-title').innerText = title;
+      document.getElementById('p-title').innerText = currentLesson;
       document.getElementById('p-desc').innerText = desc;
-      document.getElementById('p-diff').innerText = diff.toUpperCase();
-      document.getElementById('p-diff').className = `difficulty ${diff.toLowerCase()}`;
-      document.getElementById('b-skill').innerText = skill.toUpperCase();
+      document.getElementById('p-diff').innerText = lessonDifficulty.toUpperCase();
+      document.getElementById('p-diff').className = `difficulty ${lessonDifficulty.toLowerCase()}`;
+      document.getElementById('b-skill').innerText = currentSkill.toUpperCase();
+      
+      const pId = params.get('id');
+      if (pId) document.getElementById('p-id').innerText = pId;
 
-      editor.value = "// Initialize Neural Stream\nfunction stabilizeSignal(packets) {\n    // Orbital logic here\n    console.log('Synchronizing signal...');\n    return true;\n}\n\nstabilizeSignal([]);";
+      // Better dynamic boilerplate
+      refreshBoilerplate();
+
+      // Language mismatch detection
+      const isPythonSkill = currentSkill.toLowerCase().includes('python') || currentSkill.toLowerCase().includes('tensorflow') || currentSkill.toLowerCase().includes('learning') || currentSkill.toLowerCase().includes('science');
+      const isJSInEditor = editor.value.includes('function') || editor.value.includes('const');
+
+      if (isPythonSkill && isJSInEditor) {
+        setTimeout(() => {
+          const switchApprove = confirm(`This challenge requires Python (TensorFlow), but your editor content looks like JavaScript. Would you like to switch to a Python template?`);
+          if (switchApprove) refreshBoilerplate('python');
+        }, 1000);
+      }
 
       // Orbit Assistant Logic
       setupOrbit();
+
+      // Configure marked to handle code blocks with custom wrappers
+      const renderer = new marked.Renderer();
+      renderer.code = (content, language) => {
+        // Handle both older (content as string) and newer (content as object) Marked versions
+        const code = typeof content === 'object' ? (content.text || "") : (content || "");
+        const lang = typeof content === 'object' ? (content.lang || "") : (language || "");
+        const id = 'code-' + Math.random().toString(36).substr(2, 9);
+        return `
+          <div class="code-block-wrapper">
+            <button class="copy-btn" onclick="copyToClipboard('${id}')">COPY</button>
+            <pre><code id="${id}" class="language-${lang}">${code}</code></pre>
+          </div>
+        `;
+      };
+      marked.setOptions({
+        renderer,
+        breaks: true,
+        gfm: true
+      });
+
+      // Dynamic File Tab Name & Terminal Header
+      const isPython = currentSkill.toLowerCase().includes('python') || currentSkill.toLowerCase().includes('tensorflow') || currentSkill.toLowerCase().includes('learning') || currentSkill.toLowerCase().includes('science');
+      const tabName = isPython ? 'SOLUTIONS.PY' : 'SOLUTIONS.JS';
+      document.getElementById('file-tab-name').innerText = tabName;
+
+      const terminalHeader = document.querySelector('.c-header span');
+      if (terminalHeader) {
+        terminalHeader.innerText = isPython ? 'PYTHON KERNEL v3.10.x' : 'VIRTUAL TERMINAL v1.4.0';
+      }
+    }
+
+    function refreshBoilerplate(forceLang = null) {
+      const lang = forceLang || (currentSkill.toLowerCase().includes('python') || currentSkill.toLowerCase().includes('tensorflow') || currentSkill.toLowerCase().includes('learning') || currentSkill.toLowerCase().includes('science') ? 'python' : 'javascript');
+      const commentMarker = lang === 'python' ? '#' : '//';
+      const defaultComment = `${commentMarker} PRACTICE: ${currentLesson}\n${commentMarker} Domain: ${currentSkill}\n${commentMarker} Difficulty: ${lessonDifficulty.toUpperCase()}\n\n`;
+
+      if (lang === 'python') {
+        editor.value = defaultComment + "import tensorflow as tf\nimport numpy as np\n\ndef main():\n    # Start your implementation here\n    print('Orbit Sandbox Initialized...')\n\nif __name__ == '__main__':\n    main()";
+      } else {
+        editor.value = defaultComment + "function solveTask() {\n    // Start your implementation here\n    console.log('Initiating solution core...');\n    return true;\n}\n\nsolveTask();";
+      }
+    }
+
+    function generateStarterCode() {
+      const isAI = currentSkill.toLowerCase().includes('tensorflow') || currentSkill.toLowerCase().includes('gan') || currentSkill.toLowerCase().includes('learning');
+      let starter = "";
+
+      if (isAI) {
+        starter = `\n# --- GENERATED STARTER CODE ---\n# Architecture for: ${currentLesson}\n\nimport tensorflow as tf\nfrom tensorflow.keras import layers\n\ndef build_generator():\n    model = tf.keras.Sequential([\n        layers.Dense(256, activation='relu', input_shape=(100,)),\n        layers.Dense(512, activation='relu'),\n        layers.Dense(784, activation='tanh')\n    ])\n    return model\n\ndef build_discriminator():\n    model = tf.keras.Sequential([\n        layers.Dense(512, activation='relu', input_shape=(784,)),\n        layers.Dense(256, activation='relu'),\n        layers.Dense(1, activation='sigmoid')\n    ])\n    return model\n\n# Compilation step\ncross_entropy = tf.keras.losses.BinaryCrossentropy()\n# Add training loop logic below...`;
+      } else {
+        starter = `\n// --- GENERATED STARTER CODE ---\nfunction handleLogic() {\n    // 1. Initialize data\n    const data = [];\n    \n    // 2. Process logic\n    // TODO: Implement the key challenge algorithm\n    \n    // 3. Return results\n    return data;\n}\n\nconsole.log(handleLogic());`;
+      }
+
+      editor.value += starter;
+      updateQuickActions();
+      alert("Starter code injected into workspace.");
+    }
+
+    function updateQuickActions() {
+      const promptContainer = document.getElementById('suggested-prompts');
+      const hasCode = editor.value.split('\n').filter(l => l.trim() && !l.trim().startsWith('//') && !l.trim().startsWith('#')).length > 3;
+
+      const basePrompts = `
+        <span style="font-size: 11px; color: var(--text-secondary); width: 100%; margin-bottom: 4px; font-weight: 700;">QUICK ACTIONS:</span>
+        <div class="prompt-chip" onclick="generateStarterCode()">Generate Starter Code</div>
+        <div class="prompt-chip" onclick="handlePromptClick('Explain this lesson')">Explain Lesson</div>
+        <div class="prompt-chip" onclick="handlePromptClick('Give me a hint')">Get Hint</div>
+      `;
+
+      const codePrompts = `
+        <span style="font-size: 11px; color: var(--text-secondary); width: 100%; margin-bottom: 4px; font-weight: 700;">EDITOR ACTIONS:</span>
+        <div class="prompt-chip" onclick="handlePromptClick('Run my code')">Run Code</div>
+        <div class="prompt-chip" onclick="handlePromptClick('Explain my code')">Explain Code</div>
+        <div class="prompt-chip" onclick="handlePromptClick('Debug my code')">Debug Code</div>
+        <div class="prompt-chip" onclick="handlePromptClick('Modify my code')">Modify Code</div>
+      `;
+
+      promptContainer.innerHTML = hasCode ? codePrompts : basePrompts;
+    }
+
+    function fillInput(text) {
+      chatInp.value = text;
+      chatInp.focus();
+    }
+
+    function handlePromptClick(prompt) {
+      let contextStr = `\n\n(Context: ${currentSkill} | Lesson: ${currentLesson})\n`;
+      const code = editor.value.trim();
+
+      let finalPrompt = prompt;
+
+      if (prompt.toLowerCase().includes('lesson') || prompt.toLowerCase().includes('hint')) {
+        finalPrompt = `${prompt} for "${currentLesson}" (${currentSkill}).`;
+      } else if (code && (prompt.toLowerCase().includes('code') || prompt.toLowerCase().includes('debug') || prompt.toLowerCase().includes('modify'))) {
+        finalPrompt = `${prompt} in the following code:\n\n\`\`\`\n${code}\n\`\`\``;
+      } else {
+        finalPrompt = `${prompt}${contextStr}`;
+      }
+
+      chatInp.value = finalPrompt;
+      document.getElementById('chat-send').click();
+    }
+
+    function clearChat() {
+      chatMsgs.innerHTML = `
+        <div class="bubble orbit">
+          Memory banks purged. Session reset. How can Orbit assist you with **${currentSkill}** today?
+        </div>
+      `;
+      conversationHistory = [];
+    }
+
+    function copyToClipboard(id) {
+      const el = document.getElementById(id);
+      const text = el.innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = el.parentElement.parentElement.querySelector('.copy-btn');
+        const originalText = btn.innerText;
+        btn.innerText = 'COPIED!';
+        btn.style.color = '#fff';
+        btn.style.background = 'var(--orbit-green)';
+        setTimeout(() => {
+          btn.innerText = originalText;
+          btn.style.color = '';
+          btn.style.background = '';
+        }, 2000);
+      });
+    }
+
+    function identifyIntent(msg) {
+      const m = msg.toLowerCase().trim();
+      const words = m.split(/\s+/);
+      const isGreeting = words.some(w => ['hi', 'hello', 'hey', 'greetings'].includes(w));
+      if (isGreeting || m.includes('hi orbit') || m.includes('good morning')) return 'greeting';
+      if (m.includes('video') || m.includes('tutorial') || m.includes('start learning')) return 'tutorial_request';
+      if (m.includes('explain') || m.includes('what is')) return 'lesson_explanation';
+      if (m.includes('debug my code') || m.includes('fix error')) return 'debug_code';
+      if (m.includes('write code') || m.includes('generate code')) return 'generate_code';
+      if (m.includes('hint')) return 'hint';
+      if (m.includes('run') || m.includes('execute')) return 'run_code';
+      return 'general_question';
     }
 
     function setupOrbit() {
       const btn = document.getElementById('chat-send');
-      const sendMessage = async () => {
-        const text = chatInp.value.trim();
-        if (!text) return;
 
-        appendBubble('you', text);
-        chatInp.value = '';
+      window.handleSend = async (customText = null, extraData = {}) => {
+        const question = customText || chatInp.value.trim();
+        if (!question) return;
 
-        const orbitBubble = appendBubble('orbit', 'Thinking...');
+        // Intent classification (Preprocessing)
+        const user_intent = customText ? 'debug_code' : identifyIntent(question);
+
+        // 1. Append User Bubble
+        appendBubble('you', question);
+        if (!customText) chatInp.value = '';
+
+        // 2. Show thinking bubble
+        const thinkingBubble = appendBubble('orbit', 'Orbit is thinking...');
+        let hasTokens = false;
+        let fullAnswer = "";
+
+        // Detect recommended tutorials if any exist on the page
+        const tutorialElements = document.querySelectorAll('.video-title');
+        const recommendedTutorials = Array.from(tutorialElements).map(el => el.innerText.trim());
+
+        // Capture Workspace Context
+        const editorCode = editor.value;
+        const terminalOutput = consoleOut.innerText || "No terminal output yet.";
+        const cursorPosition = editor.selectionStart;
+        const cursorLine = editorCode.substring(0, cursorPosition).split("\n").length;
 
         try {
-          const res = await fetch('/api/analysis/ask', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+          const response = await fetch("/api/chat/stream", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              question: text,
-              skill: document.getElementById('b-skill').innerText,
-              context: `Workspace: ${document.getElementById('p-title').innerText}`
+              message: question,
+              intent: user_intent,
+              mode: "problem_solver",
+              skill: currentSkill,
+              lesson: currentLesson,
+              problem_title: currentLesson,
+              problem_description: document.getElementById('p-desc').innerText,
+              user_code: editorCode, // Legacy support
+              editor_code: editorCode,
+              cursor_line: cursorLine,
+              terminal_output: terminalOutput,
+              dataset_schema: datasetSchema,
+              conversationHistory: conversationHistory,
+              recommended_tutorials: recommendedTutorials,
+              ...extraData
             })
           });
-          const data = await res.json();
-          orbitBubble.innerText = '';
-          await typeWriter(orbitBubble, data.answer);
-        } catch (e) {
-          orbitBubble.innerText = "System error. Neuro-link disrupted.";
+
+          if (!response.ok) {
+            thinkingBubble.innerText = "⚠️ Backend error: " + response.status;
+            return;
+          }
+
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder();
+          let partialChunk = "";
+
+          while (true) {
+            const { value, done } = await reader.read();
+            if (done) break;
+
+            const chunk = decoder.decode(value, { stream: true });
+            partialChunk += chunk;
+
+            const lines = partialChunk.split('\n');
+            partialChunk = lines.pop();
+
+            for (let line of lines) {
+              const trimmedLine = line.trim();
+              if (trimmedLine.startsWith('data: ')) {
+                const data = trimmedLine.slice(6);
+                if (data === '[DONE]') break;
+
+                try {
+                  const parsed = JSON.parse(data);
+                  
+                  // Step 5: Role-based filtering (Ignore internal system roles)
+                  if (['system', 'internal', 'router', 'tool_log'].includes(parsed.role)) continue;
+
+                  let token = parsed.token || parsed.answer || parsed.error || "";
+                  if (typeof token === "object") token = JSON.stringify(token);
+
+                  // Step 2: Filter internal diagnostic content
+                  const internalTerms = ["Detected", "Router", "Tool activation", "High demand detected", "Switching to model", "Orbit Diagnostic"];
+                  if (internalTerms.some(term => String(token).includes(term))) {
+                    console.log(`[Orbit Privacy Filter] Suppressed internal message: ${token}`);
+                    continue;
+                  }
+
+                  if (parsed.error) {
+                    token = `Orbit is currently experiencing high load. Please try again in a moment.`;
+                  }
+
+                  if (!hasTokens && token) {
+                    hasTokens = true;
+                    thinkingBubble.innerHTML = '';
+                    thinkingBubble.classList.remove('thinking');
+                  }
+
+                  fullAnswer += token;
+                } catch (e) { }
+              }
+            }
+
+            if (hasTokens) {
+              const cleanMarkdown = fullAnswer.replace(/\[object Object\]/g, "");
+              requestAnimationFrame(() => {
+                thinkingBubble.innerHTML = marked.parse(cleanMarkdown);
+              });
+            }
+            chatMsgs.scrollTop = chatMsgs.scrollHeight;
+          }
+
+          conversationHistory.push({ role: "user", content: question });
+          conversationHistory.push({ role: "assistant", content: fullAnswer });
+          conversationHistory = conversationHistory.slice(-6);
+
+        } catch (error) {
+          thinkingBubble.innerText = "System failure. Connection disrupted.";
+          console.error("Chat Failure:", error);
         }
       };
 
-      btn.onclick = sendMessage;
-      chatInp.onkeypress = (e) => { if (e.key === 'Enter') sendMessage(); };
+      btn.onclick = () => window.handleSend();
+      chatInp.onkeypress = (e) => { if (e.key === 'Enter') window.handleSend(); };
     }
 
     function appendBubble(role, text) {
-      const div = document.createElement('div');
-      div.className = `bubble ${role}`;
-      div.innerText = text;
+      const div = document.createElement("div");
+      div.className = "bubble " + role;
+
+      let safeText = "";
+      if (typeof text === "string") {
+        safeText = text.replace(/\[object Object\]/g, "⚠️ (Neural Sync Error)");
+      } else {
+        safeText = "```json\n" + JSON.stringify(text, null, 2) + "\n```";
+      }
+
+      div.innerHTML = marked.parse(safeText);
+
       chatMsgs.appendChild(div);
       chatMsgs.scrollTop = chatMsgs.scrollHeight;
       return div;
     }
 
-    function typeWriter(el, text) {
-      return new Promise(r => {
-        let i = 0;
-        const int = setInterval(() => {
-          if (i < text.length) {
-            el.innerText += text[i++];
-            chatMsgs.scrollTop = chatMsgs.scrollHeight;
-          } else {
-            clearInterval(int);
-            r();
-          }
-        }, 10);
-      });
+    function sanitize(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
     }
 
-    document.getElementById('toggle-console').onclick = () => {
-      consoleDrawer.classList.toggle('open');
+    function typeWriter(element, text) {
+      // No longer needed for real streaming, but kept for non-streamed logic if any
+      element.innerHTML = marked.parse(text);
+    }
+
+    const tabTerminal = document.getElementById('tab-terminal');
+    const tabTests = document.getElementById('tab-tests');
+    const terminalOut = document.getElementById('console-out');
+    const testsOut = document.getElementById('test-cases-out');
+
+    let preferredConsoleHeight = 300;
+
+    function setConsoleOpen(isOpen) {
+      if (isOpen) {
+        consoleDrawer.classList.add('open');
+        consoleDrawer.style.height = preferredConsoleHeight + 'px';
+      } else {
+        consoleDrawer.classList.remove('open');
+        consoleDrawer.style.height = '0px';
+      }
+    }
+
+    function switchTab(target) {
+      setConsoleOpen(true);
+      if (target === 'terminal') {
+        tabTerminal.classList.add('active');
+        tabTests.classList.remove('active');
+        terminalOut.style.display = 'block';
+        testsOut.style.display = 'none';
+        document.getElementById('terminal-title').innerText = currentSkill.toLowerCase().includes('python') ? 'PYTHON KERNEL v3.10.x' : 'VIRTUAL TERMINAL v1.4.0';
+        document.getElementById('connection-status').style.display = 'inline';
+      } else {
+        tabTerminal.classList.remove('active');
+        tabTests.classList.add('active');
+        terminalOut.style.display = 'none';
+        testsOut.style.display = 'block';
+        document.getElementById('terminal-title').innerText = 'TEST CASE VALIDATOR';
+        document.getElementById('connection-status').style.display = 'none';
+      }
+    }
+
+    tabTerminal.onclick = () => switchTab('terminal');
+    tabTests.onclick = () => switchTab('tests');
+
+    document.getElementById('close-console').onclick = (e) => {
+      e.stopPropagation();
+      setConsoleOpen(false);
+      editor.focus();
     };
 
-    document.getElementById('btn-run').onclick = () => {
-      consoleDrawer.classList.add('open');
-      consoleOut.innerText = "> Initializing Neural Environment...\n> Running logic checks...\n> Processing Signal Stream [0...99]\n> Result: VIRTUAL STABILITY SECURED.\n\nReady for deployment.";
+    // Keyboard shortcut: Escape to close console if open
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && consoleDrawer.classList.contains('open')) {
+        setConsoleOpen(false);
+        editor.focus();
+      }
+    });
+
+    // 🏆 Draggable Resize Logic
+    const resizer = document.getElementById('resizer');
+    let isResizing = false;
+
+    resizer.onmousedown = (e) => {
+      e.preventDefault();
+      isResizing = true;
+      consoleDrawer.classList.add('resizing');
+      document.body.style.cursor = 'row-resize';
+      document.body.style.userSelect = 'none';
+    };
+
+    window.onmousemove = (e) => {
+      if (!isResizing) return;
+      
+      const windowHeight = window.innerHeight;
+      const mouseY = e.clientY;
+      const bottomAnchor = 72; // The fixed 'bottom' value from CSS
+      
+      // The height should be the distance from the bottom anchor to the mouse
+      let newHeight = windowHeight - mouseY - bottomAnchor;
+      
+      // Constraints
+      const minH = 150;
+      const maxH = windowHeight * 0.6;
+      
+      if (newHeight < minH) newHeight = minH;
+      if (newHeight > maxH) newHeight = maxH;
+      
+      consoleDrawer.style.height = newHeight + "px";
+      preferredConsoleHeight = newHeight;
+    };
+
+    window.onmouseup = () => {
+      if (isResizing) {
+        isResizing = false;
+        consoleDrawer.classList.remove('resizing');
+        document.body.style.cursor = 'default';
+        document.body.style.userSelect = 'auto';
+      }
+    };
+
+    document.getElementById('btn-run').onclick = async () => {
+      setConsoleOpen(true);
+      terminalOut.innerText = "> Initializing Neural Kernel...\n> Submitting code for execution...";
+      terminalOut.scrollTop = terminalOut.scrollHeight;
+      
+      const userCode = editor.value;
+
+      try {
+        const response = await fetch('/api/run', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            code: userCode,
+            problem_title: currentLesson,
+            problem_id: document.getElementById('p-id').innerText
+          })
+        });
+        
+        const result = await response.json();
+        datasetSchema = result.dataset_schema;
+        
+        if (result.success) {
+          terminalOut.innerText = `> Program Output:\n${result.output}`;
+          terminalOut.scrollTop = terminalOut.scrollHeight;
+          
+          // Render Test Results
+          if (result.tests && result.tests.length > 0) {
+            const totalTests = result.tests.length;
+            const passedTests = result.tests.filter(t => t.result && t.result.trim() === 'Passed').length;
+            
+            let testHtml = `
+              <div style="padding-bottom: 8px; border-bottom: 1px solid var(--border-glass); margin-bottom: 2px;">
+                <h2 style="color: var(--orbit-green); font-size: 15px; margin-bottom: 2px;">TEST RESULTS</h2>
+                <div style="font-size: 11px; color: var(--text-secondary); font-weight: 700;">
+                  Passed: <span style="color: ${passedTests === totalTests ? 'var(--orbit-green)' : '#ffaa00'}">${passedTests} / ${totalTests}</span>
+                </div>
+              </div>
+            `;
+
+            result.tests.forEach(t => {
+              const isPassed = (t.result && t.result.trim() === 'Passed');
+              const statusColor = isPassed ? 'var(--orbit-green)' : '#ff3232';
+              const icon = isPassed ? '✓' : '✗';
+              
+              testHtml += `<div style="font-size: 13px; line-height: 1.6; margin-bottom: 4px; display: flex; align-items: flex-start;">` +
+                `<span style="color: ${statusColor}; font-weight: 800; margin-right: 10px; font-size: 15px;">${icon}</span>` +
+                `<div>` +
+                  `<span style="color: var(--text-secondary); opacity: 0.8;">Case ${t.case} — </span>` +
+                  `<span style="color: ${isPassed ? 'var(--text-primary)' : statusColor}; font-weight: 500;">${t.name}</span>` +
+                `</div>` +
+              `</div>`;
+            });
+            testsOut.innerHTML = testHtml;
+          } else {
+            testsOut.innerHTML = `<div style="color: var(--text-secondary)">No test cases defined for this problem.</div>`;
+          }
+          
+          // Analyze result with Orbit (Requirement 5)
+          if (window.handleSend) {
+            window.handleSend("Explain this execution result", { 
+              problem_title: currentLesson,
+              problem_description: document.getElementById('p-desc').innerText,
+              execution_output: result.output,
+              test_results: result.tests,
+              user_code: userCode,
+              dataset_schema: datasetSchema
+            });
+          }
+        } else {
+          terminalOut.innerText = `> Execution Error:\n${result.error || "Unknown failure."}`;
+          terminalOut.scrollTop = terminalOut.scrollHeight;
+          // Analyze result with Orbit
+          if (window.handleSend) {
+            window.handleSend("Explain this execution error", { 
+              problem_title: currentLesson,
+              problem_description: document.getElementById('p-desc').innerText,
+              execution_output: result.error,
+              user_code: userCode
+            });
+          }
+        }
+      } catch (err) {
+        terminalOut.innerText = `> Transmission Error:\nCould not reach the execution engine.`;
+        console.error("Run Logic Failure:", err);
+      }
     };
 
     document.getElementById('btn-submit').onclick = () => {

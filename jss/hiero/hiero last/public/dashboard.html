@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -314,6 +315,7 @@
         opacity: 0;
         transform: translateY(30px);
       }
+
       to {
         opacity: 1;
         transform: translateY(0);
@@ -325,6 +327,7 @@
         opacity: 0;
         transform: translateY(-30px);
       }
+
       to {
         opacity: 1;
         transform: translateY(0);
@@ -370,6 +373,7 @@
     }
   </style>
 </head>
+
 <body>
   <header class="header">
     <div class="header-content">
@@ -410,7 +414,7 @@
         <span class="action-icon">🚀</span>
         <h3 class="action-title">Complete Projects</h3>
         <p class="action-description">Build real-world projects to showcase your abilities</p>
-        <a href="project.html" class="action-btn">View Projects</a>
+        <a href="coming-soon.html" class="action-btn">View Projects</a>
       </div>
 
       <div class="action-card">
@@ -451,20 +455,23 @@
   </div>
 
   <!-- Progress Modal -->
-  <div id="progress-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000;">
-    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--card-bg); border: 2px solid var(--neon-green); border-radius: var(--radius); padding: 30px; max-width: 500px; width: 90%;">
+  <div id="progress-modal"
+    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000;">
+    <div
+      style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--card-bg); border: 2px solid var(--neon-green); border-radius: var(--radius); padding: 30px; max-width: 500px; width: 90%;">
       <h3 style="color: var(--neon-green); margin-top: 0;">📊 Your Progress</h3>
       <div id="progress-content">
         <!-- Progress details will be loaded here -->
       </div>
-      <button onclick="hideProgressModal()" style="background: var(--neon-green); color: var(--black); border: none; padding: 10px 20px; border-radius: var(--radius); cursor: pointer; margin-top: 20px;">Close</button>
+      <button onclick="hideProgressModal()"
+        style="background: var(--neon-green); color: var(--black); border: none; padding: 10px 20px; border-radius: var(--radius); cursor: pointer; margin-top: 20px;">Close</button>
     </div>
   </div>
 
   <script>
     // Backend API configuration
     const API_BASE_URL = 'http://localhost:5005/api';
-    
+
     // Global variables
     let currentUser = null;
     let userStats = null;
@@ -474,10 +481,10 @@
       try {
         // Get current user info
         await getCurrentUser();
-        
+
         // Fetch user stats
         await fetchUserStats();
-        
+
         // Render dashboard components
         renderStatsOverview();
         renderRecentActivity();
@@ -496,11 +503,11 @@
           window.location.href = 'index.html';
           return;
         }
-        
+
         // Decode token to get user info
         const payload = JSON.parse(atob(token.split('.')[1]));
         currentUser = { id: payload.userId, username: payload.username };
-        
+
         // Update user name in header
         document.getElementById('user-name').textContent = currentUser.username;
       } catch (error) {
@@ -518,7 +525,7 @@
             'Authorization': `Bearer ${token}`
           }
         });
-        
+
         if (response.ok) {
           const data = await response.json();
           userStats = data.stats;
@@ -543,7 +550,7 @@
     // Render stats overview
     function renderStatsOverview() {
       if (!userStats) return;
-      
+
       const container = document.getElementById('stats-overview');
       container.innerHTML = `
         <div class="stat-card">
@@ -572,9 +579,9 @@
     // Render recent activity
     function renderRecentActivity() {
       const container = document.getElementById('activity-list');
-      
+
       const activities = [];
-      
+
       // Add skill activities
       if (userStats.completedSkills) {
         userStats.completedSkills.slice(-3).forEach(skill => {
@@ -586,7 +593,7 @@
           });
         });
       }
-      
+
       // Add project activities
       if (userStats.completedProjects) {
         userStats.completedProjects.slice(-3).forEach(project => {
@@ -598,10 +605,10 @@
           });
         });
       }
-      
+
       // Sort by date (most recent first)
       activities.sort((a, b) => new Date(b.date) - new Date(a.date));
-      
+
       if (activities.length === 0) {
         container.innerHTML = `
           <li class="activity-item">
@@ -628,7 +635,7 @@
     // Render badges
     function renderBadges() {
       const container = document.getElementById('badges-grid');
-      
+
       if (!userStats.badges || userStats.badges.length === 0) {
         container.innerHTML = `
           <div style="grid-column: 1 / -1; text-align: center; color: #fff; padding: 20px;">
@@ -663,10 +670,10 @@
     function showProgressModal() {
       const modal = document.getElementById('progress-modal');
       const content = document.getElementById('progress-content');
-      
+
       const nextLevelPoints = (userStats.level * 100) - userStats.totalPoints;
       const progressPercent = ((userStats.totalPoints % 100) / 100) * 100;
-      
+
       content.innerHTML = `
         <div style="margin-bottom: 20px;">
           <strong>Level Progress:</strong>
@@ -680,7 +687,7 @@
         <div><strong>Total Points:</strong> ${userStats.totalPoints.toLocaleString()}</div>
         <div><strong>Badges Earned:</strong> ${userStats.badges.length}</div>
       `;
-      
+
       modal.style.display = 'block';
     }
 
@@ -712,7 +719,7 @@
       `;
       errorDiv.textContent = message;
       document.body.appendChild(errorDiv);
-      
+
       setTimeout(() => {
         errorDiv.remove();
       }, 5000);
@@ -729,4 +736,5 @@
     initializeApp();
   </script>
 </body>
+
 </html>

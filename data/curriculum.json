@@ -1,0 +1,11 @@
+{
+    "React": {
+        "hooks": "React Hooks allow you to use state and other React features without writing a class. Essential hooks include useState for local state management and useEffect for side effects like data fetching or DOM manipulation. Rule of Hooks: only call Hooks at the top level and only from React functions.",
+        "effects": "The useEffect Hook lets you perform side effects in functional components. It serves the same purpose as componentDidMount, componentDidUpdate, and componentWillUnmount in React classes, but unified into a single API.",
+        "context": "React Context provides a way to pass data through the component tree without having to pass props down manually at every level. It's often used for global state management like user authentication or UI themes."
+    },
+    "JavaScript": {
+        "promises": "A Promise is an object representing the eventual completion or failure of an asynchronous operation. It can be in one of three states: pending, fulfilled, or rejected. async/await provides a cleaner syntax for working with promises.",
+        "closures": "A closure is the combination of a function bundled together (enclosed) with references to its surrounding state (the lexical environment). In other words, a closure gives you access to an outer function's scope from an inner function."
+    }
+}

@@ -34,7 +34,7 @@ if (loginForm) {
     if (!name || !password) return alert("Please enter both name and password.");
 
     try {
-      const response = await fetch("http://localhost:5000/login", {
+      const response = await fetch("/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: `${name}@example.com`, password })
@@ -86,7 +86,7 @@ async function loadCareerToolsPage() {
   }
 
   try {
-    const response = await fetch("http://localhost:5000/dashboard", {
+    const response = await fetch("/dashboard", {
       headers: { Authorization: `Bearer ${token}` },
     });
 
@@ -137,7 +137,7 @@ analysisForm?.addEventListener("submit", async (e) => {
   formData.append("jobDescription", jdFile);
 
   try {
-    const res = await fetch("http://localhost:5000/api/resume/analyze", {
+    const res = await fetch("/api/resume/analyze", {
       method: "POST",
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       body: formData,
@@ -291,14 +291,37 @@ window.addEventListener("DOMContentLoaded", async () => {
 
   async function simulateTyping(message) {
     typingIndicator.style.display = "block";
-    await new Promise((r) => setTimeout(r, 800 + message.length * 15));
+    // Faster typewriter or immediate display if long
+    const delay = message.length > 100 ? 5 : 15;
     typingIndicator.style.display = "none";
-    await addMessage(message);
+
+    const messageDiv = document.createElement("div");
+    messageDiv.className = `chat-message bot-message`;
+    const iconDiv = document.createElement("div");
+    iconDiv.className = "bot-icon";
+    iconDiv.textContent = "O";
+    messageDiv.appendChild(iconDiv);
+    const span = document.createElement("span");
+    messageDiv.appendChild(span);
+    chatContainer.appendChild(messageDiv);
+
+    let i = 0;
+    return new Promise(resolve => {
+      const interval = setInterval(() => {
+        if (i < message.length) {
+          span.textContent += message[i++];
+          chatContainer.scrollTop = chatContainer.scrollHeight;
+        } else {
+          clearInterval(interval);
+          resolve();
+        }
+      }, delay);
+    });
   }
 
   async function callApi(endpoint, data) {
     const token = localStorage.getItem("token");
-    const res = await fetch(`http://localhost:5000${endpoint}`, {
+    const res = await fetch(`${endpoint}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

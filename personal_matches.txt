@@ -1,0 +1,8 @@
+2231: const personal = data.personalInfo || {};
+2267: if (personal && personal.profilePhoto) {
+2269: doc.image(personal.profilePhoto, MARGIN, photoY, {
+2298: let val = (data.contact && data.contact[field.key]) || personal[field.key] || data[field.key];
+2299: if (field.key === 'phone' && !val && personal.contact_info) val = personal.contact_info;
+2310: const fullName = personal.fullName || data.name || (data.basic && data.basic.full_name) || 'RESUME OWNER';
+2316: const titleText = (data.title || personal.roleTitle || personal.headline || (data.experience && data.experience[0] && data.experience[0].jobTitle) || 'PROFESSIONAL').toUpperCase();
+2321: const summaryText = data.profile || data.summary || personal.summary || (data.basic && data.basic.career_summary) || '';

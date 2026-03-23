@@ -1,0 +1,16 @@
+{
+  "tests": [
+    {
+      "name": "Data loaded",
+      "condition": "'df' in locals() and len(df) > 0"
+    },
+    {
+      "name": "Model trained",
+      "condition": "'model' in locals()"
+    },
+    {
+      "name": "MAE reasonable",
+      "condition": "locals().get('mae', 100) < 10"
+    }
+  ]
+}

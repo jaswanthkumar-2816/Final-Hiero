@@ -13,9 +13,19 @@ const puppeteer = require('puppeteer');
 
 const pdfParse = require('pdf-parse');
 const axios = require('axios');
-dotenv.config();
+// Load environment variables if not already loaded (e.g., when running standalone)
+if (!process.env.GOOGLE_CLIENT_ID) {
+    dotenv.config();
+    // Try subfolder if running from root but env is in login-system
+    if (!process.env.GOOGLE_CLIENT_ID) {
+        dotenv.config({ path: path.join(__dirname, '..', 'login-system', '.env') });
+    }
+}
 
 const router = express.Router();
+
+console.log('🔑 Auth Routes initialized:');
+console.log('   GOOGLE_CLIENT_ID       =', process.env.GOOGLE_CLIENT_ID ? '✅ Loaded' : '❌ Missing');
 
 // Public URL for redirects (gateway URL)
 const PUBLIC_URL = process.env.PUBLIC_URL || 'http://localhost:2816';
@@ -41,7 +51,7 @@ async function extractTextFromPdf(filePath) {
     }
 }
 
-const { generateTemplateHTML } = require('./templates');
+
 
 // ✨ Helper: Extract sections by keywords
 function extractSection(text, keywords) {

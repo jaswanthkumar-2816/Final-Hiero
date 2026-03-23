@@ -1,0 +1,241 @@
+/* src/styles/resume.css */
+.resume-view {
+    --primary-purple: #4c1d95;
+    --light-purple: #f3e8ff;
+    --secondary-purple: #7e22ce;
+    --text-muted: #6b7280;
+    --text-dark: #1f2937;
+    --text-light: #f9fafb;
+    --background: #faf5ff;
+    --card-bg: #ffffff;
+    --accent: #9333ea;
+
+    font-family: 'Montserrat', sans-serif;
+    background-color: var(--background);
+    color: var(--text-dark);
+    line-height: 1.6;
+    padding: 40px 20px;
+    min-height: 100vh;
+}
+
+.resume-container {
+    max-width: 900px;
+    margin: 0 auto;
+    background: var(--card-bg);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    border-radius: 20px;
+    overflow: hidden;
+    padding: 40px;
+    position: relative;
+}
+
+.resume-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+    border-bottom: 3px solid var(--secondary-purple);
+    padding-bottom: 20px;
+}
+
+.main-heading {
+    font-family: 'Playfair Display', serif;
+    font-size: 5rem;
+    font-weight: 700;
+    line-height: 0.8;
+    color: var(--primary-purple);
+    letter-spacing: -2px;
+}
+
+.subtitle {
+    font-family: 'Dancing Script', cursive;
+    font-size: 2rem;
+    color: var(--secondary-purple);
+    margin-top: 10px;
+}
+
+.header-right {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.profile-photo-container {
+    width: 150px;
+    height: 150px;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 5px solid var(--light-purple);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 10px;
+}
+
+.profile-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background-color: var(--light-purple);
+}
+
+.name {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--primary-purple);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.resume-body {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 40px;
+}
+
+.section-block {
+    margin-bottom: 30px;
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+}
+
+.section-title {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--secondary-purple);
+    margin-bottom: 20px;
+    letter-spacing: 1px;
+    border-left: 4px solid var(--primary-purple);
+    padding-left: 10px;
+}
+
+.contact-info {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.contact-box {
+    display: flex;
+    align-items: center;
+    background: var(--light-purple);
+    padding: 10px 15px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    color: var(--primary-purple);
+    transition: transform 0.2s ease;
+}
+
+.contact-box:hover {
+    transform: translateX(5px);
+}
+
+.contact-box .icon {
+    margin-right: 15px;
+    font-size: 1.2rem;
+    color: var(--accent);
+}
+
+.skills-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.skill-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.skill-circle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.skill-circle::before {
+    content: '';
+    position: absolute;
+    width: 48px;
+    height: 48px;
+    background: white;
+    border-radius: 50%;
+}
+
+.skill-name {
+    position: relative;
+    z-index: 1;
+    font-size: 0.7rem;
+    text-align: center;
+    font-weight: 700;
+    color: var(--primary-purple);
+    line-height: 1.1;
+    padding: 0 5px;
+}
+
+.experience-item {
+    margin-bottom: 25px;
+    padding-bottom: 25px;
+    border-bottom: 1px dashed var(--light-purple);
+}
+
+.exp-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.exp-header .role {
+    font-weight: 700;
+    font-size: 1.15rem;
+    color: var(--primary-purple);
+    flex-basis: 100%;
+}
+
+.exp-header .company {
+    color: var(--secondary-purple);
+    font-weight: 600;
+}
+
+.bullet-points {
+    list-style: none;
+    margin-top: 10px;
+}
+
+.bullet-points li {
+    position: relative;
+    padding-left: 20px;
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+}
+
+.bullet-points li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-weight: 700;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.section-block {
+    animation: fadeIn 0.8s ease forwards;
+}

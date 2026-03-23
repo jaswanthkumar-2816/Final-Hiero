@@ -111,23 +111,37 @@ export function renderPriyaAnalyticsTemplate(data) {
   <head>
     <meta charset="UTF-8" />
     <style>
-      @page { margin: 1in; }
-      body { font-family: "Helvetica", Arial, sans-serif; font-size: 11pt; color: #000; }
-      .page { width: 100%; max-width: 800px; margin: 0 auto; }
-      .top-bar { background: #f2f2f2; padding: 12px 18px; margin-bottom: 10px; }
-      .name { font-size: 18pt; font-weight: 700; }
-      .contact { font-size: 10pt; margin-top: 4px; }
-      .links { font-size: 10pt; margin-top: 8px; }
-      .section { margin-top: 14px; }
-      .section h2 { font-size: 11.5pt; font-weight: 700; margin: 0; }
-      .rule { border-top: 1px solid #000; margin-top: 3px; margin-bottom: 6px; }
-      .edu-degree { font-weight: 700; margin: 2px 0; }
-      .edu-inst { margin: 0 0 6px 0; }
-      .proj-title { font-weight: 700; margin: 4px 0 0 0; }
-      .proj-meta { margin: 0 0 6px 0; }
-      .bullet-list { margin: 0 0 4px 15px; padding: 0; }
-      .bullet-list li { margin: 0 0 2px 0; }
-      p { margin: 0 0 4px 0; }
+      @page { size: A4; margin: 0.5in; }
+      body { 
+        font-family: "Helvetica", Arial, sans-serif; 
+        font-size: 9.5pt; 
+        color: #000; 
+        line-height: 1.2;
+        margin: 0;
+        padding: 0;
+      }
+      .page { 
+        width: 210mm; 
+        min-height: 297mm; 
+        margin: 0 auto; 
+        box-sizing: border-box;
+        padding: 15mm;
+        overflow: hidden;
+      }
+      .top-bar { background: #f2f2f2; padding: 10px 15px; margin-bottom: 8px; }
+      .name { font-size: 16pt; font-weight: 700; }
+      .contact { font-size: 9pt; margin-top: 3px; }
+      .links { font-size: 9pt; margin-top: 4px; }
+      .section { margin-top: 10px; }
+      .section h2 { font-size: 11pt; font-weight: 700; margin: 0; }
+      .rule { border-top: 1px solid #000; margin-top: 2px; margin-bottom: 4px; }
+      .edu-degree { font-weight: 700; margin: 1px 0; }
+      .edu-inst { margin: 0 0 4px 0; }
+      .proj-title { font-weight: 700; margin: 2px 0 0 0; }
+      .proj-meta { margin: 0 0 4px 0; }
+      .bullet-list { margin: 0 0 3px 15px; padding: 0; }
+      .bullet-list li { margin: 0 0 1px 0; }
+      p { margin: 0 0 3px 0; }
     </style>
   </head>
   <body>
