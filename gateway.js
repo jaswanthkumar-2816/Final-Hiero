@@ -162,6 +162,40 @@ app.use('/api', chatRouter); // Handles /api/chat
 const runRouter = require('./routes/run');
 app.use('/api', runRouter); // Handles /api/run
 
+const interviewRouter = require('./routes/interview');
+app.use('/api/interview', interviewRouter);
+
+// 📊 Admin Analytics (localhost-only + password-protected)
+const { router: analyticsRouter } = require('./routes/analytics');
+app.use('/api/admin', analyticsRouter);
+
+// 📱 QR Code tracker — record server-side THEN redirect (guaranteed, no JS needed)
+app.get('/qr', async (req, res) => {
+    try {
+        const { PageView } = require('./routes/analytics');
+        await PageView.create({
+            page:      'qr-landing',
+            source:    'qr',
+            ip:        req.ip,
+            userAgent: req.headers['user-agent'],
+            timestamp: new Date()
+        });
+        console.log(`[QR] Scan recorded from IP: ${req.ip}`);
+    } catch(e) {
+        console.warn('[QR] Could not record scan:', e.message);
+    }
+    res.redirect('/?ref=qr');
+});
+
+// Admin Analytics Dashboard (localhost-only HTML)
+app.get('/admin', (req, res) => {
+    const host = req.hostname;
+    if (host !== 'localhost' && host !== '127.0.0.1' && host !== '::1') {
+        return res.status(403).send('<h1>403 Forbidden</h1><p>This page is only accessible locally.</p>');
+    }
+    res.sendFile(require('path').join(__dirname, 'admin-analytics.html'));
+});
+
 // Support legacy shortened paths
 app.use('/auth/signup', (req, res) => res.redirect(307, '/signup'));
 app.use('/auth/login', (req, res) => res.redirect(307, '/login'));
@@ -193,7 +227,7 @@ app.get(['/resume-builder', '/resume-builder.html', '/dashboard/resume-builder']
 app.get(['/resume-form', '/resume-form.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'resume-form.html')));
 app.get(['/domain-selection', '/domain-selection.html', '/dashboard/domain-selection.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'domain-selection.html')));
 app.get(['/project', '/project.html', '/dashboard/project.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'coming-soon.html')));
-app.get(['/interview', '/interview.html', '/mock-interview', '/mock-interview.html', '/dashboard/mock-interview.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'coming-soon.html')));
+app.get(['/interview', '/interview.html', '/mock-interview', '/mock-interview.html', '/dashboard/mock-interview.html'], (req, res) => res.sendFile(path.join(__dirname, 'mock_interview', 'mock-interview.html')));
 
 
 app.get(['/analysis', '/analysis.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'analysis.html')));
@@ -204,6 +238,7 @@ app.get(['/ai-photo-formalizer', '/ai-photo-formalizer.html'], (req, res) => res
 // ======================
 app.use(express.static(landingDirPath, { index: false }));
 app.use(express.static(resumeBuilderPath, { index: false }));
+app.use('/mock-interview-assets', express.static(path.join(__dirname, 'mock_interview')));
 app.use('/public', express.static(resumeBuilderPath));
 app.use(express.static(path.join(__dirname, 'login-system'), { index: false }));
 

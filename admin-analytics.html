@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hiero · Command Center</title>
+  <link rel="icon" href="/logohiero.png">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+  /* ══ RESET ══ */
+  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
+  body {
+    font-family:'Inter',sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+    transition:background .3s, color .3s;
+  }
+
+  /* ══ DESIGN TOKENS ══ */
+  /* ── LIGHT THEME (default) ── */
+  :root, [data-theme="light"] {
+    --bg:       #f5f6fa;
+    --white:    #ffffff;
+    --s1:       #f0f1f7;
+    --border:   #e2e4ec;
+    --border2:  #cacdd8;
+    --text:     #0f1117;
+    --t2:       #4b5066;
+    --muted:    #8c91a8;
+    --nav-bg:   rgba(255,255,255,0.88);
+    --card-bg:  #ffffff;
+    --input-bg: #f5f6fa;
+    --login-bg: linear-gradient(145deg,#eef0f8 0%,#f8f9ff 50%,#edf2fb 100%);
+    --green:    #0d5c36;
+    --green-m:  #0f7245;
+    --green-d:  rgba(13,92,54,0.10);
+    --green-b:  rgba(13,92,54,0.18);
+    --blue:     #1a2f6e;
+    --blue-d:   rgba(26,47,110,0.09);
+    --blue-b:   rgba(26,47,110,0.18);
+    --amber:    #7a4e0a;
+    --amber-d:  rgba(122,78,10,0.09);
+    --amber-b:  rgba(122,78,10,0.18);
+    --red:      #8b1a2f;
+    --red-d:    rgba(139,26,47,0.09);
+    --red-b:    rgba(139,26,47,0.18);
+    --purple:   #43176b;
+    --purple-d: rgba(67,23,107,0.09);
+    --shadow-sm:0 1px 3px rgba(0,0,0,0.06),0 1px 2px rgba(0,0,0,0.04);
+    --shadow:   0 4px 16px rgba(0,0,0,0.07),0 1px 4px rgba(0,0,0,0.04);
+    --shadow-lg:0 12px 40px rgba(0,0,0,0.10),0 2px 8px rgba(0,0,0,0.06);
+    --r:12px; --r2:16px;
+  }
+
+  /* ── DARK THEME ── */
+  [data-theme="dark"] {
+    --bg:       #09090c;
+    --white:    #111116;
+    --s1:       #18181e;
+    --border:   rgba(255,255,255,0.07);
+    --border2:  rgba(255,255,255,0.13);
+    --text:     #f0f0f3;
+    --t2:       #9090a8;
+    --muted:    #505065;
+    --nav-bg:   rgba(9,9,12,0.82);
+    --card-bg:  #111116;
+    --input-bg: #18181e;
+    --login-bg: radial-gradient(ellipse at 50% -10%,rgba(13,92,54,0.08) 0%,transparent 60%),#09090c;
+    --green:    #34d399;
+    --green-m:  #10b981;
+    --green-d:  rgba(52,211,153,0.10);
+    --green-b:  rgba(52,211,153,0.22);
+    --blue:     #818cf8;
+    --blue-d:   rgba(129,140,248,0.10);
+    --blue-b:   rgba(129,140,248,0.22);
+    --amber:    #fbbf24;
+    --amber-d:  rgba(251,191,36,0.10);
+    --amber-b:  rgba(251,191,36,0.22);
+    --red:      #fb7185;
+    --red-d:    rgba(251,113,133,0.10);
+    --red-b:    rgba(251,113,133,0.22);
+    --purple:   #c084fc;
+    --purple-d: rgba(192,132,252,0.10);
+    --shadow-sm:0 1px 4px rgba(0,0,0,0.3);
+    --shadow:   0 4px 20px rgba(0,0,0,0.4);
+    --shadow-lg:0 16px 48px rgba(0,0,0,0.6);
+  }
+
+  [data-theme="dark"] body { background:var(--bg); color:var(--text); }
+  [data-theme="dark"] .lcard,
+  [data-theme="dark"] .panel,
+  [data-theme="dark"] .sc { background:var(--card-bg) !important; }
+  [data-theme="dark"] .inp { background:var(--input-bg); color:var(--text); }
+  [data-theme="dark"] .dl,
+  [data-theme="dark"] .tbl tr:hover td { background:var(--s1); }
+  [data-theme="dark"] .nbtn { background:var(--s1); color:var(--t2); }
+  [data-theme="dark"] #L { background:var(--login-bg); }
+
+  /* ══ LOGIN SCREEN ══════════════════════════════════════════════════════════ */
+  #L {
+    position:fixed; inset:0; z-index:999;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--login-bg);
+    transition:background .3s;
+  }
+
+  .lcard {
+    position:relative; z-index:1;
+    width:min(420px,92vw);
+    background:var(--white);
+    border:1px solid var(--border);
+    border-radius:24px;
+    padding:44px 38px;
+    box-shadow:var(--shadow-lg), 0 0 0 1px rgba(13,92,54,0.03);
+    animation:pop .4s cubic-bezier(.16,1,.3,1) both;
+  }
+  @keyframes pop {
+    from { opacity:0; transform:scale(.97) translateY(14px); }
+    to   { opacity:1; transform:scale(1)   translateY(0); }
+  }
+
+  .lbrand {
+    display:flex; align-items:center; gap:12px; margin-bottom:32px;
+  }
+  .lbrand-icon {
+    width:44px; height:44px; border-radius:12px;
+    background:var(--green-d); border:1px solid var(--green-b);
+    display:flex; align-items:center; justify-content:center;
+    overflow:hidden;
+  }
+  .lbrand-icon img { width:28px; height:28px; object-fit:contain; }
+  .lbrand-name { font-size:1.05rem; font-weight:900; letter-spacing:2.5px; color:var(--text); }
+  .lbrand-tag  { font-size:0.62rem; color:var(--muted); letter-spacing:1.5px; margin-top:2px; font-weight:600; }
+
+  .ltitle { font-size:1.55rem; font-weight:800; line-height:1.25; margin-bottom:8px; color:var(--text); }
+  .lsub   { font-size:0.82rem; color:var(--t2); line-height:1.65; margin-bottom:28px; }
+
+  .igrp { position:relative; margin-bottom:12px; }
+  .igrp i { position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--muted); font-size:0.8rem; }
+  .inp {
+    width:100%; height:46px; padding:0 14px 0 38px;
+    background:var(--input-bg); border:1.5px solid var(--border);
+    border-radius:10px; color:var(--text); font-size:0.88rem; font-family:inherit;
+    outline:none; transition:border-color .2s, box-shadow .2s;
+  }
+  .inp:focus { border-color:var(--green); box-shadow:0 0 0 3px rgba(13,92,54,0.1); }
+  .inp::placeholder { color:var(--muted); }
+
+  .cta {
+    width:100%; height:46px;
+    background:var(--green); color:#fff; font-weight:800; font-size:.9rem;
+    border:none; border-radius:10px; cursor:pointer; font-family:inherit;
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    box-shadow:0 6px 18px rgba(13,92,54,0.28);
+    transition:all .25s cubic-bezier(.16,1,.3,1);
+    letter-spacing:0.3px;
+  }
+  .cta:hover  { background:var(--green-m); transform:translateY(-2px); box-shadow:0 10px 24px rgba(13,92,54,0.35); }
+  .cta:active { transform:translateY(0); }
+  .cta.busy   { opacity:.65; pointer-events:none; }
+
+  .lerr {
+    display:none; margin-top:12px; padding:10px 14px;
+    background:var(--red-d); border:1px solid var(--red-b);
+    border-radius:8px; color:var(--red); font-size:0.78rem; font-weight:600;
+  }
+
+  /* ══ DASHBOARD ════════════════════════════════════════════════════════════ */
+  #D { display:none; }
+
+  /* TOP NAV */
+  .nav {
+    position:sticky; top:0; z-index:50; height:60px;
+    padding:0 32px;
+    display:flex; align-items:center; justify-content:space-between;
+    background:var(--nav-bg);
+    backdrop-filter:blur(24px) saturate(150%);
+    border-bottom:1px solid var(--border);
+    box-shadow:0 1px 3px rgba(0,0,0,0.05);
+    transition:background .3s;
+  }
+  .nvl { display:flex; align-items:center; gap:16px; }
+  .nv-logo { display:flex; align-items:center; gap:9px; text-decoration:none; }
+  .nv-icon {
+    width:30px; height:30px; border-radius:8px;
+    background:var(--green-d); border:1px solid var(--green-b);
+    display:flex; align-items:center; justify-content:center;
+    overflow:hidden;
+  }
+  .nv-icon img { width:20px; height:20px; object-fit:contain; }
+  .nv-name { font-size:.9rem; font-weight:900; letter-spacing:2px; color:var(--text); }
+  .nv-tag {
+    font-size:.6rem; font-weight:700; letter-spacing:2px;
+    padding:3px 10px; border-radius:50px;
+    background:var(--green-d); color:var(--green);
+    border:1px solid var(--green-b);
+  }
+  .nvr { display:flex; align-items:center; gap:10px; }
+  .live-tag {
+    display:flex; align-items:center; gap:6px;
+    font-size:.68rem; font-weight:700; color:var(--green); letter-spacing:1px;
+  }
+  .live-dot {
+    width:7px; height:7px; border-radius:50%; background:var(--green);
+    animation:blink 2s infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.4} }
+  .ts { font-size:.67rem; color:var(--muted); font-weight:500; }
+
+  .nbtn {
+    height:32px; padding:0 13px; border-radius:8px;
+    font-size:.72rem; font-weight:600; cursor:pointer;
+    font-family:inherit; display:flex; align-items:center; gap:6px;
+    transition:all .2s; border:1.5px solid var(--border);
+    background:var(--white); color:var(--t2);
+  }
+  .nbtn:hover { border-color:var(--border2); color:var(--text); background:var(--s1); }
+  .nbtn.red:hover { border-color:var(--red-b); color:var(--red); background:var(--red-d); }
+
+  /* MAIN */
+  .wrap {
+    max-width:1380px; margin:0 auto;
+    padding:28px 32px 60px;
+    display:flex; flex-direction:column; gap:24px;
+  }
+
+  .slabel {
+    font-size:.62rem; font-weight:700; letter-spacing:3px;
+    text-transform:uppercase; color:var(--muted); margin-bottom:14px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .slabel::after {
+    content:''; flex:1; height:1px; background:var(--border);
+  }
+
+  /* ── STAT CARDS ── */
+  .sgrid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
+
+  .sc {
+    background:var(--white); border:1.5px solid var(--border);
+    border-radius:var(--r2); padding:22px 20px;
+    box-shadow:var(--shadow-sm);
+    transition:box-shadow .25s, transform .3s cubic-bezier(.16,1,.3,1), border-color .2s;
+    position:relative; overflow:hidden;
+  }
+  .sc::after {
+    content:''; position:absolute; top:0; left:0; right:0; height:3px;
+    border-radius:var(--r2) var(--r2) 0 0;
+  }
+  .sc.g::after  { background:var(--green); }
+  .sc.bl::after { background:var(--blue);  }
+  .sc.am::after { background:var(--amber); }
+  .sc.re::after { background:var(--red);   }
+  .sc:hover { box-shadow:var(--shadow); transform:translateY(-3px); border-color:var(--border2); }
+
+  .sc-head { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:18px; }
+  .sc-icon {
+    width:38px; height:38px; border-radius:10px;
+    display:flex; align-items:center; justify-content:center; font-size:.9rem;
+  }
+  .sc-icon.g  { background:var(--green-d); color:var(--green); }
+  .sc-icon.bl { background:var(--blue-d);  color:var(--blue);  }
+  .sc-icon.am { background:var(--amber-d); color:var(--amber); }
+  .sc-icon.re { background:var(--red-d);   color:var(--red);   }
+
+  .sc-sub {
+    font-size:.64rem; font-weight:700; padding:2px 9px;
+    border-radius:5px; letter-spacing:.3px;
+    display:flex; align-items:center; gap:4px;
+  }
+  .sc-sub.g  { background:var(--green-d); color:var(--green); }
+  .sc-sub.bl { background:var(--blue-d);  color:var(--blue);  }
+  .sc-sub.am { background:var(--amber-d); color:var(--amber); }
+  .sc-sub.re { background:var(--red-d);   color:var(--red);   }
+
+  .sc-val   { font-size:2.1rem; font-weight:900; letter-spacing:-1.5px; line-height:1; margin-bottom:5px; color:var(--text); }
+  .sc-label { font-size:.75rem; color:var(--t2); font-weight:500; }
+
+  /* ── CHARTS ── */
+  .chart-row { display:grid; grid-template-columns:1.75fr 1fr; gap:14px; align-items:start; }
+  .panel {
+    background:var(--white); border:1.5px solid var(--border);
+    border-radius:var(--r2); padding:24px; box-shadow:var(--shadow-sm);
+  }
+  .ph { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:20px; }
+  .pt { font-size:.88rem; font-weight:700; color:var(--text); }
+  .ps { font-size:.7rem; color:var(--muted); margin-top:3px; }
+  .cw { position:relative; height:224px; }
+
+  /* Donut legend */
+  .dlegs { display:flex; flex-direction:column; gap:6px; margin-top:14px; }
+  .dl {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:7px 10px; border-radius:8px; background:var(--bg);
+    font-size:.77rem; transition:background .15s;
+  }
+  .dl:hover { background:var(--s1); }
+  .dl-l { display:flex; align-items:center; gap:8px; }
+  .dl-dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+  .dl-name { color:var(--t2); font-weight:500; }
+  .dl-val  { font-weight:700; color:var(--text); }
+
+  /* ── BOTTOM ── */
+  .bot-row { display:grid; grid-template-columns:1.2fr 1fr; gap:14px; align-items:start; }
+
+  /* Table */
+  .tbl { width:100%; border-collapse:collapse; }
+  .tbl th {
+    text-align:left; padding:0 8px 12px 0;
+    font-size:.6rem; font-weight:700; letter-spacing:2px;
+    color:var(--muted); text-transform:uppercase;
+    border-bottom:1.5px solid var(--border);
+  }
+  .tbl td {
+    padding:10px 8px 10px 0; font-size:.8rem;
+    border-bottom:1px solid var(--s1); vertical-align:middle;
+    color:var(--t2);
+  }
+  .tbl td b { color:var(--text); }
+  .tbl tr:last-child td { border:none; }
+  .tbl tr:hover td { background:var(--bg); }
+
+  .av {
+    width:28px; height:28px; border-radius:50%;
+    background:var(--green); color:#fff;
+    font-size:.62rem; font-weight:800;
+    display:inline-flex; align-items:center; justify-content:center;
+    flex-shrink:0; vertical-align:middle; margin-right:8px;
+  }
+  .pill {
+    display:inline-flex; align-items:center;
+    font-size:.65rem; font-weight:700; padding:2px 9px; border-radius:5px;
+  }
+  .pill.g  { background:var(--green-d); color:var(--green); }
+  .pill.bl { background:var(--blue-d);  color:var(--blue);  }
+
+  /* Page bars */
+  .pbars { display:flex; flex-direction:column; gap:11px; }
+  .pbr   { display:flex; align-items:center; gap:10px; font-size:.78rem; }
+  .pbr-n { min-width:108px; color:var(--t2); font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .pbr-bg{ flex:1; height:5px; border-radius:3px; background:var(--s1); overflow:hidden; }
+  .pbr-f { height:100%; border-radius:3px; background:var(--green); width:0; transition:width 1.1s cubic-bezier(.16,1,.3,1); }
+  .pbr-ct{ min-width:26px; text-align:right; font-weight:700; color:var(--text); font-size:.7rem; }
+
+  /* Recent */
+  .rrow {
+    display:flex; align-items:center; gap:10px;
+    padding:9px 0; border-bottom:1px solid var(--s1);
+  }
+  .rrow:last-child { border:none; padding-bottom:0; }
+  .ri { flex:1; min-width:0; }
+  .ri-name { font-size:.8rem; font-weight:600; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .ri-mail { font-size:.68rem; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .ri-time { font-size:.66rem; color:var(--muted); flex-shrink:0; }
+
+  .empty { padding:22px 0; text-align:center; color:var(--muted); font-size:.8rem; }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width:5px; height:5px; }
+  ::-webkit-scrollbar-track { background:var(--bg); }
+  ::-webkit-scrollbar-thumb { background:var(--border2); border-radius:8px; }
+
+  /* responsive */
+  @media(max-width:1100px){
+    .sgrid    { grid-template-columns:repeat(2,1fr); }
+    .chart-row,.bot-row { grid-template-columns:1fr; }
+  }
+  @media(max-width:580px){
+    .sgrid  { grid-template-columns:1fr 1fr; }
+    .wrap   { padding:16px 16px 40px; }
+    .nav    { padding:0 16px; }
+    .nvr .ts,.nbtn.red { display:none; }
+  }
+  </style>
+</head>
+<body>
+
+<!-- ══ LOGIN ══ -->
+<div id="L">
+  <div class="lcard">
+    <div class="lbrand">
+      <div class="lbrand-icon"><img src="/logohiero.png" alt="Hiero"></div>
+      <div>
+        <div class="lbrand-name">HIERO</div>
+        <div class="lbrand-tag">COMMAND CENTER</div>
+      </div>
+    </div>
+    <h1 class="ltitle">Welcome back,<br>Jaswanth 👋</h1>
+    <p class="lsub">Private owner dashboard. Enter your admin password to view live analytics.</p>
+    <div class="igrp">
+      <i class="fas fa-lock"></i>
+      <input id="pwd" type="password" class="inp" placeholder="Admin password"
+        onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="cta" id="lcta" onclick="doLogin()">
+      <i class="fas fa-unlock-keyhole"></i> Unlock Dashboard
+    </button>
+    <div class="lerr" id="lerr"><i class="fas fa-circle-xmark"></i> &nbsp;Wrong password. Please try again.</div>
+  </div>
+</div>
+
+<!-- ══ DASHBOARD ══ -->
+<div id="D">
+
+  <header class="nav">
+    <div class="nvl">
+      <a class="nv-logo" href="#">
+        <div class="nv-icon"><img src="/logohiero.png" alt="Hiero"></div>
+        <span class="nv-name">HIERO</span>
+      </a>
+      <span class="nv-tag">OWNER ANALYTICS</span>
+    </div>
+    <div class="nvr">
+      <div class="live-tag"><div class="live-dot"></div>LIVE</div>
+      <span class="ts" id="ts"></span>
+      <button class="nbtn" onclick="loadStats()"><i class="fas fa-rotate-right"></i> Refresh</button>
+      <button class="nbtn" id="theme-btn" onclick="toggleTheme()" title="Toggle theme"><i class="fas fa-moon" id="theme-icon"></i></button>
+      <button class="nbtn red" onclick="doReset()"><i class="fas fa-trash-can"></i> Reset Data</button>
+      <button class="nbtn red" onclick="doLogout()"><i class="fas fa-right-from-bracket"></i> Logout</button>
+    </div>
+  </header>
+
+  <div class="wrap">
+
+    <!-- STATS -->
+    <div>
+      <p class="slabel">Platform Overview</p>
+      <div class="sgrid">
+        <div class="sc g">
+          <div class="sc-head">
+            <div class="sc-icon g"><i class="fas fa-users"></i></div>
+            <span class="sc-sub g"><i class="fas fa-arrow-up"></i> <span id="sw">0</span> this week</span>
+          </div>
+          <div class="sc-val" id="su">—</div>
+          <div class="sc-label">Registered Users</div>
+        </div>
+        <div class="sc bl">
+          <div class="sc-head">
+            <div class="sc-icon bl"><i class="fas fa-right-to-bracket"></i></div>
+            <span class="sc-sub bl">All time</span>
+          </div>
+          <div class="sc-val" id="sl">—</div>
+          <div class="sc-label">Login Sessions</div>
+        </div>
+        <div class="sc am">
+          <div class="sc-head">
+            <div class="sc-icon am"><i class="fas fa-qrcode"></i></div>
+            <span class="sc-sub am" id="sv-sub">0 total views</span>
+          </div>
+          <div class="sc-val" id="sq">—</div>
+          <div class="sc-label">QR Code Scans</div>
+        </div>
+        <div class="sc re">
+          <div class="sc-head">
+            <div class="sc-icon re"><i class="fas fa-file-lines"></i></div>
+            <span class="sc-sub re" id="sm-sub">0 mock visits</span>
+          </div>
+          <div class="sc-val" id="sr">—</div>
+          <div class="sc-label">Resumes Created</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHARTS -->
+    <div>
+      <p class="slabel">Activity · Last 30 Days</p>
+      <div class="chart-row">
+        <div class="panel">
+          <div class="ph">
+            <div>
+              <div class="pt">Daily Logins vs QR Scans</div>
+              <div class="ps">How many users logged in vs scanned the QR code each day</div>
+            </div>
+          </div>
+          <div class="cw"><canvas id="lc"></canvas></div>
+        </div>
+        <div class="panel">
+          <div class="ph">
+            <div>
+              <div class="pt">Feature Usage Breakdown</div>
+              <div class="ps">Pages visited in the last 30 days</div>
+            </div>
+          </div>
+          <div class="cw" style="height:170px;"><canvas id="dc"></canvas></div>
+          <div class="dlegs" id="dleg"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTTOM -->
+    <div>
+      <p class="slabel">Users & Traffic</p>
+      <div class="bot-row">
+        <div class="panel">
+          <div class="ph">
+            <div>
+              <div class="pt">Most Active Users</div>
+              <div class="ps">Ranked by total login count</div>
+            </div>
+          </div>
+          <table class="tbl">
+            <thead><tr><th>User</th><th>Logins</th><th>Last seen</th></tr></thead>
+            <tbody id="tb"></tbody>
+          </table>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div class="panel">
+            <div class="ph">
+              <div>
+                <div class="pt">Page Traffic</div>
+                <div class="ps">Where users spend their time</div>
+              </div>
+            </div>
+            <div class="pbars" id="pb">
+              <div class="empty">No data yet — tracking starts automatically.</div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="ph">
+              <div>
+                <div class="pt">Recent Signups</div>
+                <div class="ps">Newest members joining Hiero</div>
+              </div>
+            </div>
+            <div id="ru"><div class="empty">Loading...</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /wrap -->
+</div><!-- /D -->
+
+<script>
+/* ══ SESSION ══ */
+let TOK = sessionStorage.getItem('h_adm') || '';
+
+async function doLogin() {
+  const p   = document.getElementById('pwd').value;
+  const btn = document.getElementById('lcta');
+  const err = document.getElementById('lerr');
+  err.style.display = 'none';
+  btn.classList.add('busy');
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying…';
+  try {
+    const r = await fetch('/api/admin/login', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ password: p })
+    });
+    const d = await r.json();
+    if (!d.success) throw new Error('wrong');
+    TOK = d.token;
+    sessionStorage.setItem('h_adm', TOK);
+    showDash();
+  } catch {
+    err.style.display = 'block';
+    btn.classList.remove('busy');
+    btn.innerHTML = '<i class="fas fa-unlock-keyhole"></i> Unlock Dashboard';
+  }
+}
+
+async function doLogout() {
+  await fetch('/api/admin/logout',{method:'POST',headers:{'x-admin-token':TOK}}).catch(()=>{});
+  sessionStorage.removeItem('h_adm');
+  location.reload();
+}
+
+async function doReset() {
+  if (!confirm('Reset all page-view tracking data to zero?\nThis cannot be undone.')) return;
+  const r = await fetch('/api/admin/reset',{method:'DELETE',headers:{'x-admin-token':TOK}});
+  const d = await r.json();
+  if (d.success) { alert(`✅ Reset done — ${d.deleted} records cleared.`); loadStats(); }
+  else           alert('❌ Failed: ' + d.error);
+}
+
+function showDash() {
+  document.getElementById('L').style.display = 'none';
+  document.getElementById('D').style.display = 'block';
+  loadStats();
+}
+
+if (TOK) showDash();
+
+/* ══ DATA ══ */
+async function loadStats() {
+  try {
+    const r = await fetch('/api/admin/stats', { headers:{'x-admin-token':TOK} });
+    if (r.status === 401) { sessionStorage.removeItem('h_adm'); location.reload(); return; }
+    const d = await r.json();
+    render(d);
+    document.getElementById('ts').textContent = 'Updated ' + new Date().toLocaleTimeString();
+  } catch(e) { console.error(e); }
+}
+
+/* ══ RENDER ══ */
+function render(d) {
+  const t = d.totals;
+  cu('su', t.totalUsers);
+  cu('sl', t.totalLogins);
+  cu('sq', t.qrScans);
+  cu('sr', t.totalResumes);
+  document.getElementById('sw').textContent    = '+' + t.newUsersWeek;
+  document.getElementById('sv-sub').textContent = (t.totalPageViews||0).toLocaleString() + ' total views';
+  document.getElementById('sm-sub').textContent = (t.mockInterviewVisits||0).toLocaleString() + ' mock visits';
+  buildLine(d.charts);
+  buildDonut(d.pageBreakdown);
+  buildTable(d.topUsers);
+  buildPbars(d.pageBreakdown);
+  buildRecent(d.recentUsers);
+}
+
+/* animated counter */
+function cu(id, target) {
+  const el  = document.getElementById(id);
+  const s0  = parseInt(el.textContent.replace(/,/g,'')) || 0;
+  const t0  = Date.now(), dur = 800;
+  const tick = () => {
+    const p = Math.min((Date.now()-t0)/dur,1);
+    const e = 1-Math.pow(1-p,3);
+    el.textContent = Math.round(s0+(target-s0)*e).toLocaleString();
+    if (p < 1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+
+/* line chart — QR Scans vs Logins */
+let LC;
+function buildLine({loginsByDay, qrScansByDay}) {
+  const labs = [];
+  for (let i=29;i>=0;i--) { const d=new Date(); d.setDate(d.getDate()-i); labs.push(d.toISOString().split('T')[0]); }
+  const lm = Object.fromEntries((loginsByDay||[]).map(r=>[r._id,r.count]));
+  const qm = Object.fromEntries((qrScansByDay||[]).map(r=>[r._id,r.count]));
+  const ctx = document.getElementById('lc').getContext('2d');
+  if (LC) LC.destroy();
+  LC = new Chart(ctx, {
+    type:'line',
+    data:{
+      labels: labs.map(l=>l.slice(5)),
+      datasets:[
+        { label:'Logins',   data:labs.map(l=>lm[l]||0),
+          borderColor:'#0d5c36', backgroundColor:'rgba(13,92,54,0.07)',
+          fill:true, tension:.4, pointRadius:3, borderWidth:2, pointBackgroundColor:'#0d5c36' },
+        { label:'QR Scans', data:labs.map(l=>qm[l]||0),
+          borderColor:'#7a4e0a', backgroundColor:'rgba(122,78,10,0.06)',
+          fill:true, tension:.4, pointRadius:3, borderWidth:2, pointBackgroundColor:'#7a4e0a' }
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      interaction:{ mode:'index', intersect:false },
+      plugins:{ legend:{ labels:{ color:'#6b7280', font:{size:11,family:'Inter'} } } },
+      scales:{
+        x:{ ticks:{color:'#9ca3af',maxRotation:0,maxTicksLimit:8,font:{size:10,family:'Inter'}},
+            grid:{color:'rgba(0,0,0,0.04)'}, border:{color:'transparent'} },
+        y:{ ticks:{color:'#9ca3af',font:{size:10,family:'Inter'}},
+            grid:{color:'rgba(0,0,0,0.04)'}, border:{color:'transparent'}, beginAtZero:true }
+      }
+    }
+  });
+}
+
+/* donut chart */
+const DOT_COLORS = ['#0d5c36','#1a2f6e','#7a4e0a','#8b1a2f','#43176b','#0e5a6e','#5c3d0d'];
+let DC;
+function buildDonut(pages) {
+  if (!pages || !pages.length) return;
+  const top = pages.slice(0,6);
+  const ctx = document.getElementById('dc').getContext('2d');
+  if (DC) DC.destroy();
+  DC = new Chart(ctx, {
+    type:'doughnut',
+    data:{
+      labels: top.map(p=>p._id),
+      datasets:[{ data:top.map(p=>p.count), backgroundColor:DOT_COLORS, borderColor:'#ffffff', borderWidth:3 }]
+    },
+    options:{ responsive:true, maintainAspectRatio:false, cutout:'66%', plugins:{ legend:{ display:false } } }
+  });
+  const total = top.reduce((a,p)=>a+p.count,0) || 1;
+  document.getElementById('dleg').innerHTML = top.map((p,i)=>`
+    <div class="dl">
+      <div class="dl-l">
+        <div class="dl-dot" style="background:${DOT_COLORS[i]}"></div>
+        <span class="dl-name">${p._id}</span>
+      </div>
+      <span class="dl-val">${Math.round(p.count/total*100)}% · ${p.count}</span>
+    </div>`).join('');
+}
+
+/* table */
+function buildTable(users) {
+  const tb = document.getElementById('tb');
+  if (!users||!users.length) { tb.innerHTML='<tr><td colspan="3"><div class="empty">No login data yet.</div></td></tr>'; return; }
+  tb.innerHTML = users.map(u=>`
+    <tr>
+      <td>
+        <span class="av">${(u.name||u._id||'?')[0].toUpperCase()}</span>
+        <b>${u.name||'Unknown'}</b>
+        <div style="font-size:.67rem;color:var(--muted);margin-left:36px;margin-top:2px;">${u._id}</div>
+      </td>
+      <td><span class="pill g">${u.loginCount}</span></td>
+      <td style="font-size:.7rem;">${ago(u.lastSeen)}</td>
+    </tr>`).join('');
+}
+
+/* page bars */
+function buildPbars(pages) {
+  const el = document.getElementById('pb');
+  if (!pages||!pages.length) { el.innerHTML='<div class="empty">No tracking data — will populate soon.</div>'; return; }
+  const mx = pages[0]?.count || 1;
+  el.innerHTML = pages.slice(0,8).map(p=>`
+    <div class="pbr">
+      <div class="pbr-n" title="${p._id}">${p._id}</div>
+      <div class="pbr-bg"><div class="pbr-f" style="width:${Math.round(p.count/mx*100)}%"></div></div>
+      <div class="pbr-ct">${p.count}</div>
+    </div>`).join('');
+}
+
+/* recent users */
+function buildRecent(users) {
+  const el = document.getElementById('ru');
+  if (!users||!users.length) { el.innerHTML='<div class="empty">No users yet.</div>'; return; }
+  el.innerHTML = users.map(u=>`
+    <div class="rrow">
+      <div class="av">${(u.username||'?')[0].toUpperCase()}</div>
+      <div class="ri">
+        <div class="ri-name">${u.username}</div>
+        <div class="ri-mail">${u.email}</div>
+      </div>
+      <div class="ri-time">${ago(u.createdAt)}</div>
+    </div>`).join('');
+}
+
+function ago(d) {
+  if (!d) return '—';
+  const s = (Date.now()-new Date(d))/1000;
+  if (s<60)    return 'just now';
+  if (s<3600)  return Math.floor(s/60)+'m ago';
+  if (s<86400) return Math.floor(s/3600)+'h ago';
+  return Math.floor(s/86400)+'d ago';
+}
+
+/* ══ THEME TOGGLE ══ */
+function toggleTheme() {
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  const next = isDark ? 'light' : 'dark';
+  html.setAttribute('data-theme', next);
+  localStorage.setItem('hiero_admin_theme', next);
+  const icon = document.getElementById('theme-icon');
+  if (icon) { icon.className = next === 'dark' ? 'fas fa-sun' : 'fas fa-moon'; }
+}
+
+// Apply saved theme immediately on load
+(function() {
+  const saved = localStorage.getItem('hiero_admin_theme') || 'light';
+  document.documentElement.setAttribute('data-theme', saved);
+  const icon = document.getElementById('theme-icon');
+  if (icon) { icon.className = saved === 'dark' ? 'fas fa-sun' : 'fas fa-moon'; }
+})();
+
+
+
+
+</script>
+</body>
+</html>

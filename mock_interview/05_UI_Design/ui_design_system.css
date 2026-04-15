@@ -1,0 +1,359 @@
+/**
+ * 05_UI_Design — Hiero Mock Interview
+ * ─────────────────────────────────────────────────────────────
+ * Design system tokens, component styles, and animation
+ * definitions for the Mock Interview UI.
+ *
+ * All styles are extracted from mock-interview.html for
+ * documentation and reusability purposes.
+ * ─────────────────────────────────────────────────────────────
+ */
+
+/*
+ ┌─────────────────────────────────────────────────────────────┐
+ │  DESIGN TOKENS                                              │
+ └─────────────────────────────────────────────────────────────┘
+*/
+:root {
+    /* Brand */
+    --g: #09c006;
+    /* Primary green */
+    --g10: rgba(9, 192, 6, 0.10);
+    --g25: rgba(9, 192, 6, 0.25);
+    --g40: rgba(9, 192, 6, 0.40);
+
+    /* Background */
+    --bg: #060608;
+    /* Deep obsidian */
+
+    /* Glass surfaces */
+    --surface: rgba(255, 255, 255, 0.04);
+    --border: rgba(255, 255, 255, 0.08);
+    --border-g: rgba(9, 192, 6, 0.20);
+
+    /* Typography */
+    --text: #f0f4f8;
+    --muted: #64748b;
+
+    /* Danger */
+    --red: #ef4444;
+}
+
+/*
+ ┌─────────────────────────────────────────────────────────────┐
+ │  TYPOGRAPHY                                                 │
+ └─────────────────────────────────────────────────────────────┘
+  Font: Inter (variable weight 300–800)
+  Source: https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800
+*/
+body {
+    font-family: 'Inter', sans-serif;
+}
+
+.title {
+    font-size: 2.4rem;
+    font-weight: 800;
+    letter-spacing: -1.5px;
+    background: linear-gradient(135deg, #fff 50%, var(--g));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.sub {
+    color: var(--muted);
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+/*
+ ┌─────────────────────────────────────────────────────────────┐
+ │  GLASS CARD (reusable panel component)                      │
+ └─────────────────────────────────────────────────────────────┘
+*/
+.card {
+    background: var(--surface);
+    backdrop-filter: blur(50px) saturate(200%);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 40px;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Subtle green gradient sheen inside card */
+.card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(9, 192, 6, 0.04), transparent);
+    pointer-events: none;
+}
+
+/*
+ ┌─────────────────────────────────────────────────────────────┐
+ │  BUTTONS                                                    │
+ └─────────────────────────────────────────────────────────────┘
+*/
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 13px 32px;
+    border-radius: 14px;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+    transition: all 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.btn-primary {
+    background: var(--g);
+    color: #000;
+    box-shadow: 0 8px 24px var(--g25);
+}
+
+.btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 16px 32px var(--g40);
+    background: #0be708;
+}
+
+.btn-ghost {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+}
+
+.btn-ghost:hover {
+    border-color: var(--border-g);
+    color: var(--text);
+}
+
+/*
+ ┌─────────────────────────────────────────────────────────────┐
+ │  NEURAL ORB (AI Visualiser)                                 │
+ └─────────────────────────────────────────────────────────────┘
+  Dot-matrix sphere that pulses when AI is speaking.
+  Uses CSS background-size dot grid trick.
+*/
+.dot-orb {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--g) 1.5px, transparent 1.5px);
+    background-size: 6px 6px;
+    /* Dot grid spacing */
+    border: 1px solid var(--border-g);
+    box-shadow: 0 0 50px var(--g25);
+    position: relative;
+    transition: all 0.2s;
+}
+
+/* Rotating orbit ring */
+.dot-orb::after {
+    content: '';
+    position: absolute;
+    width: 150%;
+    height: 150%;
+    border-radius: 50%;
+    border: 1px dashed var(--border-g);
+    animation: orbSpin 10s linear infinite;
+}
+
+/* Pulsing state when AI is speaking */
+.dot-orb.speaking {
+    animation: orbPulse 0.5s infinite alternate;
+    box-shadow: 0 0 80px var(--g40);
+    background-size: 4px 4px;
+    /* Denser dots */
+}
+
+@keyframes orbSpin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes orbPulse {
+    0% {
+        transform: scale(1);
+    }
+
+    100% {
+        transform: scale(1.12);
+    }
+}
+
+/*
+ ┌─────────────────────────────────────────────────────────────┐
+ │  SESSION LAYOUT (2-column grid)                             │
+ └─────────────────────────────────────────────────────────────┘
+  Left: AI orb + transcript + mic
+  Right: user camera + session status panel
+*/
+.session-grid {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 20px;
+    width: 100%;
+    max-width: 1080px;
+}
+
+/*
+ ┌─────────────────────────────────────────────────────────────┐
+ │  BIOMETRIC HUD (camera overlay badge)                       │
+ └─────────────────────────────────────────────────────────────┘
+*/
+.hud-badge {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border-g);
+    border-radius: 10px;
+    padding: 6px 14px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: var(--g);
+    text-transform: uppercase;
+    transition: 0.3s;
+}
+
+.hud-badge.lost {
+    color: var(--red);
+    border-color: rgba(239, 68, 68, 0.4);
+    animation: blinkBadge 0.5s infinite alternate;
+}
+
+@keyframes blinkBadge {
+    from {
+        opacity: 0.5;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/*
+ ┌─────────────────────────────────────────────────────────────┐
+ │  WARNING TOAST (3-strike system)                            │
+ └─────────────────────────────────────────────────────────────┘
+*/
+#warn-toast {
+    position: fixed;
+    top: 72px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-120%);
+    /* Hidden above */
+    z-index: 900;
+    background: rgba(10, 0, 0, 0.95);
+    border: 1px solid var(--red);
+    border-radius: 16px;
+    padding: 16px 28px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 340px;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 15px 50px rgba(239, 68, 68, 0.3);
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#warn-toast.show {
+    transform: translateX(-50%) translateY(0);
+    /* Slide in */
+}
+
+/* Strike indicator dots */
+.warn-pip {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--border);
+    transition: 0.3s;
+}
+
+.warn-pip.hit {
+    background: var(--red);
+    box-shadow: 0 0 8px var(--red);
+}
+
+/*
+ ┌─────────────────────────────────────────────────────────────┐
+ │  STAGE TRANSITION ANIMATION                                 │
+ └─────────────────────────────────────────────────────────────┘
+*/
+.stage {
+    display: none;
+    animation: stageIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.stage.active {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+@keyframes stageIn {
+    from {
+        opacity: 0;
+        transform: translateY(24px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/*
+ ┌─────────────────────────────────────────────────────────────┐
+ │  QUESTION PROGRESS DOTS                                     │
+ └─────────────────────────────────────────────────────────────┘
+*/
+.q-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    transition: 0.4s;
+}
+
+.q-dot.done {
+    background: var(--g);
+    box-shadow: 0 0 6px var(--g);
+}
+
+/*
+ ┌─────────────────────────────────────────────────────────────┐
+ │  SCORE ORB (Audit stage)                                    │
+ └─────────────────────────────────────────────────────────────┘
+*/
+.score-ring {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 5px solid var(--g);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 40px var(--g25);
+    flex-shrink: 0;
+}
