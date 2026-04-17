@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hiero | Staff Verification Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #07e219;
+            --bg: #000000;
+            --card-bg: #0a0a0a;
+            --text: #ffffff;
+            --border: #1a1a1a;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .verify-container {
+            width: 100%;
+            max-width: 400px;
+            padding: 40px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+
+        .logo {
+            background: var(--primary);
+            color: black;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            margin: 0 auto 20px;
+        }
+
+        h1 { font-size: 24px; font-weight: 800; margin-bottom: 8px; }
+        p { color: #666; font-size: 14px; margin-bottom: 30px; }
+
+        .input-group {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #444;
+            margin-bottom: 8px;
+        }
+
+        input {
+            width: 100%;
+            padding: 16px;
+            background: #000;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        button {
+            width: 100%;
+            padding: 16px;
+            background: var(--primary);
+            color: black;
+            border: none;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: transform 0.2s;
+        }
+
+        button:active { transform: scale(0.98); }
+
+        #message {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            display: none;
+        }
+
+        .success { background: rgba(7, 226, 25, 0.1); color: var(--primary); border: 1px solid rgba(7, 226, 25, 0.2); }
+        .error { background: rgba(255, 68, 68, 0.1); color: #ff4444; border: 1px solid rgba(255, 68, 68, 0.2); }
+    </style>
+</head>
+<body>
+    <div class="verify-container">
+        <div class="logo">H</div>
+        <h1>Staff Portal</h1>
+        <p>Enter reward details to verify.</p>
+
+        <div class="input-group">
+            <label>Authorization Key</label>
+            <input type="text" id="rewardCode" placeholder="HIERO-REF-XXXXXX">
+        </div>
+
+        <div class="input-group">
+            <label>Secure OTP</label>
+            <input type="text" id="otp" placeholder="6-Digit Code" maxlength="6">
+        </div>
+
+        <button onclick="verifyReward()">Click to Verify</button>
+
+        <div id="message"></div>
+    </div>
+
+    <script>
+        async function verifyReward() {
+            const rewardCode = document.getElementById('rewardCode').value;
+            const otp = document.getElementById('otp').value;
+            const msgEl = document.getElementById('message');
+
+            msgEl.style.display = 'none';
+
+            if (!rewardCode || !otp) {
+                msgEl.innerText = "Please fill in both fields.";
+                msgEl.className = "error";
+                msgEl.style.display = 'block';
+                return;
+            }
+
+            try {
+                const response = await fetch('/verify-reward', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ rewardCode, otp })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    msgEl.innerText = "✅ " + data.message;
+                    msgEl.className = "success";
+                } else {
+                    msgEl.innerText = "❌ " + data.message;
+                    msgEl.className = "error";
+                }
+                msgEl.style.display = 'block';
+
+            } catch (err) {
+                msgEl.innerText = "Error connecting to server.";
+                msgEl.className = "error";
+                msgEl.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>

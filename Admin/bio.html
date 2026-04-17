@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio | Jaswanth Kumar</title>
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-body: #ffffff;
+            --bg-card: #f8fbff;
+            --primary: #1e3a8a; /* Professional Blue */
+            --accent-blue: #3b82f6; 
+            --secondary: #065f46; /* Professional Green */
+            --accent-green: #10b981;
+            --text-main: #020617;
+            --text-muted: #64748b;
+            --border: #f1f5f9;
+            --glass: rgba(255, 255, 255, 0.85);
+            --transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            --shadow: 0 10px 40px -10px rgba(0,0,0,0.05);
+            --shadow-lg: 0 30px 60px -12px rgba(0,0,0,0.12);
+        }
+
+        @keyframes bg-move { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        @keyframes blob-float { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-40px) scale(1.1); } }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-body);
+            background-image: url('bg.png');
+            background-size: cover;
+            background-attachment: fixed;
+            color: var(--text-main);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Animated Blobs Background */
+        .blobs {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; overflow: hidden; pointer-events: none;
+        }
+        .blob {
+            position: absolute; border-radius: 50%; filter: blur(100px); opacity: 0.15; animation: blob-float 15s infinite ease-in-out;
+        }
+        .blob-1 { width: 600px; height: 600px; background: var(--accent-blue); top: -10%; left: -10%; animation-delay: 0s; }
+        .blob-2 { width: 500px; height: 500px; background: var(--accent-green); bottom: -10%; right: -10%; animation-delay: -5s; }
+
+        .container { max-width: 1300px; margin: 0 auto; padding: 0 2.5rem; }
+
+        /* Navbar */
+        .navbar {
+            position: fixed; top: 2rem; left: 50%; transform: translateX(-50%); width: 95%; max-width: 1200px;
+            padding: 1.2rem 3rem; z-index: 1000; background: var(--glass); backdrop-filter: blur(20px);
+            border-radius: 4rem; border: 1px solid var(--border); display: flex; justify-content: space-between;
+            align-items: center; box-shadow: var(--shadow); transition: var(--transition);
+        }
+        .navbar.sticky { padding: 0.8rem 2.5rem; top: 1rem; width: 90%; }
+        .logo { font-size: 1.4rem; font-weight: 800; color: var(--text-main); text-decoration: none; display: flex; align-items: center; gap: 0.8rem; }
+        .logo i { color: var(--accent-blue); }
+
+        .nav-links { display: flex; gap: 3rem; list-style: none; }
+        .nav-links a { text-decoration: none; color: var(--text-muted); font-weight: 700; font-size: 0.9rem; transition: var(--transition); }
+        .nav-links a:hover { color: var(--primary); }
+
+        /* Hero */
+        .hero { min-height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; position: relative; }
+        .hero-content { max-width: 900px; animation: fadeInUp 1.2s ease; }
+        .avail-badge { padding: 0.8rem 1.5rem; background: #f0fdf4; color: var(--secondary); border-radius: 50px; border: 1px solid #dcfce7; font-size: 0.8rem; font-weight: 800; margin-bottom: 2rem; display: inline-flex; align-items: center; gap: 0.8rem; }
+        .avail-badge span { width: 10px; height: 10px; background: var(--accent-green); border-radius: 50%; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { transform: scale(0.9); opacity: 0.7; } 70% { transform: scale(3); opacity: 0; } 100% { transform: scale(0.9); opacity: 1; } }
+
+        .hero h1 { font-size: 7.5rem; font-weight: 800; letter-spacing: -6px; line-height: 0.9; margin-bottom: 1.5rem; }
+        .gradient-txt { background: linear-gradient(135deg, var(--primary), var(--accent-green)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero h2 { font-size: 2.2rem; font-weight: 600; color: var(--text-main); margin-bottom: 3rem; }
+        #typing-text { border-right: 3px solid var(--accent-green); padding-right: 5px; color: var(--accent-blue); }
+
+        .btn { padding: 1.4rem 4rem; border-radius: 2.5rem; font-weight: 800; text-decoration: none; transition: var(--transition); display: inline-block; }
+        .btn-black { background: var(--text-main); color: white; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+        .btn-black:hover { transform: translateY(-8px) scale(1.02); box-shadow: 0 40px 60px rgba(0,0,0,0.15); }
+
+        /* About Card */
+        .about-modern { background: var(--glass); backdrop-filter: blur(40px); border-radius: 5rem; padding: 7rem; border: 1px solid var(--border); display: grid; grid-template-columns: 1fr 1.5fr; gap: 8rem; align-items: center; box-shadow: var(--shadow-lg); }
+        .image-container { position: relative; border-radius: 4rem; overflow: hidden; border: 15px solid white; box-shadow: var(--shadow-lg); transition: var(--transition); }
+        .image-container img { width: 100%; display: block; filter: grayscale(20%); transition: var(--transition); }
+        .image-container:hover img { filter: grayscale(0); transform: scale(1.05); }
+
+        /* Section Reveal */
+        section { padding: 10rem 0; opacity: 0; transform: translateY(50px); transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1); }
+        section.reveal { opacity: 1; transform: translateY(0); }
+
+        /* Skills Bantu Grid */
+        .tech-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; }
+        .tech-card { background: white; border-radius: 3.5rem; padding: 5rem 4rem; border: 1px solid var(--border); box-shadow: var(--shadow); transition: var(--transition); position: relative; overflow: hidden; }
+        .tech-card:hover { transform: translateY(-15px); border-color: var(--accent-blue); box-shadow: var(--shadow-lg); }
+        .tech-card-large { grid-column: span 2; }
+        .tech-card i { font-size: 3rem; color: var(--accent-blue); margin-bottom: 2rem; }
+        .tech-card h3 { font-size: 2rem; font-weight: 800; margin-bottom: 1.5rem; }
+        .p-bar { height: 12px; background: #f3f4f6; border-radius: 20px; margin-top: 2rem; }
+        .p-fill { height: 100%; background: linear-gradient(90deg, var(--accent-blue), var(--accent-green)); border-radius: 20px; width: 0; transition: width 2s cubic-bezier(0.19, 1, 0.22, 1); }
+
+        /* Project Showroom */
+        .project-wide { background: var(--glass); border-radius: 5rem; padding: 6rem; border: 1px solid var(--border); display: grid; grid-template-columns: 1.2fr 1fr; gap: 6rem; align-items: center; box-shadow: var(--shadow-lg); transition: var(--transition); }
+        .project-wide:hover { background: #ffffff; }
+        .project-visual { border-radius: 3.5rem; overflow: hidden; border: 10px solid white; box-shadow: var(--shadow-lg); }
+        .project-visual img { width: 100%; display: block; }
+        .project-content h3 { font-size: 3.5rem; font-weight: 800; margin-bottom: 2rem; letter-spacing: -2px; }
+
+        /* Contact Section */
+        .contact-final { background: var(--text-main); color: white; border-radius: 6rem; padding: 12rem 5rem; text-align: center; position: relative; overflow: hidden; }
+        .contact-final h2 { font-size: 6.5rem; font-weight: 800; letter-spacing: -6px; line-height: 0.85; margin-bottom: 4rem; }
+        .email-link { font-size: 3rem; font-weight: 800; color: var(--accent-green); text-decoration: none; border-bottom: 5px solid rgba(255,255,255,0.1); transition: var(--transition); }
+        .email-link:hover { color: white; border-color: var(--accent-blue); }
+
+        /* Animations */
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+
+        @media (max-width: 1100px) {
+            .hero h1 { font-size: 4.5rem; }
+            .about-modern, .project-wide { grid-template-columns: 1fr; padding: 4rem; }
+            .tech-grid { grid-template-columns: 1fr; }
+            .tech-card-large { grid-column: auto; }
+            .contact-final h2 { font-size: 3.5rem; }
+            .email-link { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+
+    <nav class="navbar" id="navbar">
+        <a href="#" class="logo"><i class="fas fa-terminal"></i> JASWANTH<span>.</span></a>
+        <ul class="nav-links">
+            <li><a href="#home">Home</a></li>
+            <li><a href="#about">Bio</a></li>
+            <li><a href="#skills">Tech</a></li>
+            <li><a href="#projects">Work</a></li>
+        </ul>
+        <div style="background: var(--text-main); color: white; padding: 0.8rem 2rem; border-radius: 50px; font-weight: 800; cursor: pointer; font-size: 0.8rem;">Let's Talk</div>
+    </nav>
+
+    <section id="home" class="hero reveal">
+        <div class="hero-content">
+            <div class="avail-badge"><span></span> Open to New Projects</div>
+            <h1 class="gradient-txt">Jaswanth Kumar</h1>
+            <h2>Creative <span id="typing-text"></span></h2>
+            <p>Full-stack developer blending scalable backend architectures with pixel-perfect, interactive AI experiences.</p>
+            <div style="margin-top: 4rem;">
+                <a href="#projects" class="btn btn-black">Explore My Portfolio</a>
+            </div>
+        </div>
+    </section>
+
+    <div class="container">
+        <section id="about" class="reveal">
+            <div class="about-modern">
+                <div class="image-container">
+                    <img src="avatar.png" alt="Jaswanth Kumar">
+                </div>
+                <div class="about-info">
+                    <h3 style="font-size: 3rem; font-weight: 800; margin-bottom: 2rem;">Turning Logic <br/>into Experience.</h3>
+                    <p style="font-size: 1.3rem; color: var(--text-muted); font-weight: 500; margin-bottom: 3rem;">I solve digital puzzles. Whether it's building safe and secure APIs or designing fluid user interfaces, my goal is always to deliver an unforgettable user journey.</p>
+                    <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
+                         <span style="padding: 0.8rem 2rem; background: white; border: 1px solid var(--border); border-radius: 50px; font-weight: 800; color: var(--primary);">React 19</span>
+                         <span style="padding: 0.8rem 2rem; background: white; border: 1px solid var(--border); border-radius: 50px; font-weight: 800; color: var(--accent-green);">Node Server</span>
+                         <span style="padding: 0.8rem 2rem; background: white; border: 1px solid var(--border); border-radius: 50px; font-weight: 800; color: var(--secondary);">Computer Vision</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="skills" class="reveal">
+            <div style="margin-bottom: 6rem;">
+                <span style="color: var(--accent-green); font-weight: 800; letter-spacing: 5px; text-transform: uppercase;">02 &bull; Skills</span>
+                <h2 style="font-size: 4.5rem; font-weight: 800; letter-spacing: -3px;">My Arsenal.</h2>
+            </div>
+            <div class="tech-grid">
+                <div class="tech-card tech-card-large">
+                    <i class="fab fa-react"></i>
+                    <h3>Frontend Systems</h3>
+                    <p style="color: var(--text-muted); font-weight: 500; font-size: 1.1rem;">Building complex Single Page Applications with dynamic state and high-performance rendering logic.</p>
+                    <div class="p-bar"><div class="p-fill" data-width="92%"></div></div>
+                </div>
+                <div class="tech-card">
+                    <i class="fab fa-node-js" style="color: var(--accent-green);"></i>
+                    <h3>Backend</h3>
+                    <p style="color: var(--text-muted); font-weight: 500;">Secure, scalable Node.js servers.</p>
+                    <div class="p-bar"><div class="p-fill" data-width="85%"></div></div>
+                </div>
+                <div class="tech-card">
+                    <i class="fas fa-brain"></i>
+                    <h3>AI Integration</h3>
+                    <p style="color: var(--text-muted); font-weight: 500;">Web-ready machine learning models.</p>
+                    <div class="p-bar"><div class="p-fill" data-width="80%"></div></div>
+                </div>
+                <div class="tech-card tech-card-large">
+                    <i class="fas fa-layer-group"></i>
+                    <h3>Product Architecture</h3>
+                    <p style="color: var(--text-muted); font-weight: 500; font-size: 1.1rem;">End-to-end planning from database schema design to the final interactive UI polish.</p>
+                    <div class="p-bar"><div class="p-fill" data-width="95%"></div></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="projects" class="reveal">
+             <div style="margin-bottom: 6rem;">
+                <span style="color: var(--accent-blue); font-weight: 800; letter-spacing: 5px; text-transform: uppercase;">03 &bull; Work</span>
+                <h2 style="font-size: 4.5rem; font-weight: 800; letter-spacing: -3px;">Selected Exhibits.</h2>
+            </div>
+            <div class="project-wide">
+                <div class="project-content">
+                    <span style="font-weight: 800; color: var(--accent-green); text-transform: uppercase; letter-spacing: 2px;">AI Computer Vision</span>
+                    <h3>Hiero Assistant</h3>
+                    <p style="font-size: 1.25rem; color: var(--text-muted); margin-bottom: 3rem; font-weight: 500;">An AI Interview Simulator that analyzes user expressions during mock interviews and provides a confidence-based executive score.</p>
+                    <a href="#" class="btn btn-black" style="padding: 1rem 3rem;">Case Study</a>
+                </div>
+                <div class="project-visual">
+                    <img src="project.png" alt="Project Screenshot">
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="reveal">
+            <div class="contact-final">
+                <div class="avail-badge" style="background: rgba(255,255,255,0.05); color: white; border-color: rgba(255,255,255,0.1); margin-bottom: 5rem;">Get in Touch</div>
+                <h2>Let's build <br/> the extraordinary.</h2>
+                <a href="mailto:jaswanth.builds@gmail.com" class="email-link">jaswanth.builds@gmail.com</a>
+                <div style="display: flex; justify-content: center; gap: 4rem; margin-top: 6rem;">
+                    <a href="#" style="color: white; font-size: 2.5rem; opacity: 0.6; transition: 0.3s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.6"><i class="fab fa-github"></i></a>
+                    <a href="#" style="color: white; font-size: 2.5rem; opacity: 0.6; transition: 0.3s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.6"><i class="fab fa-linkedin"></i></a>
+                    <a href="#" style="color: white; font-size: 2.5rem; opacity: 0.6; transition: 0.3s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.6"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer style="padding: 6rem 0; text-align: center; color: #cbd5e1; font-weight: 800; letter-spacing: 5px; font-size: 0.8rem;">
+        &copy; 2026 JASWANTH KUMAR &bull; BUILT WITH PRECISION
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Typing Animation
+            const typingText = document.getElementById('typing-text');
+            const words = ["Engineer.", "Technologist.", "Developer."];
+            let wordIdx = 0, charIdx = 0, isDeleting = false;
+
+            function type() {
+                const currentWord = words[wordIdx];
+                typingText.textContent = isDeleting ? currentWord.substring(0, charIdx--) : currentWord.substring(0, charIdx++);
+                if(!isDeleting && charIdx === currentWord.length + 1) { isDeleting = true; setTimeout(type, 2000); }
+                else if(isDeleting && charIdx === 0) { isDeleting = false; wordIdx = (wordIdx + 1) % words.length; type(); }
+                else setTimeout(type, isDeleting ? 70 : 180);
+            }
+            type();
+
+            // Sticky Nav
+            window.addEventListener('scroll', () => {
+                const nav = document.getElementById('navbar');
+                if(window.scrollY > 100) nav.classList.add('sticky');
+                else nav.classList.remove('sticky');
+            });
+
+            // Reveal Animation
+            const observer = new IntersectionObserver(entries => {
+                entries.forEach(entry => {
+                    if(entry.isIntersecting) {
+                        entry.target.classList.add('reveal');
+                        if(entry.target.id === 'skills') {
+                            entry.target.querySelectorAll('.p-fill').forEach(bar => {
+                                bar.style.width = bar.dataset.width;
+                            });
+                        }
+                    }
+                });
+            }, { threshold: 0.1 });
+            document.querySelectorAll('section').forEach(el => observer.observe(el));
+        });
+    </script>
+</body>
+</html>

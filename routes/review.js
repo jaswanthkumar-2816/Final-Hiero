@@ -129,6 +129,32 @@ router.post('/login-track', authenticateToken, async (req, res) => {
     }
 });
 
+// 📊 GET /api/profile-stats - Integrated Profile Stats
+router.get('/profile-stats', authenticateToken, async (req, res) => {
+    try {
+        const userEmail = req.user.email;
+        const user = await User.findOne({ email: userEmail });
+        if (!user) return res.status(404).json({ error: 'User not found' });
+
+        res.json({
+            success: true,
+            user: {
+                name: user.username || user.email.split('@')[0],
+                email: user.email,
+                picture: user.picture || null,
+                referralCode: user.referralCode || 'HIERO-DEFAULT',
+                referralCount: user.referralCount || 0,
+                rank: user.referralCount >= 10 ? 'Hiero Elite' : (user.referralCount >= 5 ? 'Pro Ambassador' : 'Rising Star'),
+                points: user.scores?.totalPoints || 0,
+                history: user.analysisHistory?.slice(0, 5) || [],
+                skills: user.completedSkills?.slice(0, 5) || []
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch profile stats' });
+    }
+});
+
 // 📊 GET /api/admin/dashboard - Integrated Admin Dashboard
 router.get('/admin/dashboard', async (req, res) => {
     try {
@@ -155,6 +181,31 @@ router.get('/admin/check', authenticateToken, async (req, res) => {
         res.json({ success: true, isAdmin: ADMIN_EMAILS.includes(userEmail) });
     } catch (error) {
         res.status(500).json({ error: 'Admin check failed' });
+    }
+});
+
+// 🤝 POST /api/claim-referral - Link referral code
+router.post('/claim-referral', authenticateToken, async (req, res) => {
+    try {
+        const { referralCode } = req.body;
+        const userEmail = req.user.email;
+        if (!referralCode) return res.status(400).json({ error: 'Referral code is required' });
+
+        const user = await User.findOne({ email: userEmail });
+        if (!user) return res.status(404).json({ error: 'User not found' });
+        if (user.referredBy) return res.status(400).json({ error: 'Referral already claimed' });
+
+        const referrer = await User.findOne({ referralCode: referralCode.trim().toUpperCase() });
+        if (!referrer) return res.status(404).json({ error: 'Invalid referral code' });
+        if (referrer.email === user.email) return res.status(400).json({ error: 'You cannot refer yourself' });
+
+        user.referredBy = referrer._id;
+        await user.save();
+
+        res.json({ success: true, message: 'Referral linked successfully' });
+    } catch (error) {
+        console.error('Referral claim error:', error);
+        res.status(500).json({ error: 'Failed to claim referral' });
     }
 });
 

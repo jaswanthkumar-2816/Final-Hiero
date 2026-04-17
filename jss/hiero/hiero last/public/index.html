@@ -84,6 +84,50 @@
       transform: translateY(-1px);
     }
 
+    /* Referral Ambassador Card */
+    .referral-card {
+      background: rgba(7, 226, 25, 0.05);
+      border: 1px solid rgba(7, 226, 25, 0.2);
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-top: 15px;
+      text-align: left;
+    }
+
+    .referral-title {
+      font-size: 10px;
+      font-weight: 800;
+      color: #07e219;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+
+    .referral-stat {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      margin-bottom: 5px;
+    }
+
+    .referral-label { color: #888; }
+    .referral-value { color: #fff; font-weight: 700; font-family: monospace; }
+    
+    .referral-goal {
+      width: 100%;
+      height: 4px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 2px;
+      margin-top: 8px;
+      overflow: hidden;
+    }
+
+    .referral-progress {
+      height: 100%;
+      background: #07e219;
+      box-shadow: 0 0 8px #07e219;
+    }
+
     /* Review Section Styles */
     .review-section {
       max-width: 600px;
@@ -298,6 +342,107 @@
         font-size: 12px;
       }
     }
+
+    /* Referral Modal Premium Styles */
+    .ref-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    .ref-modal-content {
+      background: #000;
+      border: 1px solid rgba(7, 226, 25, 0.3);
+      border-radius: 24px;
+      padding: 40px;
+      width: 90%;
+      max-width: 450px;
+      text-align: center;
+      box-shadow: 0 0 50px rgba(7, 226, 25, 0.2);
+    }
+
+    .ref-icon {
+      background: #07e219;
+      color: black;
+      width: 60px;
+      height: 60px;
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      font-weight: 900;
+      margin: 0 auto 24px;
+      box-shadow: 0 0 20px rgba(7, 226, 25, 0.5);
+    }
+
+    .ref-title {
+      font-size: 24px;
+      color: white;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .ref-text {
+      color: #888;
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .ref-input {
+      width: 100%;
+      background: rgba(255,255,255,0.05);
+      border: 1px dashed rgba(255,255,255,0.2);
+      border-radius: 12px;
+      padding: 16px;
+      color: white;
+      text-align: center;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      font-family: monospace;
+    }
+
+    .ref-button-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .ref-submit {
+      background: #07e219;
+      color: black;
+      border: none;
+      padding: 16px;
+      border-radius: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .ref-submit:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(7, 226, 25, 0.4); }
+
+    .ref-skip {
+      background: transparent;
+      color: #555;
+      border: none;
+      font-size: 13px;
+      cursor: pointer;
+      padding: 8px;
+    }
+
+    .ref-skip:hover { color: #888; }
   </style>
 </head>
 
@@ -305,26 +450,61 @@
   <div class="dashboard-wrapper">
 
     <!-- User Profile Section -->
-    <div class="user-profile" id="userProfile" style="display: none;">
-      <img id="userAvatar" src="" alt="Profile" class="user-avatar" />
-      <div class="user-info">
-        <h3 id="userName">Loading...</h3>
-        <p id="userEmail">Loading...</p>
+    <div class="user-profile" id="userProfile" style="display: none; flex-direction: column; align-items: stretch; padding: 16px; width: 240px; border-radius: 20px;">
+      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+        <img id="userAvatar" src="" alt="Profile" class="user-avatar" />
+        <div class="user-info">
+          <h3 id="userName">Loading...</h3>
+          <p id="userEmail" style="font-size: 10px; opacity: 0.6;">Loading...</p>
+        </div>
       </div>
-      <button id="logoutBtn" class="logout-btn">Logout</button>
+      
+      <!-- Referral Badge -->
+      <div class="referral-card">
+        <div class="referral-title">Ambassador Stats</div>
+        <div class="referral-stat">
+          <span class="referral-label">Your Code:</span>
+          <span class="referral-value" id="refCodeDisplay">---</span>
+        </div>
+        <div class="referral-stat">
+          <span class="referral-label">Successful:</span>
+          <span class="referral-value" id="refCountDisplay">0 / 10</span>
+        </div>
+        <div class="referral-goal">
+          <div class="referral-progress" id="refProgressBar" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <button id="logoutBtn" class="logout-btn" style="margin-top: 15px; width: 100%;">Logout</button>
     </div>
 
     <!-- Logo & Greeting -->
     <div class="dashboard-header">
-      <img src="/dashboard/logohiero copy.png" alt="Hiero Logo" class="logo-glow" />
+      <img src="logohiero copy.png" alt="Hiero Logo" class="logo-glow" />
       <h1> <span class="brand" id="welcomeMessage">Welcome to Hiero</span></h1>
       <p class="subtext">Your Career Assistant</p>
     </div>
 
     <!-- Buttons -->
     <div class="dashboard-actions">
-      <a href="/domain-selection.html" class="glow-button">Create Resume</a>
+      <button onclick="handleCreateResumeClick()" class="glow-button" style="cursor: pointer;">Create Resume</button>
       <a href="/dashboard/analysis.html" class="glow-button">Analyze Resume</a>
+    </div>
+
+    <!-- Referral Gate Modal -->
+    <div id="referralModal" class="ref-modal-overlay">
+      <div class="ref-modal-content">
+        <div class="ref-icon">H</div>
+        <div class="ref-title">Invitation Check</div>
+        <div class="ref-text">Welcome to the creator suite. Do you have a referral or invite code for extra trial perks?</div>
+        
+        <input type="text" id="referralCodeInput" class="ref-input" placeholder="HIERO-XXXX">
+        
+        <div class="ref-button-group">
+          <button id="verifyRefBtn" class="ref-submit" onclick="submitReferral()">Verify & Continue</button>
+          <button class="ref-skip" onclick="skipReferral()">I don't have a code, proceed directly</button>
+        </div>
+      </div>
     </div>
 
     <!-- Admin Link (only visible to admin users) -->
@@ -465,34 +645,52 @@
       const userEmail = document.getElementById('userEmail');
       const userAvatar = document.getElementById('userAvatar');
       const welcomeMessage = document.getElementById('welcomeMessage');
-      const reviewSection = document.getElementById('reviewSection');
+      
+      const refCodeDisplay = document.getElementById('refCodeDisplay');
+      const refCountDisplay = document.getElementById('refCountDisplay');
+      const refProgressBar = document.getElementById('refProgressBar');
 
       // Show user profile section
       userProfile.style.display = 'flex';
-      // Review section visibility is controlled by loadUserReview based on whether
-      // the user has already submitted a review.
-      // reviewSection.style.display = 'block';
 
       // Update user info
       userName.textContent = userData.name || 'User';
       userEmail.textContent = userData.email || '';
 
-      // Set avatar (use profile picture if available, otherwise use initials)
+      // Update Referral UI
+      if (refCodeDisplay) refCodeDisplay.textContent = userData.referralCode || 'N/A';
+      if (refCountDisplay) refCountDisplay.textContent = `${userData.referralCount || 0} / 10`;
+      if (refProgressBar) {
+        const percentage = Math.min(((userData.referralCount || 0) / 10) * 100, 100);
+        refProgressBar.style.width = `${percentage}%`;
+      }
+
+      // Set avatar (Smart Photo Logic)
       if (userData.picture) {
         userAvatar.src = userData.picture;
         userAvatar.style.display = 'block';
+        if (userProfile.querySelector('.avatar-initials')) userProfile.querySelector('.avatar-initials').style.display = 'none';
+      } else if (userData.email) {
+        // Fallback to Gravatar (Email-linked photo)
+        const emailHash = btoa(userData.email.trim().toLowerCase()).replace(/=/g, ""); // Simple hash fallback
+        // Note: Real Gravatar uses MD5, but we'll use a placeholder or public service if MD5 is unavailable
+        userAvatar.src = `https://www.gravatar.com/avatar/${emailHash}?d=identicon&s=150`;
+        userAvatar.style.display = 'block';
+        if (userProfile.querySelector('.avatar-initials')) userProfile.querySelector('.avatar-initials').style.display = 'none';
       } else {
-        // Create initials avatar
         const initials = userData.name ? userData.name.split(' ').map(n => n[0]).join('').toUpperCase() : 'U';
         userAvatar.style.display = 'none';
-        // We'll create a text-based avatar instead
-        const avatarText = document.createElement('div');
-        avatarText.className = 'avatar-initials';
+        
+        let avatarText = userProfile.querySelector('.avatar-initials');
+        if (!avatarText) {
+          avatarText = document.createElement('div');
+          avatarText.className = 'avatar-initials';
+          userAvatar.parentNode.insertBefore(avatarText, userAvatar);
+        }
+        avatarText.style.display = 'flex';
         avatarText.textContent = initials;
-        userAvatar.parentNode.replaceChild(avatarText, userAvatar);
       }
 
-      // Personalize welcome message
       const firstName = userData.name ? userData.name.split(' ')[0] : 'there';
       welcomeMessage.textContent = `Welcome back, ${firstName}!`;
     }
@@ -527,7 +725,8 @@
         if (response.ok) {
           const data = await response.json();
           if (data.isAdmin) {
-            document.getElementById('adminLink').style.display = 'block';
+            const adminLink = document.getElementById('adminLink');
+            if (adminLink) adminLink.style.display = 'block';
           }
         }
       } catch (error) {
@@ -758,6 +957,60 @@
         });
       }
     });
+
+    // ✅ Handle Create Resume Workflow
+    let currentUserData = null;
+
+    function handleCreateResumeClick() {
+      const user = JSON.parse(localStorage.getItem('user'));
+      if (!user) { window.location.href = '/login'; return; }
+
+      // If user is already referred or already has a referral linked, skip modal
+      if (user.referredBy || localStorage.getItem('referral_skipping')) {
+        window.location.href = '/domain-selection.html';
+      } else {
+        document.getElementById('referralModal').style.display = 'flex';
+      }
+    }
+
+    async function submitReferral() {
+      const code = document.getElementById('referralCodeInput').value.trim();
+      if (!code) {
+        alert('Please enter a code or click skip.');
+        return;
+      }
+
+      const verifyBtn = document.getElementById('verifyRefBtn');
+      verifyBtn.textContent = 'Verifying...';
+      verifyBtn.disabled = true;
+
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('/api/claim-referral', {
+           method: 'POST',
+           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+           body: JSON.stringify({ referralCode: code })
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+          alert('✅ Invitation verified! Perks applied.');
+          window.location.href = '/domain-selection.html';
+        } else {
+          alert('❌ ' + (data.error || 'Invalid code. Check and try again.'));
+          verifyBtn.textContent = 'Verify & Continue';
+          verifyBtn.disabled = false;
+        }
+      } catch (err) {
+        alert('Network error. Proceeding directly.');
+        window.location.href = '/domain-selection.html';
+      }
+    }
+
+    function skipReferral() {
+      localStorage.setItem('referral_skipping', 'true');
+      window.location.href = '/domain-selection.html';
+    }
 
     // Initialize dashboard when page loads
     window.addEventListener('load', initializeDashboard);

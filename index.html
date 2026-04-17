@@ -193,11 +193,38 @@
       <p>Build your resume, analyze job descriptions, learn missing skills, and launch your career with AI-powered tools
         designed to help you succeed.</p>
       <div class="button-group" style="justify-content: center;">
-        <button style="margin: 0 auto; display: block;" onclick="window.location.href='dashboard.html'">Get
-          Started</button>
+        <button style="margin: 0 auto; display: block;" onclick="handleCreateResumeClick()">Get Started</button>
       </div>
     </div>
   </div>
+
+  <!-- Referral Modal -->
+  <div id="referralModal" style="display:none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 10000; align-items: center; justify-content: center; font-family: sans-serif;">
+    <div style="background: white; color: black; padding: 40px; border-radius: 24px; max-width: 400px; width: 90%; text-align: center;">
+      <h2 style="font-weight: 900; color: #000; margin-top: 0;">Invitation Check</h2>
+      <p style="color: #666; margin-bottom: 24px;">Do you have an invitation code for a trial or bonus?</p>
+      <input type="text" id="referralCodeInput" placeholder="HIERO-XXXX" style="width: 100%; padding: 15px; border: 2px dashed #000; border-radius: 12px; margin-bottom: 20px; text-align: center; font-weight: bold; text-transform: uppercase;">
+      <button onclick="submitReferralGlobal()" style="width: 100%; background: #000; color: white; border: none; padding: 16px; border-radius: 12px; font-weight: bold; cursor: pointer; margin-bottom: 15px;">Verify & Continue</button>
+      <button onclick="skipReferralGlobal()" style="width: 100%; background: transparent; color: #999; border: none; cursor: pointer;">I don't have a code</button>
+    </div>
+  </div>
+
+  <script>
+    function handleCreateResumeClick() {
+       document.getElementById('referralModal').style.display = 'flex';
+    }
+
+    async function submitReferralGlobal() {
+      const code = document.getElementById('referralCodeInput').value.trim();
+      if(!code) return alert('Enter code or skip.');
+      localStorage.setItem('pending_referral', code);
+      window.location.href = 'dashboard.html';
+    }
+
+    function skipReferralGlobal() {
+      window.location.href = 'dashboard.html';
+    }
+  </script>
 
   <script>
     // Splash screen logic

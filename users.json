@@ -85,5 +85,22 @@
     "emailVerified": true,
     "signupMethod": "google",
     "picture": "https://lh3.googleusercontent.com/a/ACg8ocIlRdy2BafMbeWXDRVWCI2bcPEVhg5PSKWRi5hV_GwDpEJfRQ=s96-c"
+  },
+  {
+    "id": 11,
+    "name": "Test User",
+    "email": "testuser@example.com",
+    "password": "$2a$10$5hw9787hvA1RR93ske970OmgOnNc.EkCGETWuDq7vGs3jXP8STFQ6",
+    "emailVerified": false,
+    "signupMethod": "email"
+  },
+  {
+    "id": 12,
+    "googleId": "111818523999941035422",
+    "email": "noobo0283@gmail.com",
+    "name": "Op Noob",
+    "emailVerified": true,
+    "signupMethod": "google",
+    "picture": "https://lh3.googleusercontent.com/a/ACg8ocJdELS_XkWjxsc-N60ZrWpFCD-vCZPRQLcAWKorU8WILjarfw=s96-c"
   }
 ]

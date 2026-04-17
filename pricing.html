@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upgrade to Hiero PRO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2ae023;
+            --primary-glow: rgba(42, 224, 35, 0.5);
+            --bg-dark: #020402;
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-main: #ffffff;
+            --text-muted: #a0a0a0;
+            --gold: #f59e0b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Ambient Glows */
+        .ambient-glow {
+            position: fixed;
+            width: 40vw;
+            height: 40vw;
+            background: var(--primary);
+            filter: blur(150px);
+            opacity: 0.07;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .glow-1 { top: -10%; left: -10%; }
+        .glow-2 { bottom: -10%; right: -10%; }
+
+        .container {
+            width: 100%;
+            max-width: 460px;
+            z-index: 10;
+            padding: 20px;
+            animation: containerAppear 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        @keyframes containerAppear {
+            from { opacity: 0; transform: translateY(40px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .pricing-card {
+            background: rgba(10, 15, 10, 0.7);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            border: 1px solid var(--glass-border);
+            border-radius: 48px;
+            padding: 48px 32px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 40px 100px rgba(0,0,0,0.8);
+        }
+
+        .badge-student {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(42, 224, 35, 0.08);
+            color: var(--primary);
+            font-size: 0.75rem;
+            font-weight: 800;
+            padding: 10px 20px;
+            border-radius: 100px;
+            margin-bottom: 24px;
+            border: 1px solid rgba(42, 224, 35, 0.15);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 12px;
+            letter-spacing: -1.5px;
+            line-height: 1.1;
+        }
+
+        h1 span {
+            background: linear-gradient(90deg, #fff, var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 1rem;
+            margin-bottom: 40px;
+            line-height: 1.5;
+        }
+
+        .plans-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .plan {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--glass-border);
+            border-radius: 28px;
+            padding: 24px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            position: relative;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            overflow: hidden;
+            text-align: left;
+        }
+
+        .plan:hover {
+            transform: translateY(-4px);
+            border-color: rgba(42, 224, 35, 0.3);
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .plan.active {
+            border-color: var(--primary);
+            background: rgba(42, 224, 35, 0.06);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3), 0 0 20px rgba(42, 224, 35, 0.1);
+        }
+
+        .plan-meta h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+
+        .plan-meta p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .plan-price {
+            text-align: right;
+        }
+
+        .old-price {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-decoration: line-through;
+            opacity: 0.6;
+        }
+
+        .current-price {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+
+        .best-value {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: var(--primary);
+            color: #000;
+            font-size: 0.7rem;
+            font-weight: 900;
+            padding: 6px 16px;
+            border-bottom-left-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            animation: pulseLabel 2s infinite;
+        }
+
+        @keyframes pulseLabel {
+            0% { opacity: 1; }
+            50% { opacity: 0.8; }
+            100% { opacity: 1; }
+        }
+
+        .features-grid {
+            text-align: left;
+            margin-bottom: 40px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            padding: 0 10px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .feature-item i {
+            color: var(--primary);
+            font-size: 0.75rem;
+        }
+
+        .btn-pay {
+            width: 100%;
+            background: var(--primary);
+            color: #000;
+            border: none;
+            padding: 22px;
+            border-radius: 24px;
+            font-size: 1.15rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+            box-shadow: 0 15px 35px var(--primary-glow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-pay:hover {
+            transform: scale(1.02) translateY(-2px);
+            box-shadow: 0 20px 45px var(--primary-glow);
+            filter: brightness(1.1);
+        }
+
+        .btn-pay:active {
+            transform: scale(0.98);
+        }
+
+        .secure-note {
+            margin-top: 24px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .skip-btn {
+            margin-top: 20px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .skip-btn:hover { color: #fff; text-decoration: underline; }
+
+        /* Animation for icons */
+        .success-float {
+            width: 80px;
+            height: 80px;
+            background: rgba(42, 224, 35, 0.1);
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            color: var(--primary);
+            font-size: 2rem;
+            border: 1px solid rgba(42, 224, 35, 0.2);
+            animation: floatIcon 3s ease-in-out infinite;
+        }
+
+        @keyframes floatIcon {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="ambient-glow glow-1"></div>
+    <div class="ambient-glow glow-2"></div>
+
+    <div class="container">
+        <div class="pricing-card">
+            
+            <div class="success-float">
+                <i class="fa-solid fa-cloud-arrow-down"></i>
+            </div>
+
+            <div class="badge-student">
+                <i class="fa-solid fa-bolt"></i> Student Limited Offer
+            </div>
+
+            <h1>Unlock <span>Pro</span></h1>
+            <p class="subtitle">Your resume is ready! Now unlock AI insights and guided paths to land your dream job.</p>
+
+            <div class="features-grid">
+                <div class="feature-item"><i class="fa-solid fa-check-double"></i> Advanced AI Review</div>
+                <div class="feature-item"><i class="fa-solid fa-check-double"></i> Elite Templates</div>
+                <div class="feature-item"><i class="fa-solid fa-check-double"></i> Mastery Pathways</div>
+                <div class="feature-item"><i class="fa-solid fa-check-double"></i> Priority Export</div>
+            </div>
+
+            <div class="plans-stack">
+                <!-- Option 1 -->
+                <div class="plan" onclick="activatePlan(this)">
+                    <div class="plan-meta">
+                        <h3>7 Days PRO</h3>
+                        <p>Perfect for quick edits</p>
+                    </div>
+                    <div class="plan-price">
+                        <span class="old-price">₹149</span>
+                        <span class="current-price">₹49</span>
+                    </div>
+                </div>
+
+                <!-- Option 2 (Featured) -->
+                <div class="plan active" onclick="activatePlan(this)">
+                    <span class="best-value">Best Value</span>
+                    <div class="plan-meta">
+                        <h3>30 Days PRO</h3>
+                        <p>Full career growth</p>
+                    </div>
+                    <div class="plan-price">
+                        <span class="old-price">₹499</span>
+                        <span class="current-price">₹99</span>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn-pay" id="payBtn">Continue to PRO Access</button>
+
+            <div class="secure-note">
+                <i class="fa-solid fa-shield-check"></i>
+                <span>One-time payment • Secure checkout</span>
+            </div>
+
+            <button class="skip-btn" onclick="window.history.back()">Skip for now</button>
+        </div>
+    </div>
+
+    <script>
+        function activatePlan(el) {
+            document.querySelectorAll('.plan').forEach(p => p.classList.remove('active'));
+            el.classList.add('active');
+            
+            // Subtle feedback for button
+            const btn = document.getElementById('payBtn');
+            btn.style.transform = 'scale(0.98)';
+            setTimeout(() => btn.style.transform = '', 100);
+        }
+    </script>
+</body>
+</html>

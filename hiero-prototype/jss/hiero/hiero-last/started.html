@@ -179,6 +179,20 @@
       window.location.href = `/login?type=${role}`;
     }
   </script>
+
+  <!-- ── Hiero Visit Tracker (silent, never blocks page) ── -->
+  <script>
+    (function() {
+      try {
+        var src = new URLSearchParams(location.search).get('ref') === 'qr' ? 'qr' : 'direct';
+        fetch('/api/admin/pageview', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ page: 'landing', source: src })
+        }).catch(function(){});
+      } catch(e) {}
+    })();
+  </script>
 </body>
 
 </html>

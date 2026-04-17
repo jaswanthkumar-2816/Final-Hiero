@@ -118,11 +118,51 @@ const createResumeBtn = document.getElementById('create-resume-btn');
 const analyzeResumeBtn = document.getElementById('analyze-resume-btn');
 if (createResumeBtn && analyzeResumeBtn) {
   createResumeBtn.addEventListener('click', () => {
-    window.location.href = 'resume-builder.html';
+    const skip = localStorage.getItem('referral_skipping');
+    if (skip) {
+      window.location.href = 'domain-selection.html';
+    } else {
+      document.getElementById('referralModal').style.display = 'flex';
+    }
   });
+
   analyzeResumeBtn.addEventListener('click', () => {
     window.location.href = 'upload.html';
   });
+}
+
+// Referral Modal Logic
+const skipRefBtn = document.getElementById('skipRefBtn');
+if (skipRefBtn) {
+  skipRefBtn.onclick = () => {
+    localStorage.setItem('referral_skipping', 'true');
+    window.location.href = 'domain-selection.html';
+  };
+}
+
+const verifyRefBtn = document.getElementById('verifyRefBtn');
+if (verifyRefBtn) {
+  verifyRefBtn.onclick = async () => {
+    const code = document.getElementById('referralCodeInput').value.trim();
+    if (!code) return alert('Enter code or skip.');
+    
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch('/api/claim-referral', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ referralCode: code })
+      });
+      if (res.ok) {
+        alert('✅ Invitation Verified!');
+        window.location.href = 'domain-selection.html';
+      } else {
+        alert('❌ Invalid Code');
+      }
+    } catch (err) {
+      window.location.href = 'domain-selection.html';
+    }
+  };
 }
 
 // =============================

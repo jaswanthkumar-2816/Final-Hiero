@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hiero | Referral & Pricing Flow</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2ae023;
+            --primary-glow: rgba(42, 224, 35, 0.4);
+            --bg-dark: #020402;
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-main: #ffffff;
+            --text-muted: #a0a0a0;
+            --gold: #f59e0b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated Background matching Hiero theme */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(circle at 20% 30%, rgba(42, 224, 35, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(42, 224, 35, 0.08) 0%, transparent 40%);
+            z-index: -1;
+            animation: pulseBg 10s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes pulseBg {
+            0% { transform: scale(1); opacity: 0.5; }
+            100% { transform: scale(1.1); opacity: 1; }
+        }
+
+        .flow-container {
+            width: 100%;
+            max-width: 440px;
+            padding: 20px;
+            z-index: 1;
+        }
+
+        .screen {
+            background: var(--glass);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid var(--glass-border);
+            border-radius: 40px;
+            padding: 40px 30px;
+            text-align: center;
+            display: none;
+            animation: fadeIn 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Icons & Headers */
+        .icon {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+            filter: drop-shadow(0 0 10px var(--primary-glow));
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 12px;
+            letter-spacing: -1px;
+        }
+
+        p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 30px;
+        }
+
+        /* Referral Box */
+        .referral-box {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px dashed var(--glass-border);
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .code-text {
+            font-weight: 800;
+            letter-spacing: 2px;
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+
+        .copy-btn {
+            background: none;
+            border: none;
+            color: var(--primary);
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        /* Progress Bar */
+        .progress-wrapper {
+            margin-bottom: 30px;
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .bar-bg {
+            height: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            background: var(--primary);
+            box-shadow: 0 0 15px var(--primary-glow);
+            width: 60%;
+            transition: width 0.8s ease;
+        }
+
+        /* Status Cards */
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(42, 224, 35, 0.1);
+            color: var(--primary);
+            padding: 8px 16px;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            border: 1px solid rgba(42, 224, 35, 0.1);
+        }
+
+        /* Plan Cards */
+        .plan {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 20px;
+            cursor: pointer;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .plan:hover, .plan.selected {
+            border-color: var(--primary);
+            background: rgba(42, 224, 35, 0.05);
+        }
+
+        .plan.selected::after {
+            content: "\f058";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            color: var(--primary);
+            margin-left: 10px;
+        }
+
+        .best-value-label {
+            position: absolute;
+            top: 0; right: 0;
+            background: var(--primary);
+            color: #000;
+            font-size: 0.65rem;
+            font-weight: 800;
+            padding: 4px 12px;
+            border-bottom-left-radius: 15px;
+            text-transform: uppercase;
+        }
+
+        /* Buttons */
+        .btn {
+            width: 100%;
+            background: var(--primary);
+            color: #000;
+            padding: 18px;
+            border-radius: 18px;
+            font-weight: 800;
+            font-size: 1.1rem;
+            border: none;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 10px 25px var(--primary-glow);
+        }
+
+        .btn:hover {
+            transform: scale(1.02);
+            filter: brightness(1.1);
+        }
+
+        /* Features */
+        .feature-list {
+            text-align: left;
+            margin-bottom: 30px;
+        }
+
+        .feature {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            font-size: 0.95rem;
+        }
+
+        .feature i { color: var(--primary); }
+
+        /* Payment Summary */
+        .summary-box {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 20px;
+            text-align: left;
+            margin-bottom: 24px;
+        }
+
+        /* Utils */
+        .mt-4 { margin-top: 1.5rem; }
+        .text-accent { color: var(--primary); font-weight: 700; }
+    </style>
+</head>
+<body>
+
+    <div class="flow-container">
+        
+        <!-- 1. Referral Dashboard -->
+        <div id="step-1" class="screen active">
+            <i class="fa-solid fa-gift icon"></i>
+            <h1>Refer & Earn</h1>
+            <p>Invite 10 friends and unlock <span class="text-accent">10 Days PRO</span> for free!</p>
+            
+            <div class="referral-box">
+                <span class="code-text" id="refCode">HIERO99</span>
+                <button class="copy-btn" onclick="copyCode()"><i class="fa-solid fa-copy"></i></button>
+            </div>
+
+            <div class="progress-wrapper">
+                <div class="progress-info">
+                    <span>Progress</span>
+                    <span>6/10 Friends</span>
+                </div>
+                <div class="bar-bg">
+                    <div class="bar-fill" style="width: 60%;"></div>
+                </div>
+            </div>
+
+            <button class="btn" onclick="showStep(2)">Share Referral Link</button>
+        </div>
+
+        <!-- 2. Reward Progress -->
+        <div id="step-2" class="screen">
+            <i class="fa-solid fa-fire icon" style="color: #ff9f43;"></i>
+            <h1>Keep going!</h1>
+            <p>You're only <span class="text-accent">4 invites</span> away from unlocking PRO access.</p>
+
+            <div class="status-pill">
+                <i class="fa-solid fa-bolt"></i> 4 more to go
+            </div>
+
+            <div class="progress-wrapper">
+                <div class="progress-info">
+                    <span>Current Level</span>
+                    <span id="progress-val">60%</span>
+                </div>
+                <div class="bar-bg">
+                    <div class="bar-fill" id="dynamic-bar" style="width: 60%;"></div>
+                </div>
+            </div>
+
+            <button class="btn" style="background: var(--text-main); margin-bottom: 12px;" onclick="simulateUnlock()">Simulate 10 / 10</button>
+            <button class="btn" onclick="showStep(1)">Back</button>
+        </div>
+
+        <!-- 3. Trial Active -->
+        <div id="step-3" class="screen">
+            <i class="fa-solid fa-circle-check icon"></i>
+            <h1>PRO Unlocked 🎉</h1>
+            <p>Congrats! You have full access to Hiero PRO for the next 10 days.</p>
+
+            <div class="status-pill" style="padding: 12px 24px; font-size: 1.2rem;">
+                9d : 23h : 59m
+            </div>
+
+            <div class="feature-list">
+                <div class="feature"><i class="fa-solid fa-check"></i> Unlimited Analysis</div>
+                <div class="feature"><i class="fa-solid fa-check"></i> All Premium Templates</div>
+                <div class="feature"><i class="fa-solid fa-check"></i> Skill Mastery Roadmaps</div>
+            </div>
+
+            <button class="btn" onclick="showStep(4)">Start Building</button>
+        </div>
+
+        <!-- 4. Trial Expired / Pricing -->
+        <div id="step-4" class="screen">
+            <i class="fa-solid fa-hourglass-end icon" style="color: #ff4757;"></i>
+            <div class="status-pill" style="background: rgba(42, 224, 35, 0.08); border-color: rgba(42, 224, 35, 0.2); font-size: 0.7rem; letter-spacing: 2px;">RESUME DOWNLOADED</div>
+            <h1>Trial Expired</h1>
+            <p>Your PRO trial has ended. Choose a student plan to continue your journey.</p>
+
+            <div class="plan" onclick="selectPlan(this, '7 Days Access', '₹49')">
+                <div class="text-left">
+                    <div style="font-weight: 700;">7 Days Access</div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted);">Quick fix for interviews</div>
+                </div>
+                <div style="text-align: right;">
+                    <span style="font-size: 0.8rem; color: var(--text-muted); text-decoration: line-through; display: block;">₹149</span>
+                    <div style="font-weight: 800; font-size: 1.2rem;">₹49</div>
+                </div>
+            </div>
+
+            <div class="plan selected" onclick="selectPlan(this, '30 Days Access', '₹99')">
+                <span class="best-value-label">Best Value</span>
+                <div class="text-left">
+                    <div style="font-weight: 700;">30 Days Access</div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted);">Complete acceleration</div>
+                </div>
+                <div style="text-align: right;">
+                    <span style="font-size: 0.8rem; color: var(--text-muted); text-decoration: line-through; display: block;">₹499</span>
+                    <div style="font-weight: 800; font-size: 1.2rem;">₹99</div>
+                </div>
+            </div>
+
+            <p style="color: var(--primary); font-size: 0.8rem; font-weight: 700; margin-bottom: 20px;">
+                <i class="fa-solid fa-bolt"></i> Limited-time student offer
+            </p>
+
+            <button class="btn" onclick="showStep(5)">Upgrade Now</button>
+        </div>
+
+        <!-- 5. Payment Confirmation -->
+        <div id="step-5" class="screen">
+            <i class="fa-solid fa-shield-halved icon"></i>
+            <h1>Secure Checkout</h1>
+            <p>One step away from your career growth.</p>
+
+            <div class="summary-box">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                    <span id="selected-plan">30 Days Access</span>
+                    <span id="selected-price" style="font-weight: 800;">₹99</span>
+                </div>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">Access expires after period ends.</div>
+            </div>
+
+            <button class="btn" style="background: #ffffff; color: #000;">Confirm & Pay</button>
+            <p class="mt-4" style="font-size: 0.8rem; cursor: pointer;" onclick="showStep(4)">Back to Plans</p>
+        </div>
+
+    </div>
+
+    <script>
+        function showStep(stepNum) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById('step-' + stepNum).classList.add('active');
+        }
+
+        function copyCode() {
+            const code = document.getElementById('refCode').innerText;
+            navigator.clipboard.writeText(code);
+            alert('Referral code copied!');
+        }
+
+        function simulateUnlock() {
+            document.getElementById('dynamic-bar').style.width = '100%';
+            document.getElementById('progress-val').innerText = '100%';
+            setTimeout(() => {
+                showStep(3);
+            }, 800);
+        }
+
+        function selectPlan(el, name, price) {
+            document.querySelectorAll('.plan').forEach(p => p.classList.remove('selected'));
+            el.classList.add('selected');
+            document.getElementById('selected-plan').innerText = name;
+            document.getElementById('selected-price').innerText = price;
+        }
+    </script>
+</body>
+</html>

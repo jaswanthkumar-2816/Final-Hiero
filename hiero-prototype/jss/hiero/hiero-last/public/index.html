@@ -490,12 +490,143 @@
       </div>
 
       <div class="grid-layout">
-        <a href="/domain-selection.html" class="grid-card special">
+        <a href="javascript:void(0)" onclick="handleCreateResumeClick()" class="grid-card special">
           <i class="fa-solid fa-file-lines" style="font-size: 28px; color: var(--icon-color); margin-bottom: 12px;"></i>
           <h3>Create Resume</h3>
           <p>Build a professional resume with smart templates</p>
           <div class="card-act-btn primary-solid">Start <i class="fa-solid fa-arrow-right"></i></div>
         </a>
+
+        <!-- Instagram-style Ambassador Profile Modal -->
+        <div id="userProfileModal" style="display:none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 10001; align-items: center; justify-content: center; backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); animation: fadeIn 0.4s ease;">
+          <div style="background: rgba(10, 10, 10, 0.9); border: 1px solid rgba(255,255,255,0.1); width: 100%; max-width: 480px; border-radius: 40px; overflow: hidden; box-shadow: 0 50px 120px rgba(0,0,0,1); transform: scale(1); animation: popIn 0.5s cubic-bezier(0.19, 1, 0.22, 1); position: relative;">
+            
+            <!-- Dynamic Cover Photo (Clipped) -->
+            <div style="height: 160px; position: relative; overflow: hidden; background: #000;">
+              <div id="coverBlurImg" style="position: absolute; inset: 0; background-size: cover; background-position: center; filter: blur(40px) brightness(0.4); opacity: 0.7;"></div>
+              <button onclick="closeProfile()" style="position: absolute; top: 25px; right: 25px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: white; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(10px); z-index: 10;"><i class="fa-solid fa-times"></i></button>
+            </div>
+
+            <!-- Floating Avatar (Outside Clipping) -->
+            <div id="modalAvatar" style="position: absolute; left: 50%; top: 100px; transform: translateX(-50%); width: 120px; height: 120px; border-radius: 50%; background: #111; border: 5px solid #0a0a0a; display: flex; align-items: center; justify-content: center; font-size: 38px; font-weight: 800; color: var(--primary); box-shadow: 0 20px 50px rgba(0,0,0,0.9); overflow: hidden; z-index: 20;">H</div>
+
+            <!-- Profile Body -->
+            <div style="padding: 70px 30px 45px; text-align: center;">
+              <h2 id="modalName" style="font-size: 30px; font-weight: 900; color: #fff; margin-bottom: 25px; letter-spacing: -1px; text-shadow: 0 4px 15px rgba(0,0,0,0.5);">User Name</h2>
+              
+              <!-- Tabs Navigation -->
+              <div style="display: flex; background: rgba(255,255,255,0.03); padding: 5px; border-radius: 15px; margin-bottom: 30px; gap: 5px;">
+                <button onclick="switchModalTab('stats')" id="btnTabStats" style="flex: 1; padding: 12px; border: none; border-radius: 12px; font-weight: 800; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; transition: 0.3s; background: var(--primary); color: #000;">Ambassador</button>
+                <button onclick="switchModalTab('journey')" id="btnTabJourney" style="flex: 1; padding: 12px; border: none; border-radius: 12px; font-weight: 800; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; transition: 0.3s; background: transparent; color: #666;">My Journey</button>
+              </div>
+
+              <!-- Content Tab: Stats (Default) -->
+              <div id="tabContentStats">
+                <div style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; background: rgba(7, 226, 25, 0.05); border: 1px solid rgba(7, 226, 25, 0.15); border-radius: 100px; color: var(--primary); font-size: 11px; font-weight: 800; margin-bottom: 35px; letter-spacing: 1px;">
+                  <i class="fa-solid fa-crown"></i> <span id="modalRank">HIERO AMBASSADOR</span>
+                </div>
+
+                <div style="display: flex; justify-content: space-around; margin-bottom: 40px; padding: 0 10px;">
+                  <div style="flex: 1;">
+                    <div id="statsReferrals" style="font-size: 22px; font-weight: 900; color: #fff;">0</div>
+                    <div style="font-size: 10px; font-weight: 800; color: #444; text-transform: uppercase; margin-top: 5px; letter-spacing: 1.5px;">Referrals</div>
+                  </div>
+                  <div style="width: 1px; height: 30px; background: rgba(255,255,255,0.05); align-self: center;"></div>
+                  <div style="flex: 1;">
+                    <div id="statsPoints" style="font-size: 22px; font-weight: 900; color: #fff;">0</div>
+                    <div style="font-size: 10px; font-weight: 800; color: #444; text-transform: uppercase; margin-top: 5px; letter-spacing: 1.5px;">Points</div>
+                  </div>
+                  <div style="width: 1px; height: 30px; background: rgba(255,255,255,0.05); align-self: center;"></div>
+                  <div style="flex: 1;">
+                    <div id="statsImpact" style="font-size: 22px; font-weight: 900; color: var(--primary);">A+</div>
+                    <div style="font-size: 10px; font-weight: 800; color: #444; text-transform: uppercase; margin-top: 5px; letter-spacing: 1.5px;">Impact</div>
+                  </div>
+                </div>
+
+                <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px; padding: 22px; margin-bottom: 30px; text-align: left;">
+                  <span style="font-size: 10px; font-weight: 800; color: #555; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px; display: block;">Invitation Code</span>
+                  <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <span id="modalRefCodeDisplay" style="font-family: 'JetBrains Mono', monospace; font-size: 17px; font-weight: 900; color: var(--primary); letter-spacing: 2px;">HIERO-CODE</span>
+                    <input type="hidden" id="modalRefCode" value="HIERO-CODE">
+                    <button onclick="copyRefCode()" style="background: rgba(7,226,25,0.1); color: var(--primary); width: 44px; height: 44px; border-radius: 12px; cursor: pointer; border:1px solid rgba(7,226,25,0.2); transition: 0.2s;"><i class="fa-solid fa-copy"></i></button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Content Tab: Journey (Hiero Activity) -->
+              <div id="tabContentJourney" style="display: none; text-align: left; max-height: 400px; overflow-y: auto; padding-right: 5px;">
+                <h4 style="font-size: 11px; font-weight: 800; color: #444; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px;">Recent Career Activity</h4>
+                <div id="activityFeed" style="display: flex; flex-direction: column; gap: 12px;">
+                  <!-- Activity items will be injected here -->
+                  <div style="padding: 15px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 15px; color: #666; font-size: 13px; text-align: center;">No activity recorded yet. Start building your resume!</div>
+                </div>
+              </div>
+
+              <button onclick="closeProfile()" style="width: 100%; height: 60px; background: #fff; color: #000; border-radius: 20px; border: none; font-size: 16px; font-weight: 900; cursor: pointer; transition: transform 0.2s ease;">Return to Hiero</button>
+            </div>
+          </div>
+        </div>
+
+        <style>
+          @keyframes popIn { from { opacity: 0; transform: scale(0.9) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        </style>
+
+        <!-- Intelligence Gateway Referral Modal (Step 2 of 3) -->
+        <div id="referralModal" style="display:none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 10000; align-items: center; justify-content: center; backdrop-filter: blur(35px); -webkit-backdrop-filter: blur(35px); animation: fadeIn 0.4s ease;">
+          <div style="background: rgba(15, 15, 15, 0.9); border: 1px solid rgba(255,255,255,0.08); width: 100%; max-width: 440px; border-radius: 40px; overflow: hidden; box-shadow: 0 40px 100px rgba(0,0,0,1); transform: scale(1); animation: popIn 0.5s cubic-bezier(0.19, 1, 0.22, 1); position: relative; padding: 40px;">
+            
+            <!-- Progress Bars -->
+            <div style="display: flex; gap: 8px; justify-content: center; margin-bottom: 35px;">
+              <div style="height: 4px; width: 45px; background: var(--primary); border-radius: 2px; box-shadow: 0 0 10px rgba(7, 226, 25, 0.3);"></div>
+              <div style="height: 4px; width: 45px; background: var(--primary); border-radius: 2px; box-shadow: 0 0 10px rgba(7, 226, 25, 0.5); opacity: 0.9;"></div>
+              <div style="height: 4px; width: 45px; background: rgba(255,255,255,0.1); border-radius: 2px;"></div>
+            </div>
+
+            <!-- Lock Indicator Pill -->
+            <div style="position: relative; width: 100px; height: 100px; margin: 0 auto 45px;">
+              <div style="position: absolute; inset: 0; background: rgba(7, 226, 25, 0.03); border: 1px solid rgba(7, 226, 25, 0.15); border-radius: 30px; display: flex; align-items: center; justify-content: center;">
+                <i class="fa-solid fa-lock" style="color: var(--primary); font-size: 32px; filter: drop-shadow(0 0 10px rgba(7,226,25,0.3));"></i>
+              </div>
+              <div style="position: absolute; bottom: -12px; left: 50%; transform: translateX(-50%); background: var(--primary); color: #000; font-size: 10px; font-weight: 900; padding: 6px 14px; border-radius: 100px; white-space: nowrap; letter-spacing: 0.5px; box-shadow: 0 5px 15px rgba(7,226,25,0.4);">Step 2 of 3</div>
+            </div>
+
+            <h2 style="font-size: 32px; font-weight: 900; color: #fff; margin-bottom: 12px; letter-spacing: -1px; text-align: center;">Private Access</h2>
+            <p style="color: #666; font-size: 15px; font-weight: 500; text-align: center; margin-bottom: 40px; padding: 0 15px; line-height: 1.5;">Enter your verified invitation code to unlock the Hiero engine.</p>
+            
+            <div style="margin-bottom: 25px; position: relative;">
+              <input type="text" id="referralCodeInput" placeholder="ENTER CODE" 
+                style="width: 100%; padding: 22px 55px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 24px; color: var(--primary); text-align: center; font-weight: 900; font-family: 'JetBrains Mono', monospace; font-size: 18px; letter-spacing: 4px; outline: none; transition: 0.3s; text-transform: uppercase;">
+              <i class="fa-solid fa-qrcode" style="position: absolute; left: 25px; top: 50%; transform: translateY(-50%); color: #444; font-size: 18px;"></i>
+              <i class="fa-solid fa-magnifying-glass" style="position: absolute; right: 25px; top: 50%; transform: translateY(-50%); color: #444; font-size: 16px;"></i>
+            </div>
+
+            <button id="verifyRefBtn" onclick="submitReferral()" 
+              style="width: 100%; background: var(--primary); color: #000; border: none; padding: 22px; border-radius: 24px; font-weight: 900; font-size: 17px; cursor: pointer; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 10px 30px rgba(7, 226, 25, 0.2); margin-bottom: 25px;">
+              Verify Entrance
+            </button>
+            
+            <button onclick="skipReferral()" 
+              style="width: 100%; background: transparent; color: #444; border: none; cursor: pointer; font-size: 12px; font-weight: 900; letter-spacing: 1.5px; text-transform: uppercase; transition: 0.3s;">
+              PROCEED WITHOUT CODE
+            </button>
+          </div>
+        </div>
+
+        <style>
+          @keyframes ticketEnter { from { opacity: 0; transform: scale(0.9) translateY(60px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+          @keyframes shimmer { 0% { left: -150%; } 100% { left: 150%; } }
+          #referralCodeInput:focus { border-color: var(--primary); border-width: 1px; background: rgba(7, 226, 25, 0.05); box-shadow: 0 0 40px rgba(7, 226, 25, 0.2), inset 0 2px 10px rgba(0,0,0,0.5); }
+          #verifyRefBtn:hover { transform: translateY(-5px) scale(1.02); box-shadow: 0 25px 50px rgba(7, 226, 25, 0.5); }
+          #verifyRefBtn:active { transform: translateY(0) scale(0.98); }
+        </style>
+
+        <style>
+          @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+          @keyframes slideUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+          #referralCodeInput:focus { border-color: var(--primary); background: rgba(7, 226, 25, 0.05); box-shadow: 0 0 20px rgba(7, 226, 25, 0.1); }
+          #verifyRefBtn:hover { transform: scale(1.02); box-shadow: 0 15px 30px rgba(7, 226, 25, 0.3); }
+          #verifyRefBtn:active { transform: scale(0.98); }
+        </style>
 
         <a href="/analysis.html" class="grid-card">
           <i class="fa-solid fa-magnifying-glass" style="font-size: 28px; color: var(--icon-color); margin-bottom: 12px;"></i>
@@ -504,11 +635,11 @@
           <div class="card-act-btn ghost-outline">Analyse <i class="fa-solid fa-arrow-right"></i></div>
         </a>
 
-        <a href="/mock-interview.html" class="grid-card">
+        <a href="/mock-interview.html" onclick="handleMockInterviewClick()" class="grid-card special">
           <i class="fa-solid fa-comments" style="font-size: 28px; color: var(--icon-color); margin-bottom: 12px;"></i>
           <h3>Mock Interview</h3>
           <p>Practice AI Interviews tailored to your resume</p>
-          <div class="card-act-btn ghost-outline">Practice <i class="fa-solid fa-arrow-right"></i></div>
+          <div class="card-act-btn primary-solid">Practice <i class="fa-solid fa-arrow-right"></i></div>
         </a>
       </div>
     </main>
@@ -1075,6 +1206,190 @@
       resize();
       animate();
     })();
+  </script>
+  <script>
+    async function handleCreateResumeClick() {
+      // Force the modal even if they skipped before, to show the new stunning UI
+      document.getElementById('referralModal').style.display = 'flex';
+    }
+
+    async function submitReferral() {
+      const code = document.getElementById('referralCodeInput').value.trim();
+      if (!code) return alert('Please enter a code or click skip.');
+      
+      const btn = document.getElementById('verifyRefBtn');
+      btn.textContent = 'Verifying...';
+      btn.disabled = true;
+
+      try {
+        const token = localStorage.getItem('token');
+        const res = await fetch('/api/claim-referral', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ referralCode: code })
+        });
+        if (res.ok) {
+          alert('✅ Welcome aboard! referral verified.');
+          window.location.href = '/domain-selection.html';
+        } else {
+          const data = await res.json();
+          alert('❌ ' + (data.error || 'Invalid code'));
+          btn.textContent = 'Verify & Continue';
+          btn.disabled = false;
+        }
+      } catch (err) {
+        window.location.href = '/domain-selection.html';
+      }
+    }
+
+    function skipReferral() {
+      localStorage.setItem('referral_skipping', 'true');
+      window.location.href = '/domain-selection.html';
+    }
+
+    function handleMockInterviewClick() {
+      sessionStorage.removeItem('mockCurStage');
+      sessionStorage.removeItem('mockSessionId');
+    }
+
+    // Ambassador Profile Logic
+    async function openProfile() {
+      const modal = document.getElementById('userProfileModal');
+      modal.style.display = 'flex';
+      
+      // 1. Smart Sync (Instant UI Clone)
+      try {
+        const topName = document.querySelector('.user-name-label')?.textContent;
+        const topPic = document.querySelector('.user-avatar-initial img')?.src;
+        if (topName) document.getElementById('modalName').textContent = topName;
+        if (topPic) {
+          document.getElementById('modalAvatar').innerHTML = `<img src="${topPic}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
+          document.getElementById('coverBlurImg').style.backgroundImage = `url(${topPic})`;
+          document.getElementById('coverBlurImg').style.backgroundSize = "cover";
+        }
+      } catch (err) { console.log('UI sync skipped'); }
+
+      // 2. Data Fetch (Stats & Activity)
+      try {
+        const token = localStorage.getItem('token');
+        const res = await fetch('/api/profile-stats', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        
+          if (data.success) {
+            const u = data.user;
+            const displayName = u.name || (u.email ? u.email.split('@')[0] : "Hiero User");
+            
+            document.getElementById('modalName').textContent = displayName;
+            document.getElementById('modalRank').textContent = u.rank || "Ambassador";
+            document.getElementById('statsReferrals').textContent = u.referralCount || 0;
+            document.getElementById('statsPoints').textContent = u.points || 0;
+            document.getElementById('modalRefCodeDisplay').textContent = u.referralCode || "HIERO-CODE";
+            document.getElementById('modalRefCode').value = u.referralCode || "HIERO-CODE";
+          
+          if (u.picture) {
+            const picHtml = `<img src="${u.picture}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
+            document.getElementById('modalAvatar').innerHTML = picHtml;
+            document.getElementById('coverBlurImg').style.backgroundImage = `url(${u.picture})`;
+            document.getElementById('coverBlurImg').style.backgroundSize = "cover";
+          }
+
+          // 3. Activity Feed Injection
+          const feed = document.getElementById('activityFeed');
+          if (feed) {
+            feed.innerHTML = '';
+            if (u.history && u.history.length > 0) {
+              u.history.forEach(item => {
+                const div = document.createElement('div');
+                div.style.padding = '15px'; div.style.background = 'rgba(255,255,255,0.03)';
+                div.style.border = '1px solid rgba(255,255,255,0.05)'; div.style.borderRadius = '15px';
+                div.style.borderLeft = `4px solid ${item.score >= 80 ? '#07e219' : '#e29707'}`;
+                div.style.marginBottom = '10px';
+                div.innerHTML = `
+                  <div style="display:flex; justify-content:space-between;">
+                    <span style="font-weight:800; color:#fff; font-size:13px;">Resume Match</span>
+                    <span style="font-weight:900; color:var(--primary);">${item.score}%</span>
+                  </div>
+                  <div style="font-size:11px; color:#555; margin-top:4px;">${new Date(item.analyzedAt || Date.now()).toLocaleDateString()}</div>
+                `;
+                feed.appendChild(div);
+              });
+            }
+            if (u.skills && u.skills.length > 0) {
+              u.skills.forEach(skill => {
+                const div = document.createElement('div');
+                div.style.padding = '15px'; div.style.background = 'rgba(7,226,25,0.02)';
+                div.style.border = '1px solid rgba(7,226,25,0.1)'; div.style.borderRadius = '15px';
+                div.style.marginBottom = '10px';
+                div.innerHTML = `
+                  <div style="display:flex; justify-content:space-between;">
+                    <span style="font-weight:800; color:#fff; font-size:13px;">Skill: ${skill.skillName}</span>
+                    <i class="fa-solid fa-check-circle" style="color:var(--primary);"></i>
+                  </div>
+                  <div style="font-size:11px; color:#555; margin-top:4px;">+${skill.pointsEarned} Points</div>
+                `;
+                feed.appendChild(div);
+              });
+            }
+            if (feed.innerHTML === '') feed.innerHTML = '<div style="text-align:center; color:#444; font-size:13px;">No history yet.</div>';
+          }
+        }
+      } catch (err) { console.error('Profile fetch error', err); }
+    }
+
+    function switchModalTab(tab) {
+      const statsTab = document.getElementById('tabContentStats');
+      const journeyTab = document.getElementById('tabContentJourney');
+      const btnStats = document.getElementById('btnTabStats');
+      const btnJourney = document.getElementById('btnTabJourney');
+      
+      if (tab === 'stats') {
+        statsTab.style.display = 'block';
+        journeyTab.style.display = 'none';
+        btnStats.style.background = 'var(--primary)';
+        btnStats.style.color = '#000';
+        btnJourney.style.background = 'transparent';
+        btnJourney.style.color = '#666';
+      } else {
+        statsTab.style.display = 'none';
+        journeyTab.style.display = 'block';
+        btnJourney.style.background = 'var(--primary)';
+        btnJourney.style.color = '#000';
+        btnStats.style.background = 'transparent';
+        btnStats.style.color = '#666';
+      }
+    }
+
+    function closeProfile() {
+      document.getElementById('userProfileModal').style.display = 'none';
+    }
+
+    function copyRefCode() {
+      const codeItem = document.getElementById('modalRefCode');
+      codeItem.select();
+      document.execCommand('copy');
+      alert('📋 Code copied: ' + codeItem.value);
+    }
+
+    // Hook up the top nav pill
+    document.addEventListener('DOMContentLoaded', () => {
+      const pill = document.querySelector('.user-access-pill');
+      if (pill) {
+        pill.style.cursor = 'pointer';
+        pill.onclick = openProfile;
+      }
+    });
+
+    // Fix loadUserReview error reported in logs
+    const originalLoadUserReview = window.loadUserReview;
+    window.loadUserReview = function() {
+      try {
+        if (originalLoadUserReview) originalLoadUserReview();
+      } catch (e) {
+        console.warn('Hiero: Suppressed review error');
+      }
+    };
   </script>
 </body>
 
