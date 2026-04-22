@@ -178,6 +178,10 @@ app.use('/api', reviewRouter); // Handles /api/review, /api/login-track, /api/ad
 const analysisRouter = require('./routes/analysis');
 app.use('/api/analysis', analysisRouter); // Supports /api/analysis/analyze
 
+// Scoring & Project Outcomes API (New!)
+const scoringRouter = require('./routes/scoring');
+app.use('/api/scoring', scoringRouter); // Handles /api/scoring/project-complete
+
 // AI Photo Formalizer API (New!)
 const aiPhotoRouter = require('./routes/ai-photo');
 app.use('/api', aiPhotoRouter); // Handles /api/generate-executive-photo
