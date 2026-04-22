@@ -2490,12 +2490,20 @@
     async function completeProject() {
       const diff = document.getElementById('difficulty').value;
       if (!confirm(`Mark "${RAW_NAME}" as completed?`)) return;
+      
+      // Extract generated docs for saving if available
+      let projectData = {};
+      try {
+        const k = 'docs' + JSON.stringify({ projectTitle: RAW_NAME, tags: M.tags });
+        if (AC[k]) projectData = AC[k];
+      } catch (e) {}
+
       try {
         const token = localStorage.getItem('token');
         const r = await fetch('/api/scoring/project-complete', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-          body: JSON.stringify({ projectName: RAW_NAME, difficulty: diff })
+          body: JSON.stringify({ projectName: RAW_NAME, difficulty: diff, projectData })
         });
         if (r.ok) {
           fetchUserStats();
