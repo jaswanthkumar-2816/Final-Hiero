@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -56,7 +57,9 @@
       font-family: var(--font-sans);
     }
 
-    p, span, div {
+    p,
+    span,
+    div {
       font-family: 'Inter', sans-serif;
       font-weight: 400;
     }
@@ -168,7 +171,8 @@
     }
 
     .nav-btn i {
-      font-size: 1.35rem; /* Increased size */
+      font-size: 1.35rem;
+      /* Increased size */
       margin-bottom: 2px;
       font-weight: 700;
     }
@@ -228,14 +232,14 @@
       width: 40px;
       height: 40px;
       border-radius: 50%;
-      background: rgba(255,255,255,0.05);
+      background: rgba(255, 255, 255, 0.05);
       color: var(--text-muted);
       display: flex;
       align-items: center;
       justify-content: center;
       font-weight: 700;
       font-size: 0.9rem;
-      border: 1px solid rgba(255,255,255,0.1);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       overflow: hidden;
     }
 
@@ -320,13 +324,33 @@
     }
 
     /* Grid Spanning for Perfect Alignment */
-    .card-score { grid-column: span 4; }
-    .card-details { grid-column: span 4; }
-    .card-skills { grid-column: span 4; }
-    .card-projects { grid-column: span 6; }
-    .card-learning { grid-column: span 6; }
-    .card-interview { grid-column: span 6; }
-    .card-fixes { grid-column: span 6; }
+    .card-score {
+      grid-column: span 4;
+    }
+
+    .card-details {
+      grid-column: span 4;
+    }
+
+    .card-skills {
+      grid-column: span 4;
+    }
+
+    .card-projects {
+      grid-column: span 6;
+    }
+
+    .card-learning {
+      grid-column: span 6;
+    }
+
+    .card-interview {
+      grid-column: span 6;
+    }
+
+    .card-fixes {
+      grid-column: span 6;
+    }
 
     .card:hover {
       border-color: var(--primary-accent);
@@ -383,15 +407,20 @@
     .score-svg-wrapper .progress {
       stroke: var(--primary-accent);
       stroke-linecap: round;
-      stroke-dasharray: 251.3; 
+      stroke-dasharray: 251.3;
       stroke-dashoffset: 251.3;
       animation: fillRing 1.5s ease-out forwards;
       animation-delay: 0.5s;
     }
 
     @keyframes fillRing {
-      from { stroke-dashoffset: 251.3; }
-      to { stroke-dashoffset: var(--target-offset); }
+      from {
+        stroke-dashoffset: 251.3;
+      }
+
+      to {
+        stroke-dashoffset: var(--target-offset);
+      }
     }
 
     .score-val {
@@ -474,14 +503,27 @@
       width: 100%;
       height: 6px;
       border-radius: 3px;
-      background: rgba(255,255,255,0.06);
+      background: rgba(255, 255, 255, 0.06);
       margin: 12px 0;
       overflow: hidden;
       display: flex;
     }
 
-    .ratio-fill-matched { height: 100%; background: #1D9E75; width: 0%; transition: width 1s ease; border-radius: 3px; }
-    .ratio-fill-missing { height: 100%; background: #D85A30; width: 0%; transition: width 1s ease; border-radius: 3px; }
+    .ratio-fill-matched {
+      height: 100%;
+      background: #1D9E75;
+      width: 0%;
+      transition: width 1s ease;
+      border-radius: 3px;
+    }
+
+    .ratio-fill-missing {
+      height: 100%;
+      background: #D85A30;
+      width: 0%;
+      transition: width 1s ease;
+      border-radius: 3px;
+    }
 
     /* Skills List Style (Fixing Truncation) */
     .skills-stack {
@@ -498,11 +540,13 @@
     .skills-stack::-webkit-scrollbar {
       width: 4px;
     }
+
     .skills-stack::-webkit-scrollbar-track {
-      background: rgba(255,255,255,0.02);
+      background: rgba(255, 255, 255, 0.02);
     }
+
     .skills-stack::-webkit-scrollbar-thumb {
-      background: rgba(255,255,255,0.1);
+      background: rgba(255, 255, 255, 0.1);
       border-radius: 2px;
     }
 
@@ -529,16 +573,27 @@
       flex-shrink: 0;
     }
 
-    .dot-matched { background: #1D9E75; box-shadow: 0 0 8px rgba(29, 158, 117, 0.4); }
-    .dot-missing { background: #D85A30; box-shadow: 0 0 8px rgba(216, 90, 48, 0.4); }
-    .dot-bonus   { background: #7F77DD; box-shadow: 0 0 8px rgba(127, 119, 221, 0.4); }
+    .dot-matched {
+      background: #1D9E75;
+      box-shadow: 0 0 8px rgba(29, 158, 117, 0.4);
+    }
+
+    .dot-missing {
+      background: #D85A30;
+      box-shadow: 0 0 8px rgba(216, 90, 48, 0.4);
+    }
+
+    .dot-bonus {
+      background: #7F77DD;
+      box-shadow: 0 0 8px rgba(127, 119, 221, 0.4);
+    }
 
     .skill-legend {
       display: flex;
       gap: 16px;
       margin-top: auto;
       padding-top: 12px;
-      border-top: 0.5px solid rgba(255,255,255,0.06);
+      border-top: 0.5px solid rgba(255, 255, 255, 0.06);
     }
 
     .legend-bit {
@@ -549,9 +604,17 @@
       font-weight: 700;
     }
 
-    .legend-matched { color: #1D9E75; }
-    .legend-missing { color: #D85A30; }
-    .legend-bonus   { color: #7F77DD; }
+    .legend-matched {
+      color: #1D9E75;
+    }
+
+    .legend-missing {
+      color: #D85A30;
+    }
+
+    .legend-bonus {
+      color: #7F77DD;
+    }
 
     /* Project Cards */
     .project-card {
@@ -584,8 +647,17 @@
       border-radius: 12px;
     }
 
-    .proj-text h4 { font-size: 1rem; font-weight: 700; margin-bottom: 4px; }
-    .proj-text p { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
+    .proj-text h4 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .proj-text p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
 
     /* Learning Path - Filling gaps */
     .l-path {
@@ -609,7 +681,9 @@
       background: var(--border-color);
     }
 
-    .path-row:last-child::before { display: none; }
+    .path-row:last-child::before {
+      display: none;
+    }
 
     .path-num {
       width: 36px;
@@ -643,7 +717,11 @@
       padding-top: 4px;
     }
 
-    .path-name { font-weight: 700; font-size: 1.05rem; }
+    .path-name {
+      font-weight: 700;
+      font-size: 1.05rem;
+    }
+
     .path-tag {
       font-size: 0.65rem;
       font-weight: 800;
@@ -653,7 +731,10 @@
       background: rgba(255, 255, 255, 0.05);
     }
 
-    .priority-tag { background: var(--nav-active-bg); color: var(--primary-accent); }
+    .priority-tag {
+      background: var(--nav-active-bg);
+      color: var(--primary-accent);
+    }
 
     /* Mock Interview - Fill top space */
     .mock-intro {
@@ -681,8 +762,8 @@
     }
 
     .i-stat {
-      background: rgba(255,255,255,0.03);
-      border: 0.5px solid rgba(255,255,255,0.06);
+      background: rgba(255, 255, 255, 0.03);
+      border: 0.5px solid rgba(255, 255, 255, 0.06);
       border-radius: 10px;
       padding: 10px;
       text-align: center;
@@ -697,7 +778,7 @@
 
     .i-label {
       font-size: 11px;
-      color: rgba(255,255,255,0.4);
+      color: rgba(255, 255, 255, 0.4);
       margin-top: 2px;
       text-transform: capitalize;
     }
@@ -740,46 +821,119 @@
       background: var(--nav-active-bg);
     }
 
-    .action-row {
-      display: flex;
-      gap: 16px;
-      margin-top: 64px;
-      justify-content: center;
+    /* --- ANTI-GRAVITY UI ENHANCEMENTS --- */
+    @keyframes oscillate {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-8px);
+      }
     }
 
-    .action-btn {
-      width: auto;
-      padding: 12px 28px;
+    .project-card {
+      display: flex;
+      gap: 16px;
+      padding: 18px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      margin-bottom: 12px;
+      text-decoration: none;
+      color: inherit;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      animation: oscillate 4s ease-in-out infinite;
+      transform-style: preserve-3d;
+      perspective: 1000px;
     }
+
+    .project-card:nth-child(even) {
+      animation-delay: -2s;
+    }
+
+    .project-card:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: var(--primary-accent);
+      transform: translateY(-12px) scale(1.02) rotateX(5deg);
+      box-shadow: 0 15px 30px rgba(0, 255, 0, 0.15);
+    }
+
+    .project-card:active {
+      transform: scale(0.98);
+    }
+
+    .transitioning {
+      pointer-events: none;
+    }
+
+    .transitioning .project-card.selected {
+      position: fixed;
+      z-index: 2000;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(1.5) translateZ(100px);
+      opacity: 0;
+      transition: all 0.8s ease-in-out;
+    }
+
+    .page-blur {
+      filter: blur(10px);
+      opacity: 0.3;
+      transition: all 0.6s ease;
+    }
+
 
     /* --- RESPONSIVE --- */
     @media (max-width: 1024px) {
-      .card-score, .card-details, .card-skills, 
-      .card-projects, .card-learning, 
-      .card-interview, .card-fixes { 
-        grid-column: span 12; 
+
+      .card-score,
+      .card-details,
+      .card-skills,
+      .card-projects,
+      .card-learning,
+      .card-interview,
+      .card-fixes {
+        grid-column: span 12;
       }
     }
 
     @media (max-width: 768px) {
-      .grid { grid-template-columns: 1fr; }
-      .nav-menu { display: none; }
-      .nav-header { padding: 12px 20px; }
-      .container { padding: 24px 20px; }
-      .page-title { font-size: 2rem; }
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .nav-menu {
+        display: none;
+      }
+
+      .nav-header {
+        padding: 12px 20px;
+      }
+
+      .container {
+        padding: 24px 20px;
+      }
+
+      .page-title {
+        font-size: 2rem;
+      }
     }
   </style>
 </head>
+
 <body>
+
 
   <header class="nav-header">
     <a href="/" class="app-brand">
       <div class="app-logo-box">
-        <img src="logo-hiero.png" alt="H">
+        <img src="logo-hiero.png" alt="Hiero Logo">
       </div>
-      <span>HIERO</span>
     </a>
-    
+
     <nav class="nav-menu">
       <a href="domain-selection.html" class="nav-btn">
         <i class="fa-regular fa-file-lines"></i>
@@ -789,7 +943,7 @@
         <i class="fa-solid fa-magnifying-glass"></i>
         <span>Analyse Resume</span>
       </a>
-      <a href="coming-soon.html?type=interview" class="nav-btn">
+      <a href="/mock-interview.html" class="nav-btn">
         <i class="fa-solid fa-microphone"></i>
         <span>Mock Interview</span>
       </a>
@@ -803,7 +957,7 @@
       <button class="theme-toggle" id="theme-switch" onclick="window.toggleTheme()" title="Switch Theme">
         <i class="fa-solid fa-moon"></i>
       </button>
-      
+
       <div class="user-profile">
         <div class="user-avatar" id="user-avatar">J</div>
       </div>
@@ -821,7 +975,7 @@
 
     <h1 class="page-title">Analysis <span>Summary</span></h1>
     <p class="page-subtitle">Detailed breakdown of how your skills align with the target role.</p>
-    
+
     <div id="domain-badge-box" class="role-tag">Full Stack Developer Profile</div>
 
     <div class="grid">
@@ -839,7 +993,7 @@
             </svg>
             <div class="score-val" id="score-percent">0%</div>
           </div>
-          
+
           <div class="score-meta">
             <div class="percentile-text" id="score-context">Analyzing match...</div>
             <div class="mini-bar-bg">
@@ -853,7 +1007,8 @@
       <div class="card card-details">
         <div class="card-header">
           <span class="card-title">Analysis Details</span>
-          <span style="font-size: 0.75rem; color: var(--primary-accent); font-weight: 800;" id="domain-display">TECH</span>
+          <span style="font-size: 0.75rem; color: var(--primary-accent); font-weight: 800;"
+            id="domain-display">TECH</span>
         </div>
         <div class="details-grid">
           <div class="stat-row">
@@ -877,7 +1032,7 @@
               <span class="stat-num" id="missing-count">--</span>
             </div>
           </div>
-          
+
           <div class="ratio-container">
             <div class="stat-label" style="font-size: 0.7rem; display: flex; justify-content: space-between;">
               <span>Match Ratio</span>
@@ -927,7 +1082,8 @@
         <div class="l-path" id="learning-path-steps">
           <!-- Steps injected here -->
         </div>
-        <button class="btn btn-outline" style="margin-top: auto; padding-top: 12px;" id="start-learning-btn">Start Skill Module</button>
+        <button class="btn btn-outline" style="margin-top: auto; padding-top: 12px;" id="start-learning-btn">Start Skill
+          Module</button>
       </div>
 
       <!-- Card 7: Resume Optimization (The Career Coach) -->
@@ -963,12 +1119,13 @@
           <span style="font-size: 0.7rem; color: #F39C12; font-weight: 800;" id="focus-skill-badge">Focus: AI</span>
         </div>
         <div class="mock-intro">
-          <p style="font-size: 0.95rem; color: var(--text-muted);">Practice AI-graded interview questions based on the JD requirements found.</p>
+          <p style="font-size: 0.95rem; color: var(--text-muted);">Practice AI-graded interview questions based on the
+            JD requirements found.</p>
           <div class="question-preview">
             "Based on your resume, how would you approach building a scalable REST API using Node.js?"
           </div>
         </div>
-        
+
         <div class="interview-stats">
           <div class="i-stat">
             <span class="i-val">5</span>
@@ -988,11 +1145,14 @@
     </div>
 
     <div class="action-row">
-      <button class="btn btn-outline action-btn" onclick="window.location.href='analysis.html'"><i class="fa-solid fa-rotate"></i> Re-Analyze</button>
-      <button class="btn btn-outline action-btn" onclick="exportAnalysis()"><i class="fa-solid fa-file-export"></i> Download PDF</button>
+      <button class="btn btn-outline action-btn" onclick="window.location.href='analysis.html'"><i
+          class="fa-solid fa-rotate"></i> Re-Analyze</button>
+      <button class="btn btn-outline action-btn" onclick="exportAnalysis()"><i class="fa-solid fa-file-export"></i>
+        Download PDF</button>
     </div>
 
-    <footer style="margin-top: 100px; padding: 48px 0; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; color: var(--text-muted); font-size: 0.85rem;">
+    <footer
+      style="margin-top: 100px; padding: 48px 0; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; color: var(--text-muted); font-size: 0.85rem;">
       <div id="timestamp-text">Analyzed: --</div>
       <div>Hiero Intelligence &copy; 2026</div>
     </footer>
@@ -1034,16 +1194,16 @@
       const circle = document.getElementById('score-circle');
       const bar = document.getElementById('score-bar-fill');
       const context = document.getElementById('score-context');
-      
+
       const circumference = 251.3; // 2 * PI * 40
       const offset = circumference - (percent / 100) * circumference;
-      
+
       // Update animation target
       document.documentElement.style.setProperty('--target-offset', offset);
-      
+
       setTimeout(() => {
-        if(bar) bar.style.width = percent + '%';
-        if(context) {
+        if (bar) bar.style.width = percent + '%';
+        if (context) {
           if (percent > 75) context.textContent = "Great Match! You're in top 10% of candidates.";
           else if (percent > 40) context.textContent = "Good Match! Better than 45% of candidates.";
           else context.textContent = "Room to Grow. Focus on missing skills.";
@@ -1055,7 +1215,7 @@
       const stored = JSON.parse(localStorage.getItem('analysisResult'));
       if (!stored) return;
       const data = stored.data || stored;
-      
+
       const jdCount = (data.jdSkills || []).length;
       const matchedCount = (data.matchedSkills || []).length;
       const missingCount = (data.missingSkills || []).length;
@@ -1069,7 +1229,7 @@
       const domain = (data.domain || 'Tech').toUpperCase();
       document.getElementById('domain-display').textContent = domain;
       document.getElementById('domain-badge-box').textContent = `${domain} Professional Profile`;
-      
+
       document.getElementById('jd-skills-count').textContent = jdCount;
       document.getElementById('resume-skills-count').textContent = (data.resumeSkills || []).length;
       document.getElementById('matched-count').textContent = matchedCount;
@@ -1078,7 +1238,7 @@
       // Ratio Bar Logic
       const coverage = jdCount > 0 ? Math.round((matchedCount / jdCount) * 100) : 0;
       const missingPct = jdCount > 0 ? Math.round((missingCount / jdCount) * 100) : 0;
-      
+
       setTimeout(() => {
         document.getElementById('ratio-bar-matched').style.width = coverage + '%';
         document.getElementById('ratio-bar-missing').style.width = missingPct + '%';
@@ -1089,7 +1249,7 @@
       const skillsContainer = document.getElementById('skills-breakdown-list');
       if (skillsContainer) {
         skillsContainer.innerHTML = '';
-        
+
         const addSkill = (name, type) => {
           const div = document.createElement('div');
           div.className = 'skill-list-item';
@@ -1101,7 +1261,7 @@
         const seenMatched = new Set();
         const uniqueMatched = (data.matchedSkills || []).filter(s => {
           const l = s.toLowerCase().trim();
-          if(seenMatched.has(l)) return false;
+          if (seenMatched.has(l)) return false;
           seenMatched.add(l);
           return true;
         });
@@ -1109,7 +1269,7 @@
         const seenMissing = new Set();
         const uniqueMissing = (data.missingSkills || []).filter(s => {
           const l = s.toLowerCase().trim();
-          if(seenMissing.has(l) || seenMatched.has(l)) return false;
+          if (seenMissing.has(l) || seenMatched.has(l)) return false;
           seenMissing.add(l);
           return true;
         });
@@ -1129,32 +1289,48 @@
 
       // Projects
       const projectContainer = document.getElementById('project-list-container');
-      projectContainer.innerHTML = '';
-      (data.projectSuggestions || []).slice(0, 3).forEach((p, i) => {
-        const name = typeof p === 'string' ? p : (p.title || p.name);
-        projectContainer.innerHTML += `
-          <a href="#" class="project-card">
+      if (projectContainer) {
+        projectContainer.innerHTML = '';
+        (data.projectSuggestions || []).slice(0, 3).forEach((p, i) => {
+          const name = typeof p === 'string' ? p : (p.title || p.name);
+          const card = document.createElement('div');
+          card.className = 'project-card';
+          card.style.animationDelay = `${i * 0.4}s`;
+          card.innerHTML = `
             <div class="proj-icon"><i class="fa-solid fa-code-merge"></i></div>
             <div class="proj-text">
               <h4>${sanitize(name)}</h4>
               <p>Critical Skill Bridging Project</p>
             </div>
-          </a>
-        `;
-      });
+          `;
+          card.onclick = (e) => {
+            e.preventDefault();
+            // Anti-gravity transition
+            document.body.classList.add('transitioning');
+            card.classList.add('selected');
+            document.querySelector('.container').classList.add('page-blur');
+
+            localStorage.setItem('selectedProjectName', name);
+            setTimeout(() => {
+              window.location.href = `project.html?name=${encodeURIComponent(name)}`;
+            }, 600);
+          };
+          projectContainer.appendChild(card);
+        });
+      }
 
       // Learning Path (Filing Gap)
       const pathContainer = document.getElementById('learning-path-steps');
       pathContainer.innerHTML = '';
       const missing = data.missingSkills || ['React.js', 'Agile/Scrum', 'Cloud Deployment'];
-      
+
       // Ensure specific skills requested are there or use available ones
       const pathItems = missing.length >= 3 ? missing.slice(0, 5) : [...missing, 'React.js', 'Agile/Scrum'].slice(0, 5);
-      
+
       pathItems.forEach((s, i) => {
         pathContainer.innerHTML += `
           <div class="path-row ${i === 0 ? 'top-priority' : ''}">
-            <div class="path-num">${i+1}</div>
+            <div class="path-num">${i + 1}</div>
             <div class="path-info">
               <span class="path-name">${sanitize(s)}</span>
               <span class="path-tag ${i === 0 ? 'priority-tag' : ''}">${i === 0 ? 'Priority' : 'High'}</span>
@@ -1170,7 +1346,7 @@
         window.location.href = `learn.html`;
       };
       document.getElementById('start-interview-btn').onclick = () => {
-        window.location.href = `coming-soon.html?type=interview&skill=${encodeURIComponent(topSkill)}`;
+        window.location.href = `/mock-interview.html?skill=${encodeURIComponent(topSkill)}`;
       };
 
       // Resume Fixes - Dynamic mapping
@@ -1178,13 +1354,13 @@
       if (suggestionContainer) {
         suggestionContainer.innerHTML = '';
         const suggestions = [];
-        
+
         if (score < 70) suggestions.push('Add measurable achievements (e.g. "increased X by 20%")');
         if (missingPct > 20) suggestions.push(`Add a project focused on <strong>${sanitize(topSkill)}</strong> to your portfolio`);
         if (!data.extraSkills || data.extraSkills.length < 2) suggestions.push('Diversify your skill stack with "Bonus" technologies for higher match rate');
         suggestions.push('Include GitHub project links for technical verification of your claims');
         suggestions.push('Explicitly mention REST API experience for backend verification');
-        
+
         suggestions.forEach(s => {
           suggestionContainer.innerHTML += `
             <div style="display: flex; gap: 10px; font-size: 13px; color: var(--text-muted);">
@@ -1209,7 +1385,20 @@
       alert("Preparing high-quality PDF report for download...");
     }
 
+    // Reset transitions on back navigation (BFCache)
+    window.addEventListener('pageshow', (event) => {
+      document.body.classList.remove('transitioning');
+      const container = document.querySelector('.container');
+      if (container) container.classList.remove('page-blur');
+      // Also remove selected state from any cards
+      document.querySelectorAll('.project-card.selected').forEach(c => c.classList.remove('selected'));
+    });
+
     document.addEventListener('DOMContentLoaded', renderPage);
   </script>
+
+  <!-- Projects Portal Modal -->
+  <script src="/jss/projects-modal.js"></script>
 </body>
+
 </html>

@@ -141,6 +141,22 @@ const availableTemplates = [
     description: 'Modern minimalist A4 portrait with a bold two-column split layout. Features a grayscale aesthetic with bold orange accents and a vertical timeline.',
     preview: '/templates/previews/hiero-signature.png',
     recommended: ['Graphic Designer', 'UI/UX Designer', 'Creative Lead']
+  },
+  {
+    id: 'hiero-scholar',
+    name: 'Hiero Scholar',
+    category: 'premium',
+    description: 'A premium, academic-focused template with a colorful, modern layout. Features a timeline for work experience and progress-style skill nodes.',
+    preview: '/templates/previews/hiero-scholar.png',
+    recommended: ['Teacher', 'Academic', 'Researcher', 'Modern Professional']
+  },
+  {
+    id: 'hiero-axis',
+    name: 'TriPanel Executive CV',
+    category: 'premium',
+    description: 'A high-fidelity, TriPanel Executive CV template. Features a strict 3-column layout, elegant spacing, and structured data binding for executives and senior managers.',
+    preview: '/templates/previews/hiero-axis.png',
+    recommended: ['Executive', 'Senior Manager', 'Director', 'Project Manager']
   }
 ];
 

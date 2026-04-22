@@ -8,10 +8,32 @@ const compression = require('compression');
 const axios = require('axios');
 const { createProxyMiddleware } = require('http-proxy-middleware');
 
+const { execSync } = require('child_process');
 dotenv.config();
 
-const app = express();
+// Auto-fix EADDRINUSE (Fixes "address already in use" errors)
 const PORT = process.env.PORT || 2816;
+if (process.env.NODE_ENV !== 'production' && process.platform === 'win32') {
+    try {
+        const checkPortOutput = execSync(`netstat -ano | findstr :${PORT}`).toString();
+        const pids = [...new Set(checkPortOutput.split('\n')
+            .map(line => line.trim().split(/\s+/).pop())
+            .filter(pid => pid && pid !== process.pid.toString() && !isNaN(pid)))];
+            
+        pids.forEach(pid => {
+            console.log(`🧹 Auto-clearing port ${PORT} (Terminating process ${pid})...`);
+            execSync(`taskkill /F /PID ${pid} /T 2>NUL`);
+        });
+    } catch (e) { /* Port is free */ }
+}
+
+// Backup: Try to load from login-system/.env if root .env didn't provide critical variables
+if (!process.env.GOOGLE_CLIENT_ID) {
+    dotenv.config({ path: path.join(__dirname, 'login-system', '.env') });
+}
+
+const app = express();
+
 
 // ======================
 // CONFIG & PATHS
@@ -138,6 +160,11 @@ app.use('/api/resume', importRouter);
 const resumeRouter = require('./routes/resume');
 app.use('/api/resume', resumeRouter);
 
+// 🚀 Projects Portal API (Groq-powered)
+const projectsRouter = require('./routes/projects');
+app.use('/api/projects', projectsRouter);
+
+
 // Support templates and preview folder sharing
 app.use('/templates/previews', express.static(path.join(__dirname, 'hiero-backend', 'templates', 'previews')));
 app.use('/dashboard/previews', express.static(path.join(__dirname, 'hiero-backend', 'templates', 'previews')));
@@ -184,7 +211,10 @@ app.get(['/learn', '/learn.html'], (req, res) => res.sendFile(path.join(resumeBu
 app.get(['/solve', '/solve.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'solve.html')));
 app.get(['/resume-builder', '/resume-builder.html', '/dashboard/resume-builder'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'resume-builder.html')));
 app.get(['/resume-form', '/resume-form.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'resume-form.html')));
-app.get(['/project', '/project.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'project.html')));
+app.get(['/domain-selection', '/domain-selection.html', '/dashboard/domain-selection.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'domain-selection.html')));
+app.get(['/project', '/project.html', '/dashboard/project.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'project.html')));
+app.get(['/interview', '/interview.html', '/mock-interview', '/mock-interview.html', '/dashboard/mock-interview.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'mock-interview.html')));
+
 app.get(['/analysis', '/analysis.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'analysis.html')));
 app.get(['/ai-photo-formalizer', '/ai-photo-formalizer.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'ai-photo-formalizer.html')));
 
@@ -243,7 +273,7 @@ app.post('/api/interview/chat', async (req, res) => {
 // ======================
 // START SERVER
 // ======================
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
     console.log(`
 🚀 Unified Gateway LIVE at http://localhost:${PORT}
    📁 Landing UI         → Integrated (Port ${PORT})
@@ -258,4 +288,13 @@ app.listen(PORT, () => {
       - /api/review       → MongoDB Storage
 
 `);
+}).on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+        console.error(`\n❌ Error: Port ${PORT} is already in use.`);
+        console.error(`💡 Hiero Auto-Fix: We attempted to clear the port, but it's still busy.`);
+        console.error(`👉 Solution: Please wait a moment or manually close any open Hiero terminals.\n`);
+        process.exit(1);
+    } else {
+        throw err;
+    }
 });

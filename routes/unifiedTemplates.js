@@ -282,6 +282,20 @@ const TEMPLATE_COLORS = {
         accent: '#333333',
         background: '#E0E2E5',
         light: '#FFFFFF'
+    },
+    'hiero-scholar': {
+        primary: '#eb7c74',      // Scholar Red
+        secondary: '#a8c1c5',    // Teal
+        accent: '#eb7c74',       // Red Accent
+        background: '#FFFFFF',
+        light: '#f1f5f9'         // Slate 50
+    },
+    'hiero-axis': {
+        primary: '#8D6E63',
+        secondary: '#EDE6DD',
+        accent: '#8D6E63',
+        background: '#F4F1EC',
+        light: '#FFFFFF'
     }
 };
 
@@ -309,6 +323,8 @@ const TEMPLATE_MAP = {
     'vision': 'hiero-vision',
     'hiero-premium': 'hiero-premium',
     'premium': 'hiero-premium',
+    'hiero-velocity': 'hiero-velocity',
+    'velocity': 'hiero-velocity',
     'hiero-prestige': 'hiero-prestige',
     'prestige': 'hiero-prestige',
     'hiero-royal': 'hiero-royal',
@@ -316,7 +332,11 @@ const TEMPLATE_MAP = {
     'hiero-cool': 'hiero-cool',
     'cool': 'hiero-cool',
     'hiero-vertex': 'hiero-vertex',
-    'vertex': 'hiero-vertex'
+    'vertex': 'hiero-vertex',
+    'hiero-scholar': 'hiero-scholar',
+    'scholar': 'hiero-scholar',
+    'hiero-axis': 'hiero-axis',
+    'axis': 'hiero-axis'
 };
 
 
@@ -1544,7 +1564,16 @@ async function generateUnifiedResume(data, templateId, outStream, customOptions 
                         resolve(doc);
                     }
                     return;
-
+                case 'hiero-scholar':
+                    await renderTemplate_HieroScholar(doc, data);
+                    doc.end();
+                    if (outStream && outStream.on) {
+                        outStream.on('finish', () => resolve(true));
+                        outStream.on('error', reject);
+                    } else {
+                        resolve(doc);
+                    }
+                    return;
                 case 'hiero-legion':
                     await renderTemplate_HieroLegion(doc, data);
                     doc.end();
@@ -5587,8 +5616,8 @@ async function renderTemplate_HieroVision(doc, rawData, colors, spacing) {
     }
 }
 
-async function renderTemplate_HieroPremium(doc, rawData, colors, spacing) {
-    const data = normalizeData(rawData);
+async function renderTemplate_HieroPremium(doc, data, colors, spacing) {
+    if (!data.personalInfo) data.personalInfo = {};
 
     // Prevent accidental pagination that causes infinite loops and scattered text
     doc.addPage = function () { return doc; };
@@ -5797,6 +5826,12 @@ async function renderTemplate_HieroPremium(doc, rawData, colors, spacing) {
     const rightSideSections = (data.sectionOrder || ['education', 'experience', 'projects', 'certifications']).filter(id => ['education', 'experience', 'projects', 'certifications', 'achievements', 'activities'].includes(id));
 
     rightSideSections.forEach(sectionId => {
+        const edus = data.education || [];
+        const exps = data.experience || [];
+        const projects = data.projects || [];
+        const certs = data.certifications || [];
+        const achvs = data.achievements || [];
+        const acts = data.activities || data.extraCurricular || [];
         // Education
         if (sectionId === 'education' && edus.length > 0) {
             rightY += drawCard(RIGHT_X, rightY, RIGHT_W, (cx, cy, cw, dry) => {
@@ -7316,6 +7351,187 @@ function renderTemplate_HieroVertex(doc, data) {
     else if (typeof data.softSkills === 'string') softArray = data.softSkills.split(',').map(s => s.trim()).filter(Boolean);
 
     renderSkillsBars('PER SKILLS', softArray, ['Creative', 'Teamwork', 'Punctual', 'Leadership']);
+}
+
+/**
+ * 🎨 HIERO SCHOLAR TEMPLATE
+ * Design: Pixel-perfect match to reference image.
+ * Teal triangle top-left, white middle box, blue-grey/peach bottom half.
+ * Long red ribbon with serif initials overlapping centered photo.
+ */
+async function renderTemplate_HieroScholar(doc, data) {
+    const pageWidth = 595.28;
+    const pageHeight = 841.89;
+
+    // Normalize data
+    const normalized = typeof normalizeData === 'function' ? normalizeData(data) : data;
+    const pInfo = normalized.personalInfo || {};
+
+    const colors = {
+        teal: '#a8c1c5',
+        blueGrey: '#b0c4ce',
+        peach: '#d7a692',
+        accentRed: '#eb7c74',
+        textDark: '#333333',
+        textGray: '#666666',
+        white: '#FFFFFF'
+    };
+
+    // 1. Draw Background Splits
+    // Teal triangle top-left
+    doc.fillColor(colors.teal)
+       .moveTo(0, 0)
+       .lineTo(pageWidth * 0.5, 0)
+       .lineTo(0, 350)
+       .closePath()
+       .fill();
+
+    // Blue-grey bottom-left block
+    doc.fillColor(colors.blueGrey)
+       .rect(0, 420, pageWidth * 0.45, pageHeight - 420)
+       .fill();
+
+    // Peach bottom-right block
+    doc.fillColor(colors.peach)
+       .rect(pageWidth * 0.45, 420, pageWidth * 0.55, pageHeight - 420)
+       .fill();
+
+    // Small white triangle at bottom left
+    doc.fillColor(colors.white)
+       .moveTo(0, pageHeight)
+       .lineTo(0, pageHeight - 80)
+       .lineTo(150, pageHeight)
+       .closePath()
+       .fill();
+
+    // 2. Red Ribbon (Behind photo area but rendered first)
+    const ribbonW = 50;
+    const ribbonH = 140;
+    const ribbonX = 210;
+    doc.fillColor(colors.accentRed)
+       .rect(ribbonX, 0, ribbonW, ribbonH)
+       .fill();
+    
+    // Ribbon notch
+    doc.fillColor(colors.accentRed)
+       .moveTo(ribbonX, ribbonH)
+       .lineTo(ribbonX + (ribbonW / 2), ribbonH + 15)
+       .lineTo(ribbonX + ribbonW, ribbonH)
+       .closePath()
+       .fill();
+
+    // Initials on ribbon (Serif)
+    const initials = (pInfo.fullName || 'JS').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+    doc.fillColor(colors.white).font('Times-Bold').fontSize(24).text(initials[0] || '', ribbonX, 75, { width: ribbonW, align: 'center' });
+    doc.fillColor(colors.white).font('Times-Bold').fontSize(24).text(initials[1] || '', ribbonX, 95, { width: ribbonW, align: 'center' });
+
+    // 3. Photo Area (Centered Overlap)
+    const photoSize = 150;
+    const photoX = (pageWidth - photoSize) / 2 - 40; // Offset left a bit like the image
+    const photoY = 30;
+
+    // Photo Circles (borders)
+    doc.save();
+    doc.lineWidth(5).strokeColor(colors.white);
+    doc.circle(photoX + photoSize / 2, photoY + photoSize / 2, (photoSize / 2) + 3).stroke();
+    doc.lineWidth(3).strokeColor(colors.teal);
+    doc.circle(photoX + photoSize / 2, photoY + photoSize / 2, (photoSize / 2) + 7).stroke();
+    
+    doc.circle(photoX + photoSize / 2, photoY + photoSize / 2, photoSize / 2).clip();
+    let photoDrawn = false;
+    if (pInfo.profilePhoto) {
+        try {
+            const buf = base64ToBuffer(pInfo.profilePhoto);
+            if (buf) {
+                doc.image(buf, photoX, photoY, { width: photoSize, height: photoSize, cover: [photoSize, photoSize] });
+                photoDrawn = true;
+            }
+        } catch (e) {}
+    }
+    if (!photoDrawn) {
+        renderInitials(doc, pInfo.fullName || 'JS', photoX + photoSize / 2, photoY + photoSize / 2, photoSize / 2);
+    }
+    doc.restore();
+
+    // 4. Name and Title (Right Side)
+    const nameArr = (pInfo.fullName || 'Jonathan Smith').split(' ');
+    const nameLine1 = nameArr[0].toUpperCase();
+    const nameLine2 = nameArr.slice(1).join(' ').toUpperCase();
+    const title = (pInfo.roleTitle || pInfo.title || 'English Teacher').toUpperCase();
+
+    doc.fillColor(colors.textDark).font('Helvetica-Bold').fontSize(40).text(nameLine1, pageWidth / 2 + 50, 70);
+    doc.fillColor(colors.textDark).font('Helvetica-Bold').fontSize(40).text(nameLine2, pageWidth / 2 + 50, 105);
+    doc.fillColor(colors.textGray).font('Helvetica').fontSize(14).text(title, pageWidth / 2 + 50, 150, { characterSpacing: 2 });
+
+    // 5. Middle Box (Profile & Contact)
+    const boxX = 40;
+    const boxY = 220;
+    const boxW = pageWidth - 80;
+    const boxH = 180;
+    
+    doc.fillColor(colors.white).rect(boxX, boxY, boxW, boxH).fill();
+
+    function drawHeader(text, x, y, color = colors.textDark) {
+        doc.fillColor(color).font('Helvetica-Bold').fontSize(20).text(text, x, y);
+        return y + 30;
+    }
+
+    let midY = boxY + 25;
+    drawHeader('Profile', boxX + 40, midY);
+    doc.fillColor(colors.textDark).font('Helvetica').fontSize(9.5).text(normalized.summary || 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis vel velit purus. Donec turpis tortor, convallis sit amet sem id, varius mollis ex. Pellentesque blandit nisi ut massa molestie efficitur.', boxX + 40, midY + 30, { width: 300, align: 'justify', lineGap: 3 });
+
+    drawHeader('Contact', boxX + 380, midY);
+    doc.fillColor(colors.textDark).font('Helvetica').fontSize(10);
+    doc.font('Helvetica-Bold').text(pInfo.location || 'New York', boxX + 380, midY + 30);
+    doc.font('Helvetica').text('Lorem ipsum dolor sit met', boxX + 380, midY + 45);
+    doc.text(pInfo.phone || '+111 222 333 444', boxX + 380, midY + 60);
+    doc.text(pInfo.email || 'jonathansmith@gmail.com', boxX + 380, midY + 75);
+    
+    // Social circles simulated
+    doc.fillColor(colors.teal).circle(boxX + 395, midY + 110, 12).fill();
+    doc.fillColor(colors.teal).circle(boxX + 425, midY + 110, 12).fill();
+    doc.fillColor(colors.teal).circle(boxX + 455, midY + 110, 12).fill();
+    doc.fillColor(colors.textGray).fontSize(8).text(pInfo.linkedin || '/JonathanSmith', boxX + 380, midY + 130);
+
+    // 6. Bottom Part
+    let bottomLeftY = 460;
+    let bottomRightY = 460;
+
+    // LEFT: Education & Skills
+    drawHeader('Education', boxX + 10, bottomLeftY);
+    bottomLeftY += 40;
+    const edu = normalized.education || [];
+    (edu.length > 0 ? edu.slice(0, 2) : [{school:'School Name', degree:'Degree', gradYear:'2016 > 2019'}]).forEach(item => {
+        doc.fillColor(colors.textDark).font('Helvetica-BoldOblique').fontSize(12).text(item.school || item.institute, boxX + 10, bottomLeftY);
+        doc.font('Helvetica').fontSize(9).text(`( ${item.gradYear || item.dates || '2016 > 2019'} )`, boxX + 10, bottomLeftY + 15);
+        doc.font('Helvetica').fontSize(9).text(item.degree || 'Education details.', boxX + 10, bottomLeftY + 30, { width: 220 });
+        bottomLeftY += 60;
+    });
+
+    drawHeader('Skills', boxX + 10, bottomLeftY + 20);
+    bottomLeftY += 60;
+    const sList = normalized.skills || ['Google Classroom', 'Microsoft Word', 'Microsoft PPT'];
+    sList.slice(0, 3).forEach((s, i) => {
+        const sx = boxX + 10 + (i * 75);
+        doc.lineWidth(3).strokeColor(colors.white).circle(sx + 25, bottomLeftY + 25, 30).stroke();
+        // Skill arc
+        doc.lineWidth(3).strokeColor(colors.accentRed).arc(sx + 25, bottomLeftY + 25, 30, 0, Math.PI).stroke();
+        doc.fillColor(colors.textDark).font('Helvetica-Bold').fontSize(7).text(s.toUpperCase(), sx, bottomLeftY + 65, { width: 50, align: 'center' });
+    });
+
+    // RIGHT: Work Experience
+    drawHeader('Work Experience', pageWidth * 0.5 + 40, bottomRightY);
+    bottomRightY += 50;
+    const exp = normalized.experience || [];
+    (exp.length > 0 ? exp.slice(0, 3) : [{jobTitle:'Position Name', company:'Company', startDate:'2019', description: 'Description here.'}]).forEach(item => {
+        doc.fillColor(colors.white).font('Helvetica-Bold').fontSize(10).text(item.startDate?.split(' ')[1] || item.startDate || '2019', pageWidth * 0.5 - 20, bottomRightY);
+        doc.rect(pageWidth * 0.5 + 15, bottomRightY + 5, 15, 2).fill(colors.white);
+        
+        doc.fillColor(colors.textDark).font('Helvetica-Bold').fontSize(12).text(item.jobTitle || item.role, pageWidth * 0.5 + 40, bottomRightY);
+        doc.font('Helvetica').fontSize(10).text(item.company, pageWidth * 0.5 + 40, bottomRightY + 15);
+        doc.font('Helvetica').fontSize(9).text(item.description || 'Position description and responsibilities.', pageWidth * 0.5 + 40, bottomRightY + 32, { width: 220 });
+        bottomRightY += 90;
+    });
 }
 
 module.exports = { generateUnifiedResume };

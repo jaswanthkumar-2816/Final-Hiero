@@ -251,6 +251,12 @@ app.get('/dashboard', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// Explicit route for mock-interview coming soon page
+app.get('/mock-interview.html', (req, res) => {
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.sendFile(path.join(__dirname, 'mock-interview.html'));
+});
+
 // Support legacy dashboard.html links by redirecting to /dashboard
 app.get('/dashboard.html', (req, res) => {
   res.redirect('/dashboard');

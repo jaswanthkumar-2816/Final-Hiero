@@ -7,7 +7,13 @@ const path = require('path');
 const dotenv = require('dotenv');
 const { Groq } = require('groq-sdk');
 const authObj = require('./auth'); // For personalization
+const Tesseract = require('tesseract.js');
+const puppeteer = require('puppeteer');
+const mammoth = require('mammoth');
 const { normalizeResponse } = require('../utils/normalizeResponse');
+
+
+
 
 dotenv.config();
 
@@ -283,9 +289,23 @@ function classifyDomain(resumeSkills, jdSkills) {
     return techCount >= softCount ? 'tech' : 'non-tech';
 }
 
-// PDF Helper using pdf-parse
-async function safeExtractPdf(buffer, fileName = 'unknown') {
-    console.log(`Attempting to parse PDF: ${fileName}, size: ${buffer.length} bytes`);
+// PDF Helper using pdf-parse with OCR Fallback
+async function safeExtractPdf(buffer, fileName = 'unknown', filePath = null) {
+    console.log(`Attempting to parse file: ${fileName}, size: ${buffer.length} bytes`);
+
+    const ext = path.extname(fileName).toLowerCase();
+    
+    // If it's an image, skip PDF parsing and go straight to OCR
+    if (['.png', '.jpg', '.jpeg', '.bmp', '.tiff', '.webp'].includes(ext)) {
+        console.log(`🔍 File is an image, using OCR...`);
+        try {
+            const { data: { text } } = await Tesseract.recognize(filePath || buffer, 'eng');
+            return text || '';
+        } catch (e) {
+            console.error(`OCR failed for image ${fileName}:`, e.message);
+            return '';
+        }
+    }
 
     let bestResult = '';
     let bestLength = 0;
@@ -323,10 +343,60 @@ async function safeExtractPdf(buffer, fileName = 'unknown') {
         console.warn(`Method 2 failed for ${fileName}:`, error.message);
     }
 
+    // Method 3: Premium OCR Fallback (Puppeteer + Tesseract)
+    // This is the most robust method for scanned PDFs.
+    if (bestLength < 50 && filePath) {
+        console.log(`⚠️ Standard extraction failed for ${fileName}. Launching Premium OCR (Puppeteer)...`);
+        let browser;
+        try {
+            browser = await puppeteer.launch({ 
+                headless: 'new',
+                executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || null,
+                args: [
+                    '--no-sandbox', 
+                    '--disable-setuid-sandbox', 
+                    '--disable-dev-shm-usage',
+                    '--disable-gpu',
+                    '--disable-software-rasterizer',
+                    '--disable-extensions'
+                ]
+            });
+
+            const page = await browser.newPage();
+            
+            // Set high resolution for OCR
+            await page.setViewport({ width: 1200, height: 1600, deviceScaleFactor: 2 });
+            
+            // Convert to absolute path for file:// protocol
+            const absPath = path.resolve(filePath);
+            await page.goto(`file://${absPath}`, { waitUntil: ['load', 'networkidle0'], timeout: 10000 });
+            
+            // Wait for PDF viewer to settle
+            await new Promise(r => setTimeout(r, 2000));
+            
+            console.log(`📸 Taking high-res snapshot of ${fileName} for OCR...`);
+            const screenshot = await page.screenshot({ fullPage: true });
+            
+            const { data: { text } } = await Tesseract.recognize(screenshot, 'eng');
+            if (text && text.trim().length > bestLength) {
+                console.log(`✅ Premium OCR successful: ${text.length} chars extracted.`);
+                bestResult = text.trim();
+                bestLength = bestResult.length;
+            }
+        } catch (error) {
+            console.warn(`❌ Premium OCR failed for ${fileName}:`, error.message);
+        } finally {
+            if (browser) await browser.close();
+        }
+    }
+
     if (bestLength > 0) return bestResult;
-    console.error(`❌ PDF extraction failed for ${fileName}`);
+    console.error(`❌ All extraction methods failed for ${fileName}`);
     return '';
 }
+
+
+
 
 // AI Problem fallback generator
 async function generateAIProblems(skill) {
@@ -562,20 +632,52 @@ router.post(['/analyze', '/analyze-full'], upload.fields([{ name: 'resume' }, { 
         if (jdFile) jdFilePath = jdFile.path;
 
         const resumeBuffer = fs.readFileSync(resumeFilePath);
-        const resumeText = await safeExtractPdf(resumeBuffer, resumeFile.originalname);
+        const resumeExt = path.extname(resumeFile.originalname).toLowerCase();
+        let resumeText = '';
+
+        console.log(`[ANALYSIS] Processing resume: ${resumeFile.originalname} (${resumeExt})`);
+
+        if (resumeExt === '.docx') {
+            try {
+                const result = await mammoth.extractRawText({ path: resumeFilePath });
+                resumeText = result.value || '';
+            } catch (err) {
+                console.error('Mammoth DOCX extraction failed:', err.message);
+            }
+        } else if (resumeExt === '.doc') {
+            // Hiero .doc files are often HTML. Let's check.
+            const content = resumeBuffer.toString('utf8');
+            if (content.includes('<html') || content.includes('<body')) {
+                console.log('[ANALYSIS] Detected HTML-based .doc file, stripping tags...');
+                resumeText = content.replace(/<[^>]*>?/gm, ' ').replace(/\s+/g, ' ').trim();
+            } else {
+                // Legacy binary .doc - try raw read or suggest conversion
+                resumeText = content.replace(/[^\x20-\x7E\n\t]/g, ' ');
+            }
+        } else {
+            // PDF or Image
+            resumeText = await safeExtractPdf(resumeBuffer, resumeFile.originalname, resumeFilePath);
+        }
 
         if (!resumeText || resumeText.length < 10) {
-            return res.status(400).json({ success: false, error: 'Unable to extract text from resume PDF.' });
+            return res.status(400).json({ 
+                success: false, 
+                error: 'Unable to extract text from resume.',
+                details: 'This may be a scanned PDF, an unsupported format, or a corrupted file. Please try a text-based PDF or a .docx file.'
+            });
         }
+
+
 
         let jdText = '';
         if (jdFile) {
             const jdBuffer = fs.readFileSync(jdFilePath);
-            jdText = await safeExtractPdf(jdBuffer, jdFile.originalname);
+            jdText = await safeExtractPdf(jdBuffer, jdFile.originalname, jdFilePath);
             if (!jdText || jdText.length < 10) {
                 return res.status(400).json({ success: false, error: 'Unable to extract text from JD PDF.' });
             }
         } else if (jdTextField) {
+
             jdText = jdTextField;
             console.log(`[ANALYSIS] Received JD Text from body: ${jdText.substring(0, 50)}...`);
         }

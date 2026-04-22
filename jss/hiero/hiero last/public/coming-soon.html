@@ -645,8 +645,12 @@
         initCanvas(); createParticles(); animate();
 
         // 4. Dynamic Content Logic
-        const urlParams = new URLSearchParams(window.location.search);
-        const type = urlParams.get('type') || (window.location.pathname.includes('interview') ? 'interview' : 'project');
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('type') === 'interview') {
+            window.location.href = '/mock-interview.html' + window.location.search;
+        }
+        const RAW_NAME = decodeURIComponent(params.get('name') || 'Project'); 
+        const type = params.get('type') || (window.location.pathname.includes('interview') ? 'interview' : 'project');
         const titleEl = document.getElementById('main-title');
         const descEl = document.getElementById('main-desc');
         const iconEl = document.getElementById('main-icon');
