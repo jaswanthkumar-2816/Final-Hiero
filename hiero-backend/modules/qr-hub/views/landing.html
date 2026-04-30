@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Hiero | Career Intelligence Engine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+        
+        body { font-family: 'Inter', sans-serif; background-color: #050505; color: #fff; scroll-behavior: smooth; cursor: default; }
+
+        @keyframes floatGlow {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(20px, -40px) scale(1.1); }
+            100% { transform: translate(0, 0) scale(1); }
+        }
+
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 20px 4px rgba(16, 185, 129, 0.3); }
+            50% { box-shadow: 0 0 50px 15px rgba(16, 185, 129, 0.6); }
+            100% { box-shadow: 0 0 20px 4px rgba(16, 185, 129, 0.3); }
+        }
+
+        .animate-float { animation: floatGlow 20s ease-in-out infinite; }
+        .animate-pulse-cta { animation: pulseGlow 3s ease-in-out infinite; }
+        
+        .gradient-text {
+            background: linear-gradient(180deg, #FFFFFF 30%, #34d399 100%);
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(12px); border-radius: 20px;
+        }
+
+        .noise-bg::before {
+            content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url('data:image/svg+xml,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch" /%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)" /%3E%3C/svg%3E');
+            opacity: 0.04; pointer-events: none; z-index: 50; mix-blend-mode: overlay;
+        }
+
+        /* Responsive spacing fixes */
+        .section-gap { padding-top: 5rem; padding-bottom: 5rem; }
+        @media (max-width: 768px) { .section-gap { padding-top: 3.5rem; padding-bottom: 3.5rem; } }
+    </style>
+</head>
+<body class="noise-bg overflow-x-hidden">
+
+    <!-- AMBIENT FLOATING BLOOMS -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div class="animate-float absolute top-[-10%] left-[-10%] w-[80vw] h-[80vw] rounded-full opacity-30 blur-[150px]"
+             style="background: radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, transparent 70%);"></div>
+        <div class="animate-float absolute bottom-[-10%] right-[-10%] w-[60vw] h-[60vw] rounded-full opacity-20 blur-[130px]"
+             style="background: radial-gradient(circle, rgba(6, 182, 212, 0.12) 0%, transparent 70%);"></div>
+    </div>
+
+    <!-- STICKY HEADER -->
+    <header class="fixed top-0 left-0 w-full z-[100] border-b border-white/5 bg-black/40 backdrop-blur-xl">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-emerald-500/5 border border-emerald-500/20 flex items-center justify-center overflow-hidden shadow-[0_0_15px_rgba(16,185,129,0.1)]">
+                    <img src="/logo-hiero.png" alt="Hiero Logo" class="w-full h-full object-cover">
+                </div>
+                <span class="text-2xl font-black tracking-tighter uppercase italic">HIERO</span>
+            </div>
+            
+            <nav class="hidden md:flex items-center gap-8 text-sm font-semibold tracking-wide text-white/50">
+                <a href="#shredder" class="hover:text-white transition-colors">The Shredder</a>
+                <a href="#ats" class="hover:text-white transition-colors">ATS Optimization</a>
+                <a href="#insights" class="hover:text-white transition-colors">Insights</a>
+            </nav>
+
+            <a href="/q/go/website" class="px-5 py-2.5 rounded-full bg-emerald-500 text-black text-xs font-black tracking-[0.1em] uppercase hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_rgba(16,185,129,0.3)]">
+                Get Started
+            </a>
+        </div>
+    </header>
+
+    <!-- HERO SECTION -->
+    <section class="relative z-10 pt-40 md:pt-48 pb-20 px-6 max-w-7xl mx-auto flex flex-col items-center">
+        <!-- AI ENGINE BADGE -->
+        <div class="inline-flex items-center px-4 py-1.5 rounded-full mb-10 border border-emerald-500/30 bg-emerald-500/10 backdrop-blur-xl animate-pulse">
+            <span class="flex w-2 h-2 rounded-full bg-emerald-400 mr-3"></span>
+            <span class="text-[10px] font-black tracking-[0.2em] uppercase text-emerald-400/90 text-center">
+                AI Powered Extraction Active
+            </span>
+        </div>
+
+        <h1 class="text-5xl md:text-[84px] font-black tracking-tighter leading-[0.95] md:leading-[0.9] text-center mb-10 max-w-5xl">
+            Your resume is being <span class="italic text-emerald-400 gradient-text">judged</span> in 7 seconds.
+        </h1>
+
+        <p class="text-lg md:text-xl text-center text-white/40 max-w-2xl mb-12 font-medium leading-relaxed">
+            Don't leave your career to chance. Our Kinetic engine simulates high-pressure recruiter bias before you even hit apply.
+        </p>
+
+        <a href="/q/go/website" class="w-full max-w-sm px-10 py-5 rounded-2xl bg-emerald-400 text-black text-xl font-black tracking-wide text-center animate-pulse-cta hover:scale-105 active:scale-95 transition-all shadow-2xl flex items-center justify-center gap-3">
+            Analyze My Resume <span>→</span>
+        </a>
+
+        <!-- HERO MOCKUP -->
+        <div class="mt-24 w-full glass-card p-4 overflow-hidden shadow-2xl border-white/5 group">
+            <img src="/ats_laptop_mockup_1775236869188.png" alt="ATS Analysis Dashboard" class="w-full rounded-xl opacity-90 group-hover:opacity-100 transition-opacity duration-700">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 pt-8 border-t border-white/5">
+                <div class="text-center">
+                    <div class="text-3xl font-black text-emerald-400">87%</div>
+                    <div class="text-[10px] uppercase tracking-widest text-white/40 mt-1">Improved Score</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl font-black">2.4s</div>
+                    <div class="text-[10px] uppercase tracking-widest text-white/40 mt-1">Analysis Speed</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl font-black">45+</div>
+                    <div class="text-[10px] uppercase tracking-widest text-white/40 mt-1">ATS Systems</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl font-black text-emerald-400">14k+</div>
+                    <div class="text-[10px] uppercase tracking-widest text-white/40 mt-1">Students Hired</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- MODULE 01: THE SHREDDER -->
+    <section id="shredder" class="relative z-10 section-gap px-6 max-w-7xl mx-auto">
+        <div class="grid md:grid-cols-2 gap-12 items-center">
+            <div class="glass-card p-12 aspect-square flex flex-col justify-center relative overflow-hidden group">
+                <div class="absolute top-0 right-0 p-8">
+                    <svg class="w-24 h-24 text-white/5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-width="1" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-4v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                </div>
+                <div class="text-emerald-500 text-xs font-black tracking-widest uppercase mb-4">Module 01</div>
+                <h2 class="text-4xl md:text-5xl font-black tracking-tighter mb-8">The Shredder Test.</h2>
+                <p class="text-white/40 leading-relaxed mb-10 text-lg">
+                    Recruiters scan resumes in 6 seconds. Our AI simulates eye-tracking heatmaps to identify where you're losing their attention and which bullets get "shredded."
+                </p>
+                <div class="space-y-4">
+                    <div class="flex items-center gap-4 text-sm font-bold text-white/60">
+                        <span class="w-5 h-5 rounded bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500">✓</span>
+                        Eye-tracking simulation
+                    </div>
+                    <div class="flex items-center gap-4 text-sm font-bold text-white/60">
+                        <span class="w-5 h-5 rounded bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500">✓</span>
+                        Cognitive load analysis
+                    </div>
+                </div>
+            </div>
+            
+            <div id="ats" class="glass-card p-12 aspect-square flex flex-col justify-center relative border-emerald-500/10">
+                <div class="absolute top-0 right-0 p-8">
+                    <svg class="w-20 h-20 text-white/5 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A10.003 10.003 0 0012 3c1.708 0 3.303.427 4.7 1.18M6.7 21a10.003 10.003 0 000-12m10.6 12a10.003 10.003 0 011.4-12m-6.3 3h3m-3 3h3m-3 3h3m-3 3h3"/></svg>
+                </div>
+                <div class="text-emerald-500 text-xs font-black tracking-widest uppercase mb-4">Module 02</div>
+                <h2 class="text-4xl md:text-5xl font-black tracking-tighter mb-8">ATS Optimization.</h2>
+                <p class="text-white/40 leading-relaxed mb-10 text-lg">
+                    The digital gatekeepers don't care about your design. They care about parsing. We reverse-engineer the top 45 ATS systems to ensure 100% readability.
+                </p>
+                <div class="flex flex-wrap gap-3">
+                    <span class="px-3 py-1 bg-white/5 rounded text-[10px] font-bold text-white/40 uppercase tracking-widest">Workday</span>
+                    <span class="px-3 py-1 bg-white/5 rounded text-[10px] font-bold text-white/40 uppercase tracking-widest">Lever</span>
+                    <span class="px-3 py-1 bg-white/5 rounded text-[10px] font-bold text-white/40 uppercase tracking-widest">Greenhouse</span>
+                    <span class="px-3 py-1 bg-white/5 rounded text-[10px] font-bold text-white/40 uppercase tracking-widest">Taleo</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- INSTAGRAM CTA SECTION -->
+    <section id="insights" class="relative z-10 section-gap px-6">
+        <div class="max-w-7xl mx-auto grid md:grid-cols-5 gap-8">
+            <div class="md:col-span-2 glass-card p-8 flex flex-col items-center text-center">
+                <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-pink-500 via-red-500 to-yellow-500 p-[1px] mb-8">
+                    <div class="w-full h-full rounded-2xl bg-black flex items-center justify-center">
+                        <svg class="w-8 h-8 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.51"/></svg>
+                    </div>
+                </div>
+                <h3 class="text-2xl font-black tracking-tight mb-4">@CareerTips</h3>
+                <p class="text-white/40 text-sm mb-12">Daily resume hacks, recruiter secrets, and professional glow-ups on Instagram.</p>
+                <a href="/q/go/instagram" class="flex items-center gap-2 text-xs font-black text-emerald-400 tracking-widest uppercase hover:underline">
+                    Follow on Instagram <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg>
+                </a>
+            </div>
+
+            <div class="md:col-span-3 glass-card p-12 flex flex-col justify-center">
+                <h2 class="text-4xl md:text-5xl font-black tracking-tighter mb-8 leading-tight italic">Beyond the grid.<br>Beyond the noise.</h2>
+                <p class="text-white/40 leading-relaxed mb-12 text-lg">
+                    Hiero AI isn't just a spell-checker. It's a high-frequency intelligence layer that sits between your experience and the recruiter's decision.
+                </p>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="flex items-center gap-3 text-xs font-bold text-emerald-400/80 tracking-widest uppercase">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> 24/7 Analysis Pipeline
+                    </div>
+                    <div class="flex items-center gap-3 text-xs font-bold text-emerald-400/80 tracking-widest uppercase">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Dynamic Keyword Balancing
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FINAL CTA SECTION -->
+    <section class="relative z-10 section-gap px-6 bg-emerald-400 overflow-hidden">
+        <div class="max-w-4xl mx-auto flex flex-col items-center text-center">
+            <h2 class="text-5xl md:text-[84px] font-black tracking-tighter text-black leading-[0.9] mb-12">
+                Stop being <span class="opacity-50">ignored.</span>
+            </h2>
+            <a href="/q/go/website" class="w-full max-w-sm px-10 py-6 rounded-2xl bg-black text-white text-xl font-black tracking-wide text-center hover:scale-105 active:scale-95 transition-all shadow-2xl">
+                Start Your Shredder Test
+            </a>
+        </div>
+        <!-- Abstract shape -->
+        <div class="absolute bottom-0 right-0 opacity-10 pointer-events-none">
+            <svg class="w-[800px] h-[800px] text-black" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="relative z-10 py-20 px-6 border-t border-white/5">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-12">
+            <div class="flex flex-col items-center md:items-start gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-emerald-500/5 border border-emerald-500/20 flex items-center justify-center overflow-hidden">
+                        <img src="/logo-hiero.png" alt="Hiero Logo" class="w-full h-full object-cover">
+                    </div>
+                    <span class="text-xl font-black tracking-tighter uppercase italic">HIERO</span>
+                </div>
+                <p class="text-[10px] uppercase tracking-[0.3em] font-bold text-white/20">© 2026 HIERO Intelligence. All rights reserved.</p>
+            </div>
+            
+            <nav class="flex flex-wrap justify-center gap-8 text-[10px] font-bold uppercase tracking-[0.2em] text-white/30">
+                <a href="#" class="hover:text-emerald-400 transition-colors">Privacy</a>
+                <a href="#" class="hover:text-emerald-400 transition-colors">Terms</a>
+                <a href="#" class="hover:text-emerald-400 transition-colors">Careers</a>
+                <a href="#" class="hover:text-emerald-400 transition-colors">Contact Support</a>
+            </nav>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scroll reveal observer
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.glass-card').forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'all 1s cubic-bezier(0.16, 1, 0.3, 1)';
+            observer.observe(card);
+        });
+    </script>
+</body>
+</html>

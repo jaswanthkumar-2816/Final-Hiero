@@ -25,15 +25,12 @@ console.log('   PORT                   =', PORT);
 // ======================
 // CONFIG & PATHS
 // ======================
-// ======================
-// CONFIG & PATHS
-// ======================
 const fs = require('fs');
 const landingDirPath = path.join(__dirname, 'hiero-prototype', 'jss', 'hiero', 'hiero-last');
 const resumeBuilderPath = path.join(landingDirPath, 'public');
 const STARTED_HTML = path.join(landingDirPath, 'started.html');
 
-// Debug check for directory existence (Critical for Render/Linux)
+// Debug check for directory existence
 console.log('--- Path Verification ---');
 console.log('Current Dir:', __dirname);
 console.log('Landing Path:', landingDirPath, fs.existsSync(landingDirPath) ? '✅' : '❌');
@@ -81,7 +78,7 @@ app.use(cors({
     origin: function (origin, callback) {
         if (!origin) return callback(null, true);
         if (allowedOrigins.includes(origin)) return callback(null, true);
-        callback(null, true); // Fallback to true if in development or testing
+        callback(null, true); 
     },
     credentials: true
 }));
@@ -92,8 +89,10 @@ app.use(passport.initialize());
 // DATABASE CONNECTION
 // ======================
 mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log("✅ MongoDB Connected"))
-  .catch(err => console.error("❌ MongoDB Connection Error:", err));
+  .then(() => console.log("✅ [DATABASE] Connected to Hiero Hub (MongoDB)"))
+  .catch(err => {
+    console.error("❌ [DATABASE] Critical Connection Error:", err.message);
+  });
 
 // ======================
 // AUTH ROUTER (Integrated)
@@ -111,55 +110,27 @@ app.get('/dashboard', authObj.authenticateToken, (req, res) => {
 // ======================
 // PROXIES & INTEGRATED ROUTES
 // ======================
-
-// Dashboard Static Serving (Replaces non-functional localhost proxy)
-// This ensures that links like /dashboard/styles.css work correctly.
 app.use('/dashboard', express.static(resumeBuilderPath));
 app.use('/dashboard', express.static(landingDirPath));
-app.use('/public/dashboard', express.static(resumeBuilderPath)); // Fix for nested paths
+app.use('/public/dashboard', express.static(resumeBuilderPath)); 
 
-
-// 📄 Resume API (Integrated!)
-// Mount Import Service FIRST to handle /import requests effectively
+// Resume API
 const importRouter = require('./routes/import-service');
 app.use('/api/resume', importRouter);
-
 const resumeRouter = require('./routes/resume');
 app.use('/api/resume', resumeRouter);
 
-// Support templates and preview folder sharing
-app.use('/templates/previews', express.static(path.join(__dirname, 'hiero-backend', 'templates', 'previews')));
-app.use('/dashboard/previews', express.static(path.join(__dirname, 'hiero-backend', 'templates', 'previews')));
-
-
-// Reviews & Admin API (Integrated - No Proxy!)
+// Reviews & Admin API
 const reviewRouter = require('./routes/review');
-app.use('/api', reviewRouter); // Handles /api/review, /api/login-track, /api/admin/*
+app.use('/api', reviewRouter); 
 
-// Analysis API (Integrated)
+// Analysis API
 const analysisRouter = require('./routes/analysis');
-app.use('/api/analysis', analysisRouter); // Supports /api/analysis/analyze
+app.use('/api/analysis', analysisRouter); 
 
-// AI Photo Formalizer API (New!)
-const aiPhotoRouter = require('./routes/ai-photo');
-app.use('/api', aiPhotoRouter); // Handles /api/generate-executive-photo
-
-// Orbit Neural Assistant Chat API (New!)
-const chatRouter = require('./routes/chat');
-app.use('/api', chatRouter); // Handles /api/chat
-
-// Python Code Execution API (New!)
-const runRouter = require('./routes/run');
-app.use('/api', runRouter); // Handles /api/run
-
-// QR Tracking + Link Hub (New!)
+// QR Tracking Hub
 const qrRoutes = require('./hiero-backend/modules/qr-hub/routes/qr.routes.cjs');
-app.use('/q', qrRoutes); // Handles /q, /q/go/*, /q/admin/*
-
-// Support legacy shortened paths
-app.use('/auth/signup', (req, res) => res.redirect(307, '/signup'));
-app.use('/auth/login', (req, res) => res.redirect(307, '/login'));
-app.use('/auth/verify-email', (req, res) => res.redirect(307, '/verify-email'));
+app.use('/q', qrRoutes); 
 
 // Root UI
 app.get('/', (req, res) => {
@@ -167,42 +138,21 @@ app.get('/', (req, res) => {
     res.sendFile(STARTED_HTML);
 });
 
-// Explicit UI Routes
+// UI Routes
 app.get(['/login', '/login.html'], (req, res) => res.sendFile(path.join(landingDirPath, 'login.html')));
 app.get(['/signup', '/signup.html'], (req, res) => res.sendFile(path.join(landingDirPath, 'signup.html')));
 app.get('/dashboard.html', (req, res) => res.sendFile(path.join(resumeBuilderPath, 'index.html')));
 
-
-// Route /get-started to the role selection page
-app.get('/get-started', (req, res) => {
-    res.sendFile(path.join(landingDirPath, 'role-selection.html'));
-});
-
-app.get('/sitemap.xml', (req, res) => res.sendFile(path.join(landingDirPath, 'sitemap.xml')));
-app.get('/robots.txt', (req, res) => res.sendFile(path.join(landingDirPath, 'robots.txt')));
-
 app.get(['/learn', '/learn.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'learn.html')));
-app.get(['/solve', '/solve.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'solve.html')));
 app.get(['/resume-builder', '/resume-builder.html', '/dashboard/resume-builder'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'resume-builder.html')));
-app.get(['/resume-form', '/resume-form.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'resume-form.html')));
-app.get(['/project', '/project.html', '/dashboard/project.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'coming-soon.html')));
-app.get(['/interview', '/interview.html', '/mock-interview', '/mock-interview.html', '/dashboard/mock-interview.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'mock-interview.html')));
-
-
 app.get(['/analysis', '/analysis.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'analysis.html')));
-app.get(['/ai-photo-formalizer', '/ai-photo-formalizer.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'ai-photo-formalizer.html')));
 
-// ======================
 // STATIC FILES
-// ======================
 app.use(express.static(landingDirPath, { index: false }));
 app.use(express.static(resumeBuilderPath, { index: false }));
 app.use('/public', express.static(resumeBuilderPath));
-app.use(express.static(path.join(__dirname, 'login-system'), { index: false }));
 
-// ======================
-// SPA FALLBACK & FINAL ANALYSIS FALLBACK
-// ======================
+// SPA FALLBACK
 app.get('*', (req, res, next) => {
     if (path.extname(req.path) !== '') return next();
     if (!req.path.startsWith('/api') && !req.path.startsWith('/auth') && !req.path.startsWith('/dashboard')) {
@@ -211,26 +161,19 @@ app.get('*', (req, res, next) => {
     next();
 });
 
-// Final fallback for legacy /api/analyze if not caught by reviewRouter
-app.use('/api', analysisRouter);
-
-// ======================
 // START SERVER
-// ======================
 app.listen(PORT, () => {
     console.log(`
 🚀 Unified Gateway LIVE at http://localhost:${PORT}
    📁 Landing UI         → Integrated (Port ${PORT})
    🔐 Auth System        → Integrated (Port ${PORT})
-   ⭐️ Review System       → Integrated (Port ${PORT}) [NEW]
+   ⭐️ Review System       → Integrated (Port ${PORT})
    🧠 Analysis System     → Integrated (Port ${PORT})
-   
    📊 Integrated Systems:
       - /dashboard        → Serves Static UI
       - /api/resume       → Native Controller
       - /api/analysis     → AI Engine
       - /api/review       → MongoDB Storage
       - /q                → QR Hub & Tracking [NEW]
-
 `);
 });

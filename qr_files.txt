@@ -1,0 +1,11 @@
+C:\Users\souvi\Final-Hiero\qr_files.txt
+C:\Users\souvi\Final-Hiero\hiero-backend\modules\qr-hub
+C:\Users\souvi\Final-Hiero\hiero-backend\modules\qr-hub\controllers\qr.controller.cjs
+C:\Users\souvi\Final-Hiero\hiero-backend\modules\qr-hub\data\qr_events.jsonl
+C:\Users\souvi\Final-Hiero\hiero-backend\modules\qr-hub\models\qr-event.model.cjs
+C:\Users\souvi\Final-Hiero\hiero-backend\modules\qr-hub\routes\qr.routes.cjs
+C:\Users\souvi\Final-Hiero\_backup_today\qr-hub
+C:\Users\souvi\Final-Hiero\_backup_today\qr-hub\controllers\qr.controller.cjs
+C:\Users\souvi\Final-Hiero\_backup_today\qr-hub\data\qr_events.jsonl
+C:\Users\souvi\Final-Hiero\_backup_today\qr-hub\models\qr-event.model.cjs
+C:\Users\souvi\Final-Hiero\_backup_today\qr-hub\routes\qr.routes.cjs

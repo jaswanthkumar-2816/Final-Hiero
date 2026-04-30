@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Hiero | Launch Your Future</title>
+    <style>
+        :root {
+            --bg: #0a0a0a;
+            --surface: #111111;
+            --accent: #ffffff;
+            --text-main: #ffffff;
+            --text-dim: #999999;
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            min-height: 100vh; padding: 24px; overflow: hidden;
+        }
+
+        .bg-glow {
+            position: fixed; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle at center, #111 0%, #0a0a0a 100%);
+            z-index: -1;
+        }
+
+        .container {
+            width: 100%; max-width: 400px; text-align: center;
+            animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .badge {
+            display: inline-block; background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--border); padding: 6px 14px; border-radius: 100px;
+            font-size: 11px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 1.2px; color: #fff; margin-bottom: 24px;
+        }
+
+        .logo {
+            font-size: 44px; font-weight: 900; letter-spacing: -2.5px; margin-bottom: 12px;
+            background: linear-gradient(180deg, #FFFFFF 0%, #A0A0A0 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+
+        .tagline {
+            font-size: 20px; font-weight: 500; color: var(--text-dim); line-height: 1.4;
+            margin-bottom: 40px; padding: 0 10px;
+        }
+
+        .tagline b { color: var(--text-main); display: block; font-size: 26px; margin-bottom: 12px; letter-spacing: -0.5px; }
+
+        .button-group { display: flex; flex-direction: column; gap: 16px; }
+
+        .btn {
+            display: flex; align-items: center; justify-content: center; width: 100%;
+            padding: 22px; border-radius: 20px; font-size: 17px; font-weight: 700;
+            text-decoration: none; transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid transparent;
+        }
+
+        .btn-primary { background-color: var(--accent); color: #000; box-shadow: 0 10px 40px rgba(255,255,255,0.1); }
+        .btn-primary:active { transform: scale(0.96); }
+
+        .btn-secondary { background-color: var(--surface); border: 1px solid var(--border); color: #fff; }
+        .btn-secondary:active { transform: scale(0.96); }
+
+        .footer-trust { margin-top: 50px; font-size: 14px; color: var(--text-dim); }
+        .footer-trust span { color: var(--text-main); font-weight: 600; }
+        .microcopy { font-size: 12px; opacity: 0.5; margin-bottom: 20px; display: block; }
+    </style>
+</head>
+<body>
+    <div class="bg-glow"></div>
+    <div class="container">
+        <div class="badge">Limited Early Access</div>
+        <h1 class="logo">Hiero</h1>
+        
+        <p class="tagline">
+            <b>Launch your future in 60s.</b>
+            Unlock the same AI career tools used by elite students to land top-tier roles.
+        </p>
+
+        <div class="button-group">
+            <span class="microcopy">No signup or credit card required.</span>
+            <a href="/q/go/website" class="btn btn-primary">Start My Career Dashboard — Free</a>
+            <a href="/q/go/instagram" class="btn btn-secondary">Get Daily Career Shortcuts</a>
+        </div>
+
+        <div class="footer-trust">
+            Join <span>10,000+ ambitious students</span> building their future today.
+        </div>
+    </div>
+</body>
+</html>
