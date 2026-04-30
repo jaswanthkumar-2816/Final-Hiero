@@ -490,17 +490,6 @@
     #loading-overlay {
       position: fixed;
       inset: 0;
-      background: #000;
-      z-index: 1000;
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-    }
-
-    #loading-overlay {
-      position: fixed;
-      inset: 0;
       background: #020402;
       backdrop-filter: blur(40px);
       z-index: 9999;
@@ -559,7 +548,6 @@
       width: 140px;
       height: 140px;
       object-fit: contain;
-      /* Starts hidden for manifestation */
       opacity: 0;
       filter: blur(10px) brightness(0.5);
       transform: scale(0.9);
@@ -567,7 +555,6 @@
       z-index: 11;
     }
 
-    /* Subtle Energy Pulse behind shield */
     .core-aura {
       position: absolute;
       width: 180px;
@@ -588,7 +575,6 @@
       50% { transform: scale(1.4); opacity: 0.1; }
     }
 
-    /* --- STAGE LIST --- */
     .loading-status-wrap {
       width: 100%;
       display: flex;
@@ -659,25 +645,6 @@
       50% { transform: translateY(-5px); }
     }
 
-    /* --- PROGRESS BAR --- */
-    .master-progress-track {
-      width: 100%;
-      height: 4px;
-      background: rgba(255,255,255,0.05);
-      border-radius: 10px;
-      overflow: hidden;
-      margin-top: 10px;
-    }
-
-    .master-progress-fill {
-      height: 100%;
-      width: 0%;
-      background: var(--primary-accent);
-      box-shadow: 0 0 15px var(--primary-accent);
-      transition: width 0.5s ease;
-    }
-
-    /* --- SCANNING EFFECT --- */
     .scanning-line {
       position: absolute;
       top: 0;
@@ -712,7 +679,6 @@
         background: rgba(255,255,255,0.02);
     }
 
-    /* Validation Errors */
     #validation-errors {
         margin-top: 24px;
         padding: 16px;
@@ -723,7 +689,6 @@
         font-size: 0.85rem;
     }
 
-    /* Responsive */
     @media (max-width: 900px) {
       .main-grid {
         grid-template-columns: 1fr;
@@ -833,12 +798,10 @@
       </div>
 
       <form id="analyze-form">
-        <!-- Hidden radios for the script to pick up -->
         <input type="radio" name="jd_mode" value="file" id="radio-file" checked style="display:none;">
         <input type="radio" name="jd_mode" value="text" id="radio-text" style="display:none;">
 
         <div class="upload-group">
-          <!-- Your Resume -->
           <div class="upload-box">
             <div class="upload-left">
               <div class="upload-icon"><i class="fa-solid fa-file-lines"></i></div>
@@ -851,7 +814,6 @@
             <input type="file" id="resume" name="resume" accept=".pdf,.txt" required class="file-input-hidden" onchange="updateFileName('resume', this)">
           </div>
 
-          <!-- Job Description File -->
           <div id="jd-file-wrapper" class="upload-box">
             <div class="upload-left">
               <div class="upload-icon"><i class="fa-solid fa-briefcase"></i></div>
@@ -864,7 +826,6 @@
             <input type="file" id="jd" name="jd" accept=".pdf,.txt" class="file-input-hidden" onchange="updateFileName('jd', this)">
           </div>
 
-          <!-- Job Description Text -->
           <div id="jd-text-wrapper" style="display:none;">
              <textarea id="jd-text" class="pasted-text-area" placeholder="Paste full Job Description here..."></textarea>
           </div>
@@ -921,7 +882,6 @@
         </div>
       </div>
       <div class="scanning-line"></div>
-
     </div>
   </div>
 
@@ -969,11 +929,9 @@
                     btn.style.background = 'rgba(255,255,255,0.1)';
                 }
             }
-            console.log(`📎 File selected for ${type}: ${fileName}`);
         }
     }
 
-    // Interactive neural background
     (function () {
       const canvas = document.getElementById('antigravity-bg');
       if (!canvas) return;
@@ -1055,5 +1013,4 @@
     })();
   </script>
 </body>
-
 </html>

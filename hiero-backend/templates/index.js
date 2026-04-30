@@ -8,6 +8,7 @@ import { renderPriyaAnalyticsTemplate } from './priyaAnalyticsTemplate.js';
 import { renderHieroEliteTemplate } from './hieroEliteTemplate.js';
 import { generateHieroBlueTemplate } from './hieroBlueTemplate.js';
 import { generateHieroSignatureTemplate } from './hieroSignatureTemplate.js';
+import { generateHieroScholarTemplate } from './hieroScholar.js';
 
 export function listTemplates() {
   return [
@@ -20,6 +21,7 @@ export function listTemplates() {
     { id: 'hiero-elite', name: 'Hiero Elite' },
     { id: 'hiero-blue', name: 'Hiero Premium Blue' },
     { id: 'hiero-signature', name: 'Hiero Signature' },
+    { id: 'hiero-scholar', name: 'Hiero Scholar' },
   ];
 }
 
@@ -42,6 +44,8 @@ export function generateTemplateHTML(templateId, data = {}) {
       return generateHieroBlueTemplate(data);
     case 'hiero-signature':
       return generateHieroSignatureTemplate(data);
+    case 'hiero-scholar':
+      return generateHieroScholarTemplate(data);
     case 'classic':
     default:
       return generateClassicTemplate(data);

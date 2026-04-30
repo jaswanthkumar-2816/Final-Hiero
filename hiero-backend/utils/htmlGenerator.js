@@ -2,6 +2,8 @@
 // This generates instant HTML previews without LaTeX compilation
 
 import { generateHieroSignatureTemplate } from '../templates/hieroSignatureTemplate.js';
+import { generateHieroScholarTemplate } from '../templates/hieroScholar.js';
+import { generateHieroAxisTemplate } from '../templates/hieroAxis.js';
 import fs from 'fs';
 import path from 'path';
 
@@ -16,7 +18,9 @@ export function generateHTMLPreview(templateId, resumeData) {
     functional: generateFunctionalHTML,
     rishi: generateModernHTML,
     'priya-analytics': generateProfessionalHTML,
-    'hiero-signature': (data) => generateHieroSignatureTemplate(convertToModernSchema(data))
+    'hiero-signature': (data) => generateHieroSignatureTemplate(convertToModernSchema(data)),
+    'hiero-scholar': (data) => generateHieroScholarTemplate(convertToModernSchema(data)),
+    'hiero-axis': (data) => generateHieroAxisTemplate(convertToModernSchema(data))
   };
 
   const generator = templates[templateId] || templates.professionalcv;

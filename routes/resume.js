@@ -2,7 +2,6 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-const os = require('os');
 const PDFDocument = require('pdfkit');
 const jwt = require('jsonwebtoken');
 const pdfParse = require('pdf-parse');
@@ -13,27 +12,7 @@ const { generateUnifiedResume } = require('./unifiedTemplates');
 const router = express.Router();
 
 // Multer for uploads
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        const uploadDir = path.join(__dirname, '..', 'hiero-prototype/jss/hiero/hiero-last/public/uploads');
-        if (!fs.existsSync(uploadDir)) {
-            fs.mkdirSync(uploadDir, { recursive: true });
-        }
-        cb(null, uploadDir);
-    },
-    filename: (req, file, cb) => {
-        cb(null, `photo-${Date.now()}${path.extname(file.originalname)}`);
-    }
-});
-const upload = multer({ 
-    storage,
-    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
-    fileFilter: (req, file, cb) => {
-        const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg'];
-        if (allowedTypes.includes(file.mimetype)) cb(null, true);
-        else cb(new Error('Only PNG and JPEG images are allowed'));
-    }
-});
+const upload = multer({ dest: '/tmp' });
 
 // Middleware to verify JWT token
 const authenticateToken = (req, res, next) => {
@@ -124,109 +103,6 @@ router.post('/skills', authenticateToken, async (req, res) => {
     }
 });
 
-router.post('/certifications', authenticateToken, async (req, res) => {
-    try {
-        const { certifications } = req.body;
-        const userId = req.user.userId || req.user.id;
-        let resume = await Resume.findOne({ userId });
-        if (!resume) resume = new Resume({ userId, data: {} });
-        resume.data.certifications = certifications;
-        resume.markModified('data');
-        await resume.save();
-        res.json({ success: true, message: 'Certifications saved' });
-    } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
-    }
-});
-
-router.post('/achievements', authenticateToken, async (req, res) => {
-    try {
-        const { achievements } = req.body;
-        const userId = req.user.userId || req.user.id;
-        let resume = await Resume.findOne({ userId });
-        if (!resume) resume = new Resume({ userId, data: {} });
-        resume.data.achievements = achievements;
-        resume.markModified('data');
-        await resume.save();
-        res.json({ success: true, message: 'Achievements saved' });
-    } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
-    }
-});
-
-router.post('/hobbies', authenticateToken, async (req, res) => {
-    try {
-        const { hobbies } = req.body;
-        const userId = req.user.userId || req.user.id;
-        let resume = await Resume.findOne({ userId });
-        if (!resume) resume = new Resume({ userId, data: {} });
-        resume.data.hobbies = hobbies;
-        resume.markModified('data');
-        await resume.save();
-        res.json({ success: true, message: 'Hobbies saved' });
-    } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
-    }
-});
-
-router.post('/personal_details', authenticateToken, async (req, res) => {
-    try {
-        const { personal_details } = req.body;
-        const userId = req.user.userId || req.user.id;
-        let resume = await Resume.findOne({ userId });
-        if (!resume) resume = new Resume({ userId, data: {} });
-        resume.data.personal_details = personal_details;
-        resume.markModified('data');
-        await resume.save();
-        res.json({ success: true, message: 'Personal details saved' });
-    } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
-    }
-});
-
-router.post('/references', authenticateToken, async (req, res) => {
-    try {
-        const { references } = req.body;
-        const userId = req.user.userId || req.user.id;
-        let resume = await Resume.findOne({ userId });
-        if (!resume) resume = new Resume({ userId, data: {} });
-        resume.data.references = references;
-        resume.markModified('data');
-        await resume.save();
-        res.json({ success: true, message: 'References saved' });
-    } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
-    }
-});
-
-router.post('/photo', authenticateToken, upload.single('photo'), async (req, res) => {
-    try {
-        if (!req.file) {
-            return res.status(400).json({ success: false, error: 'No photo uploaded' });
-        }
-        
-        const userId = req.user.userId || req.user.id;
-        let resume = await Resume.findOne({ userId });
-        if (!resume) resume = new Resume({ userId, data: {} });
-        
-        // Save relative path for easy serving via /public/uploads/xxx.jpg
-        const photoPath = `/public/uploads/${req.file.filename}`;
-        
-        resume.data.photo = photoPath;
-        resume.markModified('data');
-        await resume.save();
-        
-        res.json({ 
-            success: true, 
-            message: 'Photo uploaded successfully', 
-            imageUrl: photoPath 
-        });
-    } catch (error) {
-        console.error('Photo upload error:', error);
-        res.status(500).json({ success: false, error: error.message });
-    }
-});
-
 router.post('/template', authenticateToken, async (req, res) => {
     try {
         const { template } = req.body;
@@ -247,21 +123,46 @@ router.post('/template', authenticateToken, async (req, res) => {
 
 router.get('/health', (req, res) => res.json({ status: 'ok', service: 'resume-integrated' }));
 
-
-const { generatePuppeteerPDF } = require('../utils/puppeteer-service');
-
 router.post('/preview-resume', async (req, res) => {
     try {
         const data = req.body;
+        // Basic validation
         if (!data || Object.keys(data).length === 0) {
             return res.status(400).send('No resume data provided');
         }
-
         const templateId = data.template || 'classic';
 
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', 'inline; filename=resume-preview.pdf');
-        await generateUnifiedResume(data, templateId, res, { forceSinglePage: true });
+        if (templateId === 'hiero-scholar' || templateId === 'hiero-axis' || templateId === 'hiero-apex' || templateId === 'hiero-nimbus') {
+            let html = '';
+            if (templateId === 'hiero-scholar') {
+                const scholarModule = await import('../hiero-backend/templates/hieroScholar.js');
+                html = scholarModule.generateHieroScholarTemplate(data);
+            } else if (templateId === 'hiero-apex') {
+                const apexModule = await import('../hiero-backend/templates/hieroApex.js');
+                html = apexModule.generateHieroApexTemplate(data);
+            } else if (templateId === 'hiero-nimbus') {
+                const nimbusModule = await import('../hiero-backend/templates/hieroNimbus.js');
+                html = nimbusModule.generateHieroNimbusTemplate(data);
+            } else {
+                const axisModule = await import('../hiero-backend/templates/hieroAxis.js');
+                html = axisModule.generateHieroAxisTemplate(data);
+            }
+            const fileName = `${templateId}_preview_${Date.now()}.pdf`;
+            const filePath = path.join(os.tmpdir(), fileName);
+            await generatePuppeteerPDF(html, filePath);
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', 'inline; filename=resume-preview.pdf');
+            const stream = fs.createReadStream(filePath);
+            stream.pipe(res);
+            stream.on('end', () => {
+                try { fs.unlinkSync(filePath); } catch (e) {}
+            });
+        } else {
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', 'inline; filename=resume-preview.pdf');
+            await generateUnifiedResume(data, templateId, res, { forceSinglePage: true });
+        }
+
     } catch (error) {
         console.error('Preview error:', error);
         if (!res.headersSent) res.status(500).send('Generation failed');
@@ -271,17 +172,44 @@ router.post('/preview-resume', async (req, res) => {
 router.post('/download-resume', async (req, res) => {
     try {
         const data = req.body;
+        // Basic validation
         if (!data || Object.keys(data).length === 0) {
             return res.status(400).send('No resume data provided');
         }
-
         const templateId = data.template || 'classic';
         const name = (data.personalInfo?.fullName || data.basic?.full_name || 'Resume').replace(/\s+/g, '_');
 
+        if (templateId === 'hiero-scholar' || templateId === 'hiero-axis' || templateId === 'hiero-apex' || templateId === 'hiero-nimbus') {
+            let html = '';
+            if (templateId === 'hiero-scholar') {
+                const scholarModule = await import('../hiero-backend/templates/hieroScholar.js');
+                html = scholarModule.generateHieroScholarTemplate(data);
+            } else if (templateId === 'hiero-apex') {
+                const apexModule = await import('../hiero-backend/templates/hieroApex.js');
+                html = apexModule.generateHieroApexTemplate(data);
+            } else if (templateId === 'hiero-nimbus') {
+                const nimbusModule = await import('../hiero-backend/templates/hieroNimbus.js');
+                html = nimbusModule.generateHieroNimbusTemplate(data);
+            } else {
+                const axisModule = await import('../hiero-backend/templates/hieroAxis.js');
+                html = axisModule.generateHieroAxisTemplate(data);
+            }
+            const fileName = `${name}_${templateId}_${Date.now()}.pdf`;
+            const filePath = path.join(os.tmpdir(), fileName);
+            await generatePuppeteerPDF(html, filePath);
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', `attachment; filename="${name}_Hiero.pdf"`);
+            const stream = fs.createReadStream(filePath);
+            stream.pipe(res);
+            stream.on('end', () => {
+                try { fs.unlinkSync(filePath); } catch (e) {}
+            });
+        } else {
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', `attachment; filename="${name}_Hiero.pdf"`);
+            await generateUnifiedResume(data, templateId, res);
+        }
 
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename="${name}_Hiero.pdf"`);
-        await generateUnifiedResume(data, templateId, res);
     } catch (error) {
         console.error('Download PDF error:', error);
         if (!res.headersSent) res.status(500).json({ error: 'Failed to generate PDF' });
@@ -291,8 +219,7 @@ router.post('/download-resume', async (req, res) => {
 router.post('/download-docx', authenticateToken, async (req, res) => {
     try {
         const data = req.body;
-        const name = (data.personalInfo?.fullName || data.basic?.full_name || 'Resume').replace(/\s+/g, '_');
-
+        const name = (data.personalInfo?.fullName || 'Resume').replace(/\s+/g, '_');
 
         // Generate Word session content (Word-compatible HTML)
         const html = generateWordHTML(data);
@@ -306,47 +233,63 @@ router.post('/download-docx', authenticateToken, async (req, res) => {
     }
 });
 
-// Helper for Word generation (Exact Hiero Minimal Replica)
+// Helper for Word generation (Refined to match the 'Jhon Smith' template)
 function generateWordHTML(data) {
     const {
-        personalInfo: pi = {},
+        personalInfo = {},
         experience = [],
         education = [],
         projects = [],
-        technicalSkills: techSkillsRaw = '',
-        softSkills: softSkillsRaw = '',
-        summary: summaryRaw = '',
-        languages = '',
-        hobbies = '',
-        references = []
+        softSkills = '',
+        summary = '',
+        achievements = ''
     } = data;
+
+    // Skills can come as 'skills' or 'technicalSkills'
+    const technicalSkills = data.skills || data.technicalSkills || '';
+
+    // Mapping keys to perfect titles
+    const titles = {
+        summary: 'CARRIER OBJECTIVE',
+        education: 'EDUCATION',
+        projects: 'PROJECTS',
+        technicalSkills: 'TECHNICAL STRENGTHS',
+        experience: 'WORK EXPERIENCE',
+        achievements: 'ACADEMIC ACHIEVEMENTS',
+        softSkills: 'PERSONAL TRAITS'
+    };
 
     const b = data.basic || {};
     const c = b.contact_info || {};
 
-    const personalInfo = {
-        fullName: pi.fullName || pi.name || data.fullName || data.name || b.full_name || b.fullName || 'RESUME',
-        email: pi.email || data.email || c.email || b.email || '',
-        phone: pi.phone || data.phone || c.phone || b.phone || '',
-        address: pi.address || data.address || pi.location || data.location || c.address || b.address || '',
-        website: pi.website || data.website || b.website || c.website || '',
-        linkedin: pi.linkedin || data.linkedin || c.linkedin || b.linkedin || '',
-        profilePhoto: pi.profilePhoto || pi.picture || data.profilePhoto || data.picture || data.photoUrl || data.photo || b.photo || '',
-        dob: pi.dateOfBirth || pi.dob || b.dateOfBirth || b.dob || '',
-        nationality: pi.nationality || b.nationality || '',
+    const pi = {
+        fullName: personalInfo.fullName || personalInfo.name || b.full_name || 'RESUME',
+        email: personalInfo.email || c.email || '',
+        phone: personalInfo.phone || c.phone || '',
+        address: personalInfo.address || c.address || '',
+        website: personalInfo.website || b.website || '',
+        linkedin: personalInfo.linkedin || b.linkedin || '',
     };
 
-    const technicalSkills = data.skills || data.technicalSkills || techSkillsRaw || '';
-    const softSkills = data.softSkills || softSkillsRaw || b.soft_skills || '';
-    const summary = summaryRaw || b.career_summary || '';
-    const template = data.template || 'classic';
+    const techSkillsRaw = data.skills || data.technicalSkills || '';
+    const softSkillsRaw = data.softSkills || b.soft_skills || '';
+    const summaryRaw = summary || b.career_summary || '';
+    
     const roleTitle = (pi.roleTitle || pi.title || (experience[0]?.jobTitle || '') || 'Professional').toUpperCase();
+    const isScholar = data.template === 'hiero-scholar';
+    const isAxis = data.template === 'hiero-axis';
+    const isEssence = data.template === 'hiero-essence';
+    
+    const bgColor = isEssence ? '#121212' : '#FFFFFF';
+    const textColor = isEssence ? '#FFFFFF' : '#333333';
+    const accentColor = isScholar ? '#eb7c74' : (isAxis ? '#8D6E63' : (isEssence ? '#f5a623' : '#222222'));
+    const secondaryColor = isScholar ? '#a8c1c5' : (isAxis ? '#EDE6DD' : (isEssence ? '#aaaaaa' : '#666666'));
 
     const colors = {
-        text: '#222222',
-        secondary: '#666666',
-        line: '#cccccc',
-        light: '#f0f0f0'
+        text: textColor,
+        secondary: secondaryColor,
+        line: isScholar ? '#a8c1c5' : '#cccccc',
+        light: isScholar ? '#f1f5f9' : '#f0f0f0'
     };
 
     // Helper: Render Hiero Timeline Row (3-column layout)
@@ -380,6 +323,219 @@ function generateWordHTML(data) {
             </table>
         `;
     };
+
+    // IF HIERO-SCHOLAR
+    if (isScholar) {
+        let htmlSnippet = '';
+        
+        const firstInitial = (personalInfo.fullName || 'J')[0].toUpperCase();
+        const lastInitial = (personalInfo.fullName || ' S').split(' ').pop()[0].toUpperCase();
+
+        htmlSnippet += `
+            <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #a8c1c5; margin-bottom: 20pt;">
+                <tr>
+                    <td width="100" style="background-color: #eb7c74; color: #FFFFFF; text-align: center; font-size: 36pt; font-weight: bold; padding: 25pt; font-family: 'Times New Roman', serif;">
+                        ${firstInitial}${lastInitial}
+                    </td>
+                    <td valign="middle" style="padding-left: 25pt; padding-top: 20pt; padding-bottom: 20pt;">
+                        <div style="font-size: 28pt; font-weight: bold; color: #111111; font-family: 'Times New Roman', serif; line-height: 1.1;">${(personalInfo.fullName || 'RESUME').toUpperCase()}</div>
+                        <div style="font-size: 11pt; color: #444444; margin-top: 5pt; font-weight: bold; letter-spacing: 2pt; font-family: 'Segoe UI', Arial, sans-serif;">${roleTitle}</div>
+                    </td>
+                </tr>
+            </table>
+
+            <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom: 20pt;">
+                <tr>
+                    <td style="font-size: 9.5pt; color: #555555; font-family: 'Segoe UI', Arial, sans-serif; padding-left: 20pt;">
+                        ${[personalInfo.email, personalInfo.phone, personalInfo.address, personalInfo.linkedin].filter(Boolean).join('  |  ')}
+                    </td>
+                </tr>
+            </table>
+
+            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                    <!-- LEFT COLUMN -->
+                    <td width="230" valign="top" style="padding-right: 20pt; border-right: 1.5pt solid #eb7c74;">
+                        ${summary ? `
+                            <div style="margin-bottom: 25pt;">
+                                <div style="font-size: 13pt; font-weight: bold; color: #eb7c74; border-bottom: 1.5pt solid #eb7c74; padding-bottom: 5pt; margin-bottom: 10pt; font-family: 'Times New Roman', serif;">PROFILE</div>
+                                <div style="font-size: 9.5pt; color: #333333; line-height: 1.6; text-align: justify; font-family: 'Segoe UI', Arial, sans-serif;">${summary}</div>
+                            </div>
+                        ` : ''}
+
+                        ${education.length > 0 ? `
+                            <div style="margin-bottom: 25pt;">
+                                <div style="font-size: 13pt; font-weight: bold; color: #eb7c74; border-bottom: 1.5pt solid #eb7c74; padding-bottom: 5pt; margin-bottom: 10pt; font-family: 'Times New Roman', serif;">EDUCATION</div>
+                                ${education.map(edu => `
+                                    <div style="margin-bottom: 12pt;">
+                                        <div style="font-size: 10pt; font-weight: bold; color: #111111;">${edu.school || ''}</div>
+                                        <div style="font-size: 9pt; color: #eb7c74; font-style: italic;">${edu.gradYear || ''}</div>
+                                        <div style="font-size: 9.5pt; color: #333333;">${edu.degree || ''}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+
+                        ${technicalSkills || softSkills ? `
+                            <div style="margin-bottom: 25pt;">
+                                <div style="font-size: 13pt; font-weight: bold; color: #eb7c74; border-bottom: 1.5pt solid #eb7c74; padding-bottom: 5pt; margin-bottom: 10pt; font-family: 'Times New Roman', serif;">SKILLS</div>
+                                <div style="font-size: 9.5pt; color: #333333; line-height: 1.6; font-family: 'Segoe UI', Arial, sans-serif;">
+                                    ${typeof technicalSkills === 'string' ? technicalSkills : technicalSkills.join(', ')}
+                                    ${softSkills ? `<br><br><b>Soft Skills:</b> ${typeof softSkills === 'string' ? softSkills : softSkills.join(', ')}` : ''}
+                                </div>
+                            </div>
+                        ` : ''}
+                    </td>
+
+                    <!-- RIGHT COLUMN -->
+                    <td valign="top" style="padding-left: 25pt;">
+                        ${experience.length > 0 ? `
+                            <div style="margin-bottom: 25pt;">
+                                <div style="font-size: 13pt; font-weight: bold; color: #eb7c74; border-bottom: 1.5pt solid #eb7c74; padding-bottom: 5pt; margin-bottom: 10pt; font-family: 'Times New Roman', serif;">EXPERIENCE</div>
+                                ${experience.map(exp => `
+                                    <div style="margin-bottom: 18pt;">
+                                        <div style="font-size: 11pt; font-weight: bold; color: #111111;">${exp.jobTitle || ''}</div>
+                                        <div style="font-size: 10pt; font-weight: bold; color: #444444;">${exp.company || ''}</div>
+                                        <div style="font-size: 9pt; color: #eb7c74; font-style: italic; margin-bottom: 5pt;">${exp.startDate || ''} - ${exp.endDate || 'Present'}</div>
+                                        <div style="font-size: 9.5pt; color: #333333; line-height: 1.5;">
+                                            ${exp.description ? `<ul style="margin-top: 5pt; padding-left: 15pt;">${exp.description.split('\n').filter(l => l.trim()).map(l => `<li style="margin-bottom: 4pt;">${l.replace(/^[\*-•]\s*/, '')}</li>`).join('')}</ul>` : ''}
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+
+                        ${projects.length > 0 ? `
+                             <div style="margin-bottom: 25pt;">
+                                <div style="font-size: 13pt; font-weight: bold; color: #eb7c74; border-bottom: 1.5pt solid #eb7c74; padding-bottom: 5pt; margin-bottom: 10pt; font-family: 'Times New Roman', serif;">PROJECTS</div>
+                                ${projects.map(proj => `
+                                    <div style="margin-bottom: 12pt;">
+                                        <div style="font-size: 10.5pt; font-weight: bold; color: #111111;">${proj.title || ''}</div>
+                                        <div style="font-size: 9.5pt; color: #333333; margin-top: 2pt;">${proj.description || ''}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                    </td>
+                </tr>
+            </table>
+        `;
+
+        return `
+            <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+            <head><meta charset='utf-8'><title>Resume</title>
+            <style>
+                @page { size: 8.5in 11in; margin: 0.5in; }
+                body { font-family: 'Segoe UI', Arial, sans-serif; color: #111111; margin: 0; padding: 0; }
+                table { border-collapse: collapse; }
+                td { padding: 0; }
+                ul { margin: 0; }
+            </style>
+            </head>
+            <body>
+                ${htmlSnippet}
+            </body>
+            </html>
+        `;
+    }
+
+    // IF HIERO-AXIS
+    if (isAxis) {
+        let htmlSnippet = '';
+        
+        htmlSnippet += `
+            <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom: 20pt; background: #EDE6DD; padding: 20pt;">
+                <tr>
+                    <td valign="middle">
+                        <div style="font-size: 28pt; font-weight: bold; color: #8D6E63; font-family: 'Times New Roman', serif; line-height: 1.1; text-transform: uppercase;">${personalInfo.fullName || 'RESUME'}</div>
+                        <div style="font-size: 14pt; color: #8D6E63; margin-top: 5pt; font-weight: bold; letter-spacing: 2pt; font-family: 'Segoe UI', Arial, sans-serif;">${roleTitle}</div>
+                    </td>
+                </tr>
+            </table>
+
+            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                    <!-- LEFT COLUMN -->
+                    <td width="230" valign="top" style="padding-right: 20pt; border-right: 2pt solid #8D6E63;">
+                        ${summary ? `
+                            <div style="margin-bottom: 20pt;">
+                                <div style="font-size: 11pt; font-weight: bold; color: #8D6E63; border-bottom: 1.5pt solid #8D6E63; padding-bottom: 5pt; margin-bottom: 10pt; font-family: 'Times New Roman', serif;">PROFILE</div>
+                                <div style="font-size: 9.5pt; color: #333333; line-height: 1.6; text-align: justify; font-family: 'Segoe UI', Arial, sans-serif;">${summary}</div>
+                            </div>
+                        ` : ''}
+
+                        ${education.length > 0 ? `
+                            <div style="margin-bottom: 20pt;">
+                                <div style="font-size: 11pt; font-weight: bold; color: #8D6E63; border-bottom: 1.5pt solid #8D6E63; padding-bottom: 5pt; margin-bottom: 10pt; font-family: 'Times New Roman', serif;">EDUCATION</div>
+                                ${education.map(edu => `
+                                    <div style="margin-bottom: 10pt;">
+                                        <div style="font-size: 10pt; font-weight: bold; color: #111111;">${edu.school || ''}</div>
+                                        <div style="font-size: 9pt; color: #8D6E63; font-style: italic;">${edu.gradYear || ''}</div>
+                                        <div style="font-size: 9.5pt; color: #333333;">${edu.degree || ''}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+
+                        ${technicalSkills || softSkills ? `
+                            <div style="margin-bottom: 20pt;">
+                                <div style="font-size: 11pt; font-weight: bold; color: #8D6E63; border-bottom: 1.5pt solid #8D6E63; padding-bottom: 5pt; margin-bottom: 10pt; font-family: 'Times New Roman', serif;">SKILLS</div>
+                                <div style="font-size: 9.5pt; color: #333333; line-height: 1.6; font-family: 'Segoe UI', Arial, sans-serif;">
+                                    ${typeof technicalSkills === 'string' ? technicalSkills : technicalSkills.join(', ')}
+                                    ${softSkills ? `<br><br><b>Soft Skills:</b> ${typeof softSkills === 'string' ? softSkills : softSkills.join(', ')}` : ''}
+                                </div>
+                            </div>
+                        ` : ''}
+                    </td>
+
+                    <!-- RIGHT COLUMN -->
+                    <td valign="top" style="padding-left: 20pt;">
+                        <div style="margin-bottom: 15pt; padding: 10pt; background: #8D6E63; color: white;">
+                             <div style="font-size: 10pt;"><b>CONTACT</b></div>
+                             <div style="font-size: 9pt; margin-top: 4pt;">
+                                ${[personalInfo.email, personalInfo.phone, personalInfo.address, personalInfo.linkedin].filter(Boolean).join(' | ')}
+                             </div>
+                        </div>
+
+                        ${experience.length > 0 ? `
+                            <div style="margin-bottom: 25pt;">
+                                <div style="font-size: 11pt; font-weight: bold; color: #8D6E63; border-bottom: 1.5pt solid #8D6E63; padding-bottom: 5pt; margin-bottom: 10pt; font-family: 'Times New Roman', serif;">WORK EXPERIENCE</div>
+                                ${experience.map(exp => `
+                                    <div style="margin-bottom: 15pt;">
+                                        <div style="font-size: 11pt; font-weight: bold; color: #111111;">${exp.jobTitle || ''}</div>
+                                        <div style="font-size: 10pt; font-weight: bold; color: #444444;">${exp.company || ''}</div>
+                                        <div style="font-size: 9pt; color: #8D6E63; font-style: italic; margin-bottom: 5pt;">${exp.startDate || ''} - ${exp.endDate || 'Present'}</div>
+                                        <div style="font-size: 9.5pt; color: #333333; line-height: 1.5;">
+                                            ${exp.description ? `<ul style="margin-top: 5pt; padding-left: 15pt;">${exp.description.split('\n').filter(l => l.trim()).map(l => `<li style="margin-bottom: 4pt;">${l.replace(/^[\*-•]\s*/, '')}</li>`).join('')}</ul>` : ''}
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                    </td>
+                </tr>
+            </table>
+        `;
+
+        return `
+            <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+            <head><meta charset='utf-8'><title>Resume</title>
+            <style>
+                @page { size: 8.5in 11in; margin: 0.5in; }
+                body { font-family: 'Segoe UI', Arial, sans-serif; color: #111111; margin: 0; padding: 0; background: #F4F1EC; }
+                table { border-collapse: collapse; }
+                td { padding: 0; }
+                ul { margin: 0; }
+            </style>
+            </head>
+            <body>
+                ${htmlSnippet}
+            </body>
+            </html>
+        `;
+    }
+
+
 
     // IF HIERO-MINIMAL (New refined version)
     if (template === 'hiero-minimal' || template === 'minimal' || template === 'hiero-timeline') {
@@ -887,7 +1043,7 @@ function generateWordHTML(data) {
         </html>`;
     }
 
-    if (template === 'hiero-premium' || template === 'premium') {
+    if (template === 'hiero-premium' || template === 'premium' || template === 'hiero-velocity' || template === 'velocity') {
         const BG_COLOR = '#F4F5F7';
         const CARD_BG = '#FFFFFF';
         const PEACH_ACCENT = '#F2B66D';
@@ -1236,34 +1392,120 @@ function generateWordHTML(data) {
 
     // DEFAULT FALLBACK
     const bgFallback = '#FFFFFF', textFallback = '#000000', accentFallback = '#2ae023', metaFallback = '#333333';
+
     return `
     <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-    <head><meta charset='utf-8'><title>Resume</title></head>
-    <body style='font-family: Arial, sans-serif; background-color: ${bgFallback}; color: ${textFallback}; padding: 20pt;'>
-        <div style="text-align: center; margin-bottom: 25pt; border-bottom: 2pt solid ${accentFallback}; padding-bottom: 10pt;">
-            <div style="font-size: 24pt; font-weight: bold; color: ${accentFallback};">${name}</div>
-            <div style="font-size: 10pt; color: ${metaFallback}; margin-top: 5pt;">${contactStr}</div>
+    <head><meta charset='utf-8'><title>Resume</title><style>
+        body { font-family: 'Times New Roman', serif; line-height: 1.4; color: #000; margin: 40pt; }
+        .header { text-align: center; margin-bottom: 25pt; }
+        .name { font-size: 20pt; font-weight: bold; margin: 0; text-transform: none; }
+        .contact { font-size: 10pt; color: #333; margin-top: 5pt; }
+        .section-title { font-size: 12pt; font-weight: bold; color: #000; margin-top: 20pt; margin-bottom: 5pt; text-transform: uppercase; letter-spacing: 1px; }
+        .section-line { border-top: 1pt solid #000; margin-bottom: 10pt; }
+        .item-title { font-size: 11pt; font-weight: bold; }
+        .item-meta { font-size: 10pt; color: #444; }
+        .content { font-size: 10pt; margin-bottom: 8pt; text-align: justify; }
+        ul { margin-top: 5pt; padding-left: 20pt; }
+        li { margin-bottom: 4pt; }
+    </style></head>
+    <body>
+        <div class='header'>
+            <div class='name'>${personalInfo.fullName || 'RESUME'}</div>
+            <div class='contact'>${[personalInfo.address, personalInfo.phone, personalInfo.email].filter(Boolean).join('  |  ')}</div>
         </div>
-        ${summary ? `<h2 style="font-size: 14pt; color:${accentFallback}; border-bottom: 1pt solid #ccc; padding-bottom:4pt; text-transform:uppercase;">Summary</h2><p>${summary}</p>` : ''}
-        ${experience.map(e => formatExp(e, textFallback, accentFallback, metaFallback)).join('')}
-        ${education.map(e => formatEdu(e, textFallback, accentFallback, metaFallback)).join('')}
-    </body></html>`;
+        
+        ${summary ? `
+            <div class='section-title'>${titles.summary}</div>
+            <div class='section-line'></div>
+            <div class='content'>${summary}</div>
+        ` : ''}
+        
+        <div class='section-title'>${titles.education}</div>
+        <div class='section-line'></div>
+        ${education.map(edu => `
+            <div style='margin-bottom: 10pt;'>
+                <div class='item-title'>${edu.degree || ''}</div>
+                <div class='item-meta'>${edu.school || ''} ${edu.gradYear ? ` | ${edu.gradYear}` : ''} ${edu.gpa ? ` | GPA: ${edu.gpa}` : ''}</div>
+            </div>
+        `).join('')}
+
+        <div class='section-title'>${titles.projects}</div>
+        <div class='section-line'></div>
+        ${Array.isArray(projects) ? projects.map(proj => `
+            <div style='margin-bottom: 12pt;'>
+                <div class='item-title'>${proj.name || proj.title || ''}</div>
+                <div class='item-meta'>${proj.technologies || ''}</div>
+                <div class='content'>${proj.description || ''}</div>
+                ${proj.achievement ? `<div class='content'><b>Achievement:</b> ${proj.achievement}</div>` : ''}
+            </div>
+        `).join('') : `<div class='content'>${projects}</div>`}
+
+        ${technicalSkills ? `
+            <div class='section-title'>${titles.technicalSkills}</div>
+            <div class='section-line'></div>
+            <div class='content'>${technicalSkills}</div>
+        ` : ''}
+
+        <div class='section-title'>${titles.experience}</div>
+        <div class='section-line'></div>
+        ${experience.map(exp => `
+            <div style='margin-bottom: 15pt;'>
+                <div class='item-title'>${exp.jobTitle || ''}</div>
+                <div class='item-meta'>${exp.company || ''} (${exp.startDate || ''} - ${exp.endDate || 'Present'})</div>
+                <div class='content'>${exp.description ? `<ul>${exp.description.split('\n').filter(l => l.trim()).map(l => `<li>${l.replace(/^[\*-•]\s*/, '')}</li>`).join('')}</ul>` : ''}</div>
+            </div>
+        `).join('')}
+
+        ${achievements ? `
+            <div class='section-title'>${titles.achievements}</div>
+            <div class='section-line'></div>
+            <div class='content'>${achievements}</div>
+        ` : ''}
+
+        ${softSkills ? `
+            <div class='section-title'>${titles.softSkills}</div>
+            <div class='section-line'></div>
+            <div class='content'>${softSkills}</div>
+        ` : ''}
+
+        ${Array.isArray(data.customDetails) ? data.customDetails.map(custom => `
+            <div class='section-title'>${custom.heading || 'ADDITIONAL DETAIL'}</div>
+            <div class='section-line'></div>
+            <div class='content'>${custom.content || ''}</div>
+        `).join('') : ''}
+
+        ${data.customSectionContent ? `
+            <div class='section-title'>${data.customSectionTitle || 'ADDITIONAL DETAILS'}</div>
+            <div class='section-line'></div>
+            <div class='content'>${data.customSectionContent}</div>
+        ` : ''}
+    </body>
+    </html>`;
 }
+
+
 
 router.get('/preview-pdf', async (req, res) => {
     try {
         const userId = req.query.userId;
         const resume = await Resume.findOne({ userId });
         if (!resume) return res.status(404).send('Resume not found');
-
-        const templateId = resume.data.template || 'classic';
-
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', 'inline; filename=resume-preview.pdf');
-        await generateUnifiedResume(resume.data, templateId, res);
+        await generateUnifiedResume(resume.data, resume.data.template || 'classic', res);
     } catch (error) {
-        console.error('Preview GET error:', error);
         res.status(500).send('Generation failed');
+    }
+});
+
+router.get('/data', authenticateToken, async (req, res) => {
+    try {
+        const userId = req.user.userId || req.user.id;
+        const resume = await Resume.findOne({ userId });
+        if (!resume) return res.status(404).json({ error: 'Resume not found' });
+        res.json({ success: true, data: resume.data });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
     }
 });
 
@@ -1272,15 +1514,11 @@ router.get('/download', authenticateToken, async (req, res) => {
         const userId = req.user.userId || req.user.id;
         const resume = await Resume.findOne({ userId });
         if (!resume) return res.status(404).json({ error: 'Resume not found' });
-
-        const templateId = resume.data.template || 'classic';
         const name = (resume.data.basic?.full_name || 'Resume').replace(/\s+/g, '_');
-
         res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename = "${name}_Hiero.pdf"`);
-        await generateUnifiedResume(resume.data, templateId, res);
+        res.setHeader('Content-Disposition', `attachment; filename="${name}_Hiero.pdf"`);
+        await generateUnifiedResume(resume.data, resume.data.template || 'classic', res);
     } catch (error) {
-        console.error('Download GET error:', error);
         if (!res.headersSent) res.status(500).json({ error: 'Failed to generate PDF' });
     }
 });
@@ -1294,7 +1532,10 @@ router.get('/templates', (req, res) => {
         { id: 'hiero-signature', name: 'Hiero Signature', preview: '/templates/previews/hiero-signature.png' },
         { id: 'hiero-prestige', name: 'Hiero Prestige', preview: '/templates/previews/hiero-prestige.png' },
         { id: 'hiero-cool', name: 'Hiero Cool (Premium)', preview: '/templates/previews/hiero-cool.png' },
-        { id: 'hiero-vertex', name: 'Hiero Vertex', preview: '/templates/previews/hiero-vertex.png' }
+        { id: 'hiero-vertex', name: 'Hiero Vertex', preview: '/templates/previews/hiero-vertex.png' },
+        { id: 'hiero-scholar', name: 'Hiero Scholar', preview: '/templates/previews/hiero-scholar.png' },
+        { id: 'hiero-axis', name: 'TriPanel Executive', preview: '/templates/previews/hiero-axis.png' }
+
     ];
     res.json({ success: true, templates });
 });

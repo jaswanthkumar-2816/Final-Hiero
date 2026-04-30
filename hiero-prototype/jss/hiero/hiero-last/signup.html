@@ -136,10 +136,23 @@
           <input type="text" id="name" name="name" placeholder="Full Name" required>
           <input type="email" id="email" name="email" placeholder="Email Address" required>
           <input type="password" id="password" name="password" placeholder="Password" required>
-          <button type="submit" class="btn email-btn">
+          <button type="submit" class="btn email-btn" id="signup-btn">
             Create Account
           </button>
         </form>
+
+        <!-- OTP Verification Section (Hidden initially) -->
+        <div id="otp-section" style="display:none; margin-top:20px; border:1px solid rgba(0,255,0,0.2); padding:20px; border-radius:12px; background:rgba(0,255,0,0.05);">
+          <h3 style="color:#00ff00; margin-bottom:10px;">Verify Identity</h3>
+          <p id="otp-message" style="font-size:12px; color:rgba(255,255,255,0.7); margin-bottom:15px;">Enter the 6-digit code sent to your email.</p>
+          <input type="text" id="otp-code" placeholder="ENTER 6-DIGIT CODE" style="text-align:center; letter-spacing:4px; font-weight:bold; border:1px solid #00ff00;">
+          <button onclick="verifyOtp()" class="btn email-btn" style="margin-top:15px; width:100%;">Verify & Sign In</button>
+          
+          <!-- Development Bypass -->
+          <div id="dev-otp" style="display:none; margin-top:10px; font-size:10px; text-transform:uppercase;">
+            <p>Dev Mode: Code is <span id="actual-otp" style="color:#0ff">XXXXXX</span></p>
+          </div>
+        </div>
 
         <p class="signup-text">Already have an account? <a href="login.html">Sign in</a></p>
       </div>
@@ -158,29 +171,64 @@
     // ✅ Signup logic
     document.getElementById("signup-form").addEventListener("submit", async (e) => {
       e.preventDefault();
-      const name = document.getElementById("name").value.trim();
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value.trim();
+      const n = document.getElementById("name").value.trim();
+      const em = document.getElementById("email").value.trim();
+      const pw = document.getElementById("password").value.trim();
+      document.getElementById('signup-btn').disabled = true;
+      document.getElementById('signup-btn').innerText = 'Please wait...';
 
       try {
         const res = await fetch("/signup", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name, email, password })
+          body: JSON.stringify({ name: n, email: em, password: pw })
         });
         const result = await res.json();
 
         if (res.ok) {
-          alert("✅ Account created! Please check your email for verification.");
-          window.location.href = "login.html";
+          // If OTP is provided in response (dev or email fail)
+          if (result.otp) {
+            document.getElementById("signup-form").style.display = "none";
+            document.getElementById("otp-section").style.display = "block";
+            document.getElementById("actual-otp").textContent = result.otp;
+            document.getElementById("dev-otp").style.display = "block"; // Show dev-otp help if email failed
+            alert("⚠️ Account created, but email server is offline. Use the bypass code provided below.");
+          } else {
+            alert("✅ Account created! Check your email for verification.");
+            window.location.href = "login.html";
+          }
         } else {
           alert("❌ " + (result.error || "Signup failed"));
+          document.getElementById('signup-btn').disabled = false;
+          document.getElementById('signup-btn').innerText = 'Create Account';
         }
       } catch (err) {
-        alert("❌ Error signing up. Please try again.");
+        alert("❌ Error connecting to server.");
+        document.getElementById('signup-btn').disabled = false;
+        document.getElementById('signup-btn').innerText = 'Create Account';
       }
     });
+
+    async function verifyOtp() {
+      const email = document.getElementById("email").value.trim();
+      const otp = document.getElementById("otp-code").value.trim();
+      if (!otp) return alert("Enter the code!");
+
+      try {
+        const res = await fetch("/verify-otp", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, otp })
+        });
+        if (res.ok) {
+          alert("✅ Identity Verified! You can now login.");
+          window.location.href = "login.html";
+        } else {
+          const d = await res.json();
+          alert("❌ " + (d.error || "Verification failed"));
+        }
+      } catch (e) { alert("❌ Verification error."); }
+    }
   </script>
 </body>
-
 </html>

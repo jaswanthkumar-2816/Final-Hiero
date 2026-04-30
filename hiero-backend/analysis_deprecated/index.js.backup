@@ -1,0 +1,1396 @@
+require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
+const bodyParser = require('body-parser');
+const multer = require('multer');
+const pdfParse = require('pdf-parse');
+const upload = multer({ dest: 'uploads/' });
+const fs = require('fs');
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
+const app = express();
+app.use(cors({
+  origin: ['http://localhost:3000', 'http://127.0.0.1:3000', 'http://localhost:5500', 'http://127.0.0.1:5500', 'http://localhost:8080', 'http://127.0.0.1:8080'],
+  credentials: true
+}));
+app.use(bodyParser.json({ limit: '50mb' }));
+app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
+
+// Add request logging middleware
+app.use((req, res, next) => {
+  console.log(`🌐 ${new Date().toISOString()} ${req.method} ${req.path}`);
+  if (req.body && Object.keys(req.body).length > 0) {
+    console.log('📝 Body keys:', Object.keys(req.body));
+  }
+  if (req.files && Object.keys(req.files).length > 0) {
+    console.log('📁 Files:', Object.keys(req.files));
+  }
+  next();
+});
+
+// Add response logging
+app.use((req, res, next) => {
+  const originalSend = res.send;
+  res.send = function(data) {
+    console.log(`✅ ${req.method} ${req.path} - ${res.statusCode}`);
+    originalSend.call(this, data);
+  };
+  next();
+});
+const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
+
+// Skill normalization map to clean raw AI outputs
+const skillMap = {
+  'strong python knowledge': 'Python',
+  'python knowledge (existing but needs improvement)': 'Python',
+  'familiarity with python': 'Python',
+  'python programming': 'Python',
+  'python': 'Python',
+  'familiarity with ml libraries': 'Machine Learning',
+  'machine learning expertise': 'Machine Learning',
+  'ml': 'Machine Learning',
+  'machine learning': 'Machine Learning',
+  'data preprocessing': 'Data Analysis',
+  'data processing': 'Data Analysis',
+  'data analytics': 'Data Analysis',
+  'data analysis': 'Data Analysis',
+  'deep learning knowledge': 'Deep Learning',
+  'dl': 'Deep Learning',
+  'deep learning': 'Deep Learning',
+  'javascript programming': 'JavaScript',
+  'js': 'JavaScript',
+  'javascript': 'JavaScript',
+  'react js': 'React',
+  'react': 'React',
+  'web development skills': 'Web Development',
+  'web dev': 'Web Development',
+  'web development': 'Web Development',
+  'data mining': 'Data Mining and Pattern Recognition',
+  'pattern recognition': 'Data Mining and Pattern Recognition',
+  'experience in kaggle competitions': 'Machine Learning',
+  'kaggel': 'Machine Learning',
+  'kaggl': 'Machine Learning'
+};
+
+// Normalize raw skill names to standardized ones
+function normalizeSkill(raw) {
+  if (!raw) return '';
+  let s = String(raw).trim().toLowerCase();
+  // Remove parentheses and anything after ' or '
+  const noParen = s.split('(')[0];
+  const beforeOr = noParen.split(/\bor\b/i)[0].trim();
+  s = beforeOr;
+  return skillMap[s] || s.charAt(0).toUpperCase() + s.slice(1).replace(/[^a-zA-Z\s]/g, '');
+}
+
+// Real coding problems from LeetCode/HackerRank
+const realProblems = {
+  "Python": {
+    easy: [
+      { title: "Two Sum", platform: "LeetCode", url: "https://leetcode.com/problems/two-sum/", difficulty: "Easy" },
+      { title: "Valid Parentheses", platform: "LeetCode", url: "https://leetcode.com/problems/valid-parentheses/", difficulty: "Easy" },
+      { title: "Maximum Subarray", platform: "LeetCode", url: "https://leetcode.com/problems/maximum-subarray/", difficulty: "Easy" }
+    ],
+    medium: [
+      { title: "Longest Palindromic Substring", platform: "LeetCode", url: "https://leetcode.com/problems/longest-palindromic-substring/", difficulty: "Medium" },
+      { title: "Container With Most Water", platform: "LeetCode", url: "https://leetcode.com/problems/container-with-most-water/", difficulty: "Medium" },
+      { title: "3Sum", platform: "LeetCode", url: "https://leetcode.com/problems/3sum/", difficulty: "Medium" }
+    ],
+    hard: [
+      { title: "Median of Two Sorted Arrays", platform: "LeetCode", url: "https://leetcode.com/problems/median-of-two-sorted-arrays/", difficulty: "Hard" },
+      { title: "Regular Expression Matching", platform: "LeetCode", url: "https://leetcode.com/problems/regular-expression-matching/", difficulty: "Hard" },
+      { title: "Merge k Sorted Lists", platform: "LeetCode", url: "https://leetcode.com/problems/merge-k-sorted-lists/", difficulty: "Hard" }
+    ]
+  },
+  "JavaScript": {
+    easy: [
+      { title: "Valid Anagram", platform: "LeetCode", url: "https://leetcode.com/problems/valid-anagram/", difficulty: "Easy" },
+      { title: "First Unique Character", platform: "LeetCode", url: "https://leetcode.com/problems/first-unique-character-in-a-string/", difficulty: "Easy" },
+      { title: "Climbing Stairs", platform: "LeetCode", url: "https://leetcode.com/problems/climbing-stairs/", difficulty: "Easy" }
+    ],
+    medium: [
+      { title: "Group Anagrams", platform: "LeetCode", url: "https://leetcode.com/problems/group-anagrams/", difficulty: "Medium" },
+      { title: "Longest Substring Without Repeating Characters", platform: "LeetCode", url: "https://leetcode.com/problems/longest-substring-without-repeating-characters/", difficulty: "Medium" },
+      { title: "Product of Array Except Self", platform: "LeetCode", url: "https://leetcode.com/problems/product-of-array-except-self/", difficulty: "Medium" }
+    ],
+    hard: [
+      { title: "Sliding Window Maximum", platform: "LeetCode", url: "https://leetcode.com/problems/sliding-window-maximum/", difficulty: "Hard" },
+      { title: "Word Ladder", platform: "LeetCode", url: "https://leetcode.com/problems/word-ladder/", difficulty: "Hard" },
+      { title: "Serialize and Deserialize Binary Tree", platform: "LeetCode", url: "https://leetcode.com/problems/serialize-and-deserialize-binary-tree/", difficulty: "Hard" }
+    ]
+  },
+  "Machine Learning": {
+    easy: [
+      { title: "Linear Regression Implementation", platform: "HackerRank", url: "https://www.hackerrank.com/challenges/linear-regression", difficulty: "Easy" },
+      { title: "Basic Classification", platform: "Kaggle", url: "https://www.kaggle.com/c/titanic", difficulty: "Easy" },
+      { title: "Data Preprocessing", platform: "HackerRank", url: "https://www.hackerrank.com/challenges/data-preprocessing", difficulty: "Easy" }
+    ],
+    medium: [
+      { title: "Random Forest Classifier", platform: "HackerRank", url: "https://www.hackerrank.com/challenges/random-forest", difficulty: "Medium" },
+      { title: "SVM Implementation", platform: "Kaggle", url: "https://www.kaggle.com/c/digit-recognizer", difficulty: "Medium" },
+      { title: "Cross Validation", platform: "HackerRank", url: "https://www.hackerrank.com/challenges/cross-validation", difficulty: "Medium" }
+    ],
+    hard: [
+      { title: "Ensemble Methods", platform: "Kaggle", url: "https://www.kaggle.com/c/house-prices-advanced-regression-techniques", difficulty: "Hard" },
+      { title: "Feature Engineering", platform: "HackerRank", url: "https://www.hackerrank.com/challenges/feature-engineering", difficulty: "Hard" },
+      { title: "Model Optimization", platform: "Kaggle", url: "https://www.kaggle.com/c/porto-seguro-safe-driver-prediction", difficulty: "Hard" }
+    ]
+  }
+};
+
+// Problems database for different skills (fallback)
+const problems = {
+  "Data Mining and Pattern Recognition": {
+    easy: ["Basic Data Filtering", "Simple Pattern Matching", "Data Visualization"],
+    medium: ["K-Means Clustering", "Association Rules Mining", "Decision Tree Implementation"],
+    hard: ["Neural Network Pattern Recognition", "Advanced Clustering Algorithms", "Time Series Pattern Analysis"]
+  },
+  "Deep Learning": {
+    easy: ["Build a Perceptron", "MNIST Digit Classification", "Image Augmentation"],
+    medium: ["CNN for CIFAR-10", "Transfer Learning on ResNet", "Sentiment Analysis with RNN"],
+    hard: ["GAN for Image Generation", "Attention Mechanism from Scratch", "Custom Transformer"]
+  },
+  "Machine Learning": {
+    easy: ["Linear Regression", "Basic Classification", "Data Preprocessing"],
+    medium: ["Random Forest", "SVM Implementation", "Cross Validation"],
+    hard: ["Ensemble Methods", "Feature Engineering", "Model Optimization"]
+  },
+  "Python": {
+    easy: ["Variables and Data Types", "Loops and Conditions", "Functions"],
+    medium: ["Object-Oriented Programming", "File Handling", "Exception Handling"],
+    hard: ["Decorators and Generators", "Multithreading", "Web Scraping"]
+  },
+  "JavaScript": {
+    easy: ["DOM Manipulation", "Event Handling", "Array Methods"],
+    medium: ["Promises and Async/Await", "ES6 Features", "API Integration"],
+    hard: ["Design Patterns", "Performance Optimization", "Node.js Backend"]
+  },
+  "React": {
+    easy: ["Components and JSX", "Props and State", "Event Handling"],
+    medium: ["Hooks", "Context API", "Routing"],
+    hard: ["Performance Optimization", "Custom Hooks", "State Management"]
+  },
+  "Data Analysis": {
+    easy: ["Basic Statistics", "Data Cleaning", "Simple Plots"],
+    medium: ["Pivot Tables", "Correlation Analysis", "Time Series"],
+    hard: ["Advanced Modeling", "Machine Learning", "Big Data Processing"]
+  },
+  "Web Development": {
+    easy: ["HTML Structure", "CSS Styling", "Basic JavaScript"],
+    medium: ["Responsive Design", "Form Validation", "AJAX Requests"],
+    hard: ["Full Stack Application", "Database Integration", "Deployment"]
+  },
+  "Node.js": {
+    easy: ["Basic Server Setup", "File System Operations", "NPM Packages"],
+    medium: ["Express.js Routes", "Middleware", "Database Connection"],
+    hard: ["Authentication System", "REST API Design", "Performance Optimization"]
+  },
+  "Flutter": {
+    easy: ["Basic Widgets", "Stateful vs Stateless", "Layout Basics"],
+    medium: ["Navigation", "State Management", "API Integration"],
+    hard: ["Custom Animations", "Platform Channels", "Advanced State Management"]
+  },
+  "SQL": {
+    easy: ["SELECT Queries", "Basic Joins", "Data Filtering"],
+    medium: ["Subqueries", "Aggregate Functions", "Index Optimization"],
+    hard: ["Stored Procedures", "Query Optimization", "Database Design"]
+  },
+  "Java": {
+    easy: ["Basic Syntax", "OOP Concepts", "Collections"],
+    medium: ["Exception Handling", "Multithreading", "File I/O"],
+    hard: ["Design Patterns", "Spring Framework", "Performance Tuning"]
+  },
+  "C++": {
+    easy: ["Basic Syntax", "Pointers", "Classes"],
+    medium: ["STL Containers", "Memory Management", "Inheritance"],
+    hard: ["Template Programming", "Move Semantics", "Concurrency"]
+  },
+  "HTML": {
+    easy: ["Basic Tags", "Form Elements", "Semantic HTML"],
+    medium: ["Accessibility", "SEO Optimization", "HTML5 APIs"],
+    hard: ["Custom Elements", "Web Components", "Performance Optimization"]
+  },
+  "CSS": {
+    easy: ["Basic Styling", "Box Model", "Selectors"],
+    medium: ["Flexbox", "Grid Layout", "Responsive Design"],
+    hard: ["CSS Animations", "Custom Properties", "Advanced Layouts"]
+  },
+  "Angular": {
+    easy: ["Components", "Templates", "Data Binding"],
+    medium: ["Services", "Routing", "Forms"],
+    hard: ["State Management", "Performance Optimization", "Testing"]
+  },
+  "Vue": {
+    easy: ["Vue Instance", "Templates", "Directives"],
+    medium: ["Components", "Vuex", "Vue Router"],
+    hard: ["Composition API", "Custom Directives", "Performance"]
+  },
+  "Git": {
+    easy: ["Basic Commands", "Repository Setup", "Commit History"],
+    medium: ["Branching", "Merging", "Remote Repositories"],
+    hard: ["Rebase Workflows", "Advanced Merging", "Git Hooks"]
+  },
+  "Docker": {
+    easy: ["Container Basics", "Docker Images", "Running Containers"],
+    medium: ["Dockerfile Creation", "Volume Management", "Docker Compose"],
+    hard: ["Multi-stage Builds", "Container Orchestration", "Docker Security"]
+  },
+  "Data Visualization": {
+    easy: ["Basic Charts", "Bar and Line Graphs", "Simple Dashboards"],
+    medium: ["Interactive Visualizations", "Statistical Plots", "Data Storytelling"],
+    hard: ["Custom Visualizations", "Real-time Dashboards", "Advanced Analytics"]
+  },
+  "NumPy": {
+    easy: ["Array Creation", "Basic Operations", "Indexing and Slicing"],
+    medium: ["Array Manipulation", "Broadcasting", "Linear Algebra"],
+    hard: ["Advanced Indexing", "Performance Optimization", "Custom UFuncs"]
+  },
+  "Pandas": {
+    easy: ["DataFrame Basics", "Data Loading", "Simple Filtering"],
+    medium: ["Data Cleaning", "GroupBy Operations", "Merging DataFrames"],
+    hard: ["Time Series Analysis", "Performance Optimization", "Custom Functions"]
+  },
+  "Kubernetes": {
+    easy: ["Pod Creation", "Deployments", "Services"],
+    medium: ["ConfigMaps", "Secrets", "Ingress"],
+    hard: ["Helm Charts", "Custom Controllers", "Cluster Administration"]
+  },
+  "MongoDB": {
+    easy: ["Document Operations", "Basic Queries", "Collections"],
+    medium: ["Aggregation Pipeline", "Indexing", "Schema Design"],
+    hard: ["Sharding", "Replica Sets", "Performance Optimization"]
+  }
+};
+
+// Language codes for relevanceLanguage
+const langCodes = {
+  english: 'en',
+  hindi: 'hi',
+  telugu: 'te',
+  tamil: 'ta',
+  kannada: 'kn'
+};
+
+// Helper function to format ISO 8601 duration to readable format
+function formatDuration(isoDuration) {
+  if (!isoDuration) return "00:00";
+  const match = isoDuration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+  if (!match) return "00:00";
+  const h = parseInt(match[1] || 0, 10);
+  const m = parseInt(match[2] || 0, 10);
+  const s = parseInt(match[3] || 0, 10);
+  return [
+    h > 0 ? String(h).padStart(2, "0") : null,
+    String(m).padStart(2, "0"),
+    String(s).padStart(2, "0")
+  ].filter(Boolean).join(":");
+}
+
+// Helper to convert ISO 8601 duration to seconds for filtering
+function durationToSeconds(isoDuration) {
+  if (!isoDuration) return 0;
+  const match = isoDuration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+  if (!match) return 0;
+  const h = parseInt(match[1] || 0, 10);
+  const m = parseInt(match[2] || 0, 10);
+  const s = parseInt(match[3] || 0, 10);
+  return h * 3600 + m * 60 + s;
+}
+
+// Normalize/expand skill into a better search phrase
+function normalizeSkillForSearch(skill) {
+  const s = String(skill || '').trim().toLowerCase();
+  const synonyms = {
+    'ml': 'machine learning',
+    'ai': 'artificial intelligence',
+    'ds': 'data science',
+    'dl': 'deep learning',
+    'js': 'javascript',
+    'ts': 'typescript',
+    'react js': 'react',
+    'node js': 'node.js',
+    'nodejs': 'node.js',
+    'vue js': 'vue',
+    'vuejs': 'vue',
+    'angular js': 'angular',
+    'angularjs': 'angular',
+    'html5': 'html',
+    'css3': 'css',
+    'c++': 'cpp',
+    'cpp': 'c++',
+    'mysql': 'sql',
+    'postgresql': 'sql',
+    'database': 'sql',
+    'backend': 'backend development',
+    'frontend': 'frontend development',
+    'fullstack': 'full stack development',
+    'mobile': 'mobile development',
+    'app development': 'mobile development',
+    'version control': 'git'
+  };
+  const expanded = synonyms[s] || s;
+  // Prefer queries that surface beginner friendly full courses/tutorials
+  return `${expanded} tutorial course for beginners`;
+}
+
+// Quality controls
+const NEGATIVE_KEYWORDS = [
+  'shorts', 'short', 'live', 'webinar', 'podcast', 'motivation', 'interview',
+  'funny', 'memes', 'compilation', 'trailer', 'teaser', 'ad', 'promo'
+];
+
+const ALLOWLIST_CHANNELS = new Set([
+  'freeCodeCamp.org',
+  'Traversy Media',
+  'Fireship',
+  'Programming with Mosh',
+  'sentdex',
+  'Corey Schafer',
+  'Krish Naik',
+  'CodeWithHarry',
+  'Simplilearn',
+  'Great Learning',
+  'Telusko',
+  'Amigoscode'
+]);
+
+const MIN_VIEWCOUNT_PRIMARY = 50000; // 50k
+const MIN_VIEWCOUNT_FALLBACK = 10000; // fallback if too few
+const RECENCY_YEARS = 4; // only prefer videos within last N years
+
+// Function to fetch multiple videos in different languages with improved quality and relevance
+async function fetchVideos(query) {
+  console.log(`🔍 fetchVideos called with query: "${query}"`);
+  
+  // First, try to use hardcoded high-quality videos for common skills
+  const hardcodedVideos = getHardcodedVideosForSkill(query);
+  if (hardcodedVideos) {
+    console.log(`✅ Using hardcoded videos for "${query}"`);
+    return hardcodedVideos;
+  }
+  
+  // If no hardcoded videos, try improved YouTube API search
+  console.log(`🔍 No hardcoded videos found for "${query}", trying YouTube API with improved search...`);
+  
+  // Check if YouTube API key is available
+  if (!YOUTUBE_API_KEY) {
+    console.log('❌ No YouTube API key available, using fallback videos');
+    return getFallbackVideos(query);
+  }
+  
+  return await getFallbackVideos(query);
+}
+
+// Validate and force clean skill names from AI response
+function validateAndCleanSkills(aiResult) {
+  const validSkills = [
+    'Python', 'JavaScript', 'React', 'Machine Learning', 'Data Analysis', 
+    'SQL', 'HTML', 'CSS', 'Node.js', 'Java', 'C++', 'Angular', 'Vue', 
+    'Git', 'Docker', 'Kubernetes', 'Flutter', 'NumPy', 'Pandas', 
+    'Deep Learning', 'Web Development', 'Data Visualization', 'Data Mining and Pattern Recognition'
+  ];
+  
+  if (!aiResult.missingSkills || !Array.isArray(aiResult.missingSkills)) {
+    console.log('⚠️ AI returned invalid missingSkills, using fallback');
+    return {
+      ...aiResult,
+      missingSkills: ['Python', 'Machine Learning'],
+      skillToLearnFirst: 'Python'
+    };
+  }
+  
+  const cleanedSkills = [];
+  const rawSkills = aiResult.missingSkills;
+  
+  console.log('🔍 Validating AI skills:', rawSkills);
+  
+  for (const rawSkill of rawSkills) {
+    const cleaned = cleanSkillName(rawSkill);
+    if (cleaned && validSkills.includes(cleaned)) {
+      cleanedSkills.push(cleaned);
+      console.log(`✅ Valid skill: "${rawSkill}" → "${cleaned}"`);
+    } else {
+      console.log(`❌ Invalid skill: "${rawSkill}" → "${cleaned}" (not in valid list)`);
+    }
+  }
+  
+  // If no valid skills found, use fallback
+  if (cleanedSkills.length === 0) {
+    console.log('⚠️ No valid skills found, using fallback skills');
+    cleanedSkills.push('Python', 'Machine Learning');
+  }
+  
+  // Ensure skillToLearnFirst is also valid
+  let validFirstSkill = cleanSkillName(aiResult.skillToLearnFirst);
+  if (!validFirstSkill || !validSkills.includes(validFirstSkill)) {
+    validFirstSkill = cleanedSkills[0];
+  }
+  
+  return {
+    ...aiResult,
+    missingSkills: cleanedSkills,
+    skillToLearnFirst: validFirstSkill
+  };
+}
+
+// Clean AI-provided skill names to stable canonical labels
+function cleanSkillName(raw) {
+  const s = String(raw || '').trim();
+  if (!s) return '';
+  
+  // Remove parentheses content and anything after ' or '
+  const noParen = s.split('(')[0];
+  const beforeOr = noParen.split(/\bor\b/i)[0];
+  let cleaned = beforeOr.trim();
+  
+  // Map common variations to standard names
+  const skillMappings = {
+    // Python variations
+    'python programming': 'Python',
+    'python development': 'Python',
+    'python coding': 'Python',
+    'strong python knowledge': 'Python',
+    'python skills': 'Python',
+    
+    // Machine Learning variations
+    'machine learning': 'Machine Learning',
+    'ml': 'Machine Learning',
+    'machine learning algorithms': 'Machine Learning',
+    'ml algorithms': 'Machine Learning',
+    'artificial intelligence': 'Machine Learning',
+    'ai': 'Machine Learning',
+    
+    // JavaScript variations
+    'javascript': 'JavaScript',
+    'js': 'JavaScript',
+    'javascript programming': 'JavaScript',
+    'node.js': 'Node.js',
+    'nodejs': 'Node.js',
+    
+    // React variations
+    'react': 'React',
+    'react.js': 'React',
+    'reactjs': 'React',
+    'react development': 'React',
+    
+    // Data Analysis variations
+    'data analysis': 'Data Analysis',
+    'data analytics': 'Data Analysis',
+    'data science': 'Data Analysis',
+    'data visualization': 'Data Visualization',
+    
+    // Web Development variations
+    'web development': 'Web Development',
+    'web dev': 'Web Development',
+    'frontend development': 'Web Development',
+    'backend development': 'Web Development',
+    
+    // Database variations
+    'sql': 'SQL',
+    'database': 'SQL',
+    'mysql': 'SQL',
+    'postgresql': 'SQL',
+    
+    // Other common mappings
+    'html': 'HTML',
+    'css': 'CSS',
+    'git': 'Git',
+    'docker': 'Docker',
+    'kubernetes': 'Kubernetes',
+    'java': 'Java',
+    'c++': 'C++',
+    'angular': 'Angular',
+    'vue': 'Vue',
+    'flutter': 'Flutter',
+    'numpy': 'NumPy',
+    'pandas': 'Pandas',
+    'deep learning': 'Deep Learning',
+    'data mining': 'Data Mining and Pattern Recognition'
+  };
+  
+  // Check for exact matches first
+  const lowerCleaned = cleaned.toLowerCase();
+  for (const [variation, standard] of Object.entries(skillMappings)) {
+    if (lowerCleaned.includes(variation.toLowerCase())) {
+      return standard;
+    }
+  }
+  
+  // If no mapping found, return cleaned version
+  return cleaned;
+}
+
+// ===== COMPREHENSIVE DOMAIN-AWARE AI SYSTEM =====
+
+// Domain-specific skill banks
+const DOMAIN_SKILL_BANKS = {
+  tech: {
+    core: ['Python', 'Java', 'JavaScript', 'C++', 'SQL', 'HTML', 'CSS', 'React', 'Node.js', 'Angular', 'Vue'],
+    advanced: ['Machine Learning', 'Deep Learning', 'AI', 'Docker', 'Kubernetes', 'AWS', 'Azure', 'GCP', 'DevOps'],
+    data: ['Data Analysis', 'Data Science', 'NumPy', 'Pandas', 'TensorFlow', 'PyTorch', 'Tableau', 'Power BI'],
+    security: ['Cybersecurity', 'Penetration Testing', 'Network Security', 'Ethical Hacking', 'CISSP'],
+    tools: ['Git', 'Jenkins', 'MongoDB', 'PostgreSQL', 'Redis', 'Elasticsearch', 'Kafka']
+  },
+  nonTech: {
+    retail: [
+      'Customer Service', 'Visual Merchandising', 'Inventory Management', 'Store Operations', 
+      'POS Systems', 'Shrinkage Control', 'Store Layout', 'Product Knowledge', 'Sales Techniques',
+      'Customer Retention', 'Store Security', 'Cash Handling', 'Staff Scheduling', 'Loss Prevention'
+    ],
+    finance: [
+      'Financial Analysis', 'Accounting', 'Bookkeeping', 'Tally', 'SAP', 'Excel', 
+      'Financial Reporting', 'Budgeting', 'Tax Preparation', 'Auditing', 'Cost Control',
+      'Financial Planning', 'Investment Analysis', 'Risk Management', 'Compliance', 'QuickBooks'
+    ],
+    hr: [
+      'Recruitment', 'Employee Relations', 'Performance Management', 'Training & Development', 
+      'HRIS', 'Labor Laws', 'Compensation & Benefits', 'Workplace Safety', 'Employee Engagement',
+      'Conflict Resolution', 'HR Policies', 'Talent Acquisition', 'Onboarding', 'Exit Management'
+    ],
+    operations: [
+      'Supply Chain', 'Logistics', 'Process Improvement', 'Quality Control', 'Lean Manufacturing', 
+      'Six Sigma', 'Vendor Management', 'Inventory Control', 'Production Planning', 'Cost Optimization',
+      'Workflow Design', 'Performance Metrics', 'Continuous Improvement', 'Resource Planning'
+    ],
+    sales: [
+      'Sales Management', 'Lead Generation', 'CRM', 'Sales Forecasting', 'Negotiation', 
+      'Client Relations', 'Account Management', 'Sales Strategy', 'Market Research', 'Pricing Strategy',
+      'Sales Training', 'Customer Acquisition', 'Sales Analytics', 'Territory Management'
+    ],
+    leadership: [
+      'Team Management', 'Project Management', 'Communication', 'Leadership', 'Problem Solving', 
+      'Time Management', 'Strategic Planning', 'Decision Making', 'Change Management', 'Mentoring',
+      'Performance Coaching', 'Crisis Management', 'Stakeholder Management', 'Team Building'
+    ],
+    healthcare: [
+      'Patient Care', 'Medical Records', 'HIPAA Compliance', 'Healthcare Administration', 
+      'Clinical Documentation', 'Patient Safety', 'Healthcare IT', 'Medical Terminology',
+      'Quality Assurance', 'Regulatory Compliance', 'Healthcare Analytics', 'Care Coordination'
+    ],
+    education: [
+      'Curriculum Development', 'Classroom Management', 'Educational Technology', 'Student Assessment',
+      'Learning Design', 'Educational Psychology', 'Teaching Methods', 'Academic Planning',
+      'Student Counseling', 'Educational Research', 'Professional Development', 'Educational Leadership'
+    ],
+    marketing: [
+      'Digital Marketing', 'Social Media Marketing', 'Content Marketing', 'SEO/SEM', 'Email Marketing',
+      'Brand Management', 'Market Research', 'Campaign Management', 'Analytics', 'Public Relations',
+      'Advertising', 'Customer Segmentation', 'Marketing Strategy', 'Lead Nurturing'
+    ]
+  }
+};
+
+// Enhanced domain classification with multiple criteria
+function enhancedDomainClassification(jdText, resumeText = '') {
+  const combinedText = (jdText + ' ' + resumeText).toLowerCase();
+  
+  // Explicit role-based classification with more comprehensive roles
+  const techRoles = [
+    'software engineer', 'developer', 'programmer', 'data scientist', 'ml engineer', 'ai engineer',
+    'web developer', 'mobile developer', 'devops engineer', 'system administrator', 'database administrator',
+    'cybersecurity analyst', 'it analyst', 'cloud engineer', 'full stack', 'backend', 'frontend',
+    'software architect', 'tech lead', 'engineering manager', 'qa engineer', 'test engineer',
+    'ui/ux designer', 'product manager', 'scrum master', 'tech consultant'
+  ];
+  
+  const nonTechRoles = [
+    // Retail & Sales
+    'store manager', 'assistant manager', 'retail manager', 'sales manager', 'sales associate',
+    'customer service', 'cashier', 'sales representative', 'account manager', 'territory manager',
+    // Finance & Accounting
+    'finance manager', 'accountant', 'financial analyst', 'bookkeeper', 'auditor', 'controller',
+    'treasurer', 'financial advisor', 'investment analyst', 'tax specialist',
+    // HR & People
+    'hr manager', 'human resources', 'recruiter', 'talent acquisition', 'hr specialist',
+    'employee relations', 'training manager', 'hr coordinator', 'people operations',
+    // Operations & Management
+    'operations manager', 'operations coordinator', 'supply chain manager', 'logistics coordinator',
+    'project manager', 'program manager', 'business analyst', 'process improvement',
+    // Healthcare
+    'nurse', 'healthcare administrator', 'medical assistant', 'patient coordinator',
+    'healthcare manager', 'clinical coordinator', 'healthcare analyst',
+    // Education
+    'teacher', 'professor', 'education coordinator', 'academic advisor', 'curriculum specialist',
+    'education manager', 'training coordinator', 'instructional designer',
+    // Marketing & Communications
+    'marketing manager', 'marketing coordinator', 'brand manager', 'content manager',
+    'social media manager', 'digital marketing', 'communications manager', 'pr manager'
+  ];
+  
+  // Check for tech roles first
+  for (const role of techRoles) {
+    if (combinedText.includes(role)) return 'tech';
+  }
+  
+  // Check for non-tech roles
+  for (const role of nonTechRoles) {
+    if (combinedText.includes(role)) return 'non-tech';
+  }
+  
+  // Enhanced skill-based classification
+  const techKeywords = [
+    'programming', 'coding', 'software', 'algorithm', 'database', 'api', 'framework',
+    'python', 'java', 'javascript', 'sql', 'react', 'node', 'docker', 'aws', 'cloud',
+    'machine learning', 'data science', 'artificial intelligence', 'cybersecurity',
+    'git', 'github', 'kubernetes', 'microservices', 'rest api', 'graphql', 'mongodb',
+    'postgresql', 'redis', 'elasticsearch', 'jenkins', 'ci/cd', 'agile', 'scrum'
+  ];
+  
+  const nonTechKeywords = [
+    // Retail & Customer Service
+    'retail', 'store', 'sales', 'customer service', 'inventory', 'merchandising',
+    'pos system', 'shrinkage', 'visual merchandising', 'store operations', 'cash handling',
+    // Finance & Accounting
+    'finance', 'accounting', 'bookkeeping', 'tally', 'sap', 'excel', 'financial reporting',
+    'budgeting', 'auditing', 'tax preparation', 'quickbooks', 'financial planning',
+    // HR & People Management
+    'hr', 'human resources', 'recruitment', 'employee relations', 'performance management',
+    'training', 'onboarding', 'compensation', 'benefits', 'labor laws', 'workplace safety',
+    // Operations & Management
+    'operations', 'logistics', 'supply chain', 'process improvement', 'quality control',
+    'lean manufacturing', 'six sigma', 'vendor management', 'production planning',
+    // Healthcare
+    'healthcare', 'patient care', 'medical records', 'hipaa', 'clinical', 'healthcare it',
+    'medical terminology', 'patient safety', 'healthcare administration',
+    // Education
+    'education', 'teaching', 'curriculum', 'classroom management', 'student assessment',
+    'educational technology', 'learning design', 'academic planning',
+    // Marketing & Communications
+    'marketing', 'digital marketing', 'social media', 'content marketing', 'seo', 'sem',
+    'brand management', 'campaign management', 'public relations', 'advertising',
+    // General Business
+    'business development', 'project management', 'team leadership', 'strategic planning',
+    'change management', 'stakeholder management', 'business analysis'
+  ];
+  
+  let techScore = 0, nonTechScore = 0;
+  
+  for (const keyword of techKeywords) {
+    if (combinedText.includes(keyword)) techScore++;
+  }
+  
+  for (const keyword of nonTechKeywords) {
+    if (combinedText.includes(keyword)) nonTechScore++;
+  }
+  
+  // More sophisticated scoring with weighted importance
+  const techWeight = 1.5; // Tech keywords are more specific
+  const nonTechWeight = 1.0;
+  
+  const weightedTechScore = techScore * techWeight;
+  const weightedNonTechScore = nonTechScore * nonTechWeight;
+  
+  return weightedTechScore > weightedNonTechScore ? 'tech' : 'non-tech';
+}
+
+// Dynamic skill extraction using AI-like pattern matching
+function dynamicSkillExtraction(text, domain) {
+  const extractedSkills = new Set();
+  const textLower = text.toLowerCase();
+  
+  // Get relevant skill bank based on domain
+  const skillBank = domain === 'tech' ? 
+    Object.values(DOMAIN_SKILL_BANKS.tech).flat() : 
+    Object.values(DOMAIN_SKILL_BANKS.nonTech).flat();
+  
+  // Enhanced skill matching with variations
+  for (const skill of skillBank) {
+    const skillLower = skill.toLowerCase();
+    const variations = generateSkillVariations(skillLower);
+    
+    for (const variation of variations) {
+      if (textLower.includes(variation)) {
+        extractedSkills.add(skill);
+        break;
+      }
+    }
+  }
+  
+  return Array.from(extractedSkills);
+}
+
+// Generate skill variations for better matching
+function generateSkillVariations(skill) {
+  const variations = [skill];
+  const skillLower = skill.toLowerCase();
+  
+  // Comprehensive skill variations for both tech and non-tech
+  const mappings = {
+    // Customer Service & Retail
+    'customer service': ['customer support', 'customer care', 'client service', 'customer relations', 'guest services'],
+    'inventory management': ['inventory control', 'stock management', 'stock control', 'inventory tracking', 'warehouse management'],
+    'visual merchandising': ['merchandising', 'store display', 'product presentation', 'retail merchandising', 'store layout'],
+    'pos systems': ['point of sale', 'pos', 'cash register', 'payment systems', 'transaction processing'],
+    'shrinkage control': ['loss prevention', 'inventory shrinkage', 'theft prevention', 'asset protection'],
+    
+    // Finance & Accounting
+    'financial analysis': ['financial planning', 'financial modeling', 'financial reporting', 'budget analysis'],
+    'bookkeeping': ['accounting', 'record keeping', 'financial records', 'transaction recording'],
+    'excel': ['microsoft excel', 'spreadsheet', 'excel formulas', 'data analysis excel'],
+    'financial reporting': ['financial statements', 'monthly reports', 'quarterly reports', 'annual reports'],
+    'budgeting': ['budget planning', 'financial planning', 'cost control', 'expense management'],
+    
+    // HR & People Management
+    'people management': ['team management', 'staff management', 'team leadership', 'employee management'],
+    'recruitment': ['hiring', 'talent acquisition', 'staffing', 'recruiting', 'candidate selection'],
+    'employee relations': ['staff relations', 'workplace relations', 'employee engagement', 'team building'],
+    'performance management': ['employee evaluation', 'performance review', 'staff assessment', 'performance tracking'],
+    'training & development': ['employee training', 'staff development', 'learning & development', 'professional development'],
+    
+    // Operations & Management
+    'supply chain': ['logistics', 'procurement', 'vendor management', 'supply management'],
+    'process improvement': ['process optimization', 'workflow improvement', 'efficiency improvement', 'lean management'],
+    'quality control': ['quality assurance', 'quality management', 'quality standards', 'qc'],
+    'project management': ['project coordination', 'project planning', 'project execution', 'pm'],
+    
+    // Sales & Marketing
+    'sales management': ['sales leadership', 'sales operations', 'sales strategy', 'sales planning'],
+    'lead generation': ['prospecting', 'lead development', 'customer acquisition', 'sales leads'],
+    'crm': ['customer relationship management', 'sales crm', 'client management', 'customer database'],
+    'digital marketing': ['online marketing', 'internet marketing', 'web marketing', 'digital advertising'],
+    'social media marketing': ['social media management', 'social media strategy', 'social media advertising'],
+    
+    // Healthcare
+    'patient care': ['patient services', 'healthcare delivery', 'clinical care', 'patient support'],
+    'medical records': ['health records', 'patient records', 'electronic health records', 'ehr'],
+    'hipaa compliance': ['hipaa', 'patient privacy', 'healthcare compliance', 'medical privacy'],
+    'healthcare administration': ['healthcare management', 'medical administration', 'healthcare operations'],
+    
+    // Education
+    'curriculum development': ['curriculum design', 'course development', 'educational content', 'learning materials'],
+    'classroom management': ['class management', 'student management', 'classroom control', 'discipline management'],
+    'student assessment': ['student evaluation', 'academic assessment', 'student testing', 'performance evaluation'],
+    
+    // Tech Skills (keeping existing)
+    'machine learning': ['ml', 'artificial intelligence', 'ai', 'deep learning'],
+    'javascript': ['js', 'ecmascript', 'node.js', 'react'],
+    'python': ['py', 'python programming', 'python development'],
+    'sql': ['structured query language', 'database query', 'database management'],
+    'data analysis': ['data analytics', 'data science', 'statistical analysis', 'data insights']
+  };
+  
+  if (mappings[skillLower]) {
+    variations.push(...mappings[skillLower]);
+  }
+  
+  // Add common business skill variations
+  const businessVariations = {
+    'communication': ['verbal communication', 'written communication', 'interpersonal skills', 'presentation skills'],
+    'leadership': ['team leadership', 'management', 'supervision', 'guidance'],
+    'problem solving': ['analytical thinking', 'critical thinking', 'troubleshooting', 'solution development'],
+    'time management': ['scheduling', 'prioritization', 'deadline management', 'productivity'],
+    'teamwork': ['collaboration', 'team collaboration', 'group work', 'team player']
+  };
+  
+  if (businessVariations[skillLower]) {
+    variations.push(...businessVariations[skillLower]);
+  }
+  
+  return variations;
+}
+
+// NEW: Basic skill matching helper (added to replace missing implementation)
+function matchSkills(resumeSkills = [], jdSkills = []) {
+  const resumeSet = new Set(resumeSkills.map(s => String(s).toLowerCase()));
+  const present = [];
+  const missing = [];
+  for (const skill of jdSkills) {
+    const lower = String(skill).toLowerCase();
+    if (resumeSet.has(lower)) present.push(skill); else missing.push(skill);
+  }
+  const scoreRaw = jdSkills.length ? (present.length / jdSkills.length) * 100 : 0;
+  const score = Math.min(100, Math.ceil(scoreRaw / 5) * 5);
+  return { present, missing, score };
+}
+
+// Clean up and extract text from uploaded PDF or image files
+async function extractTextFromUpload(file) {
+  if (!file) return '';
+  const filePath = file.path;
+  const ext = file.originalname.split('.').pop().toLowerCase();
+  
+  try {
+    let text = '';
+    if (ext === 'pdf') {
+      const dataBuffer = fs.readFileSync(filePath);
+      const pdfData = await pdfParse(dataBuffer);
+      text = pdfData.text;
+    } else if (['txt', 'text'].includes(ext)) {
+      // Read plain text files
+      text = fs.readFileSync(filePath, 'utf8');
+    } else if (['jpg', 'jpeg', 'png', 'bmp', 'gif'].includes(ext)) {
+      // For images, use OCR (e.g., Tesseract.js) - placeholder for actual implementation
+      text = 'Image text extraction not implemented';
+    } else {
+      console.log('Unsupported file type for text extraction:', ext);
+    }
+    
+    // Cleanup: remove file after processing
+    fs.unlinkSync(filePath);
+    
+    return text;
+  } catch (error) {
+    console.error('Error extracting text from upload:', error);
+    return '';
+  }
+}
+
+// New improved analysis endpoint that works with both files and text
+app.post('/api/analyze-v2', upload.fields([{ name: 'resume' }, { name: 'jd' }]), async (req, res) => {
+  try {
+    console.log('🔥 /api/analyze-v2 called with new logic');
+    
+    // Accept either uploaded files or raw text in body
+    const resumeFile = req.files && req.files.resume ? req.files.resume[0] : null;
+    const jdFile = req.files && req.files.jd ? req.files.jd[0] : null;
+
+    const [resumeFileText, jdFileText] = await Promise.all([
+      extractTextFromUpload(resumeFile),
+      extractTextFromUpload(jdFile)
+    ]);
+
+    const resumeText = (req.body.resumeText || '').trim() || resumeFileText;
+    const jdText = (req.body.jdText || '').trim() || jdFileText;
+
+    console.log('📄 Resume text length:', resumeText.length);
+    console.log('📄 JD text length:', jdText.length);
+
+    if (!resumeText && !jdText) {
+      return res.status(400).json({ error: 'Provide resume and JD (as files or text).' });
+    }
+
+    const domain = classifyDomain(jdText);
+    const resumeSkills = dynamicSkillExtraction(resumeText, domain);
+    const jdSkills = dynamicSkillExtraction(jdText, domain);
+
+    console.log('🎯 Domain:', domain);
+    console.log('👤 Resume skills:', resumeSkills);
+    console.log('📋 JD skills:', jdSkills);
+
+    const { present, missing, score } = matchSkills(resumeSkills, jdSkills);
+    const suggestions = suggestProjects(domain, missing);
+
+    console.log('✅ Analysis complete - Score:', score);
+
+    return res.json({
+      domain,
+      score, // rounded to nearest 5
+      presentSkills: present,
+      missingSkills: missing,
+      jdSkills,
+      resumeSkills,
+      suggestions,
+      meta: {
+        jdSkillCount: jdSkills.length,
+        resumeSkillCount: resumeSkills.length
+      }
+    });
+  } catch (err) {
+    console.error('Analysis error:', err);
+    return res.status(500).json({ error: 'Failed to analyze resume and JD.' });
+  }
+});
+
+// Enhanced analysis endpoint using the comprehensive domain-aware system
+app.post('/api/analyze-enhanced', upload.fields([{ name: 'resume' }, { name: 'jd' }]), async (req, res) => {
+  try {
+    console.log('🚀 Enhanced analysis called - supporting both IT and non-IT domains');
+    
+    // Extract text from files or use provided text
+    const resumeFile = req.files && req.files.resume ? req.files.resume[0] : null;
+    const jdFile = req.files && req.files.jd ? req.files.jd[0] : null;
+
+    let resumeText = (req.body.resumeText || '').trim();
+    let jdText = (req.body.jdText || '').trim();
+
+    // Extract from files if needed
+    if (resumeFile && !resumeText) {
+      try {
+        const resumeBuffer = fs.readFileSync(resumeFile.path);
+        resumeText = (await pdfParse(resumeBuffer)).text || '';
+        fs.unlinkSync(resumeFile.path);
+      } catch (e) {
+        console.log('Error reading resume file:', e);
+      }
+    }
+    
+    if (jdFile && !jdText) {
+      try {
+        const jdBuffer = fs.readFileSync(jdFile.path);
+        jdText = (await pdfParse(jdBuffer)).text || '';
+        fs.unlinkSync(jdFile.path);
+      } catch (e) {
+        console.log('Error reading JD file:', e);
+      }
+    }
+
+    if (!resumeText || !jdText) {
+      return res.status(400).json({ 
+        error: 'Both resume and job description are required (as files or text).' 
+      });
+    }
+
+    // Use enhanced matching system
+    const result = await enhancedResumeMatching(resumeText, jdText); // FIX: added await
+
+    console.log('✅ Enhanced analysis complete:');
+    console.log('   🎯 Domain:', result.domain);
+    console.log('   📊 Score:', result.score + '%');
+    console.log('   ✅ Present Skills:', result.presentSkills.length);
+    console.log('   ❌ Missing Skills:', result.missingSkills.length);
+    console.log('   💡 Project Suggestions:', result.projectSuggestions.length);
+
+    return res.json({
+      success: true,
+      analysis: result,
+      message: `Domain-aware analysis complete for ${result.domain} field`
+    });
+
+  } catch (err) {
+    console.error('Enhanced analysis error:', err);
+    return res.status(500).json({ 
+      error: 'Enhanced analysis failed. Please try again.',
+      details: err.message 
+    });
+  }
+});
+
+// NEW: Detect specific non-tech sub-domain (retail, finance, hr, etc.) for UX badge
+function detectNonTechSubDomain(jdText = '', resumeText = '') {
+  try {
+    const text = (jdText + ' ' + resumeText).toLowerCase();
+    const categoryScores = {};
+    const prettyNames = {
+      retail: 'Retail / Store Management',
+      finance: 'Finance & Accounting',
+      hr: 'Human Resources',
+      operations: 'Operations & Supply Chain',
+      sales: 'Sales & Business Development',
+      leadership: 'Leadership & Management',
+      healthcare: 'Healthcare Administration',
+      education: 'Education & Training',
+      marketing: 'Marketing & Communications'
+    };
+
+    const nonTechBanks = DOMAIN_SKILL_BANKS.nonTech || {};
+    for (const [category, skills] of Object.entries(nonTechBanks)) {
+      let score = 0;
+      for (const skill of skills) {
+        // basic and word-boundary occurrence counts
+        const skillLower = skill.toLowerCase();
+        if (text.includes(skillLower)) score += 2; // direct match weight
+        // simple regex word boundary match
+        const regex = new RegExp('\\b' + skillLower.replace(/[-/]/g, '[\\-/]') + '\\b', 'g');
+        if (regex.test(text)) score += 1;
+      }
+      categoryScores[category] = score;
+    }
+    const best = Object.entries(categoryScores).sort((a,b)=>b[1]-a[1])[0];
+    if (!best || best[1] < 3) return null; // threshold: at least ~2 direct hits
+    const category = best[0];
+    return { key: category, name: prettyNames[category] || category.charAt(0).toUpperCase()+category.slice(1) };
+  } catch (e) {
+    return null;
+  }
+}
+
+// Add health endpoint for frontend connection testing
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', message: 'Analysis server is running' });
+});
+
+app.get('/', (req, res) => {
+  res.json({ status: 'ok', message: 'Hiero Analysis API v1.0' });
+});
+
+// Start server (allow env override and friendly error on port in use)
+const DEFAULT_ANALYSIS_PORT = 5001;
+const PORT = process.env.ANALYSIS_PORT || process.env.PORT_ANALYSIS || DEFAULT_ANALYSIS_PORT;
+const server = app.listen(PORT, () => console.log(`Analysis server running on port ${PORT}`));
+server.on('error', (err) => {
+  if (err && err.code === 'EADDRINUSE') {
+    console.error(`Port ${PORT} is already in use. On macOS, you can free it by finding the PID and killing it.`);
+    console.error(`Example: lsof -nP -iTCP:${PORT} -sTCP:LISTEN`);
+    console.error(`Then:    kill -9 <PID>`);
+    process.exit(1);
+  } else {
+    console.error('Server error:', err);
+    process.exit(1);
+  }
+});
+
+function roundToNearestFive(n) {
+  // Round UP to the nearest multiple of 5 to match expected display (e.g., 67 -> 70)
+  return Math.ceil((n || 0) / 5) * 5;
+}
+
+// Non-tech keywords for improved domain detection
+const NON_TECH_KEYWORDS = [
+  'retail','store','sales','hr','human resources','finance','accounting','bookkeeping','tally','excel','customer',
+  'merchandising','visual merchandising','inventory','inventory control','inventory management','sop','compliance',
+  'shift','scheduling','cashier','billing','operations','logistics','procurement','marketing','hospitality',
+  'front office','bpo','call center','teamwork','communication','people management','shrinkage','audit',
+  'management','service','team','leadership','time management','problem solving','store operations','customer satisfaction','complaint handling'
+];
+
+// Improved domain classification considering non-tech roles
+function classifyDomain(jdText) {
+  const jdLower = (jdText || '').toLowerCase();
+  
+  // Check for explicit tech/domain keywords first
+  if (jdLower.includes('software engineer') || jdLower.includes('developer') || 
+      jdLower.includes('programmer') || jdLower.includes('data scientist') || 
+      jdLower.includes('ml engineer') || jdLower.includes('ai engineer') || 
+      jdLower.includes('web developer') || jdLower.includes('mobile developer')) {
+    return 'tech';
+  }
+  
+  // Check for non-tech keywords
+  for (const keyword of NON_TECH_KEYWORDS) {
+    if (jdLower.includes(keyword)) {
+      return 'non-tech';
+    }
+  }
+  
+  // Fallback to general classification
+  return jdLower.includes('data') || jdLower.includes('ml') || jdLower.includes('ai') ? 'tech' : 'non-tech';
+}
+
+// Enhanced project suggestions for non-tech domains
+function suggestProjects(domain, missingSkills = []) {
+  const suggestions = [];
+  if (domain === 'tech') {
+    const base = [
+      'Build a CRUD web app (auth + REST API) and deploy it',
+      'Analyze a public dataset in Python and publish a notebook',
+      'Design and document a REST API with OpenAPI/Swagger',
+      'Create SQL schema + queries and a small dashboard'
+    ];
+    suggestions.push(...base);
+    for (const s of missingSkills.slice(0, 5)) {
+      if (s === 'React') suggestions.push('Build a React Todo app with routing and state management');
+      else if (s === 'Node.js') suggestions.push('Build an Express API with JWT auth and CRUD routes');
+      else if (s === 'SQL') suggestions.push('Design a relational DB and write JOIN/Aggregation queries');
+      else if (s === 'Machine Learning') suggestions.push('Train a classification model and evaluate on a dataset');
+      else if (s === 'Docker') suggestions.push('Containerize an app with Docker and use docker-compose');
+      else suggestions.push(`Do a focused mini-project demonstrating ${s}`);
+    }
+  } else {
+    const base = [
+      'Create an Excel template for inventory tracking and reporting',
+      'Design a weekly shift schedule for store staff with coverage for peak hours',
+      'Develop a customer feedback collection form and summary report',
+      'Prepare a visual merchandising plan for a store section with layout sketches',
+      'Build a SOP compliance checklist for daily store operations'
+    ];
+    suggestions.push(...base);
+    for (const s of missingSkills.slice(0, 5)) {
+      if (s === 'Inventory Control') suggestions.push('Perform a one-week mock stock count and create a variance report');
+      else if (s === 'Visual Merchandising') suggestions.push('Plan a shelf layout and create a weekly VM refresh checklist');
+      else if (s === 'SOP Compliance') suggestions.push('Draft an SOP compliance audit checklist for the store');
+      else if (s === 'Shrinkage Control') suggestions.push('Create a shrinkage tracking sheet and monthly audit plan');
+      else if (s === 'Shift Scheduling') suggestions.push('Build a shift roster resolving peak-hour coverage and breaks');
+      else if (s === 'Customer Service') suggestions.push('Define a customer complaint handling flow and SLA guidelines');
+      else if (s === 'People Management') suggestions.push('Design a team performance review template and feedback process');
+      else if (s === 'Sales') suggestions.push('Create a sales target tracking sheet with incentives and KPIs');
+      else if (s === 'Communication') suggestions.push('Prepare a communication plan for store announcements and updates');
+      else if (s === 'Teamwork') suggestions.push('Organize a team-building activity plan and evaluation form');
+      else suggestions.push(`Create a small operational improvement related to ${s}`);
+    }
+  }
+  // De-duplicate while preserving order
+  return Array.from(new Set(suggestions));
+}
+
+// Enhanced resume-JD matching with confidence scoring
+async function enhancedResumeMatching(resumeText, jdText) {
+  // Step 1: Domain classification
+  const domain = enhancedDomainClassification(jdText, resumeText);
+  // NEW: detect sub-domain if non-tech
+  const subDomainInfo = domain === 'non-tech' ? detectNonTechSubDomain(jdText, resumeText) : null;
+  
+  // Step 2: Dynamic skill extraction
+  const resumeSkills = dynamicSkillExtraction(resumeText, domain);
+  const jdSkills = dynamicSkillExtraction(jdText, domain);
+  
+  // Step 3: Skill matching with weighted scoring
+  const resumeSkillSet = new Set(resumeSkills.map(s => s.toLowerCase()));
+  const jdSkillSet = new Set(jdSkills.map(s => s.toLowerCase()));
+  
+  const exactMatches = [];
+  const partialMatches = [];
+  const missing = [];
+  
+  for (const jdSkill of jdSkills) {
+    const jdSkillLower = jdSkill.toLowerCase();
+    if (resumeSkillSet.has(jdSkillLower)) {
+      exactMatches.push(jdSkill);
+    } else {
+      // Check for partial matches (substrings)
+      const partials = Array.from(resumeSkillSet).filter(rs => rs.includes(jdSkillLower) || jdSkillLower.includes(rs));
+      if (partials.length > 0) {
+        partialMatches.push({ skill: jdSkill, matchedVariants: partials });
+      } else {
+        missing.push(jdSkill);
+      }
+    }
+  }
+  
+  // Calculate scores
+  const exactMatchScore = (exactMatches.length / jdSkills.length) * 100;
+  const partialMatchScore = (partialMatches.length / jdSkills.length) * 100;
+  const confidenceScore = Math.min(100, Math.round((exactMatchScore + partialMatchScore) / 2));
+  
+  return {
+    domain: domain,
+    subDomain: subDomainInfo ? subDomainInfo.name : null,
+    score: roundToNearestFive(confidenceScore),
+    presentSkills: exactMatches,
+    missingSkills: missing,
+    projectSuggestions: suggestProjects(domain, missing),
+    videos: {}, // to be filled with video suggestions keyed by skill
+    meta: {
+      totalJdSkills: jdSkills.length,
+      totalResumeSkills: resumeSkills.length,
+      confidence: confidenceScore
+    }
+  };
+}
+
+/**********************  NEW MULTI-LANGUAGE LEARNING FLOW ADDITIONS  ************************/
+// Supported languages for video recommendations (English, Hindi, Telugu, Kannada, Tamil)
+const SUPPORTED_VIDEO_LANGUAGES = ['en','hi','te','kn','ta'];
+const LANGUAGE_LABELS = { en: 'English', hi: 'Hindi', te: 'Telugu', kn: 'Kannada', ta: 'Tamil' };
+
+// Simple in-memory cache for dynamic video lookups (per skill+lang)
+const videoCache = new Map(); // key => { ts, videos }
+const VIDEO_CACHE_TTL_MS = 1000 * 60 * 60 * 6; // 6 hours
+
+// In‑memory session store (can be moved to Redis / DB later)
+const analysisSessions = new Map();
+const makeSessionId = () => 'S_' + Math.random().toString(36).slice(2,10);
+
+// Lightweight curated hardcoded best channels per skill & language (fallback before API)
+const CURATED_VIDEOS = {
+  Python: {
+    en: [
+      { title: 'Python Full Course - Beginner to Advanced', channel: 'freeCodeCamp.org', url: 'https://www.youtube.com/watch?v=rfscVS0vtbw', views: 40000000 },
+      { title: 'Python for Beginners - Mosh', channel: 'Programming with Mosh', url: 'https://www.youtube.com/watch?v=_uQrJ0TkZlc', views: 35000000 },
+      { title: 'Automate with Python', channel: 'Corey Schafer', url: 'https://www.youtube.com/watch?v=qbW6FRbaSl0', views: 2000000 }
+    ],
+    hi: [
+      { title: 'Python Tutorial in Hindi (Full Course)', channel: 'CodeWithHarry', url: 'https://www.youtube.com/watch?v=gfDE2a7MKjA', views: 15000000 },
+      { title: 'Python Complete Course Hindi', channel: 'Great Learning', url: 'https://www.youtube.com/watch?v=QXeEoD0pB3E', views: 5000000 },
+      { title: 'Python Basics Hindi', channel: 'WsCube Tech', url: 'https://www.youtube.com/watch?v=5rtujDjt50w', views: 2000000 }
+    ],
+    te: [
+      { title: 'Python Full Course Telugu', channel: 'Telugu Skillhub', url: 'https://www.youtube.com/watch?v=yn3py5d3Jz0', views: 300000 },
+      { title: 'Python Tutorial Series Telugu', channel: 'Knowledge World', url: 'https://www.youtube.com/watch?v=4O0m8JkQJ0E', views: 250000 },
+      { title: 'Python Basics Telugu', channel: 'Simplified Learner Telugu', url: 'https://www.youtube.com/watch?v=hMX0fVB2E8U', views: 120000 }
+    ],
+    kn: [
+      { title: 'Python Course Kannada', channel: 'Kannada Coding Academy', url: 'https://www.youtube.com/watch?v=2YE5-h8mYIY', views: 180000 },
+      { title: 'Python Programming Kannada', channel: 'LearnTech Kannada', url: 'https://www.youtube.com/watch?v=LSvBBruRbtU', views: 150000 },
+      { title: 'Python Basics Kannada', channel: 'CareerKannada', url: 'https://www.youtube.com/watch?v=C8mZP2c1Fds', views: 90000 }
+    ],
+    ta: [
+      { title: 'Python Tutorial in Tamil', channel: 'Fenil Codes Tamil', url: 'https://www.youtube.com/watch?v=wAsZ6RcqQgU', views: 400000 },
+      { title: 'Python Full Course Tamil', channel: 'Programming Line Tamil', url: 'https://www.youtube.com/watch?v=X2W5S6-Urao', views: 300000 },
+      { title: 'Python Basics for Beginners Tamil', channel: 'Tamil Tech Education', url: 'https://www.youtube.com/watch?v=8OZQz4J_GX0', views: 180000 }
+    ]
+  },
+  'Machine Learning': {
+    en: [
+      { title: 'Machine Learning Course - 12 Hours', channel: 'freeCodeCamp.org', url: 'https://www.youtube.com/watch?v=GwIo3gDZCVQ', views: 4000000 },
+      { title: 'ML Crash Course', channel: 'Krish Naik', url: 'https://www.youtube.com/watch?v=OB1reY6IX-o', views: 1500000 },
+      { title: 'ML for Absolute Beginners', channel: 'Simplilearn', url: 'https://www.youtube.com/watch?v=ukzFI9rgwfU', views: 2000000 }
+    ],
+    hi: [
+      { title: 'Machine Learning Tutorial Hindi', channel: 'CodeWithHarry', url: 'https://www.youtube.com/watch?v=IoZGSQ07e8g', views: 1200000 },
+      { title: 'Machine Learning Full Course Hindi', channel: 'Great Learning', url: 'https://www.youtube.com/watch?v=Gv9_4yMHFhI', views: 2500000 },
+      { title: 'ML Basics Hindi', channel: 'WsCube Tech', url: 'https://www.youtube.com/watch?v=EItlUEPCIzM', views: 800000 }
+    ],
+    ta: [
+      { title: 'Machine Learning Tamil Course', channel: 'Tamil AI School', url: 'https://www.youtube.com/watch?v=KTGepQJ4Wkc', views: 160000 },
+      { title: 'Intro to Machine Learning Tamil', channel: 'Code Tamil', url: 'https://www.youtube.com/watch?v=3QyQ3VIAtF4', views: 140000 },
+      { title: 'ML Basics in Tamil', channel: 'TechTamizha', url: 'https://www.youtube.com/watch?v=4E-y_1fNqvQ', views: 90000 }
+    ]
+  }
+};
+
+// Helper to fetch top videos per language (tries curated, optionally YouTube API)
+async function fetchVideosForSkillMultiLang(skill, limit = 3) {
+  const result = {};
+  for (const lang of SUPPORTED_VIDEO_LANGUAGES) {
+    // 1. Curated first
+    const curated = (CURATED_VIDEOS[skill] && CURATED_VIDEOS[skill][lang]) || [];
+    if (curated.length >= limit) {
+      result[lang] = curated.slice(0, limit).map(v => ({ ...v, language: LANGUAGE_LABELS[lang] }));
+      continue;
+    }
+    // 2. YouTube API (simple search) if key exists
+    if (YOUTUBE_API_KEY) {
+      try {
+        // CACHE check
+        const cacheKey = `${skill}|${lang}`;
+        const existing = videoCache.get(cacheKey);
+        if (existing && (Date.now() - existing.ts) < VIDEO_CACHE_TTL_MS) {
+          result[lang] = existing.videos.slice(0, limit).map(v => ({ ...v, language: LANGUAGE_LABELS[lang] }));
+          continue;
+        }
+        const q = encodeURIComponent(`${skill} tutorial ${lang === 'en' ? '' : LANGUAGE_LABELS[lang]} 2024 2025`.trim());
+        const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=10&order=viewCount&regionCode=IN&relevanceLanguage=${lang}&q=${q}&key=${YOUTUBE_API_KEY}`;
+        const r = await fetch(searchUrl);
+        const data = await r.json();
+        const items = Array.isArray(data.items) ? data.items : [];
+        const videoIds = items.map(i => i.id && i.id.videoId).filter(Boolean).join(',');
+        let statsMap = {};
+        if (videoIds) {
+          const statsUrl = `https://www.googleapis.com/youtube/v3/videos?part=statistics,contentDetails&id=${videoIds}&key=${YOUTUBE_API_KEY}`;
+          const rs = await fetch(statsUrl);
+          const statsData = await rs.json();
+          (statsData.items || []).forEach(v => { statsMap[v.id] = v; });
+        }
+        const filtered = [];
+        for (const it of items) {
+          if (!it || !it.id || !it.id.videoId) continue;
+          const title = it.snippet.title;
+          const lower = title.toLowerCase();
+          if (NEGATIVE_KEYWORDS.some(k => lower.includes(k))) continue;
+          const stats = statsMap[it.id.videoId];
+          const viewCount = stats && stats.statistics ? parseInt(stats.statistics.viewCount || '0', 10) : 0;
+          if (viewCount < 20000 && curated.length === 0) continue; // basic quality filter
+          filtered.push({
+            title,
+            channel: it.snippet.channelTitle,
+            url: `https://www.youtube.com/watch?v=${it.id.videoId}`,
+            views: viewCount,
+            language: LANGUAGE_LABELS[lang]
+          });
+          if (filtered.length >= limit) break;
+        }
+        const merged = (curated.concat(filtered)).slice(0, limit);
+        videoCache.set(cacheKey, { ts: Date.now(), videos: merged });
+        result[lang] = merged.map(v => ({ ...v, language: LANGUAGE_LABELS[lang] }));
+      } catch (e) {
+        result[lang] = curated.slice(0, limit); // fallback curated only
+      }
+    } else {
+      result[lang] = curated.slice(0, limit);
+    }
+  }
+  return result;
+}
+
+// Build problems per skill (coding style for tech, scenario tasks for non‑tech)
+function buildProblemsForSkills(domain, skills) {
+  const out = {};
+  const techSample = ['Python','JavaScript','Machine Learning','React','SQL'];
+  for (const skill of skills.slice(0,5)) {
+    if (domain === 'tech' && realProblems[skill]) {
+      out[skill] = {
+        easy: realProblems[skill].easy.slice(0,2),
+        medium: realProblems[skill].medium.slice(0,2),
+        hard: realProblems[skill].hard.slice(0,1)
+      };
+    } else if (domain === 'tech' && techSample.includes(skill)) {
+      out[skill] = { easy: [{ title: `${skill} Basics Exercise`, description: `Implement a simple ${skill} concept.` }], medium: [], hard: [] };
+    } else {
+      // Non‑tech scenario style
+      out[skill] = {
+        scenarios: [
+          { title: `${skill} Scenario 1`, description: `Describe how you would apply ${skill} in a real workplace situation and list 3 measurable outcomes.` },
+          { title: `${skill} Scenario 2`, description: `Identify a problem related to ${skill} and propose a structured improvement plan.` }
+        ]
+      };
+    }
+  }
+  return out;
+}
+
+// Augmented wrapper: full analysis + multi‑language videos + problems + session id
+app.post('/api/analyze-full', upload.fields([{ name: 'resume' }, { name: 'jd' }]), async (req, res) => {
+  try {
+    const resumeFile = req.files && req.files.resume ? req.files.resume[0] : null;
+    const jdFile = req.files && req.files.jd ? req.files.jd[0] : null;
+    let resumeText = (req.body.resumeText || '').trim();
+    let jdText = (req.body.jdText || '').trim();
+    if (resumeFile && !resumeText) { try { const b = fs.readFileSync(resumeFile.path); resumeText = (await pdfParse(b)).text || ''; fs.unlinkSync(resumeFile.path); } catch {} }
+    if (jdFile && !jdText) { try { const b = fs.readFileSync(jdFile.path); jdText = (await pdfParse(b)).text || ''; fs.unlinkSync(jdFile.path); } catch {} }
+    if (!resumeText || !jdText) return res.status(400).json({ error: 'Resume and JD required.' });
+
+    const analysis = await enhancedResumeMatching(resumeText, jdText);
+
+    // Decide which skills to fetch videos for (missing prioritized, fallback to top present)
+    const targetSkills = analysis.missingSkills.slice(0,3).length ? analysis.missingSkills.slice(0,3) : analysis.presentSkills.slice(0,3);
+    const videosBySkill = {};
+    for (const skill of targetSkills) {
+      videosBySkill[skill] = await fetchVideosForSkillMultiLang(skill, 3);
+    }
+
+    const problemsBySkill = buildProblemsForSkills(analysis.domain, targetSkills);
+
+    const sessionId = makeSessionId();
+    const sessionPayload = { sessionId, createdAt: Date.now(), analysis, videosBySkill, problemsBySkill };
+    analysisSessions.set(sessionId, sessionPayload);
+
+    return res.json({ success: true, sessionId, analysis, videosBySkill, problemsBySkill });
+  } catch (e) {
+    return res.status(500).json({ error: 'Full analysis failed', details: e.message });
+  }
+});
+
+// Retrieve learning package for a session (used by learn.html)
+app.get('/api/learn/:sessionId', (req, res) => {
+    const s = analysisSessions.get(req.params.sessionId);
+    if (!s) return res.status(404).json({ error: 'Session not found' });
+    return res.json({ success: true, session: s });
+});
+
+// Simple AI chat endpoint (contextual to session) using OpenRouter
+app.post('/api/chat', async (req, res) => {
+  try {
+    if (!OPENROUTER_API_KEY) return res.status(500).json({ error: 'Chat not configured' });
+    const { sessionId, message } = req.body || {};
+    if (!message) return res.status(400).json({ error: 'Message required' });
+    const session = sessionId ? analysisSessions.get(sessionId) : null;
+    const sys = `You are a helpful learning assistant. If session context present, guide the user on improving missing skills: ${session ? JSON.stringify({ domain: session.analysis.domain, missing: session.analysis.missingSkills.slice(0,8) }) : 'no context'}. Answer briefly.`;
+    const r = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'openrouter/auto',
+        messages: [ { role: 'system', content: sys }, { role: 'user', content: message } ],
+        max_tokens: 300
+      })
+    });
+    const data = await r.json();
+    const answer = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content || 'Sorry, no response.';
+    return res.json({ success: true, answer });
+  } catch (e) {
+    return res.status(500).json({ error: 'Chat failed', details: e.message });
+  }
+});
+
+// Add debug logging and error handling improvements
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} ${req.method} ${req.path}`);
+  next();
+});
+
+// Add more detailed error responses
+app.use((err, req, res, next) => {
+  console.error('Server error:', err);
+  res.status(500).json({ 
+    error: 'Internal server error', 
+    details: err.message,
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Export app (extended)
+module.exports = { app, analysisSessions };
+/**********************  END MULTI-LANGUAGE LEARNING FLOW ADDITIONS  ************************/

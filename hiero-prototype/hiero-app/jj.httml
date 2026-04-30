@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login | Your App</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: linear-gradient(to right, #0d0d0d, #1a1a1a);
+      color: white;
+      font-family: Arial, sans-serif;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .login-box {
+      background-color: #111;
+      padding: 40px;
+      width: 350px;
+      border-radius: 20px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.7);
+      text-align: center;
+    }
+
+    .login-box img {
+      width: 80px;
+      margin-bottom: 20px;
+    }
+
+    .login-box h2 {
+      margin-bottom: 30px;
+      font-size: 24px;
+    }
+
+    .login-btn {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      border: none;
+      border-radius: 10px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .email-btn {
+      background-color: white;
+      color: black;
+    }
+
+    .email-btn:hover {
+      background-color: #ddd;
+    }
+
+    .google-btn {
+      background-color:rgb(5, 12, 22);
+      color: white;
+    }
+
+    .google-btn:hover {
+      background-color:rgb(3, 5, 9);
+    }
+
+    .github-btn {
+      background-color: #333;
+      color: white;
+      border: 1px solid #555;
+    }
+
+    .github-btn:hover {
+      background-color: #222;
+    }
+
+    .signup-text {
+      margin-top: 20px;
+      font-size: 14px;
+      color: #aaa;
+    }
+
+    .signup-text a {
+      color: white;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-box">
+    <img src="logo.png" alt="App Logo">
+    <h2>Log into your account</h2>
+
+    <button class="login-btn email-btn">Login with Email</button>
+    <button class="login-btn google-btn">Login with Google</button>
+    <button class="login-btn github-btn">Login with GitHub</button>
+
+    <div class="signup-text">
+      Don’t have an account? <a href="#">Sign up</a>
+    </div>
+  </div>
+</body>
+</html>

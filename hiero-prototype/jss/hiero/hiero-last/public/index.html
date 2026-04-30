@@ -456,7 +456,6 @@
     <nav class="top-nav">
       <div class="brand-group">
         <img src="/logo-hiero.png" alt="Hiero Logo" style="width: 28px; height: 28px; object-fit: contain;">
-        <span class="brand-name">HIERO</span>
       </div>
 
       <div class="user-access-pill" onclick="toggleUserDropdown()" id="userPill">
@@ -464,10 +463,45 @@
         <span class="user-name-label" id="userNameLabel">User Profile</span>
         
         <div class="logout-box" id="userDropdown">
+          <a href="/admin-dashboard.html" style="display: none; padding: 10px 20px; color: #ffeb3b; font-weight: 700; font-size: 13px; text-align: center; text-decoration: none;" id="adminLink">🎛️ Admin</a>
           <div class="logout-trigger" onclick="handleLogout()">Logout</div>
         </div>
       </div>
     </nav>
+
+    <!-- Review Section (appears dynamically) -->
+    <div class="review-section" id="reviewSection" style="display: none; position: absolute; right: 40px; top: 100px; z-index: 100; width: 340px; background: var(--card-bg); border: 1px solid var(--card-border); padding: 20px; border-radius: 12px; backdrop-filter: blur(20px);">
+      <h3 style="margin-bottom: 15px; font-size: 16px; font-weight: 800; color: var(--text-main);">⭐ Rate Your Experience</h3>
+      <div class="review-section-inner">
+        <!-- Star Rating -->
+        <div class="star-rating" id="starRating" style="margin-bottom: 10px; font-size: 24px; color: var(--text-muted); cursor: pointer;">
+          <span class="star" data-rating="1">★</span>
+          <span class="star" data-rating="2">★</span>
+          <span class="star" data-rating="3">★</span>
+          <span class="star" data-rating="4">★</span>
+          <span class="star" data-rating="5">★</span>
+        </div>
+
+        <!-- Review Input -->
+        <textarea id="reviewText" class="review-input" placeholder="Share your feedback..." maxlength="1000" style="width: 100%; min-height: 80px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-soft); color: white; padding: 10px; border-radius: 8px; margin-bottom: 5px; font-family: inherit; font-size: 13px;"></textarea>
+        <div style="text-align: right; color: #999; font-size: 11px; margin-top: -4px;">
+          <span id="charCount">0</span>/1000
+        </div>
+
+        <!-- Submit Button -->
+        <button id="submitReviewBtn" class="submit-review-btn card-act-btn primary-solid" style="margin-top: 10px; width: 100%; cursor: pointer; border: none;">Submit Review</button>
+
+        <!-- Status Message -->
+        <div id="reviewStatus" class="review-status" style="display: none; margin-top: 10px; font-size: 13px; color: var(--primary);"></div>
+
+        <!-- Existing Review Display -->
+        <div id="existingReview" class="existing-review" style="display: none; margin-top: 15px; font-size: 13px;">
+          <p style="margin-bottom: 5px; color: #aaa;"><strong>Your Rating:</strong> <span id="userRatingDisplay" style="color: white;"></span></p>
+          <p style="margin-bottom: 10px; color: #aaa;"><strong>Your Review:</strong> <span id="userReviewDisplay" style="color: white;"></span></p>
+          <button id="editReviewBtn" class="edit-review-btn card-act-btn ghost-outline" style="width: 100%; cursor: pointer;">Edit Review</button>
+        </div>
+      </div>
+    </div>
 
     <main class="content-stage">
       <div class="hero-greeting">
@@ -782,9 +816,6 @@
         dropdown.classList.remove('show');
       }
     });
-
-    // Handle review section visibility separately if needed
-    // (Old review logic can stay or be removed based on requirements)
 
     // ⭐ Track user login
     async function trackLogin() {
@@ -1392,5 +1423,4 @@
     };
   </script>
 </body>
-
 </html>

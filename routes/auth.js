@@ -311,6 +311,8 @@ router.post('/signup', async (req, res) => {
     saveUsers();
 
     const token = jwt.sign({ email: user.email, userId: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    user.otp = otp;
     const link = `${PUBLIC_URL}/verify-email?token=${token}`;
 
     try {
@@ -318,12 +320,32 @@ router.post('/signup', async (req, res) => {
             from: process.env.EMAIL_USER,
             to: user.email,
             subject: `Verify Your Hiero Account`,
-            html: `<p>Please <a href="${link}">click here</a> to verify your account.</p>`
+            html: `<p>Your verification code is: <strong>${otp}</strong></p><p>Or <a href="${link}">click here</a> to verify your account.</p>`
         });
         res.status(201).json({ message: 'Account created! Check your email.' });
     } catch (err) {
-        res.status(201).json({ message: 'Account created! (Email sending failed)', verificationLink: link });
+        console.warn('⚠️ Email failed, providing direct verification link/OTP to user.');
+        res.status(201).json({ 
+            message: 'Account created! (Email service offline)', 
+            verificationLink: link,
+            otp: otp,
+            autoVerifySecret: token // Allow frontend to verify immediately
+        });
     }
+});
+
+// Manual OTP Verification
+router.post('/verify-otp', (req, res) => {
+    const { email, otp } = req.body;
+    const user = users.find(u => u.email === email.trim().toLowerCase());
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    if (user.otp === otp) {
+        user.emailVerified = true;
+        delete user.otp;
+        saveUsers();
+        return res.json({ message: 'Email verified successfully!' });
+    }
+    res.status(400).json({ error: 'Invalid OTP' });
 });
 
 // Verify Email
