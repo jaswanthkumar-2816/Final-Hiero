@@ -6,7 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Hiero Resume Builder</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="theme.css">
   <script src="theme.js"></script>
   <script src="domain-mapping.js"></script>
@@ -39,9 +40,13 @@
     }
 
     /* Fix for Font Awesome icons being overridden by theme.js */
-    i.fas, i.fab, i.far, i.fal, i.fad {
-        font-family: "Font Awesome 6 Free" !important;
-        font-weight: 900 !important;
+    i.fas,
+    i.fab,
+    i.far,
+    i.fal,
+    i.fad {
+      font-family: "Font Awesome 6 Free" !important;
+      font-weight: 900 !important;
     }
 
     body::before {
@@ -689,18 +694,21 @@
 
     /* Theme-aware icon colors as requested */
     body.light-mode .section-icon {
-        color: #05a313 !important;
+      color: #05a313 !important;
     }
-    
+
     body:not(.light-mode) .section-icon {
-        color: white !important;
+      color: white !important;
     }
-    
+
     /* Ensure all badges and tags are visible */
-    .premium-badge, .tag, .photo-status, .step-text {
-        opacity: 1 !important;
-        visibility: visible !important;
-        display: inline-flex !important;
+    .premium-badge,
+    .tag,
+    .photo-status,
+    .step-text {
+      opacity: 1 !important;
+      visibility: visible !important;
+      display: inline-flex !important;
     }
 
     .skip-link {
@@ -939,9 +947,9 @@
     }
 
     .photo-upload-info li i {
-        color: var(--primary);
-        font-size: 11px;
-        margin-top: 3px;
+      color: var(--primary);
+      font-size: 11px;
+      margin-top: 3px;
     }
 
     .photo-status {
@@ -1256,20 +1264,21 @@
         height: 40px;
         color: var(--primary) !important;
       }
-      
+
       /* Theme-aware icon colors as requested */
       body.light-mode .section-icon {
-          color: #05a313 !important;
+        color: #05a313 !important;
       }
-      
+
       body:not(.light-mode) .section-icon {
-          color: white !important;
+        color: white !important;
       }
-      
+
       /* Badge overrides */
-      .premium-badge, .tag {
-          opacity: 1 !important;
-          display: inline-block !important;
+      .premium-badge,
+      .tag {
+        opacity: 1 !important;
+        display: inline-block !important;
       }
 
       /* Mobile template grid */
@@ -1599,6 +1608,32 @@
           </div>
         </div>
 
+        <!-- Hiero Scholar Template -->
+        <div class="template-card premium" data-category="professional" data-template="hiero-scholar"
+          data-type="premium">
+          <div class="premium-badge">NEW</div>
+          <div class="template-preview" onclick="previewTemplate('hiero-scholar')">
+            <i class="fas fa-graduation-cap" style="color: #1e3a8a;"></i>
+            <div class="preview-overlay">
+              <button class="preview-btn">Preview Template</button>
+            </div>
+          </div>
+          <div class="template-info">
+            <h3>Hiero Scholar</h3>
+            <p>Premium academic-inspired design with a deep blue sidebar and sophisticated rose accents. Features a
+              modern two-column layout.</p>
+            <div class="template-tags">
+              <span class="tag">Academic</span>
+              <span class="tag">Premium</span>
+              <span class="tag">Two-Column</span>
+            </div>
+            <button class="start-building-btn" onclick="startBuilding('hiero-scholar')"
+              style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);">
+              <i class="fas fa-arrow-right"></i> Start Building
+            </button>
+          </div>
+        </div>
+
         <!-- Hiero Vertex Template -->
         <div class="template-card" data-category="modern" data-template="hiero-vertex" data-type="free">
           <div class="template-preview" onclick="previewTemplate('hiero-vertex')">
@@ -1767,6 +1802,76 @@
           </div>
         </div>
 
+        <!-- Hiero TriPanel Template -->
+        <div class="template-card premium" data-category="premium" data-template="hiero-axis" data-type="premium">
+          <div class="premium-badge">NEW</div>
+          <div class="template-preview" onclick="previewTemplate('hiero-axis')">
+            <i class="fas fa-sitemap" style="color: #8D6E63;"></i>
+            <div class="preview-overlay">
+              <button class="preview-btn">Preview Template</button>
+            </div>
+          </div>
+          <div class="template-info">
+            <h3>Hiero Axis</h3>
+            <p>A high-fidelity, strict 3-column structural layout mapped with natural coffee-tone aesthetics. Ideal for
+              executives.</p>
+            <div class="template-tags">
+              <span class="tag premium">Executive</span>
+              <span class="tag premium">3-Column</span>
+              <span class="tag premium">Premium</span>
+            </div>
+            <button class="start-building-btn" onclick="startBuilding('hiero-axis')">
+              <i class="fas fa-arrow-right"></i> Start Building
+            </button>
+          </div>
+        </div>
+
+        <!-- Hiero Apex Template -->
+        <div class="template-card premium" data-category="professional" data-template="hiero-apex" data-type="premium">
+          <div class="premium-badge">NEW</div>
+          <div class="template-preview" onclick="previewTemplate('hiero-apex')">
+            <i class="fas fa-layer-group"></i>
+            <div class="preview-overlay">
+              <button class="preview-btn">Preview Template</button>
+            </div>
+          </div>
+          <div class="template-info">
+            <h3>Hiero Apex</h3>
+            <p>A pixel-perfect professional minimalist layout with an ATS-friendly, clean 2-column format.</p>
+            <div class="template-tags">
+              <span class="tag premium">Professional</span>
+              <span class="tag premium">Minimalist</span>
+              <span class="tag premium">ATS</span>
+            </div>
+            <button class="start-building-btn" onclick="startBuilding('hiero-apex')">
+              <i class="fas fa-arrow-right"></i> Start Building
+            </button>
+          </div>
+        </div>
+
+        <!-- Hiero Nimbus Template -->
+        <div class="template-card premium" data-category="premium" data-template="hiero-nimbus" data-type="premium">
+          <div class="premium-badge">NEW</div>
+          <div class="template-preview" onclick="previewTemplate('hiero-nimbus')">
+            <i class="fas fa-cloud"></i>
+            <div class="preview-overlay">
+              <button class="preview-btn">Preview Template</button>
+            </div>
+          </div>
+          <div class="template-info">
+            <h3>Hiero Nimbus</h3>
+            <p>A serene, modern soft-gradient layout utilizing a clean horizontal rhythm and split architecture.</p>
+            <div class="template-tags">
+              <span class="tag premium">Modern</span>
+              <span class="tag premium">Soft Gradient</span>
+              <span class="tag premium">Clean</span>
+            </div>
+            <button class="start-building-btn" onclick="startBuilding('hiero-nimbus')">
+              <i class="fas fa-arrow-right"></i> Start Building
+            </button>
+          </div>
+        </div>
+
         <!-- Hiero Retail Template -->
         <div class="template-card" data-category="professional" data-template="hiero-retail" data-type="free">
           <div class="template-preview" onclick="previewTemplate('hiero-retail')">
@@ -1908,7 +2013,8 @@
                         <span class="btn-shine"></span>
                         <i class="fas fa-wand-magic-sparkles"></i> ✨ Generate Executive Photo
                       </button>
-                      <p style="font-size: 11px; color: var(--primary); text-align: center; margin-top: 5px; opacity: 0.8;">
+                      <p
+                        style="font-size: 11px; color: var(--primary); text-align: center; margin-top: 5px; opacity: 0.8;">
                         <i class="fas fa-crown"></i> Hiero Executive AI (Premium)
                       </p>
                     </div>
@@ -2581,7 +2687,7 @@
         if (targetEl) {
           targetEl.style.borderLeft = '6px solid var(--primary)';
           targetEl.style.paddingLeft = '20px';
-          
+
           const label = targetEl.querySelector('h2');
           if (label) {
             const badge = document.createElement('span');
@@ -3031,6 +3137,26 @@
           name: 'Hiero Vertex',
           description: 'A minimalist elegant design featuring a strong right charcoal sidebar. Highly attractive one-page resume.',
           style: 'Two-column minimalist, charcoal sidebar, sleek top contact strip.'
+        },
+        'hiero-scholar': {
+          name: 'Hiero Scholar',
+          description: 'Academic-inspired design with a deep blue sidebar and sophisticated rose accents. Features a modern two-column layout.',
+          style: 'Deep blue sidebar, rose accents, circular profile ribbon, modern two-column academic look.'
+        },
+        'hiero-axis': {
+          name: 'Hiero Axis',
+          description: 'A high-fidelity, strict 3-column structural layout mapped with natural coffee-tone aesthetics. Ideal for executives.',
+          style: 'Coffee-tone aesthetics, strict 3-column structural layout, modern professional look.'
+        },
+        'hiero-apex': {
+          name: 'Hiero Apex',
+          description: 'A pixel-perfect professional minimalist layout with an ATS-friendly, clean 2-column format.',
+          style: 'Clean minimalist, left sidebar, precise professional typography.'
+        },
+        'hiero-nimbus': {
+          name: 'Hiero Nimbus',
+          description: 'A serene, modern soft-gradient layout utilizing a clean horizontal rhythm and split architecture.',
+          style: 'Soft gradient background, minimalist sections, strong typography.'
         }
 
       };
@@ -3260,6 +3386,49 @@
               'Strong problem-solving and analytical skills',
               'Excellent collaboration and communication abilities'
             ]
+          };
+        }
+        // Customize sample data for Hiero Scholar
+        else if (templateId === 'hiero-scholar') {
+          sampleData = {
+            template: 'hiero-scholar',
+            personalInfo: {
+              fullName: 'Julian Scholar',
+              email: 'julian.scholar@gmail.com',
+              phone: '+1 (555) 000-1111',
+              roleTitle: 'English Teacher'
+            },
+            address: 'Cambridge, MA',
+            summary: 'Dedicated and innovative English Teacher with over 5 years of experience in fostering inclusive learning environments and developing creative curriculum. Expertise in digital integration and student mentorship.',
+            experience: [
+              {
+                jobTitle: 'Senior English Instructor',
+                company: 'Global Heights Academy',
+                startDate: '2021-08',
+                endDate: 'Present',
+                description: 'Implemented data-driven instruction and managed diverse classroom dynamics to improve student outcomes.\nDeveloped comprehensive lesson plans and integrated digital tools to increase engagement by 40%.'
+              },
+              {
+                jobTitle: 'Curriculum Developer',
+                company: 'Creative Learning Systems',
+                startDate: '2018-06',
+                endDate: '2021-07',
+                description: 'Collaborated with multidisciplinary teams to design and implement a new literacy program.\nFacilitated teacher workshops on innovative pedagogy.'
+              }
+            ],
+            education: [
+              {
+                degree: 'Master of Arts in Education',
+                school: 'Harvard Graduate School of Education',
+                gradYear: '2018'
+              },
+              {
+                degree: 'B.A. in English Literature',
+                school: 'University of Massachusetts',
+                gradYear: '2016'
+              }
+            ],
+            skills: ['Google Classroom', 'MS Word', 'PowerPoint', 'Mentorship', 'Public Speaking', 'Curriculum Design']
           };
         }
 
