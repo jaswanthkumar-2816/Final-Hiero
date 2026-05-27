@@ -5590,6 +5590,11 @@ async function renderTemplate_HieroVision(doc, rawData, colors, spacing) {
 async function renderTemplate_HieroPremium(doc, rawData, colors, spacing) {
     const data = normalizeData(rawData);
 
+    const edus = data.education || [];
+    const exps = data.experience || [];
+    const projects = data.projects || [];
+    const certs = data.certifications || data.awards || [];
+
     // Prevent accidental pagination that causes infinite loops and scattered text
     doc.addPage = function () { return doc; };
 
@@ -5990,6 +5995,7 @@ async function renderTemplate_HieroRoyal(doc, rawData) {
 
     // Name
     const fullName = data.personalInfo.fullName || 'John Doe';
+    const pInfo = data.personalInfo || {};
     doc.font('Helvetica-Bold').fontSize(28).fillColor(BLACK);
     doc.text(fullName, MARGIN, y, { width: HEADER_TEXT_W });
     y += 36;
