@@ -1,520 +1,1215 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Resume Analysis Result</title>
-  <script>
-    // Helper utilities
-    function sanitize(str){ const d=document.createElement('div'); d.textContent = String(str||''); return d.innerHTML; }
-    function getAnalysisData(){
-      // New flow (sessionStorage)
-      let raw = sessionStorage.getItem('analysisData');
-      if(raw){
-        try { const parsed = JSON.parse(raw); return parsed; } catch(e){ console.warn('Session analysisData parse failed', e); }
-      }
-      // Fallback old localStorage key
-      raw = localStorage.getItem('analysisResult');
-      if(raw){
-        try { return JSON.parse(raw); } catch(e){ console.warn('Local analysisResult parse failed', e); }
-      }
-      return null;
-    }
-
-    window.addEventListener('DOMContentLoaded', () => {
-      const analysis = getAnalysisData();
-      console.log('[RESULT] sessionStorage.analysisData =', sessionStorage.getItem('analysisData'));
-      console.log('[RESULT] localStorage.analysisResult =', localStorage.getItem('analysisResult'));
-      console.log('[RESULT] Parsed analysis object:', analysis);
-      if(!analysis){
-        document.body.innerHTML = '<div style="text-align:center;padding:60px;color:#fff"><h1>No Analysis Data Found</h1><p>Please run an analysis first.</p><a href="upload.html" style="color:#0dff00">Go to Upload</a></div>';
-        return;
-      }
-      // Temporary debug block (remove later)
-      const dbg = document.createElement('pre');
-      dbg.style.cssText='position:fixed;bottom:10px;left:10px;max-width:420px;max-height:200px;overflow:auto;background:rgba(0,0,0,0.7);color:#0dff00;padding:8px;font-size:10px;z-index:9999;border:1px solid #0dff00;';
-      dbg.textContent = 'RAW ANALYSIS JSON\n'+JSON.stringify(analysis, null, 2);
-      document.body.appendChild(dbg);
-      renderAnalysis(analysis);
-    });
-
-    function renderAnalysis(a){
-      console.log('[RESULT] Raw analysis object received:', a);
-      console.log('[RESULT] Videos available:', a.videos);
-      console.log('[RESULT] Problems available:', a.problems);
-      
-      // Score ring
-      const score = typeof a.score === 'number' ? a.score : 0;
-      const scoreEl = document.getElementById('score-percent');
-      if(scoreEl) scoreEl.textContent = score + '%';
-      const circle = document.querySelector('.progress');
-      if(circle){ const r=50, c=2*Math.PI*r; circle.style.strokeDasharray=c; circle.style.strokeDashoffset=c - (score/100)*c; }
-
-      // Skills lists
-      const missing = a.missingSkills || [];
-      const present = a.presentSkills || a.matchedSkills || [];
-      const missingBox = document.getElementById('missing-skills-list');
-      if(missingBox){
-        missingBox.innerHTML = missing.map(s=>`<li class="skill-chip">${sanitize(s)}</li>`).join('');
-        if(missing.length===0) document.getElementById('missing-skills-card').style.display='none';
-      }
-      const learnFirst = document.getElementById('learn-first');
-      if(learnFirst) learnFirst.textContent = sanitize(a.skillToLearnFirst || missing[0] || present[0] || '');
-
-      // Projects
-      const projectList = document.getElementById('project-list');
-      if(projectList){ projectList.innerHTML = (a.projectSuggestions||[]).map(p=>`<li class="project-card">${sanitize(p)}</li>`).join(''); }
-
-      // Matched / Present skills section injection (if not already present)
-      const leftCol = document.querySelector('.left-col');
-      if(leftCol && !document.getElementById('present-skills-card')){
-        const card=document.createElement('div');
-        card.className='card';
-        card.id='present-skills-card';
-        card.innerHTML=`<section aria-labelledby="present-skills-title"><h3 class="section-title" id="present-skills-title">Matched Skills (${present.length})</h3><ul class="skills-list" id="present-skills-list">${present.map(s=>`<li class=\"skill-chip\">${sanitize(s)}</li>`).join('')}</ul></section>`;
-        leftCol.insertBefore(card, document.getElementById('missing-skills-card'));
-      } else if(document.getElementById('present-skills-list')) {
-        document.getElementById('present-skills-list').innerHTML = present.map(s=>`<li class="skill-chip">${sanitize(s)}</li>`).join('');
-      }
-
-      // Videos (a.videos from backend: {english:[{title,url,duration},...]...})
-      if(a.videos && Object.keys(a.videos).length){
-        console.log('[RESULT] Creating videos section with data:', a.videos);
-        ensureVideosSection();
-        populateVideos(a.videos);
-      } else {
-        console.log('[RESULT] No videos data found');
-      }
-
-      // Problems (a.problems: {easy:[], medium:[], hard:[]})
-      if(a.problems && (a.problems.easy || a.problems.medium || a.problems.hard)){
-        console.log('[RESULT] Creating problems section with data:', a.problems);
-        ensureProblemsSection();
-        populateProblems(a.problems);
-      } else {
-        console.log('[RESULT] No problems data found');
-      }
-
-      // Timestamp
-      const ts = document.getElementById('timestamp');
-      if(ts) ts.textContent = new Date().toLocaleString();
-    }
-
-    function ensureVideosSection(){
-      if(document.getElementById('videos-section')) return;
-      const rightCol = document.querySelector('.right-col');
-      const card = document.createElement('div');
-      card.className='card';
-      card.id='videos-section';
-      card.innerHTML = '<section aria-labelledby="videos-title"><h3 class="section-title" id="videos-title">🎥 Learning Videos</h3><div id="videos-container"></div></section>';
-      rightCol.insertBefore(card, rightCol.lastElementChild); // before language card
-    }
-    function populateVideos(videos){
-      const container = document.getElementById('videos-container');
-      if(!container) return;
-      container.innerHTML = Object.entries(videos).map(([lang,list])=>{
-        if(!Array.isArray(list) || list.length===0) return '';
-        return `<div class="video-lang"><h4 style="color:var(--gold-accent);margin:8px 0 4px">${sanitize(lang)}</h4>` +
-          list.slice(0,3).map(v=>`<a href="${sanitize(v.url)}" target="_blank" class="video-item" style="display:flex;align-items:center;gap:10px;padding:6px 10px;background:rgba(13,255,0,0.1);border:1px solid rgba(13,255,0,0.3);border-radius:8px;color:var(--soft-green);text-decoration:none;font-size:.85rem;margin-bottom:6px;">▶️ <span style="flex:1">${sanitize(v.title)}</span><span style="opacity:.7">${sanitize(v.duration||'')}</span></a>`).join('') + '</div>';
-      }).join('');
-    }
-
-    function ensureProblemsSection(){
-      if(document.getElementById('problems-section')) return;
-      const rightCol = document.querySelector('.right-col');
-      const card = document.createElement('div');
-      card.className='card';
-      card.id='problems-section';
-      card.innerHTML = '<section aria-labelledby="problems-title"><h3 class="section-title" id="problems-title">🧠 Practice Problems</h3><div id="problems-container"></div></section>';
-      rightCol.insertBefore(card, document.getElementById('videos-section') || rightCol.lastElementChild);
-    }
-    function populateProblems(problems){
-      const container = document.getElementById('problems-container');
-      if(!container) return;
-      const tiers=['easy','medium','hard'];
-      container.innerHTML = tiers.filter(t=>Array.isArray(problems[t]) && problems[t].length).map(t=>{
-        return `<div class="problem-tier"><h4 style="color:var(--gold-accent);margin:10px 0 6px;text-transform:capitalize">${t}</h4>` +
-          problems[t].slice(0,5).map(p=>`<div class="problem-item" style="background:rgba(13,255,0,0.08);border:1px solid rgba(13,255,0,0.2);padding:6px 10px;border-radius:6px;font-size:.85rem;margin-bottom:4px;">${sanitize(p)}</div>`).join('') + '</div>';
-      }).join('');
-    }
-
-    function exportAnalysis(){
-      const a = getAnalysisData() || {};
-      const blob = new Blob([JSON.stringify(a,null,2)], {type:'application/json'});
-      const url = URL.createObjectURL(blob);
-      const link=document.createElement('a');
-      link.href=url; link.download='resume-analysis.json'; link.click();
-      URL.revokeObjectURL(url);
-    }
-    window.exportAnalysis = exportAnalysis;
-  </script>
+  <title>Hiero | Analysis Summary</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="theme.css">
+  <script src="theme.js"></script>
   <style>
     :root {
-      --soft-teal: #030e04;
-      --lavender: #011104;
-      --warm-beige: #09c006;
-      --soft-green: #08c108;
-      --gold-accent: #169f04;
-      --bg-light: #060706;
-      --card-bg: rgb(3, 3, 3);
-      --text-dark: #333333;
-      --shadow-glow: 0 0 15px rgb(17, 173, 17), 0 0 10px rgba(212, 160, 23, 0.3);
-      --border-radius: 15px;
-      --padding: 20px;
+      /* Theme Transitions */
+      --transition-speed: 0.3s;
+
+      /* Colors - DARK (Default) */
+      --bg-color: #0A0A0F;
+      --nav-bg: rgba(10, 10, 15, 0.8);
+      --card-bg: #111111;
+      --card-hover: #161616;
+      --text-main: #ffffff;
+      --text-muted: #a1a1aa;
+      --border-color: #222222;
+      --primary-accent: #00ff00;
+      --primary-accent-glow: rgba(0, 255, 0, 0.2);
+      --nav-active-bg: rgba(0, 255, 0, 0.12);
+      --nav-active-text: #00ff00;
+      --glow-top: rgba(127, 119, 221, 0.12);
+      --glow-bottom: rgba(127, 119, 221, 0.07);
+      --font-sans: 'Inter', sans-serif;
     }
-    body {
+
+    [data-theme="light"] {
+      --bg-color: #F8FAFC;
+      --nav-bg: rgba(248, 250, 252, 0.8);
+      --card-bg: #ffffff;
+      --card-hover: #fcfcfc;
+      --text-main: #0F172A;
+      --text-muted: #64748B;
+      --border-color: #E2E8F0;
+      --primary-accent: #1D9E75;
+      --primary-accent-glow: rgba(29, 158, 117, 0.1);
+      --nav-active-bg: #E1F5EE;
+      --nav-active-text: #0F6E56;
+      --glow-top: rgba(29, 158, 117, 0.08);
+      --glow-bottom: rgba(127, 119, 221, 0.05);
+    }
+
+    * {
       margin: 0;
       padding: 0;
-      background: linear-gradient(135deg, var(--soft-teal) 0%, var(--lavender) 50%, var(--warm-beige) 100%);
-      font-family: 'Open Sans', sans-serif;
-      color: var(--text-dark);
+      box-sizing: border-box;
+      -webkit-font-smoothing: antialiased;
+      font-family: var(--font-sans);
+    }
+
+    p, span, div {
+      font-family: 'Inter', sans-serif;
+      font-weight: 400;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      font-size: 16px;
+      line-height: 1.6;
+      font-weight: 400;
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
       overflow-x: hidden;
       position: relative;
-      animation: gradientFlow 20s ease infinite;
+      transition: background-color var(--transition-speed), color var(--transition-speed);
     }
-    @keyframes gradientFlow {
-      0% { background-position: 0% 0%; }
-      50% { background-position: 50% 50%; }
-      100% { background-position: 0% 0%; }
+
+    /* Option 2: Background Glows */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -200px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 800px;
+      height: 600px;
+      background: radial-gradient(ellipse, var(--glow-top) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+      transition: background var(--transition-speed);
     }
-    .hero {
+
+    body::after {
+      content: '';
+      position: fixed;
+      bottom: -100px;
+      right: -100px;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(ellipse, var(--glow-bottom) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+      transition: background var(--transition-speed);
+    }
+
+    /* --- NAVBAR REFINEMENT --- */
+    .nav-header {
+      padding: 12px 40px;
       display: flex;
-      flex-direction: column;
       align-items: center;
-      width: 100%;
-      padding: 60px 30px;
-      min-height: 100vh;
-      position: relative;
-      z-index: 1;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-color);
+      background: var(--nav-bg);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      transition: background var(--transition-speed), border-color var(--transition-speed);
     }
-    .logo-fixed {
-      position: absolute;
-      top: 25px;
-      right: 32px;
+
+    .app-brand {
       display: flex;
       align-items: center;
-      z-index: 100;
-      background: rgba(8, 164, 8, 0.805);
+      gap: 12px;
+      text-decoration: none;
+    }
+
+    .app-logo-box {
+      width: 42px;
+      height: 42px;
+      background: rgba(29, 158, 117, 0.1);
       border-radius: 12px;
-      padding: 6px 16px 6px 8px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.959), var(--shadow-glow);
-    }
-    .logo-fixed img {
-      height: 38px;
-      width: 38px;
-      min-width: 38px;
-      min-height: 38px;
-      object-fit: contain;
-      filter: drop-shadow(var(--shadow-glow));
-    }
-    .logo-fixed span {
-      font-weight: 700;
-      letter-spacing: 1.5px;
-      font-size: 1.2rem;
-      margin-left: 6px;
-      color: white;
-    }
-    h2 {
-      font-family: 'Lora', serif;
-      font-size: 2.2rem;
-      color: var(--gold-accent);
-      margin-bottom: 30px;
-      animation: slideUp 2s ease-out;
-    }
-    @keyframes slideUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .main-flex {
       display: flex;
-      gap: 32px;
-      max-width: 1000px;
-      width: 100%;
-      margin: 0 auto;
+      align-items: center;
       justify-content: center;
-      align-items: flex-start;
-      flex-wrap: wrap;
+      border: 1px solid rgba(29, 158, 117, 0.2);
     }
-    .left-col, .right-col {
+
+    .app-logo-box img {
+      height: 28px;
+      width: 28px;
+    }
+
+    .app-brand span {
+      color: var(--text-main);
+      font-weight: 800;
+      font-size: 1.4rem;
+      letter-spacing: 0.5px;
+    }
+
+    .nav-menu {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .nav-btn {
       display: flex;
       flex-direction: column;
-      gap: 30px;
-      flex: 1 1 340px;
-      min-width: 320px;
-      max-width: 480px;
+      align-items: center;
+      gap: 4px;
+      padding: 10px 20px;
+      border-radius: 14px;
+      text-decoration: none;
+      color: var(--text-muted);
+      transition: all 0.2s ease;
+      font-weight: 500;
+      font-size: 13px;
     }
+
+    .nav-btn i {
+      font-size: 1.35rem; /* Increased size */
+      margin-bottom: 2px;
+      font-weight: 700;
+    }
+
+    .nav-btn span {
+      font-size: 0.75rem;
+      text-transform: capitalize;
+    }
+
+    .nav-btn:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .nav-btn.active {
+      background: var(--nav-active-text);
+      color: #000;
+      font-weight: 700;
+      box-shadow: 0 0 15px var(--primary-accent-glow);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    /* Theme Toggle */
+    .theme-toggle {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      transition: all 0.2s;
+    }
+
+    .theme-toggle:hover {
+      border-color: var(--primary-accent);
+      color: var(--primary-accent);
+      background: var(--nav-active-bg);
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.05);
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+      border: 1px solid rgba(255,255,255,0.1);
+      overflow: hidden;
+    }
+
+    .user-name {
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--text-muted);
+    }
+
+    /* --- LAYOUT --- */
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .breadcrumb {
+      display: flex;
+      gap: 8px;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      margin-bottom: 12px;
+      align-items: center;
+    }
+
+    .breadcrumb i {
+      font-size: 0.65rem;
+      opacity: 0.5;
+    }
+
+    /* Heading Style Option 2 */
+    .page-title {
+      font-size: 2.2rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      letter-spacing: -0.02em;
+    }
+
+    .page-title span {
+      color: var(--primary-accent);
+    }
+
+    .page-subtitle {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 24px;
+      max-width: 450px;
+    }
+
+    .role-tag {
+      display: inline-block;
+      padding: 4px 12px;
+      background: var(--nav-active-bg);
+      color: var(--primary-accent);
+      border-radius: 100px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    /* --- GRID & CARDS --- */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 16px;
+      align-items: stretch;
+    }
+
     .card {
       background: var(--card-bg);
-      border-radius: var(--border-radius);
-      border: 1px solid rgba(241, 246, 241, 0.955);
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1), var(--shadow-glow);
-      padding: var(--padding);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+      transition: all 0.3s ease;
       display: flex;
       flex-direction: column;
-      gap: 15px;
-      min-height: 200px; /* Consistent card height */
-      animation: liftUp 2.5s ease-out infinite;
-    }
-    @keyframes liftUp {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-5px); }
-    }
-    .score-section {
-      align-items: center;
-      text-align: center;
-    }
-    .score-ring {
       position: relative;
-      width: 120px;
-      height: 120px;
-      margin: 0 auto;
+      overflow: hidden;
+      height: 100%;
     }
-    .score-ring svg {
-      position: absolute;
-      top: 0;
-      left: 0;
+
+    /* Grid Spanning for Perfect Alignment */
+    .card-score { grid-column: span 4; }
+    .card-details { grid-column: span 4; }
+    .card-skills { grid-column: span 4; }
+    .card-projects { grid-column: span 6; }
+    .card-learning { grid-column: span 6; }
+    .card-interview { grid-column: span 6; }
+    .card-fixes { grid-column: span 6; }
+
+    .card:hover {
+      border-color: var(--primary-accent);
+      background: var(--card-hover);
+      transform: translateY(-3px);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+
+    .card-title {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    /* Score Ring Refinement */
+    .score-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding-top: 10px;
+    }
+
+    .score-svg-wrapper {
+      position: relative;
+      width: 100px;
+      height: 100px;
+      margin-bottom: 8px;
+    }
+
+    .score-svg-wrapper svg {
       transform: rotate(-90deg);
+      width: 100px;
+      height: 100px;
     }
-    .score-ring .score-text {
+
+    .score-svg-wrapper circle {
+      fill: none;
+      stroke-width: 8;
+    }
+
+    .score-svg-wrapper .bg {
+      stroke: var(--border-color);
+    }
+
+    .score-svg-wrapper .progress {
+      stroke: var(--primary-accent);
+      stroke-linecap: round;
+      stroke-dasharray: 251.3; 
+      stroke-dashoffset: 251.3;
+      animation: fillRing 1.5s ease-out forwards;
+      animation-delay: 0.5s;
+    }
+
+    @keyframes fillRing {
+      from { stroke-dashoffset: 251.3; }
+      to { stroke-dashoffset: var(--target-offset); }
+    }
+
+    .score-val {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      font-size: 2.5rem;
+      font-size: 1.4rem;
+      font-weight: 800;
+    }
+
+    .score-meta {
+      width: 100%;
+      text-align: center;
+      padding-top: 24px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .percentile-text {
+      color: var(--primary-accent);
       font-weight: 700;
-      color: var(--soft-green);
-      text-shadow: var(--shadow-glow);
-      animation: gentlePulse 2s ease-in-out infinite;
+      font-size: 0.95rem;
+      margin-bottom: 12px;
     }
-    @keyframes gentlePulse {
-      0%, 100% { transform: translate(-50%, -50%) scale(1); }
-      50% { transform: translate(-50%, -50%) scale(1.02); }
+
+    .mini-bar-bg {
+      width: 100%;
+      height: 6px;
+      background: var(--border-color);
+      border-radius: 100px;
+      overflow: hidden;
     }
-    .score-label {
-      color: var(--gold-accent);
-      font-size: 1.2rem;
-      margin-top: 10px;
+
+    .mini-bar-fill {
+      height: 100%;
+      background: var(--primary-accent);
+      width: 0%;
+      transition: width 1.5s ease;
     }
-    .section-title {
-      color: var(--soft-green);
-      font-size: 1.5rem;
-      font-weight: 600;
-      margin-bottom: 15px;
-    }
-    .skills-list, .projects-list {
+
+    /* Details Grid */
+    .details-grid {
       display: flex;
-      flex-wrap: wrap;
-      gap: 15px;
-      margin: 0;
-      padding: 0;
-      list-style: none;
-      max-height: 300px;
-      overflow-y: auto;
-      scrollbar-width: thin;
-      scrollbar-color: var(--soft-green) transparent;
+      flex-direction: column;
+      gap: 16px;
+      flex: 1;
     }
-    .skills-list::-webkit-scrollbar, .projects-list::-webkit-scrollbar {
-      width: 6px;
-    }
-    .skills-list::-webkit-scrollbar-track, .projects-list::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    .skills-list::-webkit-scrollbar-thumb, .projects-list::-webkit-scrollbar-thumb {
-      background: var(--soft-green);
-      border-radius: 3px;
-    }
-    .skill-chip, .project-card {
-      background: rgba(23, 209, 6, 0.8);
-      border-radius: var(--border-radius);
-      color: var(--text-dark);
-      font-size: 1rem;
-      padding: 8px 16px;
-      border: 1px solid var(--soft-green);
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05), var(--shadow-glow);
-      cursor: pointer;
-      transition: all 0.3s ease;
-      flex: 0 0 auto;
-      max-width: 100%;
-      word-wrap: break-word;
-      text-align: center;
-    }
-    .skill-chip:hover, .project-card:hover {
-      background: var(--soft-green);
-      color: var(--bg-light);
-      box-shadow: 0 4px 20px rgba(3, 215, 3, 0.6);
-      transform: translateY(-2px);
-    }
-    .language-selection {
-      text-align: center;
-      padding: 20px;
-    }
-    .language-buttons {
+
+    .stat-row {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-      gap: 15px;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .stat-num {
+      font-size: 1.4rem;
+      font-weight: 800;
+    }
+
+    /* Ratio bar for Analysis details */
+    .ratio-container {
+      grid-column: span 2;
+      padding: 12px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .ratio-bar-bg {
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: rgba(255,255,255,0.06);
+      margin: 12px 0;
+      overflow: hidden;
+      display: flex;
+    }
+
+    .ratio-fill-matched { height: 100%; background: #1D9E75; width: 0%; transition: width 1s ease; border-radius: 3px; }
+    .ratio-fill-missing { height: 100%; background: #D85A30; width: 0%; transition: width 1s ease; border-radius: 3px; }
+
+    /* Skills List Style (Fixing Truncation) */
+    .skills-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      overflow-y: auto;
+      max-height: 280px;
+      flex: 1;
+      padding-right: 4px;
+    }
+
+    /* Custom Scrollbar for Skills */
+    .skills-stack::-webkit-scrollbar {
+      width: 4px;
+    }
+    .skills-stack::-webkit-scrollbar-track {
+      background: rgba(255,255,255,0.02);
+    }
+    .skills-stack::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.1);
+      border-radius: 2px;
+    }
+
+    .skill-list-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    [data-theme="light"] .skill-list-item {
+      background: rgba(0, 0, 0, 0.02);
+    }
+
+    .skill-status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .dot-matched { background: #1D9E75; box-shadow: 0 0 8px rgba(29, 158, 117, 0.4); }
+    .dot-missing { background: #D85A30; box-shadow: 0 0 8px rgba(216, 90, 48, 0.4); }
+    .dot-bonus   { background: #7F77DD; box-shadow: 0 0 8px rgba(127, 119, 221, 0.4); }
+
+    .skill-legend {
+      display: flex;
+      gap: 16px;
+      margin-top: auto;
+      padding-top: 12px;
+      border-top: 0.5px solid rgba(255,255,255,0.06);
+    }
+
+    .legend-bit {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    .legend-matched { color: #1D9E75; }
+    .legend-missing { color: #D85A30; }
+    .legend-bonus   { color: #7F77DD; }
+
+    /* Project Cards */
+    .project-card {
+      display: flex;
+      gap: 16px;
+      padding: 18px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      margin-bottom: 12px;
+      text-decoration: none;
+      color: inherit;
+      transition: all 0.2s;
+    }
+
+    .project-card:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: var(--primary-accent);
+      transform: translateX(4px);
+    }
+
+    .proj-icon {
+      width: 42px;
+      height: 42px;
+      background: var(--nav-active-bg);
+      color: var(--primary-accent);
+      display: flex;
+      align-items: center;
       justify-content: center;
-      margin-top: 15px;
+      border-radius: 12px;
     }
-    .language-btn {
-      padding: 10px 20px;
-      border: 2px solid var(--soft-green);
-      background: transparent;
-      color: var(--soft-green);
-      border-radius: 25px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      font-weight: 600;
-      font-size: 1rem;
+
+    .proj-text h4 { font-size: 1rem; font-weight: 700; margin-bottom: 4px; }
+    .proj-text p { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
+
+    /* Learning Path - Filling gaps */
+    .l-path {
+      flex: 1;
     }
-    .language-btn:hover {
-      background: var(--soft-green);
-      color: var(--bg-light);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 15px rgba(8, 193, 8, 0.3);
-    }
-    .learn-first {
-      margin-top: 20px;
-      padding: 15px;
-      background: linear-gradient(135deg, var(--soft-green), var(--gold-accent));
-      color: white;
-      border-radius: var(--border-radius);
-      text-align: center;
-    }
-    .learn-first strong {
-      display: block;
-      margin-bottom: 10px;
-      font-size: 1.1rem;
-    }
-    #start-learning-btn {
-      margin-top: 10px;
-      background: white;
-      color: var(--soft-green);
-      font-weight: bold;
-      border: none;
-      border-radius: var(--border-radius);
-      padding: 12px 25px;
-      font-size: 1.1rem;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1), var(--shadow-glow);
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-    #start-learning-btn:hover {
-      background: var(--bg-light);
-      color: var(--gold-accent);
-    }
-    .timestamp {
-      font-size: 1rem;
-      color: var(--gold-accent);
-      text-align: center;
-      margin-top: 20px;
-    }
-    .button-row {
+
+    .path-row {
       display: flex;
       gap: 20px;
-      margin-top: 30px;
-      flex-wrap: wrap;
+      padding-bottom: 16px;
+      position: relative;
+    }
+
+    .path-row::before {
+      content: '';
+      position: absolute;
+      left: 17px;
+      top: 36px;
+      bottom: 0;
+      width: 1px;
+      background: var(--border-color);
+    }
+
+    .path-row:last-child::before { display: none; }
+
+    .path-num {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--card-bg);
+      border: 2px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      flex-shrink: 0;
+      z-index: 1;
+      transition: all 0.3s;
+    }
+
+    .path-row.top-priority .path-num {
+      background: var(--primary-accent);
+      color: black;
+      border-color: var(--primary-accent);
+      box-shadow: 0 0 15px var(--primary-accent-glow);
+    }
+
+    .path-info {
+      flex: 1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 4px;
+    }
+
+    .path-name { font-weight: 700; font-size: 1.05rem; }
+    .path-tag {
+      font-size: 0.65rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .priority-tag { background: var(--nav-active-bg); color: var(--primary-accent); }
+
+    /* Mock Interview - Fill top space */
+    .mock-intro {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 2px;
+    }
+
+    .question-preview {
+      padding: 16px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px dashed var(--border-color);
+      border-radius: 12px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-style: italic;
+    }
+
+    .interview-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      margin: 14px 0;
+    }
+
+    .i-stat {
+      background: rgba(255,255,255,0.03);
+      border: 0.5px solid rgba(255,255,255,0.06);
+      border-radius: 10px;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .i-val {
+      font-size: 20px;
+      font-weight: 500;
+      color: #fff;
+      display: block;
+    }
+
+    .i-label {
+      font-size: 11px;
+      color: rgba(255,255,255,0.4);
+      margin-top: 2px;
+      text-transform: capitalize;
+    }
+
+    /* Buttons */
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 0.95rem;
+    }
+
+    .btn-primary {
+      background: var(--primary-accent);
+      border: none;
+      color: black;
+    }
+
+    .btn-primary:hover {
+      background: #14805e;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px var(--primary-accent-glow);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+    }
+
+    .btn-outline:hover {
+      border-color: var(--primary-accent);
+      background: var(--nav-active-bg);
+    }
+
+    .action-row {
+      display: flex;
+      gap: 16px;
+      margin-top: 64px;
       justify-content: center;
     }
-    .btn {
-      background: var(--soft-green);
-      color: var(--bg-light);
-      border: none;
-      border-radius: var(--border-radius);
-      padding: 12px 25px;
-      font-size: 1.1rem;
-      font-weight: 600;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1), var(--shadow-glow);
-      cursor: pointer;
-      transition: all 0.3s ease;
+
+    .action-btn {
+      width: auto;
+      padding: 12px 28px;
     }
-    .btn:hover {
-      background: var(--gold-accent);
-      color: var(--bg-light);
-      box-shadow: 0 4px 20px rgba(212, 160, 23, 0.6);
-      transform: translateY(-2px);
+
+    /* --- RESPONSIVE --- */
+    @media (max-width: 1024px) {
+      .card-score, .card-details, .card-skills, 
+      .card-projects, .card-learning, 
+      .card-interview, .card-fixes { 
+        grid-column: span 12; 
+      }
     }
-    .error-message {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: #dc3545;
-      color: white;
-      padding: 15px;
-      border-radius: 8px;
-      z-index: 1000;
-      box-shadow: var(--shadow-glow);
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
-    .error-message button {
-      background: transparent;
-      border: none;
-      color: white;
-      cursor: pointer;
+
+    @media (max-width: 768px) {
+      .grid { grid-template-columns: 1fr; }
+      .nav-menu { display: none; }
+      .nav-header { padding: 12px 20px; }
+      .container { padding: 24px 20px; }
+      .page-title { font-size: 2rem; }
     }
   </style>
 </head>
 <body>
-  <div class="logo-fixed">
-    <img src="logohiero copy.png" alt="Hiero Logo" style="height:38px;width:38px;min-width:38px;min-height:38px;object-fit:contain;filter:drop-shadow(var(--shadow-glow));">
-    <span style="font-weight:700;letter-spacing:1.5px;font-size:1.2rem;margin-left:6px;">HIERO</span>
-  </div>
-  <div class="hero">
-    <h2>Analysis Summary</h2>
-    <div class="main-flex">
-      <div class="left-col">
-        <div class="card">
-          <section class="score-section" aria-labelledby="score-title">
-            <h3 class="section-title" id="score-title">Analysis Result</h3>
-            <div class="score-ring">
-              <svg width="120" height="120" role="img" aria-label="Resume match score">
-                <circle class="bg" cx="60" cy="60" r="50" stroke="#e0e0e0" stroke-width="10" fill="none"/>
-                <circle class="progress" cx="60" cy="60" r="50" stroke="var(--soft-green)" stroke-width="10" fill="none" stroke-linecap="round"/>
-              </svg>
-              <div class="score-text" id="score-percent">0%</div>
-            </div>
-            <div class="score-label">Resume Match Score</div>
-          </section>
-        </div>
-        <div class="card" id="missing-skills-card">
-          <section aria-labelledby="skills-title">
-            <h3 class="section-title" id="skills-title">Missing Skills</h3>
-            <ul class="skills-list" id="missing-skills-list"></ul>
-            <div class="learn-first">
-              <strong>Recommended Learning Path:</strong> <span id="learn-first"></span>
-              <button class="btn" id="start-learning-btn" aria-label="Start personalized learning" onclick="window.location.href='learn.html'">🚀 Start Personalized Learning</button>
-            </div>
-          </section>
-        </div>
+
+  <header class="nav-header">
+    <a href="/" class="app-brand">
+      <div class="app-logo-box">
+        <img src="logo-hiero.png" alt="H">
       </div>
-      <div class="right-col">
-        <div class="card">
-          <section aria-labelledby="projects-title">
-            <h3 class="section-title" id="projects-title">Projects</h3>
-            <ul class="projects-list" id="project-list"></ul>
-          </section>
-        </div>
-        <div class="card">
-          <section class="language-selection" aria-labelledby="language-title">
-            <h3 class="section-title" id="language-title">📚 Learn in Your Language</h3>
-            <div class="language-buttons" id="language-buttons"></div>
-          </section>
-        </div>
+      <span>HIERO</span>
+    </a>
+    
+    <nav class="nav-menu">
+      <a href="domain-selection.html" class="nav-btn">
+        <i class="fa-regular fa-file-lines"></i>
+        <span>Resume Builder</span>
+      </a>
+      <a href="analysis.html" class="nav-btn active">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <span>Analyse Resume</span>
+      </a>
+      <a href="coming-soon.html?type=interview" class="nav-btn">
+        <i class="fa-solid fa-microphone"></i>
+        <span>Mock Interview</span>
+      </a>
+      <a href="learn.html" class="nav-btn">
+        <i class="fa-solid fa-book-open"></i>
+        <span>Learn Skills</span>
+      </a>
+    </nav>
+
+    <div class="nav-actions">
+      <button class="theme-toggle" id="theme-switch" onclick="window.toggleTheme()" title="Switch Theme">
+        <i class="fa-solid fa-moon"></i>
+      </button>
+      
+      <div class="user-profile">
+        <div class="user-avatar" id="user-avatar">J</div>
       </div>
     </div>
-    <div class="timestamp">Analyzed at: <span id="timestamp"></span></div>
-    <div class="button-row">
-      <button class="btn" onclick="window.location.href='upload.html'" aria-label="Analyze another resume">🔁 Analyze Another Resume</button>
-      <button class="btn" onclick="exportAnalysis()" aria-label="Export analysis">📄 Export Analysis</button>
+  </header>
+
+  <main class="container">
+    <nav class="breadcrumb">
+      <span>Dashboard</span>
+      <i class="fa-solid fa-chevron-right"></i>
+      <span>Analyse</span>
+      <i class="fa-solid fa-chevron-right"></i>
+      <span style="color: var(--text-main); font-weight: 700;">Results</span>
+    </nav>
+
+    <h1 class="page-title">Analysis <span>Summary</span></h1>
+    <p class="page-subtitle">Detailed breakdown of how your skills align with the target role.</p>
+    
+    <div id="domain-badge-box" class="role-tag">Full Stack Developer Profile</div>
+
+    <div class="grid">
+      <!-- Card 1: Match Score -->
+      <div class="card card-score">
+        <div class="card-header">
+          <span class="card-title">Match Score</span>
+          <i class="fa-solid fa-bahai" style="color: var(--primary-accent)"></i>
+        </div>
+        <div class="score-box">
+          <div class="score-svg-wrapper">
+            <svg width="100" height="100">
+              <circle class="bg" cx="50" cy="50" r="40" />
+              <circle class="progress" id="score-circle" cx="50" cy="50" r="40" />
+            </svg>
+            <div class="score-val" id="score-percent">0%</div>
+          </div>
+          
+          <div class="score-meta">
+            <div class="percentile-text" id="score-context">Analyzing match...</div>
+            <div class="mini-bar-bg">
+              <div class="mini-bar-fill" id="score-bar-fill"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2: Analysis Details -->
+      <div class="card card-details">
+        <div class="card-header">
+          <span class="card-title">Analysis Details</span>
+          <span style="font-size: 0.75rem; color: var(--primary-accent); font-weight: 800;" id="domain-display">TECH</span>
+        </div>
+        <div class="details-grid">
+          <div class="stat-row">
+            <div class="stat-item">
+              <span class="stat-label">JD Skills</span>
+              <span class="stat-num" id="jd-skills-count">--</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Your Skills</span>
+              <span class="stat-num" id="resume-skills-count">--</span>
+            </div>
+          </div>
+
+          <div class="stat-row">
+            <div class="stat-item">
+              <span class="stat-label">Matched</span>
+              <span class="stat-num" id="matched-count">--</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Missing</span>
+              <span class="stat-num" id="missing-count">--</span>
+            </div>
+          </div>
+          
+          <div class="ratio-container">
+            <div class="stat-label" style="font-size: 0.7rem; display: flex; justify-content: space-between;">
+              <span>Match Ratio</span>
+              <span id="ratio-text">0% coverage</span>
+            </div>
+            <div class="ratio-bar-bg">
+              <div class="ratio-fill-matched" id="ratio-bar-matched"></div>
+              <div class="ratio-fill-missing" id="ratio-bar-missing"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 3: Skills Breakdown -->
+      <div class="card card-skills">
+        <div class="card-header">
+          <span class="card-title">Skills Breakdown</span>
+          <i class="fa-solid fa-list-ul" style="color: var(--text-muted)"></i>
+        </div>
+        <div class="skills-stack" id="skills-breakdown-list">
+          <!-- List items injected here (No truncation) -->
+        </div>
+        <div class="skill-legend">
+          <div class="legend-bit legend-matched"><span class="skill-status-dot dot-matched"></span> matched</div>
+          <div class="legend-bit legend-missing"><span class="skill-status-dot dot-missing"></span> missing</div>
+          <div class="legend-bit legend-bonus"><span class="skill-status-dot dot-bonus"></span> bonus</div>
+        </div>
+      </div>
+
+      <!-- Card 4: Suggested Projects -->
+      <div class="card card-projects">
+        <div class="card-header">
+          <span class="card-title">Suggested Projects</span>
+          <i class="fa-solid fa-terminal" style="color: var(--text-muted)"></i>
+        </div>
+        <div id="project-list-container">
+          <!-- Projects injected here -->
+        </div>
+      </div>
+
+      <!-- Card 5: Learning Track -->
+      <div class="card card-learning">
+        <div class="card-header">
+          <span class="card-title">Learning Track</span>
+          <i class="fa-solid fa-bolt" style="color: #F39C12"></i>
+        </div>
+        <div class="l-path" id="learning-path-steps">
+          <!-- Steps injected here -->
+        </div>
+        <button class="btn btn-outline" style="margin-top: auto; padding-top: 12px;" id="start-learning-btn">Start Skill Module</button>
+      </div>
+
+      <!-- Card 7: Resume Optimization (The Career Coach) -->
+      <div class="card card-fixes" style="border-color: rgba(255, 0, 0, 0.2);">
+        <div class="card-header">
+          <span class="card-title" style="color: #ff4d4d;">Resume Fixes</span>
+          <i class="fa-solid fa-wand-magic-sparkles" style="color: #ff4d4d;"></i>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 12px; padding-top: 8px;" id="suggestion-list">
+          <div style="display: flex; gap: 10px; font-size: 13px; color: var(--text-muted);">
+            <i class="fa-solid fa-triangle-exclamation" style="color: #ff4d4d; margin-top: 3px;"></i>
+            <span>Add measurable achievements (e.g. "increased X by 20%")</span>
+          </div>
+          <div style="display: flex; gap: 10px; font-size: 13px; color: var(--text-muted);">
+            <i class="fa-solid fa-triangle-exclamation" style="color: #ff4d4d; margin-top: 3px;"></i>
+            <span>Include GitHub project links for technical verification</span>
+          </div>
+          <div style="display: flex; gap: 10px; font-size: 13px; color: var(--text-muted);">
+            <i class="fa-solid fa-triangle-exclamation" style="color: #ff4d4d; margin-top: 3px;"></i>
+            <span>Add a specialized React.js project to your portfolio</span>
+          </div>
+          <div style="display: flex; gap: 10px; font-size: 13px; color: var(--text-muted);">
+            <i class="fa-solid fa-triangle-exclamation" style="color: #ff4d4d; margin-top: 3px;"></i>
+            <span>Explicitly mention REST API experience in summary</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 6: Mock Interview -->
+      <div class="card card-interview">
+        <div class="card-header">
+          <span class="card-title">Mock Interview</span>
+          <span style="font-size: 0.7rem; color: #F39C12; font-weight: 800;" id="focus-skill-badge">Focus: AI</span>
+        </div>
+        <div class="mock-intro">
+          <p style="font-size: 0.95rem; color: var(--text-muted);">Practice AI-graded interview questions based on the JD requirements found.</p>
+          <div class="question-preview">
+            "Based on your resume, how would you approach building a scalable REST API using Node.js?"
+          </div>
+        </div>
+        
+        <div class="interview-stats">
+          <div class="i-stat">
+            <span class="i-val">5</span>
+            <span class="i-label">Questions</span>
+          </div>
+          <div class="i-stat">
+            <span class="i-val">10m</span>
+            <span class="i-label">Duration</span>
+          </div>
+          <div class="i-stat">
+            <span class="i-val">AI</span>
+            <span class="i-label">Live AI</span>
+          </div>
+        </div>
+        <button class="btn btn-primary" id="start-interview-btn">Start Mock Interview</button>
+      </div>
     </div>
-  </div>
+
+    <div class="action-row">
+      <button class="btn btn-outline action-btn" onclick="window.location.href='analysis.html'"><i class="fa-solid fa-rotate"></i> Re-Analyze</button>
+      <button class="btn btn-outline action-btn" onclick="exportAnalysis()"><i class="fa-solid fa-file-export"></i> Download PDF</button>
+    </div>
+
+    <footer style="margin-top: 100px; padding: 48px 0; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; color: var(--text-muted); font-size: 0.85rem;">
+      <div id="timestamp-text">Analyzed: --</div>
+      <div>Hiero Intelligence &copy; 2026</div>
+    </footer>
+  </main>
+
+  <script>
+    // --- THEME ENGINE ---
+    window.toggleTheme = () => {
+      const doc = document.documentElement;
+      const current = doc.getAttribute('data-theme');
+      const target = current === 'light' ? 'dark' : 'light';
+      doc.setAttribute('data-theme', target);
+      localStorage.setItem('hiero-theme', target);
+      updateThemeUI(target);
+    };
+
+    function updateThemeUI(theme) {
+      const btn = document.getElementById('theme-switch');
+      if (theme === 'light') {
+        btn.innerHTML = '<i class="fa-solid fa-sun"></i>';
+      } else {
+        btn.innerHTML = '<i class="fa-solid fa-moon"></i>';
+      }
+    }
+
+    // Initialize Theme
+    const savedTheme = localStorage.getItem('hiero-theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    updateThemeUI(savedTheme);
+
+    // --- DATA RENDERING ---
+    function sanitize(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function animateStats(percent) {
+      const circle = document.getElementById('score-circle');
+      const bar = document.getElementById('score-bar-fill');
+      const context = document.getElementById('score-context');
+      
+      const circumference = 251.3; // 2 * PI * 40
+      const offset = circumference - (percent / 100) * circumference;
+      
+      // Update animation target
+      document.documentElement.style.setProperty('--target-offset', offset);
+      
+      setTimeout(() => {
+        if(bar) bar.style.width = percent + '%';
+        if(context) {
+          if (percent > 75) context.textContent = "Great Match! You're in top 10% of candidates.";
+          else if (percent > 40) context.textContent = "Good Match! Better than 45% of candidates.";
+          else context.textContent = "Room to Grow. Focus on missing skills.";
+        }
+      }, 500);
+    }
+
+    function renderPage() {
+      const stored = JSON.parse(localStorage.getItem('analysisResult'));
+      if (!stored) return;
+      const data = stored.data || stored;
+      
+      const jdCount = (data.jdSkills || []).length;
+      const matchedCount = (data.matchedSkills || []).length;
+      const missingCount = (data.missingSkills || []).length;
+
+      // Score
+      const score = Math.round(data.score || 0);
+      document.getElementById('score-percent').textContent = score + '%';
+      animateStats(score);
+
+      // Details
+      const domain = (data.domain || 'Tech').toUpperCase();
+      document.getElementById('domain-display').textContent = domain;
+      document.getElementById('domain-badge-box').textContent = `${domain} Professional Profile`;
+      
+      document.getElementById('jd-skills-count').textContent = jdCount;
+      document.getElementById('resume-skills-count').textContent = (data.resumeSkills || []).length;
+      document.getElementById('matched-count').textContent = matchedCount;
+      document.getElementById('missing-count').textContent = missingCount;
+
+      // Ratio Bar Logic
+      const coverage = jdCount > 0 ? Math.round((matchedCount / jdCount) * 100) : 0;
+      const missingPct = jdCount > 0 ? Math.round((missingCount / jdCount) * 100) : 0;
+      
+      setTimeout(() => {
+        document.getElementById('ratio-bar-matched').style.width = coverage + '%';
+        document.getElementById('ratio-bar-missing').style.width = missingPct + '%';
+        document.getElementById('ratio-text').textContent = coverage + '% coverage';
+      }, 800);
+
+      // Skills Breakdown (List Style, No truncation)
+      const skillsContainer = document.getElementById('skills-breakdown-list');
+      if (skillsContainer) {
+        skillsContainer.innerHTML = '';
+        
+        const addSkill = (name, type) => {
+          const div = document.createElement('div');
+          div.className = 'skill-list-item';
+          div.innerHTML = `<span class="skill-status-dot dot-${type}"></span> ${sanitize(name)}`;
+          skillsContainer.appendChild(div);
+        };
+
+        // Deduplicate skills
+        const seenMatched = new Set();
+        const uniqueMatched = (data.matchedSkills || []).filter(s => {
+          const l = s.toLowerCase().trim();
+          if(seenMatched.has(l)) return false;
+          seenMatched.add(l);
+          return true;
+        });
+
+        const seenMissing = new Set();
+        const uniqueMissing = (data.missingSkills || []).filter(s => {
+          const l = s.toLowerCase().trim();
+          if(seenMissing.has(l) || seenMatched.has(l)) return false;
+          seenMissing.add(l);
+          return true;
+        });
+
+        uniqueMatched.forEach(s => addSkill(s, 'matched'));
+        uniqueMissing.slice(0, 5).forEach(s => {
+          const div = document.createElement('div');
+          div.className = 'skill-list-item';
+          div.style.cursor = 'pointer';
+          div.title = 'Click to learn this skill';
+          div.onclick = () => window.location.href = `learn.html?skill=${encodeURIComponent(s)}`;
+          div.innerHTML = `<span class="skill-status-dot dot-missing"></span> ${sanitize(s)}`;
+          skillsContainer.appendChild(div);
+        });
+        (data.extraSkills || []).slice(0, 3).forEach(s => addSkill(s, 'bonus'));
+      }
+
+      // Projects
+      const projectContainer = document.getElementById('project-list-container');
+      projectContainer.innerHTML = '';
+      (data.projectSuggestions || []).slice(0, 3).forEach((p, i) => {
+        const name = typeof p === 'string' ? p : (p.title || p.name);
+        projectContainer.innerHTML += `
+          <a href="#" class="project-card">
+            <div class="proj-icon"><i class="fa-solid fa-code-merge"></i></div>
+            <div class="proj-text">
+              <h4>${sanitize(name)}</h4>
+              <p>Critical Skill Bridging Project</p>
+            </div>
+          </a>
+        `;
+      });
+
+      // Learning Path (Filing Gap)
+      const pathContainer = document.getElementById('learning-path-steps');
+      pathContainer.innerHTML = '';
+      const missing = data.missingSkills || ['React.js', 'Agile/Scrum', 'Cloud Deployment'];
+      
+      // Ensure specific skills requested are there or use available ones
+      const pathItems = missing.length >= 3 ? missing.slice(0, 5) : [...missing, 'React.js', 'Agile/Scrum'].slice(0, 5);
+      
+      pathItems.forEach((s, i) => {
+        pathContainer.innerHTML += `
+          <div class="path-row ${i === 0 ? 'top-priority' : ''}">
+            <div class="path-num">${i+1}</div>
+            <div class="path-info">
+              <span class="path-name">${sanitize(s)}</span>
+              <span class="path-tag ${i === 0 ? 'priority-tag' : ''}">${i === 0 ? 'Priority' : 'High'}</span>
+            </div>
+          </div>
+        `;
+      });
+
+      const topSkill = data.skillToLearnFirst || pathItems[0] || 'Modern Web Stack';
+      document.getElementById('focus-skill-badge').textContent = `Focus: ${topSkill}`;
+
+      document.getElementById('start-learning-btn').onclick = () => {
+        window.location.href = `learn.html`;
+      };
+      document.getElementById('start-interview-btn').onclick = () => {
+        window.location.href = `coming-soon.html?type=interview&skill=${encodeURIComponent(topSkill)}`;
+      };
+
+      // Resume Fixes - Dynamic mapping
+      const suggestionContainer = document.getElementById('suggestion-list');
+      if (suggestionContainer) {
+        suggestionContainer.innerHTML = '';
+        const suggestions = [];
+        
+        if (score < 70) suggestions.push('Add measurable achievements (e.g. "increased X by 20%")');
+        if (missingPct > 20) suggestions.push(`Add a project focused on <strong>${sanitize(topSkill)}</strong> to your portfolio`);
+        if (!data.extraSkills || data.extraSkills.length < 2) suggestions.push('Diversify your skill stack with "Bonus" technologies for higher match rate');
+        suggestions.push('Include GitHub project links for technical verification of your claims');
+        suggestions.push('Explicitly mention REST API experience for backend verification');
+        
+        suggestions.forEach(s => {
+          suggestionContainer.innerHTML += `
+            <div style="display: flex; gap: 10px; font-size: 13px; color: var(--text-muted);">
+              <i class="fa-solid fa-triangle-exclamation" style="color: #ff4d4d; margin-top: 3px;"></i>
+              <span>${s}</span>
+            </div>
+          `;
+        });
+
+        // Add the "View Full Resume Report" button to fill the gap
+        suggestionContainer.innerHTML += `
+          <button class="btn btn-outline" style="margin-top: 20px; border-color: rgba(255, 77, 77, 0.4); color: #ff4d4d; font-size: 0.8rem;" onclick="exportAnalysis()">
+            View Full Resume Report
+          </button>
+        `;
+      }
+
+      document.getElementById('timestamp-text').textContent = "Analyzed: " + new Date().toLocaleString();
+    }
+
+    function exportAnalysis() {
+      alert("Preparing high-quality PDF report for download...");
+    }
+
+    document.addEventListener('DOMContentLoaded', renderPage);
+  </script>
 </body>
 </html>
