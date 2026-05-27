@@ -5,21 +5,13 @@ const dotenv = require('dotenv');
 const path = require('path');
 const mongoose = require('mongoose');
 const compression = require('compression');
+const axios = require('axios');
 const { createProxyMiddleware } = require('http-proxy-middleware');
 
 dotenv.config();
 
-// Backup: Try to load from login-system/.env if root .env didn't provide critical variables
-if (!process.env.GOOGLE_CLIENT_ID) {
-    dotenv.config({ path: path.join(__dirname, 'login-system', '.env') });
-}
-
 const app = express();
 const PORT = process.env.PORT || 2816;
-
-console.log('🔐 Gateway Startup Logic:');
-console.log('   GOOGLE_CLIENT_ID       =', process.env.GOOGLE_CLIENT_ID ? '✅ Loaded' : '❌ Missing');
-console.log('   PORT                   =', PORT);
 
 // ======================
 // CONFIG & PATHS
@@ -44,11 +36,9 @@ app.set('trust proxy', 1);
 app.use(compression());
 app.use(express.json({ limit: '20mb' }));
 
-// Debug log for auth/OAuth routes
+// Debug log for all routes
 app.use((req, res, next) => {
-    if (req.path.startsWith('/auth') || req.path.startsWith('/api')) {
-        console.log(`[GW] ${req.method} ${req.originalUrl}`);
-    }
+    console.log(`[GW DEBUG] ${req.method} ${req.path}`);
     next();
 });
 
@@ -111,13 +101,6 @@ if (process.env.MONGODB_URI) {
 const authObj = require('./routes/auth');
 app.use('/', authObj.router);
 
-// Profile endpoint
-app.get('/dashboard', authObj.authenticateToken, (req, res) => {
-    const user = authObj.users.find(u => u.id === req.user.id);
-    if (!user) return res.status(404).json({ error: 'User not found' });
-    res.json({ id: user.id, name: user.name, email: user.email, picture: user.picture });
-});
-
 // ======================
 // PROXIES & INTEGRATED ROUTES
 // ======================
@@ -127,6 +110,24 @@ app.get('/dashboard', authObj.authenticateToken, (req, res) => {
 app.use('/dashboard', express.static(resumeBuilderPath));
 app.use('/dashboard', express.static(landingDirPath));
 app.use('/public/dashboard', express.static(resumeBuilderPath)); // Fix for nested paths
+
+// Profile endpoint (Integrated)
+app.get('/api/me', authObj.authenticateToken, (req, res) => {
+    const user = authObj.users.find(u => u.id === req.user.id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    res.json({ id: user.id, name: user.name, email: user.email, picture: user.picture });
+});
+
+// Legacy API (for frontend compat)
+app.get('/dashboard', authObj.authenticateToken, (req, res, next) => {
+    // If request accepts JSON, handle as API. If not, it's probably a navigation (allow static to take over)
+    if (req.accepts('json')) {
+        const user = authObj.users.find(u => u.id === req.user.id);
+        if (!user) return res.status(404).json({ error: 'User not found' });
+        return res.json({ id: user.id, name: user.name, email: user.email, picture: user.picture });
+    }
+    next();
+});
 
 
 // 📄 Resume API (Integrated!)
@@ -154,48 +155,6 @@ app.use('/api/analysis', analysisRouter); // Supports /api/analysis/analyze
 const aiPhotoRouter = require('./routes/ai-photo');
 app.use('/api', aiPhotoRouter); // Handles /api/generate-executive-photo
 
-// Orbit Neural Assistant Chat API (New!)
-const chatRouter = require('./routes/chat');
-app.use('/api', chatRouter); // Handles /api/chat
-
-// Python Code Execution API (New!)
-const runRouter = require('./routes/run');
-app.use('/api', runRouter); // Handles /api/run
-
-const interviewRouter = require('./routes/interview');
-app.use('/api/interview', interviewRouter);
-
-// 📊 Admin Analytics (localhost-only + password-protected)
-const { router: analyticsRouter } = require('./routes/analytics');
-app.use('/api/admin', analyticsRouter);
-
-// 📱 QR Code tracker — record server-side THEN redirect (guaranteed, no JS needed)
-app.get('/qr', async (req, res) => {
-    try {
-        const { PageView } = require('./routes/analytics');
-        await PageView.create({
-            page:      'qr-landing',
-            source:    'qr',
-            ip:        req.ip,
-            userAgent: req.headers['user-agent'],
-            timestamp: new Date()
-        });
-        console.log(`[QR] Scan recorded from IP: ${req.ip}`);
-    } catch(e) {
-        console.warn('[QR] Could not record scan:', e.message);
-    }
-    res.redirect('/?ref=qr');
-});
-
-// Admin Analytics Dashboard (localhost-only HTML)
-app.get('/admin', (req, res) => {
-    const host = req.hostname;
-    if (host !== 'localhost' && host !== '127.0.0.1' && host !== '::1') {
-        return res.status(403).send('<h1>403 Forbidden</h1><p>This page is only accessible locally.</p>');
-    }
-    res.sendFile(require('path').join(__dirname, 'admin-analytics.html'));
-});
-
 // Support legacy shortened paths
 app.use('/auth/signup', (req, res) => res.redirect(307, '/signup'));
 app.use('/auth/login', (req, res) => res.redirect(307, '/login'));
@@ -210,14 +169,14 @@ app.get('/', (req, res) => {
 // Explicit UI Routes
 app.get(['/login', '/login.html'], (req, res) => res.sendFile(path.join(landingDirPath, 'login.html')));
 app.get(['/signup', '/signup.html'], (req, res) => res.sendFile(path.join(landingDirPath, 'signup.html')));
-app.get('/dashboard.html', (req, res) => res.sendFile(path.join(resumeBuilderPath, 'index.html')));
-
+app.get('/dashboard.html', (req, res) => res.sendFile(path.join(resumeBuilderPath, 'dashboard.html')));
 
 // Route /get-started to the role selection page
 app.get('/get-started', (req, res) => {
     res.sendFile(path.join(landingDirPath, 'role-selection.html'));
 });
 
+app.get(['/mock-interview', '/mock-interview.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'mock-interview.html')));
 app.get('/sitemap.xml', (req, res) => res.sendFile(path.join(landingDirPath, 'sitemap.xml')));
 app.get('/robots.txt', (req, res) => res.sendFile(path.join(landingDirPath, 'robots.txt')));
 
@@ -225,11 +184,7 @@ app.get(['/learn', '/learn.html'], (req, res) => res.sendFile(path.join(resumeBu
 app.get(['/solve', '/solve.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'solve.html')));
 app.get(['/resume-builder', '/resume-builder.html', '/dashboard/resume-builder'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'resume-builder.html')));
 app.get(['/resume-form', '/resume-form.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'resume-form.html')));
-app.get(['/domain-selection', '/domain-selection.html', '/dashboard/domain-selection.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'domain-selection.html')));
-app.get(['/project', '/project.html', '/dashboard/project.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'coming-soon.html')));
-app.get(['/interview', '/interview.html', '/mock-interview', '/mock-interview.html', '/dashboard/mock-interview.html'], (req, res) => res.sendFile(path.join(__dirname, 'mock_interview', 'mock-interview.html')));
-
-
+app.get(['/project', '/project.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'project.html')));
 app.get(['/analysis', '/analysis.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'analysis.html')));
 app.get(['/ai-photo-formalizer', '/ai-photo-formalizer.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'ai-photo-formalizer.html')));
 
@@ -238,7 +193,6 @@ app.get(['/ai-photo-formalizer', '/ai-photo-formalizer.html'], (req, res) => res
 // ======================
 app.use(express.static(landingDirPath, { index: false }));
 app.use(express.static(resumeBuilderPath, { index: false }));
-app.use('/mock-interview-assets', express.static(path.join(__dirname, 'mock_interview')));
 app.use('/public', express.static(resumeBuilderPath));
 app.use(express.static(path.join(__dirname, 'login-system'), { index: false }));
 
@@ -255,6 +209,36 @@ app.get('*', (req, res, next) => {
 
 // Final fallback for legacy /api/analyze if not caught by reviewRouter
 app.use('/api', analysisRouter);
+
+// --- Groq AI Interview Chat ---
+app.post('/api/interview/chat', async (req, res) => {
+    try {
+        const { messages } = req.body;
+        if (!process.env.GROQ_API_KEY) {
+            return res.status(500).json({ error: 'Groq API Key not configured' });
+        }
+
+        const response = await axios.post('https://api.groq.com/openai/v1/chat/completions', {
+            model: process.env.AI_MODEL || 'grok-beta',
+            messages: messages,
+            temperature: 0.7,
+            max_tokens: 150
+        }, {
+            headers: {
+                'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        res.json(response.data);
+    } catch (error) {
+        console.error('Groq API Error:', error.response ? error.response.data : error.message);
+        res.status(500).json({
+            error: 'AI service error',
+            details: error.response ? error.response.data : error.message
+        });
+    }
+});
 
 // ======================
 // START SERVER

@@ -1,0 +1,140 @@
+
+Gateway LIVE at http://localhost:2816
+   Landing dir          → /Users/jaswanthkumar/Desktop/shared folder/hiero last prtotype/jss/hiero/hiero last
+   started.html        → /
+   Sign-up/Login       → /auth/signup, /auth/login
+   Google OAuth        → /auth/google, /auth/google/callback
+   GitHub OAuth        → /auth/github, /auth/github/callback
+   Dashboard UI        → /dashboard (proxied from :8082)
+   Resume API          → /api/resume/*     (:5003)
+   Analysis API        → /api/analysis/*   (:5001)
+   Base URL Mode       → ENV https://361a91192475.ngrok-free.app
+   Proxy Log Level     → warn
+
+[GW] GET /auth/google
+(node:91633) [DEP0060] DeprecationWarning: The `util._extend` API is deprecated. Please use Object.assign() instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+[GW] GET /auth/google/callback?code=4%2F0Ab32j93QO_FkT3jF2XYlQA8NDdeHqvpyeA6bWnf-ktv8clzzeTtnpUEoSZX-sqIGb-257A&scope=email+profile+openid+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile&authuser=0&prompt=none
+[GW] GET /auth/google
+[GW] GET /auth/google/callback?code=4%2F0Ab32j93CDpBIcyhqG5Z3h2v7tS2SPrBV-y3Ki6yMEGqoGOc3hIiFKRTdtQ1Akc1MzCi8LQ&scope=email+profile+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile+openid&authuser=0&prompt=none
+[GW] GET /auth/google
+[GW] GET /auth/google/callback?code=4%2F0Ab32j91FlsvdcPuUF5nqUhjjRgRFfaZBY04bEL-uTKQs0QETlFmY_L-Evqp5Fv_2xHl7RQ&scope=email+profile+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile+openid&authuser=0&prompt=none
+
+Gateway LIVE at http://localhost:2816
+   Landing dir          → /Users/jaswanthkumar/Desktop/shared folder/hiero last prtotype/jss/hiero/hiero last
+   started.html        → /
+   Sign-up/Login       → /auth/signup, /auth/login
+   Google OAuth        → /auth/google, /auth/google/callback
+   GitHub OAuth        → /auth/github, /auth/github/callback
+   Dashboard UI        → /dashboard (proxied from :8082)
+   Resume API          → /api/resume/*     (:5003)
+   Analysis API        → /api/analysis/*   (:5001)
+   Base URL Mode       → ENV https://361a91192475.ngrok-free.app
+   Proxy Log Level     → warn
+
+(node:93402) [DEP0060] DeprecationWarning: The `util._extend` API is deprecated. Please use Object.assign() instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+
+Gateway LIVE at http://localhost:2816
+   Landing dir          → /Users/jaswanthkumar/Desktop/shared folder/hiero last prtotype/jss/hiero/hiero last
+   started.html        → /
+   Sign-up/Login       → /auth/signup, /auth/login
+   Google OAuth        → /auth/google, /auth/google/callback
+   GitHub OAuth        → /auth/github, /auth/github/callback
+   Dashboard UI        → /dashboard (proxied from :8082)
+   Resume API          → /api/resume/*     (:5003)
+   Analysis API        → /api/analysis/*   (:5001)
+   Base URL Mode       → ENV https://361a91192475.ngrok-free.app
+   Proxy Log Level     → warn
+
+(node:94482) [DEP0060] DeprecationWarning: The `util._extend` API is deprecated. Please use Object.assign() instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+[GW] GET /auth/google
+
+Gateway LIVE at http://localhost:2816
+   Landing dir          → /Users/jaswanthkumar/Desktop/shared folder/hiero last prtotype/jss/hiero/hiero last
+   started.html        → /
+   Sign-up/Login       → /auth/signup, /auth/login
+   Google OAuth        → /auth/google, /auth/google/callback
+   GitHub OAuth        → /auth/github, /auth/github/callback
+   Dashboard UI        → /dashboard (proxied from :8082)
+   Resume API          → /api/resume/*     (:5003)
+   Analysis API        → /api/analysis/*   (:5001)
+   Base URL Mode       → ENV https://3067c52088e2.ngrok-free.app
+   Proxy Log Level     → warn
+
+[GW] GET /auth/google
+(node:96214) [DEP0060] DeprecationWarning: The `util._extend` API is deprecated. Please use Object.assign() instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+[GW] GET /auth/google
+[GW] GET /auth/google
+[GW] GET /auth/google/callback?code=4%2F0Ab32j931x8HnDaP7rmiBL9jzVilBj3c8oxBxeW00v0-l87nIAuJPpFr3RiAKLXo2sVekgg&scope=email+profile+openid+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email&authuser=0&prompt=none
+[GW] GET /auth/google
+
+Gateway LIVE at http://localhost:2816
+   Landing dir          → /Users/jaswanthkumar/Desktop/shared folder/hiero last prtotype/jss/hiero/hiero last
+   started.html        → /
+   Sign-up/Login       → /auth/signup, /auth/login
+   Google OAuth        → /auth/google, /auth/google/callback
+   GitHub OAuth        → /auth/github, /auth/github/callback
+   Dashboard UI        → /dashboard (proxied from :8082)
+   Resume API          → /api/resume/*     (:5003)
+   Analysis API        → /api/analysis/*   (:5001)
+   Base URL Mode       → ENV https://3067c52088e2.ngrok-free.app
+   Proxy Log Level     → warn
+
+(node:97127) [DEP0060] DeprecationWarning: The `util._extend` API is deprecated. Please use Object.assign() instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+[GW] GET /auth/google
+[GW] GET /auth/google
+[GW] GET /auth/google
+[GW] GET /auth/google/callback?code=4%2F0Ab32j90yKeIJwRuTYStrx53BlnEKOHe-Qg1KFCSbBgv-iLG-4jL6NpvhLcVPjahQGc6mZQ&scope=email+profile+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile+openid&authuser=0&prompt=none
+[GW] Registering route: POST/GET /signup → http://localhost:3000
+[GW] Registering route: POST/GET /login → http://localhost:3000
+[GW] Registering route: POST/GET /logout → http://localhost:3000
+[GW] Registering route: POST/GET /verify-email → http://localhost:3000
+[GW] Registering route: POST/GET /me → http://localhost:3000
+[GW] Registering route: POST/GET /generate-resume → http://localhost:3000
+[GW] Registering route: POST/GET /download-resume → http://localhost:3000
+[GW] Registering route: POST/GET /preview-resume → http://localhost:3000
+
+Gateway LIVE at http://localhost:2816
+   Landing dir          → /Users/jaswanthkumar/Desktop/shared folder/hiero last prtotype/jss/hiero/hiero last
+   started.html        → /
+   Sign-up/Login       → /auth/signup, /auth/login
+   Google OAuth        → /auth/google, /auth/google/callback
+   GitHub OAuth        → /auth/github, /auth/github/callback
+   Dashboard UI        → /dashboard (proxied from :8082)
+   Resume API          → /api/resume/*     (:5003)
+   Analysis API        → /api/analysis/*   (:5001)
+   Base URL Mode       → ENV https://3067c52088e2.ngrok-free.app
+   Proxy Log Level     → warn
+
+[GW] ⚡ Received request: POST /preview-resume
+(node:98171) [DEP0060] DeprecationWarning: The `util._extend` API is deprecated. Please use Object.assign() instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+[GW] ⚡ Received request: GET /preview-resume
+[GW] Registering route: POST/GET /signup → http://localhost:3000
+[GW] Registering route: POST/GET /login → http://localhost:3000
+[GW] Registering route: POST/GET /logout → http://localhost:3000
+[GW] Registering route: POST/GET /verify-email → http://localhost:3000
+[GW] Registering route: POST/GET /me → http://localhost:3000
+[GW] Registering route: POST/GET /generate-resume → http://localhost:3000
+[GW] Registering route: POST/GET /download-resume → http://localhost:3000
+[GW] Registering route: POST/GET /preview-resume → http://localhost:3000
+
+Gateway LIVE at http://localhost:2816
+   Landing dir          → /Users/jaswanthkumar/Desktop/shared folder/hiero last prtotype/jss/hiero/hiero last
+   started.html        → /
+   Sign-up/Login       → /auth/signup, /auth/login
+   Google OAuth        → /auth/google, /auth/google/callback
+   GitHub OAuth        → /auth/github, /auth/github/callback
+   Dashboard UI        → /dashboard (proxied from :8082)
+   Resume API          → /api/resume/*     (:5003)
+   Analysis API        → /api/analysis/*   (:5001)
+   Base URL Mode       → ENV https://3067c52088e2.ngrok-free.app
+   Proxy Log Level     → warn
+
+[GW] ⚡ Received request: POST /preview-resume
+(node:711) [DEP0060] DeprecationWarning: The `util._extend` API is deprecated. Please use Object.assign() instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)

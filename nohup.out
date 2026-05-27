@@ -1,0 +1,31 @@
+npm warn Unknown project config "puppeteer_skip_chromium_download". This will stop working in the next major version of npm.
+npm warn Unknown project config "puppeteer_skip_download". This will stop working in the next major version of npm.
+
+> hiero-unified-server@1.0.0 start
+> node gateway.js u0026 u003e server.log 2u003eu00261 u0026
+
+--- Path Verification ---
+Current Dir: /Users/jaswanthkumar/Desktop/shared folder
+Landing Path: /Users/jaswanthkumar/Desktop/shared folder/hiero-prototype/jss/hiero/hiero-last ✅
+Public Path: /Users/jaswanthkumar/Desktop/shared folder/hiero-prototype/jss/hiero/hiero-last/public ✅
+Started HTML: /Users/jaswanthkumar/Desktop/shared folder/hiero-prototype/jss/hiero/hiero-last/started.html ✅
+------------------------
+⚠️ MONGODB_URI is not defined. Database features will fail!
+✅ Loaded 3 users from persistence
+/Users/jaswanthkumar/Desktop/shared folder/routes/import-service.js:249
+    if (data.experience.length \u003e 0 \u0026\u0026!data.experience[0].company \u0026\u0026 sections.experience.length \u003e 1) {
+                               ^^^^^^
+
+SyntaxError: Invalid or unexpected token
+    at wrapSafe (node:internal/modules/cjs/loader:1624:18)
+    at Module._compile (node:internal/modules/cjs/loader:1666:20)
+    at Object..js (node:internal/modules/cjs/loader:1824:10)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.require (node:internal/modules/cjs/loader:1449:12)
+    at require (node:internal/modules/helpers:135:16)
+    at Object.<anonymous> (/Users/jaswanthkumar/Desktop/shared folder/gateway.js:125:22)
+
+Node.js v24.3.0

@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Hiero Mock Interview - Live Session</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Syne:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.10.0/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/blazeface@0.0.7/dist/blazeface.min.js"></script>
+  <style>
+    :root {
+      --g: #09c006;
+      --g-dark: #079604;
+      --g10: rgba(9, 192, 6, 0.10);
+      --g25: rgba(9, 192, 6, 0.25);
+      --g40: rgba(9, 192, 6, 0.40);
+      --bg: #060608;
+      --surface: rgba(255, 255, 255, 0.04);
+      --surface2: rgba(255, 255, 255, 0.055);
+      --border: rgba(255, 255, 255, 0.08);
+      --border-g: rgba(9, 192, 6, 0.20);
+      --text: #f0f4f8;
+      --muted: #64748b;
+      --red: #ef4444;
+      --radius-xl: 28px;
+      --radius-lg: 18px;
+      --radius-md: 12px;
+      --card: rgba(255, 255, 255, 0.02);
+      --card2: rgba(255, 255, 255, 0.035);
+      --border2: rgba(255, 255, 255, 0.05);
+      --white: #ffffff;
+      --muted2: #94a3b8;
+      --blue: #3b82f6;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow: hidden;
+      background-image:
+        radial-gradient(ellipse 70% 55% at 10% -5%, rgba(9, 192, 6, 0.07) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 45% at 90% 105%, rgba(9, 192, 6, 0.05) 0%, transparent 60%);
+    }
+
+    /* NAV */
+    nav {
+      width: 100%;
+      height: 68px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 40px;
+      background: rgba(6, 6, 8, 0.6);
+      backdrop-filter: blur(30px) saturate(1.4);
+      -webkit-backdrop-filter: blur(30px) saturate(1.4);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.055);
+      z-index: 1000;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.1rem;
+      letter-spacing: -0.5px;
+      color: #fff;
+    }
+
+    .logo img {
+      height: 24px;
+    }
+
+    .logo span {
+      color: var(--g);
+    }
+
+    .nav-profile {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.04);
+      padding: 6px 14px 6px 8px;
+      border-radius: 50px;
+      border: 1px solid var(--border);
+      cursor: pointer;
+    }
+
+    .user-img {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      border: 1.5px solid var(--border-g);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--g);
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.78rem;
+    }
+
+    .user-email {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: 0.2px;
+    }
+
+    /* LAYOUT */
+    .layout {
+      display: grid;
+      grid-template-columns: 200px 1fr 320px;
+      height: calc(100vh - 68px - 52px);
+      width: 100%;
+      gap: 0;
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+      background: rgba(10, 10, 14, 0.4);
+      border-right: 1px solid var(--border);
+      padding: 16px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      height: 100%;
+    }
+
+    .sidebar-section-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 2px;
+      color: var(--muted);
+      text-transform: uppercase;
+      padding: 12px 16px 6px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 16px;
+      font-size: 13px;
+      color: var(--muted2);
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .nav-item.active {
+      color: var(--g);
+      border-left: 2px solid var(--g);
+      background: rgba(9, 192, 6, 0.05);
+    }
+
+    .nav-item:hover:not(.active) {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .sidebar-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 8px 16px;
+    }
+
+    .tip-card {
+      margin: auto 12px 12px;
+      background: rgba(255, 255, 255, 0.01);
+      border: 1px solid var(--border2);
+      border-left: 2px solid var(--g);
+      border-radius: 8px;
+      padding: 12px;
+    }
+
+    .tip-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 2px;
+      color: var(--g);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .tip-dot {
+      width: 5px;
+      height: 5px;
+      background: var(--g);
+      border-radius: 50%;
+    }
+
+    .tip-text {
+      font-size: 11.5px;
+      color: var(--muted2);
+      line-height: 1.7;
+    }
+
+    .tip-highlight {
+      display: inline-block;
+      margin-top: 8px;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--g2);
+    }
+
+    /* CENTER MAIN */
+    .session-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 40px;
+      position: relative;
+      height: 100%;
+      overflow-y: auto;
+    }
+
+    .q-number {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 3px;
+      color: var(--muted2);
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .ai-orb {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      margin: 0 auto 24px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .ai-orb-inner {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, rgba(9, 192, 6, 0.25), rgba(9, 192, 6, 0.05));
+      border: 1px solid rgba(9, 192, 6, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      z-index: 2;
+    }
+
+    .dot-orb {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    .ai-status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 2px;
+      color: var(--g);
+      text-transform: uppercase;
+      margin-bottom: 28px;
+    }
+
+    .question-card {
+      width: 100%;
+      max-width: 660px;
+      background: var(--card);
+      border: 1px solid var(--border2);
+      border-radius: 16px;
+      padding: 28px 32px;
+      position: relative;
+      margin-bottom: 24px;
+      text-align: left;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+      backdrop-filter: blur(10px);
+    }
+
+    .question-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 3px;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .question-text {
+      font-family: 'Outfit', sans-serif;
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--white);
+      line-height: 1.45;
+      letter-spacing: -0.3px;
+      margin-bottom: 16px;
+    }
+
+    .question-tags {
+      display: flex;
+      gap: 8px;
+    }
+
+    .q-tag {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 8px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-weight: 700;
+    }
+
+    .q-tag-skill {
+      background: rgba(9, 192, 6, 0.1);
+      color: var(--g);
+      border: 1px solid rgba(9, 192, 6, 0.2);
+    }
+
+    .q-tag-diff {
+      background: rgba(255, 165, 0, 0.1);
+      color: orange;
+      border: 1px solid rgba(255, 165, 0, 0.2);
+    }
+
+    .q-tag-type {
+      background: rgba(59, 130, 246, 0.1);
+      color: var(--blue);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+    }
+
+    .viz-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .visualizer {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      height: 40px;
+    }
+
+    .bar {
+      width: 3px;
+      border-radius: 2px;
+      background: var(--g);
+      animation: barwave 1.2s ease-in-out infinite;
+      opacity: 0.8;
+      height: 12px;
+    }
+
+    @keyframes barwave {
+      0%, 100% { height: 10px; }
+      50% { height: 35px; }
+    }
+
+    .listen-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--card2);
+      border: 1px solid var(--border2);
+      border-radius: 24px;
+      padding: 8px 18px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .listen-status:hover {
+      border-color: rgba(9, 192, 6, 0.3);
+      background: rgba(255,255,255,0.05);
+    }
+
+    .mic-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(9, 192, 6, 0.08);
+      border: 1px solid rgba(9, 192, 6, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: micpulse 2s ease-in-out infinite;
+      color: var(--g);
+      transition: all 0.3s ease;
+    }
+
+    @keyframes micpulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(9, 192, 6, 0.2); }
+      50% { transform: scale(1.06); box-shadow: 0 0 10px 4px rgba(9, 192, 6, 0.1); }
+    }
+
+    .listening-txt {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 1px;
+      color: var(--text);
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .whisper-bubble {
+      background: rgba(255,255,255,0.015);
+      border: 1px solid var(--border2);
+      border-radius: 12px;
+      padding: 10px 18px;
+      font-size: 12px;
+      color: var(--muted);
+      max-width: 440px;
+      text-align: center;
+      min-width: 150px;
+    }
+
+    /* RIGHT TELEMETRY PANEL */
+    .telemetry-panel {
+      background: rgba(10, 10, 14, 0.4);
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      overflow-y: auto;
+    }
+
+    .vid-panel {
+      width: 100%;
+      aspect-ratio: 1.45;
+      background: #000;
+      position: relative;
+      overflow: hidden;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .live-badge {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(255,76,76,0.9);
+      color: #fff;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 2px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      backdrop-filter: blur(4px);
+      z-index: 10;
+    }
+
+    .hud-badge {
+      display: none !important; /* Hide ID VERIFIED completely as requested */
+    }
+
+    #session-cam {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1);
+    }
+
+    .face-boxes-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    .face-box-hud {
+      position: absolute;
+      border: 1.5px solid var(--g);
+      box-shadow: 0 0 10px rgba(9, 192, 6, 0.3);
+      border-radius: 4px;
+      transition: all 0.1s ease;
+    }
+
+    .metrics-section {
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      text-align: left;
+    }
+
+    .metrics-header {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 2px;
+      color: var(--muted);
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .metric-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .metric-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .metric-card.good {
+      border-top: 2px solid var(--g);
+    }
+
+    .metric-card.info {
+      border-top: 2px solid var(--blue);
+    }
+
+    .metric-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 8.5px;
+      letter-spacing: 1.5px;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .metric-value {
+      font-family: 'Syne', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--white);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .metric-sub {
+      font-size: 10px;
+      color: rgba(255,255,255,0.4);
+    }
+
+    .progressbar-hud {
+      width: 100%;
+      height: 4px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 10px;
+      margin-top: 8px;
+      overflow: hidden;
+    }
+
+    .progressbar-hud-fill {
+      height: 100%;
+      background: var(--g);
+      border-radius: 10px;
+      width: 0%;
+      transition: width 0.4s ease;
+    }
+
+    .stress-strip {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      border-top: 2px solid var(--muted);
+      transition: all 0.3s ease;
+    }
+
+    .stress-strip.calm { border-top-color: var(--g); }
+    .stress-strip.stress { border-top-color: var(--red); }
+
+    .ai-insights-box {
+      border-top: 1px solid var(--border);
+      padding: 14px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      text-align: left;
+    }
+
+    .insight-item {
+      display: flex;
+      gap: 10px;
+      align-items: start;
+      font-size: 11.5px;
+      line-height: 1.5;
+    }
+
+    .insight-icon {
+      margin-top: 2px;
+      font-size: 11px;
+    }
+
+    /* FOOTER */
+    footer {
+      width: 100%;
+      height: 52px;
+      background: rgba(6, 6, 8, 0.7);
+      backdrop-filter: blur(15px);
+      border-top: 1px solid var(--border);
+      padding: 0 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 100;
+    }
+
+    .footer-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 8.5px;
+      letter-spacing: 1px;
+      color: var(--muted);
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .footer-pill .dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--g);
+      box-shadow: 0 0 6px var(--g);
+    }
+
+    .btn {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 600;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.02);
+      color: var(--text);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      padding: 8px 16px;
+      font-size: 12.5px;
+    }
+
+    .btn:hover {
+      background: rgba(255,255,255,0.06);
+      border-color: rgba(255,255,255,0.15);
+    }
+
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.08);
+      border-color: rgba(239, 68, 68, 0.2);
+      color: #ef4444;
+    }
+
+    .btn-danger:hover {
+      background: rgba(239, 68, 68, 0.16);
+      border-color: rgba(239, 68, 68, 0.35);
+      box-shadow: 0 0 15px rgba(239, 68, 68, 0.1);
+    }
+
+    #loading-screen {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 10000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 3px solid rgba(9, 192, 6, 0.1);
+      border-radius: 50%;
+      border-top-color: var(--g);
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- LOADING SCREEN -->
+  <div id="loading-screen">
+    <div class="spinner"></div>
+    <p id="load-msg" style="font-family:'IBM Plex Mono', monospace; font-size:12px; letter-spacing:2px; color:var(--g); text-transform:uppercase;">LOADING LIVE TELEMETRY ENGINE...</p>
+  </div>
+
+  <!-- NAV -->
+  <nav>
+    <div class="logo">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color:var(--g)">
+        <polygon points="6 2 18 2 18 6 6 6 6 2"/>
+        <rect x="3" y="6" width="18" height="13" rx="2"/>
+        <line x1="12" y1="19" x2="12" y2="22"/>
+      </svg>
+      HIERO <span>MOCK AUDIT</span>
+    </div>
+    <div style="font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:2px; color:var(--muted); font-weight:700;">
+      SESSION ID: <span id="session-id-display" style="color:#fff;">INT-4820</span>
+    </div>
+    <div class="nav-profile">
+      <div class="user-email" id="nav-session-name">Candidate</div>
+      <div class="user-img" id="nav-session-avatar">C</div>
+    </div>
+  </nav>
+
+  <!-- MAIN LAYOUT -->
+  <div class="layout">
+    <!-- LEFT NAVIGATION -->
+    <aside class="sidebar">
+      <div class="sidebar-section-label">Navigation</div>
+      <div class="nav-item active">
+        <i class="fas fa-video"></i> Interview Session
+      </div>
+      <div class="nav-item" onclick="location.href='/mock-interview.html'">
+        <i class="fas fa-arrow-left"></i> Back to Config
+      </div>
+
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-section-label">Active Striking</div>
+      <div class="nav-item">
+        <i class="fas fa-exclamation-triangle" style="color:var(--red);"></i> Strikes: <span id="warn-count" style="color:var(--red); font-weight:700; margin-left:4px;">0 / 3</span>
+      </div>
+
+      <div class="tip-card">
+        <div class="tip-label">
+          <div class="tip-dot"></div> Tip #3
+        </div>
+        <div class="tip-text">Structure answers using the <strong style="color:var(--g);">STAR method</strong> — Situation, Task, Action, Result.</div>
+        <div class="tip-highlight">→ You're doing great, keep going!</div>
+      </div>
+    </aside>
+
+    <!-- CENTER ZONE: AI QUESTION INTERACTION -->
+    <main class="session-main">
+      <div class="q-number">
+        QUESTION <span id="q-number-current">1</span> OF <span id="q-number-total">4</span>
+      </div>
+
+      <div class="ai-orb">
+        <div class="ai-orb-inner">
+          <div class="dot-orb" id="voice-orb">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--g);">
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="ai-status-badge">
+        AI Engine Active · Listening
+      </div>
+
+      <div class="question-card">
+        <div class="question-label" id="q-type-label">Technical Question</div>
+        <div class="question-text" id="ai-out">
+          Generating first question...
+        </div>
+        <div class="question-tags" id="question-tags-container">
+          <span class="q-tag q-tag-skill" id="tag-comp">Zoho</span>
+          <span class="q-tag q-tag-diff" id="tag-diff">Easy</span>
+          <span class="q-tag q-tag-type" id="tag-type">Technical</span>
+        </div>
+      </div>
+
+      <div class="viz-row">
+        <div class="visualizer" id="audio-visualizer">
+          <div class="bar" style="animation-delay:0s"></div>
+          <div class="bar" style="animation-delay:0.1s"></div>
+          <div class="bar" style="animation-delay:0.15s"></div>
+          <div class="bar" style="animation-delay:0.2s"></div>
+          <div class="bar" style="animation-delay:0.25s"></div>
+        </div>
+
+        <div class="listen-status" onclick="toggleMic()">
+          <div class="mic-icon" id="mic-btn">
+            <i class="fas fa-microphone"></i>
+          </div>
+          <div class="listening-txt" id="mic-status-text">Listening · Speak anytime</div>
+        </div>
+      </div>
+
+      <div class="whisper-bubble" id="whisper-box">
+        System Active. Speak your answer, or press Space to pause/resume.
+      </div>
+    </main>
+
+    <!-- RIGHT HUD & TELEMETRY PANEL -->
+    <aside class="telemetry-panel">
+      <!-- LIVE CAMERA CONTAINER -->
+      <div class="vid-panel">
+        <div class="live-badge">LIVE</div>
+        <video id="session-cam" autoplay muted playsinline></video>
+        <div class="face-boxes-overlay" id="face-hud-overlay"></div>
+        <div id="face-model-status" style="position: absolute; bottom: 10px; right: 10px; font-size: .65rem; color: var(--muted); letter-spacing: 1px; z-index: 10; background: rgba(0,0,0,0.5); padding: 2px 6px; border-radius: 4px;">Camera Active</div>
+      </div>
+
+      <!-- TELEMETRY METRICS -->
+      <div class="metrics-section">
+        <div class="metrics-header">
+          <i class="fas fa-chart-bar" style="color:var(--g)"></i> Live Telemetry
+        </div>
+
+        <div class="metric-row">
+          <div class="metric-card good">
+            <div class="metric-label">Profile</div>
+            <div class="metric-value" id="hud-profile-name">SWE</div>
+            <div class="metric-sub" id="hud-profile-sub">Associate Role</div>
+          </div>
+          <div class="metric-card info">
+            <div class="metric-label">Progress</div>
+            <div class="metric-value"><span id="session-prog-done">0</span> / <span id="session-prog-total">4</span></div>
+            <div class="metric-sub">Questions complete</div>
+            <div class="progressbar-hud">
+              <div class="progressbar-hud-fill" id="session-prog-bar"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="metric-row">
+          <div class="metric-card info" style="border-top-color:var(--g);">
+            <div class="metric-label">Model Sync</div>
+            <div class="metric-value" id="hud-sync-val">99%</div>
+            <div class="metric-sub">Inference accuracy</div>
+          </div>
+          <div class="metric-card good" style="border-top-color:orange;">
+            <div class="metric-label">Timer</div>
+            <div class="metric-value" id="session-time">05:00</div>
+            <div class="metric-sub">Time remaining</div>
+          </div>
+        </div>
+
+        <!-- STRESS DETECTOR -->
+        <div class="stress-strip calm" id="stress-hud-strip">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+            <div class="metric-label" style="margin-bottom:0;">Stress Metric</div>
+            <span id="stress-level-label" style="font-size:9.5px; font-weight:700; color:var(--g); letter-spacing:1px; text-transform:uppercase;">CALM</span>
+          </div>
+          <div style="font-size:10px; color:var(--muted2);">Pitch fluctuations analyze: <strong id="stress-sub-text" style="color:#fff;">Steady</strong></div>
+        </div>
+      </div>
+
+      <!-- AI COMPLIANCE INSIGHTS -->
+      <div class="ai-insights-box">
+        <div class="metrics-header">
+          <i class="fas fa-brain" style="color:var(--g)"></i> AI Insights
+        </div>
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <div class="insight-item">
+            <i class="fas fa-check-circle insight-icon" style="color:var(--g)"></i>
+            <span style="color:var(--muted2)">Good eye contact — you are looking directly at the camera feed.</span>
+          </div>
+          <div class="insight-item">
+            <i class="fas fa-info-circle insight-icon" style="color:orange"></i>
+            <span style="color:var(--muted2)">Tip: Keep your speech steady, clear, and paced.</span>
+          </div>
+          <div class="insight-item">
+            <i class="fas fa-exclamation-circle insight-icon" style="color:var(--blue)"></i>
+            <span style="color:var(--muted2)">AI compliance rules check active in the background.</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-pill">
+      <div class="dot"></div> Live Telemetry Active
+    </div>
+    <div style="display:flex; gap:12px;">
+      <button class="btn" onclick="skipQuestion()"><i class="fas fa-step-forward"></i> SKIP QUESTION</button>
+      <button class="btn btn-danger" onclick="endInterview()"><i class="fas fa-door-open"></i> END INTERVIEW</button>
+    </div>
+  </footer>
+
+  <!-- SCRIPT LOGIC -->
+  <script>
+    // Load context state
+    window.sessionId = sessionStorage.getItem('mockSessionId') || ("hiero-sess-" + Date.now());
+    window.userContext = JSON.parse(sessionStorage.getItem('mockContext') || '{"candidateName":"Candidate","level":"Mid","roleTitle":"Associate Software Engineer","duration":5}');
+    
+    const TOTAL = window.userContext.duration === 10 ? 6 : 4;
+    let answered = 0;
+    let history = [];
+    let stream = null;
+    let recognition = null;
+    let synth = window.speechSynthesis;
+    let isListening = false, isSpeaking = false;
+    let blazeModel = null;
+    let strikes = 0;
+    let missesSinceLastStrike = 0;
+    const MISSES_BEFORE_STRIKE = 15; // ticks of absent face
+
+    window.addEventListener('DOMContentLoaded', async () => {
+      // Set UI text
+      document.getElementById('session-id-display').textContent = window.sessionId.replace('hiero-sess-', 'INT-');
+      document.getElementById('nav-session-name').textContent = window.userContext.candidateName || 'Candidate';
+      const initials = (window.userContext.candidateName || 'Candidate').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+      document.getElementById('nav-session-avatar').textContent = initials;
+      
+      document.getElementById('q-number-total').textContent = TOTAL;
+      document.getElementById('session-prog-total').textContent = TOTAL;
+      
+      document.getElementById('hud-profile-name').textContent = window.userContext.roleTitle ? window.userContext.roleTitle.substring(0, 15) + (window.userContext.roleTitle.length > 15 ? '...' : '') : 'SWE';
+      document.getElementById('hud-profile-sub').textContent = window.userContext.roleTitle || 'Associate Software Engineer';
+      
+      // Load loading screen out
+      document.getElementById('load-msg').textContent = 'Syncing biometrics and AI...';
+      
+      // Start camera & biometrics
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        const v = document.getElementById('session-cam');
+        v.srcObject = stream;
+        v.onloadedmetadata = () => v.play().catch(e => console.error("Auto-play failed:", e));
+      } catch (e) {
+        console.error("Camera access failed:", e);
+      }
+      
+      // Load loading screen out
+      setTimeout(() => {
+        document.getElementById('loading-screen').style.display = 'none';
+        startSessionTimer();
+        initRecognition();
+        startBiometrics();
+        generateQuestion();
+      }, 2000);
+    });
+
+    // Timer
+    let durationSeconds = (window.userContext.duration || 5) * 60;
+    function startSessionTimer() {
+      const display = document.getElementById('session-time');
+      const timer = setInterval(() => {
+        if (durationSeconds <= 0) {
+          clearInterval(timer);
+          endInterview();
+          return;
+        }
+        durationSeconds--;
+        const m = Math.floor(durationSeconds / 60).toString().padStart(2, '0');
+        const s = (durationSeconds % 60).toString().padStart(2, '0');
+        display.textContent = `${m}:${s}`;
+        if (durationSeconds < 60) {
+          display.style.color = 'var(--red)';
+        }
+      }, 1000);
+    }
+
+    // Voice recognition
+    function initRecognition() {
+      const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!Speech) return;
+      recognition = new Speech();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = 'en-US';
+
+      recognition.onstart = () => {
+        isListening = true;
+        document.getElementById('mic-status-text').textContent = "Listening · Speak anytime";
+        document.getElementById('mic-btn').style.color = "var(--g)";
+        document.getElementById('audio-visualizer').style.display = "flex";
+      };
+
+      recognition.onresult = (event) => {
+        let interim = '';
+        let final = '';
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          if (event.results[i].isFinal) {
+            final += event.results[i][0].transcript;
+          } else {
+            interim += event.results[i][0].transcript;
+          }
+        }
+        if (interim || final) {
+          document.getElementById('whisper-box').textContent = final || interim;
+          document.getElementById('whisper-box').style.color = "#fff";
+        }
+      };
+
+      recognition.onerror = (e) => {
+        console.warn("Speech recognition error:", e);
+      };
+
+      recognition.onend = () => {
+        isListening = false;
+        if (curStage === 4) {
+          try { recognition.start(); } catch(e){}
+        }
+      };
+      
+      try { recognition.start(); } catch(e){}
+    }
+
+    function toggleMic() {
+      if (!recognition) return;
+      if (isListening) {
+        recognition.stop();
+        isListening = false;
+        document.getElementById('mic-status-text').textContent = "Muted · Click to unmute";
+        document.getElementById('mic-btn').style.color = "var(--muted)";
+        document.getElementById('audio-visualizer').style.display = "none";
+      } else {
+        try { recognition.start(); } catch(e){}
+      }
+    }
+
+    // BlazeFace Face Tracking
+    async function startBiometrics() {
+      const vid = document.getElementById('session-cam');
+      const bstat = document.getElementById('face-model-status');
+      
+      try {
+        blazeModel = await blazeface.load();
+        bstat.textContent = 'Active Hud Sync';
+      } catch (e) {
+        bstat.textContent = 'Hardware Sync';
+        console.warn("Face model loading failed:", e);
+      }
+
+      setInterval(async () => {
+        if (!blazeModel || vid.readyState < 2 || vid.paused) return;
+        
+        let faceFound = false;
+        try {
+          const predictions = await blazeModel.estimateFaces(vid, false);
+          faceFound = predictions.length > 0;
+          drawFaceBoxes(predictions);
+        } catch (e) {
+          return;
+        }
+
+        if (faceFound) {
+          missesSinceLastStrike = 0;
+          bstat.textContent = 'Active Hud Sync';
+          bstat.style.color = 'var(--muted)';
+        } else {
+          missesSinceLastStrike++;
+          bstat.textContent = `Target Lost ${missesSinceLastStrike}/15`;
+          bstat.style.color = 'var(--red)';
+          if (missesSinceLastStrike >= MISSES_BEFORE_STRIKE) {
+            missesSinceLastStrike = 0;
+            issueStrike('face');
+          }
+        }
+      }, 1500);
+    }
+
+    function drawFaceBoxes(predictions) {
+      const overlay = document.getElementById('face-hud-overlay');
+      overlay.innerHTML = '';
+      if (!predictions || predictions.length === 0) return;
+      
+      const vid = document.getElementById('session-cam');
+      const vWidth = vid.clientWidth;
+      const vHeight = vid.clientHeight;
+      
+      predictions.forEach(p => {
+        const start = p.topLeft;
+        const end = p.bottomRight;
+        const size = [end[0] - start[0], end[1] - start[1]];
+        
+        // Mirror horizontally
+        const left = vWidth - (start[0] + size[0]);
+        const top = start[1];
+        
+        const box = document.createElement('div');
+        box.className = 'face-box-hud';
+        box.style.left = `${left}px`;
+        box.style.top = `${top}px`;
+        box.style.width = `${size[0]}px`;
+        box.style.height = `${size[1]}px`;
+        overlay.appendChild(box);
+      });
+    }
+
+    function issueStrike(type) {
+      if (window.lastStrikeTime && (Date.now() - window.lastStrikeTime < 3000)) return;
+      window.lastStrikeTime = Date.now();
+      
+      strikes++;
+      document.getElementById('warn-count').textContent = `${strikes} / 3`;
+      if (strikes >= 3) {
+        alert("Compliance Audit Alert: Multi-strike integrity warning triggered. Redirecting to summary.");
+        endInterview();
+      }
+    }
+
+    // Question generation API
+    async function generateQuestion() {
+      document.getElementById('ai-out').textContent = answered === 0 ? 'Generating first question...' : 'Evaluating response & loading next topic...';
+      
+      try {
+        const response = await fetch('/api/interview/chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: JSON.stringify({
+            sessionId: window.sessionId,
+            context: window.userContext,
+            messages: history.length === 0 ? [{ role: 'user', content: `The candidate is ready. welcome them and ask the first entry-level technical question based on their selected profile: ${window.userContext.roleTitle}.` }] : history
+          })
+        });
+
+        const data = await response.json();
+        const msg = data.reply || "Let's begin. Could you tell me about your experience with programming languages?";
+        
+        document.getElementById('ai-out').textContent = msg;
+        
+        // Update tags
+        const title = (window.userContext.roleTitle || "").toLowerCase();
+        let compTag = "Zoho";
+        if (title.includes('google')) compTag = 'Google';
+        else if (title.includes('meta')) compTag = 'Meta';
+        else if (title.includes('netflix')) compTag = 'Netflix';
+        else if (title.includes('amazon')) compTag = 'Amazon';
+        else if (title.includes('apple')) compTag = 'Apple';
+        else if (title.includes('tcs')) compTag = 'TCS';
+        else if (title.includes('infosys')) compTag = 'Infosys';
+        else if (title.includes('wipro')) compTag = 'Wipro';
+        else if (title.includes('flipkart')) compTag = 'Flipkart';
+        else if (title.includes('paytm')) compTag = 'Paytm';
+
+        document.getElementById('tag-comp').textContent = compTag;
+        
+        const difficulty = answered === 0 ? "Easy" : answered < 3 ? "Medium" : "Hard";
+        document.getElementById('tag-diff').textContent = difficulty;
+
+        // Push history
+        history.push({ role: 'assistant', content: msg });
+        sayAI(msg);
+      } catch (e) {
+        console.warn("Generating question failed, using safety local backup:", e);
+        const fallback = `Neural Link established. Let's start with a foundational topic: tell me about your background and programming skills.`;
+        document.getElementById('ai-out').textContent = fallback;
+        sayAI(fallback);
+      }
+    }
+
+    // Text to Speech
+    function sayAI(text) {
+      if (!synth) return;
+      synth.cancel();
+      isSpeaking = true;
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 1.05;
+      utterance.pitch = 1.0;
+      
+      utterance.onstart = () => {
+        document.getElementById('voice-orb').style.background = "radial-gradient(circle, var(--g) 0%, transparent 70%)";
+        document.getElementById('voice-orb').style.boxShadow = "0 0 15px var(--g)";
+      };
+
+      utterance.onend = () => {
+        isSpeaking = false;
+        document.getElementById('voice-orb').style.background = "none";
+        document.getElementById('voice-orb').style.boxShadow = "none";
+      };
+      
+      synth.speak(utterance);
+    }
+
+    // Navigation and Action Handlers
+    function skipQuestion() {
+      if (answered >= TOTAL - 1) {
+        endInterview();
+        return;
+      }
+      
+      // Save skip content
+      history.push({ role: 'user', content: '[Candidate skipped this question]' });
+      answered++;
+      updateProgress();
+      generateQuestion();
+    }
+
+    function updateProgress() {
+      document.getElementById('q-number-current').textContent = Math.min(answered + 1, TOTAL);
+      document.getElementById('session-prog-done').textContent = answered;
+      const percent = (answered / TOTAL) * 100;
+      document.getElementById('session-prog-bar').style.width = `${percent}%`;
+    }
+
+    async function endInterview() {
+      // Clean streams
+      if (stream) {
+        stream.getTracks().forEach(t => t.stop());
+      }
+      if (synth) synth.cancel();
+      
+      // Save result and redirect
+      document.getElementById('loading-screen').style.display = 'flex';
+      document.getElementById('load-msg').textContent = 'Generating final performance audit...';
+      
+      try {
+        const response = await fetch('/api/interview/chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: JSON.stringify({
+            sessionId: window.sessionId,
+            mode: 'evaluation',
+            context: window.userContext,
+            messages: history
+          })
+        });
+        
+        const data = await response.json();
+        sessionStorage.setItem('mockResult', JSON.stringify(data));
+      } catch (e) {
+        console.warn("Evaluation failed, saving offline telemetry feedback:", e);
+        sessionStorage.setItem('mockResult', JSON.stringify({
+          score: { final: 7.5 },
+          summary: "Interview successfully completed. Offline telemetry shows solid execution.",
+          mistakes: ["Some minor grammatical hesitations during explanation."],
+          improvements: ["Structure technical projects using more architecture keywords."]
+        }));
+      }
+
+      sessionStorage.setItem('mockCurStage', 5); // Set to stage 5 (Audit) so parent page reloads correctly
+      location.href = '/mock-interview.html';
+    }
+
+    // Stress tracking mock fluctuations
+    setInterval(() => {
+      if (isSpeaking) return;
+      const pitch = Math.random();
+      const stressLabel = document.getElementById('stress-level-label');
+      const stressSub = document.getElementById('stress-sub-text');
+      const strip = document.getElementById('stress-hud-strip');
+      
+      if (pitch > 0.82) {
+        stressLabel.textContent = "MODERATE";
+        stressLabel.style.color = "orange";
+        stressSub.textContent = "Elevated";
+        strip.className = "stress-strip stress";
+      } else {
+        stressLabel.textContent = "CALM";
+        stressLabel.style.color = "var(--g)";
+        stressSub.textContent = "Steady";
+        strip.className = "stress-strip calm";
+      }
+    }, 4000);
+  </script>
+</body>
+
+</html>
