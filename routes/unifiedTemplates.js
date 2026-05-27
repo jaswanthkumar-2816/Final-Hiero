@@ -1435,7 +1435,16 @@ async function generateUnifiedResume(data, templateId, outStream, customOptions 
                 case 'portfolio-style':
                 case 'creative-bold': renderHeader_Modern(doc, data, colors); break;
                 case 'tech-focus':
-                case 'hiero-tech': renderHeader_Tech(doc, data, colors); break;
+                case 'hiero-tech':
+                    await renderTemplate_HieroTech(doc, data);
+                    doc.end();
+                    if (outStream && outStream.on) {
+                        outStream.on('finish', () => resolve(true));
+                        outStream.on('error', reject);
+                    } else {
+                        resolve(doc);
+                    }
+                    return;
                 case 'ats-optimized':
                 case 'corporate-ats': renderHeader_ATS(doc, data, colors); break;
                 case 'priya-analytics':
@@ -7322,6 +7331,305 @@ function renderTemplate_HieroVertex(doc, data) {
     else if (typeof data.softSkills === 'string') softArray = data.softSkills.split(',').map(s => s.trim()).filter(Boolean);
 
     renderSkillsBars('PER SKILLS', softArray, ['Creative', 'Teamwork', 'Punctual', 'Leadership']);
+}
+
+async function renderTemplate_HieroTech(doc, rawData) {
+    const data = normalizeData(rawData);
+    const pInfo = data.personalInfo || {};
+
+    const PAGE_W = 595.28;
+    const PAGE_H = 841.89;
+    const MARGIN = 36;
+    const CONTENT_W = PAGE_W - MARGIN * 2;
+
+    // Strict minimalist styling to match image
+    const BLACK = '#000000';
+    const DARK = '#111111';
+    const MED = '#222222';
+    const LIGHT = '#555555';
+    const BLUE_LINK = '#0000EE';
+
+    // Professional Academic & Fresher Font Stack (Times New Roman Family)
+    const FONT_BOLD = 'Times-Bold';
+    const FONT_REG = 'Times-Roman';
+    const FONT_ITALIC = 'Times-Italic';
+
+    // Start rendering y coordinate
+    let y = MARGIN;
+
+    // Determine if single page is forced (e.g. preview) to prevent blank pages or overlapping
+    const isForceSingle = !!doc._originalAddPage;
+
+    // Helper to check page breaks safely
+    function checkHieroTechPageBreak(heightNeeded) {
+        if (!isForceSingle && y + heightNeeded > PAGE_H - MARGIN) {
+            doc.addPage();
+            y = MARGIN;
+        }
+    }
+
+    // ======= HEADER =======
+    // 1. Calculate centered name position to draw vertical line perfectly next to it
+    const rawName = (pInfo.fullName || data.name || 'John Doe').toUpperCase();
+    
+    // Clean, professional spacing of 0.8pt (native PDFKit characterSpacing option)
+    const charSpacing = 0.8;
+    
+    doc.font(FONT_BOLD).fontSize(22);
+    const nameW = doc.widthOfString(rawName, { characterSpacing: charSpacing });
+    const nameX = (PAGE_W - nameW) / 2;
+
+    // Draw thick vertical black line prefix
+    doc.save();
+    doc.rect(nameX - 16, y + 2, 4.5, 23).fill(BLACK);
+    doc.restore();
+
+    // Render centered Name text (Cohesive, not disjointed)
+    doc.fillColor(BLACK).text(rawName, nameX, y, { characterSpacing: charSpacing });
+    y = doc.y + 2;
+
+    // Title / Subtitle (Centered)
+    const titleStr = pInfo.roleTitle || data.title || 'AIML Undergraduate';
+    doc.font(FONT_REG).fontSize(11).fillColor(MED);
+    doc.text(titleStr, MARGIN, y, { width: CONTENT_W, align: 'center' });
+    y = doc.y + 6;
+
+    // Contact row: phone, email, address (Centered)
+    doc.font(FONT_REG).fontSize(9.5).fillColor(MED);
+    const contactItems = [];
+    if (pInfo.phone || pInfo.contactNumber) contactItems.push(pInfo.phone || pInfo.contactNumber);
+    if (pInfo.email) contactItems.push(pInfo.email);
+    if (pInfo.address || pInfo.location) contactItems.push(pInfo.address || pInfo.location);
+    const contactStr = contactItems.join('      ');
+
+    doc.text(contactStr, MARGIN, y, { width: CONTENT_W, align: 'center' });
+    y = doc.y + 4;
+
+    // Links Row: LinkedIn, GitHub, Website (Centered)
+    const linkItems = [];
+    if (pInfo.linkedin) linkItems.push(pInfo.linkedin);
+    if (pInfo.github) linkItems.push(pInfo.github);
+    if (pInfo.website) linkItems.push(pInfo.website);
+    const linkStr = linkItems.join('      ');
+
+    if (linkStr) {
+        doc.text(linkStr, MARGIN, y, { width: CONTENT_W, align: 'center' });
+        y = doc.y + 14;
+    } else {
+        y += 10;
+    }
+
+    // Helper: draw section header
+    function drawSectionHeader(title) {
+        checkHieroTechPageBreak(80);
+        y += 8;
+        doc.font(FONT_BOLD).fontSize(12).fillColor(BLACK).text(title, MARGIN, y);
+        y = doc.y + 4;
+        doc.moveTo(MARGIN, y).lineTo(PAGE_W - MARGIN, y).strokeColor(BLACK).lineWidth(0.8).stroke();
+        y += 8;
+    }
+
+    // ======= CAREER OBJECTIVE =======
+    const objectiveText = data.summary || data.objective || pInfo.summary || '';
+    if (objectiveText) {
+        drawSectionHeader('Career Objective');
+        doc.font(FONT_REG).fontSize(10).fillColor(MED);
+        doc.text(objectiveText, MARGIN, y, { width: CONTENT_W, align: 'justify', lineGap: 1.5 });
+        y = doc.y + 10;
+    }
+
+    // ======= EDUCATION =======
+    const edus = data.education || [];
+    if (edus.length > 0) {
+        drawSectionHeader('Education');
+        edus.forEach(edu => {
+            checkHieroTechPageBreak(60);
+            
+            const startY = y;
+            // Degree
+            doc.font(FONT_BOLD).fontSize(10.5).fillColor(BLACK);
+            doc.text(edu.degree || '', MARGIN, y, { width: CONTENT_W - 120 });
+            
+            // School
+            doc.font(FONT_ITALIC).fontSize(10).fillColor(MED);
+            doc.text(edu.school || edu.institute || '', MARGIN, doc.y + 2, { width: CONTENT_W - 120 });
+            const schoolEndY = doc.y;
+
+            // Date (Right Column)
+            doc.font(FONT_REG).fontSize(10).fillColor(MED);
+            const dateStr = edu.gradYear || edu.dates || '';
+            doc.text(dateStr, PAGE_W - MARGIN - 110, startY, { width: 110, align: 'right' });
+
+            y = schoolEndY + 10;
+        });
+    }
+
+    // ======= TECHNICAL SKILLS =======
+    if (data.skillsCategorized || data.technicalSkills || data.skills) {
+        drawSectionHeader('Technical Skills');
+        doc.font(FONT_REG).fontSize(10).fillColor(MED);
+        
+        if (data.skillsCategorized) {
+            Object.entries(data.skillsCategorized).forEach(([category, list]) => {
+                checkHieroTechPageBreak(40);
+                const listStr = Array.isArray(list) ? list.join(', ') : String(list);
+                
+                // Bold label
+                doc.font(FONT_BOLD).text(`• ${category}: `, MARGIN, y, { continued: true });
+                // Regular skills
+                doc.font(FONT_REG).text(listStr);
+                y = doc.y + 4;
+            });
+        } else {
+            const skillsVal = data.technicalSkills || (Array.isArray(data.skills) ? data.skills.join(', ') : data.skills);
+            if (skillsVal) {
+                doc.text(`• ${skillsVal}`, MARGIN, y, { width: CONTENT_W });
+                y = doc.y + 6;
+            }
+        }
+    }
+
+    // ======= PROJECTS =======
+    const projects = data.projects || [];
+    if (projects.length > 0) {
+        drawSectionHeader('Projects');
+        projects.forEach(proj => {
+            checkHieroTechPageBreak(70);
+
+            // Project Title
+            doc.font(FONT_BOLD).fontSize(10.5).fillColor(BLACK);
+            doc.text(proj.title || proj.name || '', MARGIN, y, { width: CONTENT_W });
+            y = doc.y + 2;
+
+            // Tech Stack
+            if (proj.tech || proj.technologies) {
+                doc.font(FONT_BOLD).fontSize(10).fillColor(MED);
+                doc.text('Tech Stack: ', MARGIN, y, { continued: true });
+                doc.font(FONT_REG).text(proj.tech || proj.technologies);
+                y = doc.y + 2;
+            }
+
+            // Description bullets
+            if (proj.description) {
+                const descLines = Array.isArray(proj.description) 
+                    ? proj.description 
+                    : String(proj.description).split('\n').filter(Boolean);
+                descLines.forEach(line => {
+                    checkHieroTechPageBreak(30);
+                    const cleanLine = line.replace(/^[\*\-•\u2022]\s*/, '')
+                                          .replace(/^â€¢\s*/, '')
+                                          .replace(/^Â/g, '')
+                                          .replace(/^â€¢\s*/, '')
+                                          .trim();
+                    doc.font(FONT_REG).fontSize(10).fillColor(MED);
+                    doc.text('• ' + cleanLine, MARGIN + 12, y, { width: CONTENT_W - 12 });
+                    y = doc.y + 2;
+                });
+            }
+
+            // Project Link (Safe underline usage)
+            const link = proj.link || proj.github || proj.liveUrl || proj.projectUrl;
+            if (link) {
+                checkHieroTechPageBreak(25);
+                doc.font(FONT_BOLD).fontSize(10).fillColor(MED);
+                doc.text('GitHub/Live: ', MARGIN, y, { continued: true });
+                doc.font(FONT_REG).fillColor(BLUE_LINK).text(link, { underline: true });
+                y = doc.y + 4;
+            }
+
+            y += 8;
+        });
+    }
+
+    // ======= EXPERIENCE / INTERNSHIP =======
+    const experience = data.experience || [];
+    if (experience.length > 0) {
+        drawSectionHeader('Experience / Internship');
+        experience.forEach(exp => {
+            checkHieroTechPageBreak(70);
+
+            // Company and Role
+            doc.font(FONT_BOLD).fontSize(11).fillColor(BLACK);
+            const expTitle = `${exp.company || ''} – ${exp.jobTitle || ''}`;
+            doc.text(expTitle, MARGIN, y, { width: CONTENT_W });
+            y = doc.y + 2;
+            
+            // Date (Next line, bold and left-aligned matching standard template reference image)
+            const dateStr = [exp.startDate, exp.endDate || 'Present'].filter(Boolean).join(' - ');
+            if (dateStr) {
+                checkHieroTechPageBreak(25);
+                doc.font(FONT_BOLD).fontSize(10).fillColor(MED);
+                doc.text(dateStr, MARGIN, y, { width: CONTENT_W });
+                y = doc.y + 2;
+            }
+
+            // Description bullets
+            if (exp.description) {
+                const descLines = Array.isArray(exp.description)
+                    ? exp.description
+                    : String(exp.description).split('\n').filter(Boolean);
+                descLines.forEach(line => {
+                    checkHieroTechPageBreak(30);
+                    const cleanLine = line.replace(/^[\*\-•\u2022]\s*/, '')
+                                          .replace(/^â€¢\s*/, '')
+                                          .replace(/^Â/g, '')
+                                          .replace(/^â€¢\s*/, '')
+                                          .trim();
+                    doc.font(FONT_REG).fontSize(10).fillColor(MED);
+                    doc.text('• ' + cleanLine, MARGIN + 12, y, { width: CONTENT_W - 12 });
+                    y = doc.y + 2;
+                });
+            }
+            y += 10;
+        });
+    }
+
+    // ======= CERTIFICATIONS =======
+    const certs = data.certifications || data.awards || [];
+    if (certs.length > 0) {
+        drawSectionHeader('Certifications');
+        certs.forEach(cert => {
+            checkHieroTechPageBreak(35);
+            const certStr = typeof cert === 'string' ? cert : (cert.name || cert.title || '');
+            const issuer = cert.issuer || cert.provider || '';
+            const displayStr = issuer ? `${certStr} - ${issuer}` : certStr;
+            
+            doc.font(FONT_REG).fontSize(10).fillColor(MED);
+            doc.text('• ' + displayStr, MARGIN, y, { width: CONTENT_W });
+            y = doc.y + 3;
+        });
+    }
+
+    // ======= SOFT SKILLS =======
+    const softSkills = data.softSkills || [];
+    if (softSkills.length > 0) {
+        drawSectionHeader('Soft Skills');
+        const skillsArr = typeof softSkills === 'string' ? softSkills.split(',').map(s => s.trim()).filter(Boolean) : softSkills;
+        skillsArr.forEach(skill => {
+            checkHieroTechPageBreak(30);
+            doc.font(FONT_REG).fontSize(10).fillColor(MED);
+            doc.text('• ' + skill, MARGIN, y, { width: CONTENT_W });
+            y = doc.y + 3;
+        });
+    }
+
+    // ======= LANGUAGES =======
+    const languages = pInfo.languagesKnown || data.languages || '';
+    if (languages) {
+        drawSectionHeader('Languages');
+        checkHieroTechPageBreak(30);
+        const langStr = Array.isArray(languages) ? languages.join(', ') : String(languages);
+        doc.font(FONT_REG).fontSize(10).fillColor(MED);
+        doc.text(langStr, MARGIN, y, { width: CONTENT_W });
+        y = doc.y + 12;
+    }
+
+    // ======= DECLARATION =======
+    drawSectionHeader('Declaration');
+    checkHieroTechPageBreak(30);
+    const declarationText = "The information provided above is true and correct to the best of my knowledge.";
+    doc.font(FONT_REG).fontSize(10).fillColor(MED);
+    doc.text(declarationText, MARGIN, y, { width: CONTENT_W });
 }
 
 module.exports = { generateUnifiedResume };

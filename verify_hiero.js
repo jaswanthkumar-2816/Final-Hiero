@@ -58,7 +58,7 @@ const testData = {
 };
 
 async function runVerification() {
-    const templates = ['hiero-design', 'hiero-modern-brown', 'hiero-premium', 'hiero-royal', 'hiero-velocity', 'hiero-nova'];
+    const templates = ['hiero-design', 'hiero-modern-brown', 'hiero-premium', 'hiero-royal', 'hiero-velocity', 'hiero-nova', 'hiero-tech'];
 
     for (const template of templates) {
         console.log(`Generating ${template}...`);
