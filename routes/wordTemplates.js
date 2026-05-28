@@ -4163,181 +4163,126 @@ function generateWordHTML(data, templateId) {
 }
 
 function generateRishiWordHTML(data) {
-  const d = normalizeWordData(data);
-  const p = d.personalInfo;
+    const d = normalizeWordData(data);
+    const p = d.personalInfo || {};
 
-  const PRIMARY   = '#111827'; // Deep Navy/Black
-  const SECONDARY = '#4b5563'; // Slate Grey
-  const ACCENT    = '#2ae023'; // Hiero Green
-  const BG_LIGHT  = '#f3f4f6'; // Light grey for tag pills
-  const WHITE     = '#FFFFFF';
+    const BLUE = '#2f5678';
+    const DARK = '#161616';
+    const MUTED = '#3a3a3a';
+    const BULLET = '#b4793f';
+    const PAPER = '#ffffff';
 
-  const name        = (p.fullName || 'YOUR NAME').toUpperCase();
-  const roleTitle   = p.roleTitle || '';
-  const contactLine = [p.address, p.phone, p.email].filter(Boolean).map(s => s.toUpperCase()).join('  •  ');
-  const linksLine   = [p.linkedin, p.github, p.website].filter(Boolean).join('  |  ');
+    const name = p.fullName || 'Jason Bourne';
+    const roleTitle = p.roleTitle || 'Professional';
+    const rightInfo = [
+        p.phone ? ['Contact', p.phone] : null,
+        p.email ? ['Email', p.email] : null,
+        p.linkedin ? ['LinkedIn', p.linkedin] : null,
+        p.github ? ['GitHub', p.github] : null,
+        p.website ? ['Portfolio', p.website] : null,
+        p.address ? ['Location', p.address] : null
+    ].filter(Boolean);
 
-  const skillsArr = d.technicalSkills
-      ? d.technicalSkills.split(',').map(s => s.trim()).filter(Boolean)
-      : [];
+    const techSkills = d.technicalSkills ? d.technicalSkills.split(',').map(s => s.trim()).filter(Boolean) : [];
+    const softSkills = d.softSkills ? d.softSkills.split(',').map(s => s.trim()).filter(Boolean) : [];
+    const certItems = d.certifications ? d.certifications.split(',').map(s => s.trim()).filter(Boolean) : [];
+    const achItems = d.achievements ? d.achievements.split(/[;\n]/).map(s => s.trim()).filter(Boolean) : [];
 
-  // ── Section bar with Hiero Accent Line underneath ──
-  function sectionBar(title) {
-      return `
-      <table cellpadding="0" cellspacing="0" border="0" style="width:100%; border-collapse:collapse; margin-top:10pt; margin-bottom:5pt;">
-        <tr>
-          <td style="font-family:Arial,sans-serif; font-size:11.5pt; font-weight:bold; color:${PRIMARY}; text-transform:uppercase; padding-bottom:2pt;">
-            ${title.toUpperCase()}
-          </td>
-        </tr>
-        <tr>
-          <td bgcolor="${ACCENT}" style="background-color:${ACCENT}; height:1.5pt; line-height:1px; font-size:1px;">&nbsp;</td>
-        </tr>
-      </table>`;
-  }
+    function section(title) {
+        return `
+        <div style="margin-top:8pt;">
+            <div style="font-family:Arial,sans-serif;font-size:10.5pt;font-weight:bold;color:${BLUE};text-transform:uppercase;letter-spacing:0.3px;">${title}</div>
+            <div style="height:0;border-bottom:1.2px solid ${BLUE};margin-top:2pt;"></div>
+        </div>`;
+    }
 
-  // ── Entry header row: title left + date right ──
-  function entryHeader(titleText, dateText) {
-      return `
-      <table cellpadding="0" cellspacing="0" border="0" style="width:100%; border-collapse:collapse; margin-top:4pt;">
-        <tr>
-          <td style="font-family:Arial,sans-serif; font-size:10pt; font-weight:bold; color:${PRIMARY}; vertical-align:top; text-transform:uppercase;">${titleText}</td>
-          <td style="font-family:Arial,sans-serif; font-size:8.5pt; color:${SECONDARY}; text-align:right; white-space:nowrap; vertical-align:top;">${dateText || ''}</td>
-        </tr>
-      </table>`;
-  }
+    function bullet(line) {
+        const txt = String(line || '').replace(/^[•\-\*]\s*/, '').trim();
+        if (!txt) return '';
+        return `<div style="display:flex;gap:6pt;margin-top:2pt;"><span style="color:${BULLET};font-size:10pt;line-height:1;">•</span><span style="font-size:10pt;color:${DARK};line-height:1.35;">${txt}</span></div>`;
+    }
 
-  // ── Bullet point styled with Hiero Green bullet ──
-  function bullet(text) {
-      if (!text || !text.trim()) return '';
-      const clean = String(text).replace(/^[•\-\*]\s*/, '').trim();
-      if (!clean) return '';
-      return `
-      <table cellpadding="0" cellspacing="0" border="0" style="margin-left:10pt; margin-bottom:2pt; border-collapse:collapse;">
-        <tr>
-          <td style="width:10pt; font-family:Arial,sans-serif; font-size:10pt; color:${ACCENT}; vertical-align:top; line-height:1.2;">&#x2022;</td>
-          <td style="font-family:Arial,sans-serif; font-size:8.5pt; color:${SECONDARY}; vertical-align:top; line-height:1.25;">${clean}</td>
-        </tr>
-      </table>`;
-  }
+    const expHTML = d.experience.length ? d.experience.map(exp => `
+        <div style="margin-top:6pt;">
+            <table style="width:100%;border-collapse:collapse;">
+                <tr>
+                    <td style="font-size:12pt;font-weight:bold;color:${DARK};">${exp.company || exp.jobTitle || ''}</td>
+                    <td style="text-align:right;font-size:10pt;font-style:italic;color:${DARK};white-space:nowrap;">${[exp.startDate, exp.endDate || 'Present'].filter(Boolean).join(' – ')}</td>
+                </tr>
+                <tr>
+                    <td style="font-size:10pt;font-style:italic;font-weight:bold;color:${DARK};">${exp.jobTitle || ''}</td>
+                    <td style="text-align:right;font-size:10pt;font-style:italic;color:${DARK};white-space:nowrap;">${exp.location || ''}</td>
+                </tr>
+            </table>
+            ${(exp.description || '').split('\n').filter(Boolean).map(bullet).join('')}
+        </div>`).join('') : '';
 
-  // ── Summary ──
-  const summaryHTML = d.summary ? `
-      ${sectionBar('Professional Summary')}
-      <div style="font-family:Arial,sans-serif; font-size:8.5pt; color:${SECONDARY}; text-align:justify; margin-bottom:4pt; margin-top:2pt; line-height:1.25;">${d.summary}</div>
-  ` : '';
+    const projHTML = d.projects.length ? d.projects.map(proj => `
+        <div style="margin-top:6pt;">
+            <table style="width:100%;border-collapse:collapse;">
+                <tr>
+                    <td style="font-size:12pt;font-weight:bold;color:${DARK};">${proj.name || proj.title || 'Project'}</td>
+                    <td style="text-align:right;font-size:10pt;font-style:italic;color:${DARK};white-space:nowrap;">${proj.date || proj.dates || ''}</td>
+                </tr>
+            </table>
+            ${(proj.description || '').split('\n').filter(Boolean).map(bullet).join('')}
+        </div>`).join('') : '';
 
-  // ── Experience ──
-  const expHTML = d.experience.length > 0 ? `
-      ${sectionBar('Work Experience')}
-      ${d.experience.map(exp => `
-      <div style="margin-bottom:7pt;">
-          ${entryHeader(exp.jobTitle || exp.role || '', [exp.startDate, exp.endDate || 'Present'].filter(Boolean).join(' – '))}
-          ${exp.company ? `<div style="font-family:Arial,sans-serif; font-size:9pt; color:${SECONDARY}; margin-top:1pt; margin-bottom:2pt; font-style:italic;">${exp.company}</div>` : ''}
-          ${exp.description ? exp.description.split('\n').filter(Boolean).map(b => bullet(b)).join('') : ''}
-      </div>`).join('')}
-  ` : '';
+    const eduHTML = d.education.length ? d.education.map(edu => `
+        <div style="margin-top:6pt;">
+            <table style="width:100%;border-collapse:collapse;">
+                <tr>
+                    <td style="font-size:12pt;font-weight:bold;color:${DARK};">${edu.degree || ''}</td>
+                    <td style="text-align:right;font-size:10pt;color:${DARK};white-space:nowrap;">${edu.gradYear || edu.year || ''}</td>
+                </tr>
+            </table>
+            <div style="font-size:10pt;color:${DARK};margin-top:2pt;">${edu.school || ''}${edu.gpa ? `, Cumulative GPA: <b>${edu.gpa}</b>` : ''}</div>
+        </div>`).join('') : '';
 
-  // ── Projects ──
-  const projHTML = d.projects.length > 0 ? `
-      ${sectionBar('Projects')}
-      ${d.projects.map(proj => `
-      <div style="margin-bottom:7pt;">
-          ${entryHeader(proj.name || proj.title || '', proj.dates || proj.date || '')}
-          ${proj.tech || proj.technologies ? `<div style="font-family:Arial,sans-serif; font-size:8.5pt; color:${SECONDARY}; font-style:italic; margin-top:1pt; margin-bottom:1pt;">Tech: ${proj.tech || proj.technologies}</div>` : ''}
-          ${proj.link ? `<div style="font-family:Arial,sans-serif; font-size:8.5pt; color:${SECONDARY}; margin-bottom:1pt;">${proj.link}</div>` : ''}
-          ${proj.description ? proj.description.split('\n').filter(Boolean).map(b => bullet(b)).join('') : ''}
-      </div>`).join('')}
-  ` : '';
-
-  // ── Skills: inline pills with BG_LIGHT ──
-  const skillsHTML = skillsArr.length > 0 ? `
-      ${sectionBar('Skills & Technologies')}
-      <div style="margin-top:4pt; line-height:1.8;">
-        ${skillsArr.map(s => `
-          <span style="display:inline-block; font-family:Arial,sans-serif; font-size:7.5pt; font-weight:bold; background-color:${BG_LIGHT}; color:${PRIMARY}; padding:3px 8px; margin-right:4pt; margin-bottom:4pt; border-radius:4px;">
-            ${s}
-          </span>
-        `).join('')}
-      </div>
-  ` : '';
-
-  // ── Education ──
-  const eduHTML = d.education.length > 0 ? `
-      ${sectionBar('Education')}
-      ${d.education.map(edu => `
-      <div style="margin-bottom:6pt;">
-          ${entryHeader(edu.degree || '', edu.gradYear || edu.year || '')}
-          ${edu.school ? `<div style="font-family:Arial,sans-serif; font-size:9pt; color:${SECONDARY}; margin-top:1pt;">${edu.school}</div>` : ''}
-          ${edu.gpa ? `<div style="font-family:Arial,sans-serif; font-size:8.5pt; color:${SECONDARY};">GPA: ${edu.gpa}</div>` : ''}
-      </div>`).join('')}
-  ` : '';
-
-  // ── Certifications ──
-  const certItems = d.certifications ? d.certifications.split(',').map(s => s.trim()).filter(Boolean) : [];
-  const certHTML  = certItems.length > 0 ? `
-      ${sectionBar('Certifications')}
-      <div style="margin-top:3pt;">${certItems.map(c => bullet(c)).join('')}</div>
-  ` : '';
-
-  // ── Achievements ──
-  const achItems = d.achievements ? d.achievements.split(';').map(s => s.trim()).filter(Boolean) : [];
-  const achHTML  = achItems.length > 0 ? `
-      ${sectionBar('Achievements')}
-      <div style="margin-top:3pt;">${achItems.map(a => bullet(a)).join('')}</div>
-  ` : '';
-
-  return `<!DOCTYPE html>
-<html xmlns:o='urn:schemas-microsoft-com:office:office'
-      xmlns:w='urn:schemas-microsoft-com:office:word'
-      xmlns='http://www.w3.org/TR/REC-html40'>
+    return `<!DOCTYPE html>
+<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
 <head>
 <meta charset='utf-8'>
 <title>${name} - Resume</title>
 <style>
-  @page { size: A4; margin: 14mm 14mm; }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: Arial, Helvetica, sans-serif;
-    background: #f0f0f0;
-    color: ${PRIMARY};
-  }
-  .page {
-    width: 210mm;
-    min-height: 297mm;
-    margin: 0 auto;
-    padding: 14mm 14mm;
-    background: ${WHITE};
-    box-shadow: 0 2px 16px rgba(0,0,0,0.13);
-  }
+  @page { size: A4; margin: 10mm 10mm; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: Arial, Helvetica, sans-serif; background:#f0f0f0; color:${DARK}; }
+  .page { width:210mm; min-height:297mm; margin:0 auto; background:${PAPER}; padding:8mm 10mm; box-shadow:0 2px 12px rgba(0,0,0,0.12); }
+  a { color:${BLUE}; text-decoration:underline; }
 </style>
 </head>
 <body>
 <div class="page">
+    <table style="width:100%;border-collapse:collapse;">
+        <tr>
+            <td style="width:68%;vertical-align:top;">
+                <div style="font-size:52px;line-height:1.02;color:${BLUE};font-weight:700;">${name}</div>
+                <div style="font-size:39px;line-height:1.05;color:${DARK};font-weight:700;margin-top:2pt;">${roleTitle}</div>
+            </td>
+            <td style="width:32%;vertical-align:top;padding-top:4pt;">
+                ${rightInfo.map(item => `<div style="font-size:9pt;line-height:1.3;margin-bottom:2pt;"><b>${item[0]}:</b> ${item[1]}</div>`).join('')}
+            </td>
+        </tr>
+    </table>
 
-  <!-- HEADER -->
-  <table cellpadding="0" cellspacing="0" border="0" style="width:100%; border-collapse:collapse; margin-bottom:12pt;">
-    <tr>
-      <!-- Left green stripe accent -->
-      <td bgcolor="${ACCENT}" style="background-color:${ACCENT}; width:3.5pt; font-size:1px; line-height:1px;">&nbsp;</td>
-      <!-- Header text content -->
-      <td style="padding-left:10pt; vertical-align:middle;">
-        <div style="font-family:Arial,Helvetica,sans-serif; font-size:28pt; font-weight:bold; color:${PRIMARY}; letter-spacing:1.5px;">${name}</div>
-        ${roleTitle   ? `<div style="font-family:Arial,sans-serif; font-size:11pt; font-weight:bold; color:${SECONDARY}; text-transform:uppercase; margin-top:2pt; margin-bottom:4pt;">${roleTitle}</div>` : ''}
-        ${contactLine ? `<div style="font-family:Arial,sans-serif; font-size:9.5pt; color:${SECONDARY};">${contactLine}</div>` : ''}
-        ${linksLine   ? `<div style="font-family:Arial,sans-serif; font-size:9.5pt; color:${ACCENT}; font-weight:bold; margin-top:2pt;">${linksLine}</div>` : ''}
-      </td>
-    </tr>
-  </table>
+    ${section('Summary')}
+    <div style="font-size:10pt;line-height:1.35;color:${MUTED};margin-top:4pt;">${d.summary || ''}</div>
 
-  ${summaryHTML}
-  ${expHTML}
-  ${skillsHTML}
-  ${projHTML}
-  ${eduHTML}
-  ${certHTML}
-  ${achHTML}
+    ${(techSkills.length || softSkills.length) ? `
+        ${section('Skillset')}
+        ${techSkills.length ? `<div style="margin-top:4pt;font-size:10pt;color:${DARK};"><b>Technical Skills:</b> ${techSkills.join(', ')}</div>` : ''}
+        ${softSkills.length ? `<div style="margin-top:3pt;font-size:10pt;color:${DARK};"><b>Business Skills:</b> ${softSkills.join(', ')}</div>` : ''}
+    ` : ''}
 
+    ${expHTML ? `${section('Work Experience')}${expHTML}` : ''}
+    ${projHTML ? `${section('Project Experience')}${projHTML}` : ''}
+
+    ${certItems.length ? `${section('Certification')}<div style="margin-top:5pt;font-size:10pt;font-style:italic;color:${DARK};">${certItems[0]}</div>` : ''}
+
+    ${eduHTML ? `${section('Education')}${eduHTML}` : ''}
+
+    ${achItems.length ? `${section('Achievements')}<div style="margin-top:3pt;">${achItems.map(bullet).join('')}</div>` : ''}
 </div>
 </body>
 </html>`;
