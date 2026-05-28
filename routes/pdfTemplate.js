@@ -1,5 +1,6 @@
 const puppeteer = require('puppeteer');
 const fs = require('fs');
+const { execSync } = require('child_process');
 const { generateWordHTML } = require('./wordTemplates');
 
 let sharedBrowserPromise = null;
@@ -11,8 +12,11 @@ async function getSharedBrowser() {
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
+                '--disable-gpu',
                 '--disable-web-security',
-                '--disable-features=IsolateOrigins,site-per-process'
+                '--disable-features=IsolateOrigins,site-per-process',
+                '--single-process'
             ]
         };
 
@@ -20,7 +24,25 @@ async function getSharedBrowser() {
         if (process.platform === 'darwin' && fs.existsSync(macChrome)) {
             launchOptions.executablePath = macChrome;
         } else if (process.env.PUPPETEER_EXECUTABLE_PATH) {
-            launchOptions.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
+            let path = process.env.PUPPETEER_EXECUTABLE_PATH;
+            if (!path.startsWith('/') && !path.startsWith('.')) {
+                try {
+                    path = execSync(`which ${path}`).toString().trim();
+                } catch (e) {}
+            }
+            launchOptions.executablePath = path;
+        } else {
+            const linuxFallbacks = [
+                '/usr/bin/chromium',
+                '/usr/bin/chromium-browser',
+                '/usr/bin/google-chrome'
+            ];
+            for (const p of linuxFallbacks) {
+                if (fs.existsSync(p)) {
+                    launchOptions.executablePath = p;
+                    break;
+                }
+            }
         }
 
         sharedBrowserPromise = puppeteer.launch(launchOptions).catch((err) => {
