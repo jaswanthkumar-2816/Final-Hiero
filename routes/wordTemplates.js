@@ -2073,9 +2073,9 @@ function generateHieroAcademicWordHTML(data) {
     const NAVY_MID  = '#2A3F8F';
     const WHITE     = '#FFFFFF';
     const BLACK     = '#111111';
-    const DARK_GRAY = '#333333';
     const MED_GRAY  = '#666666';
     const LITE_GRAY = '#888888';
+    const DARK_GRAY = '#333333';
 
     const name        = (p.fullName || 'YOUR NAME').toUpperCase();
     const roleTitle   = p.roleTitle || '';
@@ -2089,113 +2089,150 @@ function generateHieroAcademicWordHTML(data) {
     const leftSkills  = skillsList.slice(0, half);
     const rightSkills = skillsList.slice(half);
 
+    // ── Section bar: full-width navy bar exactly like PDF ──
     function sectionBar(title) {
-        return `<div style="background-color:${NAVY};color:${WHITE};font-family:Arial,sans-serif;font-size:10pt;font-weight:bold;letter-spacing:0.8px;text-transform:uppercase;padding:3pt 6pt;margin:10pt 0 5pt 0;">${title}</div>`;
+        return `
+        <table cellpadding="0" cellspacing="0" border="0" style="width:100%;border-collapse:collapse;margin-top:9pt;margin-bottom:4pt;">
+          <tr>
+            <td bgcolor="${NAVY}" style="background-color:${NAVY};padding:3pt 6pt;">
+              <span style="font-family:Arial,sans-serif;font-size:9.5pt;font-weight:bold;color:${WHITE};letter-spacing:0.8px;text-transform:uppercase;">${title.toUpperCase()}</span>
+            </td>
+          </tr>
+        </table>`;
     }
 
+    // ── Entry header row: title left + date right (same line) ──
+    function entryHeader(titleText, dateText) {
+        return `
+        <table cellpadding="0" cellspacing="0" border="0" style="width:100%;border-collapse:collapse;margin-top:4pt;">
+          <tr>
+            <td style="font-family:Arial,sans-serif;font-size:9.5pt;font-weight:bold;color:${BLACK};vertical-align:top;">${(titleText || '').toUpperCase()}</td>
+            <td style="font-family:Arial,sans-serif;font-size:8.5pt;color:${MED_GRAY};text-align:right;white-space:nowrap;vertical-align:top;">${dateText || ''}</td>
+          </tr>
+        </table>`;
+    }
+
+    // ── Bullet point exactly like PDF ──
     function bullet(text) {
-        if (!text) return '';
-        return `<div style="font-size:9pt;color:${DARK_GRAY};margin-left:14pt;margin-bottom:2pt;text-indent:-8pt;padding-left:8pt;">&#x2022;&nbsp;${String(text).replace(/^[•\-\*]\s*/, '').trim()}</div>`;
+        if (!text || !text.trim()) return '';
+        const clean = String(text).replace(/^[•\-\*]\s*/, '').trim();
+        if (!clean) return '';
+        return `<div style="font-family:Arial,sans-serif;font-size:8.5pt;color:${DARK_GRAY};margin-left:12pt;margin-bottom:2pt;">&#x2022;&nbsp;${clean}</div>`;
     }
 
+    // ── Summary ──
     const summaryHTML = d.summary ? `
         ${sectionBar('Professional Summary')}
-        <div style="font-size:9pt;color:${DARK_GRAY};text-align:justify;margin-bottom:4pt;">${d.summary}</div>
+        <div style="font-family:Arial,sans-serif;font-size:8.5pt;color:${DARK_GRAY};text-align:justify;margin-bottom:4pt;margin-top:2pt;">${d.summary}</div>
     ` : '';
 
+    // ── Experience ──
     const expHTML = d.experience.length > 0 ? `
         ${sectionBar('Experience')}
         ${d.experience.map(exp => `
-        <div style="margin-bottom:8pt;">
-            <table style="width:100%;border-collapse:collapse;"><tr>
-                <td style="font-size:10pt;font-weight:bold;color:${BLACK};">${(exp.jobTitle || '').toUpperCase()}</td>
-                <td style="font-size:8.5pt;color:${MED_GRAY};text-align:right;white-space:nowrap;">${[exp.startDate, exp.endDate || 'Present'].filter(Boolean).join(' – ')}</td>
-            </tr></table>
-            ${exp.company ? `<div style="font-size:9pt;color:${MED_GRAY};margin-top:1pt;">${exp.company}</div>` : ''}
+        <div style="margin-bottom:7pt;">
+            ${entryHeader(exp.jobTitle || exp.role || '', [exp.startDate, exp.endDate || 'Present'].filter(Boolean).join(' \u2013 '))}
+            ${exp.company ? `<div style="font-family:Arial,sans-serif;font-size:9pt;color:${MED_GRAY};margin-top:1pt;margin-bottom:2pt;">${exp.company}</div>` : ''}
             ${exp.description ? exp.description.split('\n').filter(Boolean).map(b => bullet(b)).join('') : ''}
         </div>`).join('')}
     ` : '';
 
+    // ── Projects ──
     const projHTML = d.projects.length > 0 ? `
         ${sectionBar('Projects')}
         ${d.projects.map(proj => `
-        <div style="margin-bottom:8pt;">
-            <table style="width:100%;border-collapse:collapse;"><tr>
-                <td style="font-size:10pt;font-weight:bold;color:${BLACK};">${(proj.name || proj.title || '').toUpperCase()}</td>
-                <td style="font-size:8.5pt;color:${MED_GRAY};text-align:right;white-space:nowrap;">${proj.dates || proj.date || ''}</td>
-            </tr></table>
-            ${proj.tech || proj.technologies ? `<div style="font-size:8.5pt;color:${LITE_GRAY};font-style:italic;">Tech: ${proj.tech || proj.technologies}</div>` : ''}
-            ${proj.link ? `<div style="font-size:8.5pt;color:${NAVY_MID};">${proj.link}</div>` : ''}
+        <div style="margin-bottom:7pt;">
+            ${entryHeader(proj.name || proj.title || '', proj.dates || proj.date || '')}
+            ${proj.tech || proj.technologies ? `<div style="font-family:Arial,sans-serif;font-size:8.5pt;color:${LITE_GRAY};font-style:italic;margin-top:1pt;margin-bottom:1pt;">Tech: ${proj.tech || proj.technologies}</div>` : ''}
+            ${proj.link ? `<div style="font-family:Arial,sans-serif;font-size:8.5pt;color:${NAVY_MID};margin-bottom:1pt;">${proj.link}</div>` : ''}
             ${proj.description ? proj.description.split('\n').filter(Boolean).map(b => bullet(b)).join('') : ''}
         </div>`).join('')}
     ` : '';
 
+    // ── Skills: two-column table exactly like PDF ──
     const skillsHTML = skillsList.length > 0 ? `
         ${sectionBar('Skills')}
-        <table style="width:100%;border-collapse:collapse;">
-            <tr>
-                <td style="width:50%;vertical-align:top;">
-                    ${leftSkills.map(s => bullet(s)).join('')}
-                </td>
-                <td style="width:50%;vertical-align:top;">
-                    ${rightSkills.map(s => bullet(s)).join('')}
-                </td>
-            </tr>
+        <table cellpadding="0" cellspacing="0" border="0" style="width:100%;border-collapse:collapse;margin-top:3pt;">
+          <tr>
+            <td style="width:50%;vertical-align:top;padding-right:8pt;">
+                ${leftSkills.map(s => bullet(s)).join('')}
+            </td>
+            <td style="width:50%;vertical-align:top;">
+                ${rightSkills.map(s => bullet(s)).join('')}
+            </td>
+          </tr>
         </table>
     ` : '';
 
+    // ── Education ──
     const eduHTML = d.education.length > 0 ? `
         ${sectionBar('Education')}
         ${d.education.map(edu => `
         <div style="margin-bottom:6pt;">
-            <table style="width:100%;border-collapse:collapse;"><tr>
-                <td style="font-size:10pt;font-weight:bold;color:${BLACK};">${(edu.degree || '').toUpperCase()}</td>
-                <td style="font-size:8.5pt;color:${MED_GRAY};text-align:right;white-space:nowrap;">${edu.gradYear || edu.year || ''}</td>
-            </tr></table>
-            ${edu.school ? `<div style="font-size:9pt;color:${MED_GRAY};">${edu.school}</div>` : ''}
-            ${edu.gpa ? `<div style="font-size:8.5pt;color:${MED_GRAY};">GPA: ${edu.gpa}</div>` : ''}
-            ${edu.coursework ? `<div style="font-size:8.5pt;color:${LITE_GRAY};font-style:italic;">Coursework: ${edu.coursework}</div>` : ''}
+            ${entryHeader(edu.degree || '', edu.gradYear || edu.year || '')}
+            ${edu.school ? `<div style="font-family:Arial,sans-serif;font-size:9pt;color:${MED_GRAY};margin-top:1pt;">${edu.school}</div>` : ''}
+            ${edu.gpa ? `<div style="font-family:Arial,sans-serif;font-size:8.5pt;color:${MED_GRAY};">GPA: ${edu.gpa}</div>` : ''}
+            ${edu.coursework ? `<div style="font-family:Arial,sans-serif;font-size:8.5pt;color:${LITE_GRAY};font-style:italic;">Coursework: ${edu.coursework}</div>` : ''}
         </div>`).join('')}
     ` : '';
 
+    // ── Certifications ──
     const certItems = d.certifications ? d.certifications.split(',').map(s => s.trim()).filter(Boolean) : [];
     const certHTML  = certItems.length > 0 ? `
         ${sectionBar('Certifications')}
-        ${certItems.map(c => bullet(c)).join('')}
+        <div style="margin-top:3pt;">${certItems.map(c => bullet(c)).join('')}</div>
     ` : '';
 
+    // ── Achievements ──
     const achItems = d.achievements ? d.achievements.split(';').map(s => s.trim()).filter(Boolean) : [];
     const achHTML  = achItems.length > 0 ? `
         ${sectionBar('Achievements')}
-        ${achItems.map(a => bullet(a)).join('')}
+        <div style="margin-top:3pt;">${achItems.map(a => bullet(a)).join('')}</div>
     ` : '';
 
-    return `
-<!DOCTYPE html>
-<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-<head><meta charset='utf-8'><title>${name} - Resume</title><style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: Arial, Helvetica, sans-serif; background: ${WHITE}; color: ${BLACK}; }
-    .resume { width: 210mm; margin: 0 auto; padding: 15mm 18mm; min-height: 297mm; }
-</style></head>
+    return `<!DOCTYPE html>
+<html xmlns:o='urn:schemas-microsoft-com:office:office'
+      xmlns:w='urn:schemas-microsoft-com:office:word'
+      xmlns='http://www.w3.org/TR/REC-html40'>
+<head>
+<meta charset='utf-8'>
+<title>${name} - Resume</title>
+<style>
+  @page { size: A4; margin: 15mm 18mm; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f0f0f0;
+    color: ${BLACK};
+  }
+  .page {
+    width: 210mm;
+    min-height: 297mm;
+    margin: 0 auto;
+    padding: 15mm 18mm;
+    background: ${WHITE};
+    box-shadow: 0 2px 16px rgba(0,0,0,0.13);
+  }
+</style>
+</head>
 <body>
-<div class="resume">
+<div class="page">
 
-    <!-- HEADER -->
-    <div style="text-align:center;margin-bottom:10pt;">
-        <div style="font-size:26pt;font-weight:bold;color:${NAVY};letter-spacing:2px;">${name}</div>
-        ${contactLine ? `<div style="font-size:9pt;color:${MED_GRAY};margin-top:4pt;">${contactLine}</div>` : ''}
-        ${linksLine   ? `<div style="font-size:9pt;color:${NAVY_MID};margin-top:2pt;">${linksLine}</div>`   : ''}
-        ${roleTitle   ? `<div style="font-size:12pt;color:${NAVY_MID};margin-top:4pt;">${roleTitle}</div>`   : ''}
-    </div>
+  <!-- HEADER -->
+  <div style="text-align:center;margin-bottom:8pt;">
+    <div style="font-family:Arial,Helvetica,sans-serif;font-size:26pt;font-weight:bold;color:${NAVY};letter-spacing:3px;">${name}</div>
+    ${contactLine ? `<div style="font-family:Arial,sans-serif;font-size:9pt;color:${MED_GRAY};margin-top:4pt;">${contactLine}</div>` : ''}
+    ${linksLine   ? `<div style="font-family:Arial,sans-serif;font-size:9pt;color:${NAVY_MID};margin-top:2pt;">${linksLine}</div>` : ''}
+    ${roleTitle   ? `<div style="font-family:Arial,sans-serif;font-size:12pt;color:${NAVY_MID};margin-top:4pt;">${roleTitle}</div>` : ''}
+  </div>
 
-    ${summaryHTML}
-    ${expHTML}
-    ${projHTML}
-    ${skillsHTML}
-    ${eduHTML}
-    ${certHTML}
-    ${achHTML}
+  ${summaryHTML}
+  ${expHTML}
+  ${projHTML}
+  ${skillsHTML}
+  ${eduHTML}
+  ${certHTML}
+  ${achHTML}
 
 </div>
 </body>
