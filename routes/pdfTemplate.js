@@ -1,6 +1,5 @@
 const puppeteer = require('puppeteer');
 const fs = require('fs');
-const path = require('path');
 const { generateWordHTML } = require('./wordTemplates');
 
 let sharedBrowserPromise = null;
@@ -21,23 +20,7 @@ async function getSharedBrowser() {
         if (process.platform === 'darwin' && fs.existsSync(macChrome)) {
             launchOptions.executablePath = macChrome;
         } else if (process.env.PUPPETEER_EXECUTABLE_PATH) {
-            if (path.isAbsolute(process.env.PUPPETEER_EXECUTABLE_PATH)) {
-                launchOptions.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
-            } else {
-                try {
-                    const resolvedPath = require('child_process')
-                        .execSync(`which ${process.env.PUPPETEER_EXECUTABLE_PATH}`)
-                        .toString()
-                        .trim();
-                    if (resolvedPath && fs.existsSync(resolvedPath)) {
-                        launchOptions.executablePath = resolvedPath;
-                    } else {
-                        launchOptions.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
-                    }
-                } catch (e) {
-                    launchOptions.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
-                }
-            }
+            launchOptions.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
         }
 
         sharedBrowserPromise = puppeteer.launch(launchOptions).catch((err) => {
@@ -57,8 +40,7 @@ async function getSharedBrowser() {
  * @returns {Promise<Buffer>} - Compiled PDF binary buffer
  */
 async function generatePuppeteerPDF(data, templateId) {
-    const { generateTemplateHTML } = require('./templates');
-    const html = generateTemplateHTML(templateId, data);
+    const html = generateWordHTML(data, templateId);
     const browser = await getSharedBrowser();
     const page = await browser.newPage();
 
@@ -91,8 +73,7 @@ async function generatePuppeteerPDF(data, templateId) {
 
 // Single source of truth HTML generator for both PDF and DOCX
 function generateResumeHtmlForOutput(data, templateId) {
-    const { generateTemplateHTML } = require('./templates');
-    return generateTemplateHTML(templateId, data);
+    return generateWordHTML(data, templateId);
 }
 
 module.exports = {
