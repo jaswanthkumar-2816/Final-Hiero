@@ -4166,7 +4166,7 @@ function generateRishiWordHTML(data) {
     const d = normalizeWordData(data);
     const p = d.personalInfo || {};
 
-    const BLUE = '#1f4e79';
+    const BLUE = '#c1121f';
     const DARK = '#1a1a1a';
     const MUTED = '#2f3b45';
     const BULLET = '#b77a3f';
