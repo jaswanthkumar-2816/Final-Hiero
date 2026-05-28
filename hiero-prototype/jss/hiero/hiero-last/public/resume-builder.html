@@ -5514,17 +5514,29 @@
       document.querySelector('.bottom-actions').style.display = 'flex';
     }
 
-    // Download and Preview with backend integration
     async function downloadDocx() {
-      const data = collectFormData();
-      // Ensure template is set
-      data.template = selectedTemplate || 'classic';
-
       try {
         const btn = document.getElementById('downloadDocxBtn');
-        const originalText = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
-        btn.disabled = true;
+        const originalText = btn ? btn.innerHTML : 'Download Word';
+        if (btn) {
+          btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+          btn.disabled = true;
+        }
+
+        let data = {};
+        try {
+          data = JSON.parse(localStorage.getItem('resumeData') || '{}');
+        } catch (e) {
+          console.error('Error reading resumeData from localStorage:', e);
+        }
+
+        // Fallback to collectFormData if localStorage has no personalInfo/data
+        if (!data || !data.personalInfo || !data.personalInfo.fullName) {
+          data = collectFormData();
+        }
+
+        // Ensure template is set
+        data.template = selectedTemplate || data.template || localStorage.getItem('selectedTemplate') || 'classic';
 
         const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
         const response = await fetch(`${BACKEND_URL}/download-docx`, {
@@ -5542,14 +5554,19 @@
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `${data.personalInfo.fullName || 'resume'}_${data.template}.doc`;
+        a.download = `${data.personalInfo?.fullName || 'resume'}_${data.template}.doc`;
         document.body.appendChild(a);
         a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
+        
+        setTimeout(() => {
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+        }, 100);
 
-        btn.innerHTML = originalText;
-        btn.disabled = false;
+        if (btn) {
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+        }
       } catch (error) {
         console.error('DOCX download error:', error);
         alert('Failed to download Word document. Please try again.');
