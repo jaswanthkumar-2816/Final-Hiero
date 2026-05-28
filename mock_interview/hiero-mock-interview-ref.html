@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Hiero — Mock Interview</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --g: #00FF88;
+  --g2: #00cc6a;
+  --g3: #00ff8820;
+  --bg: #060809;
+  --bg2: #0b0e0f;
+  --bg3: #111416;
+  --card: #0f1214;
+  --card2: #141719;
+  --border: #1c2022;
+  --border2: #242829;
+  --text: #c8ced2;
+  --muted: #4a5358;
+  --muted2: #6b757c;
+  --white: #eef1f3;
+  --red: #ff4c4c;
+  --red2: #ff4c4c22;
+  --yellow: #ffc840;
+  --yellow2: #ffc84020;
+  --blue: #4a9eff;
+  --blue2: #4a9eff20;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  height: 100vh;
+  overflow: hidden;
+  font-size: 14px;
+}
+
+/* ── SCAN LINE OVERLAY ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,255,136,0.012) 2px,
+    rgba(0,255,136,0.012) 4px
+  );
+  pointer-events: none;
+  z-index: 1000;
+}
+
+/* ── TOP NAV ── */
+nav {
+  height: 52px;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 16px;
+  position: relative;
+  z-index: 10;
+}
+
+.nav-logo {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 17px;
+  color: var(--g);
+  letter-spacing: -0.3px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.nav-logo-dot {
+  width: 7px; height: 7px;
+  background: var(--g);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--g);
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%,100%{opacity:1;transform:scale(1)}
+  50%{opacity:.5;transform:scale(0.85)}
+}
+
+.nav-session-info {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--muted2);
+  letter-spacing: 1px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  padding: 4px 10px;
+  border-radius: 4px;
+}
+.nav-session-info span { color: var(--g); }
+
+.nav-center {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.focus-banner {
+  background: #ffc84008;
+  border: 1px solid #ffc84030;
+  border-radius: 6px;
+  padding: 5px 14px;
+  font-size: 11px;
+  color: var(--yellow);
+  font-family: 'IBM Plex Mono', monospace;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.focus-banner::before {
+  content: '';
+  width: 6px; height: 6px;
+  background: var(--yellow);
+  border-radius: 50%;
+  animation: blink 1.4s ease-in-out infinite;
+}
+@keyframes blink {
+  0%,100%{opacity:1} 50%{opacity:0.2}
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.timer-nav {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--white);
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  padding: 5px 12px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.timer-dot {
+  width: 6px; height: 6px;
+  background: var(--red);
+  border-radius: 50%;
+  box-shadow: 0 0 6px var(--red);
+  animation: blink 1s ease-in-out infinite;
+}
+
+.user-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--card);
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  padding: 4px 12px 4px 4px;
+  font-size: 12px;
+  color: var(--text);
+}
+.avatar {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--g2), #00ffcc);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Syne', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  color: #000;
+}
+
+/* ── MAIN LAYOUT ── */
+.layout {
+  display: grid;
+  grid-template-columns: 200px 1fr 320px;
+  grid-template-rows: 1fr 52px;
+  height: calc(100vh - 52px);
+  gap: 0;
+}
+
+/* ── LEFT SIDEBAR ── */
+.sidebar {
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  padding: 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sidebar-section-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--muted);
+  text-transform: uppercase;
+  padding: 12px 16px 6px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 16px;
+  font-size: 13px;
+  color: var(--muted2);
+  cursor: pointer;
+  border-left: 2px solid transparent;
+  transition: all 0.15s;
+}
+.nav-item:hover { color: var(--text); background: var(--bg3); }
+.nav-item.active {
+  color: var(--g);
+  border-left-color: var(--g);
+  background: var(--g3);
+}
+.nav-item svg { opacity: 0.7; flex-shrink: 0; }
+.nav-item.active svg { opacity: 1; }
+
+.sidebar-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 8px 16px;
+}
+
+.tip-card {
+  margin: auto 12px 12px;
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-left: 2px solid var(--g);
+  border-radius: 8px;
+  padding: 12px;
+}
+.tip-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--g);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.tip-dot { width: 5px; height: 5px; background: var(--g); border-radius: 50%; }
+.tip-text {
+  font-size: 11.5px;
+  color: var(--muted2);
+  line-height: 1.7;
+}
+.tip-highlight {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--g2);
+}
+
+/* ── MAIN CENTER ── */
+.main {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  position: relative;
+  overflow: hidden;
+}
+
+/* subtle grid bg */
+.main::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0,255,136,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,255,136,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+}
+
+/* ── QUESTION AREA ── */
+.question-zone {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 40px;
+  position: relative;
+}
+
+.q-number {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: var(--muted2);
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.q-number::before, .q-number::after {
+  content: '';
+  height: 1px;
+  width: 40px;
+  background: var(--border2);
+}
+
+.ai-orb {
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  margin: 0 auto 24px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ai-orb-inner {
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #00ff8840, #00ff8810);
+  border: 1px solid #00ff8855;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 2;
+}
+.ai-orb-inner svg { color: var(--g); }
+
+.ai-orb::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px solid #00ff8830;
+  animation: orbring 3s ease-in-out infinite;
+}
+.ai-orb::after {
+  content: '';
+  position: absolute;
+  inset: -12px;
+  border-radius: 50%;
+  border: 1px solid #00ff8815;
+  animation: orbring 3s ease-in-out infinite 0.5s;
+}
+@keyframes orbring {
+  0%,100%{transform:scale(1);opacity:1}
+  50%{transform:scale(1.08);opacity:0.5}
+}
+
+.ai-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--g2);
+  text-transform: uppercase;
+  margin-bottom: 28px;
+}
+.ai-status-badge::before {
+  content: '';
+  width: 5px; height: 5px;
+  background: var(--g);
+  border-radius: 50%;
+  box-shadow: 0 0 6px var(--g);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.question-card {
+  width: 100%;
+  max-width: 660px;
+  background: var(--card);
+  border: 1px solid var(--border2);
+  border-radius: 16px;
+  padding: 28px 32px;
+  position: relative;
+  margin-bottom: 24px;
+}
+.question-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 24px; right: 24px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--g2), transparent);
+}
+
+.question-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.question-text {
+  font-family: 'Syne', sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--white);
+  line-height: 1.45;
+  letter-spacing: -0.3px;
+  margin-bottom: 16px;
+}
+
+.question-tags {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+.q-tag {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+}
+.q-tag-skill { background: var(--blue2); color: var(--blue); border: 1px solid #4a9eff25; }
+.q-tag-diff { background: var(--yellow2); color: var(--yellow); border: 1px solid #ffc84025; }
+.q-tag-type { background: var(--g3); color: var(--g2); border: 1px solid #00ff8825; }
+
+/* ── AUDIO VISUALIZER ── */
+.viz-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.visualizer {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 40px;
+}
+.bar {
+  width: 3px;
+  border-radius: 2px;
+  background: var(--g);
+  animation: barwave 1.2s ease-in-out infinite;
+  opacity: 0.8;
+}
+.bar:nth-child(1){height:12px;animation-delay:0s}
+.bar:nth-child(2){height:22px;animation-delay:0.1s}
+.bar:nth-child(3){height:30px;animation-delay:0.15s}
+.bar:nth-child(4){height:18px;animation-delay:0.2s}
+.bar:nth-child(5){height:36px;animation-delay:0.25s}
+.bar:nth-child(6){height:28px;animation-delay:0.3s}
+.bar:nth-child(7){height:22px;animation-delay:0.35s}
+.bar:nth-child(8){height:32px;animation-delay:0.4s}
+.bar:nth-child(9){height:18px;animation-delay:0.45s}
+.bar:nth-child(10){height:26px;animation-delay:0.5s}
+.bar:nth-child(11){height:38px;animation-delay:0.55s}
+.bar:nth-child(12){height:20px;animation-delay:0.6s}
+.bar:nth-child(13){height:14px;animation-delay:0.65s}
+.bar:nth-child(14){height:24px;animation-delay:0.7s}
+.bar:nth-child(15){height:10px;animation-delay:0.75s}
+@keyframes barwave {
+  0%,100%{transform:scaleY(1);opacity:0.8}
+  50%{transform:scaleY(0.3);opacity:0.3}
+}
+
+.listen-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--card2);
+  border: 1px solid var(--border2);
+  border-radius: 24px;
+  padding: 8px 18px;
+}
+.mic-icon {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--g3);
+  border: 1px solid #00ff8840;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: micpulse 2s ease-in-out infinite;
+}
+@keyframes micpulse {
+  0%,100%{box-shadow:0 0 0 0 #00ff8830}
+  50%{box-shadow:0 0 0 8px transparent}
+}
+.listen-text {
+  font-size: 13px;
+  color: var(--text);
+  font-weight: 400;
+}
+.listen-text strong { color: var(--g); font-weight: 500; }
+
+.hint-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--muted);
+  font-family: 'IBM Plex Mono', monospace;
+}
+.kbd {
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  padding: 2px 7px;
+  font-size: 10px;
+  color: var(--muted2);
+}
+
+/* ── BOTTOM ACTION BAR ── */
+.action-bar {
+  grid-column: 1 / -1;
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 12px;
+}
+
+.status-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--muted2);
+  letter-spacing: 0.5px;
+}
+.status-chip .dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+}
+.dot-green { background: var(--g); box-shadow: 0 0 5px var(--g); }
+.dot-red { background: var(--red); }
+
+.divider-v {
+  width: 1px;
+  height: 20px;
+  background: var(--border);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.15s;
+  font-family: 'DM Sans', sans-serif;
+}
+.btn-end {
+  background: #ff4c4c18;
+  color: var(--red);
+  border-color: #ff4c4c35;
+}
+.btn-end:hover { background: #ff4c4c28; }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--muted2);
+  border-color: var(--border2);
+}
+.btn-ghost:hover { background: var(--bg3); color: var(--text); }
+
+.btn-skip {
+  background: transparent;
+  color: var(--muted2);
+  border-color: var(--border);
+}
+.btn-skip:hover { color: var(--text); }
+
+.bar-right { margin-left: auto; display: flex; gap: 10px; align-items: center; }
+
+/* ── RIGHT PANEL ── */
+.right-panel {
+  background: var(--bg2);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.right-panel::-webkit-scrollbar { width: 4px; }
+.right-panel::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+/* ── VIDEO FEED ── */
+.video-section {
+  position: relative;
+  background: #050709;
+  aspect-ratio: 16/10;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.video-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(ellipse at center, #0f1a12 0%, #060809 70%);
+}
+
+/* fake video person silhouette */
+.silhouette {
+  width: 120px; height: 160px;
+  position: relative;
+}
+.sil-head {
+  width: 54px; height: 54px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1a2820, #0f1a12);
+  border: 1px solid #1c2e22;
+  margin: 0 auto 6px;
+  position: relative;
+  overflow: hidden;
+}
+.sil-head::after {
+  content: '';
+  position: absolute;
+  top: 14px; left: 12px;
+  width: 30px; height: 22px;
+  border-radius: 50% 50% 0 0;
+  background: #0a160e;
+}
+.sil-body {
+  width: 80px;
+  height: 90px;
+  background: linear-gradient(135deg, #1a2820, #0f1a12);
+  border-radius: 40px 40px 0 0;
+  border: 1px solid #1c2e22;
+  margin: 0 auto;
+}
+
+.live-badge {
+  position: absolute;
+  top: 10px; left: 10px;
+  background: rgba(255,76,76,0.9);
+  color: #fff;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  backdrop-filter: blur(4px);
+}
+.live-badge::before {
+  content: '';
+  width: 5px; height: 5px;
+  background: #fff;
+  border-radius: 50%;
+  animation: blink 1s infinite;
+}
+
+.video-controls {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+}
+.vc-btn {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.7);
+  border: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+}
+.vc-btn:hover { border-color: rgba(255,255,255,0.3); }
+
+.face-detect-overlay {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100px; height: 100px;
+}
+.face-detect-overlay::before,
+.face-detect-overlay::after {
+  content: '';
+  position: absolute;
+  width: 16px; height: 16px;
+}
+.face-detect-overlay::before {
+  top: 0; left: 0;
+  border-top: 2px solid var(--g);
+  border-left: 2px solid var(--g);
+}
+.face-detect-overlay::after {
+  bottom: 0; right: 0;
+  border-bottom: 2px solid var(--g);
+  border-right: 2px solid var(--g);
+}
+.fdc1 { position: absolute; top: 0; right: 0; width: 16px; height: 16px; border-top: 2px solid var(--g); border-right: 2px solid var(--g); }
+.fdc2 { position: absolute; bottom: 0; left: 0; width: 16px; height: 16px; border-bottom: 2px solid var(--g); border-left: 2px solid var(--g); }
+
+/* ── METRICS SECTION ── */
+.metrics-section {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.metrics-header {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--muted);
+  text-transform: uppercase;
+  padding: 0 2px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.metrics-header::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.metric-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.metric-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  position: relative;
+  overflow: hidden;
+}
+.metric-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+}
+.metric-card.good::before { background: var(--g); }
+.metric-card.warn::before { background: var(--yellow); }
+.metric-card.info::before { background: var(--blue); }
+.metric-card.neutral::before { background: var(--border2); }
+
+.metric-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 8.5px;
+  letter-spacing: 1.5px;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.metric-value {
+  font-family: 'Syne', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+.metric-sub {
+  font-size: 10px;
+  color: var(--muted2);
+}
+.val-green { color: var(--g); }
+.val-yellow { color: var(--yellow); }
+.val-blue { color: var(--blue); }
+.val-white { color: var(--white); }
+
+/* mini progress bar */
+.mini-bar {
+  height: 3px;
+  background: var(--border);
+  border-radius: 2px;
+  margin-top: 6px;
+  overflow: hidden;
+}
+.mini-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 1s;
+}
+.fill-green { background: var(--g); }
+.fill-yellow { background: var(--yellow); }
+.fill-blue { background: var(--blue); }
+
+/* ── STRESS / EMOTION METER ── */
+.stress-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+}
+.stress-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 8.5px;
+  letter-spacing: 1.5px;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.stress-value {
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--g);
+  float: right;
+  margin-top: -18px;
+}
+.stress-bar-track {
+  height: 6px;
+  background: var(--bg3);
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+  margin-bottom: 6px;
+}
+.stress-bar-fill {
+  height: 100%;
+  width: 28%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--g2), #66ffbb);
+  position: relative;
+}
+.stress-bar-fill::after {
+  content: '';
+  position: absolute;
+  right: 0; top: -2px; bottom: -2px;
+  width: 2px;
+  background: #fff;
+  border-radius: 1px;
+  box-shadow: 0 0 4px var(--g);
+}
+.stress-zones {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+  color: var(--muted);
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+/* ── PROGRESS ── */
+.progress-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+}
+.prog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.prog-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 8.5px;
+  letter-spacing: 1.5px;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.prog-count {
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--white);
+}
+.prog-count span { color: var(--muted2); font-size: 11px; font-weight: 400; }
+
+.question-dots {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.q-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  position: relative;
+}
+.q-dot.done { background: var(--g); }
+.q-dot.current {
+  background: transparent;
+  border: 2px solid var(--g);
+  animation: dotpulse 1.5s ease-in-out infinite;
+}
+@keyframes dotpulse {
+  0%,100%{box-shadow:0 0 0 0 #00ff8840}
+  50%{box-shadow:0 0 0 5px transparent}
+}
+.q-dot.upcoming { background: var(--border2); }
+
+/* ── AI INSIGHTS ── */
+.insights-section {
+  padding: 0 14px 14px;
+}
+.insight-item {
+  display: flex;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border);
+}
+.insight-item:last-child { border-bottom: none; }
+.insight-icon {
+  width: 26px; height: 26px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.ii-green { background: var(--g3); }
+.ii-yellow { background: var(--yellow2); }
+.ii-blue { background: var(--blue2); }
+.insight-text { font-size: 11.5px; color: var(--text); line-height: 1.55; }
+.insight-text strong { color: var(--white); font-weight: 500; }
+
+/* scrollbar for right panel */
+.right-panel { scrollbar-width: thin; scrollbar-color: var(--border2) transparent; }
+</style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<nav>
+  <div class="nav-logo">
+    <div class="nav-logo-dot"></div>
+    HIERO
+  </div>
+
+  <div class="nav-session-info">SESSION <span>INT-2024-05-20-001</span></div>
+
+  <div class="nav-center">
+    <div class="focus-banner">INTERVIEW IN PROGRESS — STAY FOCUSED</div>
+  </div>
+
+  <div class="nav-right">
+    <div class="timer-nav">
+      <div class="timer-dot"></div>
+      <span id="navtimer">00:01:24</span>
+    </div>
+    <div class="user-chip">
+      <div class="avatar">JK</div>
+      <span>Jaswanth Kumar</span>
+    </div>
+  </div>
+</nav>
+
+<!-- MAIN LAYOUT -->
+<div class="layout">
+
+  <!-- LEFT SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-section-label">Navigation</div>
+
+    <div class="nav-item active">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Interview
+    </div>
+    <div class="nav-item">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      Sessions
+    </div>
+    <div class="nav-item">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      Analytics
+    </div>
+    <div class="nav-item">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      Feedback
+    </div>
+
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-section-label">Session</div>
+
+    <div class="nav-item">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+      Live Feedback
+    </div>
+    <div class="nav-item">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Replay Mode
+    </div>
+    <div class="nav-item">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Settings
+    </div>
+
+    <div class="tip-card">
+      <div class="tip-label"><div class="tip-dot"></div> Tip #3</div>
+      <div class="tip-text">Structure answers using the <strong style="color:var(--g2)">STAR method</strong> — Situation, Task, Action, Result.</div>
+      <div class="tip-highlight">→ You're doing great, keep going!</div>
+    </div>
+  </aside>
+
+  <!-- CENTER MAIN -->
+  <main class="main">
+    <div class="question-zone">
+
+      <div class="q-number">QUESTION 1 OF 4</div>
+
+      <div class="ai-orb">
+        <div class="ai-orb-inner">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="ai-status-badge">AI Engine Active · Listening</div>
+
+      <div class="question-card">
+        <div class="question-label">Behavioral Question</div>
+        <div class="question-text">
+          Can you walk me through how you reduced manual testing time by 30% using Python automation scripts?
+        </div>
+        <div class="question-tags">
+          <span class="q-tag q-tag-skill">Python</span>
+          <span class="q-tag q-tag-skill">Automation</span>
+          <span class="q-tag q-tag-diff">Medium</span>
+          <span class="q-tag q-tag-type">Behavioral</span>
+        </div>
+      </div>
+
+      <div class="viz-row">
+        <div class="visualizer">
+          <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+          <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+          <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+          <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+          <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+        </div>
+        <div class="listen-status">
+          <div class="mic-icon">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00FF88" stroke-width="2.5">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+              <line x1="12" y1="19" x2="12" y2="23"/>
+              <line x1="8" y1="23" x2="16" y2="23"/>
+            </svg>
+          </div>
+          <span class="listen-text"><strong>Listening</strong> · 00:12 recorded</span>
+        </div>
+        <div class="visualizer" style="transform:scaleX(-1)">
+          <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+          <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+          <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+          <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+          <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+        </div>
+      </div>
+
+      <div class="hint-row">
+        Press <span class="kbd">Space</span> to pause · <span class="kbd">↵</span> to submit answer · <span class="kbd">S</span> to skip
+      </div>
+
+    </div>
+  </main>
+
+  <!-- RIGHT PANEL -->
+  <aside class="right-panel">
+
+    <!-- Video Feed -->
+    <div class="video-section">
+      <div class="video-placeholder">
+        <div class="silhouette">
+          <div class="sil-head"></div>
+          <div class="sil-body"></div>
+        </div>
+        <div class="face-detect-overlay">
+          <div class="fdc1"></div>
+          <div class="fdc2"></div>
+        </div>
+      </div>
+      <div class="live-badge">LIVE</div>
+      <div class="video-controls">
+        <div class="vc-btn">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2">
+            <rect x="2" y="7" width="15" height="10" rx="1"/><polygon points="23 7 17 12 23 17 23 7"/>
+          </svg>
+        </div>
+        <div class="vc-btn">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+          </svg>
+        </div>
+        <div class="vc-btn">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2">
+            <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/>
+            <line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Metrics -->
+    <div class="metrics-section">
+
+      <div class="metrics-header">Live Telemetry</div>
+
+      <div class="metric-row">
+        <div class="metric-card good">
+          <div class="metric-label">Profile</div>
+          <div class="metric-value val-white" style="font-size:13px">Swe</div>
+          <div class="metric-sub">Software Engineer</div>
+        </div>
+        <div class="metric-card info">
+          <div class="metric-label">Progress</div>
+          <div class="metric-value val-blue">1 / 4</div>
+          <div class="metric-sub">Questions done</div>
+          <div class="mini-bar"><div class="mini-fill fill-blue" style="width:25%"></div></div>
+        </div>
+      </div>
+
+      <div class="metric-row">
+        <div class="metric-card good">
+          <div class="metric-label">Video Sync</div>
+          <div class="metric-value val-green">99%</div>
+          <div class="metric-sub">Excellent</div>
+          <div class="mini-bar"><div class="mini-fill fill-green" style="width:99%"></div></div>
+        </div>
+        <div class="metric-card neutral">
+          <div class="metric-label">Warnings</div>
+          <div class="metric-value val-white">0 / 3</div>
+          <div class="metric-sub">None flagged</div>
+        </div>
+      </div>
+
+      <!-- Stress Meter -->
+      <div class="stress-card">
+        <div class="stress-label">
+          STRESS METRIC — Voice Pitch Analysis
+          <span class="stress-value val-green">Calm</span>
+        </div>
+        <div class="stress-bar-track">
+          <div class="stress-bar-fill"></div>
+        </div>
+        <div class="stress-zones">
+          <span>Calm</span>
+          <span>Neutral</span>
+          <span>Tense</span>
+          <span>High</span>
+        </div>
+      </div>
+
+      <!-- Question Progress -->
+      <div class="progress-card">
+        <div class="prog-header">
+          <div class="prog-title">Session Progress</div>
+          <div class="prog-count">1<span> of 4</span></div>
+        </div>
+        <div class="question-dots">
+          <div class="q-dot done" title="Q1 — Complete"></div>
+          <div class="q-dot current" title="Q2 — Current"></div>
+          <div class="q-dot upcoming" title="Q3"></div>
+          <div class="q-dot upcoming" title="Q4"></div>
+        </div>
+      </div>
+
+      <!-- AI Insights -->
+      <div class="metrics-header" style="margin-top:4px">AI Insights</div>
+      <div class="insights-section">
+        <div class="insight-item">
+          <div class="insight-icon ii-green">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#00FF88" stroke-width="2">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </div>
+          <div class="insight-text"><strong>Good eye contact</strong> — you're looking at the camera consistently.</div>
+        </div>
+        <div class="insight-item">
+          <div class="insight-icon ii-yellow">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ffc840" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+          </div>
+          <div class="insight-text"><strong>Tip:</strong> Slow down slightly — speaking pace is a bit fast this minute.</div>
+        </div>
+        <div class="insight-item">
+          <div class="insight-icon ii-blue">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4a9eff" stroke-width="2">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+          </div>
+          <div class="insight-text"><strong>Remember STAR</strong> — mention the Result clearly at the end.</div>
+        </div>
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- BOTTOM ACTION BAR -->
+  <div class="action-bar">
+    <div class="status-chip">
+      <div class="dot dot-green"></div>
+      AI Active & Listening
+    </div>
+    <div class="divider-v"></div>
+    <div class="status-chip">
+      <div class="dot dot-green"></div>
+      Network Excellent
+    </div>
+    <div class="divider-v"></div>
+    <div class="status-chip">
+      <div class="dot" style="background:var(--blue)"></div>
+      Session Secure & Private
+    </div>
+
+    <div class="bar-right">
+      <div class="btn btn-skip">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/>
+        </svg>
+        Skip Question
+      </div>
+      <div class="btn btn-ghost">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+        Invite Delegate
+      </div>
+      <div class="btn btn-end">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+        </svg>
+        End Interview
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  let s = 84;
+  const el = document.getElementById('navtimer');
+  setInterval(()=>{
+    s++;
+    const h = String(Math.floor(s/3600)).padStart(2,'0');
+    const m = String(Math.floor((s%3600)/60)).padStart(2,'0');
+    const sc = String(s%60).padStart(2,'0');
+    el.textContent = `${h}:${m}:${sc}`;
+  }, 1000);
+</script>
+</body>
+</html>

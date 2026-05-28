@@ -2,39 +2,16 @@ const express = require('express');
 const cors = require('cors');
 const passport = require('passport');
 const dotenv = require('dotenv');
-const cookieParser = require('cookie-parser');
 const path = require('path');
 const mongoose = require('mongoose');
 const compression = require('compression');
 const axios = require('axios');
 const { createProxyMiddleware } = require('http-proxy-middleware');
 
-const { execSync } = require('child_process');
 dotenv.config();
 
-// Auto-fix EADDRINUSE (Fixes "address already in use" errors)
-const PORT = process.env.PORT || 2816;
-if (process.env.NODE_ENV !== 'production' && process.platform === 'win32') {
-    try {
-        const checkPortOutput = execSync(`netstat -ano | findstr :${PORT}`).toString();
-        const pids = [...new Set(checkPortOutput.split('\n')
-            .map(line => line.trim().split(/\s+/).pop())
-            .filter(pid => pid && pid !== process.pid.toString() && !isNaN(pid)))];
-            
-        pids.forEach(pid => {
-            console.log(`🧹 Auto-clearing port ${PORT} (Terminating process ${pid})...`);
-            execSync(`taskkill /F /PID ${pid} /T 2>NUL`);
-        });
-    } catch (e) { /* Port is free */ }
-}
-
-// Backup: Try to load from login-system/.env if root .env didn't provide critical variables
-if (!process.env.GOOGLE_CLIENT_ID) {
-    dotenv.config({ path: path.join(__dirname, 'login-system', '.env') });
-}
-
 const app = express();
-
+const PORT = process.env.PORT || 2816;
 
 // ======================
 // CONFIG & PATHS
@@ -58,7 +35,6 @@ console.log('------------------------');
 app.set('trust proxy', 1);
 app.use(compression());
 app.use(express.json({ limit: '20mb' }));
-app.use(cookieParser());
 
 // Debug log for all routes
 app.use((req, res, next) => {
@@ -103,9 +79,21 @@ app.use(passport.initialize());
 // ======================
 // DATABASE CONNECTION
 // ======================
-mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log("✅ MongoDB Connected"))
-  .catch(err => console.error("❌ MongoDB Connection Error:", err));
+if (process.env.MONGODB_URI) {
+    console.log('⏳ Connecting to MongoDB...');
+    // Safe debug: Check first few chars and total length (don't log secrets)
+    const uri = process.env.MONGODB_URI;
+    console.log(`[DB Debug] URI starts with: "${uri.substring(0, 5)}...", Total length: ${uri.length}`);
+
+    mongoose.connect(process.env.MONGODB_URI)
+        .then(() => console.log('✅ MongoDB connected successfully'))
+        .catch(err => {
+            console.error('❌ MongoDB connection error:', err.message);
+            console.error('Check your MONGODB_URI environment variable on Render.');
+        });
+} else {
+    console.warn('⚠️ MONGODB_URI is not defined. Database features will fail!');
+}
 
 // ======================
 // AUTH ROUTER (Integrated)
@@ -150,11 +138,6 @@ app.use('/api/resume', importRouter);
 const resumeRouter = require('./routes/resume');
 app.use('/api/resume', resumeRouter);
 
-// 🚀 Projects Portal API (Groq-powered)
-const projectsRouter = require('./routes/projects');
-app.use('/api/projects', projectsRouter);
-
-
 // Support templates and preview folder sharing
 app.use('/templates/previews', express.static(path.join(__dirname, 'hiero-backend', 'templates', 'previews')));
 app.use('/dashboard/previews', express.static(path.join(__dirname, 'hiero-backend', 'templates', 'previews')));
@@ -168,25 +151,9 @@ app.use('/api', reviewRouter); // Handles /api/review, /api/login-track, /api/ad
 const analysisRouter = require('./routes/analysis');
 app.use('/api/analysis', analysisRouter); // Supports /api/analysis/analyze
 
-// Scoring & Project Outcomes API (New!)
-const scoringRouter = require('./routes/scoring');
-app.use('/api/scoring', scoringRouter); // Handles /api/scoring/project-complete
-
 // AI Photo Formalizer API (New!)
 const aiPhotoRouter = require('./routes/ai-photo');
 app.use('/api', aiPhotoRouter); // Handles /api/generate-executive-photo
-
-// Orbit Neural Assistant Chat API (New!)
-const chatRouter = require('./routes/chat');
-app.use('/api', chatRouter); // Handles /api/chat
-
-// Python Code Execution API (New!)
-const runRouter = require('./routes/run');
-app.use('/api', runRouter); // Handles /api/run
-
-// QR Tracking + Link Hub (New!)
-const qrRoutes = require('./hiero-backend/modules/qr-hub/routes/qr.routes.cjs');
-app.use('/q', qrRoutes); // Handles /q, /q/go/*, /q/admin/*
 
 // Support legacy shortened paths
 app.use('/auth/signup', (req, res) => res.redirect(307, '/signup'));
@@ -217,10 +184,8 @@ app.get(['/learn', '/learn.html'], (req, res) => res.sendFile(path.join(resumeBu
 app.get(['/solve', '/solve.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'solve.html')));
 app.get(['/resume-builder', '/resume-builder.html', '/dashboard/resume-builder'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'resume-builder.html')));
 app.get(['/resume-form', '/resume-form.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'resume-form.html')));
-app.get(['/project', '/project.html', '/dashboard/project.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'coming-soon.html')));
-app.get(['/interview', '/interview.html', '/mock-interview', '/mock-interview.html', '/dashboard/mock-interview.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'mock-interview.html')));
-
-
+app.get(['/template-verifier', '/template-verifier.html'], (req, res) => res.sendFile(path.join(__dirname, 'template-verifier.html')));
+app.get(['/project', '/project.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'project.html')));
 app.get(['/analysis', '/analysis.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'analysis.html')));
 app.get(['/ai-photo-formalizer', '/ai-photo-formalizer.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'ai-photo-formalizer.html')));
 
@@ -279,7 +244,7 @@ app.post('/api/interview/chat', async (req, res) => {
 // ======================
 // START SERVER
 // ======================
-const server = app.listen(PORT, () => {
+app.listen(PORT, () => {
     console.log(`
 🚀 Unified Gateway LIVE at http://localhost:${PORT}
    📁 Landing UI         → Integrated (Port ${PORT})
@@ -292,16 +257,6 @@ const server = app.listen(PORT, () => {
       - /api/resume       → Native Controller
       - /api/analysis     → AI Engine
       - /api/review       → MongoDB Storage
-      - /q                → QR Hub & Tracking [NEW]
 
 `);
-}).on('error', (err) => {
-    if (err.code === 'EADDRINUSE') {
-        console.error(`\n❌ Error: Port ${PORT} is already in use.`);
-        console.error(`💡 Hiero Auto-Fix: We attempted to clear the port, but it's still busy.`);
-        console.error(`👉 Solution: Please wait a moment or manually close any open Hiero terminals.\n`);
-        process.exit(1);
-    } else {
-        throw err;
-    }
 });

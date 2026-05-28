@@ -153,9 +153,7 @@
 
   <!-- Main Content -->
   <div class="main-container" id="main-content">
-    <div style="margin-bottom: 40px; display: flex; justify-content: center;">
-      <img src="logo-hiero.png" alt="Hiero Logo" style="width: 100px; height: 100px; object-fit: contain; filter: drop-shadow(0 0 15px rgba(0, 255, 0, 0.4)); animation: glow 2s infinite alternate;">
-    </div>
+    <h1 class="app-title">HIERO</h1>
     <div class="content-section">
       <h2>Welcome to Your Career Journey</h2>
       <p>Build your resume, analyze job descriptions, learn missing skills, and launch your career with AI-powered tools
@@ -181,19 +179,6 @@
       window.location.href = `/login?type=${role}`;
     }
   </script>
-
-  <!-- ── Hiero Visit Tracker (silent, never blocks page) ── -->
-  <script>
-    (function() {
-      try {
-        var src = new URLSearchParams(location.search).get('ref') === 'qr' ? 'qr' : 'direct';
-        fetch('/api/admin/pageview', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ page: 'landing', source: src })
-        }).catch(function(){});
-      } catch(e) {}
-    })();
-  </script>
 </body>
+
 </html>
