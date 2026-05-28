@@ -1,6 +1,7 @@
 const puppeteer = require('puppeteer');
 const fs = require('fs');
 const { generateWordHTML } = require('./wordTemplates');
+
 let sharedBrowserPromise = null;
 
 async function getSharedBrowser() {
