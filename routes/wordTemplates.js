@@ -93,7 +93,7 @@ function generateTopDownWordHTML(data, config) {
         }
         .page {
             width: 210mm;
-            min-height: 297mm;
+            height: 297mm;
             margin: 0 auto;
             padding: 14mm 14mm;
             background: ${c.background || '#ffffff'};
@@ -282,7 +282,7 @@ function generateSidebarWordHTML(data, config) {
         }
         .page {
             width: 210mm;
-            min-height: 297mm;
+            height: 297mm;
             margin: 0 auto;
             background: ${c.background || '#ffffff'};
             box-shadow: 0 2px 16px rgba(0,0,0,0.13);
@@ -293,7 +293,7 @@ function generateSidebarWordHTML(data, config) {
     </style></head>
     <body>
         <div class="page">
-            <table style="width: 100%; min-height: 297mm; background-color: ${c.background || '#ffffff'};">
+            <table style="width: 100%; height: 297mm; background-color: ${c.background || '#ffffff'};">
                 <tr>
                     ${config.sidebarPosition === 'left' ? `
                         <td style="width: 32%; background-color: ${c.sidebarBg || '#1f2a44'}; vertical-align: top; padding: 0;">${sidebarHTML}</td>
@@ -344,7 +344,7 @@ const TEMPLATE_CONFIGS = {
     'hiero-monethon': { type: 'sidebar', sidebarPosition: 'left', font: 'Georgia', colors: { sidebarBg: '#1F2A36', sidebarText: '#ffffff', sidebarAccent: '#F2B66D', primary: '#1F2A36', secondary: '#F2B66D', text: '#222222', background: '#ffffff' } },
     'hiero-essence': { type: 'sidebar', sidebarPosition: 'left', font: 'Arial', colors: { sidebarBg: '#1e1e1e', sidebarText: '#ffffff', sidebarAccent: '#f5a623', primary: '#ffffff', secondary: '#aaaaaa', text: '#ffffff', background: '#121212' } },
     'hiero-timeline': { type: 'sidebar', sidebarPosition: 'left', font: 'Arial', colors: { sidebarBg: '#f3f4f6', sidebarText: '#222222', sidebarAccent: '#777777', primary: '#222222', secondary: '#777777', text: '#333333', background: '#ffffff' } },
-    'hiero-prestige': { type: 'sidebar', sidebarPosition: 'left', font: 'Arial', colors: { sidebarBg: '#2e2e2e', sidebarText: '#ffffff', sidebarAccent: '#ffffff', primary: '#2e2e2e', secondary: '#333333', text: '#333333', background: '#f4f4f4' } },
+    'hiero-prestige': { type: 'sidebar', sidebarPosition: 'left', font: 'Arial', colors: { sidebarBg: '#1e293b', sidebarText: '#ffffff', sidebarAccent: '#ffffff', primary: '#0f172a', secondary: '#334155', text: '#0f172a', background: '#ffffff' } },
     'hiero-royal': { type: 'sidebar', sidebarPosition: 'left', font: 'Georgia', colors: { sidebarBg: '#BFAF9A', sidebarText: '#1a1a1a', sidebarAccent: '#1a1a1a', primary: '#1a1a1a', secondary: '#3a3a3a', text: '#3a3a3a', background: '#EDE8D9' } },
     'hiero-cool': { type: 'top-down', font: 'Arial', colors: { primary: '#1e3a8a', secondary: '#374151', text: '#374151', background: '#FFFFFF' } },
     'hiero-nova': { type: 'sidebar', sidebarPosition: 'left', font: 'Times New Roman', colors: { sidebarBg: '#1a1a1a', sidebarText: '#ffffff', sidebarAccent: '#f4b400', primary: '#1a1a1a', secondary: '#777777', text: '#1a1a1a', background: '#ffffff' } },
