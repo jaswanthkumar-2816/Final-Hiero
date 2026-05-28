@@ -4166,10 +4166,10 @@ function generateRishiWordHTML(data) {
     const d = normalizeWordData(data);
     const p = d.personalInfo || {};
 
-    const BLUE = '#2f5678';
-    const DARK = '#161616';
-    const MUTED = '#3a3a3a';
-    const BULLET = '#b4793f';
+    const BLUE = '#1f4e79';
+    const DARK = '#1a1a1a';
+    const MUTED = '#2f3b45';
+    const BULLET = '#b77a3f';
     const PAPER = '#ffffff';
 
     const name = p.fullName || 'Jason Bourne';
@@ -4190,8 +4190,8 @@ function generateRishiWordHTML(data) {
 
     function section(title) {
         return `
-        <div style="margin-top:8pt;">
-            <div style="font-family:Arial,sans-serif;font-size:10.5pt;font-weight:bold;color:${BLUE};text-transform:uppercase;letter-spacing:0.3px;">${title}</div>
+        <div style="margin-top:9pt;">
+            <div style="font-family:Garamond, 'Times New Roman', serif;font-size:10.8pt;font-weight:700;color:${BLUE};text-transform:uppercase;letter-spacing:0.2px;">${title}</div>
             <div style="height:0;border-bottom:1.2px solid ${BLUE};margin-top:2pt;"></div>
         </div>`;
     }
@@ -4199,19 +4199,19 @@ function generateRishiWordHTML(data) {
     function bullet(line) {
         const txt = String(line || '').replace(/^[•\-\*]\s*/, '').trim();
         if (!txt) return '';
-        return `<div style="display:flex;gap:6pt;margin-top:2pt;"><span style="color:${BULLET};font-size:10pt;line-height:1;">•</span><span style="font-size:10pt;color:${DARK};line-height:1.35;">${txt}</span></div>`;
+        return `<div style="display:flex;gap:6pt;margin-top:2pt;"><span style="color:${BULLET};font-size:10pt;line-height:1;">•</span><span style="font-size:10pt;color:${DARK};line-height:1.36;">${txt}</span></div>`;
     }
 
     const expHTML = d.experience.length ? d.experience.map(exp => `
         <div style="margin-top:6pt;">
             <table style="width:100%;border-collapse:collapse;">
                 <tr>
-                    <td style="font-size:12pt;font-weight:bold;color:${DARK};">${exp.company || exp.jobTitle || ''}</td>
-                    <td style="text-align:right;font-size:10pt;font-style:italic;color:${DARK};white-space:nowrap;">${[exp.startDate, exp.endDate || 'Present'].filter(Boolean).join(' – ')}</td>
+                    <td style="font-size:12pt;font-weight:700;color:${DARK};">${exp.company || exp.jobTitle || ''}</td>
+                    <td style="text-align:right;font-size:10pt;font-style:italic;color:${MUTED};white-space:nowrap;">${[exp.startDate, exp.endDate || 'Present'].filter(Boolean).join(' – ')}</td>
                 </tr>
                 <tr>
-                    <td style="font-size:10pt;font-style:italic;font-weight:bold;color:${DARK};">${exp.jobTitle || ''}</td>
-                    <td style="text-align:right;font-size:10pt;font-style:italic;color:${DARK};white-space:nowrap;">${exp.location || ''}</td>
+                    <td style="font-size:10pt;font-style:italic;font-weight:700;color:${DARK};">${exp.jobTitle || ''}</td>
+                    <td style="text-align:right;font-size:10pt;font-style:italic;color:${MUTED};white-space:nowrap;">${exp.location || ''}</td>
                 </tr>
             </table>
             ${(exp.description || '').split('\n').filter(Boolean).map(bullet).join('')}
@@ -4221,8 +4221,8 @@ function generateRishiWordHTML(data) {
         <div style="margin-top:6pt;">
             <table style="width:100%;border-collapse:collapse;">
                 <tr>
-                    <td style="font-size:12pt;font-weight:bold;color:${DARK};">${proj.name || proj.title || 'Project'}</td>
-                    <td style="text-align:right;font-size:10pt;font-style:italic;color:${DARK};white-space:nowrap;">${proj.date || proj.dates || ''}</td>
+                    <td style="font-size:12pt;font-weight:700;color:${DARK};">${proj.name || proj.title || 'Project'}</td>
+                    <td style="text-align:right;font-size:10pt;font-style:italic;color:${MUTED};white-space:nowrap;">${proj.date || proj.dates || ''}</td>
                 </tr>
             </table>
             ${(proj.description || '').split('\n').filter(Boolean).map(bullet).join('')}
@@ -4232,8 +4232,8 @@ function generateRishiWordHTML(data) {
         <div style="margin-top:6pt;">
             <table style="width:100%;border-collapse:collapse;">
                 <tr>
-                    <td style="font-size:12pt;font-weight:bold;color:${DARK};">${edu.degree || ''}</td>
-                    <td style="text-align:right;font-size:10pt;color:${DARK};white-space:nowrap;">${edu.gradYear || edu.year || ''}</td>
+                    <td style="font-size:12pt;font-weight:700;color:${DARK};">${edu.degree || ''}</td>
+                    <td style="text-align:right;font-size:10pt;color:${MUTED};white-space:nowrap;">${edu.gradYear || edu.year || ''}</td>
                 </tr>
             </table>
             <div style="font-size:10pt;color:${DARK};margin-top:2pt;">${edu.school || ''}${edu.gpa ? `, Cumulative GPA: <b>${edu.gpa}</b>` : ''}</div>
@@ -4247,7 +4247,7 @@ function generateRishiWordHTML(data) {
 <style>
   @page { size: A4; margin: 10mm 10mm; }
   * { box-sizing: border-box; }
-  body { margin:0; font-family: Arial, Helvetica, sans-serif; background:#f0f0f0; color:${DARK}; }
+  body { margin:0; font-family: Garamond, 'Times New Roman', serif; background:#f0f0f0; color:${DARK}; }
   .page { width:210mm; min-height:297mm; margin:0 auto; background:${PAPER}; padding:8mm 10mm; box-shadow:0 2px 12px rgba(0,0,0,0.12); }
   a { color:${BLUE}; text-decoration:underline; }
 </style>
@@ -4257,28 +4257,28 @@ function generateRishiWordHTML(data) {
     <table style="width:100%;border-collapse:collapse;">
         <tr>
             <td style="width:68%;vertical-align:top;">
-                <div style="font-size:52px;line-height:1.02;color:${BLUE};font-weight:700;">${name}</div>
-                <div style="font-size:39px;line-height:1.05;color:${DARK};font-weight:700;margin-top:2pt;">${roleTitle}</div>
+                <div style="font-family:Garamond, 'Times New Roman', serif;font-size:28pt;line-height:1.05;color:${BLUE};font-weight:700;letter-spacing:0.1px;">${name}</div>
+                <div style="font-family:Garamond, 'Times New Roman', serif;font-size:17pt;line-height:1.1;color:${DARK};font-weight:700;margin-top:2pt;">${roleTitle}</div>
             </td>
-            <td style="width:32%;vertical-align:top;padding-top:4pt;">
-                ${rightInfo.map(item => `<div style="font-size:9pt;line-height:1.3;margin-bottom:2pt;"><b>${item[0]}:</b> ${item[1]}</div>`).join('')}
+            <td style="width:32%;vertical-align:top;padding-top:2pt;">
+                ${rightInfo.map(item => `<div style="font-family:Garamond, 'Times New Roman', serif;font-size:10pt;line-height:1.28;margin-bottom:2pt;color:${DARK};"><b>${item[0]}:</b> <span style="color:${item[0] === 'LinkedIn' || item[0] === 'GitHub' || item[0] === 'Portfolio' ? BLUE : DARK};text-decoration:${item[0] === 'LinkedIn' || item[0] === 'GitHub' || item[0] === 'Portfolio' ? 'underline' : 'none'};">${item[1]}</span></div>`).join('')}
             </td>
         </tr>
     </table>
 
     ${section('Summary')}
-    <div style="font-size:10pt;line-height:1.35;color:${MUTED};margin-top:4pt;">${d.summary || ''}</div>
+    <div style="font-family:Garamond, 'Times New Roman', serif;font-size:10pt;line-height:1.35;color:${MUTED};margin-top:4pt;">${d.summary || ''}</div>
 
     ${(techSkills.length || softSkills.length) ? `
         ${section('Skillset')}
-        ${techSkills.length ? `<div style="margin-top:4pt;font-size:10pt;color:${DARK};"><b>Technical Skills:</b> ${techSkills.join(', ')}</div>` : ''}
-        ${softSkills.length ? `<div style="margin-top:3pt;font-size:10pt;color:${DARK};"><b>Business Skills:</b> ${softSkills.join(', ')}</div>` : ''}
+        ${techSkills.length ? `<div style="font-family:Garamond, 'Times New Roman', serif;margin-top:4pt;font-size:10pt;color:${DARK};"><b>Technical Skills:</b> ${techSkills.join(', ')}</div>` : ''}
+        ${softSkills.length ? `<div style="font-family:Garamond, 'Times New Roman', serif;margin-top:3pt;font-size:10pt;color:${DARK};"><b>Business Skills:</b> ${softSkills.join(', ')}</div>` : ''}
     ` : ''}
 
     ${expHTML ? `${section('Work Experience')}${expHTML}` : ''}
     ${projHTML ? `${section('Project Experience')}${projHTML}` : ''}
 
-    ${certItems.length ? `${section('Certification')}<div style="margin-top:5pt;font-size:10pt;font-style:italic;color:${DARK};">${certItems[0]}</div>` : ''}
+    ${certItems.length ? `${section('Certification')}<div style="font-family:Garamond, 'Times New Roman', serif;margin-top:5pt;font-size:10pt;font-style:italic;color:${DARK};">${certItems[0]}</div>` : ''}
 
     ${eduHTML ? `${section('Education')}${eduHTML}` : ''}
 
