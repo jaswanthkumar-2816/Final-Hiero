@@ -52,11 +52,8 @@ async function getSharedBrowser() {
         if (!resolvedPath && process.env.PUPPETEER_EXECUTABLE_PATH) {
             let p = process.env.PUPPETEER_EXECUTABLE_PATH;
             if (!p.startsWith('/') && !p.startsWith('.')) {
-                try {
-                    p = execSync(`which ${p}`).toString().trim();
-                } catch (e) {}
-            }
-            if (fs.existsSync(p)) {
+                resolvedPath = p; // Simple binary name (e.g. 'chromium') - use directly so Puppeteer resolves from PATH
+            } else if (fs.existsSync(p)) {
                 resolvedPath = p;
             }
         }
@@ -64,13 +61,21 @@ async function getSharedBrowser() {
         // 4. Linux standard locations fallback
         if (!resolvedPath) {
             const linuxFallbacks = [
-                '/usr/bin/chromium',
                 '/usr/bin/chromium-browser',
+                '/usr/bin/chromium',
                 '/usr/bin/google-chrome',
-                '/usr/bin/chrome'
+                '/usr/bin/chrome',
+                'chromium-browser',
+                'chromium'
             ];
             for (const p of linuxFallbacks) {
-                if (fs.existsSync(p)) {
+                if (p.startsWith('/') || p.startsWith('.')) {
+                    if (fs.existsSync(p)) {
+                        resolvedPath = p;
+                        break;
+                    }
+                } else {
+                    // Use simple binary name directly so Puppeteer can find it in PATH
                     resolvedPath = p;
                     break;
                 }
