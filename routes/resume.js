@@ -155,9 +155,15 @@ router.post('/preview-resume', async (req, res) => {
         const templateId = data.template || data.templateId || 'classic';
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', 'inline; filename=resume-preview.pdf');
-        // IMPORTANT: Use the same Puppeteer+HTML pipeline as `download-resume`
-        // so previews match `pdfTemplate.js` output exactly.
-        const pdfBuffer = await generatePuppeteerPDF(data, templateId);
+        let pdfBuffer;
+        try {
+            // Preferred render path (matches HTML template output)
+            pdfBuffer = await generatePuppeteerPDF(data, templateId);
+        } catch (puppeteerErr) {
+            // Cloud/runtime fallback: still return PDF instead of 500.
+            console.error('Preview Puppeteer failed, falling back to PDFKit:', puppeteerErr.message || puppeteerErr);
+            pdfBuffer = await generatePDFKitBuffer(data, templateId);
+        }
         res.send(pdfBuffer);
     } catch (error) {
         console.error('Preview error:', error);
@@ -184,8 +190,15 @@ router.post('/download-resume', async (req, res) => {
 			});
 		}
 
-		// PDF generation must use the SAME HTML template used for Word, to ensure fidelity
-		const pdfBuffer = await generatePuppeteerPDF(data, templateId);
+		let pdfBuffer;
+		try {
+			// Preferred render path (matches HTML template output)
+			pdfBuffer = await generatePuppeteerPDF(data, templateId);
+		} catch (puppeteerErr) {
+			// Cloud/runtime fallback: still return PDF instead of 500.
+			console.error('Download Puppeteer failed, falling back to PDFKit:', puppeteerErr.message || puppeteerErr);
+			pdfBuffer = await generatePDFKitBuffer(data, templateId);
+		}
 		res.setHeader('Content-Type', 'application/pdf');
 		res.setHeader('Content-Disposition', `attachment; filename="resume_${templateId}.pdf"`);
 		return res.send(pdfBuffer);
