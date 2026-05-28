@@ -114,8 +114,11 @@ async function generatePuppeteerPDF(data, templateId) {
         // Emulate screen media to ensure colors, backgrounds and margins render accurately
         await page.emulateMediaType('screen');
         
-        // `domcontentloaded` is much faster than `networkidle0` for local inline HTML templates.
-        await page.setContent(html, { waitUntil: 'domcontentloaded' });
+        // Wait for all network requests (fonts, external assets) to complete
+        await page.setContent(html, { waitUntil: 'networkidle0' });
+        
+        // Ensure web fonts are completely loaded and active before generating PDF
+        await page.evaluateHandle('document.fonts.ready');
         
         // Print to PDF with exact A4 dimensions and background colors enabled
         const pdfBuffer = await page.pdf({
