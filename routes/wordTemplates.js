@@ -83,70 +83,87 @@ function generateTopDownWordHTML(data, config) {
     return `
     <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
     <head><meta charset='utf-8'><title>Resume</title><style>
-        body { font-family: '${config.font || 'Arial'}', serif; line-height: 1.2; color: ${c.text || '#333333'}; background-color: ${c.background || '#ffffff'}; margin: 30pt; }
+        @page { size: A4; margin: 14mm 14mm; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: '${config.font || 'Arial'}', sans-serif; 
+            line-height: 1.25; 
+            color: ${c.text || '#333333'}; 
+            background: #f0f0f0; 
+        }
+        .page {
+            width: 210mm;
+            min-height: 297mm;
+            margin: 0 auto;
+            padding: 14mm 14mm;
+            background: ${c.background || '#ffffff'};
+            box-shadow: 0 2px 16px rgba(0,0,0,0.13);
+        }
         .header { text-align: ${config.headerAlign || 'left'}; margin-bottom: 10pt; border-bottom: ${config.headerBorder ? '2.5pt solid ' + (c.accent || c.primary) : 'none'}; padding-bottom: 5pt; }
-        .name { font-size: 22pt; font-weight: bold; margin: 0; color: ${c.primary}; text-transform: uppercase; }
+        .name { font-size: 24pt; font-weight: bold; margin: 0; color: ${c.primary}; text-transform: uppercase; letter-spacing: 1px; }
         .role { font-size: 11pt; color: ${c.secondary || c.primary}; margin-top: 3pt; font-weight: bold; text-transform: uppercase; }
         .contact { font-size: 9.5pt; color: ${c.text || '#333333'}; margin-top: 3pt; }
-        .section-title { font-size: 11.5pt; font-weight: bold; color: ${c.primary}; margin-top: 12pt; margin-bottom: 5pt; text-transform: uppercase; border-bottom: 1.5pt solid ${c.secondary || c.primary}; padding-bottom: 2pt; }
-        .item-title { font-size: 10pt; font-weight: bold; color: ${c.text || '#222222'}; margin-top: 6pt; }
+        .section-title { font-size: 11.5pt; font-weight: bold; color: ${c.primary}; margin-top: 12pt; margin-bottom: 5pt; text-transform: uppercase; border-bottom: 1.5pt solid ${c.accent || c.secondary || c.primary}; padding-bottom: 2pt; }
+        .item-title { font-size: 10pt; font-weight: bold; color: ${c.text || '#222222'}; margin-top: 6pt; text-transform: uppercase; }
         .item-meta { font-size: 9pt; color: ${c.secondary || '#666666'}; font-style: italic; margin-bottom: 2pt; }
         .content { font-size: 9.5pt; margin-bottom: 4pt; text-align: justify; color: ${c.text || '#222222'}; }
         ul { margin-top: 2pt; margin-bottom: 3pt; padding-left: 15pt; }
-        li { margin-bottom: 2pt; font-size: 9.5pt; }
+        li { margin-bottom: 2pt; font-size: 9.5pt; color: ${c.text || '#333333'}; }
     </style></head>
     <body>
-        <div class='header'>
-            <div class='name'>${p.fullName || 'RESUME'}</div>
-            ${p.roleTitle ? `<div class='role'>${p.roleTitle}</div>` : ''}
-            <div class='contact'>${[p.address, p.phone, p.email, p.linkedin, p.github, p.website].filter(Boolean).join('  |  ')}</div>
+        <div class="page">
+            <div class='header'>
+                <div class='name'>${p.fullName || 'RESUME'}</div>
+                ${p.roleTitle ? `<div class='role'>${p.roleTitle}</div>` : ''}
+                <div class='contact'>${[p.address, p.phone, p.email, p.linkedin, p.github, p.website].filter(Boolean).join('  |  ')}</div>
+            </div>
+            
+            ${d.summary ? `
+                <div class='section-title'>PROFESSIONAL SUMMARY</div>
+                <div class='content'>${d.summary}</div>
+            ` : ''}
+
+            ${d.experience.length > 0 ? `
+                <div class='section-title'>WORK EXPERIENCE</div>
+                ${d.experience.map(exp => `
+                    <div class='item-title'>${(exp.jobTitle || '').toUpperCase()}</div>
+                    <div class='item-meta'>${exp.company || ''} | ${exp.startDate || ''} - ${exp.endDate || 'Present'} ${exp.location ? '| ' + exp.location : ''}</div>
+                    <div class='content'>${exp.description ? `<ul>${exp.description.split('\n').filter(l => l.trim()).map(l => `<li>${l.replace(/^[\*-•]\s*/, '')}</li>`).join('')}</ul>` : ''}</div>
+                `).join('')}
+            ` : ''}
+
+            ${d.education.length > 0 ? `
+                <div class='section-title'>EDUCATION</div>
+                ${d.education.map(edu => `
+                    <div class='item-title'>${edu.degree || ''}</div>
+                    <div class='item-meta'>${edu.school || ''} | ${edu.gradYear || ''} ${edu.gpa ? '| GPA: ' + edu.gpa : ''}</div>
+                `).join('')}
+            ` : ''}
+
+            ${d.projects.length > 0 ? `
+                <div class='section-title'>PROJECTS</div>
+                ${d.projects.map(proj => `
+                    <div class='item-title'>${(proj.name || proj.title || '').toUpperCase()}</div>
+                    ${proj.tech || proj.technologies ? `<div class='item-meta'>Technologies: ${proj.tech || proj.technologies}</div>` : ''}
+                    <div class='content'>${proj.description ? `<ul>${proj.description.split('\n').filter(l => l.trim()).map(l => `<li>${l.replace(/^[\*-•]\s*/, '')}</li>`).join('')}</ul>` : ''}</div>
+                `).join('')}
+            ` : ''}
+
+            ${d.technicalSkills ? `
+                <div class='section-title'>TECHNICAL SKILLS</div>
+                <div class='content'>${d.technicalSkills}</div>
+            ` : ''}
+
+            ${d.certifications ? `
+                <div class='section-title'>CERTIFICATIONS</div>
+                <div class='content'>${d.certifications}</div>
+            ` : ''}
+            
+            ${d.achievements ? `
+                <div class='section-title'>ACHIEVEMENTS</div>
+                <div class='content'><ul>${d.achievements.split(';').map(a => `<li>${a.trim()}</li>`).join('')}</ul></div>
+            ` : ''}
         </div>
-        
-        ${d.summary ? `
-            <div class='section-title'>PROFESSIONAL SUMMARY</div>
-            <div class='content'>${d.summary}</div>
-        ` : ''}
-
-        ${d.experience.length > 0 ? `
-            <div class='section-title'>WORK EXPERIENCE</div>
-            ${d.experience.map(exp => `
-                <div class='item-title'>${(exp.jobTitle || '').toUpperCase()}</div>
-                <div class='item-meta'>${exp.company || ''} | ${exp.startDate || ''} - ${exp.endDate || 'Present'} ${exp.location ? '| ' + exp.location : ''}</div>
-                <div class='content'>${exp.description ? `<ul>${exp.description.split('\n').filter(l => l.trim()).map(l => `<li>${l.replace(/^[\*-•]\s*/, '')}</li>`).join('')}</ul>` : ''}</div>
-            `).join('')}
-        ` : ''}
-
-        ${d.education.length > 0 ? `
-            <div class='section-title'>EDUCATION</div>
-            ${d.education.map(edu => `
-                <div class='item-title'>${edu.degree || ''}</div>
-                <div class='item-meta'>${edu.school || ''} | ${edu.gradYear || ''} ${edu.gpa ? '| GPA: ' + edu.gpa : ''}</div>
-            `).join('')}
-        ` : ''}
-
-        ${d.projects.length > 0 ? `
-            <div class='section-title'>PROJECTS</div>
-            ${d.projects.map(proj => `
-                <div class='item-title'>${(proj.name || proj.title || '').toUpperCase()}</div>
-                ${proj.tech || proj.technologies ? `<div class='item-meta'>Technologies: ${proj.tech || proj.technologies}</div>` : ''}
-                <div class='content'>${proj.description ? `<ul>${proj.description.split('\n').filter(l => l.trim()).map(l => `<li>${l.replace(/^[\*-•]\s*/, '')}</li>`).join('')}</ul>` : ''}</div>
-            `).join('')}
-        ` : ''}
-
-        ${d.technicalSkills ? `
-            <div class='section-title'>TECHNICAL SKILLS</div>
-            <div class='content'>${d.technicalSkills}</div>
-        ` : ''}
-
-        ${d.certifications ? `
-            <div class='section-title'>CERTIFICATIONS</div>
-            <div class='content'>${d.certifications}</div>
-        ` : ''}
-        
-        ${d.achievements ? `
-            <div class='section-title'>ACHIEVEMENTS</div>
-            <div class='content'><ul>${d.achievements.split(';').map(a => `<li>${a.trim()}</li>`).join('')}</ul></div>
-        ` : ''}
     </body>
     </html>`;
 }
@@ -160,7 +177,7 @@ function generateSidebarWordHTML(data, config) {
     let sidebarHTML = `
         <div style="background-color: ${c.sidebarBg || '#111827'}; color: ${c.sidebarText || '#ffffff'}; padding: 15pt 12pt; min-height: 100%;">
             ${config.sidebarPosition === 'left' ? `
-            <h1 style="color: ${c.sidebarText || '#ffffff'}; font-size: 20pt; font-weight: bold; margin: 0 0 4pt 0; text-transform: uppercase;">${p.fullName || 'RESUME'}</h1>
+            <h1 style="color: ${c.sidebarText || '#ffffff'}; font-size: 20pt; font-weight: bold; margin: 0 0 4pt 0; text-transform: uppercase; letter-spacing: 0.5px;">${p.fullName || 'RESUME'}</h1>
             ${p.roleTitle ? `<h2 style="color: ${config.roleBg ? '#ffffff' : (c.sidebarAccent || '#ffffff')}; background-color: ${config.roleBg ? config.roleBg : 'transparent'}; padding: ${config.roleBg ? '2pt 6pt' : '0'}; display: inline-block; font-size: 10.5pt; font-weight: bold; margin: 0 0 10pt 0; text-transform: uppercase;">${p.roleTitle}</h2>` : ''}
             ` : ''}
             
@@ -206,7 +223,7 @@ function generateSidebarWordHTML(data, config) {
     let mainHTML = `
         <div style="padding: 15pt 20pt; min-height: 100%;">
             ${config.sidebarPosition === 'right' ? `
-            <h1 style="color: ${c.primary || '#111827'}; font-size: 22pt; font-weight: bold; margin: 0 0 4pt 0; text-transform: uppercase;">${p.fullName || 'RESUME'}</h1>
+            <h1 style="color: ${c.primary || '#111827'}; font-size: 22pt; font-weight: bold; margin: 0 0 4pt 0; text-transform: uppercase; letter-spacing: 0.5px;">${p.fullName || 'RESUME'}</h1>
             ${p.roleTitle ? `<h2 style="color: ${config.roleBg ? '#ffffff' : (c.secondary || '#555555')}; background-color: ${config.roleBg ? config.roleBg : 'transparent'}; padding: ${config.roleBg ? '2pt 6pt' : '0'}; display: inline-block; font-size: 10.5pt; font-weight: bold; margin: 0 0 10pt 0; text-transform: uppercase;">${p.roleTitle}</h2>` : ''}
             ` : ''}
 
@@ -254,22 +271,40 @@ function generateSidebarWordHTML(data, config) {
     return `
     <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
     <head><meta charset='utf-8'><title>Resume</title><style>
-        body { font-family: '${config.font || 'Arial'}', sans-serif; margin: 0; padding: 0; background-color: ${c.background || '#ffffff'}; color: ${c.text || '#333333'}; }
+        @page { size: A4; margin: 14mm 14mm; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: '${config.font || 'Arial'}', sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            background: #f0f0f0; 
+            color: ${c.text || '#333333'}; 
+        }
+        .page {
+            width: 210mm;
+            min-height: 297mm;
+            margin: 0 auto;
+            background: ${c.background || '#ffffff'};
+            box-shadow: 0 2px 16px rgba(0,0,0,0.13);
+            overflow: hidden;
+        }
         table { width: 100%; border-collapse: collapse; }
         td { vertical-align: top; }
     </style></head>
     <body>
-        <table style="width: 100%; background-color: ${c.background || '#ffffff'};">
-            <tr>
-                ${config.sidebarPosition === 'left' ? `
-                    <td style="width: 32%; background-color: ${c.sidebarBg || '#1f2a44'}; vertical-align: top; padding: 0;">${sidebarHTML}</td>
-                    <td style="width: 68%; background-color: ${c.background || '#ffffff'}; vertical-align: top; padding: 0;">${mainHTML}</td>
-                ` : `
-                    <td style="width: 68%; background-color: ${c.background || '#ffffff'}; vertical-align: top; padding: 0;">${mainHTML}</td>
-                    <td style="width: 32%; background-color: ${c.sidebarBg || '#1f2a44'}; vertical-align: top; padding: 0;">${sidebarHTML}</td>
-                `}
-            </tr>
-        </table>
+        <div class="page">
+            <table style="width: 100%; min-height: 297mm; background-color: ${c.background || '#ffffff'};">
+                <tr>
+                    ${config.sidebarPosition === 'left' ? `
+                        <td style="width: 32%; background-color: ${c.sidebarBg || '#1f2a44'}; vertical-align: top; padding: 0;">${sidebarHTML}</td>
+                        <td style="width: 68%; background-color: ${c.background || '#ffffff'}; vertical-align: top; padding: 0;">${mainHTML}</td>
+                    ` : `
+                        <td style="width: 68%; background-color: ${c.background || '#ffffff'}; vertical-align: top; padding: 0;">${mainHTML}</td>
+                        <td style="width: 32%; background-color: ${c.sidebarBg || '#1f2a44'}; vertical-align: top; padding: 0;">${sidebarHTML}</td>
+                    `}
+                </tr>
+            </table>
+        </div>
     </body>
     </html>`;
 }
