@@ -2284,227 +2284,181 @@ function generateRishiWordHTML(data) {
   const d = normalizeWordData(data);
   const p = d.personalInfo;
 
-  // === PERSONAL INFO ===
-  const name = p.fullName || 'YARAJARLA GANESH';
-  const address = p.address || 'Tripuranthakam, Andhra Pradesh';
-  const phone = p.phone || '+91-7993241780';
-  const email = p.email || 'ganeshyarajarla35@gmail.com';
+  const PRIMARY   = '#111827'; // Deep Navy/Black
+  const SECONDARY = '#4b5563'; // Slate Grey
+  const ACCENT    = '#2ae023'; // Hiero Green
+  const BG_LIGHT  = '#f3f4f6'; // Light grey for tag pills
+  const WHITE     = '#FFFFFF';
 
-  // === CAREER OBJECTIVE ===
-  const objective = d.summary ||
-    `AIML undergraduate with strong foundations in Artificial Intelligence, Machine Learning, and Web Development. Seeking internship opportunities to apply technical skills.`;
+  const name        = (p.fullName || 'YOUR NAME').toUpperCase();
+  const roleTitle   = p.roleTitle || '';
+  const contactLine = [p.address, p.phone, p.email].filter(Boolean).map(s => s.toUpperCase()).join('  •  ');
+  const linksLine   = [p.linkedin, p.github, p.website].filter(Boolean).join('  |  ');
 
-  // === EDUCATION ===
-  const educationList = d.education;
+  const skillsArr = d.technicalSkills
+      ? d.technicalSkills.split(',').map(s => s.trim()).filter(Boolean)
+      : [];
 
-  // === PROJECTS ===
-  const projectsList = d.projects;
+  // ── Section bar with Hiero Accent Line underneath ──
+  function sectionBar(title) {
+      return `
+      <table cellpadding="0" cellspacing="0" border="0" style="width:100%; border-collapse:collapse; margin-top:10pt; margin-bottom:5pt;">
+        <tr>
+          <td style="font-family:Arial,sans-serif; font-size:11.5pt; font-weight:bold; color:${PRIMARY}; text-transform:uppercase; padding-bottom:2pt;">
+            ${title.toUpperCase()}
+          </td>
+        </tr>
+        <tr>
+          <td bgcolor="${ACCENT}" style="background-color:${ACCENT}; height:1.5pt; line-height:1px; font-size:1px;">&nbsp;</td>
+        </tr>
+      </table>`;
+  }
 
-  // === TECHNICAL STRENGTHS ===
-  const modeling = d.technicalSkills || 'Python, C, C++, MySQL, React, Node.js';
-  const software = d.softSkills || 'Problem-solving, Communication, Team collaboration';
+  // ── Entry header row: title left + date right ──
+  function entryHeader(titleText, dateText) {
+      return `
+      <table cellpadding="0" cellspacing="0" border="0" style="width:100%; border-collapse:collapse; margin-top:4pt;">
+        <tr>
+          <td style="font-family:Arial,sans-serif; font-size:10pt; font-weight:bold; color:${PRIMARY}; vertical-align:top; text-transform:uppercase;">${titleText}</td>
+          <td style="font-family:Arial,sans-serif; font-size:8.5pt; color:${SECONDARY}; text-align:right; white-space:nowrap; vertical-align:top;">${dateText || ''}</td>
+        </tr>
+      </table>`;
+  }
 
-  // === WORK EXPERIENCE ===
-  const experienceList = d.experience;
+  // ── Bullet point styled with Hiero Green bullet ──
+  function bullet(text) {
+      if (!text || !text.trim()) return '';
+      const clean = String(text).replace(/^[•\-\*]\s*/, '').trim();
+      if (!clean) return '';
+      return `
+      <table cellpadding="0" cellspacing="0" border="0" style="margin-left:10pt; margin-bottom:2pt; border-collapse:collapse;">
+        <tr>
+          <td style="width:10pt; font-family:Arial,sans-serif; font-size:10pt; color:${ACCENT}; vertical-align:top; line-height:1.2;">&#x2022;</td>
+          <td style="font-family:Arial,sans-serif; font-size:8.5pt; color:${SECONDARY}; vertical-align:top; line-height:1.25;">${clean}</td>
+        </tr>
+      </table>`;
+  }
 
-  // === ACADEMIC ACHIEVEMENTS ===
-  const achievementsList = d.achievements ? d.achievements.split('\n').map(s => s.replace(/^[•\-]\s*/, '').trim()).filter(Boolean) : [
-    'Winner Inter-College Hackathon 2023',
-    'Top 1% LeetCode India'
-  ];
+  // ── Summary ──
+  const summaryHTML = d.summary ? `
+      ${sectionBar('Professional Summary')}
+      <div style="font-family:Arial,sans-serif; font-size:8.5pt; color:${SECONDARY}; text-align:justify; margin-bottom:4pt; margin-top:2pt; line-height:1.25;">${d.summary}</div>
+  ` : '';
 
-  // === EXTRA-CURRICULAR ===
-  const extraList = d.extraCurricular ? d.extraCurricular.split('\n').map(s => s.replace(/^[•\-]\s*/, '').trim()).filter(Boolean) : [
-    'President of the Coding Club',
-    'Attended workshop on AI/ML applications',
-    'Volunteer at local community center'
-  ];
+  // ── Experience ──
+  const expHTML = d.experience.length > 0 ? `
+      ${sectionBar('Work Experience')}
+      ${d.experience.map(exp => `
+      <div style="margin-bottom:7pt;">
+          ${entryHeader(exp.jobTitle || exp.role || '', [exp.startDate, exp.endDate || 'Present'].filter(Boolean).join(' – '))}
+          ${exp.company ? `<div style="font-family:Arial,sans-serif; font-size:9pt; color:${SECONDARY}; margin-top:1pt; margin-bottom:2pt; font-style:italic;">${exp.company}</div>` : ''}
+          ${exp.description ? exp.description.split('\n').filter(Boolean).map(b => bullet(b)).join('') : ''}
+      </div>`).join('')}
+  ` : '';
 
-  // === PERSONAL TRAITS / TRAITS ===
-  const traitsList = d.additionalInfo ? d.additionalInfo.split('\n').map(s => s.replace(/^[•\-]\s*/, '').trim()).filter(Boolean) : [
-    'Highly motivated and eager to learn new things.',
-    'Ability to work as an individual as well as in a group.'
-  ];
+  // ── Projects ──
+  const projHTML = d.projects.length > 0 ? `
+      ${sectionBar('Projects')}
+      ${d.projects.map(proj => `
+      <div style="margin-bottom:7pt;">
+          ${entryHeader(proj.name || proj.title || '', proj.dates || proj.date || '')}
+          ${proj.tech || proj.technologies ? `<div style="font-family:Arial,sans-serif; font-size:8.5pt; color:${SECONDARY}; font-style:italic; margin-top:1pt; margin-bottom:1pt;">Tech: ${proj.tech || proj.technologies}</div>` : ''}
+          ${proj.link ? `<div style="font-family:Arial,sans-serif; font-size:8.5pt; color:${SECONDARY}; margin-bottom:1pt;">${proj.link}</div>` : ''}
+          ${proj.description ? proj.description.split('\n').filter(Boolean).map(b => bullet(b)).join('') : ''}
+      </div>`).join('')}
+  ` : '';
 
-  // === GENERATE HTML ===
-  return `
-<!DOCTYPE html>
-<html lang="en">
+  // ── Skills: inline pills with BG_LIGHT ──
+  const skillsHTML = skillsArr.length > 0 ? `
+      ${sectionBar('Skills & Technologies')}
+      <div style="margin-top:4pt; line-height:1.8;">
+        ${skillsArr.map(s => `
+          <span style="display:inline-block; font-family:Arial,sans-serif; font-size:7.5pt; font-weight:bold; background-color:${BG_LIGHT}; color:${PRIMARY}; padding:3px 8px; margin-right:4pt; margin-bottom:4pt; border-radius:4px;">
+            ${s}
+          </span>
+        `).join('')}
+      </div>
+  ` : '';
+
+  // ── Education ──
+  const eduHTML = d.education.length > 0 ? `
+      ${sectionBar('Education')}
+      ${d.education.map(edu => `
+      <div style="margin-bottom:6pt;">
+          ${entryHeader(edu.degree || '', edu.gradYear || edu.year || '')}
+          ${edu.school ? `<div style="font-family:Arial,sans-serif; font-size:9pt; color:${SECONDARY}; margin-top:1pt;">${edu.school}</div>` : ''}
+          ${edu.gpa ? `<div style="font-family:Arial,sans-serif; font-size:8.5pt; color:${SECONDARY};">GPA: ${edu.gpa}</div>` : ''}
+      </div>`).join('')}
+  ` : '';
+
+  // ── Certifications ──
+  const certItems = d.certifications ? d.certifications.split(',').map(s => s.trim()).filter(Boolean) : [];
+  const certHTML  = certItems.length > 0 ? `
+      ${sectionBar('Certifications')}
+      <div style="margin-top:3pt;">${certItems.map(c => bullet(c)).join('')}</div>
+  ` : '';
+
+  // ── Achievements ──
+  const achItems = d.achievements ? d.achievements.split(';').map(s => s.trim()).filter(Boolean) : [];
+  const achHTML  = achItems.length > 0 ? `
+      ${sectionBar('Achievements')}
+      <div style="margin-top:3pt;">${achItems.map(a => bullet(a)).join('')}</div>
+  ` : '';
+
+  return `<!DOCTYPE html>
+<html xmlns:o='urn:schemas-microsoft-com:office:office'
+      xmlns:w='urn:schemas-microsoft-com:office:word'
+      xmlns='http://www.w3.org/TR/REC-html40'>
 <head>
-  <meta charset="UTF-8">
-  <title>${name} - Resume</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: 'Times New Roman', serif;
-      font-size: 10pt;
-      line-height: 1.25;
-      color: #000;
-      background: #fff;
-      padding: 20px 30px;
-    }
-    .resume { 
-      width: 210mm; 
-      min-height: 297mm; 
-      margin: 0 auto; 
-      box-sizing: border-box;
-      padding: 15mm;
-      overflow: hidden;
-    }
-    h1 {
-      font-size: 16pt;
-      text-align: center;
-      margin-bottom: 4pt;
-      font-weight: bold;
-    }
-    .contact {
-      text-align: center;
-      font-size: 9pt;
-      margin-bottom: 15pt;
-    }
-    .contact a { color: #000; text-decoration: none; }
-    h2 {
-      font-size: 11.5pt;
-      font-weight: bold;
-      text-transform: uppercase;
-      border-bottom: 1px solid #000;
-      padding-bottom: 2pt;
-      margin: 12pt 0 6pt 0;
-    }
-    .section { margin-bottom: 10pt; }
-    .entry { margin-bottom: 8pt; }
-    .entry h3 {
-      font-size: 10.5pt;
-      font-weight: bold;
-      margin-bottom: 1pt;
-    }
-    .date {
-      font-size: 10pt;
-      float: right;
-      font-style: normal;
-    }
-    .clear { clear: both; }
-    ul { margin: 6pt 0 0 20pt; }
-    ul li { margin-bottom: 3pt; font-size: 11pt; }
-    .skills-table {
-      width: 100%;
-      margin-top: 6pt;
-      font-size: 11pt;
-    }
-    .skills-table td {
-      vertical-align: top;
-      padding: 0;
-    }
-    .skills-table .label {
-      font-weight: bold;
-      width: 35%;
-      padding-right: 10pt;
-    }
-    .extra li { list-style-type: disc; }
-    @media print {
-      body { padding: 30px; }
-      a { color: #000; }
-    }
-  </style>
+<meta charset='utf-8'>
+<title>${name} - Resume</title>
+<style>
+  @page { size: A4; margin: 14mm 14mm; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f0f0f0;
+    color: ${PRIMARY};
+  }
+  .page {
+    width: 210mm;
+    min-height: 297mm;
+    margin: 0 auto;
+    padding: 14mm 14mm;
+    background: ${WHITE};
+    box-shadow: 0 2px 16px rgba(0,0,0,0.13);
+  }
+</style>
 </head>
 <body>
-<div class="resume">
+<div class="page">
 
-  <h1>${name}</h1>
-  <div class="contact">
-    ${address}<br>
-    (+91)${phone.replace(/[^0-9]/g, '')} | <a href="mailto:${email}">${email}</a>
-  </div>
+  <!-- HEADER -->
+  <table cellpadding="0" cellspacing="0" border="0" style="width:100%; border-collapse:collapse; margin-bottom:12pt;">
+    <tr>
+      <!-- Left green stripe accent -->
+      <td bgcolor="${ACCENT}" style="background-color:${ACCENT}; width:3.5pt; font-size:1px; line-height:1px;">&nbsp;</td>
+      <!-- Header text content -->
+      <td style="padding-left:10pt; vertical-align:middle;">
+        <div style="font-family:Arial,Helvetica,sans-serif; font-size:28pt; font-weight:bold; color:${PRIMARY}; letter-spacing:1.5px;">${name}</div>
+        ${roleTitle   ? `<div style="font-family:Arial,sans-serif; font-size:11pt; font-weight:bold; color:${SECONDARY}; text-transform:uppercase; margin-top:2pt; margin-bottom:4pt;">${roleTitle}</div>` : ''}
+        ${contactLine ? `<div style="font-family:Arial,sans-serif; font-size:9.5pt; color:${SECONDARY};">${contactLine}</div>` : ''}
+        ${linksLine   ? `<div style="font-family:Arial,sans-serif; font-size:9.5pt; color:${ACCENT}; font-weight:bold; margin-top:2pt;">${linksLine}</div>` : ''}
+      </td>
+    </tr>
+  </table>
 
-  <h2>EDUCATION</h2>
-  <div class="section">
-    ${educationList.map(edu => `
-      <div class="entry">
-        <h3>${edu.school || edu.institute || ''}</h3>
-        <div class="date">${edu.gradYear || edu.dates || ''}</div>
-        <div class="clear"></div>
-        ${edu.degree || ''}<br>
-        ${edu.gpa || edu.details || ''}
-      </div>
-    `).join('')}
-  </div>
-
-  <h2>CAREER OBJECTIVE</h2>
-  <div class="section">
-    ${objective}
-  </div>
-
-  <h2>PROJECTS</h2>
-  <div class="section">
-    ${projectsList.map(proj => `
-      <div class="entry">
-        <h3>${proj.name || proj.title || ''}</h3>
-        ${proj.tech || proj.technologies ? `<strong>Tech Stack:</strong> ${proj.tech || proj.technologies}<br>` : ''}
-        ${(proj.description || '').replace(/\n/g, '<br>')}
-      </div>
-    `).join('')}
-  </div>
-
-  <h2>TECHNICAL STRENGTHS</h2>
-  <div class="section">
-    <table class="skills-table">
-      <tr>
-        <td class="label">Modeling, Programming &amp; Skills</td>
-        <td>${modeling}</td>
-      </tr>
-      <tr>
-        <td class="label">Software, Tools &amp; Traits</td>
-        <td>${software}</td>
-      </tr>
-    </table>
-  </div>
-
-  <h2>WORK EXPERIENCE</h2>
-  <div class="section">
-    ${experienceList.map(exp => `
-      <div class="entry">
-        <h3>${exp.company || ''}</h3>
-        <div class="date">${exp.startDate || ''} - ${exp.endDate || ''}</div>
-        <div class="clear"></div>
-        <em>${exp.jobTitle || exp.role || ''}</em>
-        <ul>
-          ${(exp.description || '').split('\n').filter(Boolean).map(point => `<li>${point.replace(/^[•\-\*]\s*/, '').trim()}</li>`).join('')}
-        </ul>
-      </div>
-    `).join('')}
-  </div>
-
-  ${achievementsList.length > 0 ? `
-  <h2>ACADEMIC ACHIEVEMENTS</h2>
-  <div class="section">
-    <ul>
-      ${achievementsList.map(ach => `<li>${ach}</li>`).join('')}
-    </ul>
-  </div>
-  ` : ''}
-
-  ${extraList.length > 0 ? `
-  <h2>EXTRA-CURRICULAR</h2>
-  <div class="section">
-    <ul class="extra">
-      ${extraList.map(item => `<li>${item}</li>`).join('')}
-    </ul>
-  </div>
-  ` : ''}
-
-  ${traitsList.length > 0 ? `
-  <h2>PERSONAL TRAITS</h2>
-  <div class="section">
-    <ul>
-      ${traitsList.map(trait => `<li>${trait}</li>`).join('')}
-    </ul>
-  </div>
-  ` : ''}
+  ${summaryHTML}
+  ${expHTML}
+  ${skillsHTML}
+  ${projHTML}
+  ${eduHTML}
+  ${certHTML}
+  ${achHTML}
 
 </div>
 </body>
-</html>
-  `;
+</html>`;
 }
 
 module.exports = {
