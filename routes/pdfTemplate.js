@@ -5,16 +5,23 @@ let sharedBrowserPromise = null;
 
 async function getSharedBrowser() {
     if (!sharedBrowserPromise) {
-        sharedBrowserPromise = puppeteer.launch({
+        const launchOptions = {
             headless: 'new',
-            executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
                 '--disable-web-security',
                 '--disable-features=IsolateOrigins,site-per-process'
             ]
-        }).catch((err) => {
+        };
+
+        // Use explicit chrome path only when provided by environment.
+        // This keeps local Mac support while allowing Linux/cloud defaults.
+        if (process.env.PUPPETEER_EXECUTABLE_PATH) {
+            launchOptions.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
+        }
+
+        sharedBrowserPromise = puppeteer.launch(launchOptions).catch((err) => {
             sharedBrowserPromise = null;
             throw err;
         });
