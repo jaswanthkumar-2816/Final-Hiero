@@ -2092,10 +2092,10 @@ function generateHieroAcademicWordHTML(data) {
     // ── Section bar: full-width navy bar exactly like PDF ──
     function sectionBar(title) {
         return `
-        <table cellpadding="0" cellspacing="0" border="0" style="width:100%;border-collapse:collapse;margin-top:9pt;margin-bottom:4pt;">
+        <table cellpadding="0" cellspacing="0" border="0" style="width:100%;border-collapse:collapse;margin-top:6pt;margin-bottom:2pt;">
           <tr>
-            <td bgcolor="${NAVY}" style="background-color:${NAVY};padding:3pt 6pt;">
-              <span style="font-family:Arial,sans-serif;font-size:9.5pt;font-weight:bold;color:${WHITE};letter-spacing:0.8px;text-transform:uppercase;">${title.toUpperCase()}</span>
+            <td bgcolor="${NAVY}" style="background-color:${NAVY};padding:3pt 6pt;height:17pt;vertical-align:middle;">
+              <span style="font-family:Arial,sans-serif;font-size:9.5pt;font-weight:bold;color:${WHITE};letter-spacing:0.8px;text-transform:uppercase;line-height:1;">${title.toUpperCase()}</span>
             </td>
           </tr>
         </table>`;
@@ -2117,13 +2117,13 @@ function generateHieroAcademicWordHTML(data) {
         if (!text || !text.trim()) return '';
         const clean = String(text).replace(/^[•\-\*]\s*/, '').trim();
         if (!clean) return '';
-        return `<div style="font-family:Arial,sans-serif;font-size:8.5pt;color:${DARK_GRAY};margin-left:12pt;margin-bottom:2pt;">&#x2022;&nbsp;${clean}</div>`;
+        return `<div style="font-family:Arial,sans-serif;font-size:8.5pt;color:${DARK_GRAY};margin-left:12pt;margin-bottom:2pt;line-height:1.25;">&#x2022;&nbsp;${clean}</div>`;
     }
 
     // ── Summary ──
     const summaryHTML = d.summary ? `
         ${sectionBar('Professional Summary')}
-        <div style="font-family:Arial,sans-serif;font-size:8.5pt;color:${DARK_GRAY};text-align:justify;margin-bottom:4pt;margin-top:2pt;">${d.summary}</div>
+        <div style="font-family:Arial,sans-serif;font-size:8.5pt;color:${DARK_GRAY};text-align:justify;margin-bottom:4pt;margin-top:2pt;line-height:1.25;">${d.summary}</div>
     ` : '';
 
     // ── Experience ──
@@ -2198,7 +2198,7 @@ function generateHieroAcademicWordHTML(data) {
 <meta charset='utf-8'>
 <title>${name} - Resume</title>
 <style>
-  @page { size: A4; margin: 15mm 18mm; }
+  @page { size: A4; margin: 14mm 14mm; }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
     font-family: Arial, Helvetica, sans-serif;
@@ -2209,7 +2209,7 @@ function generateHieroAcademicWordHTML(data) {
     width: 210mm;
     min-height: 297mm;
     margin: 0 auto;
-    padding: 15mm 18mm;
+    padding: 14mm 14mm;
     background: ${WHITE};
     box-shadow: 0 2px 16px rgba(0,0,0,0.13);
   }
@@ -2220,7 +2220,7 @@ function generateHieroAcademicWordHTML(data) {
 
   <!-- HEADER -->
   <div style="text-align:center;margin-bottom:8pt;">
-    <div style="font-family:Arial,Helvetica,sans-serif;font-size:26pt;font-weight:bold;color:${NAVY};letter-spacing:3px;">${name}</div>
+    <div style="font-family:Arial,Helvetica,sans-serif;font-size:28pt;font-weight:bold;color:${NAVY};letter-spacing:3px;">${name}</div>
     ${contactLine ? `<div style="font-family:Arial,sans-serif;font-size:9pt;color:${MED_GRAY};margin-top:4pt;">${contactLine}</div>` : ''}
     ${linksLine   ? `<div style="font-family:Arial,sans-serif;font-size:9pt;color:${NAVY_MID};margin-top:2pt;">${linksLine}</div>` : ''}
     ${roleTitle   ? `<div style="font-family:Arial,sans-serif;font-size:12pt;color:${NAVY_MID};margin-top:4pt;">${roleTitle}</div>` : ''}
