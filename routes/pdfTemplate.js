@@ -53,6 +53,12 @@ async function generatePuppeteerPDF(data, templateId) {
     }
 }
 
+// Single source of truth HTML generator for both PDF and DOCX
+function generateResumeHtmlForOutput(data, templateId) {
+    return generateWordHTML(data, templateId);
+}
+
 module.exports = {
-    generatePuppeteerPDF
+    generatePuppeteerPDF,
+    generateResumeHtmlForOutput
 };

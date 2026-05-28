@@ -246,13 +246,13 @@ const TEMPLATE_COLORS = {
         light: '#FFFFFF'
     },
     'hiero-prestige': {
-        primary: '#2e2e2e',
-        secondary: '#333333',
-        accent: '#2e2e2e',
-        background: '#f4f4f4',
-        sidebarBg: '#2e2e2e',
+        primary: '#0f172a',
+        secondary: '#334155',
+        accent: '#c8a74e',
+        background: '#f8fafc',
+        sidebarBg: '#0f172a',
         sidebarText: '#ffffff',
-        light: '#e0e0e0'
+        light: '#e2e8f0'
     },
     'hiero-royal': {
         primary: '#1a1a1a',      // Deep black for name/titles
@@ -4932,13 +4932,13 @@ async function renderTemplate_HieroPrestige(doc, rawData, colors, spacing) {
 
     // Standard high-end colors
     const COLORS = {
-        sidebar: '#1e293b',
+        sidebar: '#0f172a',
         main: '#ffffff',
-        accent: '#3b82f6',
+        accent: '#c8a74e',
         textDark: '#0f172a',
         textLight: '#f8fafc',
-        textMuted: '#64748b',
-        sectionBar: '#f1f5f9'
+        textMuted: '#475569',
+        sectionBar: '#e2e8f0'
     };
 
     const drawBackgrounds = () => {

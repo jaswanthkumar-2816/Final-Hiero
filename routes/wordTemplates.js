@@ -75,6 +75,17 @@ function normalizeWordData(data) {
     };
 }
 
+function normalizePhotoSrc(photo) {
+    if (!photo) return '';
+    const s = String(photo).trim();
+    if (!s) return '';
+    if (s.startsWith('data:')) return s;
+    if (/^https?:\/\//i.test(s)) return s;
+    // Assume raw base64; most uploads will be jpeg/png
+    const b64 = s.replace(/\s+/g, '');
+    return `data:image/jpeg;base64,${b64}`;
+}
+
 function generateTopDownWordHTML(data, config) {
     const d = normalizeWordData(data);
     const p = d.personalInfo;
@@ -344,7 +355,7 @@ const TEMPLATE_CONFIGS = {
     'hiero-monethon': { type: 'sidebar', sidebarPosition: 'left', font: 'Georgia', colors: { sidebarBg: '#1F2A36', sidebarText: '#ffffff', sidebarAccent: '#F2B66D', primary: '#1F2A36', secondary: '#F2B66D', text: '#222222', background: '#ffffff' } },
     'hiero-essence': { type: 'sidebar', sidebarPosition: 'left', font: 'Arial', colors: { sidebarBg: '#1e1e1e', sidebarText: '#ffffff', sidebarAccent: '#f5a623', primary: '#ffffff', secondary: '#aaaaaa', text: '#ffffff', background: '#121212' } },
     'hiero-timeline': { type: 'sidebar', sidebarPosition: 'left', font: 'Arial', colors: { sidebarBg: '#f3f4f6', sidebarText: '#222222', sidebarAccent: '#777777', primary: '#222222', secondary: '#777777', text: '#333333', background: '#ffffff' } },
-    'hiero-prestige': { type: 'sidebar', sidebarPosition: 'left', font: 'Arial', colors: { sidebarBg: '#1e293b', sidebarText: '#ffffff', sidebarAccent: '#ffffff', primary: '#0f172a', secondary: '#334155', text: '#0f172a', background: '#ffffff' } },
+    'hiero-prestige': { type: 'sidebar', sidebarPosition: 'left', font: 'Arial', colors: { sidebarBg: '#0f172a', sidebarText: '#ffffff', sidebarAccent: '#c8a74e', primary: '#0f172a', secondary: '#475569', text: '#0f172a', background: '#f8fafc' } },
     'hiero-royal': { type: 'sidebar', sidebarPosition: 'left', font: 'Georgia', colors: { sidebarBg: '#BFAF9A', sidebarText: '#1a1a1a', sidebarAccent: '#1a1a1a', primary: '#1a1a1a', secondary: '#3a3a3a', text: '#3a3a3a', background: '#EDE8D9' } },
     'hiero-cool': { type: 'top-down', font: 'Arial', colors: { primary: '#1e3a8a', secondary: '#374151', text: '#374151', background: '#FFFFFF' } },
     'hiero-nova': { type: 'sidebar', sidebarPosition: 'left', font: 'Times New Roman', colors: { sidebarBg: '#1a1a1a', sidebarText: '#ffffff', sidebarAccent: '#f4b400', primary: '#1a1a1a', secondary: '#777777', text: '#1a1a1a', background: '#ffffff' } },
@@ -1171,8 +1182,19 @@ function generateHieroSignatureWordHTML(data, config) {
     const lastName = nameParts.slice(1).join(' ') || 'NAME';
 
     // Expertise (Skills)
-    const rawSkillsList = data.skills && data.skills.length > 0 ? data.skills : (typeof data.technicalSkills === 'string' ? data.technicalSkills.split(',').map(s => s.trim()).filter(Boolean) : (data.technicalSkills || []));
-    const skills = rawSkillsList.slice(0, 6);
+    // `data.skills` can be either an array or a string in different flows.
+    // Normalize to a simple string[] to avoid runtime errors.
+    const rawSkillsVal = (data && data.skills != null && String(data.skills).length > 0)
+        ? data.skills
+        : (data && data.technicalSkills != null ? data.technicalSkills : d.technicalSkills);
+    const rawSkillsList = Array.isArray(rawSkillsVal)
+        ? rawSkillsVal
+        : (typeof rawSkillsVal === 'string' ? rawSkillsVal.split(/[\n,;]/).map(s => s.trim()).filter(Boolean) : []);
+    const skills = rawSkillsList
+        .map(s => (typeof s === 'object' && s !== null) ? (s.name || s.skill || s.title || '') : String(s))
+        .map(s => s.trim())
+        .filter(Boolean)
+        .slice(0, 6);
 
     // Contact Details
     const contactItems = [
@@ -1982,7 +2004,7 @@ function generateHieroNovaWordHTML(data, config) {
                 <td style="width: 38%; background-color: ${yellow}; vertical-align: middle; text-align: center; padding: 25pt 15pt; height: 130pt;">
                     <div style="display: inline-block; width: 100pt; height: 100pt; border-radius: 50pt; border: 3pt solid ${white}; overflow: hidden; background-color: ${dark}; vertical-align: middle;">
                         ${pInfo.profilePhoto ? `
-                            <img src="${pInfo.profilePhoto}" style="width: 100pt; height: 100pt; object-fit: cover;" />
+                            <img src="${normalizePhotoSrc(pInfo.profilePhoto)}" style="width: 100pt; height: 100pt; object-fit: cover;" />
                         ` : `
                             <div style="width: 100pt; height: 100pt; line-height: 100pt; text-align: center; color: ${white}; font-family: 'Times New Roman', serif; font-size: 32pt; font-weight: bold; text-transform: uppercase;">
                                 ${initials}
@@ -2274,44 +2296,1869 @@ function generateHieroAcademicWordHTML(data) {
 </html>`;
 }
 
+// ── Hiero Monethon Word HTML ─────────────────────────────────────────────────
+// ── Helper shared by all generators ─────────────────────────────────────────
+function _wBullet(txt, accent) {
+    const clean = String(txt).replace(/^[•\-\*]\s*/, '').trim();
+    return `<div style="display:flex;gap:5pt;margin-bottom:2pt;"><span style="color:${accent};min-width:8pt;">▸</span><span style="font-size:8.5pt;line-height:1.4;">${clean}</span></div>`;
+}
+function _wPage(style, content) {
+    return `<!DOCTYPE html>
+<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head><meta charset='utf-8'><title>Resume</title><style>
+  @page{size:A4;margin:0;}*{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:Arial,sans-serif;background:#e8e8e8;}
+  .page{width:210mm;min-height:297mm;margin:0 auto;overflow:hidden;${style}}
+  table{border-collapse:collapse;width:100%;}td{vertical-align:top;padding:0;}
+</style></head><body><div class="page">${content}</div></body></html>`;
+}
+
+// ── Hiero Monethon ─────────────────────────────────────────────────────────
+function generateHieroMonethonWordHTML(data) {
+    const d = normalizeWordData(data);
+    const p = d.personalInfo;
+    const OG = '#F2B66D', NAVY = '#1F2A36', WHITE = '#FFFFFF', TEXT = '#333333', LIGHT = '#fdf8f0';
+    const name = (p.fullName||'YOUR NAME').toUpperCase();
+    const role = p.roleTitle||'';
+    const contacts = [p.phone,p.email,p.address,p.linkedin,p.github,p.website].filter(Boolean);
+    const skills = (d.technicalSkills||'').split(',').map(s=>s.trim()).filter(Boolean);
+    const langs = (d.languages||'').split(',').map(s=>s.trim()).filter(Boolean);
+    const certs = (d.certifications||'').split(',').map(s=>s.trim()).filter(Boolean);
+    const mSec = (t,c) => `<div style="margin-bottom:14pt;"><div style="color:${NAVY};font-size:10.5pt;font-weight:bold;text-transform:uppercase;border-bottom:2pt solid ${OG};padding-bottom:2pt;margin-bottom:7pt;">${t}</div>${c}</div>`;
+    const sSec = (t,c) => `<div style="margin-bottom:13pt;"><div style="color:${OG};font-size:9pt;font-weight:bold;text-transform:uppercase;letter-spacing:1px;border-bottom:1pt solid ${OG};padding-bottom:2pt;margin-bottom:5pt;">${t}</div>${c}</div>`;
+    const bl = l => _wBullet(l, OG);
+    return _wPage(`background:${WHITE};box-shadow:0 2px 20px rgba(0,0,0,0.15);`, `
+  <div style="background:${OG};height:5pt;"></div>
+  <div style="background:${NAVY};padding:16pt 20pt 12pt;">
+    <div style="font-size:25pt;font-weight:bold;color:${WHITE};letter-spacing:1.5px;">${name}</div>
+    ${role?`<div style="font-size:9.5pt;color:${OG};font-weight:bold;text-transform:uppercase;margin-top:3pt;">${role}</div>`:''}
+    <div style="font-size:8pt;color:rgba(255,255,255,0.7);margin-top:5pt;">${contacts.join('  •  ')}</div>
+  </div>
+  <table><tr>
+    <td style="width:65%;padding:16pt 16pt 16pt 20pt;background:${WHITE};">
+      ${d.summary?mSec('Professional Summary',`<div style="font-size:9pt;color:${TEXT};line-height:1.5;text-align:justify;">${d.summary}</div>`):''}
+      ${d.experience.length?mSec('Work Experience',d.experience.map(e=>`
+        <div style="margin-bottom:10pt;">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;">
+            <div style="font-size:10pt;font-weight:bold;color:${NAVY};text-transform:uppercase;">${e.jobTitle||''}</div>
+            <div style="font-size:8pt;color:${OG};font-weight:bold;white-space:nowrap;">${[e.startDate,e.endDate||'Present'].filter(Boolean).join(' – ')}</div>
+          </div>
+          <div style="font-size:8.5pt;color:#666;font-style:italic;margin-bottom:3pt;">${e.company||''}</div>
+          ${(e.description||'').split('\n').filter(Boolean).map(l=>bl(l)).join('')}
+        </div>`).join('')):''}
+      ${d.projects.length?mSec('Projects',d.projects.map(p=>`
+        <div style="margin-bottom:10pt;">
+          <div style="font-size:10pt;font-weight:bold;color:${NAVY};text-transform:uppercase;">${p.name||p.title||''}</div>
+          ${p.tech?`<div style="font-size:8pt;color:${OG};font-weight:bold;margin-bottom:2pt;">Tech: ${p.tech}</div>`:''}
+          ${(p.description||'').split('\n').filter(Boolean).map(l=>bl(l)).join('')}
+        </div>`).join('')):''}
+    </td>
+    <td style="width:35%;padding:16pt 15pt;background:${LIGHT};border-left:1pt solid #edd8a8;">
+      ${skills.length?sSec('Skills',skills.map(s=>`<div style="font-size:8.5pt;color:${TEXT};margin-bottom:3pt;">• ${s}</div>`).join('')):''}
+      ${d.education.length?sSec('Education',d.education.map(e=>`
+        <div style="margin-bottom:8pt;">
+          <div style="font-size:9pt;font-weight:bold;color:${NAVY};">${e.degree||''}</div>
+          <div style="font-size:8pt;color:#555;">${e.school||''}</div>
+          <div style="font-size:8pt;color:${OG};">${e.gradYear||''}</div>
+        </div>`).join('')):''}
+      ${langs.length?sSec('Languages',langs.map(l=>`<div style="font-size:8.5pt;color:${TEXT};margin-bottom:3pt;">• ${l}</div>`).join('')):''}
+      ${certs.length?sSec('Certifications',certs.map(c=>`<div style="font-size:8.5pt;color:${TEXT};margin-bottom:3pt;">• ${c}</div>`).join('')):''}
+    </td>
+  </tr></table>`);
+}
+
+// ── Hiero Legion ────────────────────────────────────────────────────────────
+function generateHieroLegionWordHTML(data) {
+    const d = normalizeWordData(data);
+    const p = d.personalInfo;
+    const DARK = '#1a1a1a', WHITE = '#FFFFFF', TEXT = '#222222';
+    const name = (p.fullName||'YOUR NAME').toUpperCase();
+    const role = p.roleTitle||'';
+    const contacts = [p.phone,p.email,p.address,p.linkedin,p.github,p.website].filter(Boolean);
+    const skills = (d.technicalSkills||'').split(',').map(s=>s.trim()).filter(Boolean);
+    const langs = (d.languages||'').split(',').map(s=>s.trim()).filter(Boolean);
+    const certs = (d.certifications||'').split(',').map(s=>s.trim()).filter(Boolean);
+    const initials = (p.fullName||'R').split(' ').map(n=>n[0]||'').join('').substring(0,2).toUpperCase();
+    const sSec = (t,c) => `<div style="margin-bottom:13pt;"><div style="font-size:9pt;font-weight:bold;text-transform:uppercase;letter-spacing:1.5px;color:${WHITE};border-bottom:1pt solid rgba(255,255,255,0.25);padding-bottom:2pt;margin-bottom:6pt;">${t}</div>${c}</div>`;
+    const mSec = (t,c) => `<div style="margin-bottom:14pt;"><div style="font-size:11pt;font-weight:bold;text-transform:uppercase;color:${DARK};border-bottom:2pt solid ${DARK};padding-bottom:2pt;margin-bottom:7pt;">${t}</div>${c}</div>`;
+    const bl = l => _wBullet(l, '#555');
+    return _wPage(`background:${WHITE};box-shadow:0 2px 20px rgba(0,0,0,0.15);`, `
+  <table style="min-height:297mm;">
+    <tr>
+      <td style="width:37%;background:${DARK};padding:20pt 14pt;">
+        <div style="width:70pt;height:70pt;border-radius:50%;background:#333;border:3pt solid rgba(255,255,255,0.2);margin:0 auto 10pt;display:flex;align-items:center;justify-content:center;font-size:22pt;font-weight:bold;color:${WHITE};text-align:center;line-height:70pt;">${initials}</div>
+        <div style="font-size:15pt;font-weight:bold;color:${WHITE};text-align:center;text-transform:uppercase;margin-bottom:2pt;">${name}</div>
+        ${role?`<div style="font-size:8.5pt;color:rgba(255,255,255,0.65);text-align:center;text-transform:uppercase;letter-spacing:1px;margin-bottom:14pt;">${role}</div>`:'<div style="margin-bottom:14pt;"></div>'}
+        ${contacts.length?sSec('Contact',contacts.map(c=>`<div style="font-size:8pt;color:rgba(255,255,255,0.8);margin-bottom:4pt;word-break:break-all;">• ${c}</div>`).join('')):''}
+        ${skills.length?sSec('Skills',skills.map(s=>`<div style="font-size:8pt;color:rgba(255,255,255,0.8);margin-bottom:3pt;">• ${s}</div>`).join('')):''}
+        ${d.education.length?sSec('Education',d.education.map(e=>`
+          <div style="margin-bottom:8pt;">
+            <div style="font-size:9pt;font-weight:bold;color:${WHITE};">${e.degree||''}</div>
+            <div style="font-size:8pt;color:rgba(255,255,255,0.65);">${e.school||''}</div>
+            <div style="font-size:7.5pt;color:rgba(255,255,255,0.5);">${e.gradYear||''}</div>
+          </div>`).join('')):''}
+        ${langs.length?sSec('Languages',langs.map(l=>`<div style="font-size:8pt;color:rgba(255,255,255,0.8);margin-bottom:3pt;">• ${l}</div>`).join('')):''}
+        ${certs.length?sSec('Certifications',certs.map(c=>`<div style="font-size:8pt;color:rgba(255,255,255,0.8);margin-bottom:3pt;">• ${c}</div>`).join('')):''}
+      </td>
+      <td style="width:63%;background:${WHITE};padding:20pt 18pt;">
+        ${d.summary?mSec('About Me',`<div style="font-size:9pt;color:#444;line-height:1.5;text-align:justify;">${d.summary}</div>`):''}
+        ${d.experience.length?mSec('Experience',d.experience.map(e=>`
+          <div style="margin-bottom:10pt;">
+            <div style="display:flex;justify-content:space-between;">
+              <div style="font-size:10pt;font-weight:bold;color:${DARK};text-transform:uppercase;">${e.jobTitle||''}</div>
+              <div style="font-size:8pt;color:#666;white-space:nowrap;">${[e.startDate,e.endDate||'Present'].filter(Boolean).join(' – ')}</div>
+            </div>
+            <div style="font-size:8.5pt;color:#666;font-style:italic;margin-bottom:3pt;">${e.company||''}</div>
+            ${(e.description||'').split('\n').filter(Boolean).map(l=>bl(l)).join('')}
+          </div>`).join('')):''}
+        ${d.projects.length?mSec('Projects',d.projects.map(p=>`
+          <div style="margin-bottom:10pt;">
+            <div style="font-size:10pt;font-weight:bold;color:${DARK};text-transform:uppercase;">${p.name||p.title||''}</div>
+            ${p.tech?`<div style="font-size:8pt;color:#666;font-style:italic;margin-bottom:2pt;">${p.tech}</div>`:''}
+            ${(p.description||'').split('\n').filter(Boolean).map(l=>bl(l)).join('')}
+          </div>`).join('')):''}
+      </td>
+    </tr>
+  </table>`);
+}
+
+// ── Hiero Essence ───────────────────────────────────────────────────────────
+function generateHieroEssenceWordHTML(data) {
+    const d = normalizeWordData(data);
+    const p = d.personalInfo;
+    const BG = '#000000', SIDE = '#333333', GOLD = '#D4AF37', WHITE = '#FFFFFF';
+    const name = (p.fullName||'YOUR NAME').toUpperCase();
+    const role = p.roleTitle||'';
+    const contacts = [p.phone,p.email,p.address,p.linkedin,p.github,p.website].filter(Boolean);
+    const skills = (d.technicalSkills||'').split(',').map(s=>s.trim()).filter(Boolean);
+    const langs = (d.languages||'').split(',').map(s=>s.trim()).filter(Boolean);
+    const certs = (d.certifications||'').split(',').map(s=>s.trim()).filter(Boolean);
+    const sSec = (t,c) => `<div style="margin-bottom:13pt;"><div style="font-size:9pt;font-weight:bold;text-transform:uppercase;letter-spacing:1.5px;color:${GOLD};border-bottom:1pt solid ${GOLD};padding-bottom:2pt;margin-bottom:6pt;">${t}</div>${c}</div>`;
+    const mSec = (t,c) => `<div style="margin-bottom:14pt;"><div style="font-size:10.5pt;font-weight:bold;text-transform:uppercase;color:${GOLD};border-bottom:1.5pt solid ${GOLD};padding-bottom:2pt;margin-bottom:7pt;">${t}</div>${c}</div>`;
+    const bl = l => _wBullet(l, GOLD);
+    return _wPage(`background:${BG};box-shadow:0 2px 20px rgba(0,0,0,0.3);`, `
+  <div style="background:${GOLD};height:4pt;"></div>
+  <div style="background:#111;padding:16pt 22pt;">
+    <div style="font-size:24pt;font-weight:bold;color:${WHITE};letter-spacing:2px;">${name}</div>
+    ${role?`<div style="font-size:9.5pt;color:${GOLD};font-weight:bold;text-transform:uppercase;letter-spacing:1px;margin-top:3pt;">${role}</div>`:''}
+    <div style="font-size:8pt;color:rgba(255,255,255,0.65);margin-top:5pt;">${contacts.join('  •  ')}</div>
+  </div>
+  <table style="min-height:240mm;">
+    <tr>
+      <td style="width:35%;background:${SIDE};padding:16pt 13pt;border-right:1pt solid #444;">
+        ${skills.length?sSec('Skills',skills.map(s=>`<div style="font-size:8pt;color:rgba(255,255,255,0.82);margin-bottom:3pt;">• ${s}</div>`).join('')):''}
+        ${d.education.length?sSec('Education',d.education.map(e=>`
+          <div style="margin-bottom:8pt;">
+            <div style="font-size:9pt;font-weight:bold;color:${WHITE};">${e.degree||''}</div>
+            <div style="font-size:8pt;color:rgba(255,255,255,0.6);">${e.school||''}</div>
+            <div style="font-size:7.5pt;color:${GOLD};">${e.gradYear||''}</div>
+          </div>`).join('')):''}
+        ${langs.length?sSec('Languages',langs.map(l=>`<div style="font-size:8pt;color:rgba(255,255,255,0.82);margin-bottom:3pt;">• ${l}</div>`).join('')):''}
+        ${certs.length?sSec('Certifications',certs.map(c=>`<div style="font-size:8pt;color:rgba(255,255,255,0.82);margin-bottom:3pt;">• ${c}</div>`).join('')):''}
+      </td>
+      <td style="width:65%;background:${BG};padding:16pt 18pt;">
+        ${d.summary?mSec('Profile',`<div style="font-size:9pt;color:rgba(255,255,255,0.8);line-height:1.5;text-align:justify;">${d.summary}</div>`):''}
+        ${d.experience.length?mSec('Experience',d.experience.map(e=>`
+          <div style="margin-bottom:10pt;">
+            <div style="display:flex;justify-content:space-between;">
+              <div style="font-size:10pt;font-weight:bold;color:${WHITE};text-transform:uppercase;">${e.jobTitle||''}</div>
+              <div style="font-size:8pt;color:${GOLD};white-space:nowrap;">${[e.startDate,e.endDate||'Present'].filter(Boolean).join(' – ')}</div>
+            </div>
+            <div style="font-size:8.5pt;color:rgba(255,255,255,0.55);font-style:italic;margin-bottom:3pt;">${e.company||''}</div>
+            ${(e.description||'').split('\n').filter(Boolean).map(l=>bl(l)).join('')}
+          </div>`).join('')):''}
+        ${d.projects.length?mSec('Projects',d.projects.map(p=>`
+          <div style="margin-bottom:10pt;">
+            <div style="font-size:10pt;font-weight:bold;color:${WHITE};text-transform:uppercase;">${p.name||p.title||''}</div>
+            ${p.tech?`<div style="font-size:8pt;color:${GOLD};font-weight:bold;margin-bottom:2pt;">${p.tech}</div>`:''}
+            ${(p.description||'').split('\n').filter(Boolean).map(l=>bl(l)).join('')}
+          </div>`).join('')):''}
+      </td>
+    </tr>
+  </table>`);
+}
+
+// ── Hiero Timeline ──────────────────────────────────────────────────────────
+function generateHieroTimelineWordHTML(data) {
+    const d = normalizeWordData(data);
+    const p = d.personalInfo;
+    const BLACK = '#111111', DARK = '#222222', GRAY = '#666666', WHITE = '#FFFFFF', BORDER = '#e0e0e0';
+    const name = p.fullName||'YOUR NAME';
+    const role = p.roleTitle||'';
+    const contacts = [p.email,p.phone,p.address,p.linkedin].filter(Boolean);
+    const skills = (d.technicalSkills||'').split(',').map(s=>s.trim()).filter(Boolean);
+    const langs = (d.languages||'').split(',').map(s=>s.trim()).filter(Boolean);
+    const certs = (d.certifications||'').split(',').map(s=>s.trim()).filter(Boolean);
+    const initials = name.split(' ').map(n=>n[0]||'').join('').substring(0,2).toUpperCase();
+    const sec = (t,c) => `<div style="margin-bottom:16pt;">
+      <div style="font-size:11pt;font-weight:bold;font-family:'Times New Roman',serif;color:${BLACK};border-bottom:1.5pt solid ${BORDER};padding-bottom:3pt;margin-bottom:8pt;">${t}</div>
+      ${c}
+    </div>`;
+    const bl = l => _wBullet(l, DARK);
+    return _wPage(`background:${WHITE};box-shadow:0 2px 20px rgba(0,0,0,0.15);`, `
+  <div style="border-left:14pt solid ${BLACK};padding:18pt 22pt 18pt 26pt;">
+    <!-- Header row: initials circle + name -->
+    <div style="display:flex;align-items:center;gap:18pt;border-bottom:1pt solid ${BORDER};padding-bottom:14pt;margin-bottom:16pt;">
+      <div style="width:72pt;height:72pt;border-radius:50%;background:#222;color:${WHITE};font-size:22pt;font-weight:bold;text-align:center;line-height:72pt;flex-shrink:0;">${initials}</div>
+      <div>
+        <div style="font-size:26pt;font-weight:bold;font-family:'Times New Roman',serif;color:${BLACK};">${name}</div>
+        ${role?`<div style="font-size:9.5pt;color:${GRAY};text-transform:uppercase;letter-spacing:1.8px;margin-top:2pt;">${role}</div>`:''}
+        <div style="font-size:8pt;color:${GRAY};margin-top:5pt;">${contacts.join('  |  ')}</div>
+      </div>
+    </div>
+    ${d.summary?sec('Summary',`<div style="font-size:9pt;color:#444;line-height:1.55;text-align:justify;">${d.summary}</div>`):''}
+    ${d.experience.length?sec('Experience',d.experience.map(e=>`
+      <div style="margin-bottom:11pt;padding-left:12pt;border-left:2pt solid ${BORDER};">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;">
+          <div style="font-size:10pt;font-weight:bold;color:${DARK};font-family:'Times New Roman',serif;">${e.jobTitle||''}</div>
+          <div style="font-size:8pt;color:${GRAY};white-space:nowrap;">${[e.startDate,e.endDate||'Present'].filter(Boolean).join(' – ')}</div>
+        </div>
+        <div style="font-size:8.5pt;color:${GRAY};font-style:italic;margin-bottom:3pt;">${e.company||''}</div>
+        ${(e.description||'').split('\n').filter(Boolean).map(l=>bl(l)).join('')}
+      </div>`).join('')):''}
+    ${skills.length?sec('Skills',`<div style="font-size:9pt;color:${DARK};line-height:1.8;">${skills.map(s=>`<span style="display:inline-block;border:1pt solid ${BORDER};padding:1pt 8pt;margin:2pt 3pt 2pt 0;border-radius:2pt;">${s}</span>`).join('')}</div>`):''}
+    ${d.education.length?sec('Education',d.education.map(e=>`
+      <div style="margin-bottom:7pt;padding-left:12pt;border-left:2pt solid ${BORDER};">
+        <div style="font-size:10pt;font-weight:bold;color:${DARK};">${e.degree||''}</div>
+        <div style="font-size:8.5pt;color:${GRAY};">${e.school||''} ${e.gradYear?'  '+e.gradYear:''}</div>
+      </div>`).join('')):''}
+    ${d.projects.length?sec('Projects',d.projects.map(p=>`
+      <div style="margin-bottom:10pt;padding-left:12pt;border-left:2pt solid ${BORDER};">
+        <div style="font-size:10pt;font-weight:bold;color:${DARK};">${p.name||p.title||''}</div>
+        ${p.tech?`<div style="font-size:8pt;color:${GRAY};font-style:italic;margin-bottom:2pt;">${p.tech}</div>`:''}
+        ${(p.description||'').split('\n').filter(Boolean).map(l=>bl(l)).join('')}
+      </div>`).join('')):''}
+    ${certs.length?sec('Certifications',certs.map(c=>`<div style="font-size:8.5pt;color:${DARK};margin-bottom:3pt;">• ${c}</div>`).join('')):''}
+    ${langs.length?sec('Languages',`<div style="font-size:9pt;color:${DARK};">${langs.join('  |  ')}</div>`):''}
+  </div>`);
+}
+
+// ── Hiero Premium ───────────────────────────────────────────────────────────
+function generateHieroPremiumWordHTML(data) {
+    const d = normalizeWordData(data);
+    const p = d.personalInfo;
+    const BG = '#F4F5F7', CARD = '#FFFFFF', PEACH = '#F2B66D', TEXT_PRI = '#333333', TEXT_SEC = '#555555';
+    const name = (p.fullName||'YOUR NAME').toUpperCase();
+    const role = p.roleTitle||d.experience[0]?.jobTitle||'';
+    const contacts = [p.phone,p.email,p.address,p.linkedin,p.github,p.website].filter(Boolean);
+    const skills = (d.technicalSkills||'').split(',').map(s=>s.trim()).filter(Boolean);
+    const langs = (d.languages||'').split(',').map(s=>s.trim()).filter(Boolean);
+    const certs = (d.certifications||'').split(',').map(s=>s.trim()).filter(Boolean);
+    const initials = (p.fullName||'?').split(' ').map(n=>n[0]||'').join('').substring(0,2).toUpperCase();
+    const card = (title, content) => `
+      <div style="background:${CARD};border-radius:6pt;margin-bottom:10pt;overflow:hidden;box-shadow:0 1pt 4pt rgba(0,0,0,0.08);">
+        ${title?`<div style="background:${PEACH};padding:5pt 12pt;font-size:9.5pt;font-weight:bold;color:#000;text-transform:uppercase;">${title}</div>`:''}
+        <div style="padding:10pt 12pt;">${content}</div>
+      </div>`;
+    const bl = l => `<div style="font-size:9pt;color:${TEXT_SEC};margin-bottom:2pt;">• ${String(l).replace(/^[•\-\*]\s*/,'').trim()}</div>`;
+    return _wPage(`background:${BG};box-shadow:0 2px 20px rgba(0,0,0,0.15);`, `
+  <div style="padding:14pt 0 10pt;">
+    <!-- Avatar + Name centered -->
+    <div style="text-align:center;margin-bottom:10pt;">
+      <div style="width:80pt;height:80pt;border-radius:50%;background:#ddd;margin:0 auto 8pt;font-size:26pt;font-weight:bold;color:#555;line-height:80pt;">${initials}</div>
+      <div style="font-size:22pt;font-weight:bold;color:${TEXT_PRI};">${name}</div>
+      <div style="border-top:1pt solid #ccc;margin:8pt 30pt;"></div>
+      <div style="font-size:11pt;color:${TEXT_SEC};">${role}</div>
+    </div>
+  </div>
+  <table style="padding:0 14pt 14pt;">
+    <tr>
+      <td style="width:35%;padding:0 8pt 0 0;vertical-align:top;">
+        ${card('',contacts.map(c=>`<div style="font-size:9pt;color:${TEXT_SEC};margin-bottom:5pt;"><span style="color:${PEACH};">•</span> ${c}</div>`).join(''))}
+        ${skills.length?card('Skills',skills.map(s=>`<div style="font-size:9pt;color:${TEXT_SEC};margin-bottom:4pt;">- ${s}</div>`).join('')):''}
+        ${langs.length?card('Languages',`<div style="font-size:9pt;color:${TEXT_SEC};">${langs.join(', ')}</div>`):''}
+      </td>
+      <td style="width:65%;padding:0;vertical-align:top;">
+        ${d.summary?card('Objective',`<div style="font-size:9pt;color:${TEXT_SEC};line-height:1.5;text-align:justify;">${d.summary}</div>`):''}
+        ${d.education.length?card('Education',d.education.map(e=>`
+          <div style="margin-bottom:8pt;">
+            <div style="font-size:10pt;font-weight:bold;color:${TEXT_PRI};">${e.school||''}</div>
+            <div style="font-size:9pt;color:${TEXT_SEC};">${e.degree||''}</div>
+            <div style="font-size:8.5pt;color:${TEXT_SEC};">${e.gradYear||''}</div>
+          </div>`).join('')):''}
+        ${d.experience.length?card('Work Experience',d.experience.map(e=>`
+          <div style="margin-bottom:10pt;">
+            <div style="font-size:10pt;font-weight:bold;color:${TEXT_PRI};">${e.company?e.company+', ':''} ${e.jobTitle||''}</div>
+            <div style="font-size:8.5pt;color:${TEXT_SEC};margin-bottom:4pt;">${[e.startDate,e.endDate||'Present'].filter(Boolean).join(' - ')}</div>
+            ${(e.description||'').split('\n').filter(Boolean).map(l=>bl(l)).join('')}
+          </div>`).join('')):''}
+        ${d.projects.length?card('Projects',d.projects.map(p=>`
+          <div style="margin-bottom:10pt;">
+            <div style="font-size:10pt;font-weight:bold;color:${TEXT_PRI};">${p.name||p.title||''}</div>
+            ${p.tech?`<div style="font-size:8.5pt;color:${PEACH};font-weight:bold;">TECH: ${(p.tech||'').toUpperCase()}</div>`:''}
+            ${(p.description||'').split('\n').filter(Boolean).map(l=>bl(l)).join('')}
+          </div>`).join('')):''}
+        ${certs.length?card('Certifications',certs.map(c=>`<div style="font-size:9.5pt;font-weight:bold;color:${TEXT_PRI};margin-bottom:3pt;">• ${c}</div>`).join('')):''}
+      </td>
+    </tr>
+  </table>`);
+}
+
+// ── Hiero Prestige ──────────────────────────────────────────────────────────
+function generateHieroPrestigeWordHTML(data) {
+    const d = normalizeWordData(data);
+    const p = d.personalInfo;
+    const SIDE = '#1e293b', ACCENT = '#3b82f6', DARK = '#0f172a', MUTED = '#64748b', WHITE = '#FFFFFF', LIGHT = '#f8fafc';
+    const name = (p.fullName||'YOUR NAME').toUpperCase();
+    const role = p.roleTitle||'';
+    const contacts = [p.address,p.phone,p.email,p.linkedin&&'LinkedIn'].filter(Boolean);
+    const skills = (d.technicalSkills||'').split(',').map(s=>s.trim()).filter(Boolean);
+    const langs = (d.languages||'').split(',').map(s=>s.trim()).filter(Boolean);
+    const certs = (d.certifications||'').split(',').map(s=>s.trim()).filter(Boolean);
+    const initials = (p.fullName||'?').split(' ').map(n=>n[0]||'').join('').substring(0,2).toUpperCase();
+    const sSec = (t,c) => `<div style="margin-bottom:14pt;"><div style="font-size:8.5pt;font-weight:bold;text-transform:uppercase;letter-spacing:2px;color:${WHITE};border-bottom:1pt solid rgba(255,255,255,0.15);padding-bottom:2pt;margin-bottom:6pt;">${t}</div>${c}</div>`;
+    const mSec = (t,c) => `<div style="margin-bottom:14pt;"><div style="font-size:10.5pt;font-weight:bold;text-transform:uppercase;color:${DARK};border-bottom:1.5pt solid #cbd5e1;padding-bottom:3pt;margin-bottom:8pt;letter-spacing:1.5px;">${t}</div>${c}</div>`;
+    const bl = l => _wBullet(l, DARK);
+    return _wPage(`background:${WHITE};box-shadow:0 2px 20px rgba(0,0,0,0.15);`, `
+  <table style="min-height:297mm;">
+    <tr>
+      <td style="width:32%;background:${SIDE};padding:22pt 15pt;">
+        <!-- Avatar initials circle -->
+        <div style="width:70pt;height:70pt;border-radius:50%;background:#334155;border:2pt solid rgba(255,255,255,0.15);margin:0 auto 12pt;font-size:22pt;font-weight:bold;color:${WHITE};text-align:center;line-height:70pt;">${initials}</div>
+        <div style="font-size:15pt;font-weight:bold;color:${WHITE};text-transform:uppercase;text-align:center;line-height:1.2;margin-bottom:3pt;">${name}</div>
+        ${role?`<div style="font-size:8.5pt;color:${ACCENT};text-transform:uppercase;letter-spacing:1px;text-align:center;margin-bottom:14pt;">${role}</div>`:'<div style="margin-bottom:14pt;"></div>'}
+        ${contacts.length?sSec('Information',contacts.map(c=>`<div style="font-size:8pt;color:rgba(255,255,255,0.75);margin-bottom:5pt;word-break:break-all;">${c}</div>`).join('')):''}
+        ${skills.length?sSec('Skills & Expertise',skills.map(s=>`<div style="font-size:8pt;color:rgba(255,255,255,0.8);margin-bottom:3pt;">• ${s}</div>`).join('')):''}
+        ${d.education.length?sSec('Education',d.education.map(e=>`
+          <div style="margin-bottom:8pt;">
+            <div style="font-size:9pt;font-weight:bold;color:${WHITE};">${e.school||''}</div>
+            <div style="font-size:8pt;color:rgba(255,255,255,0.65);">${e.degree||''}</div>
+            <div style="font-size:7.5pt;color:rgba(255,255,255,0.5);">${e.gradYear||''}</div>
+          </div>`).join('')):''}
+        ${langs.length?sSec('Languages',langs.map(l=>`<div style="font-size:8pt;color:rgba(255,255,255,0.8);margin-bottom:3pt;">• ${l}</div>`).join('')):''}
+        ${certs.length?sSec('Certifications',certs.map(c=>`<div style="font-size:8pt;color:rgba(255,255,255,0.8);margin-bottom:3pt;">• ${c}</div>`).join('')):''}
+      </td>
+      <td style="width:68%;background:${LIGHT};padding:22pt 22pt;">
+        ${d.summary?mSec('Profile Summary',`<div style="font-size:9pt;color:#334155;line-height:1.55;text-align:justify;">${d.summary}</div>`):''}
+        ${d.experience.length?mSec('Experience',d.experience.map(e=>`
+          <div style="margin-bottom:11pt;">
+            <div style="font-size:8.5pt;color:${ACCENT};font-weight:bold;margin-bottom:1pt;">${[e.startDate,e.endDate||'Present'].filter(Boolean).join(' - ')}</div>
+            <div style="font-size:10.5pt;font-weight:bold;color:${DARK};font-family:'Times New Roman',serif;">${e.company||''}</div>
+            <div style="font-size:9pt;color:${MUTED};font-style:italic;margin-bottom:4pt;">${e.jobTitle||''}</div>
+            ${(e.description||'').split('\n').filter(Boolean).map(l=>bl(l)).join('')}
+          </div>`).join('')):''}
+        ${d.education.length?mSec('Education',d.education.map(e=>`
+          <div style="margin-bottom:8pt;">
+            <div style="font-size:8.5pt;color:${ACCENT};font-weight:bold;">${e.gradYear||''}</div>
+            <div style="font-size:10pt;font-weight:bold;font-family:'Times New Roman',serif;color:${DARK};">${e.school||''}</div>
+            <div style="font-size:9pt;color:${MUTED};">${e.degree||''}</div>
+          </div>`).join('')):''}
+        ${d.projects.length?mSec('Projects',d.projects.map(p=>`
+          <div style="margin-bottom:10pt;">
+            <div style="font-size:10.5pt;font-weight:bold;font-family:'Times New Roman',serif;color:${DARK};">${p.name||p.title||''}</div>
+            ${p.tech?`<div style="font-size:8.5pt;color:${ACCENT};font-weight:bold;margin-bottom:2pt;">Tech: ${p.tech}</div>`:''}
+            ${(p.description||'').split('\n').filter(Boolean).map(l=>bl(l)).join('')}
+          </div>`).join('')):''}
+      </td>
+    </tr>
+  </table>`);
+}
+
+// ── Hiero Royal ─────────────────────────────────────────────────────────────
+function generateHieroRoyalWordHTML(data) {
+    const d = normalizeWordData(data);
+    const p = d.personalInfo;
+    const BG = '#EDE8D9', TAG_BG = '#D8D2C0', DARK = '#2C2C2C', BLACK = '#1A1A1A', MED = '#4A4A4A', LIGHT = '#6A6A6A', LINE = '#C5BC9E';
+    const name = p.fullName||'YOUR NAME';
+    const role = p.roleTitle||'';
+    const contacts = [p.phone,p.email,p.address,p.linkedin].filter(Boolean);
+    const skills = (d.technicalSkills||'').split(',').map(s=>s.trim()).filter(Boolean);
+    const langs = (d.languages||'').split(',').map(s=>s.trim()).filter(Boolean);
+    const certs = (d.certifications||'').split(',').map(s=>s.trim()).filter(Boolean);
+    const initials = name.split(' ').map(n=>n[0]||'').join('').substring(0,2).toUpperCase();
+    const sec = (t,c) => `<div style="margin-bottom:14pt;"><div style="font-size:10.5pt;font-weight:bold;color:${DARK};letter-spacing:1px;border-bottom:1pt solid ${LINE};padding-bottom:3pt;margin-bottom:7pt;">${t}</div>${c}</div>`;
+    const bl = l => _wBullet(l, DARK);
+    return _wPage(`background:${BG};box-shadow:0 2px 20px rgba(0,0,0,0.1);`, `
+  <div style="padding:24pt 28pt;">
+    <!-- Header: name left, avatar right -->
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1.5pt solid ${LINE};padding-bottom:12pt;margin-bottom:16pt;">
+      <div>
+        <div style="font-size:26pt;font-weight:bold;font-family:'Times New Roman',serif;color:${BLACK};">${name}</div>
+        ${role?`<div style="font-size:10pt;color:${MED};text-transform:uppercase;letter-spacing:1px;margin-top:3pt;">${role}</div>`:''}
+        <div style="font-size:8pt;color:${LIGHT};margin-top:6pt;">${contacts.join('  •  ')}</div>
+      </div>
+      <div style="width:68pt;height:68pt;border-radius:50%;background:#B8AC98;font-size:22pt;font-weight:bold;color:#fff;text-align:center;line-height:68pt;flex-shrink:0;">${initials}</div>
+    </div>
+    ${d.summary?sec('Profile',`<div style="font-size:9pt;color:${MED};line-height:1.5;text-align:justify;">${d.summary}</div>`):''}
+    ${d.experience.length?sec('Work Experience',d.experience.map(e=>`
+      <div style="margin-bottom:11pt;">
+        <div style="display:flex;justify-content:space-between;">
+          <div style="font-size:10pt;font-weight:bold;color:${DARK};">${e.jobTitle||''}</div>
+          <div style="font-size:8pt;color:${LIGHT};white-space:nowrap;">${[e.startDate,e.endDate||'Present'].filter(Boolean).join(' – ')}</div>
+        </div>
+        <div style="font-size:8.5pt;color:${LIGHT};font-style:italic;margin-bottom:3pt;">${e.company||''}</div>
+        ${(e.description||'').split('\n').filter(Boolean).map(l=>bl(l)).join('')}
+      </div>`).join('')):''}
+    ${skills.length?sec('Strengths',`<div style="display:flex;flex-wrap:wrap;gap:5pt;">${skills.map(s=>`<span style="display:inline-block;background:${TAG_BG};color:${DARK};font-size:8.5pt;padding:3pt 10pt;border-radius:2pt;">${s}</span>`).join('')}</div>`):''}
+    ${d.education.length?sec('Education',d.education.map(e=>`
+      <div style="margin-bottom:7pt;">
+        <div style="font-size:10pt;font-weight:bold;color:${DARK};">${e.degree||''}</div>
+        <div style="font-size:8.5pt;color:${LIGHT};">${e.school||''} ${e.gradYear?'  '+e.gradYear:''}</div>
+      </div>`).join('')):''}
+    ${d.projects.length?sec('Projects',d.projects.map(p=>`
+      <div style="margin-bottom:10pt;">
+        <div style="font-size:10pt;font-weight:bold;color:${DARK};">${p.name||p.title||''}</div>
+        ${p.tech?`<div style="font-size:8pt;color:${LIGHT};font-style:italic;margin-bottom:2pt;">${p.tech}</div>`:''}
+        ${(p.description||'').split('\n').filter(Boolean).map(l=>bl(l)).join('')}
+      </div>`).join('')):''}
+    ${certs.length?sec('Certifications',certs.map(c=>`<div style="font-size:8.5pt;color:${MED};margin-bottom:3pt;">• ${c}</div>`).join('')):''}
+    ${langs.length?sec('Languages',`<div style="font-size:9pt;color:${MED};">${langs.join('  |  ')}</div>`):''}
+  </div>`);
+}
+
+// ── Hiero Vertex ────────────────────────────────────────────────────────────
+function generateHieroVertexWordHTML(data) {
+    const d = normalizeWordData(data);
+    const p = d.personalInfo;
+    const TOP = '#F8FAFC', LEFT_BG = '#FFFFFF', RIGHT_BG = '#0F172A', DARK = '#0F172A', LIGHT_TXT = '#F8FAFC', MUTED = '#94A3B8';
+    const name = (p.fullName||'YOUR NAME').toUpperCase();
+    const role = (p.roleTitle||'').toUpperCase();
+    const contacts = [p.email,p.phone,p.address].filter(Boolean);
+    const skills = (d.technicalSkills||'').split(',').map(s=>s.trim()).filter(Boolean);
+    const langs = (d.languages||'').split(',').map(s=>s.trim()).filter(Boolean);
+    const certs = (d.certifications||'').split(',').map(s=>s.trim()).filter(Boolean);
+    const mSec = (t,c) => `<div style="margin-bottom:14pt;"><div style="font-size:10pt;font-weight:bold;text-transform:uppercase;color:#1e293b;border-bottom:1.5pt solid #CBD5E1;padding-bottom:3pt;margin-bottom:7pt;letter-spacing:1px;">${t}</div>${c}</div>`;
+    const rSec = (t,c) => `<div style="margin-bottom:14pt;"><div style="font-size:9.5pt;font-weight:bold;text-transform:uppercase;letter-spacing:1.5px;color:#CBD5E1;border-bottom:1pt solid #334155;padding-bottom:2pt;margin-bottom:6pt;">${t}</div>${c}</div>`;
+    const bl = l => _wBullet(l, '#94A3B8');
+    return _wPage(`background:${LEFT_BG};box-shadow:0 2px 20px rgba(0,0,0,0.15);`, `
+  <!-- Light slate header spanning full width -->
+  <div style="background:${TOP};padding:18pt 22pt;border-bottom:1pt solid #CBD5E1;text-align:center;">
+    <div style="font-size:28pt;font-weight:bold;color:${DARK};letter-spacing:2.5px;">${name}</div>
+    ${role?`<div style="font-size:10pt;color:${DARK};letter-spacing:4px;margin-top:4pt;">${role}</div>`:''}
+    <!-- Contact box -->
+    <div style="display:flex;justify-content:center;border:1pt solid #94A3B8;margin:10pt 20pt 0;border-radius:2pt;">
+      ${contacts.map((c,i)=>`${i>0?'<div style="width:1pt;background:#CBD5E1;margin:6pt 0;"></div>':''}<div style="flex:1;padding:8pt 10pt;font-size:8pt;color:${DARK};text-align:center;">${c}</div>`).join('')}
+    </div>
+  </div>
+  <!-- Two-column body: white left, dark right -->
+  <table style="min-height:220mm;">
+    <tr>
+      <td style="width:60%;background:${LEFT_BG};padding:18pt 18pt;">
+        ${d.summary?mSec('Summary',`<div style="font-size:9pt;color:#334155;line-height:1.5;text-align:justify;">${d.summary}</div>`):''}
+        ${d.experience.length?mSec('Experience',d.experience.map(e=>`
+          <div style="margin-bottom:10pt;">
+            <div style="display:flex;justify-content:space-between;">
+              <div style="font-size:10pt;font-weight:bold;color:${DARK};">${e.jobTitle||''}</div>
+              <div style="background:#E2E8F0;font-size:7.5pt;color:${DARK};padding:2pt 7pt;border-radius:2pt;white-space:nowrap;">${[e.startDate,e.endDate||'Present'].filter(Boolean).join(' – ')}</div>
+            </div>
+            <div style="font-size:8.5pt;color:#64748b;font-style:italic;margin-bottom:3pt;">${e.company||''}</div>
+            ${(e.description||'').split('\n').filter(Boolean).map(l=>bl(l)).join('')}
+          </div>`).join('')):''}
+        ${d.projects.length?mSec('Projects',d.projects.map(p=>`
+          <div style="margin-bottom:10pt;">
+            <div style="font-size:10pt;font-weight:bold;color:${DARK};">${p.name||p.title||''}</div>
+            ${p.tech?`<div style="font-size:8pt;color:#64748b;font-style:italic;margin-bottom:2pt;">${p.tech}</div>`:''}
+            ${(p.description||'').split('\n').filter(Boolean).map(l=>bl(l)).join('')}
+          </div>`).join('')):''}
+      </td>
+      <td style="width:40%;background:${RIGHT_BG};padding:18pt 15pt;">
+        ${skills.length?rSec('Skills',skills.map(s=>`<div style="font-size:8pt;color:${LIGHT_TXT};margin-bottom:3pt;">• ${s}</div>`).join('')):''}
+        ${d.education.length?rSec('Education',d.education.map(e=>`
+          <div style="margin-bottom:8pt;">
+            <div style="font-size:9pt;font-weight:bold;color:${LIGHT_TXT};">${e.degree||''}</div>
+            <div style="font-size:8pt;color:${MUTED};">${e.school||''}</div>
+            <div style="font-size:7.5pt;color:${MUTED};">${e.gradYear||''}</div>
+          </div>`).join('')):''}
+        ${langs.length?rSec('Languages',langs.map(l=>`<div style="font-size:8pt;color:${LIGHT_TXT};margin-bottom:3pt;">• ${l}</div>`).join('')):''}
+        ${certs.length?rSec('Certifications',certs.map(c=>`<div style="font-size:8pt;color:${LIGHT_TXT};margin-bottom:3pt;">• ${c}</div>`).join('')):''}
+      </td>
+    </tr>
+  </table>`);
+}
+
+// ── Priya Analytics ─────────────────────────────────────────────────────────
+function generatePriyaAnalyticsWordHTML(data) {
+    const d = normalizeWordData(data);
+    const p = d.personalInfo;
+    const DARK = '#111827', MED = '#374151', MUTED = '#6B7280', WHITE = '#FFFFFF', BORDER = '#E5E7EB';
+    const name = (p.fullName||'YOUR NAME').toUpperCase();
+    const role = p.roleTitle||'';
+    const contacts = [p.phone,p.email,p.address,p.linkedin,p.github].filter(Boolean);
+    const skills = (d.technicalSkills||'').split(',').map(s=>s.trim()).filter(Boolean);
+    const certs = (d.certifications||'').split(',').map(s=>s.trim()).filter(Boolean);
+    const sec = (t,c) => `<div style="margin-bottom:14pt;"><div style="font-size:11pt;font-weight:bold;text-transform:uppercase;color:${DARK};border-bottom:2pt solid ${DARK};padding-bottom:2pt;margin-bottom:8pt;letter-spacing:1px;">${t}</div>${c}</div>`;
+    const bl = l => _wBullet(l, DARK);
+    return _wPage(`background:${WHITE};padding:18mm 18mm;box-shadow:0 2px 20px rgba(0,0,0,0.12);`, `
+  <div style="text-align:center;border-bottom:3pt solid ${DARK};padding-bottom:14pt;margin-bottom:16pt;">
+    <div style="font-size:28pt;font-weight:bold;font-family:'Times New Roman',serif;color:${DARK};letter-spacing:1.5px;">${name}</div>
+    ${role?`<div style="font-size:10pt;color:${MUTED};text-transform:uppercase;letter-spacing:2px;margin-top:4pt;">${role}</div>`:''}
+    <div style="font-size:8.5pt;color:${MUTED};margin-top:7pt;">${contacts.join('  |  ')}</div>
+  </div>
+  ${d.summary?sec('Professional Profile',`<div style="font-size:9pt;color:${MED};line-height:1.55;text-align:justify;">${d.summary}</div>`):''}
+  ${d.experience.length?sec('Professional Experience',d.experience.map(e=>`
+    <div style="margin-bottom:11pt;">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;">
+        <div style="font-size:10pt;font-weight:bold;color:${DARK};text-transform:uppercase;">${e.jobTitle||''}</div>
+        <div style="font-size:8pt;color:${MUTED};white-space:nowrap;">${[e.startDate,e.endDate||'Present'].filter(Boolean).join(' – ')}</div>
+      </div>
+      <div style="font-size:9pt;color:${MUTED};font-style:italic;margin-bottom:3pt;">${e.company||''}</div>
+      ${(e.description||'').split('\n').filter(Boolean).map(l=>bl(l)).join('')}
+    </div>`).join('')):''}
+  ${d.projects.length?sec('Projects',d.projects.map(p=>`
+    <div style="margin-bottom:10pt;">
+      <div style="font-size:10pt;font-weight:bold;color:${DARK};text-transform:uppercase;">${p.name||p.title||''}</div>
+      ${p.tech?`<div style="font-size:8.5pt;color:${MUTED};font-style:italic;margin-bottom:2pt;">${p.tech}</div>`:''}
+      ${(p.description||'').split('\n').filter(Boolean).map(l=>bl(l)).join('')}
+    </div>`).join('')):''}
+  ${skills.length?sec('Technical Skills',`<div style="line-height:2;">${skills.map(s=>`<span style="display:inline-block;border:1pt solid ${BORDER};font-size:8pt;color:${DARK};padding:2pt 9pt;margin:2pt 3pt 2pt 0;border-radius:2pt;">${s}</span>`).join('')}</div>`):''}
+  ${d.education.length?sec('Education',d.education.map(e=>`
+    <div style="margin-bottom:7pt;">
+      <div style="display:flex;justify-content:space-between;">
+        <div style="font-size:10pt;font-weight:bold;color:${DARK};">${e.degree||''}</div>
+        <div style="font-size:8.5pt;color:${MUTED};white-space:nowrap;">${e.gradYear||''}</div>
+      </div>
+      <div style="font-size:9pt;color:${MUTED};font-style:italic;">${e.school||''}</div>
+    </div>`).join('')):''}
+  ${certs.length?sec('Certifications',certs.map(c=>`<div style="font-size:8.5pt;color:${MED};margin-bottom:3pt;">• ${c}</div>`).join('')):''}
+`);
+}
+
+// ── Hiero Executive ─────────────────────────────────────────────────────────
+function generateHieroExecutiveWordHTML(data) {
+    const d = normalizeWordData(data);
+    const p = d.personalInfo;
+    const BLACK = '#000000', DARK = '#1a1a1a', MED = '#333333', GRAY = '#777777', WHITE = '#FFFFFF';
+    const name = (p.fullName||'YOUR NAME').toUpperCase();
+    const role = p.roleTitle||'';
+    const contacts = [p.phone,p.email,p.address,p.linkedin].filter(Boolean);
+    const skills = (d.technicalSkills||'').split(',').map(s=>s.trim()).filter(Boolean);
+    const certs = (d.certifications||'').split(',').map(s=>s.trim()).filter(Boolean);
+    const sec = (t,c) => `<div style="margin-bottom:14pt;"><div style="font-size:11pt;font-weight:bold;text-transform:uppercase;color:${BLACK};border-bottom:2pt solid ${BLACK};padding-bottom:2pt;margin-bottom:8pt;letter-spacing:1px;">${t}</div>${c}</div>`;
+    const bl = l => _wBullet(l, BLACK);
+    return _wPage(`background:${WHITE};padding:18mm 18mm;box-shadow:0 2px 20px rgba(0,0,0,0.12);`, `
+  <div style="margin-bottom:14pt;">
+    <div style="font-size:28pt;font-weight:bold;color:${BLACK};letter-spacing:1.5px;">${name}</div>
+    ${role?`<div style="font-size:10pt;color:${GRAY};text-transform:uppercase;letter-spacing:2px;margin-top:3pt;">${role}</div>`:''}
+    <div style="font-size:8.5pt;color:${GRAY};margin-top:6pt;">${contacts.join('  |  ')}</div>
+  </div>
+  <div style="border-top:2pt solid ${BLACK};margin-bottom:14pt;"></div>
+  ${d.summary?sec('Executive Summary',`<div style="font-size:9pt;color:${MED};line-height:1.55;text-align:justify;">${d.summary}</div>`):''}
+  ${d.experience.length?sec('Professional Experience',d.experience.map(e=>`
+    <div style="margin-bottom:11pt;">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;">
+        <div style="font-size:10.5pt;font-weight:bold;color:${BLACK};text-transform:uppercase;">${e.jobTitle||''}</div>
+        <div style="font-size:8pt;color:${GRAY};white-space:nowrap;">${[e.startDate,e.endDate||'Present'].filter(Boolean).join(' – ')}</div>
+      </div>
+      <div style="font-size:9pt;color:${GRAY};font-style:italic;margin-bottom:3pt;">${e.company||''}</div>
+      ${(e.description||'').split('\n').filter(Boolean).map(l=>bl(l)).join('')}
+    </div>`).join('')):''}
+  ${d.projects.length?sec('Key Projects',d.projects.map(p=>`
+    <div style="margin-bottom:10pt;">
+      <div style="font-size:10.5pt;font-weight:bold;color:${BLACK};text-transform:uppercase;">${p.name||p.title||''}</div>
+      ${p.tech?`<div style="font-size:8.5pt;color:${GRAY};font-style:italic;margin-bottom:2pt;">${p.tech}</div>`:''}
+      ${(p.description||'').split('\n').filter(Boolean).map(l=>bl(l)).join('')}
+    </div>`).join('')):''}
+  ${skills.length?sec('Technical Skills',`<div style="font-size:9pt;color:${MED};">${skills.join('  |  ')}</div>`):''}
+  ${d.education.length?sec('Education',d.education.map(e=>`
+    <div style="margin-bottom:7pt;">
+      <div style="display:flex;justify-content:space-between;">
+        <div style="font-size:10pt;font-weight:bold;color:${BLACK};">${e.degree||''}</div>
+        <div style="font-size:8.5pt;color:${GRAY};white-space:nowrap;">${e.gradYear||''}</div>
+      </div>
+      <div style="font-size:9pt;color:${GRAY};font-style:italic;">${e.school||''}</div>
+    </div>`).join('')):''}
+  ${certs.length?sec('Certifications',certs.map(c=>`<div style="font-size:8.5pt;color:${MED};margin-bottom:3pt;">• ${c}</div>`).join('')):''}
+`);
+}
+
+// ── Hiero Velocity (mirrors Premium look with blue accent) ──────────────────
+function generateHieroVelocityWordHTML(data) {
+    const d = normalizeWordData(data);
+    const p = d.personalInfo;
+    const BG = '#F4F5F7', CARD = '#FFFFFF', PEACH = '#F2B66D', BLUE = '#2563eb', TEXT_PRI = '#333333', TEXT_SEC = '#555555';
+    const name = (p.fullName||'YOUR NAME').toUpperCase();
+    const role = p.roleTitle||d.experience[0]?.jobTitle||'';
+    const contacts = [p.phone,p.email,p.address,p.linkedin].filter(Boolean);
+    const skills = (d.technicalSkills||'').split(',').map(s=>s.trim()).filter(Boolean);
+    const certs = (d.certifications||'').split(',').map(s=>s.trim()).filter(Boolean);
+    const card = (title, content, accent=PEACH) => `
+      <div style="background:${CARD};border-radius:6pt;margin-bottom:10pt;overflow:hidden;box-shadow:0 1pt 4pt rgba(0,0,0,0.08);">
+        ${title?`<div style="background:${accent};padding:5pt 12pt;font-size:9.5pt;font-weight:bold;color:#fff;text-transform:uppercase;">${title}</div>`:''}
+        <div style="padding:10pt 12pt;">${content}</div>
+      </div>`;
+    const bl = l => `<div style="font-size:9pt;color:${TEXT_SEC};margin-bottom:2pt;">• ${String(l).replace(/^[•\-\*]\s*/,'').trim()}</div>`;
+    const initials = (p.fullName||'?').split(' ').map(n=>n[0]||'').join('').substring(0,2).toUpperCase();
+    return _wPage(`background:${BG};box-shadow:0 2px 20px rgba(0,0,0,0.15);`, `
+  <div style="background:${BLUE};padding:16pt 22pt;">
+    <div style="display:flex;align-items:center;gap:14pt;">
+      <div style="border-left:4pt solid ${PEACH};padding-left:14pt;">
+        <div style="font-size:24pt;font-weight:bold;color:#fff;letter-spacing:1.5px;">${name}</div>
+        ${role?`<div style="font-size:9.5pt;color:${PEACH};text-transform:uppercase;letter-spacing:2px;margin-top:3pt;">${role}</div>`:''}
+      </div>
+    </div>
+    <div style="font-size:8pt;color:rgba(255,255,255,0.75);margin-top:8pt;padding-left:18pt;">${contacts.join('  •  ')}</div>
+  </div>
+  <table style="padding:12pt 14pt;">
+    <tr>
+      <td style="width:35%;padding:0 8pt 0 0;vertical-align:top;">
+        <div style="width:70pt;height:70pt;border-radius:50%;background:#ddd;margin:0 auto 10pt;font-size:22pt;font-weight:bold;color:#555;line-height:70pt;text-align:center;">${initials}</div>
+        ${skills.length?card('Skills',skills.map(s=>`<div style="font-size:9pt;color:${TEXT_SEC};margin-bottom:4pt;">- ${s}</div>`).join(''),BLUE):''}
+        ${d.education.length?card('Education',d.education.map(e=>`
+          <div style="margin-bottom:7pt;">
+            <div style="font-size:10pt;font-weight:bold;color:${TEXT_PRI};">${e.school||''}</div>
+            <div style="font-size:9pt;color:${TEXT_SEC};">${e.degree||''}</div>
+            <div style="font-size:8.5pt;color:${TEXT_SEC};">${e.gradYear||''}</div>
+          </div>`).join(''),BLUE):''}
+      </td>
+      <td style="width:65%;padding:0;vertical-align:top;">
+        ${d.summary?card('Summary',`<div style="font-size:9pt;color:${TEXT_SEC};line-height:1.5;text-align:justify;">${d.summary}</div>`,BLUE):''}
+        ${d.experience.length?card('Work Experience',d.experience.map(e=>`
+          <div style="margin-bottom:10pt;">
+            <div style="font-size:10pt;font-weight:bold;color:${TEXT_PRI};">${e.company?e.company+', ':''} ${e.jobTitle||''}</div>
+            <div style="font-size:8.5pt;color:${BLUE};font-weight:bold;margin-bottom:3pt;">${[e.startDate,e.endDate||'Present'].filter(Boolean).join(' - ')}</div>
+            ${(e.description||'').split('\n').filter(Boolean).map(l=>bl(l)).join('')}
+          </div>`).join(''),BLUE):''}
+        ${d.projects.length?card('Projects',d.projects.map(p=>`
+          <div style="margin-bottom:10pt;">
+            <div style="font-size:10pt;font-weight:bold;color:${TEXT_PRI};">${p.name||p.title||''}</div>
+            ${p.tech?`<div style="font-size:8.5pt;color:${BLUE};font-weight:bold;">TECH: ${(p.tech||'').toUpperCase()}</div>`:''}
+            ${(p.description||'').split('\n').filter(Boolean).map(l=>bl(l)).join('')}
+          </div>`).join(''),BLUE):''}
+        ${certs.length?card('Certifications',certs.map(c=>`<div style="font-size:9.5pt;color:${TEXT_PRI};margin-bottom:3pt;">• ${c}</div>`).join(''),BLUE):''}
+      </td>
+    </tr>
+  </table>`);
+}
+
+// ── Hiero Elite (RIGHT brick-red sidebar) ───────────────────────────────────
+function generateHieroEliteWordHTML(data) {
+    const d = normalizeWordData(data);
+    const p = d.personalInfo;
+    const SIDE_BG = '#8B3F2B', SIDE_DARK = '#6E2F1F', HEADING = '#8B3F2B', BODY = '#333333', LIGHT_TXT = '#777777', WHITE = '#FFFFFF', ROLE_CLR = '#E5B8AA';
+    const name = (p.fullName||'YOUR NAME').toUpperCase();
+    const role = p.roleTitle||'';
+    const contacts = [p.address,p.phone,p.email].filter(Boolean);
+    const skills = (d.technicalSkills||'').split(',').map(s=>s.trim()).filter(Boolean);
+    const langs = (d.languages||'').split(',').map(s=>s.trim()).filter(Boolean);
+    const certs = (d.certifications||'').split(',').map(s=>s.trim()).filter(Boolean);
+    const initials = (p.fullName||'?').split(' ').map(n=>n[0]||'').join('').substring(0,2).toUpperCase();
+    const sSec = (t,c) => `<div style="margin-bottom:13pt;"><div style="font-size:8.5pt;font-weight:bold;text-transform:uppercase;letter-spacing:1.5px;color:${WHITE};border-bottom:1pt solid rgba(255,255,255,0.25);padding-bottom:2pt;margin-bottom:5pt;">${t}</div>${c}</div>`;
+    const mSec = (t,c) => `<div style="margin-bottom:14pt;"><div style="font-size:10.5pt;font-weight:bold;text-transform:uppercase;color:${HEADING};border-bottom:1.5pt solid #CCCCCC;padding-bottom:2pt;margin-bottom:7pt;">${t}</div>${c}</div>`;
+    const bl = l => _wBullet(l, HEADING);
+    return _wPage(`background:#fff;box-shadow:0 2px 20px rgba(0,0,0,0.15);`, `
+  <table style="min-height:297mm;">
+    <tr>
+      <!-- LEFT: main content (~63%) -->
+      <td style="width:63%;padding:22pt 20pt;vertical-align:top;">
+        <div style="margin-bottom:16pt;border-bottom:1.5pt solid #CCCCCC;padding-bottom:12pt;">
+          <div style="font-size:24pt;font-weight:bold;color:${BODY};letter-spacing:1px;">${name}</div>
+          ${role?`<div style="font-size:10pt;color:${HEADING};text-transform:uppercase;letter-spacing:1px;margin-top:3pt;">${role}</div>`:''}
+        </div>
+        ${d.summary?mSec('Profile',`<div style="font-size:9pt;color:${BODY};line-height:1.5;text-align:justify;">${d.summary}</div>`):''}
+        ${d.experience.length?mSec('Work Experience',d.experience.map(e=>`
+          <div style="margin-bottom:11pt;">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;">
+              <div style="font-size:10pt;font-weight:bold;color:${BODY};">${e.jobTitle||''}</div>
+              <div style="font-size:8pt;color:${LIGHT_TXT};white-space:nowrap;">${[e.startDate,e.endDate||'Present'].filter(Boolean).join(' – ')}</div>
+            </div>
+            <div style="font-size:8.5pt;color:${LIGHT_TXT};font-style:italic;margin-bottom:3pt;">${e.company||''}</div>
+            ${(e.description||'').split('\n').filter(Boolean).map(l=>bl(l)).join('')}
+          </div>`).join('')):''}
+        ${d.projects.length?mSec('Projects',d.projects.map(p=>`
+          <div style="margin-bottom:10pt;">
+            <div style="font-size:10pt;font-weight:bold;color:${BODY};">${p.name||p.title||''}</div>
+            ${p.tech?`<div style="font-size:8pt;color:${HEADING};font-weight:bold;margin-bottom:2pt;">${p.tech}</div>`:''}
+            ${(p.description||'').split('\n').filter(Boolean).map(l=>bl(l)).join('')}
+          </div>`).join('')):''}
+      </td>
+      <!-- RIGHT: brick-red sidebar (~37%) -->
+      <td style="width:37%;background:${SIDE_BG};padding:22pt 15pt;vertical-align:top;">
+        <div style="width:70pt;height:70pt;border-radius:50%;background:${SIDE_DARK};margin:0 auto 10pt;font-size:22pt;font-weight:bold;color:${WHITE};text-align:center;line-height:70pt;">${initials}</div>
+        <div style="font-size:14pt;font-weight:bold;color:${WHITE};text-align:center;text-transform:uppercase;margin-bottom:2pt;">${name}</div>
+        ${role?`<div style="font-size:8.5pt;color:${ROLE_CLR};text-align:center;text-transform:uppercase;letter-spacing:1px;margin-bottom:14pt;">${role}</div>`:'<div style="margin-bottom:14pt;"></div>'}
+        ${contacts.length?sSec('Contact',contacts.map(c=>`<div style="font-size:8pt;color:rgba(255,255,255,0.82);margin-bottom:4pt;word-break:break-all;">${c}</div>`).join('')):''}
+        ${skills.length?sSec('Skills',skills.map(s=>`<div style="font-size:8pt;color:rgba(255,255,255,0.82);margin-bottom:3pt;">• ${s}</div>`).join('')):''}
+        ${d.education.length?sSec('Education',d.education.map(e=>`
+          <div style="margin-bottom:8pt;">
+            <div style="font-size:9pt;font-weight:bold;color:${WHITE};">${e.degree||''}</div>
+            <div style="font-size:8pt;color:${ROLE_CLR};">${e.school||''}</div>
+            <div style="font-size:7.5pt;color:rgba(255,255,255,0.55);">${e.gradYear||''}</div>
+          </div>`).join('')):''}
+        ${langs.length?sSec('Languages',langs.map(l=>`<div style="font-size:8pt;color:rgba(255,255,255,0.82);margin-bottom:3pt;">• ${l}</div>`).join('')):''}
+        ${certs.length?sSec('Certifications',certs.map(c=>`<div style="font-size:8pt;color:rgba(255,255,255,0.82);margin-bottom:3pt;">• ${c}</div>`).join('')):''}
+      </td>
+    </tr>
+  </table>`);
+}
+
+// ── Hiero Retail (navy border frame) ────────────────────────────────────────
+function generateHieroRetailWordHTML(data) {
+    const d = normalizeWordData(data);
+    const p = d.personalInfo;
+    const NAVY = '#1f2a6b', GRAY = '#6c757d', BLACK = '#222', WHITE = '#FFFFFF', BORDER = '#dee2e6';
+    const name = p.fullName||'YOUR NAME';
+    const role = p.roleTitle||'';
+    const contacts = [p.phone,p.email,p.address,p.linkedin].filter(Boolean);
+    const skills = (d.technicalSkills||'').split(',').map(s=>s.trim()).filter(Boolean);
+    const langs = (d.languages||'').split(',').map(s=>s.trim()).filter(Boolean);
+    const certs = (d.certifications||'').split(',').map(s=>s.trim()).filter(Boolean);
+    const sec = (t,c) => `<div style="margin-bottom:14pt;"><div style="font-size:11pt;font-weight:bold;color:${NAVY};border-bottom:2pt solid ${NAVY};padding-bottom:2pt;margin-bottom:8pt;text-transform:uppercase;">${t}</div>${c}</div>`;
+    const bl = l => _wBullet(l, NAVY);
+    return _wPage(`background:${NAVY};box-shadow:0 2px 20px rgba(0,0,0,0.2);`, `
+  <!-- Navy border frame -->
+  <div style="margin:10pt;background:${WHITE};min-height:calc(297mm - 20pt);padding:20pt 22pt;">
+    <!-- Header -->
+    <div style="margin-bottom:14pt;">
+      <div style="font-size:26pt;font-weight:bold;color:${NAVY};">${name}</div>
+      ${role?`<div style="font-size:12pt;color:${GRAY};font-style:italic;text-transform:uppercase;margin-top:3pt;">${role}</div>`:''}
+    </div>
+    <div style="border-top:2pt solid ${NAVY};margin-bottom:14pt;"></div>
+    ${d.summary?sec('Summary',`<div style="font-size:9pt;color:${BLACK};line-height:1.5;text-align:justify;">${d.summary}</div>`):''}
+    ${d.experience.length?sec('Work History',d.experience.map(e=>`
+      <div style="margin-bottom:11pt;">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;">
+          <div style="font-size:10.5pt;font-weight:bold;color:${NAVY};text-transform:uppercase;">${e.jobTitle||''}</div>
+          <div style="font-size:8pt;color:${GRAY};white-space:nowrap;">${[e.startDate,e.endDate||'Present'].filter(Boolean).join(' – ')}</div>
+        </div>
+        <div style="font-size:8.5pt;color:${GRAY};font-style:italic;margin-bottom:4pt;">${e.company||''}</div>
+        ${(e.description||'').split('\n').filter(Boolean).map(l=>bl(l)).join('')}
+      </div>`).join('')):''}
+    ${skills.length?sec('Skills',`<div style="font-size:9pt;color:${BLACK};">${skills.map(s=>`<div style="margin-bottom:3pt;">• ${s}</div>`).join('')}</div>`):''}
+    ${d.education.length?sec('Education',d.education.map(e=>`
+      <div style="margin-bottom:7pt;">
+        <div style="display:flex;justify-content:space-between;">
+          <div style="font-size:10pt;font-weight:bold;color:${NAVY};">${e.degree||''}</div>
+          <div style="font-size:8.5pt;color:${GRAY};white-space:nowrap;">${e.gradYear||''}</div>
+        </div>
+        <div style="font-size:9pt;color:${GRAY};font-style:italic;">${e.school||''}</div>
+      </div>`).join('')):''}
+    ${d.projects.length?sec('Projects',d.projects.map(p=>`
+      <div style="margin-bottom:10pt;">
+        <div style="font-size:10pt;font-weight:bold;color:${NAVY};">${p.name||p.title||''}</div>
+        ${p.tech?`<div style="font-size:8.5pt;color:${GRAY};font-style:italic;margin-bottom:2pt;">${p.tech}</div>`:''}
+        ${(p.description||'').split('\n').filter(Boolean).map(l=>bl(l)).join('')}
+      </div>`).join('')):''}
+    ${certs.length?sec('Certifications',certs.map(c=>`<div style="font-size:8.5pt;color:${BLACK};margin-bottom:3pt;">• ${c}</div>`).join('')):''}
+    ${langs.length?sec('Languages',`<div style="font-size:9pt;color:${BLACK};">${langs.join('  |  ')}</div>`):''}
+    <div style="margin-top:16pt;border-top:1pt solid ${BORDER};padding-top:8pt;">
+      <div style="font-size:8pt;color:${GRAY};">${contacts.join('  •  ')}</div>
+    </div>
+  </div>`);
+}
+
+// ── Hiero Legion Word HTML ───────────────────────────────────────────────────
+function generateHieroLegionWordHTML(data) {
+    const d = normalizeWordData(data);
+    const p = d.personalInfo;
+    const DARK = '#1a1a1a';
+    const WHITE = '#FFFFFF';
+    const SOFT_GREY = '#f3f4f6';
+    const TEXT = '#222222';
+    const name = (p.fullName || 'YOUR NAME').toUpperCase();
+    const roleTitle = p.roleTitle || '';
+    const contactItems = [p.phone, p.email, p.address, p.linkedin, p.github, p.website].filter(Boolean);
+    const skillsArr = d.technicalSkills ? d.technicalSkills.split(',').map(s => s.trim()).filter(Boolean) : [];
+    const certArr = d.certifications ? d.certifications.split(',').map(s => s.trim()).filter(Boolean) : [];
+    const langArr = d.languages ? d.languages.split(',').map(s => s.trim()).filter(Boolean) : [];
+
+    function sideSection(title, content) {
+        return `<div style="margin-bottom:14pt;">
+            <div style="font-size:10pt;font-weight:bold;text-transform:uppercase;letter-spacing:1px;color:${WHITE};border-bottom:1.5pt solid rgba(255,255,255,0.3);padding-bottom:3pt;margin-bottom:6pt;">${title}</div>
+            ${content}
+        </div>`;
+    }
+    function mainSection(title, content) {
+        return `<div style="margin-bottom:14pt;">
+            <div style="font-size:11.5pt;font-weight:bold;text-transform:uppercase;color:${DARK};border-bottom:2pt solid ${DARK};padding-bottom:2pt;margin-bottom:8pt;">${title}</div>
+            ${content}
+        </div>`;
+    }
+    function bullet(txt) {
+        const clean = String(txt).replace(/^[•\-\*]\s*/, '').trim();
+        return `<div style="display:flex;gap:5pt;margin-bottom:2pt;font-size:8.5pt;color:#444;"><span>•</span><span>${clean}</span></div>`;
+    }
+
+    return `<!DOCTYPE html>
+<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head><meta charset='utf-8'><title>Resume</title><style>
+  @page { size: A4; margin: 0; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: 'Times New Roman', serif; background: #f0f0f0; }
+  .page { width:210mm; min-height:297mm; margin:0 auto; background:${WHITE}; box-shadow:0 2px 16px rgba(0,0,0,0.13); overflow:hidden; }
+  table { border-collapse:collapse; }
+  td { vertical-align:top; padding:0; }
+</style></head>
+<body><div class="page">
+  <table style="width:100%;min-height:297mm;">
+    <tr>
+      <!-- Dark left sidebar -->
+      <td style="width:38%;background:${DARK};padding:20pt 15pt;">
+        <!-- Initials avatar -->
+        <div style="width:70pt;height:70pt;border-radius:35pt;background:#333;border:3pt solid rgba(255,255,255,0.2);margin:0 auto 12pt auto;display:flex;align-items:center;justify-content:center;font-size:22pt;font-weight:bold;color:${WHITE};text-align:center;line-height:70pt;">
+          ${(p.fullName||'R').split(' ').map(n=>n[0]||'').join('').substring(0,2).toUpperCase()}
+        </div>
+        <div style="font-size:16pt;font-weight:bold;color:${WHITE};text-align:center;text-transform:uppercase;margin-bottom:3pt;">${name}</div>
+        ${roleTitle ? `<div style="font-size:9pt;color:rgba(255,255,255,0.7);text-align:center;margin-bottom:14pt;text-transform:uppercase;letter-spacing:1px;">${roleTitle}</div>` : ''}
+        ${contactItems.length > 0 ? sideSection('Contact', contactItems.map(c => `<div style="font-size:8.5pt;color:rgba(255,255,255,0.8);margin-bottom:4pt;word-break:break-all;">• ${c}</div>`).join('')) : ''}
+        ${skillsArr.length > 0 ? sideSection('Skills', skillsArr.map(s => `<div style="font-size:8.5pt;color:rgba(255,255,255,0.8);margin-bottom:3pt;">• ${s}</div>`).join('')) : ''}
+        ${d.education.length > 0 ? sideSection('Education', d.education.map(edu => `
+          <div style="margin-bottom:8pt;">
+            <div style="font-size:9pt;font-weight:bold;color:${WHITE};">${edu.degree||''}</div>
+            <div style="font-size:8pt;color:rgba(255,255,255,0.7);">${edu.school||''}</div>
+            <div style="font-size:8pt;color:rgba(255,255,255,0.6);">${edu.gradYear||''}</div>
+          </div>`).join('')) : ''}
+        ${langArr.length > 0 ? sideSection('Languages', langArr.map(l => `<div style="font-size:8.5pt;color:rgba(255,255,255,0.8);margin-bottom:3pt;">• ${l}</div>`).join('')) : ''}
+        ${certArr.length > 0 ? sideSection('Certifications', certArr.map(c => `<div style="font-size:8.5pt;color:rgba(255,255,255,0.8);margin-bottom:3pt;">• ${c}</div>`).join('')) : ''}
+      </td>
+      <!-- Main content -->
+      <td style="width:62%;background:${WHITE};padding:20pt 20pt;">
+        ${d.summary ? mainSection('About Me', `<div style="font-size:9pt;color:#444;line-height:1.5;text-align:justify;">${d.summary}</div>`) : ''}
+        ${d.experience.length > 0 ? mainSection('Experience', d.experience.map(exp => `
+          <div style="margin-bottom:10pt;">
+            <table style="width:100%;"><tr>
+              <td style="font-size:10pt;font-weight:bold;color:${DARK};text-transform:uppercase;">${exp.jobTitle||''}</td>
+              <td style="text-align:right;font-size:8.5pt;color:#666;white-space:nowrap;">${[exp.startDate, exp.endDate||'Present'].filter(Boolean).join(' – ')}</td>
+            </tr></table>
+            <div style="font-size:9pt;color:#666;font-style:italic;margin-bottom:3pt;">${exp.company||''}</div>
+            ${exp.description ? exp.description.split('\n').filter(Boolean).map(l => bullet(l)).join('') : ''}
+          </div>`).join('')) : ''}
+        ${d.projects.length > 0 ? mainSection('Projects', d.projects.map(proj => `
+          <div style="margin-bottom:10pt;">
+            <div style="font-size:10pt;font-weight:bold;color:${DARK};text-transform:uppercase;">${proj.name||proj.title||''}</div>
+            ${proj.tech ? `<div style="font-size:8.5pt;color:#666;font-style:italic;margin-bottom:2pt;">${proj.tech}</div>` : ''}
+            ${proj.description ? proj.description.split('\n').filter(Boolean).map(l => bullet(l)).join('') : ''}
+          </div>`).join('')) : ''}
+      </td>
+    </tr>
+  </table>
+</div></body></html>`;
+}
+
+// ── Hiero Essence Word HTML ──────────────────────────────────────────────────
+function generateHieroEssenceWordHTML(data) {
+    const d = normalizeWordData(data);
+    const p = d.personalInfo;
+    const DARK = '#1e1e1e';
+    const GOLD = '#f5a623';
+    const WHITE = '#FFFFFF';
+    const LIGHT_TEXT = 'rgba(255,255,255,0.85)';
+    const name = (p.fullName || 'YOUR NAME').toUpperCase();
+    const roleTitle = p.roleTitle || '';
+    const contactItems = [p.phone, p.email, p.address, p.linkedin, p.github, p.website].filter(Boolean);
+    const skillsArr = d.technicalSkills ? d.technicalSkills.split(',').map(s => s.trim()).filter(Boolean) : [];
+    const certArr = d.certifications ? d.certifications.split(',').map(s => s.trim()).filter(Boolean) : [];
+    const langArr = d.languages ? d.languages.split(',').map(s => s.trim()).filter(Boolean) : [];
+
+    function sideSection(title, content) {
+        return `<div style="margin-bottom:14pt;">
+            <div style="font-size:9.5pt;font-weight:bold;text-transform:uppercase;letter-spacing:1.5px;color:${GOLD};border-bottom:1pt solid ${GOLD};padding-bottom:2pt;margin-bottom:6pt;">${title}</div>
+            ${content}
+        </div>`;
+    }
+    function mainSection(title, content) {
+        return `<div style="margin-bottom:14pt;">
+            <div style="font-size:10.5pt;font-weight:bold;text-transform:uppercase;color:${GOLD};border-bottom:1.5pt solid ${GOLD};padding-bottom:2pt;margin-bottom:8pt;">${title}</div>
+            ${content}
+        </div>`;
+    }
+    function bullet(txt) {
+        const clean = String(txt).replace(/^[•\-\*]\s*/, '').trim();
+        return `<div style="display:flex;gap:5pt;margin-bottom:2pt;font-size:8.5pt;color:rgba(255,255,255,0.75);"><span style="color:${GOLD};">▸</span><span>${clean}</span></div>`;
+    }
+
+    return `<!DOCTYPE html>
+<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head><meta charset='utf-8'><title>Resume</title><style>
+  @page { size: A4; margin: 0; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: Arial, sans-serif; background: #f0f0f0; }
+  .page { width:210mm; min-height:297mm; margin:0 auto; background:${DARK}; box-shadow:0 2px 16px rgba(0,0,0,0.13); }
+  table { border-collapse:collapse; }
+  td { vertical-align:top; padding:0; }
+</style></head>
+<body><div class="page">
+  <!-- Gold top accent bar -->
+  <div style="background:${GOLD};height:4pt;width:100%;"></div>
+  <!-- Header -->
+  <div style="background:#121212;padding:16pt 22pt;">
+    <div style="font-size:26pt;font-weight:bold;color:${WHITE};letter-spacing:2px;">${name}</div>
+    ${roleTitle ? `<div style="font-size:10pt;color:${GOLD};font-weight:bold;text-transform:uppercase;letter-spacing:1px;margin-top:3pt;">${roleTitle}</div>` : ''}
+    <div style="font-size:8.5pt;color:${LIGHT_TEXT};margin-top:5pt;">${contactItems.join('  •  ')}</div>
+  </div>
+  <!-- Body -->
+  <table style="width:100%;">
+    <tr>
+      <td style="width:35%;padding:16pt 14pt;background:#1a1a1a;border-right:1pt solid #333;">
+        ${skillsArr.length > 0 ? sideSection('Skills', skillsArr.map(s => `<div style="font-size:8.5pt;color:${LIGHT_TEXT};margin-bottom:3pt;">• ${s}</div>`).join('')) : ''}
+        ${d.education.length > 0 ? sideSection('Education', d.education.map(edu => `
+          <div style="margin-bottom:8pt;">
+            <div style="font-size:9.5pt;font-weight:bold;color:${WHITE};">${edu.degree||''}</div>
+            <div style="font-size:8.5pt;color:rgba(255,255,255,0.6);">${edu.school||''}</div>
+            <div style="font-size:8pt;color:${GOLD};">${edu.gradYear||''}</div>
+          </div>`).join('')) : ''}
+        ${langArr.length > 0 ? sideSection('Languages', langArr.map(l => `<div style="font-size:8.5pt;color:${LIGHT_TEXT};margin-bottom:3pt;">• ${l}</div>`).join('')) : ''}
+        ${certArr.length > 0 ? sideSection('Certifications', certArr.map(c => `<div style="font-size:8.5pt;color:${LIGHT_TEXT};margin-bottom:3pt;">• ${c}</div>`).join('')) : ''}
+      </td>
+      <td style="width:65%;padding:16pt 20pt;background:${DARK};">
+        ${d.summary ? mainSection('Profile', `<div style="font-size:9pt;color:${LIGHT_TEXT};line-height:1.5;text-align:justify;">${d.summary}</div>`) : ''}
+        ${d.experience.length > 0 ? mainSection('Experience', d.experience.map(exp => `
+          <div style="margin-bottom:10pt;">
+            <table style="width:100%;"><tr>
+              <td style="font-size:10pt;font-weight:bold;color:${WHITE};text-transform:uppercase;">${exp.jobTitle||''}</td>
+              <td style="text-align:right;font-size:8.5pt;color:${GOLD};white-space:nowrap;">${[exp.startDate, exp.endDate||'Present'].filter(Boolean).join(' – ')}</td>
+            </tr></table>
+            <div style="font-size:9pt;color:rgba(255,255,255,0.6);font-style:italic;margin-bottom:3pt;">${exp.company||''}</div>
+            ${exp.description ? exp.description.split('\n').filter(Boolean).map(l => bullet(l)).join('') : ''}
+          </div>`).join('')) : ''}
+        ${d.projects.length > 0 ? mainSection('Projects', d.projects.map(proj => `
+          <div style="margin-bottom:10pt;">
+            <div style="font-size:10pt;font-weight:bold;color:${WHITE};text-transform:uppercase;">${proj.name||proj.title||''}</div>
+            ${proj.tech ? `<div style="font-size:8.5pt;color:${GOLD};font-weight:bold;margin-bottom:2pt;">${proj.tech}</div>` : ''}
+            ${proj.description ? proj.description.split('\n').filter(Boolean).map(l => bullet(l)).join('') : ''}
+          </div>`).join('')) : ''}
+      </td>
+    </tr>
+  </table>
+</div></body></html>`;
+}
+
+// ── Hiero Timeline Word HTML ─────────────────────────────────────────────────
+function generateHieroTimelineWordHTML(data) {
+    const d = normalizeWordData(data);
+    const p = d.personalInfo;
+    const LIGHT_BG = '#f3f4f6';
+    const DARK = '#222222';
+    const GRAY = '#777777';
+    const WHITE = '#FFFFFF';
+    const BORDER = '#e0e0e0';
+    const name = (p.fullName || 'YOUR NAME').toUpperCase();
+    const roleTitle = p.roleTitle || '';
+    const contactItems = [p.phone, p.email, p.address, p.linkedin, p.github, p.website].filter(Boolean);
+    const skillsArr = d.technicalSkills ? d.technicalSkills.split(',').map(s => s.trim()).filter(Boolean) : [];
+    const certArr = d.certifications ? d.certifications.split(',').map(s => s.trim()).filter(Boolean) : [];
+    const langArr = d.languages ? d.languages.split(',').map(s => s.trim()).filter(Boolean) : [];
+
+    function sideSection(title, content) {
+        return `<div style="margin-bottom:14pt;">
+            <div style="font-size:9.5pt;font-weight:bold;text-transform:uppercase;letter-spacing:1px;color:${DARK};border-bottom:1.5pt solid ${DARK};padding-bottom:2pt;margin-bottom:6pt;">${title}</div>
+            ${content}
+        </div>`;
+    }
+    function mainSection(title, content) {
+        return `<div style="margin-bottom:14pt;">
+            <div style="font-size:11pt;font-weight:bold;text-transform:uppercase;color:${DARK};border-bottom:1.5pt solid ${BORDER};padding-bottom:2pt;margin-bottom:8pt;">${title}</div>
+            ${content}
+        </div>`;
+    }
+    function bullet(txt) {
+        const clean = String(txt).replace(/^[•\-\*]\s*/, '').trim();
+        return `<div style="display:flex;gap:5pt;margin-bottom:2pt;font-size:8.5pt;color:#555;"><span style="color:${DARK};">•</span><span>${clean}</span></div>`;
+    }
+
+    return `<!DOCTYPE html>
+<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head><meta charset='utf-8'><title>Resume</title><style>
+  @page { size: A4; margin: 0; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: Arial, sans-serif; background: #f0f0f0; }
+  .page { width:210mm; min-height:297mm; margin:0 auto; background:${WHITE}; box-shadow:0 2px 16px rgba(0,0,0,0.13); }
+  table { border-collapse:collapse; }
+  td { vertical-align:top; padding:0; }
+</style></head>
+<body><div class="page">
+  <!-- Header with light bg -->
+  <div style="background:${LIGHT_BG};padding:18pt 20pt;border-bottom:2pt solid ${BORDER};">
+    <div style="font-size:26pt;font-weight:bold;color:${DARK};letter-spacing:1.5px;">${name}</div>
+    ${roleTitle ? `<div style="font-size:10.5pt;color:${GRAY};font-weight:bold;text-transform:uppercase;margin-top:3pt;">${roleTitle}</div>` : ''}
+    <div style="font-size:8.5pt;color:${GRAY};margin-top:5pt;">${contactItems.join('  •  ')}</div>
+  </div>
+  <!-- Body -->
+  <table style="width:100%;">
+    <tr>
+      <td style="width:33%;padding:16pt 14pt;background:${LIGHT_BG};border-right:1pt solid ${BORDER};">
+        ${skillsArr.length > 0 ? sideSection('Skills', skillsArr.map(s => `<div style="font-size:8.5pt;color:${DARK};margin-bottom:3pt;">• ${s}</div>`).join('')) : ''}
+        ${d.education.length > 0 ? sideSection('Education', d.education.map(edu => `
+          <div style="margin-bottom:8pt;">
+            <div style="font-size:9.5pt;font-weight:bold;color:${DARK};">${edu.degree||''}</div>
+            <div style="font-size:8.5pt;color:${GRAY};">${edu.school||''}</div>
+            <div style="font-size:8pt;color:${GRAY};">${edu.gradYear||''}</div>
+          </div>`).join('')) : ''}
+        ${langArr.length > 0 ? sideSection('Languages', langArr.map(l => `<div style="font-size:8.5pt;color:${DARK};margin-bottom:3pt;">• ${l}</div>`).join('')) : ''}
+        ${certArr.length > 0 ? sideSection('Certifications', certArr.map(c => `<div style="font-size:8.5pt;color:${DARK};margin-bottom:3pt;">• ${c}</div>`).join('')) : ''}
+      </td>
+      <td style="width:67%;padding:16pt 20pt;background:${WHITE};">
+        ${d.summary ? mainSection('Profile', `<div style="font-size:9pt;color:#444;line-height:1.5;text-align:justify;">${d.summary}</div>`) : ''}
+        ${d.experience.length > 0 ? mainSection('Experience', d.experience.map(exp => `
+          <div style="margin-bottom:10pt;padding-left:10pt;border-left:2pt solid ${BORDER};">
+            <table style="width:100%;"><tr>
+              <td style="font-size:10pt;font-weight:bold;color:${DARK};text-transform:uppercase;">${exp.jobTitle||''}</td>
+              <td style="text-align:right;font-size:8.5pt;color:${GRAY};white-space:nowrap;">${[exp.startDate, exp.endDate||'Present'].filter(Boolean).join(' – ')}</td>
+            </tr></table>
+            <div style="font-size:9pt;color:${GRAY};font-style:italic;margin-bottom:3pt;">${exp.company||''}</div>
+            ${exp.description ? exp.description.split('\n').filter(Boolean).map(l => bullet(l)).join('') : ''}
+          </div>`).join('')) : ''}
+        ${d.projects.length > 0 ? mainSection('Projects', d.projects.map(proj => `
+          <div style="margin-bottom:10pt;padding-left:10pt;border-left:2pt solid ${BORDER};">
+            <div style="font-size:10pt;font-weight:bold;color:${DARK};text-transform:uppercase;">${proj.name||proj.title||''}</div>
+            ${proj.tech ? `<div style="font-size:8.5pt;color:${GRAY};font-style:italic;margin-bottom:2pt;">${proj.tech}</div>` : ''}
+            ${proj.description ? proj.description.split('\n').filter(Boolean).map(l => bullet(l)).join('') : ''}
+          </div>`).join('')) : ''}
+      </td>
+    </tr>
+  </table>
+</div></body></html>`;
+}
+
+// ── Hiero Premium Word HTML ──────────────────────────────────────────────────
+function generateHieroPremiumWordHTML(data) {
+    const d = normalizeWordData(data);
+    const p = d.personalInfo;
+    const NAVY = '#1F3A5F';
+    const STEEL = '#4A6572';
+    const BG = '#F4F6F8';
+    const WHITE = '#FFFFFF';
+    const TEXT = '#333333';
+    const name = (p.fullName || 'YOUR NAME').toUpperCase();
+    const roleTitle = p.roleTitle || '';
+    const contactItems = [p.phone, p.email, p.address, p.linkedin, p.github, p.website].filter(Boolean);
+    const skillsArr = d.technicalSkills ? d.technicalSkills.split(',').map(s => s.trim()).filter(Boolean) : [];
+    const certArr = d.certifications ? d.certifications.split(',').map(s => s.trim()).filter(Boolean) : [];
+
+    function section(title, content) {
+        return `<div style="margin-bottom:14pt;">
+            <div style="font-size:11pt;font-weight:bold;text-transform:uppercase;color:${NAVY};border-bottom:2pt solid ${NAVY};padding-bottom:2pt;margin-bottom:8pt;letter-spacing:1px;">${title}</div>
+            ${content}
+        </div>`;
+    }
+    function bullet(txt) {
+        const clean = String(txt).replace(/^[•\-\*]\s*/, '').trim();
+        return `<div style="display:flex;gap:6pt;margin-bottom:2pt;font-size:8.5pt;color:${TEXT};"><span style="color:${NAVY};">▸</span><span>${clean}</span></div>`;
+    }
+
+    return `<!DOCTYPE html>
+<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head><meta charset='utf-8'><title>Resume</title><style>
+  @page { size: A4; margin: 14mm 14mm; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: Georgia, serif; background: #f0f0f0; }
+  .page { width:210mm; min-height:297mm; margin:0 auto; padding:14mm 14mm; background:${BG}; box-shadow:0 2px 16px rgba(0,0,0,0.13); }
+  table { border-collapse:collapse; width:100%; }
+  td { vertical-align:top; padding:0; }
+</style></head>
+<body><div class="page">
+  <!-- Header -->
+  <div style="background:${NAVY};margin:-14mm -14mm 14pt -14mm;padding:18pt 22pt;text-align:center;">
+    <div style="font-size:28pt;font-weight:bold;color:${WHITE};letter-spacing:2px;">${name}</div>
+    ${roleTitle ? `<div style="font-size:10.5pt;color:rgba(255,255,255,0.8);text-transform:uppercase;margin-top:4pt;letter-spacing:2px;">${roleTitle}</div>` : ''}
+    <div style="font-size:8.5pt;color:rgba(255,255,255,0.7);margin-top:6pt;">${contactItems.join('  |  ')}</div>
+  </div>
+  ${d.summary ? section('Executive Summary', `<div style="font-size:9pt;color:${TEXT};line-height:1.5;text-align:justify;">${d.summary}</div>`) : ''}
+  ${d.experience.length > 0 ? section('Professional Experience', d.experience.map(exp => `
+    <div style="margin-bottom:10pt;">
+      <table style="width:100%;"><tr>
+        <td style="font-size:10pt;font-weight:bold;color:${NAVY};text-transform:uppercase;">${exp.jobTitle||''}</td>
+        <td style="text-align:right;font-size:8.5pt;color:${STEEL};white-space:nowrap;">${[exp.startDate, exp.endDate||'Present'].filter(Boolean).join(' – ')}</td>
+      </tr></table>
+      <div style="font-size:9pt;color:${STEEL};font-style:italic;margin-bottom:3pt;">${exp.company||''}</div>
+      ${exp.description ? exp.description.split('\n').filter(Boolean).map(l => bullet(l)).join('') : ''}
+    </div>`).join('')) : ''}
+  ${d.projects.length > 0 ? section('Projects', d.projects.map(proj => `
+    <div style="margin-bottom:10pt;">
+      <div style="font-size:10pt;font-weight:bold;color:${NAVY};text-transform:uppercase;">${proj.name||proj.title||''}</div>
+      ${proj.tech ? `<div style="font-size:8.5pt;color:${STEEL};font-style:italic;margin-bottom:2pt;">${proj.tech}</div>` : ''}
+      ${proj.description ? proj.description.split('\n').filter(Boolean).map(l => bullet(l)).join('') : ''}
+    </div>`).join('')) : ''}
+  ${skillsArr.length > 0 ? section('Technical Skills', `<div style="line-height:1.8;">${skillsArr.map(s => `<span style="display:inline-block;font-size:8pt;background:${WHITE};color:${NAVY};border:1pt solid ${NAVY};padding:2pt 8pt;margin:2pt 3pt 2pt 0;border-radius:3pt;">${s}</span>`).join('')}</div>`) : ''}
+  ${d.education.length > 0 ? section('Education', d.education.map(edu => `
+    <div style="margin-bottom:6pt;">
+      <table style="width:100%;"><tr>
+        <td style="font-size:10pt;font-weight:bold;color:${NAVY};">${edu.degree||''}</td>
+        <td style="text-align:right;font-size:8.5pt;color:${STEEL};white-space:nowrap;">${edu.gradYear||''}</td>
+      </tr></table>
+      <div style="font-size:9pt;color:${STEEL};font-style:italic;">${edu.school||''}</div>
+    </div>`).join('')) : ''}
+  ${certArr.length > 0 ? section('Certifications', certArr.map(c => `<div style="font-size:8.5pt;color:${TEXT};margin-bottom:3pt;">• ${c}</div>`).join('')) : ''}
+</div></body></html>`;
+}
+
+// ── Hiero Prestige Word HTML ─────────────────────────────────────────────────
+function generateHieroPrestigeWordHTML(data) {
+    const d = normalizeWordData(data);
+    const p = d.personalInfo;
+    const DARK_NAVY = '#0f172a';
+    const NAVY = '#0f172a';
+    const SLATE = '#475569';
+    const WHITE = '#FFFFFF';
+    const LIGHT = '#f8fafc';
+    const GOLD = '#c8a74e';
+    const name = (p.fullName || 'YOUR NAME').toUpperCase();
+    const roleTitle = p.roleTitle || '';
+    const contactItems = [p.phone, p.email, p.address, p.linkedin, p.github, p.website].filter(Boolean);
+    const skillsArr = d.technicalSkills ? d.technicalSkills.split(',').map(s => s.trim()).filter(Boolean) : [];
+    const certArr = d.certifications ? d.certifications.split(',').map(s => s.trim()).filter(Boolean) : [];
+    const langArr = d.languages ? d.languages.split(',').map(s => s.trim()).filter(Boolean) : [];
+
+    function sideSection(title, content) {
+        return `<div style="margin-bottom:14pt;">
+            <div style="font-size:9pt;font-weight:bold;text-transform:uppercase;letter-spacing:2px;color:${WHITE};border-bottom:1pt solid rgba(255,255,255,0.3);padding-bottom:2pt;margin-bottom:6pt;">${title}</div>
+            ${content}
+        </div>`;
+    }
+    function mainSection(title, content) {
+        return `<div style="margin-bottom:14pt;">
+            <div style="font-size:11pt;font-weight:bold;text-transform:uppercase;color:${DARK_NAVY};border-bottom:2pt solid ${GOLD};padding-bottom:2pt;margin-bottom:8pt;letter-spacing:1.5px;">${title}</div>
+            ${content}
+        </div>`;
+    }
+    function bullet(txt) {
+        const clean = String(txt).replace(/^[•\-\*]\s*/, '').trim();
+        return `<div style="display:flex;gap:6pt;margin-bottom:2pt;font-size:8.5pt;color:${SLATE};"><span style="color:${GOLD};font-weight:bold;">▸</span><span>${clean}</span></div>`;
+    }
+
+    return `<!DOCTYPE html>
+<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head><meta charset='utf-8'><title>Resume</title><style>
+  @page { size: A4; margin: 0; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: Arial, sans-serif; background: #f0f0f0; }
+  .page { width:210mm; min-height:297mm; margin:0 auto; background:${WHITE}; box-shadow:0 2px 16px rgba(0,0,0,0.13); overflow:hidden; }
+  table { border-collapse:collapse; }
+  td { vertical-align:top; padding:0; }
+</style></head>
+<body><div class="page">
+  <table style="width:100%;min-height:297mm;">
+    <tr>
+      <!-- Dark navy left sidebar -->
+      <td style="width:33%;background:${NAVY};padding:20pt 15pt;">
+        <!-- Name block -->
+        <div style="margin-bottom:16pt;border-bottom:1pt solid rgba(255,255,255,0.2);padding-bottom:12pt;">
+          <div style="font-size:18pt;font-weight:bold;color:${WHITE};text-transform:uppercase;letter-spacing:1px;line-height:1.2;">${name}</div>
+          ${roleTitle ? `<div style="font-size:9pt;color:rgba(255,255,255,0.7);text-transform:uppercase;letter-spacing:2px;margin-top:4pt;">${roleTitle}</div>` : ''}
+        </div>
+        ${contactItems.length > 0 ? sideSection('Contact', contactItems.map(c => `<div style="font-size:8pt;color:rgba(255,255,255,0.75);margin-bottom:4pt;word-break:break-all;">${c}</div>`).join('')) : ''}
+        ${skillsArr.length > 0 ? sideSection('Core Skills', skillsArr.map(s => `<div style="font-size:8pt;color:rgba(255,255,255,0.8);margin-bottom:3pt;">• ${s}</div>`).join('')) : ''}
+        ${d.education.length > 0 ? sideSection('Education', d.education.map(edu => `
+          <div style="margin-bottom:8pt;">
+            <div style="font-size:9pt;font-weight:bold;color:${WHITE};">${edu.degree||''}</div>
+            <div style="font-size:8pt;color:rgba(255,255,255,0.65);">${edu.school||''}</div>
+            <div style="font-size:7.5pt;color:rgba(255,255,255,0.5);">${edu.gradYear||''}</div>
+          </div>`).join('')) : ''}
+        ${langArr.length > 0 ? sideSection('Languages', langArr.map(l => `<div style="font-size:8pt;color:rgba(255,255,255,0.75);margin-bottom:3pt;">• ${l}</div>`).join('')) : ''}
+        ${certArr.length > 0 ? sideSection('Certifications', certArr.map(c => `<div style="font-size:8pt;color:rgba(255,255,255,0.75);margin-bottom:3pt;">• ${c}</div>`).join('')) : ''}
+      </td>
+      <!-- Main content -->
+      <td style="width:67%;padding:22pt 22pt;background:${LIGHT};">
+        ${d.summary ? mainSection('Professional Summary', `<div style="font-size:9pt;color:${SLATE};line-height:1.5;text-align:justify;">${d.summary}</div>`) : ''}
+        ${d.experience.length > 0 ? mainSection('Experience', d.experience.map(exp => `
+          <div style="margin-bottom:10pt;">
+            <table style="width:100%;"><tr>
+              <td style="font-size:10pt;font-weight:bold;color:${DARK_NAVY};text-transform:uppercase;">${exp.jobTitle||''}</td>
+              <td style="text-align:right;font-size:8pt;color:${SLATE};white-space:nowrap;">${[exp.startDate, exp.endDate||'Present'].filter(Boolean).join(' – ')}</td>
+            </tr></table>
+            <div style="font-size:9pt;color:${SLATE};font-style:italic;margin-bottom:3pt;">${exp.company||''}</div>
+            ${exp.description ? exp.description.split('\n').filter(Boolean).map(l => bullet(l)).join('') : ''}
+          </div>`).join('')) : ''}
+        ${d.projects.length > 0 ? mainSection('Projects', d.projects.map(proj => `
+          <div style="margin-bottom:10pt;">
+            <div style="font-size:10pt;font-weight:bold;color:${DARK_NAVY};text-transform:uppercase;">${proj.name||proj.title||''}</div>
+            ${proj.tech ? `<div style="font-size:8.5pt;color:${SLATE};font-style:italic;margin-bottom:2pt;">${proj.tech}</div>` : ''}
+            ${proj.description ? proj.description.split('\n').filter(Boolean).map(l => bullet(l)).join('') : ''}
+          </div>`).join('')) : ''}
+      </td>
+    </tr>
+  </table>
+</div></body></html>`;
+}
+
+// ── Hiero Royal Word HTML ────────────────────────────────────────────────────
+function generateHieroRoyalWordHTML(data) {
+    const d = normalizeWordData(data);
+    const p = d.personalInfo;
+    const SAND = '#BFAF9A';
+    const PARCHMENT = '#EDE8D9';
+    const DARK = '#1a1a1a';
+    const DARK_ALT = '#3a3a3a';
+    const WHITE = '#FFFFFF';
+    const name = (p.fullName || 'YOUR NAME').toUpperCase();
+    const roleTitle = p.roleTitle || '';
+    const contactItems = [p.phone, p.email, p.address, p.linkedin, p.github, p.website].filter(Boolean);
+    const skillsArr = d.technicalSkills ? d.technicalSkills.split(',').map(s => s.trim()).filter(Boolean) : [];
+    const certArr = d.certifications ? d.certifications.split(',').map(s => s.trim()).filter(Boolean) : [];
+    const langArr = d.languages ? d.languages.split(',').map(s => s.trim()).filter(Boolean) : [];
+
+    function sideSection(title, content) {
+        return `<div style="margin-bottom:14pt;">
+            <div style="font-size:9.5pt;font-weight:bold;text-transform:uppercase;letter-spacing:1px;color:${DARK};border-bottom:1.5pt solid ${DARK};padding-bottom:2pt;margin-bottom:6pt;">${title}</div>
+            ${content}
+        </div>`;
+    }
+    function mainSection(title, content) {
+        return `<div style="margin-bottom:14pt;">
+            <div style="font-size:11pt;font-weight:bold;text-transform:uppercase;color:${DARK};border-bottom:2pt solid ${SAND};padding-bottom:2pt;margin-bottom:8pt;letter-spacing:1px;">${title}</div>
+            ${content}
+        </div>`;
+    }
+    function bullet(txt) {
+        const clean = String(txt).replace(/^[•\-\*]\s*/, '').trim();
+        return `<div style="display:flex;gap:6pt;margin-bottom:2pt;font-size:8.5pt;color:${DARK_ALT};"><span style="color:${DARK};">▸</span><span>${clean}</span></div>`;
+    }
+
+    return `<!DOCTYPE html>
+<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head><meta charset='utf-8'><title>Resume</title><style>
+  @page { size: A4; margin: 0; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: Georgia, serif; background: #f0f0f0; }
+  .page { width:210mm; min-height:297mm; margin:0 auto; background:${PARCHMENT}; box-shadow:0 2px 16px rgba(0,0,0,0.13); overflow:hidden; }
+  table { border-collapse:collapse; }
+  td { vertical-align:top; padding:0; }
+</style></head>
+<body><div class="page">
+  <table style="width:100%;min-height:297mm;">
+    <tr>
+      <!-- Sand-tone left sidebar -->
+      <td style="width:33%;background:${SAND};padding:20pt 15pt;">
+        <div style="margin-bottom:14pt;border-bottom:1.5pt solid ${DARK};padding-bottom:10pt;">
+          <div style="font-size:16pt;font-weight:bold;color:${DARK};text-transform:uppercase;letter-spacing:1px;line-height:1.2;">${name}</div>
+          ${roleTitle ? `<div style="font-size:9pt;color:${DARK_ALT};text-transform:uppercase;letter-spacing:1px;margin-top:4pt;">${roleTitle}</div>` : ''}
+        </div>
+        ${contactItems.length > 0 ? sideSection('Contact', contactItems.map(c => `<div style="font-size:8.5pt;color:${DARK_ALT};margin-bottom:4pt;word-break:break-all;">• ${c}</div>`).join('')) : ''}
+        ${skillsArr.length > 0 ? sideSection('Skills', skillsArr.map(s => `<div style="font-size:8.5pt;color:${DARK_ALT};margin-bottom:3pt;">• ${s}</div>`).join('')) : ''}
+        ${d.education.length > 0 ? sideSection('Education', d.education.map(edu => `
+          <div style="margin-bottom:8pt;">
+            <div style="font-size:9.5pt;font-weight:bold;color:${DARK};">${edu.degree||''}</div>
+            <div style="font-size:8.5pt;color:${DARK_ALT};">${edu.school||''}</div>
+            <div style="font-size:8pt;color:${DARK_ALT};">${edu.gradYear||''}</div>
+          </div>`).join('')) : ''}
+        ${langArr.length > 0 ? sideSection('Languages', langArr.map(l => `<div style="font-size:8.5pt;color:${DARK_ALT};margin-bottom:3pt;">• ${l}</div>`).join('')) : ''}
+        ${certArr.length > 0 ? sideSection('Certifications', certArr.map(c => `<div style="font-size:8.5pt;color:${DARK_ALT};margin-bottom:3pt;">• ${c}</div>`).join('')) : ''}
+      </td>
+      <!-- Parchment main content -->
+      <td style="width:67%;padding:20pt 20pt;background:${PARCHMENT};">
+        ${d.summary ? mainSection('Profile', `<div style="font-size:9pt;color:${DARK_ALT};line-height:1.5;text-align:justify;">${d.summary}</div>`) : ''}
+        ${d.experience.length > 0 ? mainSection('Experience', d.experience.map(exp => `
+          <div style="margin-bottom:10pt;">
+            <table style="width:100%;"><tr>
+              <td style="font-size:10pt;font-weight:bold;color:${DARK};text-transform:uppercase;">${exp.jobTitle||''}</td>
+              <td style="text-align:right;font-size:8.5pt;color:${DARK_ALT};white-space:nowrap;">${[exp.startDate, exp.endDate||'Present'].filter(Boolean).join(' – ')}</td>
+            </tr></table>
+            <div style="font-size:9pt;color:${DARK_ALT};font-style:italic;margin-bottom:3pt;">${exp.company||''}</div>
+            ${exp.description ? exp.description.split('\n').filter(Boolean).map(l => bullet(l)).join('') : ''}
+          </div>`).join('')) : ''}
+        ${d.projects.length > 0 ? mainSection('Projects', d.projects.map(proj => `
+          <div style="margin-bottom:10pt;">
+            <div style="font-size:10pt;font-weight:bold;color:${DARK};text-transform:uppercase;">${proj.name||proj.title||''}</div>
+            ${proj.tech ? `<div style="font-size:8.5pt;color:${DARK_ALT};font-style:italic;margin-bottom:2pt;">${proj.tech}</div>` : ''}
+            ${proj.description ? proj.description.split('\n').filter(Boolean).map(l => bullet(l)).join('') : ''}
+          </div>`).join('')) : ''}
+      </td>
+    </tr>
+  </table>
+</div></body></html>`;
+}
+
+// ── Hiero Vertex Word HTML ───────────────────────────────────────────────────
+function generateHieroVertexWordHTML(data) {
+    const d = normalizeWordData(data);
+    const p = d.personalInfo;
+    const GREY_BG = '#E0E2E5';
+    const DARK = '#333333';
+    const MED = '#666666';
+    const WHITE = '#FFFFFF';
+    const BORDER = '#cccccc';
+    const name = (p.fullName || 'YOUR NAME').toUpperCase();
+    const roleTitle = p.roleTitle || '';
+    const contactItems = [p.phone, p.email, p.address, p.linkedin, p.github, p.website].filter(Boolean);
+    const skillsArr = d.technicalSkills ? d.technicalSkills.split(',').map(s => s.trim()).filter(Boolean) : [];
+    const certArr = d.certifications ? d.certifications.split(',').map(s => s.trim()).filter(Boolean) : [];
+
+    function section(title, content) {
+        return `<div style="margin-bottom:12pt;">
+            <div style="font-size:10.5pt;font-weight:bold;text-transform:uppercase;color:${DARK};border-bottom:1.5pt solid ${DARK};padding-bottom:2pt;margin-bottom:7pt;letter-spacing:1px;">${title}</div>
+            ${content}
+        </div>`;
+    }
+    function bullet(txt) {
+        const clean = String(txt).replace(/^[•\-\*]\s*/, '').trim();
+        return `<div style="display:flex;gap:5pt;margin-bottom:2pt;font-size:8.5pt;color:${MED};"><span style="color:${DARK};">•</span><span>${clean}</span></div>`;
+    }
+
+    return `<!DOCTYPE html>
+<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head><meta charset='utf-8'><title>Resume</title><style>
+  @page { size: A4; margin: 14mm 14mm; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: Arial, sans-serif; background: #f0f0f0; }
+  .page { width:210mm; min-height:297mm; margin:0 auto; padding:14mm 14mm; background:${GREY_BG}; box-shadow:0 2px 16px rgba(0,0,0,0.13); }
+  table { border-collapse:collapse; width:100%; }
+  td { vertical-align:top; padding:0; }
+</style></head>
+<body><div class="page">
+  <!-- Header: centered name on grey background -->
+  <div style="background:${WHITE};padding:14pt 18pt;margin-bottom:14pt;text-align:center;border-radius:4pt;">
+    <div style="font-size:28pt;font-weight:bold;color:${DARK};letter-spacing:2px;">${name}</div>
+    ${roleTitle ? `<div style="font-size:10pt;color:${MED};text-transform:uppercase;letter-spacing:1.5px;margin-top:3pt;">${roleTitle}</div>` : ''}
+    <div style="font-size:8.5pt;color:${MED};margin-top:5pt;">${contactItems.join('  •  ')}</div>
+  </div>
+  ${d.summary ? section('Summary', `<div style="font-size:9pt;color:${MED};line-height:1.5;text-align:justify;">${d.summary}</div>`) : ''}
+  ${d.experience.length > 0 ? section('Experience', d.experience.map(exp => `
+    <div style="margin-bottom:10pt;background:${WHITE};padding:8pt 10pt;border-radius:3pt;">
+      <table style="width:100%;"><tr>
+        <td style="font-size:10pt;font-weight:bold;color:${DARK};text-transform:uppercase;">${exp.jobTitle||''}</td>
+        <td style="text-align:right;font-size:8.5pt;color:${MED};white-space:nowrap;">${[exp.startDate, exp.endDate||'Present'].filter(Boolean).join(' – ')}</td>
+      </tr></table>
+      <div style="font-size:9pt;color:${MED};font-style:italic;margin-bottom:3pt;">${exp.company||''}</div>
+      ${exp.description ? exp.description.split('\n').filter(Boolean).map(l => bullet(l)).join('') : ''}
+    </div>`).join('')) : ''}
+  ${d.projects.length > 0 ? section('Projects', d.projects.map(proj => `
+    <div style="margin-bottom:10pt;background:${WHITE};padding:8pt 10pt;border-radius:3pt;">
+      <div style="font-size:10pt;font-weight:bold;color:${DARK};text-transform:uppercase;">${proj.name||proj.title||''}</div>
+      ${proj.tech ? `<div style="font-size:8.5pt;color:${MED};font-style:italic;margin-bottom:2pt;">${proj.tech}</div>` : ''}
+      ${proj.description ? proj.description.split('\n').filter(Boolean).map(l => bullet(l)).join('') : ''}
+    </div>`).join('')) : ''}
+  ${skillsArr.length > 0 ? section('Technical Skills', `<div style="line-height:1.8;">${skillsArr.map(s => `<span style="display:inline-block;font-size:8pt;background:${WHITE};color:${DARK};border:1pt solid ${BORDER};padding:2pt 8pt;margin:2pt 3pt 2pt 0;border-radius:3pt;">${s}</span>`).join('')}</div>`) : ''}
+  ${d.education.length > 0 ? section('Education', d.education.map(edu => `
+    <div style="margin-bottom:6pt;background:${WHITE};padding:6pt 10pt;border-radius:3pt;">
+      <table style="width:100%;"><tr>
+        <td style="font-size:10pt;font-weight:bold;color:${DARK};">${edu.degree||''}</td>
+        <td style="text-align:right;font-size:8.5pt;color:${MED};white-space:nowrap;">${edu.gradYear||''}</td>
+      </tr></table>
+      <div style="font-size:9pt;color:${MED};font-style:italic;">${edu.school||''}</div>
+    </div>`).join('')) : ''}
+  ${certArr.length > 0 ? section('Certifications', certArr.map(c => `<div style="font-size:8.5pt;color:${MED};margin-bottom:3pt;">• ${c}</div>`).join('')) : ''}
+</div></body></html>`;
+}
+
+// ── Priya Analytics Word HTML ────────────────────────────────────────────────
+function generatePriyaAnalyticsWordHTML(data) {
+    const d = normalizeWordData(data);
+    const p = d.personalInfo;
+    const DARK = '#111827';
+    const MED = '#374151';
+    const LIGHT_MED = '#4b5563';
+    const WHITE = '#FFFFFF';
+    const BORDER = '#e5e7eb';
+    const name = (p.fullName || 'YOUR NAME').toUpperCase();
+    const roleTitle = p.roleTitle || '';
+    const contactItems = [p.phone, p.email, p.address, p.linkedin, p.github, p.website].filter(Boolean);
+    const skillsArr = d.technicalSkills ? d.technicalSkills.split(',').map(s => s.trim()).filter(Boolean) : [];
+    const certArr = d.certifications ? d.certifications.split(',').map(s => s.trim()).filter(Boolean) : [];
+
+    function section(title, content) {
+        return `<div style="margin-bottom:14pt;">
+            <div style="font-size:11pt;font-weight:bold;text-transform:uppercase;color:${DARK};border-bottom:2pt solid ${DARK};padding-bottom:2pt;margin-bottom:8pt;letter-spacing:1px;">${title}</div>
+            ${content}
+        </div>`;
+    }
+    function bullet(txt) {
+        const clean = String(txt).replace(/^[•\-\*]\s*/, '').trim();
+        return `<div style="display:flex;gap:6pt;margin-bottom:2pt;font-size:8.5pt;color:${LIGHT_MED};"><span style="color:${DARK};">•</span><span>${clean}</span></div>`;
+    }
+
+    return `<!DOCTYPE html>
+<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head><meta charset='utf-8'><title>Resume</title><style>
+  @page { size: A4; margin: 14mm 14mm; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: Georgia, serif; background: #f0f0f0; }
+  .page { width:210mm; min-height:297mm; margin:0 auto; padding:14mm 14mm; background:${WHITE}; box-shadow:0 2px 16px rgba(0,0,0,0.13); }
+  table { border-collapse:collapse; width:100%; }
+  td { vertical-align:top; padding:0; }
+</style></head>
+<body><div class="page">
+  <!-- Centered header -->
+  <div style="text-align:center;border-bottom:3pt solid ${DARK};padding-bottom:12pt;margin-bottom:14pt;">
+    <div style="font-size:28pt;font-weight:bold;color:${DARK};letter-spacing:1.5px;">${name}</div>
+    ${roleTitle ? `<div style="font-size:10.5pt;color:${LIGHT_MED};text-transform:uppercase;letter-spacing:2px;margin-top:4pt;">${roleTitle}</div>` : ''}
+    <div style="font-size:8.5pt;color:${LIGHT_MED};margin-top:6pt;">${contactItems.join('  |  ')}</div>
+  </div>
+  ${d.summary ? section('Professional Profile', `<div style="font-size:9pt;color:${MED};line-height:1.5;text-align:justify;">${d.summary}</div>`) : ''}
+  ${d.experience.length > 0 ? section('Professional Experience', d.experience.map(exp => `
+    <div style="margin-bottom:10pt;">
+      <table style="width:100%;"><tr>
+        <td style="font-size:10pt;font-weight:bold;color:${DARK};text-transform:uppercase;">${exp.jobTitle||''}</td>
+        <td style="text-align:right;font-size:8.5pt;color:${LIGHT_MED};white-space:nowrap;">${[exp.startDate, exp.endDate||'Present'].filter(Boolean).join(' – ')}</td>
+      </tr></table>
+      <div style="font-size:9pt;color:${LIGHT_MED};font-style:italic;margin-bottom:3pt;">${exp.company||''}</div>
+      ${exp.description ? exp.description.split('\n').filter(Boolean).map(l => bullet(l)).join('') : ''}
+    </div>`).join('')) : ''}
+  ${d.projects.length > 0 ? section('Projects', d.projects.map(proj => `
+    <div style="margin-bottom:10pt;">
+      <div style="font-size:10pt;font-weight:bold;color:${DARK};text-transform:uppercase;">${proj.name||proj.title||''}</div>
+      ${proj.tech ? `<div style="font-size:8.5pt;color:${LIGHT_MED};font-style:italic;margin-bottom:2pt;">${proj.tech}</div>` : ''}
+      ${proj.description ? proj.description.split('\n').filter(Boolean).map(l => bullet(l)).join('') : ''}
+    </div>`).join('')) : ''}
+  ${skillsArr.length > 0 ? section('Technical Skills', `<div style="line-height:1.8;">${skillsArr.map(s => `<span style="display:inline-block;font-size:8pt;background:#f9fafb;color:${DARK};border:1pt solid ${BORDER};padding:2pt 8pt;margin:2pt 3pt 2pt 0;border-radius:3pt;">${s}</span>`).join('')}</div>`) : ''}
+  ${d.education.length > 0 ? section('Education', d.education.map(edu => `
+    <div style="margin-bottom:6pt;">
+      <table style="width:100%;"><tr>
+        <td style="font-size:10pt;font-weight:bold;color:${DARK};">${edu.degree||''}</td>
+        <td style="text-align:right;font-size:8.5pt;color:${LIGHT_MED};white-space:nowrap;">${edu.gradYear||''}</td>
+      </tr></table>
+      <div style="font-size:9pt;color:${LIGHT_MED};font-style:italic;">${edu.school||''}</div>
+    </div>`).join('')) : ''}
+  ${certArr.length > 0 ? section('Certifications', certArr.map(c => `<div style="font-size:8.5pt;color:${MED};margin-bottom:3pt;">• ${c}</div>`).join('')) : ''}
+</div></body></html>`;
+}
+
+// ── Hiero Executive Word HTML ────────────────────────────────────────────────
+function generateHieroExecutiveWordHTML(data) {
+    const d = normalizeWordData(data);
+    const p = d.personalInfo;
+    const BLACK = '#000000';
+    const DARK = '#1a1a1a';
+    const MED = '#333333';
+    const WHITE = '#FFFFFF';
+    const name = (p.fullName || 'YOUR NAME').toUpperCase();
+    const roleTitle = p.roleTitle || '';
+    const contactItems = [p.phone, p.email, p.address, p.linkedin, p.github, p.website].filter(Boolean);
+    const skillsArr = d.technicalSkills ? d.technicalSkills.split(',').map(s => s.trim()).filter(Boolean) : [];
+    const certArr = d.certifications ? d.certifications.split(',').map(s => s.trim()).filter(Boolean) : [];
+
+    function section(title, content) {
+        return `<div style="margin-bottom:14pt;">
+            <div style="font-size:11pt;font-weight:bold;text-transform:uppercase;color:${BLACK};border-bottom:2pt solid ${BLACK};padding-bottom:2pt;margin-bottom:8pt;letter-spacing:1px;">${title}</div>
+            ${content}
+        </div>`;
+    }
+    function bullet(txt) {
+        const clean = String(txt).replace(/^[•\-\*]\s*/, '').trim();
+        return `<div style="display:flex;gap:6pt;margin-bottom:2pt;font-size:8.5pt;color:${MED};"><span style="color:${BLACK};">•</span><span>${clean}</span></div>`;
+    }
+
+    return `<!DOCTYPE html>
+<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head><meta charset='utf-8'><title>Resume</title><style>
+  @page { size: A4; margin: 14mm 14mm; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: Arial, sans-serif; background: #f0f0f0; }
+  .page { width:210mm; min-height:297mm; margin:0 auto; padding:14mm 14mm; background:${WHITE}; box-shadow:0 2px 16px rgba(0,0,0,0.13); }
+  table { border-collapse:collapse; width:100%; }
+  td { vertical-align:top; padding:0; }
+</style></head>
+<body><div class="page">
+  <table style="width:100%;margin-bottom:14pt;">
+    <tr>
+      <td>
+        <div style="font-size:26pt;font-weight:bold;color:${BLACK};letter-spacing:1.5px;">${name}</div>
+        ${roleTitle ? `<div style="font-size:10pt;color:${MED};text-transform:uppercase;letter-spacing:2px;margin-top:2pt;">${roleTitle}</div>` : ''}
+        <div style="font-size:8.5pt;color:${MED};margin-top:5pt;">${contactItems.join('  |  ')}</div>
+      </td>
+    </tr>
+  </table>
+  <div style="border-top:2pt solid ${BLACK};margin-bottom:14pt;"></div>
+  ${d.summary ? section('Executive Summary', `<div style="font-size:9pt;color:${MED};line-height:1.5;text-align:justify;">${d.summary}</div>`) : ''}
+  ${d.experience.length > 0 ? section('Professional Experience', d.experience.map(exp => `
+    <div style="margin-bottom:10pt;">
+      <table style="width:100%;"><tr>
+        <td style="font-size:10pt;font-weight:bold;color:${BLACK};text-transform:uppercase;">${exp.jobTitle||''}</td>
+        <td style="text-align:right;font-size:8.5pt;color:${MED};white-space:nowrap;">${[exp.startDate, exp.endDate||'Present'].filter(Boolean).join(' – ')}</td>
+      </tr></table>
+      <div style="font-size:9pt;color:${MED};font-style:italic;margin-bottom:3pt;">${exp.company||''}</div>
+      ${exp.description ? exp.description.split('\n').filter(Boolean).map(l => bullet(l)).join('') : ''}
+    </div>`).join('')) : ''}
+  ${d.projects.length > 0 ? section('Key Projects', d.projects.map(proj => `
+    <div style="margin-bottom:10pt;">
+      <div style="font-size:10pt;font-weight:bold;color:${BLACK};text-transform:uppercase;">${proj.name||proj.title||''}</div>
+      ${proj.tech ? `<div style="font-size:8.5pt;color:${MED};font-style:italic;margin-bottom:2pt;">${proj.tech}</div>` : ''}
+      ${proj.description ? proj.description.split('\n').filter(Boolean).map(l => bullet(l)).join('') : ''}
+    </div>`).join('')) : ''}
+  ${skillsArr.length > 0 ? section('Technical Skills', `<div style="font-size:9pt;color:${MED};">${skillsArr.join('  |  ')}</div>`) : ''}
+  ${d.education.length > 0 ? section('Education', d.education.map(edu => `
+    <div style="margin-bottom:6pt;">
+      <table style="width:100%;"><tr>
+        <td style="font-size:10pt;font-weight:bold;color:${BLACK};">${edu.degree||''}</td>
+        <td style="text-align:right;font-size:8.5pt;color:${MED};white-space:nowrap;">${edu.gradYear||''}</td>
+      </tr></table>
+      <div style="font-size:9pt;color:${MED};font-style:italic;">${edu.school||''}</div>
+    </div>`).join('')) : ''}
+  ${certArr.length > 0 ? section('Certifications', certArr.map(c => `<div style="font-size:8.5pt;color:${MED};margin-bottom:3pt;">• ${c}</div>`).join('')) : ''}
+</div></body></html>`;
+}
+
+// ── Hiero Velocity Word HTML (mirrors Hiero Premium look) ───────────────────
+function generateHieroVelocityWordHTML(data) {
+    // Velocity uses the same PDF renderer as Premium — match that look
+    const d = normalizeWordData(data);
+    const p = d.personalInfo;
+    const NAVY = '#1F3A5F';
+    const STEEL = '#4A6572';
+    const ACCENT = '#2563eb'; // Blue velocity accent
+    const BG = '#F4F6F8';
+    const WHITE = '#FFFFFF';
+    const TEXT = '#333333';
+    const name = (p.fullName || 'YOUR NAME').toUpperCase();
+    const roleTitle = p.roleTitle || '';
+    const contactItems = [p.phone, p.email, p.address, p.linkedin, p.github, p.website].filter(Boolean);
+    const skillsArr = d.technicalSkills ? d.technicalSkills.split(',').map(s => s.trim()).filter(Boolean) : [];
+    const certArr = d.certifications ? d.certifications.split(',').map(s => s.trim()).filter(Boolean) : [];
+
+    function section(title, content) {
+        return `<div style="margin-bottom:14pt;">
+            <div style="font-size:11pt;font-weight:bold;text-transform:uppercase;color:${NAVY};border-bottom:2pt solid ${ACCENT};padding-bottom:2pt;margin-bottom:8pt;letter-spacing:1px;">${title}</div>
+            ${content}
+        </div>`;
+    }
+    function bullet(txt) {
+        const clean = String(txt).replace(/^[•\-\*]\s*/, '').trim();
+        return `<div style="display:flex;gap:6pt;margin-bottom:2pt;font-size:8.5pt;color:${TEXT};"><span style="color:${ACCENT};">▸</span><span>${clean}</span></div>`;
+    }
+
+    return `<!DOCTYPE html>
+<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head><meta charset='utf-8'><title>Resume</title><style>
+  @page { size: A4; margin: 14mm 14mm; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: Arial, sans-serif; background: #f0f0f0; }
+  .page { width:210mm; min-height:297mm; margin:0 auto; padding:14mm 14mm; background:${BG}; box-shadow:0 2px 16px rgba(0,0,0,0.13); }
+  table { border-collapse:collapse; width:100%; }
+  td { vertical-align:top; padding:0; }
+</style></head>
+<body><div class="page">
+  <!-- Header with navy bar + blue accent -->
+  <div style="background:${NAVY};margin:-14mm -14mm 14pt -14mm;padding:18pt 22pt;">
+    <div style="display:flex;align-items:center;gap:12pt;">
+      <div style="border-left:4pt solid ${ACCENT};padding-left:12pt;">
+        <div style="font-size:26pt;font-weight:bold;color:${WHITE};letter-spacing:1.5px;">${name}</div>
+        ${roleTitle ? `<div style="font-size:10pt;color:${ACCENT};text-transform:uppercase;letter-spacing:2px;margin-top:3pt;">${roleTitle}</div>` : ''}
+      </div>
+    </div>
+    <div style="font-size:8.5pt;color:rgba(255,255,255,0.75);margin-top:8pt;padding-left:16pt;">${contactItems.join('  •  ')}</div>
+  </div>
+  ${d.summary ? section('Professional Summary', `<div style="font-size:9pt;color:${TEXT};line-height:1.5;text-align:justify;">${d.summary}</div>`) : ''}
+  ${d.experience.length > 0 ? section('Experience', d.experience.map(exp => `
+    <div style="margin-bottom:10pt;">
+      <table style="width:100%;"><tr>
+        <td style="font-size:10pt;font-weight:bold;color:${NAVY};text-transform:uppercase;">${exp.jobTitle||''}</td>
+        <td style="text-align:right;font-size:8.5pt;color:${ACCENT};white-space:nowrap;">${[exp.startDate, exp.endDate||'Present'].filter(Boolean).join(' – ')}</td>
+      </tr></table>
+      <div style="font-size:9pt;color:${STEEL};font-style:italic;margin-bottom:3pt;">${exp.company||''}</div>
+      ${exp.description ? exp.description.split('\n').filter(Boolean).map(l => bullet(l)).join('') : ''}
+    </div>`).join('')) : ''}
+  ${d.projects.length > 0 ? section('Projects', d.projects.map(proj => `
+    <div style="margin-bottom:10pt;">
+      <div style="font-size:10pt;font-weight:bold;color:${NAVY};text-transform:uppercase;">${proj.name||proj.title||''}</div>
+      ${proj.tech ? `<div style="font-size:8.5pt;color:${STEEL};font-style:italic;margin-bottom:2pt;">${proj.tech}</div>` : ''}
+      ${proj.description ? proj.description.split('\n').filter(Boolean).map(l => bullet(l)).join('') : ''}
+    </div>`).join('')) : ''}
+  ${skillsArr.length > 0 ? section('Technical Skills', `<div style="line-height:1.8;">${skillsArr.map(s => `<span style="display:inline-block;font-size:8pt;background:${WHITE};color:${NAVY};border:1pt solid ${ACCENT};padding:2pt 8pt;margin:2pt 3pt 2pt 0;border-radius:3pt;">${s}</span>`).join('')}</div>`) : ''}
+  ${d.education.length > 0 ? section('Education', d.education.map(edu => `
+    <div style="margin-bottom:6pt;">
+      <table style="width:100%;"><tr>
+        <td style="font-size:10pt;font-weight:bold;color:${NAVY};">${edu.degree||''}</td>
+        <td style="text-align:right;font-size:8.5pt;color:${STEEL};white-space:nowrap;">${edu.gradYear||''}</td>
+      </tr></table>
+      <div style="font-size:9pt;color:${STEEL};font-style:italic;">${edu.school||''}</div>
+    </div>`).join('')) : ''}
+  ${certArr.length > 0 ? section('Certifications', certArr.map(c => `<div style="font-size:8.5pt;color:${TEXT};margin-bottom:3pt;">• ${c}</div>`).join('')) : ''}
+</div></body></html>`;
+}
+
+// ── Hiero Elite Word HTML ────────────────────────────────────────────────────
+function generateHieroEliteWordHTML(data) {
+    const d = normalizeWordData(data);
+    const p = d.personalInfo;
+    const DARK = '#1a202c';
+    const GOLD = '#d69e2e';
+    const WHITE = '#FFFFFF';
+    const LIGHT_TEXT = 'rgba(255,255,255,0.85)';
+    const CONTENT_BG = '#ffffff';
+    const TEXT = '#2d3748';
+    const name = (p.fullName || 'YOUR NAME').toUpperCase();
+    const roleTitle = p.roleTitle || '';
+    const contactItems = [p.phone, p.email, p.address, p.linkedin, p.github, p.website].filter(Boolean);
+    const skillsArr = d.technicalSkills ? d.technicalSkills.split(',').map(s => s.trim()).filter(Boolean) : [];
+    const certArr = d.certifications ? d.certifications.split(',').map(s => s.trim()).filter(Boolean) : [];
+    const langArr = d.languages ? d.languages.split(',').map(s => s.trim()).filter(Boolean) : [];
+
+    function sideSection(title, content) {
+        return `<div style="margin-bottom:14pt;">
+            <div style="font-size:9.5pt;font-weight:bold;text-transform:uppercase;letter-spacing:1.5px;color:${GOLD};border-bottom:1pt solid ${GOLD};padding-bottom:2pt;margin-bottom:6pt;">${title}</div>
+            ${content}
+        </div>`;
+    }
+    function mainSection(title, content) {
+        return `<div style="margin-bottom:14pt;">
+            <div style="font-size:11pt;font-weight:bold;text-transform:uppercase;color:${DARK};border-bottom:2pt solid ${GOLD};padding-bottom:2pt;margin-bottom:8pt;">${title}</div>
+            ${content}
+        </div>`;
+    }
+    function bullet(txt) {
+        const clean = String(txt).replace(/^[•\-\*]\s*/, '').trim();
+        return `<div style="display:flex;gap:6pt;margin-bottom:2pt;font-size:8.5pt;color:${TEXT};"><span style="color:${GOLD};font-weight:bold;">▸</span><span>${clean}</span></div>`;
+    }
+
+    return `<!DOCTYPE html>
+<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head><meta charset='utf-8'><title>Resume</title><style>
+  @page { size: A4; margin: 0; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: 'Times New Roman', serif; background: #f0f0f0; }
+  .page { width:210mm; min-height:297mm; margin:0 auto; background:${CONTENT_BG}; box-shadow:0 2px 16px rgba(0,0,0,0.13); overflow:hidden; }
+  table { border-collapse:collapse; }
+  td { vertical-align:top; padding:0; }
+</style></head>
+<body><div class="page">
+  <!-- Gold top accent bar -->
+  <div style="background:${GOLD};height:5pt;width:100%;"></div>
+  <table style="width:100%;min-height:297mm;">
+    <tr>
+      <!-- Dark left sidebar -->
+      <td style="width:33%;background:${DARK};padding:18pt 14pt;">
+        <div style="margin-bottom:14pt;padding-bottom:10pt;border-bottom:1pt solid rgba(255,255,255,0.15);">
+          <div style="font-size:18pt;font-weight:bold;color:${WHITE};text-transform:uppercase;letter-spacing:1px;line-height:1.2;">${name}</div>
+          ${roleTitle ? `<div style="font-size:9pt;color:${GOLD};text-transform:uppercase;letter-spacing:2px;margin-top:4pt;">${roleTitle}</div>` : ''}
+        </div>
+        ${contactItems.length > 0 ? sideSection('Contact', contactItems.map(c => `<div style="font-size:8pt;color:${LIGHT_TEXT};margin-bottom:4pt;word-break:break-all;">• ${c}</div>`).join('')) : ''}
+        ${skillsArr.length > 0 ? sideSection('Skills', skillsArr.map(s => `<div style="font-size:8pt;color:${LIGHT_TEXT};margin-bottom:3pt;">• ${s}</div>`).join('')) : ''}
+        ${d.education.length > 0 ? sideSection('Education', d.education.map(edu => `
+          <div style="margin-bottom:8pt;">
+            <div style="font-size:9pt;font-weight:bold;color:${WHITE};">${edu.degree||''}</div>
+            <div style="font-size:8pt;color:rgba(255,255,255,0.65);">${edu.school||''}</div>
+            <div style="font-size:7.5pt;color:${GOLD};">${edu.gradYear||''}</div>
+          </div>`).join('')) : ''}
+        ${langArr.length > 0 ? sideSection('Languages', langArr.map(l => `<div style="font-size:8pt;color:${LIGHT_TEXT};margin-bottom:3pt;">• ${l}</div>`).join('')) : ''}
+        ${certArr.length > 0 ? sideSection('Certifications', certArr.map(c => `<div style="font-size:8pt;color:${LIGHT_TEXT};margin-bottom:3pt;">• ${c}</div>`).join('')) : ''}
+      </td>
+      <!-- Main content -->
+      <td style="width:67%;padding:18pt 20pt;background:${CONTENT_BG};">
+        ${d.summary ? mainSection('Profile', `<div style="font-size:9pt;color:${TEXT};line-height:1.5;text-align:justify;">${d.summary}</div>`) : ''}
+        ${d.experience.length > 0 ? mainSection('Experience', d.experience.map(exp => `
+          <div style="margin-bottom:10pt;">
+            <table style="width:100%;"><tr>
+              <td style="font-size:10pt;font-weight:bold;color:${DARK};text-transform:uppercase;">${exp.jobTitle||''}</td>
+              <td style="text-align:right;font-size:8.5pt;color:${GOLD};white-space:nowrap;">${[exp.startDate, exp.endDate||'Present'].filter(Boolean).join(' – ')}</td>
+            </tr></table>
+            <div style="font-size:9pt;color:#666;font-style:italic;margin-bottom:3pt;">${exp.company||''}</div>
+            ${exp.description ? exp.description.split('\n').filter(Boolean).map(l => bullet(l)).join('') : ''}
+          </div>`).join('')) : ''}
+        ${d.projects.length > 0 ? mainSection('Projects', d.projects.map(proj => `
+          <div style="margin-bottom:10pt;">
+            <div style="font-size:10pt;font-weight:bold;color:${DARK};text-transform:uppercase;">${proj.name||proj.title||''}</div>
+            ${proj.tech ? `<div style="font-size:8.5pt;color:${GOLD};font-weight:bold;margin-bottom:2pt;">${proj.tech}</div>` : ''}
+            ${proj.description ? proj.description.split('\n').filter(Boolean).map(l => bullet(l)).join('') : ''}
+          </div>`).join('')) : ''}
+      </td>
+    </tr>
+  </table>
+</div></body></html>`;
+}
+
+// ── Hiero Retail Word HTML ───────────────────────────────────────────────────
+function generateHieroRetailWordHTML(data) {
+    const d = normalizeWordData(data);
+    const p = d.personalInfo;
+    const NAVY = '#1e3a8a';
+    const BLUE = '#3b82f6';
+    const WHITE = '#FFFFFF';
+    const TEXT = '#1f2937';
+    const LIGHT = '#eff6ff';
+    const name = (p.fullName || 'YOUR NAME').toUpperCase();
+    const roleTitle = p.roleTitle || '';
+    const contactItems = [p.phone, p.email, p.address, p.linkedin, p.github, p.website].filter(Boolean);
+    const skillsArr = d.technicalSkills ? d.technicalSkills.split(',').map(s => s.trim()).filter(Boolean) : [];
+    const certArr = d.certifications ? d.certifications.split(',').map(s => s.trim()).filter(Boolean) : [];
+    const langArr = d.languages ? d.languages.split(',').map(s => s.trim()).filter(Boolean) : [];
+
+    function sideSection(title, content) {
+        return `<div style="margin-bottom:14pt;">
+            <div style="font-size:9.5pt;font-weight:bold;text-transform:uppercase;letter-spacing:1px;color:${BLUE};border-bottom:1.5pt solid ${BLUE};padding-bottom:2pt;margin-bottom:6pt;">${title}</div>
+            ${content}
+        </div>`;
+    }
+    function mainSection(title, content) {
+        return `<div style="margin-bottom:14pt;">
+            <div style="font-size:11pt;font-weight:bold;text-transform:uppercase;color:${NAVY};border-bottom:2pt solid ${BLUE};padding-bottom:2pt;margin-bottom:8pt;">${title}</div>
+            ${content}
+        </div>`;
+    }
+    function bullet(txt) {
+        const clean = String(txt).replace(/^[•\-\*]\s*/, '').trim();
+        return `<div style="display:flex;gap:6pt;margin-bottom:2pt;font-size:8.5pt;color:${TEXT};"><span style="color:${BLUE};">▸</span><span>${clean}</span></div>`;
+    }
+
+    return `<!DOCTYPE html>
+<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head><meta charset='utf-8'><title>Resume</title><style>
+  @page { size: A4; margin: 0; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: Arial, sans-serif; background: #f0f0f0; }
+  .page { width:210mm; min-height:297mm; margin:0 auto; background:${WHITE}; box-shadow:0 2px 16px rgba(0,0,0,0.13); overflow:hidden; }
+  table { border-collapse:collapse; }
+  td { vertical-align:top; padding:0; }
+</style></head>
+<body><div class="page">
+  <!-- Blue top stripe header -->
+  <div style="background:${NAVY};padding:16pt 20pt;">
+    <div style="font-size:26pt;font-weight:bold;color:${WHITE};letter-spacing:1.5px;">${name}</div>
+    ${roleTitle ? `<div style="font-size:10pt;color:${BLUE};font-weight:bold;text-transform:uppercase;letter-spacing:1px;margin-top:3pt;">${roleTitle}</div>` : ''}
+    <div style="font-size:8.5pt;color:rgba(255,255,255,0.75);margin-top:5pt;">${contactItems.join('  •  ')}</div>
+  </div>
+  <!-- White sidebar left + main right -->
+  <table style="width:100%;">
+    <tr>
+      <td style="width:33%;padding:16pt 14pt;background:${LIGHT};border-right:2pt solid ${BLUE};">
+        ${skillsArr.length > 0 ? sideSection('Skills', skillsArr.map(s => `<div style="font-size:8.5pt;color:${TEXT};margin-bottom:3pt;">• ${s}</div>`).join('')) : ''}
+        ${d.education.length > 0 ? sideSection('Education', d.education.map(edu => `
+          <div style="margin-bottom:8pt;">
+            <div style="font-size:9.5pt;font-weight:bold;color:${NAVY};">${edu.degree||''}</div>
+            <div style="font-size:8.5pt;color:#555;">${edu.school||''}</div>
+            <div style="font-size:8pt;color:${BLUE};">${edu.gradYear||''}</div>
+          </div>`).join('')) : ''}
+        ${langArr.length > 0 ? sideSection('Languages', langArr.map(l => `<div style="font-size:8.5pt;color:${TEXT};margin-bottom:3pt;">• ${l}</div>`).join('')) : ''}
+        ${certArr.length > 0 ? sideSection('Certifications', certArr.map(c => `<div style="font-size:8.5pt;color:${TEXT};margin-bottom:3pt;">• ${c}</div>`).join('')) : ''}
+      </td>
+      <td style="width:67%;padding:16pt 20pt;background:${WHITE};">
+        ${d.summary ? mainSection('Profile', `<div style="font-size:9pt;color:${TEXT};line-height:1.5;text-align:justify;">${d.summary}</div>`) : ''}
+        ${d.experience.length > 0 ? mainSection('Experience', d.experience.map(exp => `
+          <div style="margin-bottom:10pt;">
+            <table style="width:100%;"><tr>
+              <td style="font-size:10pt;font-weight:bold;color:${NAVY};text-transform:uppercase;">${exp.jobTitle||''}</td>
+              <td style="text-align:right;font-size:8.5pt;color:${BLUE};white-space:nowrap;">${[exp.startDate, exp.endDate||'Present'].filter(Boolean).join(' – ')}</td>
+            </tr></table>
+            <div style="font-size:9pt;color:#555;font-style:italic;margin-bottom:3pt;">${exp.company||''}</div>
+            ${exp.description ? exp.description.split('\n').filter(Boolean).map(l => bullet(l)).join('') : ''}
+          </div>`).join('')) : ''}
+        ${d.projects.length > 0 ? mainSection('Projects', d.projects.map(proj => `
+          <div style="margin-bottom:10pt;">
+            <div style="font-size:10pt;font-weight:bold;color:${NAVY};text-transform:uppercase;">${proj.name||proj.title||''}</div>
+            ${proj.tech ? `<div style="font-size:8.5pt;color:${BLUE};font-weight:bold;margin-bottom:2pt;">${proj.tech}</div>` : ''}
+            ${proj.description ? proj.description.split('\n').filter(Boolean).map(l => bullet(l)).join('') : ''}
+          </div>`).join('')) : ''}
+      </td>
+    </tr>
+  </table>
+</div></body></html>`;
+}
+
+function makeOverflowAdaptive(html) {
+    if (!html || typeof html !== 'string') return html;
+
+    let out = html;
+
+    // 1) Allow page containers to expand beyond one page.
+    out = out.replace(/overflow\s*:\s*hidden\s*;/gi, 'overflow: visible;');
+
+    // 2) Avoid forcing single-screen table heights that can clip long content.
+    out = out.replace(/min-height\s*:\s*297mm\s*;?/gi, 'height:auto; min-height:297mm;');
+
+    // 3) Inject shared overflow/pagination safety rules once.
+    const adaptiveCss = `
+<style id="hiero-overflow-adaptive">
+  @media print {
+    .page { height: auto !important; overflow: visible !important; }
+    table, tr, td, div, section, article { break-inside: auto !important; page-break-inside: auto !important; }
+  }
+  .page { height: auto !important; overflow: visible !important; }
+  table { page-break-inside: auto !important; }
+  tr, td, div, section, article { break-inside: auto !important; page-break-inside: auto !important; }
+  * { overflow-wrap: anywhere; word-break: break-word; }
+</style>`;
+
+    if (/<\/head>/i.test(out)) {
+        out = out.replace(/<\/head>/i, `${adaptiveCss}</head>`);
+    } else if (/<body[^>]*>/i.test(out)) {
+        out = out.replace(/<body([^>]*)>/i, `<body$1>${adaptiveCss}`);
+    } else {
+        out = adaptiveCss + out;
+    }
+
+    return out;
+}
+
+// ── Main dispatch function ───────────────────────────────────────────────────
 function generateWordHTML(data, templateId) {
     let id = (templateId || 'classic').toLowerCase().trim();
     id = WORD_TEMPLATE_MAP[id] || id;
+    let html = '';
 
     if (id === 'template4') {
-        return generateHieroAcademicWordHTML(data);
+        html = generateHieroAcademicWordHTML(data);
+        return makeOverflowAdaptive(html);
     }
     if (id === 'hiero-urban') {
-        return generateHieroUrbanWordHTML(data, TEMPLATE_CONFIGS[id]);
+        html = generateHieroUrbanWordHTML(data, TEMPLATE_CONFIGS[id]);
+        return makeOverflowAdaptive(html);
     }
     if (id === 'hiero-vision') {
-        return generateHieroVisionWordHTML(data, TEMPLATE_CONFIGS[id]);
+        html = generateHieroVisionWordHTML(data, TEMPLATE_CONFIGS[id]);
+        return makeOverflowAdaptive(html);
     }
     if (id === 'hiero-studio') {
-        return generateHieroStudioWordHTML(data, TEMPLATE_CONFIGS[id]);
+        html = generateHieroStudioWordHTML(data, TEMPLATE_CONFIGS[id]);
+        return makeOverflowAdaptive(html);
     }
     if (id === 'hiero-signature') {
-        return generateHieroSignatureWordHTML(data, TEMPLATE_CONFIGS[id]);
+        html = generateHieroSignatureWordHTML(data, TEMPLATE_CONFIGS[id]);
+        return makeOverflowAdaptive(html);
     }
     if (id === 'hiero-tech') {
-        return generateHieroTechWordHTML(data, TEMPLATE_CONFIGS[id]);
+        html = generateHieroTechWordHTML(data, TEMPLATE_CONFIGS[id]);
+        return makeOverflowAdaptive(html);
     }
     if (id === 'hiero-cool') {
-        return generateHieroCoolWordHTML(data, TEMPLATE_CONFIGS[id]);
+        html = generateHieroCoolWordHTML(data, TEMPLATE_CONFIGS[id]);
+        return makeOverflowAdaptive(html);
     }
     if (id === 'hiero-nova') {
-        return generateHieroNovaWordHTML(data, TEMPLATE_CONFIGS['hiero-nova']);
+        html = generateHieroNovaWordHTML(data, TEMPLATE_CONFIGS['hiero-nova']);
+        return makeOverflowAdaptive(html);
     }
     if (id === 'rishi') {
-        return generateRishiWordHTML(data);
+        html = generateRishiWordHTML(data);
+        return makeOverflowAdaptive(html);
+    }
+    if (id === 'hiero-monethon') {
+        html = generateHieroMonethonWordHTML(data);
+        return makeOverflowAdaptive(html);
+    }
+    if (id === 'hiero-legion') {
+        html = generateHieroLegionWordHTML(data);
+        return makeOverflowAdaptive(html);
+    }
+    if (id === 'hiero-essence') {
+        html = generateHieroEssenceWordHTML(data);
+        return makeOverflowAdaptive(html);
+    }
+    if (id === 'hiero-timeline') {
+        html = generateHieroTimelineWordHTML(data);
+        return makeOverflowAdaptive(html);
+    }
+    if (id === 'hiero-premium') {
+        html = generateHieroPremiumWordHTML(data);
+        return makeOverflowAdaptive(html);
+    }
+    if (id === 'hiero-prestige') {
+        html = generateHieroPrestigeWordHTML(data);
+        return makeOverflowAdaptive(html);
+    }
+    if (id === 'hiero-royal') {
+        html = generateHieroRoyalWordHTML(data);
+        return makeOverflowAdaptive(html);
+    }
+    if (id === 'hiero-vertex') {
+        html = generateHieroVertexWordHTML(data);
+        return makeOverflowAdaptive(html);
+    }
+    if (id === 'priya-analytics') {
+        html = generatePriyaAnalyticsWordHTML(data);
+        return makeOverflowAdaptive(html);
+    }
+    if (id === 'hiero-executive') {
+        html = generateHieroExecutiveWordHTML(data);
+        return makeOverflowAdaptive(html);
+    }
+    if (id === 'hiero-velocity') {
+        html = generateHieroVelocityWordHTML(data);
+        return makeOverflowAdaptive(html);
+    }
+    if (id === 'hiero-elite') {
+        html = generateHieroEliteWordHTML(data);
+        return makeOverflowAdaptive(html);
+    }
+    if (id === 'hiero-retail') {
+        html = generateHieroRetailWordHTML(data);
+        return makeOverflowAdaptive(html);
     }
 
     const config = TEMPLATE_CONFIGS[id] || TEMPLATE_CONFIGS['classic'];
     
     if (config.type === 'sidebar') {
-        return generateSidebarWordHTML(data, config);
+        html = generateSidebarWordHTML(data, config);
+        return makeOverflowAdaptive(html);
     } else {
-        return generateTopDownWordHTML(data, config);
+        html = generateTopDownWordHTML(data, config);
+        return makeOverflowAdaptive(html);
     }
 }
 

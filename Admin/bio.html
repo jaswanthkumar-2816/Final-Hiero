@@ -1,289 +1,926 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portfolio | Jaswanth Kumar</title>
-    <!-- Google Fonts: Plus Jakarta Sans -->
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- FontAwesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root {
-            --bg-body: #ffffff;
-            --bg-card: #f8fbff;
-            --primary: #1e3a8a; /* Professional Blue */
-            --accent-blue: #3b82f6; 
-            --secondary: #065f46; /* Professional Green */
-            --accent-green: #10b981;
-            --text-main: #020617;
-            --text-muted: #64748b;
-            --border: #f1f5f9;
-            --glass: rgba(255, 255, 255, 0.85);
-            --transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-            --shadow: 0 10px 40px -10px rgba(0,0,0,0.05);
-            --shadow-lg: 0 30px 60px -12px rgba(0,0,0,0.12);
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hiero — Data vs Output Verifier</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --bg: #080b0f;
+      --surface: #111418;
+      --surface2: #161b24;
+      --surface3: #1d2430;
+      --border: #232a35;
+      --green: #2ae023;
+      --green-dim: rgba(42,224,35,0.12);
+      --red: #ef4444;
+      --red-dim: rgba(239,68,68,0.1);
+      --yellow: #f59e0b;
+      --blue: #3b82f6;
+      --text: #f1f5f9;
+      --muted: #64748b;
+      --muted2: #94a3b8;
+      --font: 'Inter', sans-serif;
+      --mono: 'JetBrains Mono', monospace;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      min-height: 100vh;
+    }
 
-        @keyframes bg-move { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-        @keyframes blob-float { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-40px) scale(1.1); } }
+    /* ── TOP BAR ── */
+    .topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky; top: 0; z-index: 200;
+    }
+    .topbar-brand { display: flex; align-items: center; gap: 12px; }
+    .brand-badge {
+      background: var(--green-dim);
+      border: 1px solid rgba(42,224,35,0.3);
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--green);
+      letter-spacing: 1px;
+    }
+    .topbar h1 { font-size: 1rem; font-weight: 700; color: var(--text); }
+    .topbar h1 small { color: var(--muted); font-weight: 400; font-size: 12px; margin-left: 8px; }
+    .topbar-actions { display: flex; gap: 10px; align-items: center; }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: var(--bg-body);
-            background-image: url('bg.png');
-            background-size: cover;
-            background-attachment: fixed;
-            color: var(--text-main);
-            overflow-x: hidden;
-            line-height: 1.6;
-        }
+    #progressBar {
+      height: 3px; background: linear-gradient(90deg, var(--green), #06a529);
+      width: 0%; transition: width 0.4s ease;
+      position: fixed; top: 0; left: 0; z-index: 999;
+      border-radius: 0 2px 2px 0;
+    }
 
-        /* Animated Blobs Background */
-        .blobs {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; overflow: hidden; pointer-events: none;
-        }
-        .blob {
-            position: absolute; border-radius: 50%; filter: blur(100px); opacity: 0.15; animation: blob-float 15s infinite ease-in-out;
-        }
-        .blob-1 { width: 600px; height: 600px; background: var(--accent-blue); top: -10%; left: -10%; animation-delay: 0s; }
-        .blob-2 { width: 500px; height: 500px; background: var(--accent-green); bottom: -10%; right: -10%; animation-delay: -5s; }
+    /* ── SUMMARY ROW ── */
+    .summary-row {
+      display: flex; gap: 12px; padding: 12px 28px;
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      align-items: center; flex-wrap: wrap;
+    }
+    .pill {
+      padding: 5px 14px; border-radius: 100px;
+      font-size: 11px; font-weight: 700;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .pill-total { background: rgba(255,255,255,0.04); color: var(--muted); border: 1px solid var(--border); }
+    .pill-pass  { background: var(--green-dim); color: var(--green); border: 1px solid rgba(42,224,35,0.25); }
+    .pill-fail  { background: var(--red-dim); color: var(--red); border: 1px solid rgba(239,68,68,0.25); }
+    .pill-run   { background: rgba(59,130,246,0.12); color: var(--blue); border: 1px solid rgba(59,130,246,0.25); }
 
-        .container { max-width: 1300px; margin: 0 auto; padding: 0 2.5rem; }
+    /* ── TEMPLATE BLOCKS ── */
+    .templates-wrap { padding: 20px 28px; display: flex; flex-direction: column; gap: 24px; }
 
-        /* Navbar */
-        .navbar {
-            position: fixed; top: 2rem; left: 50%; transform: translateX(-50%); width: 95%; max-width: 1200px;
-            padding: 1.2rem 3rem; z-index: 1000; background: var(--glass); backdrop-filter: blur(20px);
-            border-radius: 4rem; border: 1px solid var(--border); display: flex; justify-content: space-between;
-            align-items: center; box-shadow: var(--shadow); transition: var(--transition);
-        }
-        .navbar.sticky { padding: 0.8rem 2.5rem; top: 1rem; width: 90%; }
-        .logo { font-size: 1.4rem; font-weight: 800; color: var(--text-main); text-decoration: none; display: flex; align-items: center; gap: 0.8rem; }
-        .logo i { color: var(--accent-blue); }
+    .tmpl-block {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: border-color 0.3s;
+    }
+    .tmpl-block.pass { border-color: rgba(42,224,35,0.3); }
+    .tmpl-block.fail { border-color: rgba(239,68,68,0.3); }
+    .tmpl-block.loading { border-color: rgba(245,158,11,0.3); }
 
-        .nav-links { display: flex; gap: 3rem; list-style: none; }
-        .nav-links a { text-decoration: none; color: var(--text-muted); font-weight: 700; font-size: 0.9rem; transition: var(--transition); }
-        .nav-links a:hover { color: var(--primary); }
+    /* Block header */
+    .block-header {
+      padding: 12px 20px;
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      user-select: none;
+    }
+    .block-header:hover { background: var(--surface3); }
+    .block-title { display: flex; align-items: center; gap: 10px; }
+    .block-num {
+      width: 24px; height: 24px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; color: var(--muted);
+    }
+    .block-name { font-size: 13px; font-weight: 700; }
+    .block-id {
+      font-size: 10px; color: var(--muted);
+      background: rgba(255,255,255,0.04);
+      padding: 2px 8px; border-radius: 4px;
+      font-family: var(--mono);
+    }
+    .block-status {
+      display: flex; align-items: center; gap: 8px;
+    }
+    .status-badge {
+      padding: 4px 12px; border-radius: 8px;
+      font-size: 11px; font-weight: 700;
+      display: flex; align-items: center; gap: 5px;
+    }
+    .badge-pass { background: var(--green-dim); color: var(--green); }
+    .badge-fail { background: var(--red-dim); color: var(--red); }
+    .badge-loading { background: rgba(245,158,11,0.1); color: var(--yellow); }
+    .badge-pending { background: rgba(255,255,255,0.04); color: var(--muted); }
+    .badge-meta { font-size: 11px; color: var(--muted); }
 
-        /* Hero */
-        .hero { min-height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; position: relative; }
-        .hero-content { max-width: 900px; animation: fadeInUp 1.2s ease; }
-        .avail-badge { padding: 0.8rem 1.5rem; background: #f0fdf4; color: var(--secondary); border-radius: 50px; border: 1px solid #dcfce7; font-size: 0.8rem; font-weight: 800; margin-bottom: 2rem; display: inline-flex; align-items: center; gap: 0.8rem; }
-        .avail-badge span { width: 10px; height: 10px; background: var(--accent-green); border-radius: 50%; animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { transform: scale(0.9); opacity: 0.7; } 70% { transform: scale(3); opacity: 0; } 100% { transform: scale(0.9); opacity: 1; } }
+    /* Collapse toggle */
+    .block-toggle { color: var(--muted); font-size: 12px; transition: transform 0.2s; }
+    .block-toggle.open { transform: rotate(180deg); }
 
-        .hero h1 { font-size: 7.5rem; font-weight: 800; letter-spacing: -6px; line-height: 0.9; margin-bottom: 1.5rem; }
-        .gradient-txt { background: linear-gradient(135deg, var(--primary), var(--accent-green)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .hero h2 { font-size: 2.2rem; font-weight: 600; color: var(--text-main); margin-bottom: 3rem; }
-        #typing-text { border-right: 3px solid var(--accent-green); padding-right: 5px; color: var(--accent-blue); }
+    /* Block body — 3 columns */
+    .block-body {
+      display: grid;
+      grid-template-columns: 300px 1fr 1fr;
+      min-height: 520px;
+    }
+    .block-body.collapsed { display: none; }
 
-        .btn { padding: 1.4rem 4rem; border-radius: 2.5rem; font-weight: 800; text-decoration: none; transition: var(--transition); display: inline-block; }
-        .btn-black { background: var(--text-main); color: white; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
-        .btn-black:hover { transform: translateY(-8px) scale(1.02); box-shadow: 0 40px 60px rgba(0,0,0,0.15); }
+    /* Left: data panel */
+    .data-panel {
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      background: var(--surface2);
+      max-height: 600px;
+    }
+    .data-panel-header {
+      padding: 10px 16px;
+      background: var(--surface3);
+      border-bottom: 1px solid var(--border);
+      font-size: 11px; font-weight: 700; color: var(--muted);
+      letter-spacing: 0.5px;
+      display: flex; align-items: center; gap: 6px;
+      position: sticky; top: 0; z-index: 10;
+    }
 
-        /* About Card */
-        .about-modern { background: var(--glass); backdrop-filter: blur(40px); border-radius: 5rem; padding: 7rem; border: 1px solid var(--border); display: grid; grid-template-columns: 1fr 1.5fr; gap: 8rem; align-items: center; box-shadow: var(--shadow-lg); }
-        .image-container { position: relative; border-radius: 4rem; overflow: hidden; border: 15px solid white; box-shadow: var(--shadow-lg); transition: var(--transition); }
-        .image-container img { width: 100%; display: block; filter: grayscale(20%); transition: var(--transition); }
-        .image-container:hover img { filter: grayscale(0); transform: scale(1.05); }
+    /* Data fields */
+    .data-section { border-bottom: 1px solid var(--border); padding: 12px 16px; }
+    .data-section:last-child { border-bottom: none; }
+    .data-section-title {
+      font-size: 10px; font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.6px;
+      margin-bottom: 8px; display: flex; align-items: center; gap: 6px;
+    }
+    .data-section-title .section-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--green);
+    }
+    .field-row {
+      display: flex; align-items: flex-start;
+      gap: 8px; margin-bottom: 6px; font-size: 11px;
+    }
+    .field-key {
+      color: var(--blue);
+      font-family: var(--mono);
+      font-size: 10px;
+      min-width: 90px; flex-shrink: 0;
+      padding-top: 1px;
+    }
+    .field-val {
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 10px;
+      word-break: break-all;
+      line-height: 1.5;
+    }
+    .field-val.empty { color: var(--muted); font-style: italic; }
+    .field-val.arr-val { color: #a78bfa; }
+    .field-val.str-val { color: #34d399; }
+    .field-val.num-val { color: #fb923c; }
 
-        /* Section Reveal */
-        section { padding: 10rem 0; opacity: 0; transform: translateY(50px); transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1); }
-        section.reveal { opacity: 1; transform: translateY(0); }
+    /* Experience / education items */
+    .data-item {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 10px;
+      margin-bottom: 6px;
+      font-size: 10px;
+      font-family: var(--mono);
+    }
+    .data-item-title { color: var(--text); font-weight: 700; margin-bottom: 4px; font-size: 10.5px; }
+    .data-item-sub { color: var(--muted); margin-bottom: 2px; }
+    .data-item-desc { color: var(--muted2); margin-top: 4px; line-height: 1.5; }
 
-        /* Skills Bantu Grid */
-        .tech-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; }
-        .tech-card { background: white; border-radius: 3.5rem; padding: 5rem 4rem; border: 1px solid var(--border); box-shadow: var(--shadow); transition: var(--transition); position: relative; overflow: hidden; }
-        .tech-card:hover { transform: translateY(-15px); border-color: var(--accent-blue); box-shadow: var(--shadow-lg); }
-        .tech-card-large { grid-column: span 2; }
-        .tech-card i { font-size: 3rem; color: var(--accent-blue); margin-bottom: 2rem; }
-        .tech-card h3 { font-size: 2rem; font-weight: 800; margin-bottom: 1.5rem; }
-        .p-bar { height: 12px; background: #f3f4f6; border-radius: 20px; margin-top: 2rem; }
-        .p-fill { height: 100%; background: linear-gradient(90deg, var(--accent-blue), var(--accent-green)); border-radius: 20px; width: 0; transition: width 2s cubic-bezier(0.19, 1, 0.22, 1); }
+    /* Tag chips */
+    .tag-chip {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-family: var(--mono);
+      background: rgba(59,130,246,0.12);
+      color: var(--blue);
+      margin: 2px 2px 2px 0;
+    }
 
-        /* Project Showroom */
-        .project-wide { background: var(--glass); border-radius: 5rem; padding: 6rem; border: 1px solid var(--border); display: grid; grid-template-columns: 1.2fr 1fr; gap: 6rem; align-items: center; box-shadow: var(--shadow-lg); transition: var(--transition); }
-        .project-wide:hover { background: #ffffff; }
-        .project-visual { border-radius: 3.5rem; overflow: hidden; border: 10px solid white; box-shadow: var(--shadow-lg); }
-        .project-visual img { width: 100%; display: block; }
-        .project-content h3 { font-size: 3.5rem; font-weight: 800; margin-bottom: 2rem; letter-spacing: -2px; }
+    /* Right: PDF preview panel */
+    .pdf-panel {
+      background: #e5e7eb;
+      display: flex;
+      flex-direction: column;
+    }
+    .pdf-panel-header {
+      padding: 10px 16px;
+      background: var(--surface3);
+      border-bottom: 1px solid var(--border);
+      font-size: 11px; font-weight: 700; color: var(--muted);
+      letter-spacing: 0.5px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .pdf-panel-header .pdf-actions { display: flex; gap: 8px; }
+    .pdf-action-btn {
+      padding: 4px 10px; border-radius: 6px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      color: var(--muted); font-size: 10px; font-weight: 600;
+      cursor: pointer; text-decoration: none;
+      display: flex; align-items: center; gap: 4px;
+      transition: all 0.2s;
+    }
+    .pdf-action-btn:hover { border-color: var(--green); color: var(--green); }
+    .pdf-preview { flex: 1; min-height: 500px; background: #fff; }
+    .pdf-preview iframe { width: 100%; height: 100%; border: none; min-height: 500px; }
+    .pdf-placeholder {
+      width: 100%; height: 100%; min-height: 500px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 12px; background: var(--surface2);
+    }
+    .placeholder-icon { font-size: 48px; color: var(--muted); }
+    .placeholder-label { font-size: 13px; color: var(--muted); }
 
-        /* Contact Section */
-        .contact-final { background: var(--text-main); color: white; border-radius: 6rem; padding: 12rem 5rem; text-align: center; position: relative; overflow: hidden; }
-        .contact-final h2 { font-size: 6.5rem; font-weight: 800; letter-spacing: -6px; line-height: 0.85; margin-bottom: 4rem; }
-        .email-link { font-size: 3rem; font-weight: 800; color: var(--accent-green); text-decoration: none; border-bottom: 5px solid rgba(255,255,255,0.1); transition: var(--transition); }
-        .email-link:hover { color: white; border-color: var(--accent-blue); }
+    /* Right: DOCX preview panel */
+    .docx-panel {
+      background: #e5e7eb;
+      display: flex;
+      flex-direction: column;
+      border-left: 1px solid var(--border);
+    }
+    .docx-panel-header {
+      padding: 10px 16px;
+      background: var(--surface3);
+      border-bottom: 1px solid var(--border);
+      font-size: 11px; font-weight: 700; color: var(--muted);
+      letter-spacing: 0.5px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .docx-panel-header .docx-actions { display: flex; gap: 8px; }
+    .docx-preview { flex: 1; min-height: 500px; background: #fff; overflow-y: auto; padding: 0; }
+    .docx-preview iframe { width: 100%; height: 100%; border: none; min-height: 500px; }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid rgba(42,224,35,0.15);
+      border-top-color: var(--green);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* Animations */
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+    /* Error panel */
+    .error-panel {
+      padding: 20px; background: var(--red-dim);
+      border-top: 1px solid rgba(239,68,68,0.2);
+      font-family: var(--mono); font-size: 11px;
+      color: var(--red); line-height: 1.6;
+    }
 
-        @media (max-width: 1100px) {
-            .hero h1 { font-size: 4.5rem; }
-            .about-modern, .project-wide { grid-template-columns: 1fr; padding: 4rem; }
-            .tech-grid { grid-template-columns: 1fr; }
-            .tech-card-large { grid-column: auto; }
-            .contact-final h2 { font-size: 3.5rem; }
-            .email-link { font-size: 1.8rem; }
-        }
-    </style>
+    /* Buttons */
+    .btn {
+      padding: 9px 20px; border-radius: 10px;
+      font-weight: 700; font-size: 13px;
+      cursor: pointer; display: flex; align-items: center; gap: 8px;
+      transition: all 0.2s; border: none;
+    }
+    .btn-green { background: var(--green); color: #000; }
+    .btn-green:hover { filter: brightness(1.1); transform: translateY(-1px); }
+    .btn-green:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .btn-outline {
+      background: transparent; color: var(--muted);
+      border: 1px solid var(--border);
+    }
+    .btn-outline:hover { border-color: var(--green); color: var(--green); }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+    @media (max-width: 900px) {
+      .block-body { grid-template-columns: 1fr; }
+      .data-panel { border-right: none; border-bottom: 1px solid var(--border); max-height: 300px; }
+    }
+  </style>
 </head>
 <body>
-    <div class="blobs">
-        <div class="blob blob-1"></div>
-        <div class="blob blob-2"></div>
-    </div>
 
-    <nav class="navbar" id="navbar">
-        <a href="#" class="logo"><i class="fas fa-terminal"></i> JASWANTH<span>.</span></a>
-        <ul class="nav-links">
-            <li><a href="#home">Home</a></li>
-            <li><a href="#about">Bio</a></li>
-            <li><a href="#skills">Tech</a></li>
-            <li><a href="#projects">Work</a></li>
-        </ul>
-        <div style="background: var(--text-main); color: white; padding: 0.8rem 2rem; border-radius: 50px; font-weight: 800; cursor: pointer; font-size: 0.8rem;">Let's Talk</div>
-    </nav>
+<div id="progressBar"></div>
 
-    <section id="home" class="hero reveal">
-        <div class="hero-content">
-            <div class="avail-badge"><span></span> Open to New Projects</div>
-            <h1 class="gradient-txt">Jaswanth Kumar</h1>
-            <h2>Creative <span id="typing-text"></span></h2>
-            <p>Full-stack developer blending scalable backend architectures with pixel-perfect, interactive AI experiences.</p>
-            <div style="margin-top: 4rem;">
-                <a href="#projects" class="btn btn-black">Explore My Portfolio</a>
-            </div>
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-brand">
+    <div class="brand-badge">HIERO</div>
+    <h1>Data vs Output Verifier <small>See exactly what goes in and what comes out for each template</small></h1>
+  </div>
+  <div class="topbar-actions">
+    <button class="btn btn-outline" onclick="expandAll()"><i class="fas fa-expand-alt"></i> Expand All</button>
+    <button class="btn btn-outline" onclick="collapseAll()"><i class="fas fa-compress-alt"></i> Collapse All</button>
+    <button class="btn btn-green" id="runBtn" onclick="runAll()">
+      <i class="fas fa-play"></i> Test All 22 Templates
+    </button>
+  </div>
+</div>
+
+<!-- SUMMARY ROW -->
+<div class="summary-row">
+  <span class="pill pill-total"><i class="fas fa-layer-group"></i> 22 Templates</span>
+  <span class="pill pill-pass"><i class="fas fa-check-circle"></i> <span id="cPass">0</span> Passed</span>
+  <span class="pill pill-fail"><i class="fas fa-times-circle"></i> <span id="cFail">0</span> Failed</span>
+  <span class="pill pill-run"><i class="fas fa-clock"></i> <span id="cPend">22</span> Pending</span>
+  <span style="margin-left:auto; font-size:11px; color:var(--muted)">
+    <i class="fas fa-info-circle"></i>&nbsp;
+    Left panel = input data &nbsp;|&nbsp; Right panel = generated PDF
+  </span>
+</div>
+
+<div class="templates-wrap" id="templatesWrap"></div>
+
+<script>
+const BACKEND_URL = window.location.origin + '/api/resume';
+
+// ── 22 Templates ──────────────────────────────────────────────────────────────
+const TEMPLATES = [
+  { id:'rishi',            name:'Rishi Tech Modern',       group:'Free' },
+  { id:'hiero-monethon',   name:'Hiero Monethon',          group:'Premium' },
+  { id:'hiero-cool',       name:'Hiero Cool',              group:'Premium' },
+  { id:'hiero-legion',     name:'Hiero Legion',            group:'Premium' },
+  { id:'hiero-nova',       name:'Hiero Nova',              group:'Premium' },
+  { id:'priya-analytics',  name:'Priya Analytics',         group:'Free' },
+  { id:'hiero-executive',  name:'Hiero Executive',         group:'Free' },
+  { id:'template4',        name:'Hiero Academic',          group:'Free' },
+  { id:'hiero-timeline',   name:'Hiero Timeline',          group:'Free' },
+  { id:'hiero-tech',       name:'Hiero Tech',              group:'Free' },
+  { id:'hiero-urban',      name:'Hiero Urban',             group:'Free' },
+  { id:'hiero-vertex',     name:'Hiero Vertex',            group:'Free' },
+  { id:'hiero-studio',     name:'Hiero Studio',            group:'Free' },
+  { id:'hiero-vision',     name:'Hiero Vision',            group:'Free' },
+  { id:'hiero-elite',      name:'Hiero Elite',             group:'Premium' },
+  { id:'hiero-premium',    name:'Hiero Premium',           group:'Premium' },
+  { id:'hiero-prestige',   name:'Hiero Prestige',          group:'Premium' },
+  { id:'hiero-signature',  name:'Hiero Signature',         group:'Premium' },
+  { id:'hiero-retail',     name:'Hiero Retail',            group:'Free' },
+  { id:'hiero-essence',    name:'Hiero Essence',           group:'Premium' },
+  { id:'hiero-velocity',   name:'Hiero Velocity',          group:'Premium' },
+  { id:'hiero-royal',      name:'Hiero Royal',             group:'Free' }
+];
+
+// ── Input Data (exactly what the form / imported resume sends) ────────────────
+let INPUT_DATA = {
+  personalInfo: {
+    fullName: 'YARAJARLA GANESH',
+    email: 'ganeshyarajarla35@gmail.com',
+    phone: '+91-7993241780',
+    address: 'Tripuranthakam, Andhra Pradesh',
+    linkedin: 'linkedin.com/in/ganeshyarajarla',
+    github: 'github.com/yarajarlaganesh',
+    website: '',
+    roleTitle: 'AIML Undergraduate'
+  },
+  summary: 'AIML undergraduate with strong foundations in Artificial Intelligence, Machine Learning, and Web Development. Skilled in Python programming, NumPy, and data analysis fundamentals. Seeking internship opportunities to apply technical skills, strengthen problem-solving abilities, and gain industry exposure.',
+  experience: [
+    {
+      jobTitle: 'Python Fullstack Intern',
+      company: 'TechinIT Process Private Limited',
+      startDate: 'Nov 2024',
+      endDate: 'May 2025',
+      description: '• Developed web applications using Python, Flask, and REST APIs.\n• Worked on frontend-backend integration and databases.'
+    },
+    {
+      jobTitle: 'AI & ML Virtual Intern',
+      company: 'ShadowFox',
+      startDate: 'Apr 2026',
+      endDate: 'Apr 2026',
+      description: '• Trained ML models using Python and Scikit-learn.\n• Worked with NumPy, Pandas, and Google Colab.'
+    }
+  ],
+  education: [
+    {
+      degree: 'B.Tech in Artificial Intelligence & Machine Learning',
+      school: 'Acharya Nagarjuna University, Nambur',
+      gradYear: '2025 - 2028',
+      gpa: ''
+    },
+    {
+      degree: 'Diploma in Computer Engineering',
+      school: 'Bapatla Polytechnic College of Engineering, Bapatla',
+      gradYear: 'June 2022 - June 2025',
+      gpa: ''
+    }
+  ],
+  technicalSkills: 'Programming: Python, c, c++, MySQL. AI & Machine Learning: Artificial Intelligence, Machine Learning fundamentals, Hugging Face, NumPy, Data Analysis. Web Development: HTML5, CSS3, JavaScript, React, Angular, Tailwind CSS, PHP. Tools: Git, GitHub, VS Code, Postman, Jupyter Notebook, Google Colab, Figma, XAMPP',
+  softSkills: 'Problem-solving, Quick learner, Team collaboration, Communication skills, Time management',
+  languages: 'English, Telugu',
+  certifications: 'Python Course Completion - Techin IT (Vijayawada), Artificial Intelligence / Data Science Certification - IBM, Google Intensive AI Course - Kaggle',
+  projects: [
+    {
+      name: 'AI-Based Emergency Call Triage System',
+      tech: 'Python, AI/ML, Speech-to-Text',
+      description: '• Built an AI system to classify emergency calls based on severity.\n• Integrated speech-to-text for voice input processing.\n• Automated emergency response prioritization.',
+      link: 'https://github.com/YARAJARLAGANESH/SafeLine-AI'
+    },
+    {
+      name: 'Tourism Management System',
+      tech: 'HTML, CSS, JavaScript, PHP, MySQL',
+      description: '• Developed a tourism management website for tour bookings.\n• Designed responsive frontend pages and admin features.\n• Connected PHP with MySQL for data management.',
+      link: 'https://sanchari.infinityfreeapp.com/?i=1'
+    },
+    {
+      name: 'Interior Portfolio Website',
+      tech: 'React, Tailwind CSS, Node.js, MongoDB',
+      description: '• Developed a portfolio website for interior design projects.\n• Integrated database to manage project details dynamically.\n• Fixed backend and database issues for smooth performance.',
+      link: 'https://github.com/YARAJARLAGANESH/Interior-Website'
+    }
+  ],
+  hobbies: '',
+  additionalInfo: 'Declaration: The information provided above is true and correct to the best of my knowledge.'
+};
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let passCount = 0, failCount = 0, pendingCount = 22;
+const blobUrls = {};
+
+// ── Build all blocks on page load ─────────────────────────────────────────────
+function buildAll() {
+  const wrap = document.getElementById('templatesWrap');
+  wrap.innerHTML = '';
+  TEMPLATES.forEach((tmpl, idx) => {
+    wrap.appendChild(buildBlock(tmpl, idx + 1));
+  });
+
+  // Populate all JSON editors with current INPUT_DATA
+  TEMPLATES.forEach(tmpl => {
+    const el = document.getElementById(`json-${tmpl.id}`);
+    if (el) {
+      el.value = JSON.stringify(INPUT_DATA, null, 2);
+    }
+  });
+}
+
+function buildBlock(tmpl, num) {
+  const div = document.createElement('div');
+  div.className = 'tmpl-block';
+  div.id = `block-${tmpl.id}`;
+
+  div.innerHTML = `
+    <div class="block-header" onclick="toggleBlock('${tmpl.id}')">
+      <div class="block-title">
+        <div class="block-num">${num}</div>
+        <div class="block-name">${tmpl.name}</div>
+        <div class="block-id">${tmpl.id}</div>
+        <span style="font-size:10px;color:var(--muted);background:rgba(255,255,255,0.03);padding:2px 8px;border-radius:4px">${tmpl.group}</span>
+      </div>
+      <div class="block-status">
+        <div class="status-badge badge-pending" id="badge-${tmpl.id}">
+          <i class="fas fa-clock"></i> Pending
         </div>
-    </section>
-
-    <div class="container">
-        <section id="about" class="reveal">
-            <div class="about-modern">
-                <div class="image-container">
-                    <img src="avatar.png" alt="Jaswanth Kumar">
-                </div>
-                <div class="about-info">
-                    <h3 style="font-size: 3rem; font-weight: 800; margin-bottom: 2rem;">Turning Logic <br/>into Experience.</h3>
-                    <p style="font-size: 1.3rem; color: var(--text-muted); font-weight: 500; margin-bottom: 3rem;">I solve digital puzzles. Whether it's building safe and secure APIs or designing fluid user interfaces, my goal is always to deliver an unforgettable user journey.</p>
-                    <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
-                         <span style="padding: 0.8rem 2rem; background: white; border: 1px solid var(--border); border-radius: 50px; font-weight: 800; color: var(--primary);">React 19</span>
-                         <span style="padding: 0.8rem 2rem; background: white; border: 1px solid var(--border); border-radius: 50px; font-weight: 800; color: var(--accent-green);">Node Server</span>
-                         <span style="padding: 0.8rem 2rem; background: white; border: 1px solid var(--border); border-radius: 50px; font-weight: 800; color: var(--secondary);">Computer Vision</span>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="skills" class="reveal">
-            <div style="margin-bottom: 6rem;">
-                <span style="color: var(--accent-green); font-weight: 800; letter-spacing: 5px; text-transform: uppercase;">02 &bull; Skills</span>
-                <h2 style="font-size: 4.5rem; font-weight: 800; letter-spacing: -3px;">My Arsenal.</h2>
-            </div>
-            <div class="tech-grid">
-                <div class="tech-card tech-card-large">
-                    <i class="fab fa-react"></i>
-                    <h3>Frontend Systems</h3>
-                    <p style="color: var(--text-muted); font-weight: 500; font-size: 1.1rem;">Building complex Single Page Applications with dynamic state and high-performance rendering logic.</p>
-                    <div class="p-bar"><div class="p-fill" data-width="92%"></div></div>
-                </div>
-                <div class="tech-card">
-                    <i class="fab fa-node-js" style="color: var(--accent-green);"></i>
-                    <h3>Backend</h3>
-                    <p style="color: var(--text-muted); font-weight: 500;">Secure, scalable Node.js servers.</p>
-                    <div class="p-bar"><div class="p-fill" data-width="85%"></div></div>
-                </div>
-                <div class="tech-card">
-                    <i class="fas fa-brain"></i>
-                    <h3>AI Integration</h3>
-                    <p style="color: var(--text-muted); font-weight: 500;">Web-ready machine learning models.</p>
-                    <div class="p-bar"><div class="p-fill" data-width="80%"></div></div>
-                </div>
-                <div class="tech-card tech-card-large">
-                    <i class="fas fa-layer-group"></i>
-                    <h3>Product Architecture</h3>
-                    <p style="color: var(--text-muted); font-weight: 500; font-size: 1.1rem;">End-to-end planning from database schema design to the final interactive UI polish.</p>
-                    <div class="p-bar"><div class="p-fill" data-width="95%"></div></div>
-                </div>
-            </div>
-        </section>
-
-        <section id="projects" class="reveal">
-             <div style="margin-bottom: 6rem;">
-                <span style="color: var(--accent-blue); font-weight: 800; letter-spacing: 5px; text-transform: uppercase;">03 &bull; Work</span>
-                <h2 style="font-size: 4.5rem; font-weight: 800; letter-spacing: -3px;">Selected Exhibits.</h2>
-            </div>
-            <div class="project-wide">
-                <div class="project-content">
-                    <span style="font-weight: 800; color: var(--accent-green); text-transform: uppercase; letter-spacing: 2px;">AI Computer Vision</span>
-                    <h3>Hiero Assistant</h3>
-                    <p style="font-size: 1.25rem; color: var(--text-muted); margin-bottom: 3rem; font-weight: 500;">An AI Interview Simulator that analyzes user expressions during mock interviews and provides a confidence-based executive score.</p>
-                    <a href="#" class="btn btn-black" style="padding: 1rem 3rem;">Case Study</a>
-                </div>
-                <div class="project-visual">
-                    <img src="project.png" alt="Project Screenshot">
-                </div>
-            </div>
-        </section>
-
-        <section id="contact" class="reveal">
-            <div class="contact-final">
-                <div class="avail-badge" style="background: rgba(255,255,255,0.05); color: white; border-color: rgba(255,255,255,0.1); margin-bottom: 5rem;">Get in Touch</div>
-                <h2>Let's build <br/> the extraordinary.</h2>
-                <a href="mailto:jaswanth.builds@gmail.com" class="email-link">jaswanth.builds@gmail.com</a>
-                <div style="display: flex; justify-content: center; gap: 4rem; margin-top: 6rem;">
-                    <a href="#" style="color: white; font-size: 2.5rem; opacity: 0.6; transition: 0.3s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.6"><i class="fab fa-github"></i></a>
-                    <a href="#" style="color: white; font-size: 2.5rem; opacity: 0.6; transition: 0.3s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.6"><i class="fab fa-linkedin"></i></a>
-                    <a href="#" style="color: white; font-size: 2.5rem; opacity: 0.6; transition: 0.3s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.6"><i class="fab fa-instagram"></i></a>
-                </div>
-            </div>
-        </section>
+        <button class="btn btn-outline" style="padding:5px 12px;font-size:11px;" onclick="event.stopPropagation();retestOne('${tmpl.id}','${tmpl.name}')">
+          <i class="fas fa-redo"></i> Test
+        </button>
+        <i class="fas fa-chevron-down block-toggle open" id="toggle-${tmpl.id}"></i>
+      </div>
     </div>
 
-    <footer style="padding: 6rem 0; text-align: center; color: #cbd5e1; font-weight: 800; letter-spacing: 5px; font-size: 0.8rem;">
-        &copy; 2026 JASWANTH KUMAR &bull; BUILT WITH PRECISION
-    </footer>
+    <div class="block-body" id="body-${tmpl.id}">
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Typing Animation
-            const typingText = document.getElementById('typing-text');
-            const words = ["Engineer.", "Technologist.", "Developer."];
-            let wordIdx = 0, charIdx = 0, isDeleting = false;
+      <!-- LEFT: INPUT DATA (Fully Editable Live JSON Editor!) -->
+      <div class="data-panel" style="display:flex; flex-direction:column; padding:0; background:var(--surface);">
+        <div class="data-panel-header" style="display:flex; justify-content:space-between; align-items:center; background:var(--surface2); padding:10px 16px; border-bottom:1px solid var(--border);">
+          <span><i class="fas fa-edit" style="color:var(--blue)"></i>&nbsp; EDIT TEST DATA (JSON)</span>
+          <button class="btn btn-outline" style="padding:4px 8px; font-size:10px; color:var(--green); border-color:rgba(42,224,35,0.4);" onclick="event.stopPropagation(); syncJsonToAll('${tmpl.id}')">
+            <i class="fas fa-sync"></i> Sync to All
+          </button>
+        </div>
+        <textarea id="json-${tmpl.id}" style="width:100%; flex:1; min-height:480px; background:#0c0f13; color:#f1f5f9; border:none; padding:15px; font-family:var(--mono); font-size:11px; line-height:1.6; resize:vertical; outline:none; scrollbar-width:thin; scrollbar-color:#232a35 #0c0f13;"></textarea>
+      </div>
 
-            function type() {
-                const currentWord = words[wordIdx];
-                typingText.textContent = isDeleting ? currentWord.substring(0, charIdx--) : currentWord.substring(0, charIdx++);
-                if(!isDeleting && charIdx === currentWord.length + 1) { isDeleting = true; setTimeout(type, 2000); }
-                else if(isDeleting && charIdx === 0) { isDeleting = false; wordIdx = (wordIdx + 1) % words.length; type(); }
-                else setTimeout(type, isDeleting ? 70 : 180);
-            }
-            type();
+      <!-- MIDDLE: PDF OUTPUT -->
+      <div class="pdf-panel">
+        <div class="pdf-panel-header">
+          <span><i class="fas fa-file-pdf" style="color:var(--red)"></i>&nbsp; GENERATED PDF OUTPUT</span>
+          <div class="pdf-actions" id="pdfActions-${tmpl.id}"></div>
+        </div>
+        <div class="pdf-preview" id="pdfPreview-${tmpl.id}">
+          <div class="pdf-placeholder">
+            <div class="placeholder-icon"><i class="fas fa-file-pdf"></i></div>
+            <div class="placeholder-label">Click "Test" or "Test All 22" to generate</div>
+          </div>
+        </div>
+      </div>
 
-            // Sticky Nav
-            window.addEventListener('scroll', () => {
-                const nav = document.getElementById('navbar');
-                if(window.scrollY > 100) nav.classList.add('sticky');
-                else nav.classList.remove('sticky');
-            });
+      <!-- RIGHT: DOCX OUTPUT -->
+      <div class="docx-panel">
+        <div class="docx-panel-header">
+          <span><i class="fas fa-file-word" style="color:var(--blue)"></i>&nbsp; GENERATED DOCX OUTPUT</span>
+          <div class="docx-actions" id="docxActions-${tmpl.id}"></div>
+        </div>
+        <div class="docx-preview" id="docxPreview-${tmpl.id}">
+          <div class="pdf-placeholder">
+            <div class="placeholder-icon"><i class="fas fa-file-word"></i></div>
+            <div class="placeholder-label">Click "Test" or "Test All 22" to generate</div>
+          </div>
+        </div>
+      </div>
 
-            // Reveal Animation
-            const observer = new IntersectionObserver(entries => {
-                entries.forEach(entry => {
-                    if(entry.isIntersecting) {
-                        entry.target.classList.add('reveal');
-                        if(entry.target.id === 'skills') {
-                            entry.target.querySelectorAll('.p-fill').forEach(bar => {
-                                bar.style.width = bar.dataset.width;
-                            });
-                        }
-                    }
-                });
-            }, { threshold: 0.1 });
-            document.querySelectorAll('section').forEach(el => observer.observe(el));
-        });
-    </script>
+    </div>
+  `;
+  return div;
+}
+
+function buildDataPanel() {
+  const d = INPUT_DATA;
+  const pi = d.personalInfo;
+
+  return `
+    <!-- Personal Info -->
+    <div class="data-section">
+      <div class="data-section-title"><span class="section-dot"></span> Personal Info</div>
+      ${fieldRow('fullName', pi.fullName)}
+      ${fieldRow('email', pi.email)}
+      ${fieldRow('phone', pi.phone)}
+      ${fieldRow('address', pi.address)}
+      ${fieldRow('roleTitle', pi.roleTitle, 'KEY FIELD — shows as subtitle')}
+      ${fieldRow('linkedin', pi.linkedin)}
+      ${fieldRow('github', pi.github)}
+      ${fieldRow('website', pi.website)}
+    </div>
+
+    <!-- Summary -->
+    <div class="data-section">
+      <div class="data-section-title"><span class="section-dot"></span> Summary / About Me</div>
+      <div class="field-val str-val" style="font-family:var(--mono);font-size:10px;line-height:1.6">${d.summary}</div>
+    </div>
+
+    <!-- Experience -->
+    <div class="data-section">
+      <div class="data-section-title"><span class="section-dot"></span> Experience (${d.experience.length} items)</div>
+      ${d.experience.map(e => `
+        <div class="data-item">
+          <div class="data-item-title">📋 ${e.jobTitle} @ ${e.company}</div>
+          <div class="data-item-sub">${e.startDate} → ${e.endDate}</div>
+          <div class="data-item-desc">${e.description.replace(/\n/g,'<br>')}</div>
+        </div>
+      `).join('')}
+    </div>
+
+    <!-- Education -->
+    <div class="data-section">
+      <div class="data-section-title"><span class="section-dot"></span> Education</div>
+      ${d.education.map(e => `
+        <div class="data-item">
+          <div class="data-item-title">🎓 ${e.degree}</div>
+          <div class="data-item-sub">${e.school} · ${e.gradYear}</div>
+          ${e.gpa ? `<div class="data-item-sub">GPA: ${e.gpa}</div>` : ''}
+        </div>
+      `).join('')}
+    </div>
+
+    <!-- Skills -->
+    <div class="data-section">
+      <div class="data-section-title"><span class="section-dot"></span> Technical Skills (as string → converted to array)</div>
+      <div>${d.technicalSkills.split(',').map(s => `<span class="tag-chip">${s.trim()}</span>`).join('')}</div>
+    </div>
+
+    <!-- Soft Skills -->
+    <div class="data-section">
+      <div class="data-section-title"><span class="section-dot"></span> Soft Skills</div>
+      <div>${d.softSkills.split(',').map(s => `<span class="tag-chip" style="background:rgba(167,139,250,0.12);color:#a78bfa">${s.trim()}</span>`).join('')}</div>
+    </div>
+
+    <!-- Languages -->
+    <div class="data-section">
+      <div class="data-section-title"><span class="section-dot"></span> Languages</div>
+      <div>${d.languages.split(',').map(s => `<span class="tag-chip" style="background:rgba(251,146,60,0.12);color:#fb923c">${s.trim()}</span>`).join('')}</div>
+    </div>
+
+    <!-- Certifications -->
+    <div class="data-section">
+      <div class="data-section-title"><span class="section-dot"></span> Certifications (as string → converted to array)</div>
+      ${d.certifications.split(',').map(c => `
+        <div class="field-row">
+          <span style="color:var(--green);font-size:10px">✓</span>
+          <span class="field-val" style="font-family:var(--mono);font-size:10px">${c.trim()}</span>
+        </div>
+      `).join('')}
+    </div>
+
+    <!-- Achievements -->
+    <div class="data-section">
+      <div class="data-section-title"><span class="section-dot"></span> Achievements</div>
+      ${d.achievements.split('\n').map(a => `
+        <div class="field-row">
+          <span style="color:var(--yellow);font-size:10px">★</span>
+          <span class="field-val" style="font-family:var(--mono);font-size:10px">${a.trim()}</span>
+        </div>
+      `).join('')}
+    </div>
+
+    <!-- Projects -->
+    <div class="data-section">
+      <div class="data-section-title"><span class="section-dot"></span> Projects (${d.projects.length} items)</div>
+      ${d.projects.map(p => `
+        <div class="data-item">
+          <div class="data-item-title">🚀 ${p.name}</div>
+          <div class="data-item-sub">${p.tech}</div>
+          <div class="data-item-desc">${p.description}</div>
+          ${p.link ? `<div class="data-item-sub" style="color:var(--blue);margin-top:3px">🔗 ${p.link}</div>` : ''}
+        </div>
+      `).join('')}
+    </div>
+
+    <!-- Hobbies -->
+    <div class="data-section">
+      <div class="data-section-title"><span class="section-dot"></span> Hobbies</div>
+      <div class="field-val str-val" style="font-size:10px;font-family:var(--mono)">${d.hobbies}</div>
+    </div>
+  `;
+}
+
+function fieldRow(key, val, hint = '') {
+  const hasVal = val && val.trim && val.trim().length > 0;
+  return `
+    <div class="field-row">
+      <span class="field-key">${key}:</span>
+      <span class="field-val ${hasVal ? 'str-val' : 'empty'}" title="${hint || ''}">${hasVal ? val : '(empty)'}</span>
+    </div>`;
+}
+
+// ── Toggle collapse ───────────────────────────────────────────────────────────
+function toggleBlock(id) {
+  const body = document.getElementById(`body-${id}`);
+  const icon = document.getElementById(`toggle-${id}`);
+  body.classList.toggle('collapsed');
+  icon.classList.toggle('open');
+}
+
+function expandAll() {
+  TEMPLATES.forEach(t => {
+    document.getElementById(`body-${t.id}`).classList.remove('collapsed');
+    document.getElementById(`toggle-${t.id}`).classList.add('open');
+  });
+}
+
+function collapseAll() {
+  TEMPLATES.forEach(t => {
+    document.getElementById(`body-${t.id}`).classList.add('collapsed');
+    document.getElementById(`toggle-${t.id}`).classList.remove('open');
+  });
+}
+
+// ── Test a single template ────────────────────────────────────────────────────
+async function retestOne(id, name) {
+  await testOne(id, name, false);
+}
+
+async function testOne(id, name, batch = true) {
+  const block = document.getElementById(`block-${id}`);
+  const badge = document.getElementById(`badge-${id}`);
+  const preview = document.getElementById(`pdfPreview-${id}`);
+  const actions = document.getElementById(`pdfActions-${id}`);
+  const docxPreview = document.getElementById(`docxPreview-${id}`);
+  const docxActions = document.getElementById(`docxActions-${id}`);
+
+  block.className = 'tmpl-block loading';
+  badge.className = 'status-badge badge-loading';
+  badge.innerHTML = `<div class="spinner" style="width:10px;height:10px;border-width:2px"></div> Testing...`;
+
+  // Show spinner in preview
+  preview.innerHTML = `
+    <div class="pdf-placeholder">
+      <div class="spinner"></div>
+      <div class="placeholder-label" style="color:var(--yellow)">Generating PDF for "${name}"...</div>
+    </div>`;
+
+  docxPreview.innerHTML = `
+    <div class="pdf-placeholder">
+      <div class="spinner"></div>
+      <div class="placeholder-label" style="color:var(--yellow)">Generating DOCX for "${name}"...</div>
+    </div>`;
+
+  // Expand block to show progress
+  document.getElementById(`body-${id}`).classList.remove('collapsed');
+  document.getElementById(`toggle-${id}`).classList.add('open');
+
+  let data;
+  try {
+    const jsonStr = document.getElementById(`json-${id}`).value;
+    data = JSON.parse(jsonStr);
+    data.template = id;
+    INPUT_DATA = data; // update global
+  } catch (err) {
+    block.className = 'tmpl-block fail';
+    badge.className = 'status-badge badge-fail';
+    badge.innerHTML = `<i class="fas fa-times-circle"></i> JSON ERROR`;
+
+    preview.innerHTML = `
+      <div class="pdf-placeholder" style="background:rgba(239,68,68,0.04)">
+        <div class="placeholder-icon" style="color:var(--red);font-size:36px"><i class="fas fa-exclamation-triangle"></i></div>
+        <div class="placeholder-label" style="color:var(--red);text-align:center;max-width:320px;line-height:1.6;font-size:12px">
+          <strong>JSON Parse Error:</strong><br>${err.message}
+        </div>
+      </div>`;
+
+    docxPreview.innerHTML = `
+      <div class="pdf-placeholder" style="background:rgba(239,68,68,0.04)">
+        <div class="placeholder-icon" style="color:var(--red);font-size:36px"><i class="fas fa-exclamation-triangle"></i></div>
+        <div class="placeholder-label" style="color:var(--red);text-align:center;max-width:320px;line-height:1.6;font-size:12px">
+          <strong>JSON Parse Error:</strong><br>${err.message}
+        </div>
+      </div>`;
+
+    if (!batch) { failCount++; updateCounters(); }
+    return 'fail';
+  }
+
+  const start = Date.now();
+
+  try {
+    const resp = await fetch(`${BACKEND_URL}/download-resume`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+
+    const elapsed = Date.now() - start;
+
+    if (!resp.ok) {
+      const txt = await resp.text().catch(() => resp.statusText);
+      throw new Error(`HTTP ${resp.status} — ${txt.slice(0, 200)}`);
+    }
+
+    const ct = resp.headers.get('content-type') || '';
+    if (!ct.includes('pdf')) {
+      const txt = await resp.text();
+      throw new Error(`Server returned non-PDF: ${txt.slice(0, 150)}`);
+    }
+
+    const blob = await resp.blob();
+    if (blob.size < 300) throw new Error(`PDF too small (${blob.size} bytes) — server likely returned an error body`);
+
+    // Fetch DOCX HTML
+    let docxHtml = '';
+    try {
+      const docxResp = await fetch(`${BACKEND_URL}/preview-docx-html`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      if (docxResp.ok) {
+        docxHtml = await docxResp.text();
+      } else {
+        docxHtml = '<div style="padding: 20px; color: red;">Failed to load DOCX preview.</div>';
+      }
+    } catch (e) {
+      docxHtml = '<div style="padding: 20px; color: red;">Error loading DOCX preview.</div>';
+    }
+
+    // Revoke old blob URL if exists
+    if (blobUrls[id]) URL.revokeObjectURL(blobUrls[id]);
+    blobUrls[id] = URL.createObjectURL(blob);
+
+    // Create a blob URL for DOCX HTML so it can be iframed nicely
+    if (blobUrls[id + '_docx']) URL.revokeObjectURL(blobUrls[id + '_docx']);
+    const docxBlob = new Blob([docxHtml], { type: 'text/html' });
+    blobUrls[id + '_docx'] = URL.createObjectURL(docxBlob);
+
+    // Create a blob URL for actual DOCX download
+    if (blobUrls[id + '_download_docx']) URL.revokeObjectURL(blobUrls[id + '_download_docx']);
+    const docxDownloadBlob = new Blob([docxHtml], { type: 'application/msword' });
+    blobUrls[id + '_download_docx'] = URL.createObjectURL(docxDownloadBlob);
+
+    // ✅ SUCCESS
+    block.className = 'tmpl-block pass';
+    badge.className = 'status-badge badge-pass';
+    badge.innerHTML = `<i class="fas fa-check-circle"></i> PASS &nbsp;<small style="font-weight:400;opacity:0.7">${Math.round(blob.size/1024)}KB · ${elapsed}ms</small>`;
+
+    preview.innerHTML = `<iframe src="${blobUrls[id]}" title="${name} PDF"></iframe>`;
+    docxPreview.innerHTML = `<iframe src="${blobUrls[id + '_docx']}" title="${name} DOCX"></iframe>`;
+
+    actions.innerHTML = `
+      <a class="pdf-action-btn" href="${blobUrls[id]}" download="${id}_resume.pdf">
+        <i class="fas fa-download"></i> Download PDF
+      </a>
+      <a class="pdf-action-btn" href="${blobUrls[id]}" target="_blank">
+        <i class="fas fa-external-link-alt"></i> Full screen
+      </a>`;
+
+    docxActions.innerHTML = `
+      <a class="pdf-action-btn" href="${blobUrls[id + '_download_docx']}" download="${id}_resume.doc">
+        <i class="fas fa-download"></i> Download DOCX
+      </a>`;
+
+    if (!batch) { passCount++; updateCounters(); }
+    return 'pass';
+
+  } catch (err) {
+    const elapsed = Date.now() - start;
+    block.className = 'tmpl-block fail';
+    badge.className = 'status-badge badge-fail';
+    badge.innerHTML = `<i class="fas fa-times-circle"></i> FAIL`;
+
+    preview.innerHTML = `
+      <div class="pdf-placeholder" style="background:rgba(239,68,68,0.04)">
+        <div class="placeholder-icon" style="color:var(--red);font-size:36px"><i class="fas fa-exclamation-triangle"></i></div>
+        <div class="placeholder-label" style="color:var(--red);text-align:center;max-width:320px;line-height:1.6;font-size:12px">
+          <strong>Error after ${elapsed}ms:</strong><br>${err.message}
+        </div>
+        <button class="btn btn-outline" style="margin-top:12px;font-size:12px" onclick="retestOne('${id}','${name}')">
+          <i class="fas fa-redo"></i> Retry
+        </button>
+      </div>`;
+
+    docxPreview.innerHTML = `
+      <div class="pdf-placeholder" style="background:rgba(239,68,68,0.04)">
+        <div class="placeholder-icon" style="color:var(--red);font-size:36px"><i class="fas fa-exclamation-triangle"></i></div>
+        <div class="placeholder-label" style="color:var(--red);text-align:center;max-width:320px;line-height:1.6;font-size:12px">
+          <strong>Error generating preview</strong>
+        </div>
+      </div>`;
+
+    if (!batch) { failCount++; updateCounters(); }
+    return 'fail';
+  }
+}
+
+// ── Run all ───────────────────────────────────────────────────────────────────
+async function runAll() {
+  const btn = document.getElementById('runBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Testing all...';
+
+  passCount = 0; failCount = 0; pendingCount = 22;
+  updateCounters();
+
+  for (let i = 0; i < TEMPLATES.length; i++) {
+    const t = TEMPLATES[i];
+    const result = await testOne(t.id, t.name, true);
+    if (result === 'pass') passCount++;
+    else failCount++;
+    pendingCount = 22 - passCount - failCount;
+    updateCounters();
+    document.getElementById('progressBar').style.width = `${Math.round((passCount + failCount) / 22 * 100)}%`;
+    await new Promise(r => setTimeout(r, 100));
+  }
+
+  document.getElementById('progressBar').style.width = '100%';
+  btn.disabled = false;
+  btn.innerHTML = failCount === 0
+    ? '<i class="fas fa-check-circle"></i> All 22 Passed! Run Again'
+    : `<i class="fas fa-redo"></i> Run Again (${failCount} failed)`;
+}
+
+function updateCounters() {
+  document.getElementById('cPass').textContent = passCount;
+  document.getElementById('cFail').textContent = failCount;
+  document.getElementById('cPend').textContent = pendingCount;
+}
+
+function syncJsonToAll(currentId) {
+  const textarea = document.getElementById(`json-${currentId}`);
+  if (!textarea) return;
+
+  try {
+    const val = JSON.parse(textarea.value);
+    INPUT_DATA = val; // update global
+    
+    // Copy to all other textareas
+    TEMPLATES.forEach(tmpl => {
+      const otherTextarea = document.getElementById(`json-${tmpl.id}`);
+      if (otherTextarea && tmpl.id !== currentId) {
+        otherTextarea.value = JSON.stringify(val, null, 2);
+      }
+    });
+    
+    alert('✅ JSON synced successfully to all templates! You can now click "Test All" or test templates individually to view the custom data rendering.');
+  } catch (err) {
+    alert('❌ Invalid JSON format: ' + err.message);
+  }
+}
+
+// ── Initialize ────────────────────────────────────────────────────────────────
+buildAll();
+</script>
 </body>
 </html>
