@@ -1,240 +1,343 @@
+const esc = (s = '') => String(s || '')
+  .replace(/&/g, '&amp;')
+  .replace(/</g, '&lt;')
+  .replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;')
+  .replace(/'/g, '&#039;');
+
 export function generateRishiTemplate(data) {
   const {
     personalInfo = {},
-    experience = [],
     education = [],
-    skills = [],
+    experience = [],
     projects = [],
-    certifications = [],
     achievements = [],
-    summary = '',
-    technicalSkills = '',
-    hobbies = []
+    extracurricular = [],
+    traits = [],
+    careerObjective = '',
+    modelingSkills = '',
+    softwareSkills = ''
   } = data;
-  
-  // Extract personal info
-  const name = personalInfo?.fullName || personalInfo?.name || 'Your Name';
-  const email = personalInfo?.email || 'email@example.com';
-  const phone = personalInfo?.phone || '+00 0000000000';
-  const address = personalInfo?.address || personalInfo?.location || 'Your Address';
-  
-  // Process skills - combine technical and general skills
-  let technicalStrengthsList = [];
-  if (Array.isArray(skills) && skills.length > 0) {
-    technicalStrengthsList = skills;
+
+  const PRIMARY   = '#0f4c81'; // Royal Blue Accent
+  const BLACK     = '#000000'; // Black for headers and labels
+  const TEXT_DARK = '#111827'; // Off-black for main text
+  const ACCENT    = '#d97706'; // Orange accent for tips and guidelines
+  const WHITE     = '#FFFFFF';
+
+  const name = personalInfo?.fullName || personalInfo?.name || 'Jason Bourne';
+  const roleTitle = personalInfo?.roleTitle || 'Recruiter';
+
+  const phoneVal    = personalInfo?.phone || '+91 9123456780';
+  const emailVal    = personalInfo?.email || 'jason.bourne@email.com';
+  const linkedinVal = personalInfo?.linkedin || 'linkedin.com/jason-bourne';
+  const githubVal   = personalInfo?.github || 'github.com/jason-bourne';
+  const websiteVal  = personalInfo?.website || 'Jason-bourne.netlify.com';
+  const addressVal  = personalInfo?.address || personalInfo?.location || 'New York, US';
+
+  const summary = careerObjective || data.summary || '';
+  const isDefaultSummary = !summary || summary.toLowerCase().includes('results-driven professional') || summary.toLowerCase().includes('aiml undergraduate');
+  const summaryHTML = `
+    <table cellpadding="0" cellspacing="0" border="0" style="width:100%; border-collapse:collapse; margin-top:10pt; margin-bottom:5pt;">
+      <tr>
+        <td style="font-family:Arial,sans-serif; font-size:12pt; font-weight:bold; color:${PRIMARY}; text-transform:uppercase; padding-bottom:2pt;">
+          SUMMARY
+        </td>
+      </tr>
+      <tr>
+        <td bgcolor="${PRIMARY}" style="background-color:${PRIMARY}; height:1.5pt; line-height:1px; font-size:1px;">&nbsp;</td>
+      </tr>
+    </table>
+    <div style="font-family:Arial,sans-serif; font-size:9.5pt; line-height:1.4; text-align:justify; margin-top:4pt; margin-bottom:8pt;">
+      ${isDefaultSummary 
+        ? `<span style="color:${ACCENT}; font-weight:bold;">Add Years of Experience, Primary Skill Sets and Stream you are looking for Job into and other relevant Information, 2-3 points</span>`
+        : `<span style="color:${TEXT_DARK};">${esc(summary)}</span>`
+      }
+    </div>
+  `;
+
+  // Skills
+  const techSkillsList = modelingSkills || (Array.isArray(data.skills) ? data.skills.join(', ') : data.skills) || 'Recruitment Software Proficiency, Online Search and Sourcing, Job Posting and Advertisement, Screening and Filtering';
+  const softSkillsList = softwareSkills || (Array.isArray(traits) ? traits.join(', ') : traits) || 'Strategic Hiring Planning, Talent Pipelining and Forecasting, Employee Relations and Management, Compliance and Regulatory Affairs, Client, and Stakeholder Management';
+
+  const skillsetHTML = `
+    <table cellpadding="0" cellspacing="0" border="0" style="width:100%; border-collapse:collapse; margin-top:10pt; margin-bottom:5pt;">
+      <tr>
+        <td style="font-family:Arial,sans-serif; font-size:12pt; font-weight:bold; color:${PRIMARY}; text-transform:uppercase; padding-bottom:2pt;">
+          SKILLSET
+        </td>
+      </tr>
+      <tr>
+        <td bgcolor="${PRIMARY}" style="background-color:${PRIMARY}; height:1.5pt; line-height:1px; font-size:1px;">&nbsp;</td>
+      </tr>
+    </table>
+    <div style="font-family:Arial,sans-serif; font-size:9.5pt; line-height:1.4; margin-top:4pt; margin-bottom:8pt; color:${TEXT_DARK};">
+      <div style="margin-bottom:3pt;"><strong>Technical Skills:</strong> ${esc(techSkillsList)}</div>
+      <div><strong>Business Skills:</strong> ${esc(softSkillsList)}</div>
+    </div>
+  `;
+
+  function formatBulletText(txt) {
+    if (!txt) return '';
+    let formatted = esc(String(txt).replace(/^[•\-\*]\s*/, '').trim());
+    formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    return formatted;
   }
-  if (technicalSkills && typeof technicalSkills === 'string') {
-    const techSkillsArray = technicalSkills.split(/[\n,]/).map(s => s.trim()).filter(s => s);
-    technicalStrengthsList = [...technicalStrengthsList, ...techSkillsArray];
+
+  // Experience
+  let expList = experience;
+  if (!expList || expList.length === 0) {
+    expList = [
+      {
+        jobTitle: 'Senior Recruiter',
+        company: 'Jobbie',
+        startDate: 'June 2015',
+        endDate: 'Aug 2024',
+        location: 'Mumbai, India',
+        description: 'Conducted market research to identify **potential sales partners** for the company through cold calling and other means.'
+      },
+      {
+        jobTitle: 'Junior Recruiter',
+        company: 'ApnaBot',
+        startDate: 'May 2010',
+        endDate: 'Aug 2013',
+        location: 'Goa, India',
+        description: 'Conducted market research to identify **potential sales partners** for the company through cold calling and other means.\nDelivered presentations to showcase the company\'s **products and services**, effectively communicating **value propositions** and **unique selling points**.'
+      }
+    ];
   }
-  if (technicalStrengthsList.length === 0) {
-    technicalStrengthsList = ['AutoCAD', 'Revit', 'StaadPro', 'MS Office'];
+
+  const expHTML = `
+    <table cellpadding="0" cellspacing="0" border="0" style="width:100%; border-collapse:collapse; margin-top:10pt; margin-bottom:5pt;">
+      <tr>
+        <td style="font-family:Arial,sans-serif; font-size:12pt; font-weight:bold; color:${PRIMARY}; text-transform:uppercase; padding-bottom:2pt;">
+          WORK EXPERIENCE
+        </td>
+      </tr>
+      <tr>
+        <td bgcolor="${PRIMARY}" style="background-color:${PRIMARY}; height:1.5pt; line-height:1px; font-size:1px;">&nbsp;</td>
+      </tr>
+    </table>
+    ${expList.map((exp, index) => {
+      const desc = exp.description || (Array.isArray(exp.points) ? exp.points.join('\n') : '');
+      const bulletPoints = desc ? desc.split('\n').filter(Boolean) : [];
+      
+      let orangeGuide = '';
+      if (index === 0) {
+        orangeGuide = `<li style="color:${ACCENT}; font-style:italic; margin-bottom:3pt;">[Add up to 5-8 points, emphasize[bold] on phrases and skills, write points starting with a verb, of max 10-15 words]</li>`;
+      } else if (index === 1) {
+        orangeGuide = `<li style="color:${ACCENT}; font-style:italic; margin-bottom:3pt;">[Add relevant 4-6 point for a prior role, write points starting with a verb, of max 10-15 words]</li>`;
+      }
+
+      return `
+      <div style="margin-bottom:8pt;">
+        <table cellpadding="0" cellspacing="0" border="0" style="width:100%; border-collapse:collapse;">
+          <tr>
+            <td style="font-family:Arial,sans-serif; font-size:10.5pt; font-weight:bold; color:${BLACK};">${esc(exp.company)}</td>
+            <td style="font-family:Arial,sans-serif; font-size:9.5pt; color:${BLACK}; text-align:right; white-space:nowrap;">${esc([exp.startDate || exp.date, exp.endDate || 'Present'].filter(Boolean).join(' – '))}</td>
+          </tr>
+          <tr>
+            <td style="font-family:Arial,sans-serif; font-size:9.5pt; font-weight:bold; font-style:italic; color:${BLACK}; padding-top:1pt;">${esc(exp.jobTitle || exp.role)}</td>
+            <td style="font-family:Arial,sans-serif; font-size:9.5pt; font-style:italic; color:${BLACK}; text-align:right; padding-top:1pt;">${esc(exp.location || '')}</td>
+          </tr>
+        </table>
+        <ul style="margin:4pt 0 0 14pt; padding:0; font-family:Arial,sans-serif; font-size:9.5pt; color:${TEXT_DARK}; line-height:1.35;">
+          ${orangeGuide}
+          ${bulletPoints.map(bullet => `<li style="margin-bottom:3pt;">${formatBulletText(bullet)}</li>`).join('')}
+        </ul>
+      </div>`;
+    }).join('')}
+  `;
+
+  // Projects
+  let projList = projects;
+  if (!projList || projList.length === 0) {
+    projList = [
+      {
+        title: 'Market Analysis',
+        duration: 'Jan 2009 – March 2009',
+        description: 'Developed detailed **SWOT analysis** to assess the strengths, weaknesses, opportunities, and threats in the market, providing insights for strategic decision-making.\nConducted market research to develop a **detailed SWOT analysis**, assessing **market strengths, weaknesses, opportunities, and threats** for strategic decision-making.'
+      }
+    ];
   }
-  
-  // Process education
-  const educationList = Array.isArray(education) && education.length > 0
-    ? education.map(edu => ({
-        degree: edu.degree || '',
-        institution: edu.school || '',
-        startDate: edu.startDate || '',
-        endDate: edu.gradYear || edu.endDate || '',
-        details: edu.gpa || ''
-      }))
-    : [{
-        degree: 'Master of Technology - Structural Engineering',
-        institution: 'Your University',
-        startDate: '2018',
-        endDate: 'Present',
-        details: ''
-      }];
-  
-  // Process career objective/summary
-  const careerObjective = summary || 'To work for an organization which provides me the opportunity to improve my skills and knowledge to grow along with the organization\'s objectives.';
-  
-  // Process projects
-  const projectsList = Array.isArray(projects) && projects.length > 0
-    ? projects.map(proj => ({
-        name: proj.name || proj.title || '',
-        points: (proj.description || '').split('\n').filter(p => p.trim()).map(p => p.replace(/^[•\-]\s*/, ''))
-      }))
-    : [{
-        name: 'Sample Project',
-        points: ['Project description point 1', 'Project description point 2']
-      }];
-  
-  // Process experience
-  const experienceList = Array.isArray(experience) && experience.length > 0
-    ? experience.map(exp => ({
-        role: exp.jobTitle || exp.title || '',
-        company: exp.company || '',
-        date: `${exp.startDate || ''} - ${exp.endDate || ''}`,
-        points: (exp.description || '').split('\n').filter(p => p.trim()).map(p => p.replace(/^[•\-]\s*/, ''))
-      }))
-    : [{
-        role: 'Site Engineer (Intern)',
-        company: 'Company Name',
-        date: 'June 2016 - June 2016',
-        points: ['Work experience point 1', 'Work experience point 2']
-      }];
-  
-  // Process achievements
-  const achievementsList = Array.isArray(achievements) && achievements.length > 0
-    ? (typeof achievements[0] === 'string' ? achievements : achievements.map(a => a.description || a))
-    : ['Academic achievement 1', 'Academic achievement 2'];
-  
-  // Process hobbies/extracurricular
-  const extracurricularList = Array.isArray(hobbies) && hobbies.length > 0
-    ? (typeof hobbies[0] === 'string' ? hobbies : hobbies.map(h => h.description || h))
-    : ['Reading', 'Sports'];
-  
-  // Personal traits
-  const traitsList = ['Quick learner', 'Team player', 'Problem solver'];
+
+  const projectsHTML = `
+    <table cellpadding="0" cellspacing="0" border="0" style="width:100%; border-collapse:collapse; margin-top:10pt; margin-bottom:5pt;">
+      <tr>
+        <td style="font-family:Arial,sans-serif; font-size:12pt; font-weight:bold; color:${PRIMARY}; text-transform:uppercase; padding-bottom:2pt;">
+          PROJECT EXPERIENCE
+        </td>
+      </tr>
+      <tr>
+        <td bgcolor="${PRIMARY}" style="background-color:${PRIMARY}; height:1.5pt; line-height:1px; font-size:1px;">&nbsp;</td>
+      </tr>
+    </table>
+    ${projList.map((proj, index) => {
+      const bulletPoints = proj.description ? proj.description.split('\n').filter(Boolean) : [];
+      let orangeGuide = index === 0 ? `<li style="color:${ACCENT}; font-style:italic; margin-bottom:3pt;">[Add up to 3 points in the project section]</li>` : '';
+
+      return `
+      <div style="margin-bottom:8pt;">
+        <table cellpadding="0" cellspacing="0" border="0" style="width:100%; border-collapse:collapse;">
+          <tr>
+            <td style="font-family:Arial,sans-serif; font-size:10.5pt; font-weight:bold; color:${BLACK};">${esc(proj.title || proj.name)}</td>
+            <td style="font-family:Arial,sans-serif; font-size:9.5pt; color:${BLACK}; text-align:right; white-space:nowrap;">${esc(proj.duration || proj.date || '')}</td>
+          </tr>
+        </table>
+        <ul style="margin:4pt 0 0 14pt; padding:0; font-family:Arial,sans-serif; font-size:9.5pt; color:${TEXT_DARK}; line-height:1.35;">
+          ${orangeGuide}
+          ${bulletPoints.map(bullet => `<li style="margin-bottom:3pt;">${formatBulletText(bullet)}</li>`).join('')}
+        </ul>
+      </div>`;
+    }).join('')}
+  `;
+
+  // Certifications / Achievements
+  const certItems = achievements?.length ? achievements.map(a => typeof a === 'string' ? a : a.text) : ['Six Sigma Certification from XXXXXXX'];
+  const certHTML = `
+    <table cellpadding="0" cellspacing="0" border="0" style="width:100%; border-collapse:collapse; margin-top:10pt; margin-bottom:5pt;">
+      <tr>
+        <td style="font-family:Arial,sans-serif; font-size:12pt; font-weight:bold; color:${PRIMARY}; text-transform:uppercase; padding-bottom:2pt;">
+          CERTIFICATION
+        </td>
+      </tr>
+      <tr>
+        <td bgcolor="${PRIMARY}" style="background-color:${PRIMARY}; height:1.5pt; line-height:1px; font-size:1px;">&nbsp;</td>
+      </tr>
+    </table>
+    <div style="font-family:Arial,sans-serif; font-size:9.5pt; font-style:italic; line-height:1.4; color:${TEXT_DARK}; margin-top:4pt; margin-bottom:8pt;">
+      ${certItems.map(c => esc(c)).join('<br>')}
+    </div>
+  `;
+
+  // Education
+  let eduList = education;
+  if (!eduList || eduList.length === 0) {
+    eduList = [
+      {
+        degree: 'Business Administration',
+        school: 'NYU',
+        gradYear: '2007 – 2010',
+        gpa: 'Cumulative GPA: 3.75/4.00'
+      }
+    ];
+  }
+
+  const educationHTML = `
+    <table cellpadding="0" cellspacing="0" border="0" style="width:100%; border-collapse:collapse; margin-top:10pt; margin-bottom:5pt;">
+      <tr>
+        <td style="font-family:Arial,sans-serif; font-size:12pt; font-weight:bold; color:${PRIMARY}; text-transform:uppercase; padding-bottom:2pt;">
+          EDUCATION
+        </td>
+      </tr>
+      <tr>
+        <td bgcolor="${PRIMARY}" style="background-color:${PRIMARY}; height:1.5pt; line-height:1px; font-size:1px;">&nbsp;</td>
+      </tr>
+    </table>
+    ${eduList.map(edu => `
+      <div style="margin-bottom:6pt;">
+        <table cellpadding="0" cellspacing="0" border="0" style="width:100%; border-collapse:collapse;">
+          <tr>
+            <td style="font-family:Arial,sans-serif; font-size:10.5pt; font-weight:bold; color:${BLACK};">${esc(edu.degree)}</td>
+            <td style="font-family:Arial,sans-serif; font-size:9.5pt; color:${BLACK}; text-align:right; white-space:nowrap;">${esc(edu.gradYear || edu.dates || '')}</td>
+          </tr>
+          <tr>
+            <td colspan="2" style="font-family:Arial,sans-serif; font-size:9.5pt; font-style:italic; color:${TEXT_DARK}; padding-top:1pt;">
+              ${esc(edu.school || edu.institute)}${edu.gpa || edu.details ? `, ${esc(edu.gpa || edu.details)}` : ''}
+            </td>
+          </tr>
+        </table>
+      </div>`).join('')}
+  `;
 
   return `
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>${name}</title>
-<style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${esc(name)} - Resume</title>
+  <style>
+    @page { size: A4; margin: 15mm 15mm; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-        font-family: 'Inter', sans-serif;
-        font-size: 12pt;
-        line-height: 1.5;
-        color: #000;
-        margin: 40px;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #ffffff;
+      color: ${TEXT_DARK};
     }
-
-    h1 {
-        font-size: 22pt;
-        font-weight: 700;
-        text-transform: uppercase;
-        margin-bottom: 5px;
+    .page {
+      width: 210mm;
+      min-height: 297mm;
+      margin: 0 auto;
+      padding: 15mm 15mm;
+      background: ${WHITE};
     }
-
-    h2 {
-        font-size: 13pt;
-        font-weight: 700;
-        text-transform: uppercase;
-        border-bottom: 1px solid #000;
-        padding-bottom: 4px;
-        margin-top: 22px;
-        margin-bottom: 12px;
+    a {
+      color: ${PRIMARY};
+      text-decoration: underline;
     }
-
-    .section {
-        margin-bottom: 15px;
-    }
-
-    ul {
-        margin-left: 20px;
-        margin-top: 4px;
-    }
-
-    li {
-        margin-bottom: 4px;
-    }
-
-    .subheading {
-        font-weight: 600;
-        font-size: 11.5pt;
-        margin-bottom: 2px;
-    }
-
-    .date {
-        font-style: italic;
-        font-size: 11pt;
-        margin-bottom: 6px;
-    }
-
-    .small {
-        font-size: 11pt;
-    }
-</style>
+  </style>
 </head>
 <body>
+<div class="page">
 
-<h1>${name}</h1>
-<div class="small">${address}</div>
-<div class="small">${phone} | ${email}</div>
+  <!-- HEADER -->
+  <table cellpadding="0" cellspacing="0" border="0" style="width:100%; border-collapse:collapse; margin-bottom:15pt;">
+    <tr>
+      <!-- Left side: Name & Subtitle -->
+      <td style="vertical-align:top; width:60%;">
+        <div style="font-family:Arial,Helvetica,sans-serif; font-size:26pt; font-weight:bold; color:${PRIMARY}; letter-spacing:-0.5px; line-height:1.1;">${esc(name)}</div>
+        <div style="font-family:Arial,sans-serif; font-size:12pt; font-weight:bold; color:${BLACK}; margin-top:4pt;">${esc(roleTitle)}</div>
+      </td>
+      <!-- Right side: Contact Block -->
+      <td style="vertical-align:top; width:40%; padding-left:15pt;">
+        <table cellpadding="0" cellspacing="0" border="0" style="width:100%; border-collapse:collapse; font-family:Arial,sans-serif; font-size:9.5pt; color:${TEXT_DARK}; line-height:1.35;">
+          <tr>
+            <td style="font-weight:bold; width:70px; padding-bottom:2px; color:${BLACK};">Contact:</td>
+            <td style="padding-bottom:2px; text-align:right;">${esc(phoneVal)}</td>
+          </tr>
+          <tr>
+            <td style="font-weight:bold; padding-bottom:2px; color:${BLACK};">Email:</td>
+            <td style="padding-bottom:2px; text-align:right;"><a href="mailto:${esc(emailVal)}">${esc(emailVal)}</a></td>
+          </tr>
+          ${linkedinVal ? `<tr>
+            <td style="font-weight:bold; padding-bottom:2px; color:${BLACK};">LinkedIn:</td>
+            <td style="padding-bottom:2px; text-align:right;"><a href="https://${esc(linkedinVal.replace(/https?:\/\//, ''))}" target="_blank">${esc(linkedinVal)}</a></td>
+          </tr>` : ''}
+          ${githubVal ? `<tr>
+            <td style="font-weight:bold; padding-bottom:2px; color:${BLACK};">GitHub:</td>
+            <td style="padding-bottom:2px; text-align:right;"><a href="https://${esc(githubVal.replace(/https?:\/\//, ''))}" target="_blank">${esc(githubVal)}</a></td>
+          </tr>` : ''}
+          ${websiteVal ? `<tr>
+            <td style="font-weight:bold; padding-bottom:2px; color:${BLACK};">Portfolio:</td>
+            <td style="padding-bottom:2px; text-align:right;"><a href="https://${esc(websiteVal.replace(/https?:\/\//, ''))}" target="_blank">${esc(websiteVal)}</a></td>
+          </tr>` : ''}
+          <tr>
+            <td style="font-weight:bold; padding-bottom:2px; color:${BLACK};">Location:</td>
+            <td style="padding-bottom:2px; text-align:right;">${esc(addressVal)}</td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
 
-<!-- EDUCATION -->
-<h2>EDUCATION</h2>
-<div class="section">
-    ${educationList.map(edu => `
-        <div class="subheading">${edu.degree}</div>
-        <div class="small">${edu.institution}</div>
-        <div class="date">${edu.startDate} - ${edu.endDate}</div>
-        ${edu.details ? `<div class="small">${edu.details}</div>` : ''}
-        <br>
-    `).join('')}
+  <!-- BODY CONTENT -->
+  ${summaryHTML}
+  ${skillsetHTML}
+  ${expHTML}
+  ${projectsHTML}
+  ${certHTML}
+  ${educationHTML}
+
+  <!-- FOOTER -->
+  <div style="text-align:center; margin-top:35pt; font-family:Arial,sans-serif; font-size:9pt; line-height:1.6; border-top:0.5pt solid #eeeeee; padding-top:10pt;">
+    <div style="color:${ACCENT}; font-style:italic; margin-bottom:5pt;">(Try adding Achievements if you have any)</div>
+    <div style="font-weight:bold; font-size:11.5pt; margin-bottom:4pt;">Score Your Resume at <a href="http://jobbie.io" style="color:${PRIMARY}; text-decoration:underline;">Jobbie</a></div>
+    <div style="font-size:10.5pt; margin-bottom:4pt;">Need our support to make a perfect one check the follow link <a href="http://jobbie.io/mentorship" style="color:${PRIMARY}; text-decoration:underline;">Jobbie.io/mentorship</a></div>
+    <div style="font-size:10.5pt;">Please kindly give us a review of the template here: <a href="http://jobbie.io/review" style="color:${PRIMARY}; text-decoration:underline;">Review</a> (Won't take more than 30 seconds)</div>
+  </div>
+
 </div>
-
-<!-- CAREER OBJECTIVE -->
-<h2>CAREER OBJECTIVE</h2>
-<div class="section">
-    <div class="small">${careerObjective}</div>
-</div>
-
-<!-- PROJECTS -->
-<h2>PROJECTS</h2>
-<div class="section">
-    ${projectsList.map(project => `
-        <div class="subheading">${project.name}</div>
-        <ul>
-            ${project.points.map(point => `<li>${point}</li>`).join('\n            ')}
-        </ul>
-        <br>
-    `).join('')}
-</div>
-
-<!-- TECHNICAL STRENGTHS -->
-<h2>TECHNICAL STRENGTHS</h2>
-<div class="section">
-    <ul>
-        ${technicalStrengthsList.map(skill => `<li>${skill}</li>`).join('\n        ')}
-    </ul>
-</div>
-
-<!-- WORK EXPERIENCE -->
-<h2>WORK EXPERIENCE</h2>
-<div class="section">
-    ${experienceList.map(exp => `
-        <div class="subheading">${exp.role}</div>
-        <div class="small">${exp.company}</div>
-        <div class="date">${exp.date}</div>
-        <ul>
-            ${exp.points.map(point => `<li>${point}</li>`).join('\n            ')}
-        </ul>
-        <br>
-    `).join('')}
-</div>
-
-<!-- ACHIEVEMENTS -->
-<h2>ACADEMIC ACHIEVEMENTS</h2>
-<div class="section">
-    <ul>
-        ${achievementsList.map(achievement => `<li>${achievement}</li>`).join('\n        ')}
-    </ul>
-</div>
-
-<!-- EXTRA-CURRICULAR -->
-<h2>EXTRA-CURRICULAR</h2>
-<div class="section">
-    <ul>
-        ${extracurricularList.map(activity => `<li>${activity}</li>`).join('\n        ')}
-    </ul>
-</div>
-
-<!-- PERSONAL TRAITS -->
-<h2>PERSONAL TRAITS</h2>
-<div class="section">
-    <ul>
-        ${traitsList.map(trait => `<li>${trait}</li>`).join('\n        ')}
-    </ul>
-</div>
-
 </body>
 </html>
   `;

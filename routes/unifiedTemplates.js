@@ -86,11 +86,11 @@ const TEMPLATE_COLORS = {
         background: '#FFFFFF',
         light: '#5a6c7d'
     },
-    // Rishi: Hiero Pro (Modern Tech Black & Green)
+    // Rishi: Hiero Pro (Modern Royal Blue)
     'rishi': {
-        primary: '#111827',      // Deep Navy/Black
+        primary: '#0f4c81',      // Royal Blue Accent
         secondary: '#4b5563',    // Slate Grey
-        accent: '#2ae023',       // Hiero Green
+        accent: '#0f4c81',       // Royal Blue Accent
         background: '#FFFFFF',
         light: '#f3f4f6'         // Subdued background for pills
     },
