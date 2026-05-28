@@ -8,8 +8,30 @@ const pdfParse = require('pdf-parse');
 const axios = require('axios');
 const Resume = require('../models/Resume');
 const { generateUnifiedResume } = require('./unifiedTemplates');
-
+const { generateWordHTML } = require('./wordTemplates');
 const router = express.Router();
+const crypto = require('crypto');
+
+async function generatePDFKitBuffer(data, templateId) {
+    const tempDir = path.join(__dirname, '..', 'tmp');
+    if (!fs.existsSync(tempDir)) {
+        fs.mkdirSync(tempDir, { recursive: true });
+    }
+    const tempPath = path.join(tempDir, `resume_${crypto.randomUUID()}.pdf`);
+    const stream = fs.createWriteStream(tempPath);
+    
+    // generateUnifiedResume returns a promise that resolves only after the stream's 'finish' event emits.
+    // Hence, no further finish waiting is needed afterwards.
+    await generateUnifiedResume(data, templateId, stream);
+    
+    const buffer = fs.readFileSync(tempPath);
+    try {
+        fs.unlinkSync(tempPath); // Clean up temp file immediately
+    } catch (e) {
+        console.error('Error deleting temp PDF:', e);
+    }
+    return buffer;
+}
 
 // Multer for uploads
 const upload = multer({ dest: '/tmp' });
@@ -132,7 +154,8 @@ router.post('/preview-resume', async (req, res) => {
         }
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', 'inline; filename=resume-preview.pdf');
-        await generateUnifiedResume(data, data.template || 'classic', res, { forceSinglePage: true });
+        const pdfBuffer = await generatePDFKitBuffer(data, data.template || 'classic');
+        res.send(pdfBuffer);
     } catch (error) {
         console.error('Preview error:', error);
         if (!res.headersSent) res.status(500).send('Generation failed');
@@ -149,20 +172,22 @@ router.post('/download-resume', async (req, res) => {
         const name = (data.personalInfo?.fullName || 'Resume').replace(/\s+/g, '_');
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', `attachment; filename="${name}_Hiero.pdf"`);
-        await generateUnifiedResume(data, data.template || 'classic', res);
+        const pdfBuffer = await generatePDFKitBuffer(data, data.template || 'classic');
+        res.send(pdfBuffer);
     } catch (error) {
         console.error('Download PDF error:', error);
         if (!res.headersSent) res.status(500).json({ error: 'Failed to generate PDF' });
     }
 });
 
-router.post('/download-docx', authenticateToken, async (req, res) => {
+router.post('/download-docx', async (req, res) => {
     try {
         const data = req.body;
         const name = (data.personalInfo?.fullName || 'Resume').replace(/\s+/g, '_');
 
         // Generate Word session content (Word-compatible HTML)
-        const html = generateWordHTML(data);
+        const templateId = data.template || 'classic';
+        const html = generateWordHTML(data, templateId);
 
         res.setHeader('Content-Type', 'application/msword');
         res.setHeader('Content-Disposition', `attachment; filename="${name}_Hiero.doc"`);
@@ -173,121 +198,21 @@ router.post('/download-docx', authenticateToken, async (req, res) => {
     }
 });
 
-// Helper for Word generation (Refined to match the 'Jhon Smith' template)
-function generateWordHTML(data) {
-    const {
-        personalInfo = {},
-        experience = [],
-        education = [],
-        projects = [],
-        softSkills = '',
-        summary = '',
-        achievements = ''
-    } = data;
-
-    // Skills can come as 'skills' or 'technicalSkills'
-    const technicalSkills = data.skills || data.technicalSkills || '';
-
-    // Mapping keys to perfect titles
-    const titles = {
-        summary: 'CARRIER OBJECTIVE',
-        education: 'EDUCATION',
-        projects: 'PROJECTS',
-        technicalSkills: 'TECHNICAL STRENGTHS',
-        experience: 'WORK EXPERIENCE',
-        achievements: 'ACADEMIC ACHIEVEMENTS',
-        softSkills: 'PERSONAL TRAITS'
-    };
-
-    return `
-    <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-    <head><meta charset='utf-8'><title>Resume</title><style>
-        body { font-family: 'Times New Roman', serif; line-height: 1.4; color: #000; margin: 40pt; }
-        .header { text-align: center; margin-bottom: 25pt; }
-        .name { font-size: 20pt; font-weight: bold; margin: 0; text-transform: none; }
-        .contact { font-size: 10pt; color: #333; margin-top: 5pt; }
-        .section-title { font-size: 12pt; font-weight: bold; color: #000; margin-top: 20pt; margin-bottom: 5pt; text-transform: uppercase; letter-spacing: 1px; }
-        .section-line { border-top: 1pt solid #000; margin-bottom: 10pt; }
-        .item-title { font-size: 11pt; font-weight: bold; }
-        .item-meta { font-size: 10pt; color: #444; }
-        .content { font-size: 10pt; margin-bottom: 8pt; text-align: justify; }
-        ul { margin-top: 5pt; padding-left: 20pt; }
-        li { margin-bottom: 4pt; }
-    </style></head>
-    <body>
-        <div class='header'>
-            <div class='name'>${personalInfo.fullName || 'RESUME'}</div>
-            <div class='contact'>${[personalInfo.address, personalInfo.phone, personalInfo.email].filter(Boolean).join('  |  ')}</div>
-        </div>
-        
-        ${summary ? `
-            <div class='section-title'>${titles.summary}</div>
-            <div class='section-line'></div>
-            <div class='content'>${summary}</div>
-        ` : ''}
-        
-        <div class='section-title'>${titles.education}</div>
-        <div class='section-line'></div>
-        ${education.map(edu => `
-            <div style='margin-bottom: 10pt;'>
-                <div class='item-title'>${edu.degree || ''}</div>
-                <div class='item-meta'>${edu.school || ''} ${edu.gradYear ? ` | ${edu.gradYear}` : ''} ${edu.gpa ? ` | GPA: ${edu.gpa}` : ''}</div>
-            </div>
-        `).join('')}
-
-        <div class='section-title'>${titles.projects}</div>
-        <div class='section-line'></div>
-        ${Array.isArray(projects) ? projects.map(proj => `
-            <div style='margin-bottom: 12pt;'>
-                <div class='item-title'>${proj.name || proj.title || ''}</div>
-                <div class='item-meta'>${proj.technologies || ''}</div>
-                <div class='content'>${proj.description || ''}</div>
-                ${proj.achievement ? `<div class='content'><b>Achievement:</b> ${proj.achievement}</div>` : ''}
-            </div>
-        `).join('') : `<div class='content'>${projects}</div>`}
-
-        ${technicalSkills ? `
-            <div class='section-title'>${titles.technicalSkills}</div>
-            <div class='section-line'></div>
-            <div class='content'>${technicalSkills}</div>
-        ` : ''}
-
-        <div class='section-title'>${titles.experience}</div>
-        <div class='section-line'></div>
-        ${experience.map(exp => `
-            <div style='margin-bottom: 15pt;'>
-                <div class='item-title'>${exp.jobTitle || ''}</div>
-                <div class='item-meta'>${exp.company || ''} (${exp.startDate || ''} - ${exp.endDate || 'Present'})</div>
-                <div class='content'>${exp.description ? `<ul>${exp.description.split('\n').filter(l => l.trim()).map(l => `<li>${l.replace(/^[\*-•]\s*/, '')}</li>`).join('')}</ul>` : ''}</div>
-            </div>
-        `).join('')}
-
-        ${achievements ? `
-            <div class='section-title'>${titles.achievements}</div>
-            <div class='section-line'></div>
-            <div class='content'>${achievements}</div>
-        ` : ''}
-
-        ${softSkills ? `
-            <div class='section-title'>${titles.softSkills}</div>
-            <div class='section-line'></div>
-            <div class='content'>${softSkills}</div>
-        ` : ''}
-
-        ${Array.isArray(data.customDetails) ? data.customDetails.map(custom => `
-            <div class='section-title'>${custom.heading || 'ADDITIONAL DETAIL'}</div>
-            <div class='section-line'></div>
-            <div class='content'>${custom.content || ''}</div>
-        `).join('') : ''}
-
-        ${data.customSectionContent ? `
-            <div class='section-title'>${data.customSectionTitle || 'ADDITIONAL DETAILS'}</div>
-            <div class='section-line'></div>
-            <div class='content'>${data.customSectionContent}</div>
-        ` : ''}
-    </body>
-    </html>`;
-}
+router.post('/preview-docx-html', async (req, res) => {
+    try {
+        const data = req.body;
+        if (!data || Object.keys(data).length === 0) {
+            return res.status(400).send('No resume data provided');
+        }
+        const templateId = data.template || 'classic';
+        const html = generateWordHTML(data, templateId);
+        res.setHeader('Content-Type', 'text/html');
+        res.send(html);
+    } catch (error) {
+        console.error('Preview Word error:', error);
+        if (!res.headersSent) res.status(500).send('Generation failed');
+    }
+});
 
 
 
@@ -298,8 +223,10 @@ router.get('/preview-pdf', async (req, res) => {
         if (!resume) return res.status(404).send('Resume not found');
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', 'inline; filename=resume-preview.pdf');
-        await generateUnifiedResume(resume.data, resume.data.template || 'classic', res);
+        const pdfBuffer = await generatePDFKitBuffer(resume.data, resume.data.template || 'classic');
+        res.send(pdfBuffer);
     } catch (error) {
+        console.error('Preview PDF error:', error);
         res.status(500).send('Generation failed');
     }
 });
@@ -323,8 +250,10 @@ router.get('/download', authenticateToken, async (req, res) => {
         const name = (resume.data.basic?.full_name || 'Resume').replace(/\s+/g, '_');
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', `attachment; filename="${name}_Hiero.pdf"`);
-        await generateUnifiedResume(resume.data, resume.data.template || 'classic', res);
+        const pdfBuffer = await generatePDFKitBuffer(resume.data, resume.data.template || 'classic');
+        res.send(pdfBuffer);
     } catch (error) {
+        console.error('Download PDF error:', error);
         if (!res.headersSent) res.status(500).json({ error: 'Failed to generate PDF' });
     }
 });

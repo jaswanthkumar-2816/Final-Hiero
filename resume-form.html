@@ -1390,7 +1390,7 @@
         onmouseover="this.style.borderColor='#2ae023'" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'">
         <i class="fas fa-eye" style="font-size: 3rem; color: #2ae023; margin-bottom: 20px;"></i>
         <h4 style="color: white; margin-bottom: 20px;">Live Preview</h4>
-        <button class="btn btn-secondary" onclick="previewResume()" style="width: 100%;">View PDF</button>
+        <button id="previewResumeBtn" class="btn btn-secondary" onclick="previewResume()" style="width: 100%;">View PDF</button>
       </div>
     </div>
 
@@ -1398,6 +1398,20 @@
       <button class="btn btn-secondary" onclick="editResume()" style="opacity: 0.7;">
         <i class="fas fa-edit"></i> Edit Details
       </button>
+    </div>
+  </div>
+
+  <!-- Live Preview Modal (in-page iframe, no popup) -->
+  <div id="pdfPreviewModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; z-index:200000; background:rgba(0,0,0,0.92); flex-direction:column;">
+    <div style="display:flex; align-items:center; justify-content:space-between; padding:14px 24px; background:#111; border-bottom:1px solid rgba(42,224,35,0.3); flex-shrink:0;">
+      <span style="color:#2ae023; font-weight:700; font-size:1.1rem;"><i class="fas fa-file-pdf"></i>&nbsp; Live Preview</span>
+      <div style="display:flex; gap:12px; align-items:center;">
+        <a id="pdfOpenNewTab" href="#" target="_blank" style="color:#aaa; font-size:13px; text-decoration:none;" title="Open in new tab"><i class="fas fa-external-link-alt"></i> Open in new tab</a>
+        <button onclick="closePdfPreview()" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); color:#fff; padding:8px 18px; border-radius:8px; cursor:pointer; font-size:14px; font-weight:600;"><i class="fas fa-times"></i> Close</button>
+      </div>
+    </div>
+    <div style="flex:1; position:relative; overflow:hidden;">
+      <iframe id="pdfPreviewIframe" src="" style="width:100%; height:100%; border:none; background:#fff;"></iframe>
     </div>
   </div>
 
@@ -1413,6 +1427,7 @@
 
     // Global state
     let selectedTemplate = null;
+    let _generatedPdfBlobUrl = null; // cached blob URL from generation
 
     // ========== BACKEND CONFIGURATION ==========
     // Point to the integrated Gateway's Resume API
@@ -3673,20 +3688,15 @@
         statusEl.textContent = 'PDF ready!';
         substatusEl.textContent = 'Preparing download...';
 
-        const fileName = `${userName.replace(/[^a-zA-Z0-9]/g, '_')}_${templateName}_resume.pdf`;
-        // Download the file with proper error handling
-        try {
-          // Manual download disabled in generation - choice modal will handle it
-          console.log('✅ Generation successful - showing choice modal');
-          // skip a.click()
-        } catch (downloadError) {
-
-          console.error('❌ Download error:', downloadError);
-          throw new Error('Failed to trigger download: ' + downloadError.message);
+        // Cache the blob URL so Live Preview works instantly (no second fetch needed)
+        if (_generatedPdfBlobUrl) {
+          URL.revokeObjectURL(_generatedPdfBlobUrl);
         }
+        _generatedPdfBlobUrl = URL.createObjectURL(blob);
+        console.log('✅ PDF blob cached for live preview:', _generatedPdfBlobUrl);
 
         progressBar.style.width = '100%';
-        statusEl.textContent = '✅ Analysis Complete!';
+        statusEl.textContent = '✅ Resume Ready!';
         statusEl.style.color = '#2ae023';
         substatusEl.textContent = 'Preparing your download options...';
 
@@ -4061,82 +4071,74 @@
     }
 
     async function previewResume() {
-      // 1. Open blank window immediately to satisfy mobile popup blockers
-      // This must happen synchronously in the click event
-      const previewWindow = window.open('', '_blank');
-
-      if (!previewWindow) {
-        alert('Popup blocked! Please allow popups to see your resume preview.');
+      // If we already have a cached blob URL from generation, use it instantly (no new fetch)
+      if (_generatedPdfBlobUrl) {
+        showPdfPreviewModal(_generatedPdfBlobUrl);
         return;
       }
 
-      previewWindow.document.write(`
-        <html>
-          <head>
-            <title>Hiero - Generating Preview</title>
-            <style>
-              body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #000; color: #fff; margin:0; }
-              .spinner { border: 4px solid rgba(42, 224, 35, 0.1); border-left-color: #2ae023; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 20px; }
-              @keyframes spin { to { transform: rotate(360deg); } }
-            </style>
-          </head>
-          <body>
-            <div class="spinner"></div>
-            <h3>Generating your premium preview...</h3>
-            <p style="color: #888; font-size: 14px;">This will take just a moment.</p>
-          </body>
-        </html>
-      `);
-
-      const btn = event.target;
-      const originalText = btn.innerHTML;
-      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading Preview...';
-      btn.disabled = true;
+      // Otherwise fetch a fresh preview (fallback)
+      const btn = document.getElementById('previewResumeBtn');
+      const originalText = btn ? btn.innerHTML : '';
+      if (btn) { btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...'; btn.disabled = true; }
 
       try {
         const data = collectFormData();
         data.template = selectedTemplate || localStorage.getItem('selectedTemplate') || 'classic';
 
-        console.log('Previewing resume with template:', data.template);
+        console.log('Fetching fresh preview for template:', data.template);
 
         const response = await fetch(`${BACKEND_URL}/preview-resume`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data)
         });
 
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({ error: 'Preview failed' }));
-          previewWindow.close();
           throw new Error(errorData.error || 'Preview failed');
         }
 
         const blob = await response.blob();
+        if (blob.size < 100) throw new Error('Server returned an invalid PDF.');
 
-        // Final fallback for empty response
-        if (blob.size < 100) {
-          previewWindow.close();
-          throw new Error('Server returned an invalid PDF.');
-        }
+        if (_generatedPdfBlobUrl) URL.revokeObjectURL(_generatedPdfBlobUrl);
+        _generatedPdfBlobUrl = URL.createObjectURL(blob);
 
-        const url = window.URL.createObjectURL(blob);
-
-        // 2. Redirect the already opened window to the blob URL
-        previewWindow.location.href = url;
-
-        // Clean up memory after a delay
-        setTimeout(() => window.URL.revokeObjectURL(url), 10000);
+        showPdfPreviewModal(_generatedPdfBlobUrl);
 
       } catch (error) {
-        if (previewWindow) previewWindow.close();
         console.error('Preview error:', error);
         alert(`Failed to preview resume: ${error.message}. Please try again.`);
       } finally {
-        btn.innerHTML = originalText;
-        btn.disabled = false;
+        if (btn) { btn.innerHTML = originalText; btn.disabled = false; }
       }
+    }
+
+    function showPdfPreviewModal(blobUrl) {
+      const modal = document.getElementById('pdfPreviewModal');
+      const iframe = document.getElementById('pdfPreviewIframe');
+      const newTabLink = document.getElementById('pdfOpenNewTab');
+
+      if (!modal || !iframe) return;
+
+      // Set iframe src to the blob URL
+      iframe.src = blobUrl;
+
+      // Set "open in new tab" link
+      if (newTabLink) newTabLink.href = blobUrl;
+
+      // Show modal as flex
+      modal.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closePdfPreview() {
+      const modal = document.getElementById('pdfPreviewModal');
+      const iframe = document.getElementById('pdfPreviewIframe');
+      if (modal) modal.style.display = 'none';
+      if (iframe) iframe.src = ''; // release iframe memory
+      document.body.style.overflow = '';
     }
   </script>
 </body>

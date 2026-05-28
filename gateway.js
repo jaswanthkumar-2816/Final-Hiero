@@ -184,6 +184,7 @@ app.get(['/learn', '/learn.html'], (req, res) => res.sendFile(path.join(resumeBu
 app.get(['/solve', '/solve.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'solve.html')));
 app.get(['/resume-builder', '/resume-builder.html', '/dashboard/resume-builder'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'resume-builder.html')));
 app.get(['/resume-form', '/resume-form.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'resume-form.html')));
+app.get(['/template-verifier', '/template-verifier.html'], (req, res) => res.sendFile(path.join(__dirname, 'template-verifier.html')));
 app.get(['/project', '/project.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'project.html')));
 app.get(['/analysis', '/analysis.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'analysis.html')));
 app.get(['/ai-photo-formalizer', '/ai-photo-formalizer.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'ai-photo-formalizer.html')));
