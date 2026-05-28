@@ -1,6 +1,12 @@
 [phases.setup]
 nixPkgs = ["nodejs", "chromium"]
 
+[phases.build]
+cmds = [
+  "npm install",
+  "which chromium > .chromium_path && echo 'Chromium found:' && cat .chromium_path || echo 'chromium not found in PATH'"
+]
+
 [variables]
 PUPPETEER_SKIP_CHROMIUM_DOWNLOAD = "true"
 PUPPETEER_EXECUTABLE_PATH = "chromium"

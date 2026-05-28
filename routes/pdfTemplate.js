@@ -1,5 +1,6 @@
 const puppeteer = require('puppeteer');
 const fs = require('fs');
+const path = require('path');
 const { execSync } = require('child_process');
 const { generateWordHTML } = require('./wordTemplates');
 
@@ -20,29 +21,67 @@ async function getSharedBrowser() {
             ]
         };
 
+        let resolvedPath = null;
+
+        // 1. Check Darwin (Mac) Chrome local development path
         const macChrome = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
         if (process.platform === 'darwin' && fs.existsSync(macChrome)) {
-            launchOptions.executablePath = macChrome;
-        } else if (process.env.PUPPETEER_EXECUTABLE_PATH) {
-            let path = process.env.PUPPETEER_EXECUTABLE_PATH;
-            if (!path.startsWith('/') && !path.startsWith('.')) {
+            resolvedPath = macChrome;
+        }
+
+        // 2. Check build-time resolved chromium path file
+        if (!resolvedPath && fs.existsSync('.chromium_path')) {
+            try {
+                const p = fs.readFileSync('.chromium_path', 'utf8').trim();
+                if (p && fs.existsSync(p)) {
+                    resolvedPath = p;
+                }
+            } catch (e) {}
+        }
+        
+        if (!resolvedPath && fs.existsSync(path.join(__dirname, '..', '.chromium_path'))) {
+            try {
+                const p = fs.readFileSync(path.join(__dirname, '..', '.chromium_path'), 'utf8').trim();
+                if (p && fs.existsSync(p)) {
+                    resolvedPath = p;
+                }
+            } catch (e) {}
+        }
+
+        // 3. Check environment variable PUPPETEER_EXECUTABLE_PATH
+        if (!resolvedPath && process.env.PUPPETEER_EXECUTABLE_PATH) {
+            let p = process.env.PUPPETEER_EXECUTABLE_PATH;
+            if (!p.startsWith('/') && !p.startsWith('.')) {
                 try {
-                    path = execSync(`which ${path}`).toString().trim();
+                    p = execSync(`which ${p}`).toString().trim();
                 } catch (e) {}
             }
-            launchOptions.executablePath = path;
-        } else {
+            if (fs.existsSync(p)) {
+                resolvedPath = p;
+            }
+        }
+
+        // 4. Linux standard locations fallback
+        if (!resolvedPath) {
             const linuxFallbacks = [
                 '/usr/bin/chromium',
                 '/usr/bin/chromium-browser',
-                '/usr/bin/google-chrome'
+                '/usr/bin/google-chrome',
+                '/usr/bin/chrome'
             ];
             for (const p of linuxFallbacks) {
                 if (fs.existsSync(p)) {
-                    launchOptions.executablePath = p;
+                    resolvedPath = p;
                     break;
                 }
             }
+        }
+
+        if (resolvedPath) {
+            launchOptions.executablePath = resolvedPath;
+            console.log('Puppeteer launching with executablePath:', resolvedPath);
+        } else {
+            console.warn('Puppeteer launch could not find Chrome/Chromium; relying on default puppeteer search path');
         }
 
         sharedBrowserPromise = puppeteer.launch(launchOptions).catch((err) => {
