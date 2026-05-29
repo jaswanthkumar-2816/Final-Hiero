@@ -159,10 +159,12 @@ router.post('/preview-resume', async (req, res) => {
         try {
             // Preferred render path (matches HTML template output)
             pdfBuffer = await generatePuppeteerPDF(data, templateId);
+            res.setHeader('X-Render-Engine', 'puppeteer');
         } catch (puppeteerErr) {
             // Cloud/runtime fallback: still return PDF instead of 500.
             console.error('Preview Puppeteer failed, falling back to PDFKit:', puppeteerErr.message || puppeteerErr);
             pdfBuffer = await generatePDFKitBuffer(data, templateId);
+            res.setHeader('X-Render-Engine', 'pdfkit');
         }
         res.send(pdfBuffer);
     } catch (error) {
@@ -194,10 +196,12 @@ router.post('/download-resume', async (req, res) => {
 		try {
 			// Preferred render path (matches HTML template output)
 			pdfBuffer = await generatePuppeteerPDF(data, templateId);
+			res.setHeader('X-Render-Engine', 'puppeteer');
 		} catch (puppeteerErr) {
 			// Cloud/runtime fallback: still return PDF instead of 500.
 			console.error('Download Puppeteer failed, falling back to PDFKit:', puppeteerErr.message || puppeteerErr);
 			pdfBuffer = await generatePDFKitBuffer(data, templateId);
+			res.setHeader('X-Render-Engine', 'pdfkit');
 		}
 		res.setHeader('Content-Type', 'application/pdf');
 		res.setHeader('Content-Disposition', `attachment; filename="resume_${templateId}.pdf"`);
