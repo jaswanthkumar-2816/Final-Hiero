@@ -64,18 +64,10 @@ async function getSharedBrowser() {
                 '/usr/bin/chromium-browser',
                 '/usr/bin/chromium',
                 '/usr/bin/google-chrome',
-                '/usr/bin/chrome',
-                'chromium-browser',
-                'chromium'
+                '/usr/bin/chrome'
             ];
             for (const p of linuxFallbacks) {
-                if (p.startsWith('/') || p.startsWith('.')) {
-                    if (fs.existsSync(p)) {
-                        resolvedPath = p;
-                        break;
-                    }
-                } else {
-                    // Use simple binary name directly so Puppeteer can find it in PATH
+                if (fs.existsSync(p)) {
                     resolvedPath = p;
                     break;
                 }
