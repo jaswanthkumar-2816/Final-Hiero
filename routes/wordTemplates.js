@@ -4033,9 +4033,11 @@ function makeOverflowAdaptive(html) {
     // 2) Avoid forcing single-screen table heights that can clip long content.
     out = out.replace(/min-height\s*:\s*297mm\s*;?/gi, 'height:auto; min-height:297mm;');
 
-    // 3) Inject shared overflow/pagination safety rules once.
+    // 3) Inject shared overflow/pagination safety rules + embedded fonts.
+    const { getEmbeddedFontsCSS } = require('./fonts');
     const adaptiveCss = `
 <style id="hiero-overflow-adaptive">
+  ${getEmbeddedFontsCSS()}
   @media print {
     .page { height: auto !important; overflow: visible !important; }
     table, tr, td, div, section, article { break-inside: auto !important; page-break-inside: auto !important; }
@@ -4053,6 +4055,19 @@ function makeOverflowAdaptive(html) {
     } else {
         out = adaptiveCss + out;
     }
+
+    // 4) Normalize all font families to embedded WOFF2 web fonts to prevent OS/system dependencies
+    out = out.replace(/font-family\s*:\s*([^;'}]+)/gi, (match, families) => {
+        const lower = families.toLowerCase();
+        if (lower.includes('courier') || lower.includes('mono')) {
+            return "font-family: 'JetBrains Mono', 'Courier New', Courier, monospace";
+        }
+        if (lower.includes('times') || lower.includes('georgia') || lower.includes('garamond') || lower.includes('serif')) {
+            return "font-family: 'Lora', serif";
+        } else {
+            return "font-family: 'Inter', sans-serif";
+        }
+    });
 
     return out;
 }
