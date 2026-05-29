@@ -114,8 +114,14 @@ async function generatePuppeteerPDF(data, templateId) {
         // Emulate screen media to ensure colors, backgrounds and margins render accurately
         await page.emulateMediaType('screen');
         
-        // Wait for all network requests (fonts, external assets) to complete
-        await page.setContent(html, { waitUntil: 'networkidle2', timeout: 5000 });
+        // Use 'domcontentloaded' instead of 'networkidle0':
+        // networkidle0 waits for ALL network requests to complete — this times out when
+        // Google Fonts or other external resources fail/are slow. domcontentloaded fires
+        // as soon as the DOM is parsed, which is sufficient for inline/embedded styles.
+        await page.setContent(html, { waitUntil: 'domcontentloaded', timeout: 30000 });
+        
+        // Give fonts an extra 1s to load after DOM is ready (avoids unstyled text)
+        await new Promise(r => setTimeout(r, 1000));
         
         // Ensure web fonts are completely loaded and active before generating PDF
         await page.evaluateHandle('document.fonts.ready');
@@ -124,6 +130,7 @@ async function generatePuppeteerPDF(data, templateId) {
         const pdfBuffer = await page.pdf({
             format: 'A4',
             printBackground: true,
+            timeout: 30000,
             margin: {
                 top: '0px',
                 right: '0px',

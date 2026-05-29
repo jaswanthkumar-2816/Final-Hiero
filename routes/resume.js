@@ -8,18 +8,10 @@ const pdfParse = require('pdf-parse');
 const axios = require('axios');
 const Resume = require('../models/Resume');
 const { generateUnifiedResume } = require('./unifiedTemplates');
-const { generateWordHTML, WORD_TEMPLATE_MAP } = require('./wordTemplates');
+const { generateWordHTML } = require('./wordTemplates');
 const { generatePuppeteerPDF } = require('./pdfTemplate');
 const router = express.Router();
 const crypto = require('crypto');
-const { execSync } = require('child_process');
-
-let serverCommit = 'unknown';
-try {
-    serverCommit = execSync('git rev-parse --short HEAD', { encoding: 'utf8' }).trim();
-} catch (e) {
-    console.warn('Could not retrieve git commit hash:', e.message);
-}
 
 async function generatePDFKitBuffer(data, templateId) {
     const tempDir = path.join(__dirname, '..', 'tmp');
@@ -161,18 +153,8 @@ router.post('/preview-resume', async (req, res) => {
             return res.status(400).send('No resume data provided');
         }
         const templateId = data.template || data.templateId || 'classic';
-
-        let resolvedTemplate = String(templateId).toLowerCase().trim();
-        if (WORD_TEMPLATE_MAP && WORD_TEMPLATE_MAP[resolvedTemplate]) {
-            resolvedTemplate = WORD_TEMPLATE_MAP[resolvedTemplate];
-        }
-
-        res.setHeader('X-Template-Requested', templateId);
-        res.setHeader('X-Template-Resolved', resolvedTemplate);
-        res.setHeader('X-Server-Commit', serverCommit);
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', 'inline; filename=resume-preview.pdf');
-
         let pdfBuffer;
         try {
             // Preferred render path (matches HTML template output)
@@ -209,15 +191,6 @@ router.post('/download-resume', async (req, res) => {
 				}
 			});
 		}
-
-        let resolvedTemplate = String(templateId).toLowerCase().trim();
-        if (WORD_TEMPLATE_MAP && WORD_TEMPLATE_MAP[resolvedTemplate]) {
-            resolvedTemplate = WORD_TEMPLATE_MAP[resolvedTemplate];
-        }
-
-        res.setHeader('X-Template-Requested', templateId);
-        res.setHeader('X-Template-Resolved', resolvedTemplate);
-        res.setHeader('X-Server-Commit', serverCommit);
 
 		let pdfBuffer;
 		try {

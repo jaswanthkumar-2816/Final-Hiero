@@ -4289,6 +4289,5 @@ function generateRishiWordHTML(data) {
 }
 
 module.exports = {
-    generateWordHTML,
-    WORD_TEMPLATE_MAP
+    generateWordHTML
 };
