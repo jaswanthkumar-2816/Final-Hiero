@@ -143,7 +143,8 @@ router.post('/template', authenticateToken, async (req, res) => {
 
 // --- Generation & Download ---
 
-router.get('/health', (req, res) => res.json({ status: 'ok', service: 'resume-integrated' }));
+const WORD_TEMPLATES_LINE_COUNT = (() => { try { return require('fs').readFileSync(require('path').join(__dirname, 'wordTemplates.js'), 'utf8').split('\n').length; } catch(e) { return -1; } })();
+router.get('/health', (req, res) => res.json({ status: 'ok', service: 'resume-integrated', build: 'v2-' + WORD_TEMPLATES_LINE_COUNT + 'lines', wordTemplatesLines: WORD_TEMPLATES_LINE_COUNT }));
 
 router.post('/preview-resume', async (req, res) => {
     try {
