@@ -354,4 +354,82 @@ router.get('/templates', (req, res) => {
     res.json({ success: true, templates });
 });
 
+// ─── DEBUG ENDPOINT ──────────────────────────────────────────────────────────
+// Hit this on Render to diagnose why Puppeteer/templates are failing:
+// GET /api/resume/debug-render
+router.get('/debug-render', async (req, res) => {
+    const fs = require('fs');
+    const { execSync } = require('child_process');
+    const result = {
+        timestamp: new Date().toISOString(),
+        node: process.version,
+        platform: process.platform,
+        env: {
+            PUPPETEER_EXECUTABLE_PATH: process.env.PUPPETEER_EXECUTABLE_PATH || '(not set)',
+            NODE_ENV: process.env.NODE_ENV || '(not set)',
+        },
+        chromiumPath: null,
+        chromiumExists: false,
+        puppeteerLaunch: 'not tested',
+        puppeteerPDF: 'not tested',
+        puppeteerError: null,
+        wordTemplatesLines: null,
+        sampleHTMLLength: null,
+    };
+
+    // Check chromium path
+    const paths = [
+        process.env.PUPPETEER_EXECUTABLE_PATH,
+        '/usr/bin/chromium-browser',
+        '/usr/bin/chromium',
+        '/usr/bin/google-chrome',
+        '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+    ].filter(Boolean);
+    for (const p of paths) {
+        if (fs.existsSync(p)) { result.chromiumPath = p; result.chromiumExists = true; break; }
+    }
+    // Also check .chromium_path file
+    const chromiumPathFile = require('path').join(__dirname, '..', '.chromium_path');
+    if (fs.existsSync(chromiumPathFile)) {
+        result.chromiumPathFile = fs.readFileSync(chromiumPathFile, 'utf8').trim();
+        result.chromiumPathFileExists = fs.existsSync(result.chromiumPathFile);
+    }
+    // Check wordTemplates
+    try {
+        const wt = require('./wordTemplates');
+        const sampleData = { name:'Test User', email:'test@test.com', phone:'1234567890', experience:[], education:[], skills:[], projects:[] };
+        const html = wt.generateWordHTML(sampleData, 'hiero-cool');
+        result.wordTemplatesLines = html.split('\n').length;
+        result.sampleHTMLLength = html.length;
+        result.sampleHTMLSnippet = html.substring(0, 200);
+    } catch(e) { result.wordTemplatesError = e.message; }
+
+    // Test Puppeteer launch
+    try {
+        const puppeteer = require('puppeteer');
+        const launchOpts = {
+            headless: 'new',
+            args: ['--no-sandbox','--disable-setuid-sandbox','--disable-dev-shm-usage','--disable-gpu','--single-process'],
+        };
+        if (result.chromiumPath) launchOpts.executablePath = result.chromiumPath;
+        else if (result.chromiumPathFile && result.chromiumPathFileExists) launchOpts.executablePath = result.chromiumPathFile;
+
+        const browser = await puppeteer.launch(launchOpts);
+        result.puppeteerLaunch = 'SUCCESS';
+        const page = await browser.newPage();
+        await page.setContent('<html><body style="background:red;color:white;font-size:24px">TEST</body></html>', { waitUntil: 'domcontentloaded', timeout: 15000 });
+        const pdf = await page.pdf({ format: 'A4', timeout: 15000 });
+        result.puppeteerPDF = `SUCCESS (${pdf.length} bytes)`;
+        await page.close();
+        await browser.close();
+    } catch(e) {
+        result.puppeteerLaunch = result.puppeteerLaunch === 'not tested' ? 'FAILED' : result.puppeteerLaunch;
+        result.puppeteerPDF = 'FAILED';
+        result.puppeteerError = e.message;
+    }
+
+    res.json(result);
+});
+// ─────────────────────────────────────────────────────────────────────────────
+
 module.exports = router;
