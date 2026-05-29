@@ -167,7 +167,7 @@ router.post('/preview-resume', async (req, res) => {
             pdfBuffer = await generatePDFKitBuffer(data, templateId);
             res.setHeader('X-Render-Engine', 'pdfkit');
         }
-        res.send(pdfBuffer);
+        res.send(Buffer.isBuffer(pdfBuffer) ? pdfBuffer : Buffer.from(pdfBuffer));
     } catch (error) {
         console.error('Preview error:', error);
         if (!res.headersSent) res.status(500).send('Generation failed');
@@ -206,7 +206,7 @@ router.post('/download-resume', async (req, res) => {
 		}
 		res.setHeader('Content-Type', 'application/pdf');
 		res.setHeader('Content-Disposition', `attachment; filename="resume_${templateId}.pdf"`);
-		return res.send(pdfBuffer);
+		return res.send(Buffer.isBuffer(pdfBuffer) ? pdfBuffer : Buffer.from(pdfBuffer));
 	} catch (e) {
 		console.error('download-resume error:', e);
 		return res.status(500).json({ error: 'Failed to generate resume' });
