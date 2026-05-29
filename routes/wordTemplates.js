@@ -1,3 +1,4 @@
+// wordTemplates.js — v3-FULL — 4293 lines — deployed 2026-05-30 — DO NOT REMOVE THIS LINE
 function normalizeWordData(data) {
     const {
         personalInfo = {},
