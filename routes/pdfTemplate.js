@@ -115,7 +115,7 @@ async function generatePuppeteerPDF(data, templateId) {
         await page.emulateMediaType('screen');
         
         // Wait for all network requests (fonts, external assets) to complete
-        await page.setContent(html, { waitUntil: 'networkidle0' });
+        await page.setContent(html, { waitUntil: 'networkidle2', timeout: 5000 });
         
         // Ensure web fonts are completely loaded and active before generating PDF
         await page.evaluateHandle('document.fonts.ready');
