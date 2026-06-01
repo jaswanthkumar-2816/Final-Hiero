@@ -565,6 +565,46 @@ router.post('/admin/send-feedback-email', async (req, res) => {
     }
 });
 
+// Helper to serve local JSON fallback for Admin Dashboard
+function serveLocalDashboard(res) {
+    try {
+        const authObj = require('./auth');
+        const localUsers = authObj.users || [];
+        
+        const logins = getLocalLogins();
+        const allReviews = getLocalReviews().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        
+        // Map Mongoose User structure format for response compat
+        const usersData = localUsers.map(u => ({
+            id: u.id,
+            username: u.name || u.email.split('@')[0],
+            email: u.email,
+            loginCount: u.loginCount || 1, // Fallback default to 1 if tracked
+            lastLogin: u.lastLogin || new Date().toISOString()
+        }));
+
+        const totalUsers = localUsers.length;
+        const totalVisits = logins.length > 0 ? logins.length : localUsers.reduce((sum, u) => sum + (u.loginCount || 1), 0);
+        const avgRating = allReviews.length > 0 ? (allReviews.reduce((sum, r) => sum + r.rating, 0) / allReviews.length).toFixed(2) : 0.0;
+
+        return res.json({
+            success: true,
+            analytics: { 
+                totalUsers, 
+                totalVisits, 
+                averageRating: parseFloat(avgRating), 
+                totalReviews: allReviews.length,
+                uniqueUsersCount: totalUsers
+            },
+            users: usersData,
+            reviews: allReviews
+        });
+    } catch (err) {
+        console.error('Error in serveLocalDashboard:', err);
+        return res.status(500).json({ error: 'Failed to fetch dashboard fallback data' });
+    }
+}
+
 // 📊 GET /api/admin/dashboard - Integrated Admin Dashboard
 router.get('/admin/dashboard', async (req, res) => {
     try {
@@ -590,7 +630,7 @@ router.get('/admin/dashboard', async (req, res) => {
                 };
             }).sort((a, b) => new Date(b.lastLogin) - new Date(a.lastLogin));
 
-            res.json({
+            return res.json({
                 success: true,
                 analytics: { 
                     totalUsers, 
@@ -603,42 +643,11 @@ router.get('/admin/dashboard', async (req, res) => {
                 reviews: allReviews
             });
         } else {
-            // Local persistence fallback
-            const authObj = require('./auth');
-            const localUsers = authObj.users || [];
-            
-            const logins = getLocalLogins();
-            const allReviews = getLocalReviews().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-            
-            // Map Mongoose User structure format for response compat
-            const usersData = localUsers.map(u => ({
-                id: u.id,
-                username: u.name || u.email.split('@')[0],
-                email: u.email,
-                loginCount: u.loginCount || 1, // Fallback default to 1 if tracked
-                lastLogin: u.lastLogin || new Date().toISOString()
-            }));
-
-            const totalUsers = localUsers.length;
-            const totalVisits = logins.length > 0 ? logins.length : localUsers.reduce((sum, u) => sum + (u.loginCount || 1), 0);
-            const avgRating = allReviews.length > 0 ? (allReviews.reduce((sum, r) => sum + r.rating, 0) / allReviews.length).toFixed(2) : 0.0;
-
-            res.json({
-                success: true,
-                analytics: { 
-                    totalUsers, 
-                    totalVisits, 
-                    averageRating: parseFloat(avgRating), 
-                    totalReviews: allReviews.length,
-                    uniqueUsersCount: totalUsers
-                },
-                users: usersData,
-                reviews: allReviews
-            });
+            return serveLocalDashboard(res);
         }
     } catch (error) {
-        console.error('Admin dashboard error:', error);
-        res.status(500).json({ error: 'Failed to fetch dashboard data' });
+        console.warn('⚠️ MongoDB Admin Dashboard query failed (falling back to JSON persistence):', error.message);
+        return serveLocalDashboard(res);
     }
 });
 

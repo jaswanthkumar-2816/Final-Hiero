@@ -90,6 +90,7 @@ app.use(passport.initialize());
 // ======================
 if (process.env.MONGODB_URI) {
     console.log('⏳ Connecting to MongoDB...');
+    mongoose.set('bufferCommands', false);
     // Safe debug: Check first few chars and total length (don't log secrets)
     const uri = process.env.MONGODB_URI;
     console.log(`[DB Debug] URI starts with: "${uri.substring(0, 5)}...", Total length: ${uri.length}`);
