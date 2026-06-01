@@ -572,6 +572,107 @@ router.post('/admin/send-feedback-email', async (req, res) => {
     }
 });
 
+// Helper to merge MongoDB reviews and local JSON reviews
+function mergeReviews(mongoReviews, localReviews) {
+    const mergedMap = new Map();
+
+    // 1. Add local reviews first
+    localReviews.forEach(r => {
+        if (r.userEmail) {
+            mergedMap.set(r.userEmail.toLowerCase().trim(), {
+                id: r.id || r._id,
+                userEmail: r.userEmail,
+                userName: r.userName,
+                rating: r.rating,
+                reviewText: r.reviewText,
+                createdAt: r.createdAt,
+                updatedAt: r.updatedAt
+            });
+        }
+    });
+
+    // 2. Add/Overwrite with MongoDB reviews if they are newer
+    mongoReviews.forEach(r => {
+        if (r.userEmail) {
+            const emailKey = r.userEmail.toLowerCase().trim();
+            const existing = mergedMap.get(emailKey);
+            
+            const mongoReview = {
+                id: r._id,
+                userEmail: r.userEmail,
+                userName: r.userName,
+                rating: r.rating,
+                reviewText: r.reviewText,
+                createdAt: r.createdAt || r.updatedAt,
+                updatedAt: r.updatedAt
+            };
+
+            if (!existing) {
+                mergedMap.set(emailKey, mongoReview);
+            } else {
+                const existingTime = new Date(existing.updatedAt || existing.createdAt).getTime();
+                const mongoTime = new Date(mongoReview.updatedAt || mongoReview.createdAt).getTime();
+                if (mongoTime > existingTime) {
+                    mergedMap.set(emailKey, mongoReview);
+                }
+            }
+        }
+    });
+
+    return Array.from(mergedMap.values()).sort((a, b) => {
+        return new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt);
+    });
+}
+
+// Helper to merge MongoDB users and local users
+function mergeUsers(mongoUsers, localUsers) {
+    const mergedMap = new Map();
+
+    // 1. Add local users first
+    localUsers.forEach(u => {
+        if (u.email) {
+            mergedMap.set(u.email.toLowerCase().trim(), {
+                id: u.id,
+                username: u.name || u.email.split('@')[0],
+                email: u.email,
+                loginCount: u.loginCount || 1,
+                lastLogin: u.lastLogin || new Date().toISOString()
+            });
+        }
+    });
+
+    // 2. Add/Merge with Mongo users
+    mongoUsers.forEach(u => {
+        if (u.email) {
+            const emailKey = u.email.toLowerCase().trim();
+            const existing = mergedMap.get(emailKey);
+            const mongoUser = {
+                id: u._id,
+                username: u.username || u.email.split('@')[0],
+                email: u.email,
+                loginCount: 1,
+                lastLogin: u.createdAt
+            };
+
+            if (!existing) {
+                mergedMap.set(emailKey, mongoUser);
+            } else {
+                const existingTime = new Date(existing.lastLogin).getTime();
+                const mongoTime = new Date(mongoUser.lastLogin).getTime();
+                mergedMap.set(emailKey, {
+                    id: mongoUser.id,
+                    username: mongoUser.username,
+                    email: mongoUser.email,
+                    loginCount: (existing.loginCount || 1) + 1,
+                    lastLogin: mongoTime > existingTime ? mongoUser.lastLogin : existing.lastLogin
+                });
+            }
+        }
+    });
+
+    return Array.from(mergedMap.values());
+}
+
 // Helper to serve local JSON fallback for Admin Dashboard
 function serveLocalDashboard(res) {
     try {
@@ -615,27 +716,23 @@ function serveLocalDashboard(res) {
 // 📊 GET /api/admin/dashboard - Integrated Admin Dashboard
 router.get('/admin/dashboard', async (req, res) => {
     try {
-        if (isMongoConnected()) {
-            const totalUsers = await User.countDocuments();
-            const totalVisits = await LoginTracking.countDocuments();
-            const allReviews = await Review.find().sort({ createdAt: -1 });
-            const avgRating = allReviews.length > 0 ? (allReviews.reduce((sum, r) => sum + r.rating, 0) / allReviews.length).toFixed(2) : 0;
+        const authObj = require('./auth');
+        const localUsers = authObj.users || [];
+        const localReviews = getLocalReviews();
+        const logins = getLocalLogins();
 
-            const allUsers = await User.find();
-            const allLogins = await LoginTracking.find();
-            
-            const usersData = allUsers.map(u => {
-                const userLogins = allLogins.filter(l => l.userEmail && l.userEmail.toLowerCase() === u.email.toLowerCase());
-                const loginCount = userLogins.length;
-                const lastLoginRecord = userLogins.sort((a, b) => new Date(b.loginTimestamp) - new Date(a.loginTimestamp))[0];
-                return {
-                    id: u._id,
-                    username: u.username || u.email.split('@')[0],
-                    email: u.email,
-                    loginCount: loginCount || 1, // Fallback to 1
-                    lastLogin: lastLoginRecord ? lastLoginRecord.loginTimestamp : u.createdAt
-                };
-            }).sort((a, b) => new Date(b.lastLogin) - new Date(a.lastLogin));
+        if (isMongoConnected()) {
+            const mongoReviews = await Review.find().sort({ createdAt: -1 });
+            const mongoUsers = await User.find();
+            const mongoLogins = await LoginTracking.find();
+
+            // Merge reviews and users seamlessly
+            const allReviews = mergeReviews(mongoReviews, localReviews);
+            const usersData = mergeUsers(mongoUsers, localUsers).sort((a, b) => new Date(b.lastLogin) - new Date(a.lastLogin));
+
+            const totalUsers = usersData.length;
+            const totalVisits = logins.length + mongoLogins.length;
+            const avgRating = allReviews.length > 0 ? (allReviews.reduce((sum, r) => sum + r.rating, 0) / allReviews.length).toFixed(2) : 0;
 
             return res.json({
                 success: true,
