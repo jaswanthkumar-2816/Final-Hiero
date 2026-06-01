@@ -527,41 +527,48 @@ router.post('/admin/send-feedback-email', async (req, res) => {
             return res.status(400).json({ error: 'Array of selected emails is required' });
         }
 
-        console.log(`[Admin] Triggering bulk feedback invitation email for ${emails.length} selected users.`);
+        console.log(`[Admin] Triggering parallel bulk feedback invitation email for ${emails.length} selected users.`);
 
         const authObj = require('./auth');
         const localUsers = authObj.users || [];
 
-        let successCount = 0;
-        let failCount = 0;
+        // Instantly return success to the dashboard so the UI doesn't hang!
+        res.json({ success: true, message: `Feedback invitations are being dispatched in the background.` });
 
-        for (const email of emails) {
-            try {
-                let user;
-                if (isMongoConnected()) {
-                    user = await User.findOne({ email: email.toLowerCase() });
+        // Process email dispatching asynchronously in the background in parallel
+        (async () => {
+            const emailPromises = emails.map(async (email) => {
+                try {
+                    let user;
+                    // Safe Mongoose read with timeout check
+                    if (isMongoConnected()) {
+                        user = await User.findOne({ email: email.toLowerCase() }).maxTimeMS(2000).catch(() => null);
+                    }
+                    
+                    if (!user) {
+                        user = localUsers.find(u => u.email && u.email.toLowerCase() === email.toLowerCase());
+                    }
+
+                    const username = user ? (user.username || user.name) : email.split('@')[0];
+                    await sendFeedbackRequestEmail(email, username);
+                    console.log(`✉️ Async background dispatch complete for: ${email}`);
+                } catch (err) {
+                    console.error(`❌ Background dispatch failed for ${email}:`, err.message);
                 }
-                
-                // Fallback to local user
-                if (!user) {
-                    user = localUsers.find(u => u.email && u.email.toLowerCase() === email.toLowerCase());
-                }
+            });
 
-                const username = user ? (user.username || user.name) : email.split('@')[0];
-                
-                // Trigger feedback request email
-                await sendFeedbackRequestEmail(email, username);
-                successCount++;
-            } catch (err) {
-                console.error(`Failed sending feedback request to ${email}:`, err.message);
-                failCount++;
-            }
-        }
+            // Run all dispatches in parallel to maximize performance
+            await Promise.all(emailPromises);
+            console.log(`🚀 All background bulk feedback email dispatches completed.`);
+        })().catch(err => {
+            console.error('Fatal error in background email dispatch process:', err);
+        });
 
-        res.json({ success: true, message: `Dispatched ${successCount} emails. Failed: ${failCount}` });
     } catch (error) {
         console.error('Bulk email error:', error);
-        res.status(500).json({ error: 'Failed to dispatch emails' });
+        if (!res.headersSent) {
+            res.status(500).json({ error: 'Failed to dispatch emails' });
+        }
     }
 });
 
