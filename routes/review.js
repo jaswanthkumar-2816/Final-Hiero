@@ -15,6 +15,33 @@ const REVIEWS_FILE = path.join(__dirname, '..', 'reviews.json');
 const LOGIN_TRACK_FILE = path.join(__dirname, '..', 'login_tracking.json');
 const USERS_FILE = path.join(__dirname, '..', 'users.json');
 
+// 🚫 Test/Fake account filter — emails or usernames matching these patterns
+// are automatically excluded from the admin dashboard user list
+const TEST_ACCOUNT_PATTERNS = [
+    /^test@/i,           // test@example.com, test@test.com, etc.
+    /test\.(com|net|org|io|in)$/i, // any @test.com / @test.net etc.
+    /example\.(com|net|org)$/i, // @example.com
+    /@test\.test$/i,    // @test.test
+    /^demo@/i,           // demo@ accounts
+    /^admin@/i,          // admin@ test accounts
+];
+
+// Specific emails that are explicitly test accounts (exact match)
+const TEST_EMAILS_EXACT = [
+    'test@example.com',
+    'test@test.com',
+    'jas@123',          // invalid email used during dev testing
+    'default@example.com',
+    'demo@hiero.com',
+    'admin@hiero.com',
+];
+
+function isTestAccount(email = '') {
+    const lower = email.toLowerCase().trim();
+    if (TEST_EMAILS_EXACT.includes(lower)) return true;
+    return TEST_ACCOUNT_PATTERNS.some(pattern => pattern.test(lower));
+}
+
 // Reusable Nodemailer Transporter
 const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -628,9 +655,9 @@ function mergeReviews(mongoReviews, localReviews) {
 function mergeUsers(mongoUsers, localUsers) {
     const mergedMap = new Map();
 
-    // 1. Add local users first
+    // 1. Add local users first (skip test accounts)
     localUsers.forEach(u => {
-        if (u.email) {
+        if (u.email && !isTestAccount(u.email)) {
             mergedMap.set(u.email.toLowerCase().trim(), {
                 id: u.id,
                 username: u.name || u.email.split('@')[0],
@@ -641,9 +668,9 @@ function mergeUsers(mongoUsers, localUsers) {
         }
     });
 
-    // 2. Add/Merge with Mongo users
+    // 2. Add/Merge with Mongo users (skip test accounts)
     mongoUsers.forEach(u => {
-        if (u.email) {
+        if (u.email && !isTestAccount(u.email)) {
             const emailKey = u.email.toLowerCase().trim();
             const existing = mergedMap.get(emailKey);
             const mongoUser = {
@@ -682,14 +709,16 @@ function serveLocalDashboard(res) {
         const logins = getLocalLogins();
         const allReviews = getLocalReviews().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         
-        // Map Mongoose User structure format for response compat
-        const usersData = localUsers.map(u => ({
-            id: u.id,
-            username: u.name || u.email.split('@')[0],
-            email: u.email,
-            loginCount: u.loginCount || 1, // Fallback default to 1 if tracked
-            lastLogin: u.lastLogin || new Date().toISOString()
-        }));
+        // Map Mongoose User structure format for response compat (filter test accounts)
+        const usersData = localUsers
+            .filter(u => u.email && !isTestAccount(u.email))
+            .map(u => ({
+                id: u.id,
+                username: u.name || u.email.split('@')[0],
+                email: u.email,
+                loginCount: u.loginCount || 1, // Fallback default to 1 if tracked
+                lastLogin: u.lastLogin || new Date().toISOString()
+            }));
 
         const totalUsers = localUsers.length;
         const totalVisits = logins.length > 0 ? logins.length : localUsers.reduce((sum, u) => sum + (u.loginCount || 1), 0);
