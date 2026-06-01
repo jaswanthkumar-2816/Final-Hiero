@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hiero | Share Your Feedback</title>
+  
+  <!-- Premium Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    :root {
+      --primary: #10b981;          /* Hiero Emerald Green */
+      --primary-hover: #059669;
+      --bg-dark: #f8fafc;           /* Clean Slate Light BG */
+      --bg-card: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .form-container {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 40px;
+      width: 100%;
+      max-width: 520px;
+      box-shadow: var(--shadow);
+      position: relative;
+      animation: slideUp 0.4s ease forwards;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .brand-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .brand-header h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: #0f172a;
+    }
+
+    .brand-header h1 span {
+      color: var(--primary);
+    }
+
+    .brand-header p {
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-top: 6px;
+      font-weight: 500;
+    }
+
+    /* Star Rating Selector */
+    .star-rating-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 28px;
+    }
+
+    .star-label {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .stars-row {
+      display: flex;
+      gap: 12px;
+    }
+
+    .star-btn {
+      font-size: 34px;
+      color: #cbd5e1;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .star-btn:hover {
+      transform: scale(1.15);
+    }
+
+    .star-btn.active {
+      color: #fbbf24; /* Warm Gold */
+      filter: drop-shadow(0 0 4px rgba(251, 191, 36, 0.3));
+    }
+
+    /* Form Fields */
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+
+    .input-label {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: #334155;
+    }
+
+    .field-readonly {
+      background: #f1f5f9;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: 13.5px;
+      font-family: inherit;
+      font-weight: 600;
+      outline: none;
+    }
+
+    .textarea-field {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      color: var(--text-main);
+      font-size: 13.5px;
+      line-height: 1.5;
+      font-family: inherit;
+      resize: none;
+      height: 120px;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .textarea-field:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.1);
+    }
+
+    .btn-submit {
+      width: 100%;
+      background: var(--primary);
+      color: #ffffff;
+      border: none;
+      padding: 14px;
+      border-radius: 10px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 14.5px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-submit:hover {
+      background: var(--primary-hover);
+      box-shadow: 0 6px 15px -4px rgba(16, 185, 129, 0.35);
+      transform: translateY(-1px);
+    }
+
+    .btn-submit:active {
+      transform: translateY(1px);
+    }
+
+    .btn-submit:disabled {
+      background: #cbd5e1;
+      color: #94a3b8;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+
+    .status-msg {
+      text-align: center;
+      font-size: 13px;
+      font-weight: 600;
+      margin-top: 15px;
+      min-height: 20px;
+    }
+
+    .status-msg.success { color: #15803d; }
+    .status-msg.error { color: #b91c1c; }
+
+    /* Success Overstate Screen */
+    .success-overlay {
+      position: absolute;
+      inset: 0;
+      background: #ffffff;
+      border-radius: 20px;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      text-align: center;
+      z-index: 10;
+    }
+
+    .success-icon {
+      width: 64px;
+      height: 64px;
+      background: #ecfdf5;
+      color: var(--primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      margin-bottom: 24px;
+      animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+
+    @keyframes pop {
+      from { transform: scale(0.6); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .success-overlay h2 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 22px;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 8px;
+    }
+
+    .success-overlay p {
+      color: var(--text-muted);
+      font-size: 13.5px;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="form-container">
+    
+    <!-- Animated success screen -->
+    <div id="successOverlay" class="success-overlay">
+      <div class="success-icon">
+        <i class="fa-solid fa-circle-check"></i>
+      </div>
+      <h2>Thank You!</h2>
+      <p id="successSub">Your feedback was successfully submitted. Redirecting you back to your dashboard now...</p>
+    </div>
+
+    <!-- Header -->
+    <header class="brand-header">
+      <h1>HIERO <span>CAREER</span></h1>
+      <p>Share Your App Experience</p>
+    </header>
+
+    <!-- Star Selector -->
+    <div class="star-rating-wrapper">
+      <div class="star-label">Rate Your Experience</div>
+      <div class="stars-row" id="starsRow">
+        <i class="fa-solid fa-star star-btn" onclick="setRating(1)" onmouseover="hoverStars(1)" onmouseout="resetStars()"></i>
+        <i class="fa-solid fa-star star-btn" onclick="setRating(2)" onmouseover="hoverStars(2)" onmouseout="resetStars()"></i>
+        <i class="fa-solid fa-star star-btn" onclick="setRating(3)" onmouseover="hoverStars(3)" onmouseout="resetStars()"></i>
+        <i class="fa-solid fa-star star-btn" onclick="setRating(4)" onmouseover="hoverStars(4)" onmouseout="resetStars()"></i>
+        <i class="fa-solid fa-star star-btn" onclick="setRating(5)" onmouseover="hoverStars(5)" onmouseout="resetStars()"></i>
+      </div>
+    </div>
+
+    <!-- Fields -->
+    <div class="input-group">
+      <label class="input-label">YOUR NAME</label>
+      <input type="text" id="userNameField" class="field-readonly" readonly placeholder="Guest User">
+    </div>
+
+    <div class="input-group">
+      <label class="input-label">EMAIL ADDRESS</label>
+      <input type="email" id="userEmailField" class="field-readonly" readonly placeholder="guest@example.com">
+    </div>
+
+    <div class="input-group">
+      <label class="input-label">YOUR FEEDBACK / SUGGESTIONS</label>
+      <textarea id="feedbackTextField" class="textarea-field" placeholder="Tell us what you liked, or where we can improve..." oninput="checkFormProgress()"></textarea>
+    </div>
+
+    <!-- Button -->
+    <button id="submitBtn" class="btn-submit" disabled onclick="submitFeedback()">
+      Submit Feedback <i class="fa-solid fa-arrow-right"></i>
+    </button>
+
+    <div id="statusMsg" class="status-msg"></div>
+
+  </div>
+
+  <script>
+    // Grab URL params
+    const urlParams = new URLSearchParams(window.location.search);
+    const userEmail = urlParams.get('email') || '';
+    const userName = urlParams.get('name') || '';
+
+    // Initialize Fields
+    if (userEmail) document.getElementById('userEmailField').value = userEmail;
+    if (userName) document.getElementById('userNameField').value = userName;
+
+    let selectedRating = parseInt(urlParams.get('rating')) || 0;
+    let isSubmitted = false;
+
+    // --- Star Rating Handling ---
+
+    function setRating(rating) {
+      selectedRating = rating;
+      updateStarsDisplay(rating);
+      checkFormProgress();
+    }
+
+    function hoverStars(rating) {
+      updateStarsDisplay(rating);
+    }
+
+    function resetStars() {
+      updateStarsDisplay(selectedRating);
+    }
+
+    function updateStarsDisplay(rating) {
+      const stars = document.querySelectorAll('#starsRow i');
+      stars.forEach((star, idx) => {
+        if (idx < rating) {
+          star.classList.add('active');
+        } else {
+          star.classList.remove('active');
+        }
+      });
+    }
+
+    // --- Form validation and exit prevention ---
+
+    function checkFormProgress() {
+      const text = document.getElementById('feedbackTextField').value.trim();
+      const submitBtn = document.getElementById('submitBtn');
+      
+      const isValid = selectedRating > 0 && text.length > 3 && userEmail.length > 0;
+      submitBtn.disabled = !isValid;
+    }
+
+    // Initialize state if loaded with pre-selected rating
+    if (selectedRating > 0) {
+      updateStarsDisplay(selectedRating);
+      checkFormProgress();
+    }
+
+    // Auto focus text area
+    setTimeout(() => {
+      document.getElementById('feedbackTextField').focus();
+    }, 100);
+
+    // Prevent closing the page accidentally if they started typing
+    window.addEventListener('beforeunload', (e) => {
+      const text = document.getElementById('feedbackTextField').value.trim();
+      const hasStarted = selectedRating > 0 || text.length > 0;
+
+      if (hasStarted && !isSubmitted) {
+        // Standard code to trigger browser leave confirmation modal
+        e.preventDefault();
+        e.returnValue = 'You have unsaved feedback. Are you sure you want to exit?';
+      }
+    });
+
+    // --- Submit Action ---
+
+    async function submitFeedback() {
+      const text = document.getElementById('feedbackTextField').value.trim();
+      const status = document.getElementById('statusMsg');
+      const submitBtn = document.getElementById('submitBtn');
+
+      status.textContent = "";
+      status.className = "status-msg";
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+
+      try {
+        const response = await fetch('/api/feedback/submit', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            rating: selectedRating,
+            reviewText: text,
+            email: userEmail,
+            name: userName
+          })
+        });
+
+        const data = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to submit feedback');
+        }
+
+        handleSuccess();
+      } catch (err) {
+        console.error(err);
+        status.textContent = err.message || "Submission failed. Please check your network connection.";
+        status.className = "status-msg error";
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Submit Feedback <i class="fa-solid fa-arrow-right"></i>';
+      }
+    }
+
+    function handleSuccess() {
+      isSubmitted = true;
+      document.getElementById('successOverlay').style.display = 'flex';
+      
+      // Auto redirect to Hiero active dashboard after 2.5 seconds
+      setTimeout(() => {
+        window.location.href = '/resume-builder.html';
+      }, 2500);
+    }
+  </script>
+</body>
+
+</html>

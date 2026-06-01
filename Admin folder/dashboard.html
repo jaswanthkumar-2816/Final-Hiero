@@ -5,34 +5,56 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Hiero Admin | Command Center</title>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
-    rel="stylesheet">
+  
+  <!-- Premium Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome for Premium Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
   <style>
     :root {
-      --primary: #00ff00;
-      --primary-dim: rgba(0, 255, 0, 0.1);
-      --primary-glow: rgba(0, 255, 0, 0.4);
-      --cyan: #00d9ff;
-      --cyan-glow: rgba(0, 217, 255, 0.3);
-      --purple: #a855f7;
-      --purple-glow: rgba(168, 85, 247, 0.3);
-      --orange: #ff6b35;
-      --orange-glow: rgba(255, 107, 53, 0.3);
-      --pink: #ff006e;
-      --pink-glow: rgba(255, 0, 110, 0.3);
-      --yellow: #ffd60a;
-      --yellow-glow: rgba(255, 214, 10, 0.3);
-      --bg-dark: #050505;
-      --bg-card: rgba(18, 18, 18, 0.6);
-      --text-main: #ffffff;
-      --text-muted: #888888;
-      --border: rgba(255, 255, 255, 0.08);
-      --glass: rgba(255, 255, 255, 0.02);
-      --glass-border: rgba(255, 255, 255, 0.05);
+      /* Curated HSL Light Theme - Professional Corporate Look (Stripe/Linear-inspired) */
+      --primary: 221, 83%, 53%;     /* Royal Indigo Blue */
+      --primary-hex: #2563eb;
+      
+      --success: 142, 76%, 36%;     /* Clean Emerald Green */
+      --success-hex: #059669;
+      
+      --cyan: 199, 89%, 48%;        /* Vivid Cyan */
+      --cyan-hex: #0ea5e9;
+      
+      --purple: 262, 83%, 58%;      /* Modern Violet */
+      --purple-hex: #8b5cf6;
+      
+      --orange: 24, 94%, 50%;       /* Corporate Orange */
+      --orange-hex: #f97316;
+      
+      --rose: 343, 90%, 50%;        /* Elegant Rose */
+      --rose-hex: #f43f5e;
+      
+      --amber: 38, 92%, 50%;        /* Rich Amber */
+      --amber-hex: #d97706;
+      
+      --bg-dark: #f8fafc;           /* Soft Cool Slate Blue Grey */
+      --bg-card: #ffffff;           /* Pure White */
+      --bg-sidebar: #ffffff;        /* Pure White Sidebar */
+      
+      --text-main: #0f172a;         /* High-contrast Charcoal Slate */
+      --text-muted: #64748b;        /* Cool Muted Slate */
+      --border: #e2e8f0;            /* Soft light border */
+      --border-focus: rgba(37, 99, 235, 0.4);
+      
       --card-radius: 16px;
-      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-base: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      
+      /* Light Shadows */
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.04), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+      --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
     }
 
     * {
@@ -42,602 +64,47 @@
     }
 
     body {
-      font-family: 'Inter', sans-serif;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       background-color: var(--bg-dark);
       background-image:
-        radial-gradient(circle at 10% 20%, rgba(0, 255, 0, 0.05) 0%, transparent 40%),
-        radial-gradient(circle at 90% 10%, rgba(0, 217, 255, 0.04) 0%, transparent 40%),
-        radial-gradient(circle at 90% 80%, rgba(168, 85, 247, 0.04) 0%, transparent 40%),
-        radial-gradient(circle at 10% 80%, rgba(255, 107, 53, 0.03) 0%, transparent 40%);
+        radial-gradient(circle at 0% 0%, rgba(37, 99, 235, 0.03) 0%, transparent 40%),
+        radial-gradient(circle at 100% 0%, rgba(5, 150, 105, 0.02) 0%, transparent 40%);
+      background-attachment: fixed;
       color: var(--text-main);
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
       overflow-x: hidden;
+      display: flex;
     }
 
-    /* Scrollbar */
+    /* Scrollbars styling */
     ::-webkit-scrollbar {
       width: 6px;
       height: 6px;
     }
-
     ::-webkit-scrollbar-track {
       background: var(--bg-dark);
     }
-
     ::-webkit-scrollbar-thumb {
-      background: var(--border);
-      border-radius: 3px;
+      background: rgba(0, 0, 0, 0.1);
+      border-radius: 99px;
     }
-
     ::-webkit-scrollbar-thumb:hover {
-      background: var(--primary);
+      background: hsl(var(--primary));
     }
 
-    /* Container */
-    .container {
-      max-width: 1600px;
-      margin: 0 auto;
-      padding: 40px 20px;
-      width: 100%;
-      flex: 1;
-    }
-
-    /* Header */
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 40px;
-      padding-bottom: 20px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .brand h1 {
-      font-size: 24px;
-      font-weight: 800;
-      letter-spacing: -0.5px;
-    }
-
-    .brand span {
-      color: var(--primary);
-    }
-
-    .header-actions {
-      display: flex;
-      gap: 12px;
-    }
-
-    .btn {
-      background: var(--glass);
-      border: 1px solid var(--glass-border);
-      color: var(--text-main);
-      padding: 10px 20px;
-      border-radius: 12px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: var(--transition);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .btn:hover {
-      background: var(--primary-dim);
-      border-color: var(--primary);
-      color: var(--primary);
-      transform: translateY(-2px);
-    }
-
-    .btn-primary {
-      background: var(--primary);
-      color: #000;
-      border: none;
-    }
-
-    .btn-primary:hover {
-      background: #00cc00;
-      color: #000;
-      box-shadow: 0 0 15px var(--primary-glow);
-    }
-
-    /* Stats Grid */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 20px;
-      margin-bottom: 40px;
-    }
-
-    .stat-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--card-radius);
-      padding: 24px;
-      position: relative;
-      overflow: hidden;
-      backdrop-filter: blur(10px);
-      transition: var(--transition);
-    }
-
-    .stat-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    }
-
-    .stat-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      opacity: 0.05;
-      transition: var(--transition);
-    }
-
-    .stat-card:hover::before {
-      opacity: 0.1;
-    }
-
-    /* Individual stat card colors */
-    .stat-card:nth-child(1) {
-      border-color: rgba(0, 217, 255, 0.3);
-    }
-
-    .stat-card:nth-child(1)::before {
-      background: linear-gradient(135deg, var(--cyan), transparent);
-    }
-
-    .stat-card:nth-child(1):hover {
-      border-color: var(--cyan);
-      box-shadow: 0 10px 30px var(--cyan-glow);
-    }
-
-    .stat-card:nth-child(1) .stat-icon {
-      color: var(--cyan);
-    }
-
-    .stat-card:nth-child(1) .stat-value {
-      color: var(--cyan);
-    }
-
-    .stat-card:nth-child(2) {
-      border-color: rgba(168, 85, 247, 0.3);
-    }
-
-    .stat-card:nth-child(2)::before {
-      background: linear-gradient(135deg, var(--purple), transparent);
-    }
-
-    .stat-card:nth-child(2):hover {
-      border-color: var(--purple);
-      box-shadow: 0 10px 30px var(--purple-glow);
-    }
-
-    .stat-card:nth-child(2) .stat-icon {
-      color: var(--purple);
-    }
-
-    .stat-card:nth-child(2) .stat-value {
-      color: var(--purple);
-    }
-
-    .stat-card:nth-child(3) {
-      border-color: rgba(255, 107, 53, 0.3);
-    }
-
-    .stat-card:nth-child(3)::before {
-      background: linear-gradient(135deg, var(--orange), transparent);
-    }
-
-    .stat-card:nth-child(3):hover {
-      border-color: var(--orange);
-      box-shadow: 0 10px 30px var(--orange-glow);
-    }
-
-    .stat-card:nth-child(3) .stat-icon {
-      color: var(--orange);
-    }
-
-    .stat-card:nth-child(3) .stat-value {
-      color: var(--orange);
-    }
-
-    .stat-card:nth-child(4) {
-      border-color: rgba(255, 214, 10, 0.3);
-    }
-
-    .stat-card:nth-child(4)::before {
-      background: linear-gradient(135deg, var(--yellow), transparent);
-    }
-
-    .stat-card:nth-child(4):hover {
-      border-color: var(--yellow);
-      box-shadow: 0 10px 30px var(--yellow-glow);
-    }
-
-    .stat-card:nth-child(4) .stat-icon {
-      color: var(--yellow);
-    }
-
-    .stat-card:nth-child(4) .stat-value {
-      color: var(--yellow);
-    }
-
-    .stat-card:nth-child(5) {
-      border-color: rgba(255, 0, 110, 0.3);
-    }
-
-    .stat-card:nth-child(5)::before {
-      background: linear-gradient(135deg, var(--pink), transparent);
-    }
-
-    .stat-card:nth-child(5):hover {
-      border-color: var(--pink);
-      box-shadow: 0 10px 30px var(--pink-glow);
-    }
-
-    .stat-card:nth-child(5) .stat-icon {
-      color: var(--pink);
-    }
-
-    .stat-card:nth-child(5) .stat-value {
-      color: var(--pink);
-    }
-
-    .stat-icon {
-      font-size: 28px;
-      margin-bottom: 16px;
-      filter: drop-shadow(0 0 8px currentColor);
-    }
-
-    .stat-value {
-      font-size: 36px;
-      font-weight: 700;
-      margin-bottom: 4px;
-      font-family: 'JetBrains Mono', monospace;
-      text-shadow: 0 0 20px currentColor;
-    }
-
-    .stat-label {
-      font-size: 14px;
-      color: var(--text-muted);
-      font-weight: 500;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-    }
-
-    /* Two Column Layout */
-    .dual-panel-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 30px;
-      margin-bottom: 40px;
-    }
-
-    @media (max-width: 1200px) {
-      .dual-panel-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    /* Sections */
-    .section {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--card-radius);
-      padding: 30px;
-      backdrop-filter: blur(10px);
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .section::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 3px;
-      background: linear-gradient(90deg, var(--cyan), var(--purple), var(--orange), var(--pink));
-      opacity: 0.6;
-    }
-
-    .section-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 24px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .section-title {
-      font-size: 20px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      background: linear-gradient(90deg, var(--cyan), var(--purple));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .section-title i {
-      color: var(--cyan);
-      filter: drop-shadow(0 0 10px var(--cyan-glow));
-      -webkit-text-fill-color: var(--cyan);
-    }
-
-    .count-badge {
-      background: rgba(0, 255, 0, 0.1);
-      color: var(--primary);
-      padding: 4px 12px;
-      border-radius: 99px;
-      font-size: 12px;
-      font-weight: 700;
-      border: 1px solid rgba(0, 255, 0, 0.2);
-    }
-
-    /* Reviews List */
-    .reviews-list {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      overflow-y: auto;
-      max-height: 600px;
-      padding-right: 8px;
-    }
-
-    .review-card {
-      background: rgba(0, 0, 0, 0.3);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 20px;
-      transition: var(--transition);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .review-card::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      width: 4px;
-      background: linear-gradient(180deg, var(--cyan), var(--purple));
-      opacity: 0;
-      transition: var(--transition);
-    }
-
-    .review-card:hover::before {
-      opacity: 1;
-    }
-
-    .review-card:nth-child(odd) {
-      border-color: rgba(0, 217, 255, 0.2);
-    }
-
-    .review-card:nth-child(odd):hover {
-      border-color: var(--cyan);
-      background: rgba(0, 217, 255, 0.05);
-      transform: translateX(4px);
-      box-shadow: 0 4px 20px var(--cyan-glow);
-    }
-
-    .review-card:nth-child(even) {
-      border-color: rgba(168, 85, 247, 0.2);
-    }
-
-    .review-card:nth-child(even):hover {
-      border-color: var(--purple);
-      background: rgba(168, 85, 247, 0.05);
-      transform: translateX(4px);
-      box-shadow: 0 4px 20px var(--purple-glow);
-    }
-
-    .review-card:nth-child(even)::before {
-      background: linear-gradient(180deg, var(--purple), var(--pink));
-    }
-
-    .review-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 12px;
-    }
-
-    .review-user {
-      font-weight: 600;
-      background: linear-gradient(90deg, var(--cyan), var(--purple));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 4px;
-      font-size: 15px;
-    }
-
-    .review-date {
-      font-size: 11px;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .review-rating {
-      color: #ffd700;
-      font-size: 14px;
-      background: rgba(255, 215, 0, 0.1);
-      padding: 4px 8px;
-      border-radius: 6px;
-      white-space: nowrap;
-    }
-
-    .review-text {
-      color: #ccc;
-      line-height: 1.6;
-      font-size: 14px;
-    }
-
-    /* Users List */
-    .users-list {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      overflow-y: auto;
-      max-height: 600px;
-      padding-right: 8px;
-    }
-
-    .user-card {
-      background: rgba(0, 0, 0, 0.3);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 16px 20px;
-      transition: var(--transition);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .user-card::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      width: 4px;
-      background: linear-gradient(180deg, var(--orange), var(--pink));
-      opacity: 0;
-      transition: var(--transition);
-    }
-
-    .user-card:hover::before {
-      opacity: 1;
-    }
-
-    .user-card:nth-child(odd) {
-      border-color: rgba(255, 107, 53, 0.2);
-    }
-
-    .user-card:nth-child(odd):hover {
-      border-color: var(--orange);
-      background: rgba(255, 107, 53, 0.05);
-      transform: translateX(4px);
-    }
-
-    .user-info {
-      flex: 1;
-    }
-
-    .user-name {
-      font-weight: 600;
-      background: linear-gradient(90deg, var(--orange), var(--pink));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 4px;
-      font-size: 15px;
-    }
-
-    .user-email {
-      font-size: 12px;
-      color: var(--text-muted);
-      font-family: 'JetBrains Mono', monospace;
-    }
-
-    .user-meta {
-      display: flex;
-      gap: 16px;
-      align-items: center;
-      margin-top: 8px;
-    }
-
-    .user-stat {
-      font-size: 11px;
-      color: var(--text-muted);
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .user-stat i {
-      color: var(--orange);
-      font-size: 10px;
-      filter: drop-shadow(0 0 4px var(--orange-glow));
-    }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      padding: 4px 10px;
-      border-radius: 99px;
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-    }
-
-    .badge.active {
-      background: rgba(0, 255, 0, 0.1);
-      color: var(--primary);
-      border: 1px solid rgba(0, 255, 0, 0.2);
-    }
-
-    .badge.inactive {
-      background: rgba(255, 255, 255, 0.05);
-      color: var(--text-muted);
-      border: 1px solid var(--border);
-    }
-
-    /* Loading / Error / Empty States */
-    .state-message {
-      text-align: center;
-      padding: 60px 20px;
-      color: var(--text-muted);
-      font-size: 16px;
-    }
-
-    .spinner {
-      margin: 0 auto 20px;
-      width: 40px;
-      height: 40px;
-      border: 3px solid rgba(0, 255, 0, 0.1);
-      border-radius: 50%;
-      border-top-color: var(--primary);
-      animation: spin 1s ease-in-out infinite;
-    }
-
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-
-    /* Password Gate */
+    /* ========================================== */
+    /* PROFESSIONAL PIN GATE */
+    /* ========================================== */
     .gate-overlay {
       position: fixed;
       inset: 0;
-      background: var(--bg-dark);
+      background: rgba(241, 245, 249, 0.95);
+      backdrop-filter: blur(16px);
       z-index: 9999;
       display: flex;
       align-items: center;
       justify-content: center;
+      transition: opacity 0.4s ease;
     }
 
     .gate-card {
@@ -648,71 +115,948 @@
       width: 100%;
       max-width: 420px;
       text-align: center;
-      backdrop-filter: blur(20px);
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+      box-shadow: var(--shadow-xl);
+      animation: zoomIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes zoomIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .gate-logo {
+      font-family: 'Outfit', sans-serif;
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .gate-logo span {
+      color: hsl(var(--primary));
+    }
+
+    .gate-logo i {
+      font-size: 22px;
+      color: hsl(var(--primary));
     }
 
     .gate-icon {
-      font-size: 48px;
-      color: var(--primary);
+      font-size: 32px;
+      color: hsl(var(--primary));
       margin-bottom: 24px;
-      filter: drop-shadow(0 0 20px var(--primary-glow));
+      opacity: 0.85;
     }
 
-    .gate-input-wrapper {
-      position: relative;
+    .pin-display-container {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
       margin: 30px 0;
     }
 
-    .gate-input {
-      width: 100%;
-      background: rgba(0, 0, 0, 0.3);
-      border: 1px solid var(--border);
+    .pin-digit-box {
+      width: 48px;
+      height: 56px;
+      border: 1.5px solid var(--border);
       border-radius: 12px;
-      padding: 16px;
-      color: var(--primary);
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 24px;
-      text-align: center;
-      letter-spacing: 8px;
-      outline: none;
-      transition: var(--transition);
+      background: #f8fafc;
+      font-family: 'Outfit', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition-base);
     }
 
-    .gate-input:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 1px var(--primary-dim);
+    .pin-digit-box.active {
+      border-color: hsl(var(--primary));
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+      background: #ffffff;
+    }
+
+    .keyboard-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 30px;
+    }
+
+    .key-btn {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      color: #0f172a;
+      padding: 14px;
+      border-radius: 12px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition-base);
+      user-select: none;
+    }
+
+    .key-btn:hover {
+      background: #f1f5f9;
+      border-color: #cbd5e1;
+      transform: translateY(-1px);
+    }
+
+    .key-btn:active {
+      background: #e2e8f0;
+      transform: translateY(1px);
+    }
+
+    .key-btn.action-key {
+      color: hsl(var(--rose));
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .key-btn.submit-key {
+      color: hsl(var(--primary));
+      font-size: 13px;
+      font-weight: 700;
     }
 
     .gate-btn {
       width: 100%;
-      padding: 16px;
-      font-size: 16px;
-      margin-bottom: 12px;
+      background: hsl(var(--primary));
+      color: #ffffff;
+      border: none;
+      padding: 14px;
+      border-radius: 12px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: var(--shadow-md);
+      transition: var(--transition-base);
+    }
+
+    .gate-btn:hover {
+      background: #1d4ed8;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px -4px rgba(37, 99, 235, 0.3);
+    }
+
+    .gate-btn-secondary {
+      width: 100%;
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      padding: 14px;
+      border-radius: 12px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      margin-top: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: var(--transition-base);
+    }
+
+    .gate-btn-secondary:hover {
+      background: #f8fafc;
+      color: var(--text-main);
+      border-color: #cbd5e1;
     }
 
     .gate-error {
-      color: #ff4444;
+      color: hsl(var(--rose));
       font-size: 13px;
-      margin-top: 12px;
+      margin-top: 15px;
       min-height: 20px;
+      font-weight: 600;
+      letter-spacing: 0.2px;
     }
 
-    @media (max-width: 768px) {
-      .stats-grid {
+    .shake {
+      animation: shakeAnim 0.3s ease;
+    }
+
+    @keyframes shakeAnim {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+
+    /* ========================================== */
+    /* CLEAN WHITE SIDEBAR */
+    /* ========================================== */
+    .sidebar {
+      width: 270px;
+      background: var(--bg-sidebar);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .sidebar-brand {
+      padding: 30px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .sidebar-brand h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: #0f172a;
+    }
+
+    .sidebar-brand span {
+      color: hsl(var(--primary));
+    }
+
+    .sidebar-brand i {
+      font-size: 22px;
+      color: hsl(var(--primary));
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 10px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: 10px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition-base);
+    }
+
+    .nav-item:hover {
+      background: #f8fafc;
+      color: var(--text-main);
+    }
+
+    .nav-item.active {
+      background: rgba(37, 99, 235, 0.05);
+      color: hsl(var(--primary));
+      font-weight: 700;
+    }
+
+    .sidebar-footer {
+      padding: 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .server-status-badge {
+      background: #f0fdf4;
+      border: 1px solid #dcfce7;
+      border-radius: 10px;
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+      color: #166534;
+      font-weight: 600;
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      background: #22c55e;
+      border-radius: 50%;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.5; }
+      50% { opacity: 1; }
+      100% { opacity: 0.5; }
+    }
+
+    /* ========================================== */
+    /* LIGHT MODE WORKSPACE */
+    /* ========================================== */
+    .main-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      width: calc(100% - 270px);
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 40px;
+      width: 100%;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+      animation: fadeIn 0.4s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .top-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header-title h2 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: #0f172a;
+    }
+
+    .header-title p {
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-top: 4px;
+      font-weight: 500;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      color: #334155;
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition-base);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+    }
+
+    .btn:hover {
+      background: #f8fafc;
+      border-color: #cbd5e1;
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      background: hsl(var(--primary));
+      color: #ffffff;
+      border: none;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-primary:hover {
+      background: #1d4ed8;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+      color: #ffffff;
+    }
+
+    /* ========================================== */
+    /* ANALYTICS GRID */
+    /* ========================================== */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--card-radius);
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition-base);
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+      border-color: #cbd5e1;
+      box-shadow: var(--shadow-md);
+    }
+
+    /* Visual Accent Stripes */
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 4px;
+      width: 100%;
+    }
+
+    .stat-card.card-cyan::before { background: hsl(var(--cyan)); }
+    .stat-card.card-cyan .stat-icon { color: hsl(var(--cyan)); }
+    .stat-card.card-cyan:hover { box-shadow: 0 10px 15px -3px rgba(14, 165, 233, 0.08); }
+
+    .stat-card.card-purple::before { background: hsl(var(--purple)); }
+    .stat-card.card-purple .stat-icon { color: hsl(var(--purple)); }
+    .stat-card.card-purple:hover { box-shadow: 0 10px 15px -3px rgba(139, 92, 246, 0.08); }
+
+    .stat-card.card-amber::before { background: hsl(var(--amber)); }
+    .stat-card.card-amber .stat-icon { color: hsl(var(--amber)); }
+    .stat-card.card-amber:hover { box-shadow: 0 10px 15px -3px rgba(217, 119, 6, 0.08); }
+
+    .stat-card.card-rose::before { background: hsl(var(--rose)); }
+    .stat-card.card-rose .stat-icon { color: hsl(var(--rose)); }
+    .stat-card.card-rose:hover { box-shadow: 0 10px 15px -3px rgba(244, 63, 94, 0.08); }
+
+    .stat-icon {
+      font-size: 22px;
+      margin-bottom: 16px;
+      display: inline-block;
+    }
+
+    .stat-value {
+      font-family: 'Outfit', sans-serif;
+      font-size: 34px;
+      font-weight: 800;
+      margin-bottom: 4px;
+      color: #0f172a;
+      letter-spacing: -0.5px;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    /* ========================================== */
+    /* DASHBOARD SECTIONS & WORKSPACE PANELS */
+    /* ========================================== */
+    .dashboard-panel {
+      display: none;
+    }
+
+    .dashboard-panel.active {
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    .dual-panel-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+    }
+
+    @media (max-width: 1200px) {
+      .dual-panel-grid {
         grid-template-columns: 1fr;
       }
+    }
 
-      .header {
-        flex-direction: column;
-        gap: 20px;
-        align-items: flex-start;
+    .section {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--card-radius);
+      padding: 28px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-title i {
+      color: hsl(var(--primary));
+    }
+
+    .count-badge {
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      color: #475569;
+      padding: 3px 10px;
+      border-radius: 99px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    /* ========================================== */
+    /* FILTER AND SEARCH CONTROLS */
+    /* ========================================== */
+    .filter-search-row {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .search-input-wrapper {
+      position: relative;
+      flex: 1;
+    }
+
+    .search-input-wrapper i {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #94a3b8;
+      font-size: 13px;
+    }
+
+    .filter-input {
+      width: 100%;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 14px 10px 38px;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 13.5px;
+      outline: none;
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition-base);
+    }
+
+    .filter-input:focus {
+      border-color: hsl(var(--primary));
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+    }
+
+    .rating-filter-pills {
+      display: flex;
+      gap: 6px;
+    }
+
+    .pill-btn {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      color: #475569;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition-base);
+    }
+
+    .pill-btn:hover {
+      background: #f8fafc;
+      color: #0f172a;
+    }
+
+    .pill-btn.active {
+      background: rgba(37, 99, 235, 0.06);
+      border-color: rgba(37, 99, 235, 0.2);
+      color: hsl(var(--primary));
+      font-weight: 700;
+    }
+
+    /* ========================================== */
+    /* LIST VIEW & FEED CARDS */
+    /* ========================================== */
+    .list-container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow-y: auto;
+      max-height: 500px;
+      padding-right: 6px;
+    }
+
+    .review-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+      transition: var(--transition-base);
+      position: relative;
+    }
+
+    .review-card:hover {
+      border-color: #cbd5e1;
+      box-shadow: var(--shadow-sm);
+      transform: translateX(2px);
+    }
+
+    .review-card::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 18px;
+      bottom: 18px;
+      width: 3px;
+      border-radius: 99px;
+      background: hsl(var(--primary));
+    }
+
+    .review-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+
+    .user-avatar-tag {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .avatar-circle {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #e0f2fe 0%, #dbeafe 100%);
+      color: hsl(var(--primary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 13px;
+      text-transform: uppercase;
+    }
+
+    .reviewer-name {
+      font-weight: 700;
+      color: #1e293b;
+      font-size: 13.5px;
+    }
+
+    .review-time {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 1px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .rating-badge {
+      background: #fef3c7;
+      border: 1px solid #fde68a;
+      color: #b45309;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .review-text {
+      color: #334155;
+      font-size: 13px;
+      line-height: 1.6;
+      margin-left: 44px;
+      font-style: italic;
+    }
+
+    /* User Cards / Login Feed */
+    .user-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 18px;
+      transition: var(--transition-base);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .user-card:hover {
+      border-color: #cbd5e1;
+      box-shadow: var(--shadow-sm);
+      transform: translateX(2px);
+    }
+
+    .user-card-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .user-card-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      background: #f0fdf4;
+      border: 1px solid #dcfce7;
+      color: #166534;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .user-details {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .user-display-name {
+      font-weight: 700;
+      font-size: 14px;
+      color: #1e293b;
+    }
+
+    .user-display-email {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+      margin-top: 1px;
+    }
+
+    .user-card-stats {
+      display: flex;
+      gap: 12px;
+      margin-top: 4px;
+    }
+
+    .user-stat-pill {
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: 600;
+    }
+
+    .user-stat-pill i {
+      color: hsl(var(--primary));
+    }
+
+    .user-active-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .user-active-badge.active {
+      background: #e6f4ea;
+      border: 1px solid #cce8d5;
+      color: #137333;
+    }
+
+    .user-active-badge.inactive {
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      color: #64748b;
+    }
+
+    /* ========================================== */
+    /* ANALYTICS SECTION (VISUALIZATION) */
+    /* ========================================== */
+    .analytics-visual-grid {
+      display: grid;
+      grid-template-columns: 3fr 2fr;
+      gap: 28px;
+    }
+
+    @media (max-width: 992px) {
+      .analytics-visual-grid {
+        grid-template-columns: 1fr;
       }
+    }
 
+    /* Rating distribution visualizer */
+    .rating-distribution-container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .dist-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 13px;
+    }
+
+    .dist-label {
+      width: 40px;
+      font-weight: 600;
+      color: #475569;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 4px;
+    }
+
+    .dist-label i {
+      color: #d97706;
+    }
+
+    .dist-bar-bg {
+      flex: 1;
+      height: 10px;
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+
+    .dist-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, hsl(var(--cyan)) 0%, hsl(var(--primary)) 100%);
+      border-radius: 5px;
+      width: 0%;
+      transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .dist-value {
+      width: 30px;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+      color: #334155;
+    }
+
+    /* Log Console Component */
+    .system-logs-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11.5px;
+      max-height: 240px;
+      overflow-y: auto;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+    }
+
+    .log-line {
+      display: flex;
+      gap: 8px;
+      color: #475569;
+      line-height: 1.4;
+    }
+
+    .log-time {
+      color: #0284c7;
+    }
+
+    .log-tag {
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .log-tag.info { color: #2563eb; }
+    .log-tag.success { color: #16a34a; }
+    .log-tag.warning { color: #ea580c; }
+
+    /* Empty states / loaders */
+    .state-message {
+      text-align: center;
+      padding: 50px 20px;
+      color: var(--text-muted);
+      font-size: 13.5px;
+      font-weight: 500;
+    }
+
+    .spinner {
+      margin: 0 auto 12px;
+      width: 28px;
+      height: 28px;
+      border: 2.5px solid #f1f5f9;
+      border-radius: 50%;
+      border-top-color: hsl(var(--primary));
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      body {
+        flex-direction: column;
+      }
+      .sidebar {
+        width: 100%;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+      }
+      .main-wrapper {
+        width: 100%;
+      }
+      .container {
+        padding: 24px;
+      }
+      .top-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+      }
       .header-actions {
         width: 100%;
       }
-
       .header-actions .btn {
         flex: 1;
         justify-content: center;
@@ -723,187 +1067,445 @@
 
 <body>
 
-  <!-- Password Gate -->
+  <!-- Futuristic Light Keypad PIN Gate -->
   <div id="passwordGate" class="gate-overlay">
     <div class="gate-card">
+      <div class="gate-logo">
+        <i class="fa-solid fa-compass-drafting"></i> HIERO <span>ADMIN</span>
+      </div>
       <div class="gate-icon">
-        <i class="fas fa-fingerprint"></i>
+        <i class="fas fa-shield-halved"></i>
       </div>
-      <h2>Security Access</h2>
-      <p style="color: var(--text-muted); margin-top: 8px;">Enter Admin PIN or use Biometrics</p>
-
-      <div class="gate-input-wrapper">
-        <input type="password" id="adminPinInput" class="gate-input" maxlength="4" placeholder="••••"
-          inputmode="numeric">
-        <div id="passwordError" class="gate-error"></div>
+      <p style="color: var(--text-muted); font-size: 13.5px; font-weight: 600; margin-bottom: 10px;">Security Access Required</p>
+      
+      <!-- Hidden Input mimicking PIN entry -->
+      <input type="password" id="adminPinInput" style="display: none;" maxlength="4">
+      
+      <!-- PIN Indicators -->
+      <div class="pin-display-container">
+        <div class="pin-digit-box" id="pbox-1">•</div>
+        <div class="pin-digit-box" id="pbox-2">•</div>
+        <div class="pin-digit-box" id="pbox-3">•</div>
+        <div class="pin-digit-box" id="pbox-4">•</div>
       </div>
 
-      <button id="passwordSubmit" class="btn btn-primary gate-btn">
-        Unlock Dashboard
-      </button>
+      <!-- Keypad Grid -->
+      <div class="keyboard-grid">
+        <button class="key-btn" onclick="pressKey('1')">1</button>
+        <button class="key-btn" onclick="pressKey('2')">2</button>
+        <button class="key-btn" onclick="pressKey('3')">3</button>
+        <button class="key-btn" onclick="pressKey('4')">4</button>
+        <button class="key-btn" onclick="pressKey('5')">5</button>
+        <button class="key-btn" onclick="pressKey('6')">6</button>
+        <button class="key-btn" onclick="pressKey('7')">7</button>
+        <button class="key-btn" onclick="pressKey('8')">8</button>
+        <button class="key-btn" onclick="pressKey('9')">9</button>
+        <button class="key-btn action-key" onclick="clearPin()">CLEAR</button>
+        <button class="key-btn" onclick="pressKey('0')">0</button>
+        <button class="key-btn submit-key" onclick="checkPin()">ENTER</button>
+      </div>
 
-      <button id="fingerprintBtn" class="btn gate-btn" style="justify-content: center;">
+      <button id="fingerprintBtn" class="gate-btn-secondary">
         <i class="fas fa-fingerprint"></i> Use Biometrics
       </button>
+
+      <div id="passwordError" class="gate-error"></div>
     </div>
   </div>
 
-  <!-- Main Content -->
-  <div id="dashboardContent" class="container" style="display: none;">
-    <!-- Header -->
-    <header class="header">
-      <div class="brand">
-        <h1>HIERO <span>ADMIN</span></h1>
-      </div>
-      <div class="header-actions">
-        <button id="refreshBtn" class="btn">
-          <i class="fas fa-sync-alt"></i> Refresh Data
-        </button>
-        <a href="/" class="btn" style="text-decoration: none;">
-          <i class="fas fa-external-link-alt"></i> Live Site
-        </a>
-      </div>
-    </header>
-
-    <!-- Loading State -->
-    <div id="loadingState" class="state-message" style="display: none;">
-      <div class="spinner"></div>
-      <p>Fetching secure data...</p>
+  <!-- Sidebar Component -->
+  <aside class="sidebar" id="dashboardSidebar" style="display: none;">
+    <div class="sidebar-brand">
+      <i class="fa-solid fa-compass-drafting"></i>
+      <h1>HIERO <span>ADMIN</span></h1>
     </div>
-
-    <!-- Error State -->
-    <div id="errorState" class="state-message" style="display: none;">
-      <div style="font-size: 40px; margin-bottom: 16px;">⚠️</div>
-      <h3 style="margin-bottom: 8px;">Connection Failed</h3>
-      <p id="errorMessage" style="color: #ff4444;"></p>
-      <button onclick="location.reload()" class="btn btn-primary"
-        style="margin: 20px auto; display: inline-flex;">Retry</button>
+    
+    <nav class="sidebar-nav">
+      <div class="nav-item active" onclick="switchTab('dashboard')">
+        <i class="fa-solid fa-chart-pie"></i> Control Dashboard
+      </div>
+      <div class="nav-item" onclick="switchTab('users')">
+        <i class="fa-solid fa-users-gear"></i> User Analytics
+      </div>
+      <div class="nav-item" onclick="switchTab('reviews')">
+        <i class="fa-solid fa-star-half-stroke"></i> System Reviews
+      </div>
+    </nav>
+    
+    <div class="sidebar-footer">
+      <div class="server-status-badge">
+        <div class="status-dot"></div>
+        <span>Gateway Connect: Port 2816</span>
+      </div>
     </div>
+  </aside>
 
-    <!-- Data Content -->
-    <div id="dataView" style="display: none;">
-      <!-- Stats -->
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-header">
+  <!-- Main Platform Content Wrapper -->
+  <main class="main-wrapper" id="dashboardContent" style="display: none;">
+    <div class="container">
+      
+      <!-- Top Action Bar -->
+      <header class="top-header">
+        <div class="header-title">
+          <h2 id="currentTabTitle">Platform Control</h2>
+          <p id="currentTabDesc">Overview of live metrics, active users, and platform feedback.</p>
+        </div>
+        <div class="header-actions">
+          <button id="refreshBtn" class="btn">
+            <i class="fas fa-sync-alt"></i> Sync Data
+          </button>
+          <a href="/" class="btn btn-primary" target="_blank">
+            <i class="fas fa-external-link-alt"></i> Live App
+          </a>
+        </div>
+      </header>
+
+      <!-- Global Loading State -->
+      <div id="loadingState" class="state-message">
+        <div class="spinner"></div>
+        <p style="font-weight: 600; margin-top: 8px;">Syncing Hiero command center metrics...</p>
+      </div>
+
+      <!-- Global Error State -->
+      <div id="errorState" class="state-message" style="display: none;">
+        <div style="font-size: 36px; margin-bottom: 12px; color: hsl(var(--rose));">⚠️</div>
+        <h3 style="margin-bottom: 8px; color: var(--text-main);">Sync Handshake Failed</h3>
+        <p id="errorMessage" style="color: hsl(var(--rose)); font-weight: 600;"></p>
+        <button onclick="loadData()" class="btn btn-primary" style="margin: 20px auto 0; display: inline-flex;">Retry handshake</button>
+      </div>
+
+      <!-- Live Command Center Views -->
+      <div id="dataView" style="display: none; width: 100%;" class="dashboard-panel active">
+        
+        <!-- Stats Core Grid -->
+        <div class="stats-grid">
+          <div class="stat-card card-cyan">
             <i class="fas fa-users stat-icon"></i>
             <div class="stat-value" id="totalUsers">0</div>
-            <div class="stat-label">Total Users</div>
+            <div class="stat-label">Total Registrants</div>
           </div>
-        </div>
 
-        <div class="stat-card">
-          <div class="stat-header">
-            <i class="fas fa-user-check stat-icon"></i>
+          <div class="stat-card card-purple">
+            <i class="fas fa-eye stat-icon"></i>
             <div class="stat-value" id="uniqueUsers">0</div>
-            <div class="stat-label">Unique Visitors</div>
+            <div class="stat-label">Unique Visited</div>
           </div>
-        </div>
 
-        <div class="stat-card">
-          <div class="stat-header">
-            <i class="fas fa-door-open stat-icon"></i>
+          <div class="stat-card card-amber">
+            <i class="fas fa-right-to-bracket stat-icon"></i>
             <div class="stat-value" id="totalVisits">0</div>
-            <div class="stat-label">Total Logins</div>
+            <div class="stat-label">Session Logins</div>
           </div>
-        </div>
 
-        <div class="stat-card">
-          <div class="stat-header">
-            <i class="fas fa-star stat-icon"></i>
+          <div class="stat-card card-rose">
+            <i class="fas fa-star-half-stroke stat-icon"></i>
             <div class="stat-value" id="avgRating">0.0</div>
-            <div class="stat-label">Average Rating</div>
+            <div class="stat-label">Average Star</div>
           </div>
         </div>
 
-        <div class="stat-card">
-          <div class="stat-header">
-            <i class="fas fa-comment-alt stat-icon"></i>
-            <div class="stat-value" id="totalReviews">0</div>
-            <div class="stat-label">Total Reviews</div>
+        <!-- Custom Visualized Dashboard -->
+        <div class="analytics-visual-grid">
+          
+          <!-- LEFT: Rating distribution visualizer -->
+          <div class="section">
+            <div class="section-header">
+              <div class="section-title">
+                <i class="fa-solid fa-chart-column"></i> Rating Distribution
+              </div>
+              <span class="count-badge" id="distReviewCount">0 Reviews</span>
+            </div>
+            
+            <div class="rating-distribution-container" id="ratingDistribution">
+              <div class="dist-row">
+                <div class="dist-label">5 <i class="fas fa-star"></i></div>
+                <div class="dist-bar-bg"><div class="dist-bar-fill" id="fill-5"></div></div>
+                <div class="dist-value" id="count-5">0</div>
+              </div>
+              <div class="dist-row">
+                <div class="dist-label">4 <i class="fas fa-star"></i></div>
+                <div class="dist-bar-bg"><div class="dist-bar-fill" id="fill-4"></div></div>
+                <div class="dist-value" id="count-4">0</div>
+              </div>
+              <div class="dist-row">
+                <div class="dist-label">3 <i class="fas fa-star"></i></div>
+                <div class="dist-bar-bg"><div class="dist-bar-fill" id="fill-3"></div></div>
+                <div class="dist-value" id="count-3">0</div>
+              </div>
+              <div class="dist-row">
+                <div class="dist-label">2 <i class="fas fa-star"></i></div>
+                <div class="dist-bar-bg"><div class="dist-bar-fill" id="fill-2"></div></div>
+                <div class="dist-value" id="count-2">0</div>
+              </div>
+              <div class="dist-row">
+                <div class="dist-label">1 <i class="fas fa-star"></i></div>
+                <div class="dist-bar-bg"><div class="dist-bar-fill" id="fill-1"></div></div>
+                <div class="dist-value" id="count-1">0</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- RIGHT: Live Logging System -->
+          <div class="section">
+            <div class="section-header">
+              <div class="section-title">
+                <i class="fa-solid fa-terminal"></i> Command Audit Log
+              </div>
+              <span class="count-badge">Live logs</span>
+            </div>
+            
+            <div class="system-logs-container" id="commandLogs">
+              <div class="log-line"><span class="log-time">[11:10:15]</span> <span class="log-tag success">ok</span> Command Center startup sequence resolved.</div>
+              <div class="log-line"><span class="log-time">[11:11:32]</span> <span class="log-tag info">info</span> Local database fallback loaded.</div>
+              <div class="log-line"><span class="log-time">[11:16:38]</span> <span class="log-tag info">info</span> Environment variables handshake resolved.</div>
+              <div class="log-line"><span class="log-time">[11:17:36]</span> <span class="log-tag success">ok</span> Live MongoDB database sync active.</div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Live Users Tab View -->
+      <div id="usersView" style="display: none; width: 100%;" class="dashboard-panel">
+        
+        <div class="section">
+          <div class="section-header">
+            <div class="section-title">
+              <i class="fa-solid fa-users-viewfinder"></i> User Base Analytics
+            </div>
+            <span class="count-badge" id="userCount">0 Mapped</span>
+          </div>
+          
+          <div class="filter-search-row">
+            <div class="search-input-wrapper">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" id="userSearchInput" class="filter-input" placeholder="Search users by name or email address..." oninput="filterUsers()">
+            </div>
+          </div>
+
+          <!-- Bulk Action Row -->
+          <div style="display: flex; justify-content: space-between; align-items: center; background: #f8fafc; border: 1px solid var(--border); border-radius: 12px; padding: 12px 20px; margin-bottom: 20px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <input type="checkbox" id="selectAllUsersCheckbox" onchange="toggleSelectAllUsers(this)" style="width: 18px; height: 18px; cursor: pointer; accent-color: #10b981;">
+              <label for="selectAllUsersCheckbox" style="font-size: 13px; font-weight: 700; color: #475569; cursor: pointer; user-select: none;">Select All Users</label>
+            </div>
+            
+            <button id="sendBulkEmailBtn" class="btn btn-primary" onclick="sendBulkFeedbackEmails()" style="padding: 8px 16px; border-radius: 8px; font-size: 12px;" disabled>
+              <i class="fa-solid fa-paper-plane"></i> Send Feedback Invitation (<span id="selectedUsersCount">0</span>)
+            </button>
+          </div>
+
+          <div id="usersContainer" class="list-container">
+            <div class="state-message">No active user metrics loaded</div>
           </div>
         </div>
+
       </div>
 
-      <!-- Two Column Layout: Reviews Left, User Logins Right -->
-      <div class="dual-panel-grid">
-        <!-- LEFT: User Reviews -->
-        <section class="section">
+      <!-- Live Reviews Tab View -->
+      <div id="reviewsView" style="display: none; width: 100%;" class="dashboard-panel">
+        
+        <div class="section">
           <div class="section-header">
             <div class="section-title">
-              <i class="fas fa-star-half-alt"></i> User Reviews
+              <i class="fa-solid fa-star-half-stroke"></i> System Feedback
             </div>
-            <span class="count-badge" id="reviewCount">0</span>
+            <span class="count-badge" id="reviewCount">0 Reviews</span>
           </div>
-          <div id="reviewsContainer" class="reviews-list">
-            <div class="state-message">No reviews yet</div>
+          
+          <div class="filter-search-row">
+            <div class="search-input-wrapper">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" id="reviewSearchInput" class="filter-input" placeholder="Search reviews by email, name, or description..." oninput="filterReviews()">
+            </div>
+            
+            <div class="rating-filter-pills" id="ratingPills">
+              <button class="pill-btn active" onclick="setRatingFilter(0)">All Stars</button>
+              <button class="pill-btn" onclick="setRatingFilter(5)">5 ★</button>
+              <button class="pill-btn" onclick="setRatingFilter(4)">4 ★</button>
+              <button class="pill-btn" onclick="setRatingFilter(3)">3 ★</button>
+              <button class="pill-btn" onclick="setRatingFilter(2)">Under 3 ★</button>
+            </div>
           </div>
-        </section>
 
-        <!-- RIGHT: User Logins -->
-        <section class="section">
-          <div class="section-header">
-            <div class="section-title">
-              <i class="fas fa-users-cog"></i> Recent Logins
-            </div>
-            <span class="count-badge" id="userCount">0</span>
+          <div id="reviewsContainer" class="list-container">
+            <div class="state-message">No feedback reviews registered yet</div>
           </div>
-          <div id="usersContainer" class="users-list">
-            <div class="state-message">No users found</div>
-          </div>
-        </section>
+        </div>
+
       </div>
+
     </div>
-  </div>
+  </main>
 
   <script>
     const ADMIN_PIN = '2816';
-    const ADMIN_EMAIL = 'jaswanth'; // Filter out admin email
+    const ADMIN_EMAIL = 'jaswanth'; // Filter out admin email from reviews/users listing
 
-    // UI Elements
+    // Application state
+    let globalData = null;
+    let pinInputVal = "";
+    let activeTab = "dashboard";
+    let activeRatingFilter = 0;
+
+    // UI elements references
     const gate = document.getElementById('passwordGate');
+    const sidebar = document.getElementById('dashboardSidebar');
     const dashboard = document.getElementById('dashboardContent');
     const loading = document.getElementById('loadingState');
     const error = document.getElementById('errorState');
     const dataView = document.getElementById('dataView');
+    const usersView = document.getElementById('usersView');
+    const reviewsView = document.getElementById('reviewsView');
     const errorMsg = document.getElementById('errorMessage');
-    const pinInput = document.getElementById('adminPinInput');
-    const pinBtn = document.getElementById('passwordSubmit');
-    const bioBtn = document.getElementById('fingerprintBtn');
     const pinError = document.getElementById('passwordError');
     const refreshBtn = document.getElementById('refreshBtn');
-
-    // --- Auth Logic ---
-
+    
+    // --- Futurisic Keypad PIN logic ---
+    
+    function pressKey(num) {
+      if (pinInputVal.length < 4) {
+        pinInputVal += num;
+        updatePinDisplay();
+      }
+      if (pinInputVal.length === 4) {
+        setTimeout(checkPin, 150);
+      }
+    }
+    
+    function clearPin() {
+      pinInputVal = "";
+      updatePinDisplay();
+      pinError.textContent = "";
+    }
+    
+    function updatePinDisplay() {
+      for (let i = 1; i <= 4; i++) {
+        const box = document.getElementById(`pbox-${i}`);
+        if (i <= pinInputVal.length) {
+          box.textContent = pinInputVal[i - 1];
+          box.classList.add('active');
+        } else {
+          box.textContent = "•";
+          box.classList.remove('active');
+        }
+      }
+    }
+    
     function unlockDashboard() {
       gate.style.display = 'none';
-      dashboard.style.display = 'block';
+      sidebar.style.display = 'flex';
+      dashboard.style.display = 'flex';
+      
+      addLog("success", "Handshake resolved. Opening control panel.");
       loadData();
     }
-
+    
     function checkPin() {
-      if (pinInput.value === ADMIN_PIN) {
+      if (pinInputVal === ADMIN_PIN) {
         unlockDashboard();
       } else {
-        pinError.textContent = 'Invalid PIN - Access Denied';
-        pinInput.classList.add('shake');
-        setTimeout(() => pinInput.classList.remove('shake'), 500);
-        pinInput.value = '';
+        pinError.textContent = 'ACCESS DENIED - INVALID PASSCODE';
+        addLog("warning", "Unauthorized access attempt blocked.");
+        
+        // Shake animation
+        const gateCard = document.querySelector('.gate-card');
+        gateCard.classList.add('shake');
+        setTimeout(() => gateCard.classList.remove('shake'), 400);
+        clearPin();
       }
     }
 
-    pinBtn.addEventListener('click', checkPin);
-    pinInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') checkPin();
+    // Passcode keyboard handler for keypresses
+    window.addEventListener('keydown', (e) => {
+      if (gate.style.display !== 'none') {
+        if (e.key >= '0' && e.key <= '9') {
+          pressKey(e.key);
+        } else if (e.key === 'Backspace' || e.key === 'Delete') {
+          if (pinInputVal.length > 0) {
+            pinInputVal = pinInputVal.slice(0, -1);
+            updatePinDisplay();
+          }
+        } else if (e.key === 'Escape') {
+          clearPin();
+        }
+      }
     });
 
-    // Biometrics
+    // --- Tab switcher system ---
+    
+    function switchTab(tabName) {
+      activeTab = tabName;
+      
+      // Update sidebar nav UI
+      const navItems = document.querySelectorAll('.nav-item');
+      navItems.forEach(item => item.classList.remove('active'));
+      
+      const index = tabName === 'dashboard' ? 0 : tabName === 'users' ? 1 : 2;
+      navItems[index].classList.add('active');
+      
+      // Hide all panels
+      dataView.classList.remove('active');
+      usersView.classList.remove('active');
+      reviewsView.classList.remove('active');
+      
+      dataView.style.display = 'none';
+      usersView.style.display = 'none';
+      reviewsView.style.display = 'none';
+      
+      // Show matching panel
+      const titleEl = document.getElementById('currentTabTitle');
+      const descEl = document.getElementById('currentTabDesc');
+      
+      if (tabName === 'dashboard') {
+        dataView.style.display = 'flex';
+        dataView.classList.add('active');
+        titleEl.textContent = "Control Dashboard";
+        descEl.textContent = "Overview of live metrics, active users, and platform feedback.";
+      } else if (tabName === 'users') {
+        usersView.style.display = 'flex';
+        usersView.classList.add('active');
+        titleEl.textContent = "User Analytics";
+        descEl.textContent = "Deep metrics analysis of all registered users and active sessions.";
+        filterUsers();
+      } else if (tabName === 'reviews') {
+        reviewsView.style.display = 'flex';
+        reviewsView.classList.add('active');
+        titleEl.textContent = "System Reviews";
+        descEl.textContent = "Live user feedback logs, system star ratings, and suggestions.";
+        filterReviews();
+      }
+      
+      addLog("info", `View switched to: ${tabName}`);
+    }
+
+    // --- Audit Logging System ---
+    
+    function addLog(type, message) {
+      const logsContainer = document.getElementById('commandLogs');
+      if (!logsContainer) return;
+      
+      const now = new Date();
+      const timeStr = `[${now.toTimeString().split(' ')[0]}]`;
+      
+      const logLine = document.createElement('div');
+      logLine.className = 'log-line';
+      logLine.innerHTML = `<span class="log-time">${timeStr}</span> <span class="log-tag ${type}">${type}</span> ${message}`;
+      
+      logsContainer.appendChild(logLine);
+      logsContainer.scrollTop = logsContainer.scrollHeight;
+    }
+
+    // --- Biometrics Strategy ---
+    
     async function handleBiometrics() {
       try {
-        bioBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Scanning...';
+        const bioBtn = document.getElementById('fingerprintBtn');
+        bioBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Authenticating...';
 
         if (!window.PublicKeyCredential) {
-          throw new Error('Biometrics not supported');
+          throw new Error('WebAuthn not supported');
         }
 
         const storedId = localStorage.getItem('adminFingerprintId');
@@ -915,8 +1517,9 @@
         }
       } catch (err) {
         console.error(err);
-        pinError.textContent = 'Biometric Auth Failed. Use PIN.';
-        bioBtn.innerHTML = '<i class="fas fa-fingerprint"></i> Use Biometrics';
+        pinError.textContent = 'Biometric handshake failed. Use PIN.';
+        addLog("warning", "Biometric authentication rejected.");
+        document.getElementById('fingerprintBtn').innerHTML = '<i class="fas fa-fingerprint"></i> Use Biometrics';
       }
     }
 
@@ -930,11 +1533,11 @@
       const cred = await navigator.credentials.create({
         publicKey: {
           challenge,
-          rp: { name: "Hiero Admin", id: rpId },
+          rp: { name: "Hiero Command", id: rpId },
           user: {
             id: new Uint8Array(16),
             name: "admin@hiero.com",
-            displayName: "Admin"
+            displayName: "Admin Administrator"
           },
           pubKeyCredParams: [{ type: "public-key", alg: -7 }],
           authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required" },
@@ -944,9 +1547,11 @@
 
       const id = btoa(String.fromCharCode(...new Uint8Array(cred.rawId)));
       localStorage.setItem('adminFingerprintId', id);
-      pinError.style.color = '#00ff00';
-      pinError.textContent = 'Fingerprint Registered!';
-      setTimeout(unlockDashboard, 1000);
+      
+      pinError.style.color = '#059669';
+      pinError.textContent = 'Biometrics configured successfully!';
+      addLog("success", "Biometric fingerprint registration active.");
+      setTimeout(unlockDashboard, 800);
     }
 
     async function verifyBiometric(storedId) {
@@ -967,119 +1572,305 @@
       });
 
       if (assertion) {
-        pinError.style.color = '#00ff00';
-        pinError.textContent = 'Authenticated!';
-        setTimeout(unlockDashboard, 500);
+        pinError.style.color = '#059669';
+        pinError.textContent = 'Credentials accepted!';
+        setTimeout(unlockDashboard, 400);
       }
     }
 
-    bioBtn.addEventListener('click', handleBiometrics);
+    document.getElementById('fingerprintBtn').addEventListener('click', handleBiometrics);
 
-    // --- Data Logic ---
+    // --- Platform Data Handshake ---
 
     async function loadData() {
       loading.style.display = 'block';
       dataView.style.display = 'none';
+      usersView.style.display = 'none';
+      reviewsView.style.display = 'none';
       error.style.display = 'none';
+      
+      addLog("info", "Executing data sync handshake...");
 
       try {
-        const backend = 'https://hiero-resume-backend.onrender.com';
+        const backend = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+          ? 'http://localhost:2816'
+          : 'https://hiero-resume-backend.onrender.com';
+        
         const res = await fetch(`${backend}/api/admin/dashboard`);
 
-        if (!res.ok) throw new Error(`Server returned ${res.status}`);
+        if (!res.ok) throw new Error(`Gateway returned handshake status: ${res.status}`);
 
         const data = await res.json();
+        globalData = data;
+        
+        addLog("success", "Handshake resolved. Live metrics sync active.");
+        
         renderDashboard(data);
-
+        
         loading.style.display = 'none';
-        dataView.style.display = 'block';
+        
+        // Show correct active panel
+        switchTab(activeTab);
       } catch (err) {
         console.error(err);
         loading.style.display = 'none';
         error.style.display = 'block';
-        errorMsg.textContent = err.message + '. Is the backend running?';
+        errorMsg.textContent = err.message + '. Ensure the local server or Render container is running.';
+        addLog("warning", `Sync failure: ${err.message}`);
       }
     }
 
     function renderDashboard(data) {
-      // Stats
+      // Stats Cards
       const stats = data.analytics || {};
       document.getElementById('totalUsers').textContent = stats.totalUsers || 0;
-      document.getElementById('uniqueUsers').textContent = stats.uniqueUsersCount || 0;
+      document.getElementById('uniqueUsers').textContent = stats.uniqueUsersCount || stats.totalUsers || 0;
       document.getElementById('totalVisits').textContent = stats.totalVisits || 0;
-      document.getElementById('avgRating').textContent = stats.averageRating || '0.0';
-      document.getElementById('totalReviews').textContent = stats.totalReviews || 0;
+      document.getElementById('avgRating').textContent = stats.averageRating ? stats.averageRating.toFixed(1) : '0.0';
+      
+      // Calculate rating distribution
+      const reviews = (data.reviews || []).filter(r => !r.userEmail.toLowerCase().includes(ADMIN_EMAIL.toLowerCase()));
+      document.getElementById('distReviewCount').textContent = `${reviews.length} Feedbacks`;
+      
+      const counts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+      reviews.forEach(r => {
+        const score = Math.round(r.rating);
+        if (counts[score] !== undefined) counts[score]++;
+      });
+      
+      const totalRatings = reviews.length || 1;
+      
+      // Update distribution display
+      for (let star = 1; star <= 5; star++) {
+        const count = counts[star];
+        const pct = Math.round((count / totalRatings) * 100);
+        
+        document.getElementById(`count-${star}`).textContent = count;
+        document.getElementById(`fill-${star}`).style.width = `${pct}%`;
+      }
+      
+      // Render lists
+      renderUsersList();
+      renderReviewsList();
+    }
 
-      // Users - Filter out admin email
+    // --- Lists Filtering & Rendering ---
+
+    function renderUsersList(filteredUsers = null) {
       const usersContainer = document.getElementById('usersContainer');
-      const users = (data.users || []).filter(u => !u.email.toLowerCase().includes(ADMIN_EMAIL.toLowerCase()));
-
-      document.getElementById('userCount').textContent = users.length;
+      if (!globalData) return;
+      
+      let users = (globalData.users || []).filter(u => !u.email.toLowerCase().includes(ADMIN_EMAIL.toLowerCase()));
+      if (filteredUsers) users = filteredUsers;
+      
+      document.getElementById('userCount').textContent = `${users.length} Registrants`;
 
       if (users.length === 0) {
-        usersContainer.innerHTML = '<div class="state-message">No users found</div>';
-      } else {
-        usersContainer.innerHTML = users.map(u => {
-          const isActive = u.lastLogin && (Date.now() - new Date(u.lastLogin).getTime()) < 604800000;
-          return `
-                <div class="user-card">
-                    <div class="user-info">
-                        <div class="user-name">${u.username || 'User'}</div>
-                        <div class="user-email">${u.email}</div>
-                        <div class="user-meta">
-                            <div class="user-stat">
-                                <i class="fas fa-sign-in-alt"></i>
-                                ${u.loginCount || 0} logins
-                            </div>
-                            <div class="user-stat">
-                                <i class="fas fa-clock"></i>
-                                ${u.lastLogin ? new Date(u.lastLogin).toLocaleDateString() : 'Never'}
-                            </div>
-                        </div>
-                    </div>
-                    <span class="badge ${isActive ? 'active' : 'inactive'}">
-                        ${isActive ? 'Active' : 'Inactive'}
-                    </span>
-                </div>`;
-        }).join('');
+        usersContainer.innerHTML = '<div class="state-message">No matching registrants found</div>';
+        return;
       }
 
-      // Reviews - Filter out admin email
-      const reviewContainer = document.getElementById('reviewsContainer');
-      const reviews = (data.reviews || []).filter(r => !r.userEmail.toLowerCase().includes(ADMIN_EMAIL.toLowerCase()));
+      usersContainer.innerHTML = users.map(u => {
+        const initials = u.username ? u.username.substring(0, 2) : 'US';
+        const isActive = u.lastLogin && (Date.now() - new Date(u.lastLogin).getTime()) < 604800000;
+        
+        return `
+          <div class="user-card">
+            <div class="user-card-left">
+              <input type="checkbox" class="user-select-checkbox" data-email="${u.email}" onchange="updateSelectedUsersCount()" style="width: 18px; height: 18px; cursor: pointer; accent-color: #10b981; margin-right: 12px;">
+              <div class="user-card-avatar">${initials}</div>
+              <div class="user-details">
+                <div class="user-display-name">${u.username || 'User'}</div>
+                <div class="user-display-email">${u.email}</div>
+                <div class="user-card-stats">
+                  <div class="user-stat-pill">
+                    <i class="fas fa-sign-in-alt"></i>
+                    ${u.loginCount || 1} logins
+                  </div>
+                  <div class="user-stat-pill">
+                    <i class="fas fa-clock"></i>
+                    ${u.lastLogin ? new Date(u.lastLogin).toLocaleDateString() : 'Never'}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <span class="user-active-badge ${isActive ? 'active' : 'inactive'}">
+              ${isActive ? 'Active' : 'Offline'}
+            </span>
+          </div>`;
+      }).join('');
+    }
 
-      document.getElementById('reviewCount').textContent = reviews.length;
+    // Render lists
+    function renderReviewsList(filteredReviews = null) {
+      const reviewsContainer = document.getElementById('reviewsContainer');
+      if (!globalData) return;
+      
+      let reviews = (globalData.reviews || []).filter(r => !r.userEmail.toLowerCase().includes(ADMIN_EMAIL.toLowerCase()));
+      if (filteredReviews) reviews = filteredReviews;
+      
+      document.getElementById('reviewCount').textContent = `${reviews.length} Feedbacks`;
 
       if (reviews.length === 0) {
-        reviewContainer.innerHTML = '<div class="state-message">No reviews yet</div>';
-      } else {
-        reviewContainer.innerHTML = reviews.map(r => `
-                <div class="review-card">
-                    <div class="review-header">
-                        <div>
-                            <div class="review-user">${r.userName || r.userEmail}</div>
-                            <div class="review-date">${new Date(r.createdAt).toLocaleDateString()}</div>
-                        </div>
-                        <div class="review-rating">⭐ ${r.rating}/5</div>
-                    </div>
-                    <div class="review-text">"${r.reviewText}"</div>
+        reviewsContainer.innerHTML = '<div class="state-message">No matching feedback reviews found</div>';
+        return;
+      }
+
+      reviewsContainer.innerHTML = reviews.map(r => {
+        const name = r.userName || r.userEmail;
+        const initial = name.charAt(0);
+        
+        return `
+          <div class="review-card">
+            <div class="review-card-header">
+              <div class="user-avatar-tag">
+                <div class="avatar-circle">${initial}</div>
+                <div class="user-meta-details">
+                  <div class="reviewer-name">${name}</div>
+                  <div class="review-time">${new Date(r.createdAt).toLocaleDateString()}</div>
                 </div>
-            `).join('');
+              </div>
+              <div class="rating-badge">
+                <i class="fas fa-star"></i> ${r.rating}
+              </div>
+            </div>
+            <div class="review-text">"${r.reviewText}"</div>
+          </div>`;
+      }).join('');
+    }
+
+    function filterUsers() {
+      const query = document.getElementById('userSearchInput').value.toLowerCase().trim();
+      if (!globalData) return;
+      
+      const allUsers = (globalData.users || []).filter(u => !u.email.toLowerCase().includes(ADMIN_EMAIL.toLowerCase()));
+      
+      if (!query) {
+        renderUsersList(allUsers);
+        return;
+      }
+      
+      const filtered = allUsers.filter(u => 
+        (u.username && u.username.toLowerCase().includes(query)) ||
+        (u.email && u.email.toLowerCase().includes(query))
+      );
+      
+      renderUsersList(filtered);
+    }
+
+    // --- Bulk Email Handlers ---
+    
+    function toggleSelectAllUsers(master) {
+      const checkboxes = document.querySelectorAll('.user-select-checkbox');
+      checkboxes.forEach(cb => {
+        cb.checked = master.checked;
+      });
+      updateSelectedUsersCount();
+    }
+
+    function updateSelectedUsersCount() {
+      const checked = document.querySelectorAll('.user-select-checkbox:checked');
+      document.getElementById('selectedUsersCount').textContent = checked.length;
+      document.getElementById('sendBulkEmailBtn').disabled = checked.length === 0;
+    }
+
+    async function sendBulkFeedbackEmails() {
+      const checked = document.querySelectorAll('.user-select-checkbox:checked');
+      const emails = Array.from(checked).map(cb => cb.getAttribute('data-email'));
+      
+      if (emails.length === 0) return;
+      
+      const btn = document.getElementById('sendBulkEmailBtn');
+      const originalHtml = btn.innerHTML;
+      
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Dispatched...';
+      
+      addLog("info", `Triggering bulk feedback invitation emails to ${emails.length} selected users...`);
+      
+      try {
+        const backend = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+          ? 'http://localhost:2816'
+          : 'https://hiero-resume-backend.onrender.com';
+          
+        const res = await fetch(`${backend}/api/admin/send-feedback-email`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ emails })
+        });
+        
+        const data = await res.json();
+        
+        if (!res.ok) throw new Error(data.error || 'Bulk dispatch failed');
+        
+        addLog("success", `Feedback request successfully sent to ${emails.length} selected users.`);
+        alert(`Feedback request email triggered to ${emails.length} selected users!`);
+        
+        // Reset checkboxes
+        document.getElementById('selectAllUsersCheckbox').checked = false;
+        toggleSelectAllUsers(document.getElementById('selectAllUsersCheckbox'));
+      } catch (err) {
+        console.error(err);
+        addLog("warning", `Bulk mail failure: ${err.message}`);
+        alert(`Mail dispatch failed: ${err.message}`);
+      } finally {
+        btn.innerHTML = originalHtml;
+        updateSelectedUsersCount();
       }
     }
 
+    function setRatingFilter(rating) {
+      activeRatingFilter = rating;
+      
+      const pills = document.querySelectorAll('#ratingPills .pill-btn');
+      pills.forEach(p => p.classList.remove('active'));
+      
+      const index = rating === 0 ? 0 : rating === 5 ? 1 : rating === 4 ? 2 : rating === 3 ? 3 : 4;
+      pills[index].classList.add('active');
+      
+      filterReviews();
+    }
+
+    function filterReviews() {
+      const query = document.getElementById('reviewSearchInput').value.toLowerCase().trim();
+      if (!globalData) return;
+      
+      let reviews = (globalData.reviews || []).filter(r => !r.userEmail.toLowerCase().includes(ADMIN_EMAIL.toLowerCase()));
+      
+      if (activeRatingFilter > 0) {
+        if (activeRatingFilter === 2) {
+          reviews = reviews.filter(r => r.rating < 3);
+        } else {
+          reviews = reviews.filter(r => Math.round(r.rating) === activeRatingFilter);
+        }
+      }
+      
+      if (query) {
+        reviews = reviews.filter(r => 
+          (r.userName && r.userName.toLowerCase().includes(query)) ||
+          (r.userEmail && r.userEmail.toLowerCase().includes(query)) ||
+          (r.reviewText && r.reviewText.toLowerCase().includes(query))
+        );
+      }
+      
+      renderReviewsList(reviews);
+    }
+
     refreshBtn.addEventListener('click', () => {
-      refreshBtn.innerHTML = '<i class="fas fa-sync-alt fa-spin"></i> Refreshing...';
+      refreshBtn.innerHTML = '<i class="fas fa-sync-alt fa-spin"></i> Syncing...';
       loadData().then(() => {
-        refreshBtn.innerHTML = '<i class="fas fa-check"></i> Updated';
+        refreshBtn.innerHTML = '<i class="fas fa-check"></i> Handshake OK';
         setTimeout(() => {
-          refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh Data';
+          refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Sync Data';
         }, 1500);
       });
     });
 
     window.addEventListener('load', () => {
       document.getElementById('passwordGate').style.display = 'flex';
+      clearPin();
     });
 
   </script>

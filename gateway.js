@@ -194,6 +194,7 @@ app.get(['/solve', '/solve.html'], (req, res) => res.sendFile(path.join(resumeBu
 app.get(['/resume-builder', '/resume-builder.html', '/dashboard/resume-builder'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'resume-builder.html')));
 app.get(['/resume-form', '/resume-form.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'resume-form.html')));
 app.get(['/template-verifier', '/template-verifier.html'], (req, res) => res.sendFile(path.join(__dirname, 'template-verifier.html')));
+app.get(['/feedback', '/feedback.html'], (req, res) => res.sendFile(path.join(__dirname, 'feedback.html')));
 app.get(['/project', '/project.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'project.html')));
 app.get(['/analysis', '/analysis.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'analysis.html')));
 app.get(['/ai-photo-formalizer', '/ai-photo-formalizer.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'ai-photo-formalizer.html')));
@@ -205,6 +206,8 @@ app.use(express.static(landingDirPath, { index: false }));
 app.use(express.static(resumeBuilderPath, { index: false }));
 app.use('/public', express.static(resumeBuilderPath));
 app.use(express.static(path.join(__dirname, 'login-system'), { index: false }));
+app.use('/Admin', express.static(path.join(__dirname, 'Admin'), { index: false }));
+app.use('/Admin folder', express.static(path.join(__dirname, 'Admin folder'), { index: false }));
 
 // ======================
 // SPA FALLBACK & FINAL ANALYSIS FALLBACK

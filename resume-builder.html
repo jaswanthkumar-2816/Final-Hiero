@@ -5840,6 +5840,508 @@
       });
     });
   </script>
+
+  <!-- Premium Hiero Feedback Modal Overlay -->
+  <div id="hieroFeedbackModal" class="hiero-feedback-modal-overlay">
+    <div class="hiero-feedback-modal-card">
+      
+      <!-- Success View (Initially Hidden) -->
+      <div id="hieroFeedbackSuccess" class="hiero-feedback-success-overlay">
+        <div class="hiero-feedback-success-icon">
+          <i class="fa-solid fa-circle-check"></i>
+        </div>
+        <h2>Thank You!</h2>
+        <p>Your feedback was successfully submitted. Returning to your dashboard...</p>
+      </div>
+
+      <!-- Main Feedback Form View -->
+      <div class="hiero-feedback-form-content">
+        <div class="hiero-feedback-header">
+          <h2>HIERO <span style="color: #10b981;">CAREER</span></h2>
+          <p>Tell us about your experience</p>
+        </div>
+
+        <div class="hiero-feedback-stars-wrapper">
+          <span class="hiero-feedback-stars-label">Rate Your Experience</span>
+          <div class="hiero-feedback-stars-row" id="hieroStarsRow">
+            <i class="fa-solid fa-star hiero-star-btn" data-star="1"></i>
+            <i class="fa-solid fa-star hiero-star-btn" data-star="2"></i>
+            <i class="fa-solid fa-star hiero-star-btn" data-star="3"></i>
+            <i class="fa-solid fa-star hiero-star-btn" data-star="4"></i>
+            <i class="fa-solid fa-star hiero-star-btn" data-star="5"></i>
+          </div>
+        </div>
+
+        <!-- Readonly Display Info -->
+        <div class="hiero-feedback-field-group">
+          <label>YOUR NAME</label>
+          <input type="text" id="hieroFeedbackName" class="hiero-feedback-input-readonly" readonly placeholder="Guest User">
+        </div>
+        
+        <div class="hiero-feedback-field-group">
+          <label>EMAIL ADDRESS</label>
+          <input type="email" id="hieroFeedbackEmail" class="hiero-feedback-input-readonly" readonly placeholder="guest@example.com">
+        </div>
+
+        <div class="hiero-feedback-field-group">
+          <label>YOUR FEEDBACK / SUGGESTIONS</label>
+          <textarea id="hieroFeedbackText" class="hiero-feedback-textarea" placeholder="Tell us what you liked, or what we can improve..." maxlength="1000"></textarea>
+        </div>
+
+        <button id="hieroFeedbackSubmitBtn" class="hiero-feedback-submit-btn" disabled>
+          Submit Feedback <i class="fa-solid fa-arrow-right"></i>
+        </button>
+
+        <div id="hieroFeedbackStatus" class="hiero-feedback-status"></div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    /* Premium Feedback Modal Core Styles */
+    .hiero-feedback-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 99999;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .hiero-feedback-modal-overlay.active {
+      display: flex;
+      opacity: 1;
+    }
+
+    .hiero-feedback-modal-card {
+      width: 90%;
+      max-width: 500px;
+      border-radius: 24px;
+      padding: 36px;
+      position: relative;
+      overflow: hidden;
+      transform: scale(0.9);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      background: rgba(18, 18, 18, 0.95);
+      border: 1px solid rgba(42, 224, 35, 0.2);
+      color: #ffffff;
+    }
+
+    .hiero-feedback-modal-overlay.active .hiero-feedback-modal-card {
+      transform: scale(1);
+    }
+
+    body.light-mode .hiero-feedback-modal-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      color: #0f172a;
+      box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.15);
+    }
+
+    .hiero-feedback-header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .hiero-feedback-header h2 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: none !important;
+      -webkit-text-fill-color: initial !important;
+      text-shadow: none !important;
+      margin-bottom: 6px;
+    }
+
+    body.light-mode .hiero-feedback-header h2 {
+      color: #0f172a !important;
+    }
+
+    body:not(.light-mode) .hiero-feedback-header h2 {
+      color: #ffffff !important;
+    }
+
+    .hiero-feedback-header p {
+      font-size: 13.5px;
+      color: #a0aec0;
+      font-weight: 500;
+    }
+
+    body.light-mode .hiero-feedback-header p {
+      color: #64748b;
+    }
+
+    .hiero-feedback-stars-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .hiero-feedback-stars-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: #a0aec0;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    body.light-mode .hiero-feedback-stars-label {
+      color: #64748b;
+    }
+
+    .hiero-feedback-stars-row {
+      display: flex;
+      gap: 12px;
+    }
+
+    .hiero-star-btn {
+      font-size: 32px;
+      color: #4a5568;
+      cursor: pointer;
+      transition: transform 0.15s ease, color 0.15s ease;
+    }
+
+    body.light-mode .hiero-star-btn {
+      color: #cbd5e1;
+    }
+
+    .hiero-star-btn:hover {
+      transform: scale(1.2);
+    }
+
+    .hiero-star-btn.active {
+      color: #fbbf24;
+      filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.4));
+    }
+
+    .hiero-feedback-field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 18px;
+      text-align: left;
+    }
+
+    .hiero-feedback-field-group label {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: #cbd5e1;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    body.light-mode .hiero-feedback-field-group label {
+      color: #475569;
+    }
+
+    .hiero-feedback-input-readonly {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #a0aec0;
+      border-radius: 10px;
+      padding: 11px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      outline: none;
+    }
+
+    body.light-mode .hiero-feedback-input-readonly {
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      color: #64748b;
+    }
+
+    .hiero-feedback-textarea {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #ffffff;
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: 13px;
+      line-height: 1.5;
+      font-family: inherit;
+      resize: none;
+      height: 100px;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    body.light-mode .hiero-feedback-textarea {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      color: #0f172a;
+    }
+
+    .hiero-feedback-textarea:focus {
+      border-color: #10b981;
+      box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.15);
+    }
+
+    .hiero-feedback-submit-btn {
+      width: 100%;
+      background: #10b981;
+      color: #ffffff;
+      border: none;
+      padding: 13px;
+      border-radius: 10px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.1s ease;
+    }
+
+    .hiero-feedback-submit-btn:hover:not(:disabled) {
+      background: #059669;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .hiero-feedback-submit-btn:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+
+    .hiero-feedback-submit-btn:disabled {
+      background: #4a5568;
+      color: #718096;
+      cursor: not-allowed;
+    }
+
+    body.light-mode .hiero-feedback-submit-btn:disabled {
+      background: #e2e8f0;
+      color: #94a3b8;
+    }
+
+    .hiero-feedback-status {
+      text-align: center;
+      font-size: 12.5px;
+      font-weight: 600;
+      margin-top: 12px;
+      min-height: 18px;
+    }
+
+    .hiero-feedback-status.error {
+      color: #ef4444;
+    }
+
+    .hiero-feedback-success-overlay {
+      position: absolute;
+      inset: 0;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 30px;
+      text-align: center;
+      z-index: 10;
+      background: rgba(18, 18, 18, 0.98);
+      animation: hieroFadeIn 0.3s ease forwards;
+    }
+
+    body.light-mode .hiero-feedback-success-overlay {
+      background: #ffffff;
+    }
+
+    @keyframes hieroFadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .hiero-feedback-success-icon {
+      width: 56px;
+      height: 56px;
+      background: rgba(16, 185, 129, 0.1);
+      color: #10b981;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      margin-bottom: 20px;
+      animation: hieroScalePop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+
+    @keyframes hieroScalePop {
+      from { transform: scale(0.6); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .hiero-feedback-success-overlay h2 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 22px;
+      font-weight: 800;
+      margin-bottom: 8px;
+      background: none !important;
+      -webkit-text-fill-color: initial !important;
+    }
+
+    body.light-mode .hiero-feedback-success-overlay h2 {
+      color: #0f172a !important;
+    }
+
+    body:not(.light-mode) .hiero-feedback-success-overlay h2 {
+      color: #ffffff !important;
+    }
+
+    .hiero-feedback-success-overlay p {
+      font-size: 13.5px;
+      color: #a0aec0;
+      line-height: 1.5;
+    }
+
+    body.light-mode .hiero-feedback-success-overlay p {
+      color: #64748b;
+    }
+  </style>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const isFeedbackFlow = urlParams.get('feedback') === 'true';
+      const feedbackEmail = urlParams.get('email') || '';
+      const feedbackName = urlParams.get('name') || '';
+
+      if (isFeedbackFlow && feedbackEmail) {
+        const modal = document.getElementById('hieroFeedbackModal');
+        const nameField = document.getElementById('hieroFeedbackName');
+        const emailField = document.getElementById('hieroFeedbackEmail');
+        
+        nameField.value = feedbackName || feedbackEmail.split('@')[0];
+        emailField.value = feedbackEmail;
+
+        modal.classList.add('active');
+        
+        let ratingSelected = parseInt(urlParams.get('rating')) || 0;
+        let isSubmitted = false;
+
+        const stars = document.querySelectorAll('#hieroStarsRow .hiero-star-btn');
+        stars.forEach(star => {
+          star.addEventListener('mouseover', () => {
+            const hoverVal = parseInt(star.getAttribute('data-star'));
+            updateStarsDisplay(hoverVal);
+          });
+
+          star.addEventListener('mouseout', () => {
+            updateStarsDisplay(ratingSelected);
+          });
+
+          star.addEventListener('click', () => {
+            ratingSelected = parseInt(star.getAttribute('data-star'));
+            updateStarsDisplay(ratingSelected);
+            validateFeedbackForm(ratingSelected);
+          });
+        });
+
+        function updateStarsDisplay(rating) {
+          stars.forEach(s => {
+            const sVal = parseInt(s.getAttribute('data-star'));
+            if (sVal <= rating) {
+              s.classList.add('active');
+            } else {
+              s.classList.remove('active');
+            }
+          });
+        }
+
+        const textarea = document.getElementById('hieroFeedbackText');
+        textarea.addEventListener('input', () => {
+          validateFeedbackForm(ratingSelected);
+        });
+
+        function validateFeedbackForm(rating) {
+          const text = textarea.value.trim();
+          const submitBtn = document.getElementById('hieroFeedbackSubmitBtn');
+          submitBtn.disabled = !(rating > 0 && text.length >= 3);
+        }
+
+        // Initialize state if redirected with pre-selected rating
+        if (ratingSelected > 0) {
+          updateStarsDisplay(ratingSelected);
+          validateFeedbackForm(ratingSelected);
+        }
+        
+        // Focus suggestion field immediately
+        setTimeout(() => {
+          textarea.focus();
+        }, 100);
+
+        window.addEventListener('beforeunload', (e) => {
+          const hasStarted = ratingSelected > 0 || textarea.value.trim().length > 0;
+          if (hasStarted && !isSubmitted) {
+            e.preventDefault();
+            e.returnValue = 'You have unsaved feedback. Are you sure you want to exit?';
+          }
+        });
+
+        const submitBtn = document.getElementById('hieroFeedbackSubmitBtn');
+        submitBtn.addEventListener('click', async () => {
+          const status = document.getElementById('hieroFeedbackStatus');
+          status.textContent = '';
+          status.className = 'hiero-feedback-status';
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+
+          try {
+            const response = await fetch('/api/feedback/submit', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                rating: ratingSelected,
+                reviewText: textarea.value.trim(),
+                email: feedbackEmail,
+                name: feedbackName
+              })
+            });
+
+            const data = await response.json();
+            if (!response.ok) {
+              throw new Error(data.error || 'Failed to submit feedback');
+            }
+
+            isSubmitted = true;
+            document.getElementById('hieroFeedbackSuccess').style.display = 'flex';
+
+            setTimeout(() => {
+              modal.style.opacity = '0';
+              setTimeout(() => {
+                modal.classList.remove('active');
+                modal.style.opacity = '';
+                
+                const cleanUrl = window.location.pathname;
+                window.history.replaceState({}, document.title, cleanUrl);
+              }, 300);
+            }, 2500);
+
+          } catch (err) {
+            console.error(err);
+            status.textContent = err.message || 'Submission failed. Please check connection.';
+            status.className = 'hiero-feedback-status error';
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'Submit Feedback <i class="fa-solid fa-arrow-right"></i>';
+          }
+        });
+      }
+    });
+  </script>
 </body>
 
 </html>
