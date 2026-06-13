@@ -1769,8 +1769,14 @@
 
     function updateSelectedUsersCount() {
       const checked = document.querySelectorAll('.user-select-checkbox:checked');
-      document.getElementById('selectedUsersCount').textContent = checked.length;
-      document.getElementById('sendBulkEmailBtn').disabled = checked.length === 0;
+      const countEl = document.getElementById('selectedUsersCount');
+      if (countEl) {
+        countEl.textContent = checked.length;
+      }
+      const btn = document.getElementById('sendBulkEmailBtn');
+      if (btn) {
+        btn.disabled = checked.length === 0;
+      }
     }
 
     async function sendBulkFeedbackEmails() {
