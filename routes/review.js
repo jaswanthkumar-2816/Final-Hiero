@@ -489,10 +489,8 @@ router.post('/login-track', authenticateToken, async (req, res) => {
 
             await loginRecord.save();
 
-            // Send feedback request email if no recent login was recorded in the last 5 minutes
-            if (!recentLogin) {
-                sendFeedbackRequestEmail(user.email, user.username);
-            }
+            // Automatic feedback email sending removed on login as per request.
+            // Feedback emails are now only sent manually when triggered by the admin.
 
             res.json({ success: true, message: 'Login tracked' });
         } else {
@@ -534,10 +532,8 @@ router.post('/login-track', authenticateToken, async (req, res) => {
             logins.push(loginRecord);
             saveLocalLogins(logins);
 
-            // Send feedback request email if no recent login (cooldown inactive)
-            if (!isCooldownActive) {
-                sendFeedbackRequestEmail(user.email, user.name);
-            }
+            // Automatic feedback email sending removed on login as per request.
+            // Feedback emails are now only sent manually when triggered by the admin.
 
             res.json({ success: true, message: 'Login tracked (local)', user });
         }

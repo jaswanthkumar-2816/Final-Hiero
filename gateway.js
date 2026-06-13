@@ -6,6 +6,7 @@ const path = require('path');
 const mongoose = require('mongoose');
 const compression = require('compression');
 const axios = require('axios');
+const multer = require('multer');
 const { createProxyMiddleware } = require('http-proxy-middleware');
 
 dotenv.config();
@@ -187,6 +188,7 @@ app.get('/get-started', (req, res) => {
 });
 
 app.get(['/mock-interview', '/mock-interview.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'mock-interview.html')));
+app.get(['/session', '/session.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'session.html')));
 app.get('/sitemap.xml', (req, res) => res.sendFile(path.join(landingDirPath, 'sitemap.xml')));
 app.get('/robots.txt', (req, res) => res.sendFile(path.join(landingDirPath, 'robots.txt')));
 
@@ -194,6 +196,7 @@ app.get(['/learn', '/learn.html'], (req, res) => res.sendFile(path.join(resumeBu
 app.get(['/solve', '/solve.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'solve.html')));
 app.get(['/resume-builder', '/resume-builder.html', '/dashboard/resume-builder'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'resume-builder.html')));
 app.get(['/resume-form', '/resume-form.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'resume-form.html')));
+app.get(['/pricing', '/pricing.html'], (req, res) => res.sendFile(path.join(__dirname, 'pricing.html')));
 app.get(['/template-verifier', '/template-verifier.html'], (req, res) => res.sendFile(path.join(__dirname, 'template-verifier.html')));
 app.get(['/feedback', '/feedback.html'], (req, res) => res.sendFile(path.join(__dirname, 'feedback.html')));
 app.get(['/project', '/project.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'project.html')));
@@ -224,35 +227,9 @@ app.get('*', (req, res, next) => {
 // Final fallback for legacy /api/analyze if not caught by reviewRouter
 app.use('/api', analysisRouter);
 
-// --- Groq AI Interview Chat ---
-app.post('/api/interview/chat', async (req, res) => {
-    try {
-        const { messages } = req.body;
-        if (!process.env.GROQ_API_KEY) {
-            return res.status(500).json({ error: 'Groq API Key not configured' });
-        }
-
-        const response = await axios.post('https://api.groq.com/openai/v1/chat/completions', {
-            model: process.env.AI_MODEL || 'grok-beta',
-            messages: messages,
-            temperature: 0.7,
-            max_tokens: 150
-        }, {
-            headers: {
-                'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
-                'Content-Type': 'application/json'
-            }
-        });
-
-        res.json(response.data);
-    } catch (error) {
-        console.error('Groq API Error:', error.response ? error.response.data : error.message);
-        res.status(500).json({
-            error: 'AI service error',
-            details: error.response ? error.response.data : error.message
-        });
-    }
-});
+// --- Interview Router Module ---
+const interviewRouter = require('./routes/interview');
+app.use('/api/interview', interviewRouter);
 
 // ======================
 // START SERVER

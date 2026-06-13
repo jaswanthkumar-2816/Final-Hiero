@@ -3,159 +3,338 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upgrade to Hiero PRO</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <title>Upgrade to Hiero PRO | Career Accelerator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary: #2ae023;
-            --primary-glow: rgba(42, 224, 35, 0.5);
-            --bg-dark: #020402;
-            --glass: rgba(255, 255, 255, 0.03);
-            --glass-border: rgba(255, 255, 255, 0.08);
-            --text-main: #ffffff;
-            --text-muted: #a0a0a0;
-            --gold: #f59e0b;
+            --primary: #2563eb;
+            --primary-light: #3b82f6;
+            --primary-dark: #1d4ed8;
+            --primary-glow: rgba(37, 99, 235, 0.12);
+            --accent: #06b6d4;
+            --accent-glow: rgba(6, 182, 212, 0.15);
+            --bg-light: #f4f7fa;
+            --bg-card: rgba(255, 255, 255, 0.9);
+            --text-main: #0f172a;
+            --text-muted: #475569;
+            --border: rgba(37, 99, 235, 0.12);
+            --border-light: rgba(6, 182, 212, 0.1);
+            --glass: rgba(255, 255, 255, 0.8);
+            --font-outfit: 'Outfit', sans-serif;
+            --font-inter: 'Inter', sans-serif;
+            --gold: #d97706;
+            --gold-light: #fef3c7;
         }
 
         * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-            font-family: 'Outfit', sans-serif;
             -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            background: var(--bg-dark);
+            font-family: var(--font-inter);
+            background-color: var(--bg-light);
             color: var(--text-main);
             min-height: 100vh;
+            overflow-x: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
-            overflow: hidden;
             position: relative;
+            padding: 40px 20px;
         }
 
-        /* Ambient Glows */
+        /* Anti-gravity Floating Royal Blue & Turquoise Glows */
         .ambient-glow {
             position: fixed;
-            width: 40vw;
-            height: 40vw;
-            background: var(--primary);
-            filter: blur(150px);
-            opacity: 0.07;
-            z-index: 0;
+            width: 48vw;
+            height: 48vw;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--primary-glow) 0%, var(--accent-glow) 50%, transparent 80%);
+            filter: blur(60px);
+            z-index: -2;
             pointer-events: none;
+            animation: floatGlow 14s infinite alternate ease-in-out;
         }
 
-        .glow-1 { top: -10%; left: -10%; }
-        .glow-2 { bottom: -10%; right: -10%; }
+        .glow-1 { top: -15%; left: -10%; }
+        .glow-2 { bottom: -15%; right: -10%; animation-delay: -7s; }
 
-        .container {
+        @keyframes floatGlow {
+            0% { transform: translateY(0) scale(1); }
+            100% { transform: translateY(-40px) scale(1.1); }
+        }
+
+        /* Canvas Grid Background */
+        #bg-canvas {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            pointer-events: none;
+            opacity: 0.75;
+        }
+
+        /* Container & Grid Layout */
+        .app-container {
             width: 100%;
-            max-width: 460px;
+            max-width: 1080px;
+            display: grid;
+            grid-template-columns: 1.15fr 1fr;
+            gap: 48px;
+            align-items: center;
             z-index: 10;
-            padding: 20px;
-            animation: containerAppear 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+            animation: slideIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        @keyframes containerAppear {
-            from { opacity: 0; transform: translateY(40px) scale(0.95); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        .pricing-card {
-            background: rgba(10, 15, 10, 0.7);
-            backdrop-filter: blur(40px);
-            -webkit-backdrop-filter: blur(40px);
-            border: 1px solid var(--glass-border);
-            border-radius: 48px;
-            padding: 48px 32px;
-            text-align: center;
-            position: relative;
-            box-shadow: 0 40px 100px rgba(0,0,0,0.8);
+        /* Info Panel Left */
+        .info-panel {
+            text-align: left;
         }
 
-        .badge-student {
+        .badge-premium {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            background: rgba(42, 224, 35, 0.08);
-            color: var(--primary);
-            font-size: 0.75rem;
-            font-weight: 800;
-            padding: 10px 20px;
-            border-radius: 100px;
-            margin-bottom: 24px;
-            border: 1px solid rgba(42, 224, 35, 0.15);
+            background: rgba(37, 99, 235, 0.08);
+            color: var(--primary-dark);
+            font-size: 0.78rem;
+            font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 2px;
+            padding: 8px 16px;
+            border-radius: 99px;
+            border: 1px solid var(--border);
+            margin-bottom: 24px;
+            font-family: var(--font-outfit);
         }
 
-        h1 {
-            font-size: 2.5rem;
+        .info-panel h1 {
+            font-family: var(--font-outfit);
+            font-size: 3.4rem;
             font-weight: 800;
-            margin-bottom: 12px;
-            letter-spacing: -1.5px;
+            letter-spacing: -2px;
             line-height: 1.1;
+            margin-bottom: 16px;
+            color: #0f172a;
         }
 
-        h1 span {
-            background: linear-gradient(90deg, #fff, var(--primary));
+        .info-panel h1 span {
+            color: var(--primary-dark);
+            background: linear-gradient(120deg, var(--primary-dark), var(--accent));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
-        .subtitle {
+        .info-panel p.desc {
             color: var(--text-muted);
-            font-size: 1rem;
-            margin-bottom: 40px;
-            line-height: 1.5;
+            font-size: 1.05rem;
+            line-height: 1.6;
+            margin-bottom: 36px;
+            max-width: 480px;
         }
 
-        .plans-stack {
+        /* Dynamic Features List Details */
+        .features-list {
             display: flex;
             flex-direction: column;
             gap: 16px;
-            margin-bottom: 32px;
+            min-height: 380px;
+        }
+
+        .feature-card {
+            background: #ffffff;
+            border: 1px solid rgba(0, 0, 0, 0.03);
+            padding: 18px 22px;
+            border-radius: 20px;
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.015);
+            animation: cardAppear 0.4s ease-out;
+        }
+
+        @keyframes cardAppear {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .feature-icon {
+            width: 42px;
+            height: 42px;
+            background: rgba(6, 182, 212, 0.08);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent);
+            font-size: 1.25rem;
+            flex-shrink: 0;
+            border: 1px solid rgba(6, 182, 212, 0.15);
+        }
+
+        .feature-info h4 {
+            font-family: var(--font-outfit);
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: #0f172a;
+        }
+
+        .feature-info p {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            line-height: 1.45;
+        }
+
+        /* Integrity Trust Card */
+        .trust-card {
+            margin-top: 28px;
+            background: rgba(6, 182, 212, 0.02);
+            border: 1px dashed rgba(6, 182, 212, 0.3);
+            border-radius: 20px;
+            padding: 18px 22px;
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+        }
+
+        .trust-icon {
+            font-size: 1.5rem;
+            color: var(--accent);
+            margin-top: 2px;
+        }
+
+        .trust-info h5 {
+            font-family: var(--font-outfit);
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: #0f172a;
+        }
+
+        .trust-info p {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            line-height: 1.4;
+        }
+
+        /* Checkout Card Right */
+        .pricing-card {
+            background: var(--bg-card);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            border-radius: 36px;
+            padding: 32px 24px;
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(37, 99, 235, 0.02);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+
+        .pricing-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, var(--accent), var(--primary-dark));
+        }
+
+        /* Tab Switcher */
+        .tab-box {
+            display: flex;
+            background: rgba(0, 0, 0, 0.03);
+            border: 1px solid rgba(0, 0, 0, 0.01);
+            border-radius: 18px;
+            padding: 4px;
+            margin-bottom: 24px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            border-radius: 14px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-family: var(--font-outfit);
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .tab-btn.active {
+            background: #ffffff;
+            color: var(--primary-dark);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+            border: 1px solid rgba(0, 0, 0, 0.01);
+        }
+
+        /* Stacked Plan Cards */
+        .plans-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 24px;
         }
 
         .plan {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid var(--glass-border);
-            border-radius: 28px;
-            padding: 24px;
+            background: #ffffff;
+            border: 1px solid rgba(0, 0, 0, 0.04);
+            border-radius: 16px;
+            padding: 14px 20px;
             cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-            position: relative;
+            transition: all 0.2s ease-in-out;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            position: relative;
             overflow: hidden;
             text-align: left;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.005);
         }
 
         .plan:hover {
-            transform: translateY(-4px);
-            border-color: rgba(42, 224, 35, 0.3);
-            background: rgba(255, 255, 255, 0.04);
+            transform: translateY(-2px);
+            border-color: rgba(37, 99, 235, 0.3);
+            background: rgba(37, 99, 235, 0.01);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.01);
         }
 
         .plan.active {
-            border-color: var(--primary);
-            background: rgba(42, 224, 35, 0.06);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3), 0 0 20px rgba(42, 224, 35, 0.1);
+            border-color: var(--primary-dark);
+            background: rgba(37, 99, 235, 0.04);
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.05);
         }
 
         .plan-meta h3 {
-            font-size: 1.2rem;
+            font-family: var(--font-outfit);
+            font-size: 1.1rem;
             font-weight: 700;
             margin-bottom: 2px;
+            color: #0f172a;
         }
 
         .plan-meta p {
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             color: var(--text-muted);
         }
 
@@ -165,80 +344,58 @@
 
         .old-price {
             display: block;
-            font-size: 0.85rem;
+            font-size: 0.72rem;
             color: var(--text-muted);
             text-decoration: line-through;
-            opacity: 0.6;
+            opacity: 0.7;
         }
 
         .current-price {
-            font-size: 1.4rem;
+            font-size: 1.3rem;
             font-weight: 800;
-            color: var(--text-main);
+            color: var(--primary-dark);
+            font-family: var(--font-outfit);
         }
 
-        .best-value {
+        .best-value-tag {
             position: absolute;
             top: 0;
             right: 0;
-            background: var(--primary);
-            color: #000;
-            font-size: 0.7rem;
-            font-weight: 900;
-            padding: 6px 16px;
-            border-bottom-left-radius: 20px;
+            background: var(--primary-dark);
+            color: #ffffff;
+            font-size: 0.6rem;
+            font-weight: 800;
+            padding: 3px 12px;
+            border-bottom-left-radius: 12px;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            animation: pulseLabel 2s infinite;
+            letter-spacing: 0.5px;
         }
 
-        @keyframes pulseLabel {
-            0% { opacity: 1; }
-            50% { opacity: 0.8; }
-            100% { opacity: 1; }
-        }
-
-        .features-grid {
-            text-align: left;
-            margin-bottom: 40px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            padding: 0 10px;
-        }
-
-        .feature-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-        }
-
-        .feature-item i {
-            color: var(--primary);
-            font-size: 0.75rem;
-        }
-
+        /* Action Buttons */
         .btn-pay {
             width: 100%;
-            background: var(--primary);
-            color: #000;
+            background: var(--primary-dark);
+            color: #ffffff;
             border: none;
-            padding: 22px;
-            border-radius: 24px;
-            font-size: 1.15rem;
+            padding: 18px;
+            border-radius: 18px;
+            font-size: 1.05rem;
             font-weight: 800;
+            font-family: var(--font-outfit);
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
-            box-shadow: 0 15px 35px var(--primary-glow);
+            transition: all 0.3s;
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.2);
             position: relative;
             overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
 
         .btn-pay:hover {
-            transform: scale(1.02) translateY(-2px);
-            box-shadow: 0 20px 45px var(--primary-glow);
+            transform: scale(1.01) translateY(-2px);
+            box-shadow: 0 12px 30px rgba(37, 99, 235, 0.3);
             filter: brightness(1.1);
         }
 
@@ -246,9 +403,9 @@
             transform: scale(0.98);
         }
 
-        .secure-note {
-            margin-top: 24px;
-            font-size: 0.85rem;
+        .secure-footer {
+            margin-top: 20px;
+            font-size: 0.8rem;
             color: var(--text-muted);
             display: flex;
             align-items: center;
@@ -256,40 +413,112 @@
             gap: 8px;
         }
 
-        .skip-btn {
-            margin-top: 20px;
-            background: none;
+        .secure-footer i {
+            color: var(--accent);
+        }
+
+        .btn-back {
+            margin-top: 14px;
+            background: transparent;
             border: none;
             color: var(--text-muted);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: 600;
             cursor: pointer;
             transition: color 0.3s;
+            text-decoration: underline;
         }
 
-        .skip-btn:hover { color: #fff; text-decoration: underline; }
+        .btn-back:hover {
+            color: var(--text-main);
+        }
 
-        /* Animation for icons */
-        .success-float {
-            width: 80px;
-            height: 80px;
-            background: rgba(42, 224, 35, 0.1);
+        /* Points Unlock Special View */
+        .points-box {
+            display: none;
+            background: var(--gold-light);
+            border: 1px dashed rgba(217, 119, 6, 0.3);
             border-radius: 24px;
+            padding: 24px;
+            text-align: center;
+            margin-bottom: 28px;
+            animation: fadeIn 0.4s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .points-icon {
+            font-size: 2.5rem;
+            color: var(--gold);
+            margin-bottom: 12px;
+            filter: drop-shadow(0 0 10px rgba(217, 119, 6, 0.15));
+        }
+
+        .points-box h4 {
+            font-family: var(--font-outfit);
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: var(--gold);
+        }
+
+        .points-box p {
+            font-size: 0.82rem;
+            color: var(--gold);
+            line-height: 1.5;
+            margin-bottom: 16px;
+            opacity: 0.95;
+        }
+
+        .points-meter {
+            height: 8px;
+            background: rgba(217, 119, 6, 0.1);
+            border-radius: 99px;
+            overflow: hidden;
+            position: relative;
+            margin-bottom: 8px;
+        }
+
+        .points-fill {
+            height: 100%;
+            background: var(--gold);
+            width: 75%; /* dynamic representation */
+            border-radius: 99px;
+            box-shadow: 0 0 10px rgba(217, 119, 6, 0.25);
+        }
+
+        .points-label {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 30px;
-            color: var(--primary);
-            font-size: 2rem;
-            border: 1px solid rgba(42, 224, 35, 0.2);
-            animation: floatIcon 3s ease-in-out infinite;
+            justify-content: space-between;
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--gold);
         }
 
-        @keyframes floatIcon {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
+        /* Responsive */
+        @media (max-width: 900px) {
+            .app-container {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
 
+            .info-panel {
+                text-align: center;
+            }
+
+            .info-panel p.desc {
+                margin: 0 auto 30px auto;
+            }
+
+            .features-list {
+                max-width: 500px;
+                margin: 0 auto;
+                min-height: auto;
+            }
+        }
     </style>
 </head>
 <body>
@@ -297,33 +526,67 @@
     <div class="ambient-glow glow-1"></div>
     <div class="ambient-glow glow-2"></div>
 
-    <div class="container">
+    <!-- Background Canvas -->
+    <canvas id="bg-canvas"></canvas>
+
+    <div class="app-container">
+        
+        <!-- Left Side: Features and Copy -->
+        <div class="info-panel">
+            <div class="badge-premium">
+                <i class="fa-solid fa-crown"></i> Hiero Pro Access
+            </div>
+            <h1>Accelerate Your <span>Career</span></h1>
+            <p class="desc">Upgrade your account to access elite features designed to prepare you for top-tier technology roles.</p>
+            
+            <!-- Features list (updates dynamically depending on chosen plan) -->
+            <div class="features-list" id="dynamic-features">
+                <!-- Dynamically populated via javascript -->
+            </div>
+
+            <!-- Honesty Promise Block -->
+            <div class="trust-card">
+                <div class="trust-icon"><i class="fa-solid fa-shield-heart"></i></div>
+                <div class="trust-info">
+                    <h5>Our Integrity Promise</h5>
+                    <p>No fake placement claims. No spam or data selling. Just high-impact, active skill development to make you 100% self-reliant.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Side: Pricing Selection and Payment Card -->
         <div class="pricing-card">
             
-            <div class="success-float">
-                <i class="fa-solid fa-cloud-arrow-down"></i>
+            <!-- Switcher Tabs -->
+            <div class="tab-box">
+                <button class="tab-btn active" id="tab-cash" onclick="switchMode('cash')">
+                    <i class="fa-solid fa-wallet"></i> Student Plans
+                </button>
+                <button class="tab-btn" id="tab-points" onclick="switchMode('points')">
+                    <i class="fa-solid fa-medal"></i> Redeem XP
+                </button>
             </div>
 
-            <div class="badge-student">
-                <i class="fa-solid fa-bolt"></i> Student Limited Offer
-            </div>
-
-            <h1>Unlock <span>Pro</span></h1>
-            <p class="subtitle">Your resume is ready! Now unlock AI insights and guided paths to land your dream job.</p>
-
-            <div class="features-grid">
-                <div class="feature-item"><i class="fa-solid fa-check-double"></i> Advanced AI Review</div>
-                <div class="feature-item"><i class="fa-solid fa-check-double"></i> Elite Templates</div>
-                <div class="feature-item"><i class="fa-solid fa-check-double"></i> Mastery Pathways</div>
-                <div class="feature-item"><i class="fa-solid fa-check-double"></i> Priority Export</div>
-            </div>
-
-            <div class="plans-stack">
-                <!-- Option 1 -->
-                <div class="plan" onclick="activatePlan(this)">
+            <!-- Mode 1: Cash/UPI Plans -->
+            <div class="plans-container" id="cash-plans">
+                
+                <!-- Single Pass - ₹9 -->
+                <div class="plan" data-id="single" data-amount="9" data-name="Single Pass" data-desc="1 Resume, 1 Mock Interview" onclick="selectPlan(this)">
                     <div class="plan-meta">
-                        <h3>7 Days PRO</h3>
-                        <p>Perfect for quick edits</p>
+                        <h3>🎟️ Single Pass</h3>
+                        <p>1 Resume download & 1 Mock Interview</p>
+                    </div>
+                    <div class="plan-price">
+                        <span class="old-price">₹49</span>
+                        <span class="current-price">₹9</span>
+                    </div>
+                </div>
+
+                <!-- 1 Week PRO - ₹49 -->
+                <div class="plan" data-id="week" data-amount="49" data-name="1 Week PRO" data-desc="1 Week full prep access" onclick="selectPlan(this)">
+                    <div class="plan-meta">
+                        <h3>⚡ 1 Week PRO</h3>
+                        <p>Perfect for urgent prep this week</p>
                     </div>
                     <div class="plan-price">
                         <span class="old-price">₹149</span>
@@ -331,41 +594,329 @@
                     </div>
                 </div>
 
-                <!-- Option 2 (Featured) -->
-                <div class="plan active" onclick="activatePlan(this)">
-                    <span class="best-value">Best Value</span>
+                <!-- 1 Month PRO - ₹99 -->
+                <div class="plan active" data-id="month" data-amount="99" data-name="1 Month PRO" data-desc="1 Month career growth" onclick="selectPlan(this)">
+                    <span class="best-value-tag">Best Value</span>
                     <div class="plan-meta">
-                        <h3>30 Days PRO</h3>
-                        <p>Full career growth</p>
+                        <h3>🚀 1 Month PRO</h3>
+                        <p>Complete learning path & quiz prep</p>
+                    </div>
+                    <div class="plan-price">
+                        <span class="old-price">₹299</span>
+                        <span class="current-price">₹99</span>
+                    </div>
+                </div>
+
+                <!-- 3 Months PRO - ₹149 -->
+                <div class="plan" data-id="3months" data-amount="149" data-name="3 Months PRO" data-desc="3 Months full career path" onclick="selectPlan(this)">
+                    <div class="plan-meta">
+                        <h3>📅 3 Months PRO</h3>
+                        <p>Long-term prep & ad-free learning</p>
                     </div>
                     <div class="plan-price">
                         <span class="old-price">₹499</span>
-                        <span class="current-price">₹99</span>
+                        <span class="current-price">₹149</span>
+                    </div>
+                </div>
+
+                <!-- 6 Months PRO - ₹249 -->
+                <div class="plan" data-id="6months" data-amount="249" data-name="6 Months PRO" data-desc="6 Months unlimited access" onclick="selectPlan(this)">
+                    <div class="plan-meta">
+                        <h3>👑 6 Months PRO</h3>
+                        <p>All premium features + full chatbot access</p>
+                    </div>
+                    <div class="plan-price">
+                        <span class="old-price">₹999</span>
+                        <span class="current-price">₹249</span>
                     </div>
                 </div>
             </div>
 
-            <button class="btn-pay" id="payBtn">Continue to PRO Access</button>
-
-            <div class="secure-note">
-                <i class="fa-solid fa-shield-check"></i>
-                <span>One-time payment • Secure checkout</span>
+            <!-- Mode 2: Gamified Points Unlock -->
+            <div class="points-box" id="points-unlock">
+                <div class="points-icon"><i class="fa-solid fa-award"></i></div>
+                <h4>Earn-to-Unlock</h4>
+                <p>Learn actively, solve quizzes, and finish projects to earn Hiero Credits. Redeem them to get PRO access for free!</p>
+                
+                <div class="points-meter">
+                    <div class="points-fill" id="points-progress-bar"></div>
+                </div>
+                <div class="points-label">
+                    <span id="user-current-xp">225 XP</span>
+                    <span>300 XP Required</span>
+                </div>
             </div>
 
-            <button class="skip-btn" onclick="window.history.back()">Skip for now</button>
+            <!-- Purchase Button -->
+            <button class="btn-pay" id="payBtn">
+                <i class="fa-solid fa-unlock"></i>
+                <span id="payBtnText">Pay ₹99 via UPI / Card</span>
+            </button>
+
+            <!-- Secure Details -->
+            <div class="secure-note secure-footer">
+                <i class="fa-solid fa-shield-halved"></i>
+                <span>One-time payment • Secure Razorpay checkout</span>
+            </div>
+
+            <button class="btn-back" onclick="window.history.back()">Go back to home</button>
+
         </div>
     </div>
 
+    <!-- Razorpay Checkout SDK -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
     <script>
-        function activatePlan(el) {
+        // Adjust page viewport behaviors
+        document.body.style.minHeight = "100vh";
+        document.body.style.padding = "40px 10px";
+
+        // Global State
+        let activeMode = 'cash'; 
+        let userXP = 245; 
+        let requiredXP = 300;
+
+        let selectedPlan = {
+            id: "month",
+            amount: 99,
+            name: "1 Month PRO",
+            desc: "1 Month career growth"
+        };
+
+        // Features database matched to the user's hand-written notes
+        const planFeatures = {
+            "single": [
+                { icon: "fa-file-invoice", title: "1 Resume Download", desc: "Download 1 ATS-optimized resume template." },
+                { icon: "fa-microphone-lines", title: "1 Spoken AI Mock Interview", desc: "Experience one full speech assessment session." }
+            ],
+            "week": [
+                { icon: "fa-file-invoice", title: "3 Resume Downloads", desc: "Download up to 3 standard ATS resume templates." },
+                { icon: "fa-circle-play", title: "Videos & Skills Access", desc: "Full access to our curated course video collections." },
+                { icon: "fa-hourglass-half", title: "10-Minute Mock Interview", desc: "Secure 10 minutes of active voice mock interview practice." },
+                { icon: "fa-comment-slash", title: "No Chatbot Access", desc: "AI chatbot is locked (limited to 5 queries)." }
+            ],
+            "month": [
+                { icon: "fa-file-signature", title: "5 Resumes + 2 Premium Downloads", desc: "Get 5 standard downloads plus 2 premium visual resume designs." },
+                { icon: "fa-brain", title: "10 Interactive Quizzes", desc: "Unlock 10 practice quiz sessions to verify your knowledge." },
+                { icon: "fa-circle-play", title: "Videos & Skills Access", desc: "Full access to all course tutorial videos and practice problems." }
+            ],
+            "3months": [
+                { icon: "fa-file-signature", title: "3 Standard + 2 Premium Downloads", desc: "Download 3 standard resumes and 2 premium designs." },
+                { icon: "fa-circle-play", title: "Videos Without Ads", desc: "Watch all tutorial courses and lesson videos without interruptions." },
+                { icon: "fa-comments", title: "75 AI Chatbot Queries", desc: "75 queries with Orbit, our AI-powered personal tech tutor." }
+            ],
+            "6months": [
+                { icon: "fa-infinity", title: "Unlimited Downloads (All Premium)", desc: "Full, unrestricted access to all standard and premium templates." },
+                { icon: "fa-microphone-lines", title: "Full Mock Interviews", desc: "Unlimited AI mock interview sessions with biometrics." },
+                { icon: "fa-circle-play", title: "Videos Without Ads", desc: "Ad-free experience across all course videos and tutorials." },
+                { icon: "fa-comments", title: "Full Chatbot Access", desc: "Unlimited queries and interactive coding advice with Orbit AI tutor." }
+            ]
+        };
+
+        // Initialize XP logic
+        function initXPProgress() {
+            const currentXPLabel = document.getElementById('user-current-xp');
+            const fillEl = document.getElementById('points-progress-bar');
+            
+            try {
+                const localUser = JSON.parse(localStorage.getItem('user') || '{}');
+                if (localUser.points) userXP = localUser.points;
+            } catch(e) {}
+
+            currentXPLabel.innerText = `${userXP} XP`;
+            const percentage = Math.min((userXP / requiredXP) * 100, 100);
+            fillEl.style.width = `${percentage}%`;
+        }
+
+        // Dynamically update feature listings depending on selected plan
+        function updateFeatures(planId) {
+            const container = document.getElementById('dynamic-features');
+            container.innerHTML = '';
+            
+            const features = planFeatures[planId] || planFeatures["month"];
+            features.forEach(f => {
+                const card = document.createElement('div');
+                card.className = 'feature-card';
+                card.innerHTML = `
+                    <div class="feature-icon"><i class="fa-solid ${f.icon}"></i></div>
+                    <div class="feature-info">
+                        <h4>${f.title}</h4>
+                        <p>${f.desc}</p>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Toggle cash vs points mode
+        function switchMode(mode) {
+            activeMode = mode;
+            document.getElementById('tab-cash').classList.toggle('active', mode === 'cash');
+            document.getElementById('tab-points').classList.toggle('active', mode === 'points');
+
+            const cashBox = document.getElementById('cash-plans');
+            const pointsBox = document.getElementById('points-unlock');
+            const payBtn = document.getElementById('payBtn');
+            const payBtnText = document.getElementById('payBtnText');
+
+            if (mode === 'cash') {
+                cashBox.style.display = 'flex';
+                pointsBox.style.display = 'none';
+                payBtnText.innerText = `Pay ₹${selectedPlan.amount} via UPI / Card`;
+                payBtn.disabled = false;
+                payBtn.style.opacity = '1';
+                updateFeatures(selectedPlan.id);
+            } else {
+                cashBox.style.display = 'none';
+                pointsBox.style.display = 'block';
+                
+                // Show 6 Months PRO details for points unlock description
+                updateFeatures("6months");
+
+                if (userXP >= requiredXP) {
+                    payBtnText.innerText = `Redeem for ${requiredXP} XP`;
+                    payBtn.disabled = false;
+                    payBtn.style.opacity = '1';
+                } else {
+                    payBtnText.innerText = `Need ${requiredXP - userXP} more XP to Unlock`;
+                    payBtn.disabled = true;
+                    payBtn.style.opacity = '0.5';
+                }
+            }
+        }
+
+        // Plan Selection handler
+        function selectPlan(el) {
             document.querySelectorAll('.plan').forEach(p => p.classList.remove('active'));
             el.classList.add('active');
-            
-            // Subtle feedback for button
-            const btn = document.getElementById('payBtn');
-            btn.style.transform = 'scale(0.98)';
-            setTimeout(() => btn.style.transform = '', 100);
+
+            selectedPlan.id = el.getAttribute('data-id');
+            selectedPlan.amount = parseInt(el.getAttribute('data-amount') || '0');
+            selectedPlan.name = el.getAttribute('data-name');
+            selectedPlan.desc = el.getAttribute('data-desc');
+
+            const btnText = document.getElementById('payBtnText');
+            btnText.innerText = `Pay ₹${selectedPlan.amount} via UPI / Card`;
+
+            // Update Left Features Panel dynamically
+            updateFeatures(selectedPlan.id);
+
+            // Button Click feedback
+            const payBtn = document.getElementById('payBtn');
+            payBtn.style.transform = 'scale(0.98)';
+            setTimeout(() => payBtn.style.transform = '', 100);
         }
+
+        // Razorpay Trigger / XP Redemption
+        document.getElementById('payBtn').onclick = function() {
+            if (activeMode === 'points') {
+                if (userXP >= requiredXP) {
+                    alert(`🎉 Success! You have redeemed ${requiredXP} XP for Hiero PRO. Enjoy full premium benefits!`);
+                    userXP -= requiredXP;
+                    initXPProgress();
+                    window.location.href = "/dashboard.html";
+                }
+                return;
+            }
+
+            const options = {
+                "key": "rzp_test_YOUR_KEY_HERE", 
+                "amount": selectedPlan.amount * 100, 
+                "currency": "INR",
+                "name": "Hiero Career Assistant",
+                "description": selectedPlan.name,
+                "image": "logohiero.png",
+                "handler": function (response) {
+                    alert("🎉 Payment Successful! Transaction ID: " + response.razorpay_payment_id);
+                    window.location.href = "/dashboard.html";
+                },
+                "prefill": {
+                    "name": "Student User",
+                    "email": "student@hiero.com",
+                    "contact": "9999999999"
+                },
+                "theme": {
+                    "color": "#2563eb" // Royal Blue brand color
+                }
+            };
+
+            try {
+                const rzp = new Razorpay(options);
+                rzp.open();
+            } catch (err) {
+                console.error("Razorpay SDK launch error", err);
+                alert("Failed to connect with payment gateway. Please check key configuration.");
+            }
+        };
+
+        // ========== DIGITAL GRID CANVAS ANIMATION ==========
+        (function() {
+            const canvas = document.getElementById('bg-canvas');
+            const ctx = canvas.getContext('2d');
+            let cells = [];
+
+            function resize() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            window.addEventListener('resize', resize);
+            resize();
+
+            class GridCell {
+                constructor(x, y, size) {
+                    this.x = x;
+                    this.y = y;
+                    this.size = size;
+                    this.opacity = Math.random() * 0.02 + 0.005;
+                    this.fadeSpeed = Math.random() * 0.0008 + 0.0001;
+                    this.growing = Math.random() > 0.5;
+                }
+                update() {
+                    if (this.growing) {
+                        this.opacity += this.fadeSpeed;
+                        if (this.opacity >= 0.04) this.growing = false;
+                    } else {
+                        this.opacity -= this.fadeSpeed;
+                        if (this.opacity <= 0.005) this.growing = true;
+                    }
+                }
+                draw() {
+                    ctx.strokeStyle = `rgba(37, 99, 235, ${this.opacity})`;
+                    ctx.lineWidth = 1;
+                    ctx.strokeRect(this.x, this.y, this.size, this.size);
+                }
+            }
+
+            function initGrid() {
+                cells = [];
+                const size = 60; 
+                for (let x = 0; x < canvas.width; x += size) {
+                    for (let y = 0; y < canvas.height; y += size) {
+                        if (Math.random() > 0.85) { 
+                            cells.push(new GridCell(x, y, size));
+                        }
+                    }
+                }
+            }
+
+            function animateGrid() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                cells.forEach(cell => {
+                    cell.update();
+                    cell.draw();
+                });
+                requestAnimationFrame(animateGrid);
+            }
+
+            initGrid();
+            animateGrid();
+            window.addEventListener('resize', initGrid);
+        })();
+
+        // Bootstrap
+        initXPProgress();
+        updateFeatures("month"); // Default displays 1 Month PRO features
     </script>
 </body>
 </html>

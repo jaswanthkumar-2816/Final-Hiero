@@ -114,6 +114,11 @@ Open any of these files in your browser:
 - **Modern UI/UX**: Clean, professional design
 - **Scalable Architecture**: Easy to extend and maintain
 
+## 🎯 Platform Strategy (Do's & Don'ts)
+
+For details on our core product principles, our dual live/offline learning model, and the certificate system, see the dedicated documentation:
+- **[DOS_AND_DONTS.md](file:///Users/jaswanthkumar/Desktop/shared%20folder/DOS_AND_DONTS.md)**
+
 ## 🎉 Ready to Use!
 
 The Hiero platform is fully implemented with all requested features:
