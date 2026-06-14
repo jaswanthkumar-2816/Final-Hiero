@@ -817,6 +817,8 @@
                 return;
             }
 
+            const localUser = JSON.parse(localStorage.getItem('user') || '{}');
+
             if (activeMode === 'points') {
                 if (userXP >= requiredXP) {
                     alert(`🎉 Success! You have redeemed ${requiredXP} XP for Hiero PRO. Enjoy full premium benefits!`);
