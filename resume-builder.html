@@ -5515,6 +5515,11 @@
     }
 
     async function downloadDocx() {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      if (!user.isPro) {
+        window.location.href = '/pricing.html';
+        return;
+      }
       try {
         const btn = document.getElementById('downloadDocxBtn');
         const originalText = btn ? btn.innerHTML : 'Download Word';
@@ -5579,6 +5584,11 @@
     }
 
     async function downloadResume() {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      if (!user.isPro) {
+        window.location.href = '/pricing.html';
+        return;
+      }
       const btn = event.target;
       const originalText = btn.innerHTML;
 
