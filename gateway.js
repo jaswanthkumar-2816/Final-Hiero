@@ -166,6 +166,10 @@ app.use('/api/analysis', analysisRouter); // Supports /api/analysis/analyze
 const aiPhotoRouter = require('./routes/ai-photo');
 app.use('/api', aiPhotoRouter); // Handles /api/generate-executive-photo
 
+// Payment API (Integrated)
+const paymentRouter = require('./routes/payment');
+app.use('/api/payment', paymentRouter);
+
 // Support legacy shortened paths
 app.use('/auth/signup', (req, res) => res.redirect(307, '/signup'));
 app.use('/auth/login', (req, res) => res.redirect(307, '/login'));

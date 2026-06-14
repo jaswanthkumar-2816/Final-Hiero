@@ -35,6 +35,7 @@
     "puppeteer": "^24.37.5",
     "tesseract.js": "^5.1.1",
     "uuid": "^9.0.0",
-    "winston": "^3.11.0"
+    "winston": "^3.11.0",
+    "razorpay": "^2.9.2"
   }
 }

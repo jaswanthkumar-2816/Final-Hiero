@@ -38,6 +38,9 @@ const userSchema = new mongoose.Schema({
         analyzedAt: { type: Date },
         isReAnalysis: { type: Boolean }
     }],
+    isPro: { type: Boolean, default: false },
+    proUntil: { type: Date },
+    proPlan: { type: String },
     createdAt: { type: Date, default: Date.now }
 });
 

@@ -809,7 +809,14 @@
         }
 
         // Razorpay Trigger / XP Redemption
-        document.getElementById('payBtn').onclick = function() {
+        document.getElementById('payBtn').onclick = async function() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                alert("Please log in first to purchase PRO access!");
+                window.location.href = "/login";
+                return;
+            }
+
             if (activeMode === 'points') {
                 if (userXP >= requiredXP) {
                     alert(`🎉 Success! You have redeemed ${requiredXP} XP for Hiero PRO. Enjoy full premium benefits!`);
@@ -820,33 +827,104 @@
                 return;
             }
 
-            const options = {
-                "key": "rzp_test_YOUR_KEY_HERE", 
-                "amount": selectedPlan.amount * 100, 
-                "currency": "INR",
-                "name": "Hiero Career Assistant",
-                "description": selectedPlan.name,
-                "image": "logohiero.png",
-                "handler": function (response) {
-                    alert("🎉 Payment Successful! Transaction ID: " + response.razorpay_payment_id);
-                    window.location.href = "/dashboard.html";
-                },
-                "prefill": {
-                    "name": "Student User",
-                    "email": "student@hiero.com",
-                    "contact": "9999999999"
-                },
-                "theme": {
-                    "color": "#2563eb" // Royal Blue brand color
-                }
-            };
+            const payBtn = document.getElementById('payBtn');
+            const payBtnText = document.getElementById('payBtnText');
+            
+            // Disable button during loading
+            payBtn.disabled = true;
+            payBtnText.innerText = "Opening checkout...";
 
             try {
+                // 1. Create order on the server
+                const orderRes = await fetch('/api/payment/create-order', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ planId: selectedPlan.id })
+                });
+
+                const orderData = await orderRes.json();
+                if (!orderRes.ok || !orderData.success) {
+                    throw new Error(orderData.error || 'Failed to initialize payment order');
+                }
+
+                // 2. Open Razorpay checkout modal
+                const options = {
+                    "key": orderData.key_id,
+                    "amount": orderData.amount,
+                    "currency": orderData.currency,
+                    "name": "Hiero Career Assistant",
+                    "description": selectedPlan.name,
+                    "image": "logohiero.png",
+                    "order_id": orderData.order_id,
+                    "handler": async function (response) {
+                        payBtnText.innerText = "Verifying transaction...";
+                        
+                        try {
+                            // 3. Verify payment signature on backend
+                            const verifyRes = await fetch('/api/payment/verify-payment', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${token}`
+                                },
+                                body: JSON.stringify({
+                                    razorpay_payment_id: response.razorpay_payment_id,
+                                    razorpay_order_id: response.razorpay_order_id,
+                                    razorpay_signature: response.razorpay_signature,
+                                    planId: selectedPlan.id
+                                })
+                            });
+
+                            const verifyData = await verifyRes.json();
+                            if (verifyRes.ok && verifyData.success) {
+                                // Update local profile
+                                try {
+                                    const userObj = JSON.parse(localStorage.getItem('user') || '{}');
+                                    userObj.isPro = true;
+                                    userObj.proPlan = selectedPlan.id;
+                                    localStorage.setItem('user', JSON.stringify(userObj));
+                                } catch(e) {}
+
+                                alert("🎉 Payment Successful! Account upgraded to Hiero PRO.");
+                                window.location.href = "/dashboard.html";
+                            } else {
+                                alert("⚠️ Payment verification failed: " + (verifyData.error || "Please contact support."));
+                                payBtn.disabled = false;
+                                payBtnText.innerText = `Pay ₹${selectedPlan.amount} via UPI / Card`;
+                            }
+                        } catch(verifyErr) {
+                            console.error("Verification connection error:", verifyErr);
+                            alert("Failed to connect for payment verification. Please contact support.");
+                            payBtn.disabled = false;
+                            payBtnText.innerText = `Pay ₹${selectedPlan.amount} via UPI / Card`;
+                        }
+                    },
+                    "prefill": {
+                        "name": localUser.name || "Student User",
+                        "email": localUser.email || "student@hiero.com",
+                        "contact": localUser.phone || "9999999999"
+                    },
+                    "theme": {
+                        "color": "#2563eb"
+                    },
+                    "modal": {
+                        "ondismiss": function() {
+                            // Restore pay button
+                            payBtn.disabled = false;
+                            payBtnText.innerText = `Pay ₹${selectedPlan.amount} via UPI / Card`;
+                        }
+                    }
+                };
+
                 const rzp = new Razorpay(options);
                 rzp.open();
             } catch (err) {
-                console.error("Razorpay SDK launch error", err);
-                alert("Failed to connect with payment gateway. Please check key configuration.");
+                console.error("Razorpay SDK launch error:", err);
+                alert("Failed to connect with payment gateway: " + err.message);
+                payBtn.disabled = false;
+                payBtnText.innerText = `Pay ₹${selectedPlan.amount} via UPI / Card`;
             }
         };
 
