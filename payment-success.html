@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment Successful - Hiero</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #2ae023;
+      --primary-glow: rgba(42, 224, 35, 0.4);
+      --bg: #030803;
+      --card-bg: rgba(255, 255, 255, 0.03);
+      --card-border: rgba(42, 224, 35, 0.15);
+      --text: #ffffff;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: radial-gradient(circle at 50% 50%, #081d08 0%, var(--bg) 100%);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      overflow-x: hidden;
+    }
+
+    .success-container {
+      background: rgba(10, 15, 10, 0.7);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--card-border);
+      border-radius: 28px;
+      width: 100%;
+      max-width: 550px;
+      padding: 50px 40px;
+      text-align: center;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), 0 0 50px var(--primary-glow);
+      position: relative;
+      overflow: hidden;
+      animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes slideUp {
+      0% { opacity: 0; transform: translateY(30px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Success Checkmark Animation */
+    .success-icon-wrapper {
+      width: 100px;
+      height: 100px;
+      background: rgba(42, 224, 35, 0.1);
+      border: 2px solid var(--primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 30px;
+      box-shadow: 0 0 30px var(--primary-glow);
+      position: relative;
+      animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0.6); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .success-icon-wrapper i {
+      font-size: 3rem;
+      color: var(--primary);
+      animation: checkmark 0.6s ease-in-out 0.3s forwards;
+      opacity: 0;
+      transform: scale(0.5);
+    }
+
+    @keyframes checkmark {
+      0% { opacity: 0; transform: scale(0.5) rotate(-15deg); }
+      70% { transform: scale(1.1) rotate(10deg); }
+      100% { opacity: 1; transform: scale(1) rotate(0deg); }
+    }
+
+    h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.2rem;
+      font-weight: 800;
+      margin-bottom: 15px;
+      background: linear-gradient(135deg, #ffffff 0%, var(--primary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.5px;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      margin-bottom: 40px;
+      line-height: 1.6;
+    }
+
+    /* Template card info */
+    .template-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 35px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      text-align: left;
+    }
+
+    .template-card i {
+      font-size: 2.2rem;
+      color: var(--primary);
+      background: rgba(42, 224, 35, 0.08);
+      padding: 12px;
+      border-radius: 12px;
+    }
+
+    .template-card-info h4 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+
+    .template-card-info p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    /* Buttons */
+    .btn-download {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: linear-gradient(135deg, var(--primary) 0%, #17b310 100%);
+      color: #000;
+      border: none;
+      width: 100%;
+      padding: 16px 20px;
+      border-radius: 14px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 10px 25px var(--primary-glow);
+      transition: all 0.3s ease;
+      margin-bottom: 20px;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    .btn-download:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 30px var(--primary-glow);
+      filter: brightness(1.1);
+    }
+
+    .btn-download:active {
+      transform: translateY(0);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--primary);
+      border: 2px solid var(--primary);
+      width: 100%;
+      padding: 14px 20px;
+      border-radius: 14px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(42, 224, 35, 0.1);
+      box-shadow: 0 0 15px rgba(42, 224, 35, 0.2);
+    }
+
+    /* Dynamic loading overlay */
+    #generationOverlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 100000;
+      background: linear-gradient(135deg, #000501 0%, #155715 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="success-container">
+    <div class="success-icon-wrapper">
+      <i class="fa-solid fa-check"></i>
+    </div>
+    <h1>Payment Successful!</h1>
+    <p class="subtitle">Thank you for your purchase. Your resume is processed and ready to download.</p>
+
+    <div class="template-card">
+      <i class="fa-regular fa-file-pdf"></i>
+      <div class="template-card-info">
+        <h4 id="templateNameText">ATS Friendly Resume</h4>
+        <p id="fileNameText">resume.pdf</p>
+      </div>
+    </div>
+
+    <button id="downloadBtn" class="btn-download">
+      <i class="fa-solid fa-cloud-arrow-down"></i> Download Resume
+    </button>
+    <a href="/dashboard.html" class="btn-secondary">Done</a>
+  </div>
+
+  <!-- Dynamic loading template overlay -->
+  <div id="generationOverlay" style="display: none;">
+    <div style="text-align:center;padding:40px;max-width:600px;">
+      <div class="logo-container" style="width:250px;height:250px;margin:0 auto 40px;position:relative;">
+        <div class="logo" style="width:100%;height:100%;background:rgba(0,0,0,0.7);border-radius:20px;padding:30px;backdrop-filter:blur(10px);box-shadow:0 20px 60px rgba(0,0,0,0.5);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;">
+          <img src="logohiero.png" alt="Hiero Logo" class="logo-img" style="width:100%;height:100%;object-fit:contain;filter:drop-shadow(0px 4px 20px rgba(42,224,35,0.5));position:relative;z-index:2;">
+        </div>
+      </div>
+      <h1 id="overlayTitle" style="font-size:36px;margin-bottom:20px;font-weight:700;background:none;-webkit-text-fill-color:white;color:white;">Downloading Your Resume</h1>
+      <div id="overlayStatus" style="font-size:20px;color:#2ae023;margin-bottom:12px;font-weight:500;">Generating premium PDF...</div>
+      <div id="overlaySubstatus" style="font-size:16px;opacity:0.8;margin-bottom:35px;">This will only take a moment</div>
+      <div style="width:100%;height:10px;background:rgba(255,255,255,0.15);border-radius:12px;overflow:hidden;box-shadow:inset 0 2px 4px rgba(0,0,0,0.3);">
+        <div id="overlayProgressBar" style="height:100%;background:linear-gradient(90deg,#2ae023,#1a8b17);width:0%;transition:width 0.4s ease;box-shadow:0 0 20px rgba(42,224,35,0.6);"></div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .logo::before {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 0%;
+      background: linear-gradient(180deg, transparent 0%, rgba(42, 224, 35, 0.2) 100%);
+      animation: fillLogo 3s ease-in-out infinite;
+      z-index: 1;
+      border-radius: 20px;
+    }
+    @keyframes fillLogo {
+      0% { height: 0%; }
+      50% { height: 100%; }
+      100% { height: 0%; }
+    }
+  </style>
+
+  <script>
+    // Retrieve resume data from localStorage
+    let resumeData = {};
+    let selectedTemplate = 'classic';
+    let fullName = 'resume';
+
+    try {
+      resumeData = JSON.parse(localStorage.getItem('resumeData') || '{}');
+      selectedTemplate = localStorage.getItem('selectedTemplate') || 'classic';
+      fullName = resumeData.personalInfo?.fullName || 'resume';
+    } catch (e) {
+      console.error("Error reading localStorage:", e);
+    }
+
+    // Capitalize template name
+    const capitalize = s => s.charAt(0).toUpperCase() + s.slice(1);
+    document.getElementById('templateNameText').innerText = `${capitalize(selectedTemplate)} Template`;
+    
+    // Clean filename with only user name
+    const cleanName = fullName.trim().replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '_');
+    const pdfFileName = `${cleanName}.pdf`;
+    document.getElementById('fileNameText').innerText = pdfFileName;
+
+    // Connect to download trigger
+    document.getElementById('downloadBtn').onclick = async function() {
+      const btn = document.getElementById('downloadBtn');
+      const overlay = document.getElementById('generationOverlay');
+      const progressBar = document.getElementById('overlayProgressBar');
+      const statusEl = document.getElementById('overlayStatus');
+      
+      btn.disabled = true;
+      overlay.style.display = 'flex';
+      overlay.offsetHeight;
+      overlay.style.opacity = '1';
+      progressBar.style.width = '20%';
+
+      try {
+        statusEl.textContent = 'Contacting server...';
+        await new Promise(resolve => setTimeout(resolve, 300));
+        progressBar.style.width = '50%';
+        statusEl.textContent = 'Generating your PDF document...';
+
+        const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
+        
+        // Define backend URL fallback
+        const BACKEND_URL = window.location.origin;
+
+        const response = await fetch(`${BACKEND_URL}/api/resume/download-resume`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/pdf',
+            'Authorization': token ? `Bearer ${token}` : ''
+          },
+          body: JSON.stringify(resumeData)
+        });
+
+        progressBar.style.width = '80%';
+        if (!response.ok) throw new Error('Generation failed on backend');
+
+        const blob = await response.blob();
+        progressBar.style.width = '100%';
+        
+        // Trigger client browser download
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = pdfFileName;
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+
+        setTimeout(() => {
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+        }, 100);
+
+        statusEl.textContent = 'Download Complete!';
+        
+      } catch (error) {
+        console.error('Download error:', error);
+        alert('Failed to download resume. Please try again or contact support.');
+      } finally {
+        setTimeout(() => {
+          overlay.style.opacity = '0';
+          setTimeout(() => {
+            overlay.style.display = 'none';
+            btn.disabled = false;
+          }, 300);
+        }, 1200);
+      }
+    };
+  </script>
+</body>
+</html>

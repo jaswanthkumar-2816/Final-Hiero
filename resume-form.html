@@ -3944,6 +3944,67 @@
       }
     }
 
+    function showUpgradeLoading(callback) {
+      const overlay = document.createElement('div');
+      overlay.id = 'generationOverlay';
+      overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;z-index:100000;background:linear-gradient(135deg,#000501 0%,#2cc42c 100%);display:flex;align-items:center;justify-content:center;color:white;font-family:Inter,system-ui,sans-serif;opacity:0;transition:opacity 0.3s ease;';
+
+      overlay.innerHTML = `
+        <div style="text-align:center;padding:40px;max-width:600px;">
+          <div class="logo-container" style="width:250px;height:250px;margin:0 auto 40px;position:relative;">
+            <div class="logo" style="width:100%;height:100%;background:rgba(0,0,0,0.7);border-radius:20px;padding:30px;backdrop-filter:blur(10px);box-shadow:0 20px 60px rgba(0,0,0,0.5);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;">
+              <img src="logohiero.png" alt="Hiero Logo" class="logo-img" style="width:100%;height:100%;object-fit:contain;filter:drop-shadow(0px 4px 20px rgba(42,224,35,0.5));position:relative;z-index:2;">
+            </div>
+          </div>
+          <h1 style="font-size:36px;margin-bottom:20px;font-weight:700;">Preparing Premium Download</h1>
+          <div id="overlayStatus" style="font-size:20px;color:#2ae023;margin-bottom:12px;font-weight:500;">Securing checkout portal...</div>
+          <div id="overlaySubstatus" style="font-size:16px;opacity:0.8;margin-bottom:35px;">Redirecting you to payment options</div>
+          <div style="width:100%;height:10px;background:rgba(255,255,255,0.15);border-radius:12px;overflow:hidden;box-shadow:inset 0 2px 4px rgba(0,0,0,0.3);">
+            <div id="overlayProgressBar" style="height:100%;background:linear-gradient(90deg,#2ae023,#1a8b17);width:0%;transition:width 0.4s ease;box-shadow:0 0 20px rgba(42, 224, 35, 0.6);"></div>
+          </div>
+          <div style="margin-top:20px;font-size:14px;opacity:0.6;">
+            <i class="fas fa-spinner fa-spin"></i> Processing...
+          </div>
+        </div>
+        <style>
+          .logo::before {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 0%;
+            background: linear-gradient(180deg, transparent 0%, rgba(42, 224, 35, 0.2) 100%);
+            animation: fillLogo 3s ease-in-out infinite;
+            z-index: 1;
+            border-radius: 20px;
+          }
+          @keyframes fillLogo {
+            0% { height: 0%; }
+            50% { height: 100%; }
+            100% { height: 0%; }
+          }
+        </style>
+      `;
+
+      document.body.appendChild(overlay);
+      overlay.offsetHeight;
+      overlay.style.opacity = '1';
+
+      const progressBar = overlay.querySelector('#overlayProgressBar');
+      setTimeout(() => {
+        if (progressBar) progressBar.style.width = '100%';
+      }, 100);
+
+      setTimeout(() => {
+        overlay.style.opacity = '0';
+        setTimeout(() => {
+          overlay.remove();
+          callback();
+        }, 300);
+      }, 1800);
+    }
+
     function editResume() {
       document.getElementById('resultsSection').style.display = 'none';
       document.querySelector('.main-layout').style.display = 'grid';
@@ -3953,7 +4014,9 @@
     async function downloadDocx() {
       const user = JSON.parse(localStorage.getItem('user') || '{}');
       if (!user.isPro) {
-        window.location.href = '/pricing.html';
+        showUpgradeLoading(() => {
+          window.location.href = '/pricing.html';
+        });
         return;
       }
       try {
@@ -4022,7 +4085,9 @@
     async function downloadResume() {
       const user = JSON.parse(localStorage.getItem('user') || '{}');
       if (!user.isPro) {
-        window.location.href = '/pricing.html';
+        showUpgradeLoading(() => {
+          window.location.href = '/pricing.html';
+        });
         return;
       }
       const btn = event.target;

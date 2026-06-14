@@ -884,13 +884,22 @@
                                 // Update local profile
                                 try {
                                     const userObj = JSON.parse(localStorage.getItem('user') || '{}');
-                                    userObj.isPro = true;
-                                    userObj.proPlan = selectedPlan.id;
-                                    localStorage.setItem('user', JSON.stringify(userObj));
-                                } catch(e) {}
-
-                                alert("🎉 Payment Successful! Account upgraded to Hiero PRO.");
-                                window.location.href = "/dashboard.html";
+                                    if (selectedPlan.id === 'single') {
+                                        userObj.isPro = false;
+                                        userObj.singlePass = true;
+                                        localStorage.setItem('user', JSON.stringify(userObj));
+                                        alert("🎉 Payment Successful! Preparing your download...");
+                                        window.location.href = "/payment-success.html";
+                                    } else {
+                                        userObj.isPro = true;
+                                        userObj.proPlan = selectedPlan.id;
+                                        localStorage.setItem('user', JSON.stringify(userObj));
+                                        alert("🎉 Payment Successful! Account upgraded to Hiero PRO.");
+                                        window.location.href = "/dashboard.html";
+                                    }
+                                } catch(e) {
+                                    window.location.href = selectedPlan.id === 'single' ? "/payment-success.html" : "/dashboard.html";
+                                }
                             } else {
                                 alert("⚠️ Payment verification failed: " + (verifyData.error || "Please contact support."));
                                 payBtn.disabled = false;
