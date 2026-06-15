@@ -1,0 +1,11 @@
+[
+  {
+    "id": 1,
+    "userId": 2,
+    "userEmail": "jaswanthkumarmuthoju@gmail.com",
+    "userName": "Jaswanth Kumar",
+    "loginTimestamp": "2026-06-08T17:43:07.860Z",
+    "ipAddress": "::1",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.3.1 Safari/605.1.15"
+  }
+]

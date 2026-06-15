@@ -2,15 +2,113 @@ const express = require('express');
 const path = require('path');
 const compression = require('compression');
 const { createProxyMiddleware } = require('http-proxy-middleware');
+const jwt = require('jsonwebtoken');
+const cookieParser = require('cookie-parser');
 
 const app = express();
-const PORT = process.env.PORT || 2816; // Gateway runs here
+const PORT = process.env.PORT || 2816;
+const JWT_SECRET = process.env.JWT_SECRET || 'X7k9P!mQ2aL5vR8';
 
 // Trust proxy so OAuth callbacks build correct absolute URLs behind the gateway
 app.set('trust proxy', 1);
 
 app.use(compression());
 app.use(express.json({ limit: '20mb' }));
+app.use(cookieParser());
+
+// ------------------------------------------------------------------
+// SERVER-SIDE PAGE PROTECTION
+// Like Netflix/Google: server checks your identity BEFORE sending any page
+// ------------------------------------------------------------------
+
+// Pages that require the user to be logged in
+const PROTECTED_PAGES = [
+  '/resume-builder.html',
+  '/resume-form.html',
+  '/domain-selection.html',
+  '/create.html',
+  '/mock-interview.html',
+  '/role.html',
+  '/role-selection.html',
+];
+
+// Pages that require the user to be an ADMIN
+const ADMIN_PAGES = [
+  '/admin-dashboard.html',
+  '/Admin/',
+  '/public/admin-dashboard.html',
+  '/debug-resume-builder.html',
+];
+
+// Helper: extract JWT token from request (cookie OR Authorization header)
+function extractToken(req) {
+  // Check cookie first (most secure)
+  if (req.cookies && req.cookies.token) return req.cookies.token;
+  // Check Authorization: Bearer <token> header
+  const authHeader = req.headers['authorization'] || '';
+  if (authHeader.startsWith('Bearer ')) return authHeader.slice(7);
+  // Check query param (for backwards compatibility only)
+  if (req.query && req.query.token) return req.query.token;
+  return null;
+}
+
+// Helper: verify token and return user payload (or null)
+function verifyToken(token) {
+  if (!token) return null;
+  try {
+    return jwt.verify(token, JWT_SECRET);
+  } catch (e) {
+    return null;
+  }
+}
+
+// Middleware: protect user pages
+function requireLogin(req, res, next) {
+  const token = extractToken(req);
+  const user = verifyToken(token);
+  if (!user) {
+    // Not logged in → redirect to login (like Netflix)
+    return res.redirect('/login.html?redirect=' + encodeURIComponent(req.path));
+  }
+  req.user = user; // attach user to request
+  next();
+}
+
+// Middleware: protect admin pages
+function requireAdmin(req, res, next) {
+  const token = extractToken(req);
+  const user = verifyToken(token);
+  if (!user) {
+    return res.redirect('/login.html?redirect=' + encodeURIComponent(req.path));
+  }
+  if (!user.isAdmin && user.role !== 'admin') {
+    // Logged in but not admin → show 403 forbidden
+    return res.status(403).send(`
+      <!DOCTYPE html><html><head><title>403 Forbidden</title>
+      <style>body{font-family:sans-serif;background:#0a0a0a;color:#fff;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;flex-direction:column;}
+      h1{color:#ff4d4d;font-size:48px;}p{color:#aaa;}a{color:#2ae023;}</style></head>
+      <body><h1>403</h1><p>You don't have permission to access this page.</p><a href="/">← Go Home</a></body></html>
+    `);
+  }
+  req.user = user;
+  next();
+}
+
+// Apply protection BEFORE static files are served
+// Protected user pages
+PROTECTED_PAGES.forEach(page => {
+  app.get(page, requireLogin, (req, res, next) => next());
+});
+
+// Protected admin pages
+ADMIN_PAGES.forEach(page => {
+  const isPrefix = page.endsWith('/');
+  if (isPrefix) {
+    app.get(new RegExp('^' + page.replace('/', '\\/')), requireAdmin, (req, res, next) => next());
+  } else {
+    app.get(page, requireAdmin, (req, res, next) => next());
+  }
+});
 
 // Debug log for auth/OAuth routes
 app.use((req, res, next) => {

@@ -170,6 +170,18 @@
       background: rgba(255, 215, 0, 0.08);
     }
 
+    .template-card.affordable {
+      border-color: #6C63FF;
+      background: rgba(108, 99, 255, 0.03);
+      box-shadow: 0 5px 15px rgba(108, 99, 255, 0.05);
+    }
+
+    .template-card.affordable:hover {
+      border-color: #6C63FF;
+      box-shadow: 0 15px 40px rgba(108, 99, 255, 0.25);
+      background: rgba(108, 99, 255, 0.08);
+    }
+
     .premium-badge {
       animation: pulsePremium 2s infinite ease-in-out;
       position: absolute;
@@ -353,6 +365,12 @@
       border: none;
     }
 
+    .template-card.affordable .start-building-btn {
+      background: linear-gradient(135deg, #2ae023 0%, #1a8b17 100%);
+      color: #000;
+      border: none;
+    }
+
     .start-building-btn:hover {
       transform: translateY(-2px);
       box-shadow: 0 8px 20px rgba(42, 224, 35, 0.3);
@@ -365,6 +383,12 @@
       background: linear-gradient(135deg, #ffd700 0%, #daa520 100%);
       color: #000;
       box-shadow: 0 8px 20px rgba(255, 215, 0, 0.3);
+    }
+
+    .template-card.affordable .start-building-btn:hover {
+      background: linear-gradient(135deg, #6c63ff 0%, #4b44d1 100%);
+      color: #fff;
+      box-shadow: 0 8px 20px rgba(108, 99, 255, 0.3);
     }
 
     /* Hide form initially */
@@ -1332,16 +1356,16 @@
       <div class="templates-grid" id="templatesGrid"
         style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); max-width: 1200px; margin: 0 auto;">
         <!-- Rishi Tech Modern -->
-        <div class="template-card" data-category="modern" data-template="rishi" data-type="free">
+        <div class="template-card premium" data-category="modern" data-template="rishi" data-type="affordable">
+          <div class="premium-badge">PREMIUM</div>
           <div class="template-preview" onclick="previewTemplate('rishi')">
-
             <i class="fas fa-laptop-code"></i>
             <div class="preview-overlay">
               <button class="preview-btn">Preview Template</button>
             </div>
           </div>
           <div class="template-info">
-            <h3>Rishi Tech Modern</h3>
+            <h3>Hiero Modus</h3>
             <p>Professional modern template with clean design and excellent readability. Perfect for all industries and
               career levels.</p>
             <div class="template-tags">
@@ -1349,27 +1373,24 @@
               <span class="tag">Professional</span>
               <span class="tag">ATS-Friendly</span>
             </div>
-            <button class="start-building-btn" onclick="startBuilding('rishi')">
+            <button class="start-building-btn" onclick="startBuilding('rishi')"
+              style="background: linear-gradient(135deg, #6C63FF 0%, #4b44d1 100%); color: #fff; border: none;">
               <i class="fas fa-arrow-right"></i> Start Building
             </button>
           </div>
         </div>
 
-
-
-
         <!-- Hiero Monethon Template -->
-        <div class="template-card" data-category="premium" data-template="hiero-monethon" data-type="premium">
-          <div class="premium-badge">NEW</div>
+        <div class="template-card premium" data-category="premium" data-template="hiero-monethon" data-type="affordable">
+          <div class="premium-badge">PREMIUM</div>
           <div class="template-preview" onclick="previewTemplate('hiero-monethon')">
             <i class="fas fa-file-invoice"></i>
-
             <div class="preview-overlay">
               <button class="preview-btn">Preview Template</button>
             </div>
           </div>
           <div class="template-info">
-            <h3>Hiero Monethon</h3>
+            <h3>Hiero Monolith</h3>
             <p>Premium professional layout with orange header accents and a dark navy sidebar. Perfectly balanced for
               high-impact roles.</p>
             <div class="template-tags">
@@ -1378,15 +1399,14 @@
               <span class="tag">Corporate</span>
             </div>
             <button class="start-building-btn" onclick="startBuilding('hiero-monethon')"
-              style="background: linear-gradient(135deg, #F2B66D 0%, #d4954a 100%);">
+              style="background: linear-gradient(135deg, #6C63FF 0%, #4b44d1 100%); color: #fff; border: none;">
               <i class="fas fa-arrow-right"></i> Start Building
             </button>
           </div>
         </div>
 
         <!-- Hiero Cool Template -->
-        <div class="template-card premium" data-category="premium" data-template="hiero-cool" data-type="premium">
-          <div class="premium-badge">NEW</div>
+        <div class="template-card" data-category="premium" data-template="hiero-cool" data-type="free">
           <div class="template-preview" onclick="previewTemplate('hiero-cool')">
             <i class="fas fa-rocket" style="color: #6C63FF;"></i>
             <div class="preview-overlay">
@@ -1403,14 +1423,14 @@
               <span class="tag">Sidebar</span>
             </div>
             <button class="start-building-btn" onclick="startBuilding('hiero-cool')"
-              style="background: linear-gradient(135deg, #6C63FF 0%, #4b44d1 100%);">
+              style="background: linear-gradient(135deg, #2ae023 0%, #1a8b17 100%); color: #000; border: none;">
               <i class="fas fa-arrow-right"></i> Start Building
             </button>
           </div>
         </div>
 
         <!-- Hiero Legion Template -->
-        <div class="template-card" data-category="premium" data-template="hiero-legion" data-type="premium">
+        <div class="template-card premium" data-category="premium" data-template="hiero-legion" data-type="affordable">
           <div class="premium-badge">PREMIUM</div>
           <div class="template-preview" onclick="previewTemplate('hiero-legion')">
             <i class="fas fa-shield" style="color: #2ae023;"></i>
@@ -1427,14 +1447,15 @@
               <span class="tag">Shield</span>
               <span class="tag">Executive</span>
             </div>
-            <button class="start-building-btn" onclick="startBuilding('hiero-legion')">
+            <button class="start-building-btn" onclick="startBuilding('hiero-legion')"
+              style="background: linear-gradient(135deg, #6C63FF 0%, #4b44d1 100%); color: #fff; border: none;">
               <i class="fas fa-arrow-right"></i> Start Building
             </button>
           </div>
         </div>
 
         <!-- Hiero Nova Template -->
-        <div class="template-card" data-category="premium" data-template="hiero-nova" data-type="premium">
+        <div class="template-card premium" data-category="premium" data-template="hiero-nova" data-type="affordable">
           <div class="premium-badge">PREMIUM</div>
           <div class="template-preview" onclick="previewTemplate('hiero-nova')">
             <i class="fas fa-sun" style="color: #f4b400;"></i>
@@ -1451,24 +1472,23 @@
               <span class="tag">Yellow</span>
               <span class="tag">Impact</span>
             </div>
-            <button class="start-building-btn" onclick="startBuilding('hiero-nova')">
+            <button class="start-building-btn" onclick="startBuilding('hiero-nova')"
+              style="background: linear-gradient(135deg, #6C63FF 0%, #4b44d1 100%); color: #fff; border: none;">
               <i class="fas fa-arrow-right"></i> Start Building
             </button>
           </div>
         </div>
 
-
-        <!-- Priya Analytics Single-Column Template (matches Priya Sharma PDF) -->
+        <!-- Hiero Analytics (formerly Priya Analytics) -->
         <div class="template-card" data-category="analytics" data-template="priya-analytics" data-type="free">
           <div class="template-preview" onclick="previewTemplate('priya-analytics')">
-
             <i class="fas fa-chart-line"></i>
             <div class="preview-overlay">
               <button class="preview-btn">Preview Template</button>
             </div>
           </div>
           <div class="template-info">
-            <h3>Priya Analytics</h3>
+            <h3>Hiero Analytics</h3>
             <p>Single-column layout with a grey top bar and bold section headings. Ideal for data-driven professionals.
             </p>
             <div class="template-tags">
@@ -1476,14 +1496,16 @@
               <span class="tag">Single Column</span>
               <span class="tag">Data Science</span>
             </div>
-            <button class="start-building-btn" onclick="startBuilding('priya-analytics')">
+            <button class="start-building-btn" onclick="startBuilding('priya-analytics')"
+              style="background: linear-gradient(135deg, #2ae023 0%, #1a8b17 100%); color: #000; border: none;">
               <i class="fas fa-arrow-right"></i> Start Building
             </button>
           </div>
         </div>
 
         <!-- Hiero Executive Template -->
-        <div class="template-card" data-category="professional" data-template="hiero-executive" data-type="free">
+        <div class="template-card premium" data-category="professional" data-template="hiero-executive" data-type="affordable">
+          <div class="premium-badge">PREMIUM</div>
           <div class="template-preview" onclick="previewTemplate('hiero-executive')">
             <i class="fas fa-user-tie"></i>
             <div class="preview-overlay">
@@ -1499,14 +1521,16 @@
               <span class="tag">Timeline</span>
               <span class="tag">Executive</span>
             </div>
-            <button class="start-building-btn" onclick="startBuilding('hiero-executive')">
+            <button class="start-building-btn" onclick="startBuilding('hiero-executive')"
+              style="background: linear-gradient(135deg, #6C63FF 0%, #4b44d1 100%); color: #fff; border: none;">
               <i class="fas fa-arrow-right"></i> Start Building
             </button>
           </div>
         </div>
 
-        <!-- Hiero Academic Template (Template 4) -->
-        <div class="template-card" data-category="professional" data-template="template4" data-type="free">
+        <!-- Hiero Academic Template -->
+        <div class="template-card premium" data-category="professional" data-template="template4" data-type="affordable">
+          <div class="premium-badge">PREMIUM</div>
           <div class="template-preview" onclick="previewTemplate('template4')">
             <i class="fas fa-university"></i>
             <div class="preview-overlay">
@@ -1522,16 +1546,16 @@
               <span class="tag">Technical</span>
               <span class="tag">Bestseller</span>
             </div>
-            <button class="start-building-btn" onclick="startBuilding('template4')">
+            <button class="start-building-btn" onclick="startBuilding('template4')"
+              style="background: linear-gradient(135deg, #6C63FF 0%, #4b44d1 100%); color: #fff; border: none;">
               <i class="fas fa-arrow-right"></i> Start Building
             </button>
           </div>
         </div>
 
-
-
-        <!-- Hiero Minimal (Timeline) Template -->
-        <div class="template-card" data-category="minimal" data-template="hiero-timeline" data-type="free">
+        <!-- Hiero Timeline Template -->
+        <div class="template-card premium" data-category="minimal" data-template="hiero-timeline" data-type="affordable">
+          <div class="premium-badge">PREMIUM</div>
           <div class="template-preview" onclick="previewTemplate('hiero-timeline')">
             <i class="fas fa-stream"></i>
             <div class="preview-overlay">
@@ -1546,16 +1570,16 @@
               <span class="tag">Minimalist</span>
               <span class="tag">Corporate</span>
             </div>
-            <button class="start-building-btn" onclick="startBuilding('hiero-timeline')">
+            <button class="start-building-btn" onclick="startBuilding('hiero-timeline')"
+              style="background: linear-gradient(135deg, #6C63FF 0%, #4b44d1 100%); color: #fff; border: none;">
               <i class="fas fa-arrow-right"></i> Start Building
             </button>
           </div>
         </div>
 
-        <!-- Hiero Tech Template (Template 8) -->
+        <!-- Hiero Tech Template -->
         <div class="template-card" data-category="creative" data-template="hiero-tech" data-type="free">
           <div class="template-preview" onclick="previewTemplate('hiero-tech')">
-
             <i class="fas fa-code"></i>
             <div class="preview-overlay">
               <button class="preview-btn">Preview Template</button>
@@ -1570,14 +1594,16 @@
               <span class="tag">Developer</span>
               <span class="tag">Coding</span>
             </div>
-            <button class="start-building-btn" onclick="startBuilding('hiero-tech')">
+            <button class="start-building-btn" onclick="startBuilding('hiero-tech')"
+              style="background: linear-gradient(135deg, #2ae023 0%, #1a8b17 100%); color: #000; border: none;">
               <i class="fas fa-arrow-right"></i> Start Building
             </button>
           </div>
         </div>
 
-        <!-- Hiero Urban Template (Template 6) -->
-        <div class="template-card" data-category="modern" data-template="hiero-urban" data-type="free">
+        <!-- Hiero Urban Template -->
+        <div class="template-card premium" data-category="modern" data-template="hiero-urban" data-type="premium">
+          <div class="premium-badge">PREMIUM</div>
           <div class="template-preview" onclick="previewTemplate('hiero-urban')">
             <i class="fas fa-briefcase"></i>
             <div class="preview-overlay">
@@ -1593,14 +1619,16 @@
               <span class="tag">Urban</span>
               <span class="tag">Attractive</span>
             </div>
-            <button class="start-building-btn" onclick="startBuilding('hiero-urban')">
+            <button class="start-building-btn" onclick="startBuilding('hiero-urban')"
+              style="background: linear-gradient(135deg, #F2B66D 0%, #d4954a 100%); color: #000; border: none;">
               <i class="fas fa-arrow-right"></i> Start Building
             </button>
           </div>
         </div>
 
         <!-- Hiero Vertex Template -->
-        <div class="template-card" data-category="modern" data-template="hiero-vertex" data-type="free">
+        <div class="template-card premium" data-category="modern" data-template="hiero-vertex" data-type="premium">
+          <div class="premium-badge">PREMIUM</div>
           <div class="template-preview" onclick="previewTemplate('hiero-vertex')">
             <i class="fas fa-layer-group"></i>
             <div class="preview-overlay">
@@ -1616,14 +1644,16 @@
               <span class="tag">Creative</span>
               <span class="tag">Sidebar</span>
             </div>
-            <button class="start-building-btn" onclick="startBuilding('hiero-vertex')">
+            <button class="start-building-btn" onclick="startBuilding('hiero-vertex')"
+              style="background: linear-gradient(135deg, #F2B66D 0%, #d4954a 100%); color: #000; border: none;">
               <i class="fas fa-arrow-right"></i> Start Building
             </button>
           </div>
         </div>
 
-        <!-- Hiero Studio Template (Template 5) -->
-        <div class="template-card" data-category="professional" data-template="hiero-studio" data-type="free">
+        <!-- Hiero Studio Template -->
+        <div class="template-card premium" data-category="professional" data-template="hiero-studio" data-type="affordable">
+          <div class="premium-badge">PREMIUM</div>
           <div class="template-preview" onclick="previewTemplate('hiero-studio')">
             <i class="fas fa-columns"></i>
             <div class="preview-overlay">
@@ -1639,14 +1669,16 @@
               <span class="tag">Modern</span>
               <span class="tag">Creative</span>
             </div>
-            <button class="start-building-btn" onclick="startBuilding('hiero-studio')">
+            <button class="start-building-btn" onclick="startBuilding('hiero-studio')"
+              style="background: linear-gradient(135deg, #6C63FF 0%, #4b44d1 100%); color: #fff; border: none;">
               <i class="fas fa-arrow-right"></i> Start Building
             </button>
           </div>
         </div>
 
-        <!-- Hiero Vision Template (Template 11) -->
-        <div class="template-card" data-category="creative" data-template="hiero-vision" data-type="free">
+        <!-- Hiero Vision Template -->
+        <div class="template-card premium" data-category="creative" data-template="hiero-vision" data-type="premium">
+          <div class="premium-badge">PREMIUM</div>
           <div class="template-preview" onclick="previewTemplate('hiero-vision')">
             <i class="fas fa-eye"></i>
             <div class="preview-overlay">
@@ -1661,17 +1693,16 @@
               <span class="tag">Visual</span>
               <span class="tag">Design</span>
             </div>
-            <button class="start-building-btn" onclick="startBuilding('hiero-vision')">
+            <button class="start-building-btn" onclick="startBuilding('hiero-vision')"
+              style="background: linear-gradient(135deg, #F2B66D 0%, #d4954a 100%); color: #000; border: none;">
               <i class="fas fa-arrow-right"></i> Start Building
             </button>
           </div>
         </div>
 
-
-
-        <!-- Hiero Elite Template (Template 10) -->
+        <!-- Hiero Elite Template -->
         <div class="template-card premium" data-category="premium" data-template="hiero-elite" data-type="premium">
-          <div class="premium-badge">Premium</div>
+          <div class="premium-badge">PREMIUM</div>
           <div class="template-preview" onclick="previewTemplate('hiero-elite')">
             <i class="fas fa-crown"></i>
             <div class="preview-overlay">
@@ -1687,17 +1718,16 @@
               <span class="tag premium">Executive</span>
               <span class="tag premium">Luxury</span>
             </div>
-            <button class="start-building-btn" onclick="startBuilding('hiero-elite')">
+            <button class="start-building-btn" onclick="startBuilding('hiero-elite')"
+              style="background: linear-gradient(135deg, #F2B66D 0%, #d4954a 100%); color: #000; border: none;">
               <i class="fas fa-arrow-right"></i> Start Building
             </button>
           </div>
         </div>
 
-
-
-        <!-- Hiero Premium Template (Template 13) -->
+        <!-- Hiero Premium Template -->
         <div class="template-card premium" data-category="premium" data-template="hiero-premium" data-type="premium">
-          <div class="premium-badge">Premium</div>
+          <div class="premium-badge">PREMIUM</div>
           <div class="template-preview" onclick="previewTemplate('hiero-premium')">
             <i class="fas fa-gem"></i>
             <div class="preview-overlay">
@@ -1713,15 +1743,16 @@
               <span class="tag premium">Elegant</span>
               <span class="tag premium">Refined</span>
             </div>
-            <button class="start-building-btn" onclick="startBuilding('hiero-premium')">
+            <button class="start-building-btn" onclick="startBuilding('hiero-premium')"
+              style="background: linear-gradient(135deg, #F2B66D 0%, #d4954a 100%); color: #000; border: none;">
               <i class="fas fa-arrow-right"></i> Start Building
             </button>
           </div>
         </div>
 
-        <!-- Hiero Prestige Template (Template 14) -->
+        <!-- Hiero Prestige Template -->
         <div class="template-card premium" data-category="premium" data-template="hiero-prestige" data-type="premium">
-          <div class="premium-badge">Premium</div>
+          <div class="premium-badge">PREMIUM</div>
           <div class="template-preview" onclick="previewTemplate('hiero-prestige')">
             <i class="fas fa-star"></i>
             <div class="preview-overlay">
@@ -1737,7 +1768,8 @@
               <span class="tag premium">Distinguished</span>
               <span class="tag premium">Elite</span>
             </div>
-            <button class="start-building-btn" onclick="startBuilding('hiero-prestige')">
+            <button class="start-building-btn" onclick="startBuilding('hiero-prestige')"
+              style="background: linear-gradient(135deg, #F2B66D 0%, #d4954a 100%); color: #000; border: none;">
               <i class="fas fa-arrow-right"></i> Start Building
             </button>
           </div>
@@ -1745,7 +1777,7 @@
 
         <!-- Hiero Signature Template -->
         <div class="template-card premium" data-category="premium" data-template="hiero-signature" data-type="premium">
-          <div class="premium-badge">Premium</div>
+          <div class="premium-badge">PREMIUM</div>
           <div class="template-preview" onclick="previewTemplate('hiero-signature')">
             <i class="fas fa-signature"></i>
             <div class="preview-overlay">
@@ -1761,14 +1793,16 @@
               <span class="tag premium">Split Layout</span>
               <span class="tag premium">Modern</span>
             </div>
-            <button class="start-building-btn" onclick="startBuilding('hiero-signature')">
+            <button class="start-building-btn" onclick="startBuilding('hiero-signature')"
+              style="background: linear-gradient(135deg, #F2B66D 0%, #d4954a 100%); color: #000; border: none;">
               <i class="fas fa-arrow-right"></i> Start Building
             </button>
           </div>
         </div>
 
         <!-- Hiero Retail Template -->
-        <div class="template-card" data-category="professional" data-template="hiero-retail" data-type="free">
+        <div class="template-card premium" data-category="professional" data-template="hiero-retail" data-type="affordable">
+          <div class="premium-badge">PREMIUM</div>
           <div class="template-preview" onclick="previewTemplate('hiero-retail')">
             <i class="fas fa-store"></i>
             <div class="preview-overlay">
@@ -1784,15 +1818,16 @@
               <span class="tag">Retail</span>
               <span class="tag">Professional</span>
             </div>
-            <button class="start-building-btn" onclick="startBuilding('hiero-retail')">
+            <button class="start-building-btn" onclick="startBuilding('hiero-retail')"
+              style="background: linear-gradient(135deg, #6C63FF 0%, #4b44d1 100%); color: #fff; border: none;">
               <i class="fas fa-arrow-right"></i> Start Building
             </button>
           </div>
         </div>
 
         <!-- Hiero Essence Template -->
-        <div class="template-card premium" data-category="premium" data-template="hiero-essence" data-type="premium">
-          <div class="premium-badge">Premium</div>
+        <div class="template-card premium" data-category="premium" data-template="hiero-essence" data-type="affordable">
+          <div class="premium-badge">PREMIUM</div>
           <div class="template-preview" onclick="previewTemplate('hiero-essence')">
             <i class="fas fa-columns"></i>
             <div class="preview-overlay">
@@ -1807,17 +1842,17 @@
               <span class="tag premium">Corporate</span>
               <span class="tag premium">Premium</span>
             </div>
-            <button class="start-building-btn" onclick="startBuilding('hiero-essence')">
+            <button class="start-building-btn" onclick="startBuilding('hiero-essence')"
+              style="background: linear-gradient(135deg, #6C63FF 0%, #4b44d1 100%); color: #fff; border: none;">
               <i class="fas fa-arrow-right"></i> Start Building
             </button>
           </div>
         </div>
 
         <!-- Hiero Velocity -->
-        <div class="template-card premium" data-category="premium" data-template="hiero-velocity" data-type="premium">
-          <div class="premium-badge">Premium</div>
+        <div class="template-card premium" data-category="premium" data-template="hiero-velocity" data-type="affordable">
+          <div class="premium-badge">PREMIUM</div>
           <div class="template-preview" onclick="previewTemplate('hiero-velocity')">
-
             <i class="fas fa-bolt"></i>
             <div class="preview-overlay">
               <button class="preview-btn">Preview Template</button>
@@ -1831,14 +1866,16 @@
               <span class="tag premium">Agile</span>
               <span class="tag premium">Fast</span>
             </div>
-            <button class="start-building-btn" onclick="startBuilding('hiero-velocity')">
+            <button class="start-building-btn" onclick="startBuilding('hiero-velocity')"
+              style="background: linear-gradient(135deg, #6C63FF 0%, #4b44d1 100%); color: #fff; border: none;">
               <i class="fas fa-arrow-right"></i> Start Building
             </button>
           </div>
         </div>
 
-        <!-- Hiero Royal Template (Classic Beige) -->
-        <div class="template-card" data-category="classic" data-template="hiero-royal" data-type="free">
+        <!-- Hiero Royal Template -->
+        <div class="template-card premium" data-category="classic" data-template="hiero-royal" data-type="premium">
+          <div class="premium-badge">PREMIUM</div>
           <div class="template-preview" onclick="previewTemplate('hiero-royal')">
             <i class="fas fa-crown"></i>
             <div class="preview-overlay">
@@ -1854,13 +1891,12 @@
               <span class="tag">Elegant</span>
               <span class="tag">Executive</span>
             </div>
-            <button class="start-building-btn" onclick="startBuilding('hiero-royal')">
+            <button class="start-building-btn" onclick="startBuilding('hiero-royal')"
+              style="background: linear-gradient(135deg, #F2B66D 0%, #d4954a 100%); color: #000; border: none;">
               <i class="fas fa-arrow-right"></i> Start Building
             </button>
           </div>
         </div>
-
-
       </div>
     </div>
 
@@ -2408,8 +2444,8 @@
     // Last updated: 2026-02-21 20:15
     // CACHE BUSTER: If you see broken code, hard refresh: Ctrl+Shift+R (Windows) or Cmd+Shift+R (Mac)
 
-    console.log('ðŸ”¥ Resume Builder v5 Loaded - 2026-02-21 20:15');
-    console.log('âœ… fillFormWithImportedData function: COMPLETE AND WORKING');
+    // console.log('ðŸ"¥ Resume Builder v5 Loaded - 2026-02-21 20:15');
+    // console.log('âœ… fillFormWithImportedData function: COMPLETE AND WORKING');
 
     // Global state
     let selectedTemplate = null;
@@ -2418,42 +2454,15 @@
     // Point to the integrated Gateway's Resume API
     const BACKEND_URL = window.location.origin + '/api/resume';
 
-    console.log('ðŸŒ Backend URL:', BACKEND_URL);
-    console.log('ðŸ”§ Mode: Using Integrated Gateway');
-
-    // Add quick backend health ping (non-blocking, silent failure)
-    // Only run if page is loaded via http/https (not file://)
+    console.log('[INFO] Backend URL:', BACKEND_URL);
+    // Backend health check (non-blocking)
     (async () => {
-      // Skip health check if opened via file:// protocol (CORS will fail)
-      if (window.location.protocol === 'file:') {
-        console.log('â„¹ï¸ Skipping health check (file:// protocol)');
-        return;
-      }
-
+      if (window.location.protocol === 'file:') { return; }
       try {
-        const backendUrl = BACKEND_URL;
-        console.log('ðŸ” Checking backend health at:', backendUrl + '/health');
-
-        const r = await fetch(backendUrl + '/health', {
-          cache: 'no-store',
-          method: 'GET',
-          mode: 'cors',
-          headers: {
-            'Accept': 'application/json'
-          }
-        });
-
-        if (r.ok) {
-          const data = await r.json();
-          console.log('âœ… Backend health check passed:', backendUrl, data);
-        } else {
-          console.warn('âš ï¸ Health endpoint returned:', r.status, 'for', backendUrl);
-        }
+        const r = await fetch(BACKEND_URL + '/health', { cache: 'no-store', method: 'GET' });
+        if (r.ok) { console.log('[OK] Backend health check passed'); }
       } catch (e) {
-        // Silent failure - don't show error if backend is not accessible yet
-        // This is just a health check, not critical for functionality
-        // Common reasons: CORS, network error, server not running
-        console.debug('â„¹ï¸ Backend health check skipped (non-critical):', e.message);
+        console.debug('[INFO] Backend health check skipped:', e.message);
       }
     })();
 
@@ -2481,13 +2490,119 @@
         // Not logged in - redirect to login
         alert('Please login to access the resume builder');
         window.location.href = '/dashboard/login.html';
-        return false;
-      }
       return true;
+      }
+      return false;
+    }
+
+    function updateTemplateCardUI() {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      const isPro = !!user.isPro;
+      const plan = user.proPlan || '';
+
+      const premiumTemplates = ['hiero-royal', 'hiero-signature', 'hiero-prestige', 'hiero-elite', 'hiero-vision', 'hiero-vertex', 'hiero-premium', 'hiero-urban'];
+      const affordableTemplates = ['hiero-executive', 'hiero-nova', 'rishi', 'hiero-monethon', 'template4', 'hiero-timeline', 'hiero-studio', 'hiero-retail', 'hiero-essence', 'hiero-velocity', 'hiero-legion'];
+      const freeTemplates = ['hiero-cool', 'priya-analytics', 'hiero-tech'];
+
+      document.querySelectorAll('.template-card').forEach(card => {
+        const templateId = card.getAttribute('data-template');
+        if (!templateId) return;
+
+        const badgeEl = card.querySelector('.premium-badge');
+        const btnEl = card.querySelector('.start-building-btn');
+
+        if (freeTemplates.includes(templateId)) {
+          card.classList.remove('premium');
+          card.classList.remove('affordable');
+          card.style.borderColor = 'rgba(42, 224, 35, 0.2)';
+          if (badgeEl) {
+            badgeEl.innerText = 'FREE';
+            badgeEl.style.background = 'linear-gradient(45deg, #2ae023, #1a8b17)';
+            badgeEl.style.color = '#000';
+          } else {
+            const newBadge = document.createElement('div');
+            newBadge.className = 'premium-badge';
+            newBadge.innerText = 'FREE';
+            newBadge.style.background = 'linear-gradient(45deg, #2ae023, #1a8b17)';
+            newBadge.style.color = '#000';
+            card.insertBefore(newBadge, card.firstChild);
+          }
+          if (btnEl) {
+            btnEl.innerHTML = '<i class="fas fa-arrow-right"></i> Start Building';
+            btnEl.setAttribute('onclick', `startBuilding('${templateId}')`);
+            btnEl.style.background = 'linear-gradient(135deg, #2ae023 0%, #1a8b17 100%)';
+            btnEl.style.color = '#000';
+          }
+        } else if (affordableTemplates.includes(templateId)) {
+          card.classList.remove('premium');
+          card.classList.add('affordable');
+          card.style.borderColor = '#6C63FF';
+          card.style.background = 'rgba(108, 99, 255, 0.03)';
+          
+          if (badgeEl) {
+            badgeEl.innerText = 'AFFORDABLE (₹9)';
+            badgeEl.style.background = 'linear-gradient(45deg, #6C63FF, #4b44d1)';
+            badgeEl.style.color = '#fff';
+            badgeEl.style.animation = 'none';
+          } else {
+            const newBadge = document.createElement('div');
+            newBadge.className = 'premium-badge';
+            newBadge.innerText = 'AFFORDABLE (₹9)';
+            newBadge.style.background = 'linear-gradient(45deg, #6C63FF, #4b44d1)';
+            newBadge.style.color = '#fff';
+            card.insertBefore(newBadge, card.firstChild);
+          }
+
+          const hasAccess = isPro && (plan === 'affordable' || plan === 'premium' || plan === '6months');
+          if (btnEl) {
+            if (hasAccess) {
+              btnEl.innerHTML = '<i class="fas fa-arrow-right"></i> Start Building';
+              btnEl.setAttribute('onclick', `startBuilding('${templateId}')`);
+            } else {
+              btnEl.innerHTML = '<i class="fas fa-lock"></i> Unlock with ₹9';
+              btnEl.setAttribute('onclick', `window.location.href="/pricing.html"`);
+            }
+            btnEl.style.background = 'linear-gradient(135deg, #6C63FF 0%, #4b44d1 100%)';
+            btnEl.style.color = '#fff';
+          }
+        } else if (premiumTemplates.includes(templateId)) {
+          card.classList.remove('affordable');
+          card.classList.add('premium');
+          card.style.borderColor = '#ffd700';
+          card.style.background = 'rgba(255, 215, 0, 0.03)';
+
+          if (badgeEl) {
+            badgeEl.innerText = 'PREMIUM (₹25)';
+            badgeEl.style.background = 'linear-gradient(45deg, #ffd700, #ffed4e)';
+            badgeEl.style.color = '#000';
+          } else {
+            const newBadge = document.createElement('div');
+            newBadge.className = 'premium-badge';
+            newBadge.innerText = 'PREMIUM (₹25)';
+            newBadge.style.background = 'linear-gradient(45deg, #ffd700, #ffed4e)';
+            newBadge.style.color = '#000';
+            card.insertBefore(newBadge, card.firstChild);
+          }
+
+          const hasAccess = isPro && (plan === 'premium' || plan === '6months');
+          if (btnEl) {
+            if (hasAccess) {
+              btnEl.innerHTML = '<i class="fas fa-arrow-right"></i> Start Building';
+              btnEl.setAttribute('onclick', `startBuilding('${templateId}')`);
+            } else {
+              btnEl.innerHTML = '<i class="fas fa-lock"></i> Unlock with ₹25';
+              btnEl.setAttribute('onclick', `window.location.href="/pricing.html"`);
+            }
+            btnEl.style.background = 'linear-gradient(135deg, #F2B66D 0%, #d4954a 100%)';
+            btnEl.style.color = '#000';
+          }
+        }
+      });
     }
 
     // Initialize page - always start at Step 1 (template selection)
     function initializePage() {
+      updateTemplateCardUI();
       // Always show template selection first
       document.getElementById('templateSelection').style.display = 'block';
       document.getElementById('formStepIndicator').style.display = 'none';
@@ -2739,7 +2854,7 @@
           grid.appendChild(cards[j]);
         }
 
-        console.log('ðŸŽ² Templates shuffled randomly');
+        // console.log('ðŸŽ² Templates shuffled randomly');
 
         // Add a nice animation effect
         cards.forEach(card => {
@@ -2852,7 +2967,7 @@
           style: 'Black and white, minimal elements, clean typography'
         },
         'rishi': {
-          name: 'Rishi Tech Modern',
+          name: 'Hiero Modus',
           description: 'Modern tech layout with purple gradient sidebar',
           style: 'Two-column design, purple gradient, blue accents, Inter font'
         },
@@ -2862,12 +2977,12 @@
           style: 'Georgia serif fonts, centered header, elegant spacing, academic style'
         },
         'priya-analytics': {
-          name: 'Priya Analytics',
+          name: 'Hiero Analytics',
           description: 'Single-column layout with a grey top bar and bold section headings. Ideal for data-driven professionals.',
           style: 'Single-column, grey top bar, bold section headings with horizontal rules, matching the Priya Sharma data analyst resume style'
         },
         'hiero-monethon': {
-          name: 'Hiero Monethon',
+          name: 'Hiero Monolith',
           description: 'Premium layout with vibrant orange accents and a dominant navy sidebar.',
           style: 'Two-column, orange profile header, navy sidebar with progress skill bars'
         },
@@ -3005,7 +3120,7 @@
         'hiero-apollo': {
           name: 'Hiero Apollo',
           description: 'Academic excellence and research-focused layout for scholars.',
-          style: 'Traditionalå­¦æœ¯ (academic) structure, refined serif type.'
+          style: 'Traditional?æœ¯ (academic) structure, refined serif type.'
         },
         'hiero-orion': {
           name: 'Hiero Orion',
@@ -3039,6 +3154,42 @@
       const template = templateDetails[templateId];
       if (!template) return;
 
+      const freeTemplates = ['hiero-cool', 'priya-analytics', 'hiero-tech'];
+      const premiumTemplates = ['hiero-royal', 'hiero-signature', 'hiero-prestige', 'hiero-elite', 'hiero-vision', 'hiero-vertex', 'hiero-premium', 'hiero-urban'];
+      const affordableTemplates = ['hiero-executive', 'hiero-nova', 'rishi', 'hiero-monethon', 'template4', 'hiero-timeline', 'hiero-studio', 'hiero-retail', 'hiero-essence', 'hiero-velocity', 'hiero-legion'];
+
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      const isPro = !!user.isPro;
+      const plan = user.proPlan || '';
+
+      let modalBtnStyle = "background: linear-gradient(135deg, #2ae023 0%, #1a8b17 100%); color: black; box-shadow: 0 4px 15px rgba(42,224,35,0.4);";
+      let hoverShadow = "rgba(42,224,35,0.6)";
+      let modalSubtitle = "Free Design • High Fidelity Preview";
+      let modalBtnText = "Start Building with This Template";
+      let modalBtnAction = `startBuilding('${templateId}'); this.closest('.preview-modal-overlay').remove();`;
+      
+      if (premiumTemplates.includes(templateId)) {
+        modalBtnStyle = "background: linear-gradient(135deg, #F2B66D 0%, #d4954a 100%); color: black; box-shadow: 0 4px 15px rgba(212,149,74,0.4);";
+        hoverShadow = "rgba(212,149,74,0.6)";
+        modalSubtitle = "Premium Design (₹25) • High Fidelity Preview";
+        
+        const hasAccess = isPro && (plan === 'premium' || plan === '6months');
+        if (!hasAccess) {
+          modalBtnText = '<i class="fas fa-lock"></i> Unlock with ₹25';
+          modalBtnAction = `window.location.href="/pricing.html"`;
+        }
+      } else if (affordableTemplates.includes(templateId)) {
+        modalBtnStyle = "background: linear-gradient(135deg, #6C63FF 0%, #4b44d1 100%); color: white; box-shadow: 0 4px 15px rgba(108,99,255,0.4);";
+        hoverShadow = "rgba(108,99,255,0.6)";
+        modalSubtitle = "Affordable Design (₹9) • High Fidelity Preview";
+
+        const hasAccess = isPro && (plan === 'affordable' || plan === 'premium' || plan === '6months');
+        if (!hasAccess) {
+          modalBtnText = '<i class="fas fa-lock"></i> Unlock with ₹9';
+          modalBtnAction = `window.location.href="/pricing.html"`;
+        }
+      }
+
       // Create modal with loading state
       const modal = document.createElement('div');
       modal.className = 'preview-modal-overlay';
@@ -3054,7 +3205,7 @@
           <div style="padding: 25px 30px; border-bottom: 1px solid #222; flex-shrink: 0; background: linear-gradient(to right, #111, #1a1a1a); display: flex; align-items: center; justify-content: space-between;">
             <div>
               <h2 style="margin: 0 0 5px 0; color: #fff; font-size: 24px; font-weight: 700; letter-spacing: -0.5px;">${template.name}</h2>
-              <p style="margin: 0; color: #888; font-size: 14px;">Premium Design • High Fidelity Preview</p>
+              <p style="margin: 0; color: #888; font-size: 14px;">${modalSubtitle}</p>
             </div>
             
             <div class="zoom-controls" style="display: flex; gap: 10px; align-items: center; background: #1a1a1a; padding: 10px 15px; border-radius: 50px; border: 1px solid #333; margin-right: 50px;">
@@ -3080,12 +3231,12 @@
           </div>
           <div style="padding: 25px 30px; background: #161616; border-top: 1px solid #222; flex-shrink: 0; display: flex; align-items: center; justify-content: space-between;">
             <div style="color: #666; font-size: 13px;">Selected: <span style="color: #2ae023;">${template.name}</span></div>
-            <button onclick="startBuilding('${templateId}'); this.closest('.preview-modal-overlay').remove();" 
-                    style="background: linear-gradient(135deg, #2ae023 0%, #1a9e16 100%); color: white; border: none; padding: 14px 40px; 
-                           border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 16px; transition: all 0.3s; box-shadow: 0 4px 15px rgba(42,224,35,0.4);"
-                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(42,224,35,0.5)';"
-                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(42,224,35,0.4)';">
-              Start Building with This Template
+            <button onclick="${modalBtnAction}" 
+                    style="${modalBtnStyle} border: none; padding: 14px 40px; 
+                           border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 16px; transition: all 0.3s;"
+                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px ' + hoverShadow;"
+                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px ' + hoverShadow.replace('0.6', '0.4');">
+              ${modalBtnText}
             </button>
           </div>
         </div>
@@ -3102,7 +3253,7 @@
       let previewLoaded = false;
 
       try {
-        console.log('ðŸ” Fetching preview for template:', templateId);
+    // console.log('ðŸ" Fetching preview for template:', templateId);
 
         // Sample data tailored for different templates
         let sampleData = {
@@ -3121,14 +3272,14 @@
               company: 'Tech Innovations Inc.',
               startDate: '2022-01',
               endDate: 'Present',
-              description: 'â€¢ Led development of microservices architecture serving 1M+ users\nâ€¢ Improved system performance by 40% through optimization\nâ€¢ Mentored team of 5 junior developers'
+              description: ' Led development of microservices architecture serving 1M+ users\n Improved system performance by 40% through optimization\n Mentored team of 5 junior developers'
             },
             {
               jobTitle: 'Software Engineer',
               company: 'StartupXYZ',
               startDate: '2020-06',
               endDate: '2021-12',
-              description: 'â€¢ Developed full-stack web applications using React and Node.js\nâ€¢ Implemented RESTful APIs and database optimization\nâ€¢ Collaborated with cross-functional teams in Agile environment'
+              description: ' Developed full-stack web applications using React and Node.js\n Implemented RESTful APIs and database optimization\n Collaborated with cross-functional teams in Agile environment'
             }
           ],
           education: [
@@ -3267,7 +3418,7 @@
         const controller = new AbortController();
         const timeoutId = setTimeout(() => {
           controller.abort();
-          console.warn('â±ï¸ Preview request timeout after 90 seconds');
+          console.warn('?? Preview request timeout after 90 seconds');
         }, 90000); // 90 seconds for ngrok
 
         const response = await fetch(`${BACKEND_URL}/preview-resume`, {
@@ -3289,7 +3440,7 @@
         const blob = await response.blob();
         const previewUrl = URL.createObjectURL(blob);
 
-        console.log('âœ… Preview blob created for:', templateId);
+    // console.log('âœ… Preview blob created for:', templateId);
 
         // Update preview content with iframe
         const previewContent = modal.querySelector('#preview-content');
@@ -3363,7 +3514,7 @@
         };
 
       } catch (error) {
-        console.error('âŒ Error fetching preview:', error, 'URL:', BACKEND_URL + '/preview-resume');
+    // console.error('âŒ Error fetching preview:', error, 'URL:', BACKEND_URL + '/preview-resume');
 
         const previewContent = modal.querySelector('#preview-content');
 
@@ -3429,7 +3580,7 @@
             ${isNetworkError ? `
             <div style="margin-top: 20px; padding: 15px; background: #e8f5e9; border-radius: 6px; border-left: 4px solid #2ae023;">
               <p style="margin: 0 0 8px 0; color: #2c5e2e; font-size: 13px; font-weight: 600;">
-                ðŸ’¡ To see the actual template preview:
+                ðŸ'¡ To see the actual template preview:
               </p>
               <p style="margin: 0; color: #2c5e2e; font-size: 12px; line-height: 1.5;">
                 Make sure the backend server is running. You can still select this template to continue building your resume.
@@ -3446,7 +3597,7 @@
 
     // ========== Auto-fill imported resume data into form ==========
     function fillFormWithImportedData(data) {
-      console.log("ðŸŽ¯ Filling form with imported data:", data);
+    // console.log("ðŸŽ¯ Filling form with imported data:", data);
 
       // Personal Info
       document.getElementById("fullName").value = data.personalInfo?.fullName || "";
@@ -3541,7 +3692,7 @@
       document.getElementById("achievements").value = data.achievements || "";
       document.getElementById("hobbies").value = data.hobbies || "";
 
-      console.log("âœ”ï¸ Auto-fill completed successfully");
+      console.log('[OK] Auto-fill completed successfully');
     }
 
     // Start building with selected template
@@ -3551,7 +3702,7 @@
       // Save selected template to localStorage (for PDF generation)
       localStorage.setItem('selectedTemplate', templateId);
 
-      console.log('âœ… Template selected:', templateId);
+    // console.log('âœ… Template selected:', templateId);
 
       // Show import resume modal first
       showImportResumeModal();
@@ -3635,14 +3786,14 @@
       // Close modal when clicking the backdrop (outside the content box)
       modal.addEventListener('click', function (e) {
         if (e.target === modal) {
-          console.log('ðŸ”µ Backdrop clicked, closing modal...');
+          // console.log('ðŸ"µ Backdrop clicked, closing modal...');
           closeImportModal();
         }
       });
 
       // Handle "No, I'll Fill It Manually" button click
       document.getElementById('proceedWithoutImportBtn').addEventListener('click', function (e) {
-        console.log('ðŸŸ¢ "No, I\'ll Fill It Manually" button clicked');
+    // console.log('ðŸŸ¢ "No, I\'ll Fill It Manually" button clicked');
         e.preventDefault();
         e.stopPropagation();
         proceedToFormWithoutImport();
@@ -3651,7 +3802,7 @@
       // Handle ESC key to close modal
       const escHandler = function (e) {
         if (e.key === 'Escape') {
-          console.log('ðŸ”µ ESC pressed, closing modal...');
+          // console.log('ðŸ"µ ESC pressed, closing modal...');
           closeImportModal();
           document.removeEventListener('keydown', escHandler);
         }
@@ -3681,7 +3832,7 @@
           // Use LOCAL backend for import to get "Perfect Extraction" logic
           // The production backend doesn't have the new AI logic yet.
           const IMPORT_URL = `${BACKEND_URL}/import`;
-          console.log('ðŸš€ Importing resume via:', IMPORT_URL);
+    // console.log('ðŸš€ Importing resume via:', IMPORT_URL);
 
           const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
           const response = await fetch(IMPORT_URL, {
@@ -3777,26 +3928,26 @@
 
     // Close import modal
     function closeImportModal() {
-      console.log('ðŸ”µ Attempting to close import modal...');
+      // console.log('ðŸ"µ Attempting to close import modal...');
       const modal = document.getElementById('importResumeModal');
       if (modal) {
-        console.log('âœ… Modal found, removing...');
+        // console.log('âœ… Modal found, removing...');
         modal.remove();
-        console.log('âœ… Modal removed successfully');
+        // console.log('âœ… Modal removed successfully');
       } else {
-        console.warn('âš ï¸ Modal not found with id "importResumeModal"');
+    // console.warn('âš ? Modal not found with id "importResumeModal"');
       }
     }
 
     // Proceed to form without importing
     function proceedToFormWithoutImport() {
-      console.log('ðŸ”µ proceedToFormWithoutImport called');
+      // console.log('ðŸ"µ proceedToFormWithoutImport called');
       try {
         closeImportModal();
-        console.log('ðŸ”µ Modal closed, proceeding to form...');
+        // console.log('ðŸ"µ Modal closed, proceeding to form...');
         proceedToForm();
       } catch (error) {
-        console.error('âŒ Error in proceedToFormWithoutImport:', error);
+    // console.error('âŒ Error in proceedToFormWithoutImport:', error);
         alert('Error: ' + error.message);
       }
     }
@@ -3871,19 +4022,19 @@
 
     // Show the form (Step 2)
     function proceedToForm() {
-      console.log('ðŸ”µ Moving from Step 1 â†’ Step 2');
-      console.log('ðŸ”µ Selected template:', selectedTemplate);
+      // console.log('ðŸ"µ Moving from Step 1 â†' Step 2');
+    // console.log('ðŸ"µ Selected template:', selectedTemplate);
 
       try {
         // Check if template is selected
         if (!selectedTemplate) {
           // Try to recover from localStorage
           selectedTemplate = localStorage.getItem('selectedTemplate');
-          console.log('ðŸ”„ Recovered template from localStorage:', selectedTemplate);
+    // console.log('ðŸ"" Recovered template from localStorage:', selectedTemplate);
         }
 
         if (!selectedTemplate) {
-          console.error('âŒ No template selected!');
+    // console.error('âŒ No template selected!');
           alert('Please select a template first');
           // Fallback: show template selection
           document.getElementById('templateSelection').style.display = 'block';
@@ -3894,34 +4045,34 @@
         const templateSelection = document.getElementById('templateSelection');
         if (templateSelection) {
           templateSelection.style.display = 'none';
-          console.log('âœ… Template selection hidden');
+          // console.log('âœ… Template selection hidden');
         } else {
-          console.error('âŒ templateSelection element not found');
+    // console.error('âŒ templateSelection element not found');
         }
 
         // Show form step indicator and form (Step 2)
         const formStepIndicator = document.getElementById('formStepIndicator');
         if (formStepIndicator) {
           formStepIndicator.style.display = 'block';
-          console.log('âœ… Form step indicator shown');
+          // console.log('âœ… Form step indicator shown');
         } else {
-          console.error('âŒ formStepIndicator element not found');
+    // console.error('âŒ formStepIndicator element not found');
         }
 
         const mainLayout = document.querySelector('.main-layout');
         if (mainLayout) {
           mainLayout.style.display = 'grid';
-          console.log('âœ… Main layout shown');
+          // console.log('âœ… Main layout shown');
         } else {
-          console.error('âŒ main-layout element not found');
+    // console.error('âŒ main-layout element not found');
         }
 
         const bottomActions = document.querySelector('.bottom-actions');
         if (bottomActions) {
           bottomActions.style.display = 'flex';
-          console.log('âœ… Bottom actions shown');
+          // console.log('âœ… Bottom actions shown');
         } else {
-          console.error('âŒ bottom-actions element not found');
+    // console.error('âŒ bottom-actions element not found');
         }
 
         // Initialize photo if previously uploaded
@@ -3929,45 +4080,45 @@
 
         // Update step indicator with template info
         const templateName = getTemplateName(selectedTemplate);
-        console.log('âœ… Template name:', templateName);
+    // console.log('âœ… Template name:', templateName);
 
         const stepText = document.querySelector('#formStepIndicator .step-text');
         if (stepText) {
           stepText.textContent = `Step 2: Fill Your Information (Using ${templateName} template)`;
-          console.log('âœ… Step text updated');
+          // console.log('âœ… Step text updated');
         } else {
-          console.error('âŒ step-text element not found');
+    // console.error('âŒ step-text element not found');
         }
 
         // Add a back button to return to Step 1
         addBackToTemplatesButton();
-        console.log('âœ… Back button added');
+        // console.log('âœ… Back button added');
 
         // Push history state for Step 2 (enables proper back button behavior)
         history.pushState({ step: 2, template: selectedTemplate }, '', '');
-        console.log('âœ… History state pushed');
+        // console.log('âœ… History state pushed');
 
         // Scroll to form
         setTimeout(() => {
           const mainLayoutScroll = document.querySelector('.main-layout');
           if (mainLayoutScroll) {
             mainLayoutScroll.scrollIntoView({ behavior: 'smooth' });
-            console.log('âœ… Scrolled to form');
+            // console.log('âœ… Scrolled to form');
           }
         }, 100);
 
-        console.log('âœ…âœ…âœ… proceedToForm completed successfully!');
+        // console.log('âœ…âœ…âœ… proceedToForm completed successfully!');
 
       } catch (error) {
-        console.error('âŒ Error in proceedToForm:', error);
+    // console.error('âŒ Error in proceedToForm:', error);
         alert('Error proceeding to form: ' + error.message);
       }
     }
 
-    // Fill form with imported resume data (Auto-fill) â€” v2025-12-02
+    // Fill form with imported resume data (Auto-fill) â€" v2025-12-02
     function fillFormWithImportedData(data) {
       try {
-        console.log("ðŸŽ¯ Filling form with imported data", data);
+    // console.log("ðŸŽ¯ Filling form with imported data", data);
 
         // Preserve selected template before clearing form
         const preservedTemplate = selectedTemplate || localStorage.getItem('selectedTemplate');
@@ -3978,7 +4129,7 @@
         if (preservedTemplate) {
           selectedTemplate = preservedTemplate;
           localStorage.setItem('selectedTemplate', preservedTemplate);
-          console.log("âœ… Fixed: Preserved template during import:", selectedTemplate);
+    // console.log("âœ… Fixed: Preserved template during import:", selectedTemplate);
         }
 
         const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ""; };
@@ -4239,8 +4390,8 @@
           }
         });
 
-        console.log("âœ”ï¸ Auto-fill completed successfully");
-        alert('âœ… Imported resume data has been filled into the form. Review and generate your resume.');
+        console.log('[OK] Auto-fill completed successfully');
+        alert(' Imported resume data has been filled into the form. Review and generate your resume.');
 
         // 11. Final UI Update
         const templateSelection = document.getElementById('templateSelection');
@@ -4257,8 +4408,8 @@
         localStorage.setItem('resumeData', JSON.stringify(data));
 
       } catch (err) {
-        console.error('âŒ Error in fillFormWithImportedData:', err);
-        alert('âŒ Failed to auto-fill form: ' + err.message);
+    // console.error('âŒ Error in fillFormWithImportedData:', err);
+        alert(' Failed to auto-fill form: ' + err.message);
       }
     }
 
@@ -4374,7 +4525,7 @@
       // Validate file type
       const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
       if (!validTypes.includes(file.type)) {
-        photoStatus.textContent = 'âŒ Invalid format. Please upload JPG or PNG only.';
+        photoStatus.textContent = ' Invalid format. Please upload JPG or PNG only.';
         photoStatus.classList.add('error');
         event.target.value = ''; // Clear the input
         return;
@@ -4383,7 +4534,7 @@
       // Validate file size (minimum 50KB)
       const minSize = 50 * 1024; // 50KB in bytes
       if (file.size < minSize) {
-        photoStatus.textContent = `âŒ Photo too small. Minimum ${Math.round(minSize / 1024)}KB required.`;
+        photoStatus.textContent = ` Photo too small. Minimum ${Math.round(minSize / 1024)}KB required.`;
         photoStatus.classList.add('error');
         event.target.value = '';
         return;
@@ -4392,7 +4543,7 @@
       // Maximum size check (5MB)
       const maxSize = 5 * 1024 * 1024; // 5MB
       if (file.size > maxSize) {
-        photoStatus.textContent = 'âŒ Photo too large. Maximum 5MB allowed.';
+        photoStatus.textContent = ' Photo too large. Maximum 5MB allowed.';
         photoStatus.classList.add('error');
         event.target.value = '';
         return;
@@ -4418,7 +4569,7 @@
 
         // Show success message
         const fileSizeKB = Math.round(file.size / 1024);
-        photoStatus.textContent = `✓ Photo uploaded successfully (${fileSizeKB}KB)`;
+        photoStatus.textContent = ` Photo uploaded successfully (${fileSizeKB}KB)`;
         photoStatus.classList.add('success');
 
         // Show AI Button and Badge
@@ -4430,7 +4581,7 @@
       };
 
       reader.onerror = function () {
-        photoStatus.textContent = 'âŒ Failed to load photo. Please try again.';
+        photoStatus.textContent = ' Failed to load photo. Please try again.';
         photoStatus.classList.add('error');
       };
 
@@ -4655,7 +4806,7 @@
           return;
         }
 
-        console.log('ðŸ”„ Starting to fill sample data...');
+        // console.log('ðŸ"" Starting to fill sample data...');
 
         // Personal Information
         const fullNameEl = document.getElementById('fullName');
@@ -4663,7 +4814,7 @@
         const phoneEl = document.getElementById('phone');
 
         if (!fullNameEl || !emailEl || !phoneEl) {
-          console.error('âŒ Required form elements not found');
+    // console.error('âŒ Required form elements not found');
           alert('Error: Form elements not found. Please refresh the page and try again.');
           return;
         }
@@ -4785,7 +4936,7 @@
             start: '2023-01',
             end: '',
             current: true,
-            description: 'â€¢ Analyzed large datasets (50M+ rows) to identify trends and build predictive dashboards\nâ€¢ Developed machine learning models (classification & regression) improving customer churn prediction by 18%\nâ€¢ Performed feature engineering, model tuning, and evaluation using precision, recall, and ROC-AUC\nâ€¢ Implemented A/B testing frameworks to measure product improvements; increased conversion rate by 6.5%\nâ€¢ Built visualization dashboards using Matplotlib, Seaborn, and Tableau to support decision-making'
+            description: ' Analyzed large datasets (50M+ rows) to identify trends and build predictive dashboards\n Developed machine learning models (classification & regression) improving customer churn prediction by 18%\n Performed feature engineering, model tuning, and evaluation using precision, recall, and ROC-AUC\n Implemented A/B testing frameworks to measure product improvements; increased conversion rate by 6.5%\n Built visualization dashboards using Matplotlib, Seaborn, and Tableau to support decision-making'
           },
           {
             title: 'Junior Data Analyst',
@@ -4793,7 +4944,7 @@
             start: '2021-08',
             end: '2022-12',
             current: false,
-            description: 'â€¢ Conducted exploratory data analysis (EDA) and identified business insights\nâ€¢ Automated data cleaning and transformation pipelines using Python and SQL\nâ€¢ Contributed to clustering models for customer segmentation'
+            description: ' Conducted exploratory data analysis (EDA) and identified business insights\n Automated data cleaning and transformation pipelines using Python and SQL\n Contributed to clustering models for customer segmentation'
           }
         ];
 
@@ -4976,8 +5127,8 @@
 
         // Show success message
         setTimeout(() => {
-          console.log('âœ… Sample data filled successfully');
-          alert('âœ… Sample data has been loaded successfully!\n\nYou can now preview or generate your resume with any template to see how it looks with comprehensive data.');
+          // console.log('âœ… Sample data filled successfully');
+          alert(' Sample data has been loaded successfully!\n\nYou can now preview or generate your resume with any template to see how it looks with comprehensive data.');
 
           // Scroll to top of form
           const mainLayout = document.querySelector('.main-layout');
@@ -4987,8 +5138,8 @@
         }, 2000);
 
       } catch (error) {
-        console.error('âŒ Error filling sample data:', error);
-        alert('âŒ Error filling sample data: ' + error.message + '\n\nPlease check the browser console for details.');
+    // console.error('âŒ Error filling sample data:', error);
+        alert(' Error filling sample data: ' + error.message + '\n\nPlease check the browser console for details.');
       }
     }
 
@@ -5037,7 +5188,7 @@
       }
 
       if (!valid) {
-        alert('Please fix the following errors:\nâ€¢ ' + errors.join('\nâ€¢ '));
+        alert('Please fix the following errors:\n ' + errors.join('\n '));
         return;
       }
 
@@ -5058,7 +5209,7 @@
       data.template = selectedTemplate;
       localStorage.setItem('resumeData', JSON.stringify(data));
 
-      console.log('ðŸš€ Starting resume generation with in-page animation:', data);
+    // console.log('ðŸš€ Starting resume generation with in-page animation:', data);
       console.log('Backend URL:', BACKEND_URL);
 
       // Show beautiful loading overlay in same window (no popup!)
@@ -5125,20 +5276,16 @@
         const controller = new AbortController();
         const timeoutId = setTimeout(() => {
           controller.abort();
-          console.error('â±ï¸ Request timeout after 120 seconds');
-          statusEl.textContent = 'âŒ Request Timeout';
+          console.error('?? Request timeout after 120 seconds');
+          statusEl.textContent = ' Request Timeout';
           statusEl.style.color = '#ff6b6b';
           substatusEl.textContent = 'The server took too long to respond. Please try again or check your connection.';
           progressBar.style.background = 'linear-gradient(90deg, #ff6b6b, #c92a2a)';
         }, 120000); // 120 seconds for ngrok
 
         const downloadUrl = BACKEND_URL + '/download-resume';
-        console.log('ðŸ“¡ Generating resume at:', downloadUrl);
-        console.log('ðŸ“¦ Request data:', {
-          template: data.template,
-          name: data.personalInfo?.fullName,
-          dataSize: JSON.stringify(data).length
-        });
+    // console.log('[INFO] Generating resume at:', downloadUrl);
+    // console.log('[INFO] Request data:', { template: data.template, name: data.personalInfo?.fullName });
 
         // Test backend connectivity first
         try {
@@ -5148,12 +5295,12 @@
             cache: 'no-store'
           });
           if (healthCheck.ok) {
-            console.log('âœ… Backend health check passed before download');
+            // console.log('âœ… Backend health check passed before download');
           } else {
-            console.warn('âš ï¸ Backend health check returned:', healthCheck.status);
+    // console.warn('âš ? Backend health check returned:', healthCheck.status);
           }
         } catch (healthError) {
-          console.error('âŒ Backend health check failed:', healthError.message);
+    // console.error('âŒ Backend health check failed:', healthError.message);
           console.error('   This might indicate the backend is not accessible');
           throw new Error(`Backend server not accessible at ${BACKEND_URL}. Please check if the server is running.`);
         }
@@ -5186,16 +5333,16 @@
 
         // Check if response is actually PDF
         const contentType = response.headers.get('content-type');
-        console.log('ðŸ“„ Response Content-Type:', contentType);
+    // console.log('ðŸ"" Response Content-Type:', contentType);
 
         if (!contentType || !contentType.includes('application/pdf')) {
           const text = await response.text();
-          console.error('âŒ Response is not PDF! Content:', text.substring(0, 200));
+    // console.error('âŒ Response is not PDF! Content:', text.substring(0, 200));
           throw new Error('Server returned non-PDF response. Check console for details.');
         }
 
         const blob = await response.blob();
-        console.log('âœ… PDF blob received, size:', blob.size, 'bytes');
+    // console.log('âœ… PDF blob received, size:', blob.size, 'bytes');
 
         // Verify blob is actually PDF
         if (blob.size === 0) {
@@ -5204,7 +5351,7 @@
 
         // Check if blob type is correct
         if (!blob.type || !blob.type.includes('pdf')) {
-          console.warn('âš ï¸ Blob type is not PDF:', blob.type);
+    // console.warn('âš ? Blob type is not PDF:', blob.type);
           // Try to read first bytes to verify
           const firstBytes = await blob.slice(0, 4).text();
           console.log('First 4 bytes:', firstBytes);
@@ -5221,16 +5368,16 @@
         // Download the file with proper error handling
         try {
           // Manual download disabled in generation - choice modal will handle it
-          console.log('âœ… Generation successful - showing choice modal');
+          // console.log('âœ… Generation successful - showing choice modal');
           // skip a.click()
         } catch (downloadError) {
 
-          console.error('âŒ Download error:', downloadError);
+    // console.error('âŒ Download error:', downloadError);
           throw new Error('Failed to trigger download: ' + downloadError.message);
         }
 
         progressBar.style.width = '100%';
-        statusEl.textContent = 'âœ… Analysis Complete!';
+        statusEl.textContent = ' Analysis Complete!';
         statusEl.style.color = '#2ae023';
         substatusEl.textContent = 'Preparing your download options...';
 
@@ -5261,28 +5408,28 @@
 
 
       } catch (error) {
-        console.error('❌ Generation error:', error);
-        console.error('❌ Error details:', {
-          name: error.name,
-          message: error.message,
-          stack: error.stack,
-          backendUrl: BACKEND_URL,
-          downloadUrl: BACKEND_URL + '/download-resume'
-        });
+    // console.error('❌ Generation error:', error);
+    // console.error('❌ Error details:', {
+    //          name: error.name,
+    //          message: error.message,
+    //          stack: error.stack,
+    //          backendUrl: BACKEND_URL,
+    //          downloadUrl: BACKEND_URL + '/download-resume'
+    //        });
 
         const statusEl = document.getElementById('overlayStatus');
         const substatusEl = document.getElementById('overlaySubstatus');
         const progressBar = document.getElementById('overlayProgressBar');
 
-        statusEl.textContent = '❌ Generation Failed';
+        statusEl.textContent = ' Generation Failed';
         statusEl.style.color = '#ff6b6b';
         progressBar.style.background = 'linear-gradient(90deg, #ff6b6b, #c92a2a)';
 
         if (error.name === 'AbortError') {
-          substatusEl.textContent = '⚠️ Request timed out - server took too long. This may be due to slow network or ngrok connection.';
+          substatusEl.textContent = ' Request timed out - server took too long. This may be due to slow network or ngrok connection.';
         } else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError') || error.message.includes('ERR_CONNECTION_REFUSED')) {
-          substatusEl.textContent = `⚠️ Cannot connect to backend at ${BACKEND_URL}. Check console for details.`;
-          console.error('🔍 Connection troubleshooting:');
+          substatusEl.textContent = ` Cannot connect to backend at ${BACKEND_URL}. Check console for details.`;
+    // console.error('🔍 Connection troubleshooting:');
           console.error('   1. Is backend server running? Check: curl ' + BACKEND_URL + '/health');
           console.error('   2. Is CORS configured correctly?');
           console.error('   3. Is firewall blocking port 5003?');
@@ -5298,7 +5445,7 @@
           const errorMsg = error.name === 'AbortError'
             ? 'Request timed out. The server took too long to respond. This may be due to:\nâ€¢ Slow network connection\nâ€¢ ngrok tunnel issues\nâ€¢ Server overload\n\nPlease try again or check your connection.'
             : `Failed to generate resume: \n\n${error.message} \n\nPlease ensure the integrated gateway is running.`;
-          alert('âŒ ' + errorMsg);
+          alert(' ' + errorMsg);
         }, 3000);
       }
     }
@@ -5504,7 +5651,7 @@
 
         // UI Reset
         initializePage();
-        console.log('ðŸ§¹ Form cleared successfully');
+        // console.log('ðŸ§¹ Form cleared successfully');
       }
     }
 
@@ -5577,7 +5724,25 @@
 
     async function downloadDocx() {
       const user = JSON.parse(localStorage.getItem('user') || '{}');
-      if (!user.isPro) {
+      const isPro = !!user.isPro;
+      const plan = user.proPlan || '';
+      const currentTemplateId = selectedTemplate || localStorage.getItem('selectedTemplate') || 'classic';
+
+      const premiumTemplates = ['hiero-royal', 'hiero-signature', 'hiero-prestige', 'hiero-elite', 'hiero-vision', 'hiero-vertex', 'hiero-premium', 'hiero-urban'];
+      const affordableTemplates = ['hiero-executive', 'hiero-nova', 'rishi', 'hiero-monethon', 'template4', 'hiero-timeline', 'hiero-studio', 'hiero-retail', 'hiero-essence', 'hiero-velocity', 'hiero-legion'];
+
+      let needsUpgrade = false;
+      if (premiumTemplates.includes(currentTemplateId)) {
+        if (!isPro || (plan !== 'premium' && plan !== '6months')) {
+          needsUpgrade = true;
+        }
+      } else if (affordableTemplates.includes(currentTemplateId)) {
+        if (!isPro || (plan !== 'affordable' && plan !== 'premium' && plan !== '6months')) {
+          needsUpgrade = true;
+        }
+      }
+
+      if (needsUpgrade) {
         showUpgradeLoading(() => {
           window.location.href = '/pricing.html';
         });
@@ -5648,7 +5813,25 @@
 
     async function downloadResume() {
       const user = JSON.parse(localStorage.getItem('user') || '{}');
-      if (!user.isPro) {
+      const isPro = !!user.isPro;
+      const plan = user.proPlan || '';
+      const currentTemplateId = selectedTemplate || localStorage.getItem('selectedTemplate') || 'classic';
+
+      const premiumTemplates = ['hiero-royal', 'hiero-signature', 'hiero-prestige', 'hiero-elite', 'hiero-vision', 'hiero-vertex', 'hiero-premium', 'hiero-urban'];
+      const affordableTemplates = ['hiero-executive', 'hiero-nova', 'rishi', 'hiero-monethon', 'template4', 'hiero-timeline', 'hiero-studio', 'hiero-retail', 'hiero-essence', 'hiero-velocity', 'hiero-legion'];
+
+      let needsUpgrade = false;
+      if (premiumTemplates.includes(currentTemplateId)) {
+        if (!isPro || (plan !== 'premium' && plan !== '6months')) {
+          needsUpgrade = true;
+        }
+      } else if (affordableTemplates.includes(currentTemplateId)) {
+        if (!isPro || (plan !== 'affordable' && plan !== 'premium' && plan !== '6months')) {
+          needsUpgrade = true;
+        }
+      }
+
+      if (needsUpgrade) {
         showUpgradeLoading(() => {
           window.location.href = '/pricing.html';
         });
@@ -5670,7 +5853,7 @@
         }
 
         const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
-        console.log('ðŸ“¡ POST', `${BACKEND_URL}/download-resume`);
+    // console.log('ðŸ"¡ POST', `${BACKEND_URL}/download-resume`);
         const response = await fetch(`${BACKEND_URL}/download-resume`, {
           method: 'POST',
           headers: {
@@ -5683,22 +5866,22 @@
 
         if (!response.ok) {
           const errorText = await response.text();
-          console.error('âŒ Server error:', errorText);
+    // console.error('âŒ Server error:', errorText);
           throw new Error(`Download failed: ${response.status} ${response.statusText}`);
         }
 
         // Check content type
         const contentType = response.headers.get('content-type');
-        console.log('ðŸ“„ Response Content-Type:', contentType);
+    // console.log('ðŸ"" Response Content-Type:', contentType);
 
         if (!contentType || !contentType.includes('application/pdf')) {
           const text = await response.text();
-          console.error('âŒ Response is not PDF!', text.substring(0, 200));
+    // console.error('âŒ Response is not PDF!', text.substring(0, 200));
           throw new Error('Server returned non-PDF response');
         }
 
         const blob = await response.blob();
-        console.log('✅ PDF blob received, size:', blob.size);
+    // console.log('✅ PDF blob received, size:', blob.size);
 
         if (blob.size === 0) {
           throw new Error('Received empty PDF file');
@@ -5826,14 +6009,14 @@
             company: 'Innovation Labs',
             startDate: '2021-01',
             endDate: 'Present',
-            description: '• Architected a microservices platform serving 1M+ users.\n• Improved deployment efficiency by 50% using CI/CD.\n• Managed a team of 15 engineers across three timezones.'
+            description: ' Architected a microservices platform serving 1M+ users.\n Improved deployment efficiency by 50% using CI/CD.\n Managed a team of 15 engineers across three timezones.'
           },
           {
             jobTitle: 'Senior Engineer',
             company: 'Global Tech',
             startDate: '2018-05',
             endDate: '2020-12',
-            description: '• Developed core features for a flagship SaaS product.\n• Optimized database queries, reducing latency by 30%.\n• Mentored junior developers and conducted code reviews.'
+            description: ' Developed core features for a flagship SaaS product.\n Optimized database queries, reducing latency by 30%.\n Mentored junior developers and conducted code reviews.'
           }
         ],
         education: [
@@ -5870,12 +6053,13 @@
 
           previewAreas.forEach(area => {
             area.innerHTML = `
-              <div class="preview-scroll-container" style="width: 100%; height: 100%; overflow-y: auto; overflow-x: hidden; position: relative;">
+              <div class="preview-scroll-container" style="width: 100%; height: 100%; overflow: hidden; position: relative;">
                 <iframe src="${previewUrl}#view=FitH&zoom=70&toolbar=0&navpanes=0&scrollbar=0" 
                          style="width: 100%; aspect-ratio: 1/1.4142; height: auto; border: none; pointer-events: none; z-index: 1; display: block;"></iframe>
+                <div style="position: absolute; inset: 0; z-index: 5; background: transparent; cursor: pointer;"></div>
               </div>
-              <div class="preview-overlay" style="z-index: 10; pointer-events: none; opacity: 0; background: rgba(0,0,0,0.4); position: absolute; inset: 0; transition: opacity 0.3s;">
-                <button class="preview-btn" style="pointer-events: auto; transform: scale(0.8); margin-top: 180px;">Preview Template</button>
+              <div class="preview-overlay" style="z-index: 10; pointer-events: none; opacity: 0; background: rgba(0,0,0,0.4); position: absolute; inset: 0; transition: opacity 0.3s; display: flex; align-items: center; justify-content: center;">
+                <button class="preview-btn" style="pointer-events: auto; transform: scale(0.8);">Preview Template</button>
               </div>
             `;
 

@@ -16,7 +16,10 @@
     "signupMethod": "google",
     "picture": "https://lh3.googleusercontent.com/a/ACg8ocIcKje_SWSe0k7qVBlvrwjEGH9jykcYVcL0ZJEgDS7OOzcAjnKowg=s96-c",
     "loginCount": 1,
-    "lastLogin": "2026-06-08T17:43:07.858Z"
+    "lastLogin": "2026-06-08T17:43:07.858Z",
+    "isPro": true,
+    "proUntil": "2026-06-15T09:38:22.242Z",
+    "proPlan": "single"
   },
   {
     "id": 3,

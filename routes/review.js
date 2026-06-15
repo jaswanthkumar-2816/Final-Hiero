@@ -242,6 +242,18 @@ const authenticateToken = (req, res, next) => {
     });
 };
 
+// Middleware to restrict access to admin users only
+const requireAdmin = (req, res, next) => {
+    const ADMIN_EMAILS = [
+        process.env.ADMIN_EMAIL,
+        'jaswanthkumarmuthoju@gmail.com'
+    ];
+    if (!ADMIN_EMAILS.includes(req.user.email)) {
+        return res.status(403).json({ error: 'Admin access required' });
+    }
+    next();
+};
+
 // ⭐ POST /api/review - Add Review (Authenticated Dashboard Path)
 router.post('/review', authenticateToken, async (req, res) => {
     try {
@@ -542,8 +554,8 @@ router.post('/login-track', authenticateToken, async (req, res) => {
     }
 });
 
-// ✉️ POST /api/admin/send-feedback-email - Bulk send feedback request emails directly from Admin Dashboard controls
-router.post('/admin/send-feedback-email', async (req, res) => {
+// ✉️ POST /api/admin/send-feedback-email - Bulk send feedback request emails (Admin only)
+router.post('/admin/send-feedback-email', authenticateToken, requireAdmin, async (req, res) => {
     try {
         const { emails } = req.body;
         if (!emails || !Array.isArray(emails) || emails.length === 0) {
@@ -738,8 +750,8 @@ function serveLocalDashboard(res) {
     }
 }
 
-// 📊 GET /api/admin/dashboard - Integrated Admin Dashboard
-router.get('/admin/dashboard', async (req, res) => {
+// 📊 GET /api/admin/dashboard - Integrated Admin Dashboard (Admin only)
+router.get('/admin/dashboard', authenticateToken, requireAdmin, async (req, res) => {
     try {
         const authObj = require('./auth');
         const localUsers = authObj.users || [];

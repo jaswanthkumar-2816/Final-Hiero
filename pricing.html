@@ -570,11 +570,11 @@
             <!-- Mode 1: Cash/UPI Plans -->
             <div class="plans-container" id="cash-plans">
                 
-                <!-- Single Pass - ₹9 -->
-                <div class="plan" data-id="single" data-amount="9" data-name="Single Pass" data-desc="1 Resume, 1 Mock Interview" onclick="selectPlan(this)">
+                <!-- Affordable Plan - ₹9 -->
+                <div class="plan active" data-id="affordable" data-amount="9" data-name="Affordable Plan" data-desc="Access to all Affordable templates" onclick="selectPlan(this)">
                     <div class="plan-meta">
-                        <h3>🎟️ Single Pass</h3>
-                        <p>1 Resume download & 1 Mock Interview</p>
+                        <h3>⚡ Affordable Plan</h3>
+                        <p>Access to 11 Affordable templates (30 Days)</p>
                     </div>
                     <div class="plan-price">
                         <span class="old-price">₹49</span>
@@ -582,52 +582,16 @@
                     </div>
                 </div>
 
-                <!-- 1 Week PRO - ₹49 -->
-                <div class="plan" data-id="week" data-amount="49" data-name="1 Week PRO" data-desc="1 Week full prep access" onclick="selectPlan(this)">
+                <!-- Premium Plan - ₹25 -->
+                <div class="plan" data-id="premium" data-amount="25" data-name="Premium Plan" data-desc="Access to all templates including Premium" onclick="selectPlan(this)">
+                    <span class="best-value-tag">Best Value</span>
                     <div class="plan-meta">
-                        <h3>⚡ 1 Week PRO</h3>
-                        <p>Perfect for urgent prep this week</p>
+                        <h3>👑 Premium Plan</h3>
+                        <p>Access to all templates including Premium (90 Days)</p>
                     </div>
                     <div class="plan-price">
                         <span class="old-price">₹149</span>
-                        <span class="current-price">₹49</span>
-                    </div>
-                </div>
-
-                <!-- 1 Month PRO - ₹99 -->
-                <div class="plan active" data-id="month" data-amount="99" data-name="1 Month PRO" data-desc="1 Month career growth" onclick="selectPlan(this)">
-                    <span class="best-value-tag">Best Value</span>
-                    <div class="plan-meta">
-                        <h3>🚀 1 Month PRO</h3>
-                        <p>Complete learning path & quiz prep</p>
-                    </div>
-                    <div class="plan-price">
-                        <span class="old-price">₹299</span>
-                        <span class="current-price">₹99</span>
-                    </div>
-                </div>
-
-                <!-- 3 Months PRO - ₹149 -->
-                <div class="plan" data-id="3months" data-amount="149" data-name="3 Months PRO" data-desc="3 Months full career path" onclick="selectPlan(this)">
-                    <div class="plan-meta">
-                        <h3>📅 3 Months PRO</h3>
-                        <p>Long-term prep & ad-free learning</p>
-                    </div>
-                    <div class="plan-price">
-                        <span class="old-price">₹499</span>
-                        <span class="current-price">₹149</span>
-                    </div>
-                </div>
-
-                <!-- 6 Months PRO - ₹249 -->
-                <div class="plan" data-id="6months" data-amount="249" data-name="6 Months PRO" data-desc="6 Months unlimited access" onclick="selectPlan(this)">
-                    <div class="plan-meta">
-                        <h3>👑 6 Months PRO</h3>
-                        <p>All premium features + full chatbot access</p>
-                    </div>
-                    <div class="plan-price">
-                        <span class="old-price">₹999</span>
-                        <span class="current-price">₹249</span>
+                        <span class="current-price">₹25</span>
                     </div>
                 </div>
             </div>
@@ -678,39 +642,28 @@
         let requiredXP = 300;
 
         let selectedPlan = {
-            id: "month",
-            amount: 99,
-            name: "1 Month PRO",
-            desc: "1 Month career growth"
+            id: "affordable",
+            amount: 9,
+            name: "Affordable Plan",
+            desc: "Access to all Affordable templates"
         };
 
         // Features database matched to the user's hand-written notes
         const planFeatures = {
-            "single": [
-                { icon: "fa-file-invoice", title: "1 Resume Download", desc: "Download 1 ATS-optimized resume template." },
-                { icon: "fa-microphone-lines", title: "1 Spoken AI Mock Interview", desc: "Experience one full speech assessment session." }
+            "affordable": [
+                { icon: "fa-file-invoice", title: "Affordable Templates", desc: "Download any of the 11 Affordable templates." },
+                { icon: "fa-microphone-lines", title: "Standard Mock Interviews", desc: "Experience spoken AI mock interview sessions." },
+                { icon: "fa-circle-play", title: "Videos & Skills Access", desc: "Full access to our course video collections and practice problems." }
             ],
-            "week": [
-                { icon: "fa-file-invoice", title: "3 Resume Downloads", desc: "Download up to 3 standard ATS resume templates." },
-                { icon: "fa-circle-play", title: "Videos & Skills Access", desc: "Full access to our curated course video collections." },
-                { icon: "fa-hourglass-half", title: "10-Minute Mock Interview", desc: "Secure 10 minutes of active voice mock interview practice." },
-                { icon: "fa-comment-slash", title: "No Chatbot Access", desc: "AI chatbot is locked (limited to 5 queries)." }
-            ],
-            "month": [
-                { icon: "fa-file-signature", title: "5 Resumes + 2 Premium Downloads", desc: "Get 5 standard downloads plus 2 premium visual resume designs." },
-                { icon: "fa-brain", title: "10 Interactive Quizzes", desc: "Unlock 10 practice quiz sessions to verify your knowledge." },
-                { icon: "fa-circle-play", title: "Videos & Skills Access", desc: "Full access to all course tutorial videos and practice problems." }
-            ],
-            "3months": [
-                { icon: "fa-file-signature", title: "3 Standard + 2 Premium Downloads", desc: "Download 3 standard resumes and 2 premium designs." },
-                { icon: "fa-circle-play", title: "Videos Without Ads", desc: "Watch all tutorial courses and lesson videos without interruptions." },
-                { icon: "fa-comments", title: "75 AI Chatbot Queries", desc: "75 queries with Orbit, our AI-powered personal tech tutor." }
+            "premium": [
+                { icon: "fa-infinity", title: "All 22 Templates", desc: "Unrestricted access to all templates, including the 8 Premium layouts." },
+                { icon: "fa-microphone-lines", title: "Full Mock Interviews", desc: "Unlimited speech assessment and interview practice." },
+                { icon: "fa-comments", title: "Full Chatbot Access", desc: "Unlimited queries with Orbit, our AI-powered personal tech tutor." }
             ],
             "6months": [
-                { icon: "fa-infinity", title: "Unlimited Downloads (All Premium)", desc: "Full, unrestricted access to all standard and premium templates." },
-                { icon: "fa-microphone-lines", title: "Full Mock Interviews", desc: "Unlimited AI mock interview sessions with biometrics." },
-                { icon: "fa-circle-play", title: "Videos Without Ads", desc: "Ad-free experience across all course videos and tutorials." },
-                { icon: "fa-comments", title: "Full Chatbot Access", desc: "Unlimited queries and interactive coding advice with Orbit AI tutor." }
+                { icon: "fa-infinity", title: "All 22 Templates", desc: "Unrestricted access to all templates, including the 8 Premium layouts." },
+                { icon: "fa-microphone-lines", title: "Full Mock Interviews", desc: "Unlimited speech assessment and interview practice." },
+                { icon: "fa-comments", title: "Full Chatbot Access", desc: "Unlimited queries with Orbit, our AI-powered personal tech tutor." }
             ]
         };
 
@@ -884,22 +837,13 @@
                                 // Update local profile
                                 try {
                                     const userObj = JSON.parse(localStorage.getItem('user') || '{}');
-                                    if (selectedPlan.id === 'single') {
-                                        userObj.isPro = false;
-                                        userObj.singlePass = true;
-                                        localStorage.setItem('user', JSON.stringify(userObj));
-                                        alert("🎉 Payment Successful! Preparing your download...");
-                                        window.location.href = "/payment-success.html";
-                                    } else {
-                                        userObj.isPro = true;
-                                        userObj.proPlan = selectedPlan.id;
-                                        localStorage.setItem('user', JSON.stringify(userObj));
-                                        alert("🎉 Payment Successful! Account upgraded to Hiero PRO.");
-                                        window.location.href = "/dashboard.html";
-                                    }
-                                } catch(e) {
-                                    window.location.href = selectedPlan.id === 'single' ? "/payment-success.html" : "/dashboard.html";
-                                }
+                                    userObj.isPro = true;
+                                    userObj.proPlan = selectedPlan.id;
+                                    localStorage.setItem('user', JSON.stringify(userObj));
+                                } catch(e) {}
+
+                                alert("🎉 Payment Successful! Account upgraded to Hiero PRO.");
+                                window.location.href = "/dashboard.html";
                             } else {
                                 alert("⚠️ Payment verification failed: " + (verifyData.error || "Please contact support."));
                                 payBtn.disabled = false;

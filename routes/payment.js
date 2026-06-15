@@ -15,11 +15,13 @@ const razorpay = new Razorpay({
 });
 
 const PLAN_PRICES = {
-    'single': 9,       // ₹9
-    'week': 49,        // ₹49
-    'month': 99,       // ₹99
-    '3months': 149,    // ₹149
-    '6months': 249     // ₹249
+    'affordable': 9,   // ₹9
+    'premium': 25,     // ₹25
+    'single': 9,       // ₹9 (fallback)
+    'week': 49,        // ₹49 (fallback)
+    'month': 99,       // ₹99 (fallback)
+    '3months': 149,    // ₹149 (fallback)
+    '6months': 249     // ₹249 (fallback)
 };
 
 const USERS_FILE = path.join(__dirname, '..', 'users.json');
@@ -94,6 +96,8 @@ router.post('/verify-payment', authenticateToken, async (req, res) => {
 
         // Calculate subscription expiration date
         const daysToAdd = {
+            'affordable': 30,
+            'premium': 90,
             'single': 1,
             'week': 7,
             'month': 30,

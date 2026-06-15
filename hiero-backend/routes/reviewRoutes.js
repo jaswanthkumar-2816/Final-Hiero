@@ -25,6 +25,18 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
+// Middleware to restrict access to admin users only
+const requireAdmin = (req, res, next) => {
+  const ADMIN_EMAILS = [
+    process.env.ADMIN_EMAIL,
+    'jaswanthkumarmuthoju@gmail.com'
+  ];
+  if (!ADMIN_EMAILS.includes(req.user.email)) {
+    return res.status(403).json({ error: 'Admin access required' });
+  }
+  next();
+};
+
 // ⭐ POST /api/review - Add Review (Strictly one per user)
 router.post('/review', authenticateToken, async (req, res) => {
   try {
@@ -266,10 +278,10 @@ router.post('/login-track', authenticateToken, async (req, res) => {
   }
 });
 
-// 🧑‍💻 GET /api/admin/dashboard - Admin Dashboard Data (No Auth Required - Protected by PIN in frontend)
-router.get('/admin/dashboard', async (req, res) => {
+// 🧑‍💻 GET /api/admin/dashboard - Admin Dashboard Data (Server-side auth + admin check required)
+router.get('/admin/dashboard', authenticateToken, requireAdmin, async (req, res) => {
   try {
-    // No authentication required - frontend has 4-digit PIN protection
+    // Auth + admin check enforced via authenticateToken + requireAdmin middleware
 
     // Get statistics
     const totalUsers = await User.countDocuments();
