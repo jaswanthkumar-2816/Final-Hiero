@@ -100,6 +100,16 @@
       box-shadow: 0 15px 40px rgba(255, 215, 0, 0.2);
     }
 
+    .template-card.affordable {
+      border-color: #6C63FF;
+      background: rgba(108, 99, 255, 0.03);
+    }
+
+    .template-card.affordable:hover {
+      border-color: #6C63FF;
+      box-shadow: 0 15px 40px rgba(108, 99, 255, 0.2);
+    }
+
     .premium-badge {
       position: absolute;
       top: 15px;
@@ -217,6 +227,21 @@
     .start-building-btn:hover {
       transform: translateY(-2px);
       box-shadow: 0 8px 20px rgba(42, 224, 35, 0.3);
+      background: linear-gradient(135deg, #2ae023 0%, #1a8b17 100%);
+      color: #000;
+      border: none;
+    }
+
+    .template-card.premium .start-building-btn:hover {
+      background: linear-gradient(135deg, #ffd700 0%, #daa520 100%);
+      color: #000;
+      box-shadow: 0 8px 20px rgba(255, 215, 0, 0.3);
+    }
+
+    .template-card.affordable .start-building-btn:hover {
+      background: linear-gradient(135deg, #6c63ff 0%, #4b44d1 100%);
+      color: #fff;
+      box-shadow: 0 8px 20px rgba(108, 99, 255, 0.3);
     }
 
     /* Hide form initially */
@@ -821,6 +846,119 @@
         font-size: 13px;
       }
     }
+
+    /* =========================================
+       NEW NETFLIX-STYLE GLASSMORPHISM DESIGN
+       ========================================= */
+    .netflix-carousel {
+        display: flex !important;
+        overflow-x: auto;
+        gap: 25px;
+        padding-bottom: 30px;
+        padding-top: 10px;
+        padding-left: 10px;
+        padding-right: 10px;
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+        cursor: grab;
+        align-items: stretch !important;
+    }
+    .netflix-carousel:active {
+        cursor: grabbing;
+    }
+    
+    /* Hide scrollbar for a sleek look */
+    .netflix-carousel::-webkit-scrollbar {
+        height: 6px;
+    }
+    .netflix-carousel::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+    }
+    .netflix-carousel::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+    }
+    .netflix-carousel::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.4);
+    }
+
+    .netflix-carousel .template-card {
+        /* Default to 3 per row on desktop (gap is 25px, 2 gaps = 50px) */
+        flex: 0 0 calc((100% - 50px) / 3);
+        max-width: calc((100% - 50px) / 3);
+        min-width: calc((100% - 50px) / 3);
+        display: flex;
+        flex-direction: column;
+        scroll-snap-align: start;
+        
+        /* Glassmorphism overrides */
+        background: rgba(25, 25, 25, 0.6) !important;
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 2px solid rgba(255, 255, 255, 0.08); /* Removed !important to allow inline colored borders */
+        border-radius: 24px;
+        transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease, border-color 0.4s ease;
+    }
+    
+    .netflix-carousel .template-info {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+    }
+    
+    .netflix-carousel .start-building-btn {
+        margin-top: auto; /* Push button to the very bottom */
+    }
+    .netflix-carousel .template-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        z-index: 10;
+        border-color: rgba(255, 255, 255, 0.3) !important;
+    }
+    
+    .netflix-carousel .template-card.premium:hover {
+        box-shadow: 0 20px 40px rgba(242, 182, 109, 0.25);
+    }
+    
+    .netflix-carousel .template-card.affordable:hover {
+        box-shadow: 0 20px 40px rgba(108, 99, 255, 0.25);
+    }
+    
+    .netflix-carousel .template-card:not(.premium):not(.affordable):hover {
+        box-shadow: 0 20px 40px rgba(74, 222, 128, 0.25);
+    }
+
+    .netflix-carousel .template-preview {
+        height: 280px; /* Restore to original height to prevent iframe squishing */
+        border-radius: 16px;
+        background: rgba(0,0,0,0.3) !important;
+        border: 1px solid rgba(255,255,255,0.05);
+    }
+    
+    /* Responsive sizing for exactly 3, 2, or 1 cards per row */
+    @media (max-width: 1024px) {
+        .netflix-carousel .template-card {
+            flex: 0 0 calc((100% - 25px) / 2);
+            max-width: calc((100% - 25px) / 2);
+            min-width: calc((100% - 25px) / 2);
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .netflix-carousel .template-card {
+            /* 85% width on mobile so the next card peeks into view, encouraging swiping */
+            flex: 0 0 85%;
+            max-width: 85%;
+            min-width: 85%;
+            scroll-snap-align: center;
+        }
+        
+        .netflix-carousel {
+            gap: 15px;
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+    }
   </style>
 </head>
 
@@ -856,8 +994,9 @@
 
       <div class="templates-grid" id="templatesGrid"
         style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); max-width: 1200px; margin: 0 auto;">
-        <!-- Hiero Pro Template (formerly Rishi) -->
-        <div class="template-card" data-category="modern" data-template="rishi" data-type="free">
+        <!-- Rishi Tech Modern -->
+        <div class="template-card premium" data-category="modern" data-template="rishi" data-type="affordable">
+          <div class="premium-badge">PREMIUM</div>
           <div class="template-preview" onclick="previewTemplate('rishi')">
             <i class="fas fa-laptop-code"></i>
             <div class="preview-overlay">
@@ -865,7 +1004,7 @@
             </div>
           </div>
           <div class="template-info">
-            <h3>Hiero Pro Template</h3>
+            <h3>Hiero Modus</h3>
             <p>Professional modern template with clean design and excellent readability. Perfect for all industries and
               career levels.</p>
             <div class="template-tags">
@@ -873,13 +1012,14 @@
               <span class="tag">Professional</span>
               <span class="tag">ATS-Friendly</span>
             </div>
-            <button class="start-building-btn" onclick="startBuilding('rishi')">
+            <button class="start-building-btn" onclick="startBuilding('rishi')"
+              style="background: linear-gradient(135deg, #6C63FF 0%, #4b44d1 100%); color: #fff; border: none;">
               <i class="fas fa-arrow-right"></i> Start Building
             </button>
           </div>
         </div>
 
-        <!-- Priya Analytics Single-Column Template (matches Priya Sharma PDF) -->
+        <!-- Hiero Analytics (formerly Priya Analytics) -->
         <div class="template-card" data-category="analytics" data-template="priya-analytics" data-type="free">
           <div class="template-preview" onclick="previewTemplate('priya-analytics')">
             <i class="fas fa-chart-line"></i>
@@ -888,7 +1028,7 @@
             </div>
           </div>
           <div class="template-info">
-            <h3>Hiero Elegant Template</h3>
+            <h3>Hiero Analytics</h3>
             <p>Single-column layout with a grey top bar and bold section headings. Ideal for data-driven professionals.
             </p>
             <div class="template-tags">
@@ -896,14 +1036,16 @@
               <span class="tag">Single Column</span>
               <span class="tag">Data Science</span>
             </div>
-            <button class="start-building-btn" onclick="startBuilding('priya-analytics')">
+            <button class="start-building-btn" onclick="startBuilding('priya-analytics')"
+              style="background: linear-gradient(135deg, #2ae023 0%, #1a8b17 100%); color: #000; border: none;">
               <i class="fas fa-arrow-right"></i> Start Building
             </button>
           </div>
         </div>
 
         <!-- Hiero Executive Template -->
-        <div class="template-card" data-category="professional" data-template="hiero-executive" data-type="free">
+        <div class="template-card premium" data-category="professional" data-template="hiero-executive" data-type="affordable">
+          <div class="premium-badge">PREMIUM</div>
           <div class="template-preview" onclick="previewTemplate('hiero-executive')">
             <i class="fas fa-user-tie"></i>
             <div class="preview-overlay">
@@ -919,14 +1061,16 @@
               <span class="tag">Timeline</span>
               <span class="tag">Executive</span>
             </div>
-            <button class="start-building-btn" onclick="startBuilding('hiero-executive')">
+            <button class="start-building-btn" onclick="startBuilding('hiero-executive')"
+              style="background: linear-gradient(135deg, #6C63FF 0%, #4b44d1 100%); color: #fff; border: none;">
               <i class="fas fa-arrow-right"></i> Start Building
             </button>
           </div>
         </div>
 
-        <!-- Hiero Academic Template (Template 4) -->
-        <div class="template-card" data-category="professional" data-template="template4" data-type="free">
+        <!-- Hiero Academic Template -->
+        <div class="template-card premium" data-category="professional" data-template="template4" data-type="affordable">
+          <div class="premium-badge">PREMIUM</div>
           <div class="template-preview" onclick="previewTemplate('template4')">
             <i class="fas fa-university"></i>
             <div class="preview-overlay">
@@ -942,14 +1086,16 @@
               <span class="tag">Technical</span>
               <span class="tag">Bestseller</span>
             </div>
-            <button class="start-building-btn" onclick="startBuilding('template4')">
+            <button class="start-building-btn" onclick="startBuilding('template4')"
+              style="background: linear-gradient(135deg, #6C63FF 0%, #4b44d1 100%); color: #fff; border: none;">
               <i class="fas fa-arrow-right"></i> Start Building
             </button>
           </div>
         </div>
 
-        <!-- Hiero Studio Template (Template 5) -->
-        <div class="template-card" data-category="professional" data-template="hiero-studio" data-type="free">
+        <!-- Hiero Studio Template -->
+        <div class="template-card premium" data-category="professional" data-template="hiero-studio" data-type="affordable">
+          <div class="premium-badge">PREMIUM</div>
           <div class="template-preview" onclick="previewTemplate('hiero-studio')">
             <i class="fas fa-laptop-code"></i>
             <div class="preview-overlay">
@@ -964,7 +1110,8 @@
               <span class="tag">Studio</span>
               <span class="tag">Technical</span>
             </div>
-            <button class="start-building-btn" onclick="startBuilding('hiero-studio')">
+            <button class="start-building-btn" onclick="startBuilding('hiero-studio')"
+              style="background: linear-gradient(135deg, #6C63FF 0%, #4b44d1 100%); color: #fff; border: none;">
               <i class="fas fa-arrow-right"></i> Start Building
             </button>
           </div>
@@ -1390,7 +1537,7 @@
         onmouseover="this.style.borderColor='#2ae023'" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'">
         <i class="fas fa-eye" style="font-size: 3rem; color: #2ae023; margin-bottom: 20px;"></i>
         <h4 style="color: white; margin-bottom: 20px;">Live Preview</h4>
-        <button class="btn btn-secondary" onclick="previewResume()" style="width: 100%;">View PDF</button>
+        <button id="previewResumeBtn" class="btn btn-secondary" onclick="previewResume()" style="width: 100%;">View PDF</button>
       </div>
     </div>
 
@@ -1398,6 +1545,20 @@
       <button class="btn btn-secondary" onclick="editResume()" style="opacity: 0.7;">
         <i class="fas fa-edit"></i> Edit Details
       </button>
+    </div>
+  </div>
+
+  <!-- Live Preview Modal (in-page iframe, no popup) -->
+  <div id="pdfPreviewModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; z-index:200000; background:rgba(0,0,0,0.92); flex-direction:column;">
+    <div style="display:flex; align-items:center; justify-content:space-between; padding:14px 24px; background:#111; border-bottom:1px solid rgba(42,224,35,0.3); flex-shrink:0;">
+      <span style="color:#2ae023; font-weight:700; font-size:1.1rem;"><i class="fas fa-file-pdf"></i>&nbsp; Live Preview</span>
+      <div style="display:flex; gap:12px; align-items:center;">
+        <a id="pdfOpenNewTab" href="#" target="_blank" style="color:#aaa; font-size:13px; text-decoration:none;" title="Open in new tab"><i class="fas fa-external-link-alt"></i> Open in new tab</a>
+        <button onclick="closePdfPreview()" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); color:#fff; padding:8px 18px; border-radius:8px; cursor:pointer; font-size:14px; font-weight:600;"><i class="fas fa-times"></i> Close</button>
+      </div>
+    </div>
+    <div style="flex:1; position:relative; overflow:hidden;">
+      <iframe id="pdfPreviewIframe" src="" style="width:100%; height:100%; border:none; background:#fff;"></iframe>
     </div>
   </div>
 
@@ -1413,6 +1574,7 @@
 
     // Global state
     let selectedTemplate = null;
+    let _generatedPdfBlobUrl = null; // cached blob URL from generation
 
     // ========== BACKEND CONFIGURATION ==========
     // Point to the integrated Gateway's Resume API
@@ -1486,8 +1648,210 @@
       return true;
     }
 
+    function updateTemplateCardUI() {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      const isPro = !!user.isPro;
+      const plan = user.proPlan || '';
+
+      const premiumTemplates = ['hiero-royal', 'hiero-signature', 'hiero-prestige', 'hiero-elite', 'hiero-vision', 'hiero-vertex', 'hiero-premium', 'hiero-urban'];
+      const affordableTemplates = ['hiero-executive', 'hiero-nova', 'rishi', 'hiero-monethon', 'template4', 'hiero-timeline', 'hiero-studio', 'hiero-retail', 'hiero-essence', 'hiero-velocity', 'hiero-legion'];
+      const freeTemplates = ['hiero-cool', 'priya-analytics', 'hiero-tech'];
+
+      document.querySelectorAll('.template-card').forEach(card => {
+        const templateId = card.getAttribute('data-template');
+        if (!templateId) return;
+
+        const badgeEl = card.querySelector('.premium-badge');
+        const btnEl = card.querySelector('.start-building-btn');
+
+        if (freeTemplates.includes(templateId)) {
+          card.classList.remove('premium');
+          card.classList.remove('affordable');
+          card.style.borderColor = 'rgba(42, 224, 35, 0.5)';
+          card.style.boxShadow = '0 0 15px rgba(42, 224, 35, 0.1)';
+          if (badgeEl) {
+            badgeEl.innerHTML = '<del style="opacity:0.7;font-size:0.85em;margin-right:4px;">₹19</del> ₹0';
+            badgeEl.style.background = 'linear-gradient(45deg, #2ae023, #1a8b17)';
+            badgeEl.style.color = '#000';
+          } else {
+            const newBadge = document.createElement('div');
+            newBadge.className = 'premium-badge';
+            newBadge.innerHTML = '<del style="opacity:0.7;font-size:0.85em;margin-right:4px;">₹19</del> ₹0';
+            newBadge.style.background = 'linear-gradient(45deg, #2ae023, #1a8b17)';
+            newBadge.style.color = '#000';
+            card.insertBefore(newBadge, card.firstChild);
+          }
+          if (btnEl) {
+            btnEl.innerHTML = '<i class="fas fa-arrow-right"></i> Start Building';
+            btnEl.setAttribute('onclick', `startBuilding('${templateId}')`);
+            btnEl.style.background = 'linear-gradient(135deg, #2ae023 0%, #1a8b17 100%)';
+            btnEl.style.color = '#000';
+          }
+        } else if (affordableTemplates.includes(templateId)) {
+          card.classList.remove('premium');
+          card.classList.add('affordable');
+          card.style.borderColor = 'rgba(108, 99, 255, 0.6)';
+          card.style.boxShadow = '0 0 15px rgba(108, 99, 255, 0.15)';
+          card.style.background = 'rgba(108, 99, 255, 0.03)';
+          
+          if (badgeEl) {
+            badgeEl.innerHTML = 'PLUS <del style="opacity:0.7;font-size:0.85em;margin-left:4px;margin-right:4px;">₹49</del> ₹9';
+            badgeEl.style.background = 'linear-gradient(45deg, #6C63FF, #4b44d1)';
+            badgeEl.style.color = '#fff';
+            badgeEl.style.animation = 'none';
+          } else {
+            const newBadge = document.createElement('div');
+            newBadge.className = 'premium-badge';
+            newBadge.innerHTML = 'PLUS <del style="opacity:0.7;font-size:0.85em;margin-left:4px;margin-right:4px;">₹49</del> ₹9';
+            newBadge.style.background = 'linear-gradient(45deg, #6C63FF, #4b44d1)';
+            newBadge.style.color = '#fff';
+            card.insertBefore(newBadge, card.firstChild);
+          }
+
+          const hasAccess = isPro && (plan === 'affordable' || plan === 'premium' || plan === '6months');
+          if (btnEl) {
+            if (hasAccess) {
+              btnEl.innerHTML = '<i class="fas fa-arrow-right"></i> Start Building';
+              btnEl.setAttribute('onclick', `startBuilding('${templateId}')`);
+            } else {
+              btnEl.innerHTML = '<i class="fas fa-lock"></i> Unlock with ₹9';
+              btnEl.setAttribute('onclick', `window.location.href="/pricing.html"`);
+            }
+            btnEl.style.background = 'linear-gradient(135deg, #6C63FF 0%, #4b44d1 100%)';
+            btnEl.style.color = '#fff';
+          }
+        } else if (premiumTemplates.includes(templateId)) {
+          card.classList.remove('affordable');
+          card.classList.add('premium');
+          card.style.borderColor = 'rgba(255, 215, 0, 0.6)';
+          card.style.boxShadow = '0 0 15px rgba(255, 215, 0, 0.1)';
+          card.style.background = 'rgba(255, 215, 0, 0.03)';
+
+          if (badgeEl) {
+            badgeEl.innerHTML = 'PRO <del style="opacity:0.7;font-size:0.85em;margin-left:4px;margin-right:4px;">₹75</del> ₹25';
+            badgeEl.style.background = 'linear-gradient(45deg, #ffd700, #ffed4e)';
+            badgeEl.style.color = '#000';
+          } else {
+            const newBadge = document.createElement('div');
+            newBadge.className = 'premium-badge';
+            newBadge.innerHTML = 'PRO <del style="opacity:0.7;font-size:0.85em;margin-left:4px;margin-right:4px;">₹75</del> ₹25';
+            newBadge.style.background = 'linear-gradient(45deg, #ffd700, #ffed4e)';
+            newBadge.style.color = '#000';
+            card.insertBefore(newBadge, card.firstChild);
+          }
+
+          const hasAccess = isPro && (plan === 'premium' || plan === '6months');
+          if (btnEl) {
+            if (hasAccess) {
+              btnEl.innerHTML = '<i class="fas fa-arrow-right"></i> Start Building';
+              btnEl.setAttribute('onclick', `startBuilding('${templateId}')`);
+            } else {
+              btnEl.innerHTML = '<i class="fas fa-lock"></i> Unlock with ₹25';
+              btnEl.setAttribute('onclick', `window.location.href="/pricing.html"`);
+            }
+            btnEl.style.background = 'linear-gradient(135deg, #ffd700 0%, #ffed4e 100%)';
+            btnEl.style.color = '#000';
+          }
+        }
+      });
+    }
+
+    // Helper function to beautifully organize the grids
+    window.groupTemplatesBeautifully = function() {
+        const grid = document.getElementById('templatesGrid');
+        if (!grid || grid.classList.contains('beautiful-grouped')) return;
+        grid.classList.add('beautiful-grouped');
+        
+        const cards = Array.from(grid.querySelectorAll('.template-card'));
+
+        // Randomly shuffle the cards so templates appear in a random order
+        for (let i = cards.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [cards[i], cards[j]] = [cards[j], cards[i]];
+        }
+        
+        const createSection = (id, title, icon, color) => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'category-section-wrapper';
+            wrapper.id = 'wrapper-' + id;
+            wrapper.style.marginBottom = '60px';
+            
+            const header = document.createElement('div');
+            header.style.display = 'flex';
+            header.style.alignItems = 'center';
+            header.style.gap = '15px';
+            header.style.marginBottom = '20px';
+            header.style.paddingBottom = '15px';
+            header.style.borderBottom = `2px solid ${color}33`;
+            
+            header.innerHTML = `
+                <div style="background: ${color}20; width: 50px; height: 50px; border-radius: 14px; display: flex; align-items: center; justify-content: center;">
+                    <i class="fas ${icon}" style="font-size: 22px; color: ${color};"></i>
+                </div>
+                <div>
+                    <h2 style="margin: 0; color: #fff; font-size: 1.8rem; font-family: 'Outfit', sans-serif; font-weight: 700;">${title}</h2>
+                </div>
+            `;
+            
+            const innerGrid = document.createElement('div');
+            innerGrid.className = 'netflix-carousel inner-category-grid';
+            innerGrid.id = id;
+            
+            wrapper.appendChild(header);
+            wrapper.appendChild(innerGrid);
+            
+            // Enable drag-to-scroll logic
+            let isDown = false;
+            let startX;
+            let scrollLeft;
+            innerGrid.addEventListener('mousedown', (e) => {
+                isDown = true;
+                innerGrid.classList.add('active');
+                startX = e.pageX - innerGrid.offsetLeft;
+                scrollLeft = innerGrid.scrollLeft;
+            });
+            innerGrid.addEventListener('mouseleave', () => { isDown = false; innerGrid.classList.remove('active'); });
+            innerGrid.addEventListener('mouseup', () => { isDown = false; innerGrid.classList.remove('active'); });
+            innerGrid.addEventListener('mousemove', (e) => {
+                if (!isDown) return;
+                e.preventDefault();
+                const x = e.pageX - innerGrid.offsetLeft;
+                const walk = (x - startX) * 2;
+                innerGrid.scrollLeft = scrollLeft - walk;
+            });
+
+            return { wrapper, innerGrid };
+        };
+
+        const premiumSection = createSection('grid-premium', 'Pro Templates', 'fa-crown', '#F2B66D');
+        const affordableSection = createSection('grid-affordable', 'Plus Templates', 'fa-bolt', '#6C63FF');
+        const freeSection = createSection('grid-free', 'Free Templates', 'fa-gift', '#4ade80');
+
+        cards.forEach(card => {
+            if (card.classList.contains('affordable')) {
+                affordableSection.innerGrid.appendChild(card);
+            } else if (card.classList.contains('premium')) {
+                premiumSection.innerGrid.appendChild(card);
+            } else {
+                freeSection.innerGrid.appendChild(card);
+            }
+        });
+
+        const parent = grid.parentNode;
+        parent.insertBefore(freeSection.wrapper, grid);
+        parent.insertBefore(affordableSection.wrapper, grid);
+        parent.insertBefore(premiumSection.wrapper, grid);
+        
+        grid.style.display = 'none';
+    };
+
     // Initialize page - always start at Step 1 (template selection)
     function initializePage() {
+      updateTemplateCardUI();
+      if (window.groupTemplatesBeautifully) {
+          window.groupTemplatesBeautifully();
+      }
+      
       // Always show template selection first
       document.getElementById('templateSelection').style.display = 'block';
       document.getElementById('formStepIndicator').style.display = 'none';
@@ -1618,6 +1982,14 @@
 
       // Category filtering
       document.querySelectorAll('.category-btn').forEach(btn => {
+        if (btn.id === 'shuffleBtn') {
+          btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            shuffleTemplates();
+          });
+          return;
+        }
+
         btn.addEventListener('click', function () {
           // Update active category
           document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
@@ -1628,15 +2000,26 @@
           const cards = document.querySelectorAll('.template-card');
 
           cards.forEach(card => {
-            if (category === 'all' || card.dataset.category === category) {
+            if (category === 'all' || card.dataset.category === category || card.dataset.type === category) {
               card.style.display = 'block';
             } else {
               card.style.display = 'none';
             }
           });
+          
+          // Hide empty sections
+          document.querySelectorAll('.category-section-wrapper').forEach(wrapper => {
+              const visibleCards = wrapper.querySelectorAll('.template-card[style*="display: block"]');
+              if (category === 'all' || visibleCards.length > 0) {
+                  wrapper.style.display = 'block';
+              } else {
+                  wrapper.style.display = 'none';
+              }
+          });
         });
       });
-
+      
+      
       // Load saved skip states
       ['summary', 'experience', 'education', 'skills', 'projects', 'additional'].forEach(sec => {
         if (localStorage.getItem('skip_section_' + sec) === 'true') {
@@ -1727,7 +2110,7 @@
           style: 'Black and white, minimal elements, clean typography'
         },
         'rishi': {
-          name: 'Rishi Tech Modern',
+          name: 'Hiero Modus',
           description: 'Modern tech layout with purple gradient sidebar',
           style: 'Two-column design, purple gradient, blue accents, Inter font'
         },
@@ -1737,24 +2120,14 @@
           style: 'Georgia serif fonts, centered header, elegant spacing, academic style'
         },
         'priya-analytics': {
-          name: 'Priya Analytics',
+          name: 'Hiero Analytics',
           description: 'Single-column layout with a grey top bar and bold section headings. Ideal for data-driven professionals.',
           style: 'Single-column, grey top bar, bold section headings with horizontal rules, matching the Priya Sharma data analyst resume style'
         },
         'hiero-executive': {
-          name: 'Hiero Executive (New)',
+          name: 'Hiero Executive',
           description: 'Premium corporate side-label layout inspired by Morgan Maxwell.',
           style: 'Left labels, clean headers, corporate type, and elegant delimiters.'
-        },
-        'hiero-studio': {
-          name: 'Hiero Studio (New)',
-          description: 'Contemporary tech-focused side-label design for a modern professional look.',
-          style: 'Side-by-side structure, bold titles, and balanced professional spacing.'
-        },
-        'hiero-onyx': {
-          name: 'Hiero Onyx (New)',
-          description: 'Bold high-contrast side-label design for maximum professional impact.',
-          style: 'Professional structure, high-contrast black accents, and premium spacing.'
         },
         'template4': {
           name: 'Hiero Academic',
@@ -1767,7 +2140,7 @@
           style: 'Modern, clean, and technical.'
         },
         'hiero-retail': {
-          name: 'Hiero Retail Timeline',
+          name: 'Hiero Retail',
           description: 'Clean formatting with clear timeline layout. Ideal for retail professionals.',
           style: 'Timeline structure, left profile, distinctive border.'
         }
@@ -1775,6 +2148,42 @@
 
       const template = templateDetails[templateId];
       if (!template) return;
+
+      const freeTemplates = ['hiero-cool', 'priya-analytics', 'hiero-tech'];
+      const premiumTemplates = ['hiero-royal', 'hiero-signature', 'hiero-prestige', 'hiero-elite', 'hiero-vision', 'hiero-vertex', 'hiero-premium', 'hiero-urban'];
+      const affordableTemplates = ['hiero-executive', 'hiero-nova', 'rishi', 'hiero-monethon', 'template4', 'hiero-timeline', 'hiero-studio', 'hiero-retail', 'hiero-essence', 'hiero-velocity', 'hiero-legion'];
+
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      const isPro = !!user.isPro;
+      const plan = user.proPlan || '';
+
+      let modalBtnStyle = "background: linear-gradient(135deg, #2ae023 0%, #1a8b17 100%); color: black; box-shadow: 0 4px 15px rgba(42,224,35,0.4);";
+      let hoverShadow = "rgba(42,224,35,0.6)";
+      let modalSubtitle = "Free Design • High Fidelity Preview";
+      let modalBtnText = "Use This Template";
+      let modalBtnAction = `startBuilding('${templateId}'); this.closest('.preview-modal-overlay').remove();`;
+      
+      if (premiumTemplates.includes(templateId)) {
+        modalBtnStyle = "background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%); color: black; box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);";
+        hoverShadow = "rgba(255, 215, 0, 0.6)";
+        modalSubtitle = "Premium Design (₹25) • High Fidelity Preview";
+        
+        const hasAccess = isPro && (plan === 'premium' || plan === '6months');
+        if (!hasAccess) {
+          modalBtnText = '<i class="fas fa-lock"></i> Unlock with ₹25';
+          modalBtnAction = `window.location.href="/pricing.html"`;
+        }
+      } else if (affordableTemplates.includes(templateId)) {
+        modalBtnStyle = "background: linear-gradient(135deg, #6C63FF 0%, #4b44d1 100%); color: white; box-shadow: 0 4px 15px rgba(108,99,255,0.4);";
+        hoverShadow = "rgba(108,99,255,0.6)";
+        modalSubtitle = "Affordable Design (₹9) • High Fidelity Preview";
+
+        const hasAccess = isPro && (plan === 'affordable' || plan === 'premium' || plan === '6months');
+        if (!hasAccess) {
+          modalBtnText = '<i class="fas fa-lock"></i> Unlock with ₹9';
+          modalBtnAction = `window.location.href="/pricing.html"`;
+        }
+      }
 
       // Create modal with loading state
       const modal = document.createElement('div');
@@ -1786,30 +2195,43 @@
       `;
 
       modal.innerHTML = `
-        <div style="background: white; border-radius: 16px; max-width: 900px; width: 100%; 
-                    max-height: 90vh; display: flex; flex-direction: column; position: relative; box-shadow: 0 25px 50px rgba(0,0,0,0.5);">
-          <div style="padding: 25px 30px; border-bottom: 1px solid #eee; flex-shrink: 0;">
+        <div style="background: #111111; border: 1px solid #333; border-radius: 16px; max-width: 950px; width: 100%; 
+                    max-height: 90vh; display: flex; flex-direction: column; position: relative; box-shadow: 0 30px 60px rgba(0,0,0,0.8);">
+          <div style="padding: 25px 30px; border-bottom: 1px solid #222; flex-shrink: 0; background: linear-gradient(to right, #111, #1a1a1a); display: flex; align-items: center; justify-content: space-between;">
+            <div>
+              <h2 style="margin: 0 0 5px 0; color: #fff; font-size: 24px; font-weight: 700; letter-spacing: -0.5px;">${template.name}</h2>
+              <p style="margin: 0; color: #888; font-size: 14px;">${modalSubtitle}</p>
+            </div>
+            
+            <div class="zoom-controls" style="display: flex; gap: 10px; align-items: center; background: #1a1a1a; padding: 10px 15px; border-radius: 50px; border: 1px solid #333; margin-right: 50px;">
+              <button onclick="window.updatePreviewZoom(-0.1)" style="background: none; border: none; color: #aaa; cursor: pointer; display: flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 600; transition: all 0.2s;" onmouseover="this.style.color='#2ae023'" onmouseout="this.style.color='#aaa'"><i class="fas fa-search-minus"></i></button>
+              <div id="zoom-level-text" style="color: #2ae023; font-size: 12px; font-weight: 700; min-width: 45px; text-align: center; border-left: 1px solid #333; border-right: 1px solid #333; padding: 0 10px;">100%</div>
+              <button onclick="window.updatePreviewZoom(0.1)" style="background: none; border: none; color: #aaa; cursor: pointer; display: flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 600; transition: all 0.2s;" onmouseover="this.style.color='#2ae023'" onmouseout="this.style.color='#aaa'"><i class="fas fa-search-plus"></i></button>
+              <button onclick="window.updatePreviewZoom(0, true)" style="background: #2ae023; border: none; color: #000; cursor: pointer; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; margin-left: 5px;">RESET</button>
+            </div>
+
             <button onclick="this.closest('.preview-modal-overlay').remove()" 
-                    style="position: absolute; top: 15px; right: 15px; background: none; 
-                           border: none; font-size: 28px; cursor: pointer; color: #999; line-height: 1; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 4px; transition: all 0.2s;"
-                    onmouseover="this.style.background='#f0f0f0'; this.style.color='#333';"
-                    onmouseout="this.style.background='none'; this.style.color='#999';">×</button>
-            <h2 style="margin: 0 0 8px 0; color: #2c3e50; font-size: 24px;">${template.name}</h2>
-            <p style="margin: 0; color: #7f8c8d; font-size: 14px;">${template.description}</p>
+                    style="position: absolute; top: 20px; right: 20px; background: #222; 
+                           border: none; font-size: 20px; cursor: pointer; color: #fff; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: all 0.2s;"
+                    onmouseover="this.style.background='#ff4d4d';"
+                    onmouseout="this.style.background='#222';">×</button>
           </div>
-          <div id="preview-content" style="flex: 1; overflow-y: auto; padding: 30px; display: flex; justify-content: center; align-items: flex-start; background: #f8f9fa; min-height: 400px;">
-            <div style="text-align: center; color: #666; padding: 60px 20px;">
-              <i class="fas fa-spinner fa-spin" style="font-size: 42px; margin-bottom: 15px; color: #2ae023;"></i>
-              <p style="font-size: 16px; margin: 0;">Loading preview...</p>
+          <div id="preview-content" style="flex: 1; overflow-y: auto; padding: 40px; display: flex; justify-content: center; align-items: flex-start; background: #0a0a0a; min-height: 500px; scrollbar-width: thin; scrollbar-color: #333 #0a0a0a;">
+            <div style="text-align: center; color: #888; padding: 80px 20px;">
+              <div class="spinner-container" style="margin-bottom: 20px;">
+                <i class="fas fa-circle-notch fa-spin" style="font-size: 48px; color: #2ae023;"></i>
+              </div>
+              <p style="font-size: 16px; font-weight: 500;">Crafting your professional preview...</p>
             </div>
           </div>
-          <div style="padding: 20px 30px; background: #f8f9fa; border-top: 1px solid #e0e0e0; flex-shrink: 0;">
-            <button onclick="startBuilding('${templateId}'); this.closest('.preview-modal-overlay').remove();" 
-                    style="background: #2ae023; color: white; border: none; padding: 14px 28px; 
-                           border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%; font-size: 16px; transition: all 0.3s; box-shadow: 0 2px 8px rgba(42,224,35,0.3);"
-                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(42,224,35,0.4)';"
-                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(42,224,35,0.3)';">
-              Use This Template
+          <div style="padding: 25px 30px; background: #161616; border-top: 1px solid #222; flex-shrink: 0; display: flex; align-items: center; justify-content: space-between;">
+            <div style="color: #666; font-size: 13px;">Selected: <span style="color: #2ae023;">${template.name}</span></div>
+            <button onclick="${modalBtnAction}" 
+                    style="${modalBtnStyle} border: none; padding: 14px 40px; 
+                           border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 16px; transition: all 0.3s;"
+                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px ' + hoverShadow;"
+                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px ' + hoverShadow.replace('0.6', '0.4');">
+              ${modalBtnText}
             </button>
           </div>
         </div>
@@ -3673,20 +4095,15 @@
         statusEl.textContent = 'PDF ready!';
         substatusEl.textContent = 'Preparing download...';
 
-        const fileName = `${userName.replace(/[^a-zA-Z0-9]/g, '_')}_${templateName}_resume.pdf`;
-        // Download the file with proper error handling
-        try {
-          // Manual download disabled in generation - choice modal will handle it
-          console.log('✅ Generation successful - showing choice modal');
-          // skip a.click()
-        } catch (downloadError) {
-
-          console.error('❌ Download error:', downloadError);
-          throw new Error('Failed to trigger download: ' + downloadError.message);
+        // Cache the blob URL so Live Preview works instantly (no second fetch needed)
+        if (_generatedPdfBlobUrl) {
+          URL.revokeObjectURL(_generatedPdfBlobUrl);
         }
+        _generatedPdfBlobUrl = URL.createObjectURL(blob);
+        console.log('✅ PDF blob cached for live preview:', _generatedPdfBlobUrl);
 
         progressBar.style.width = '100%';
-        statusEl.textContent = '✅ Analysis Complete!';
+        statusEl.textContent = '✅ Resume Ready!';
         statusEl.style.color = '#2ae023';
         substatusEl.textContent = 'Preparing your download options...';
 
@@ -3934,23 +4351,121 @@
       }
     }
 
+    function showUpgradeLoading(callback) {
+      const overlay = document.createElement('div');
+      overlay.id = 'generationOverlay';
+      overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;z-index:100000;background:linear-gradient(135deg,#000501 0%,#2cc42c 100%);display:flex;align-items:center;justify-content:center;color:white;font-family:Inter,system-ui,sans-serif;opacity:0;transition:opacity 0.3s ease;';
+
+      overlay.innerHTML = `
+        <div style="text-align:center;padding:40px;max-width:600px;">
+          <div class="logo-container" style="width:250px;height:250px;margin:0 auto 40px;position:relative;">
+            <div class="logo" style="width:100%;height:100%;background:rgba(0,0,0,0.7);border-radius:20px;padding:30px;backdrop-filter:blur(10px);box-shadow:0 20px 60px rgba(0,0,0,0.5);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;">
+              <img src="logohiero.png" alt="Hiero Logo" class="logo-img" style="width:100%;height:100%;object-fit:contain;filter:drop-shadow(0px 4px 20px rgba(42,224,35,0.5));position:relative;z-index:2;">
+            </div>
+          </div>
+          <h1 style="font-size:36px;margin-bottom:20px;font-weight:700;">Preparing Premium Download</h1>
+          <div id="overlayStatus" style="font-size:20px;color:#2ae023;margin-bottom:12px;font-weight:500;">Securing checkout portal...</div>
+          <div id="overlaySubstatus" style="font-size:16px;opacity:0.8;margin-bottom:35px;">Redirecting you to payment options</div>
+          <div style="width:100%;height:10px;background:rgba(255,255,255,0.15);border-radius:12px;overflow:hidden;box-shadow:inset 0 2px 4px rgba(0,0,0,0.3);">
+            <div id="overlayProgressBar" style="height:100%;background:linear-gradient(90deg,#2ae023,#1a8b17);width:0%;transition:width 0.4s ease;box-shadow:0 0 20px rgba(42, 224, 35, 0.6);"></div>
+          </div>
+          <div style="margin-top:20px;font-size:14px;opacity:0.6;">
+            <i class="fas fa-spinner fa-spin"></i> Processing...
+          </div>
+        </div>
+        <style>
+          .logo::before {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 0%;
+            background: linear-gradient(180deg, transparent 0%, rgba(42, 224, 35, 0.2) 100%);
+            animation: fillLogo 3s ease-in-out infinite;
+            z-index: 1;
+            border-radius: 20px;
+          }
+          @keyframes fillLogo {
+            0% { height: 0%; }
+            50% { height: 100%; }
+            100% { height: 0%; }
+          }
+        </style>
+      `;
+
+      document.body.appendChild(overlay);
+      overlay.offsetHeight;
+      overlay.style.opacity = '1';
+
+      const progressBar = overlay.querySelector('#overlayProgressBar');
+      setTimeout(() => {
+        if (progressBar) progressBar.style.width = '100%';
+      }, 100);
+
+      setTimeout(() => {
+        overlay.style.opacity = '0';
+        setTimeout(() => {
+          overlay.remove();
+          callback();
+        }, 300);
+      }, 1800);
+    }
+
     function editResume() {
       document.getElementById('resultsSection').style.display = 'none';
       document.querySelector('.main-layout').style.display = 'grid';
       document.querySelector('.bottom-actions').style.display = 'flex';
     }
 
-    // Download and Preview with backend integration
     async function downloadDocx() {
-      const data = collectFormData();
-      // Ensure template is set
-      data.template = selectedTemplate || 'classic';
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      const isPro = !!user.isPro;
+      const plan = user.proPlan || '';
+      const currentTemplateId = selectedTemplate || localStorage.getItem('selectedTemplate') || 'classic';
 
+      const premiumTemplates = ['hiero-royal', 'hiero-signature', 'hiero-prestige', 'hiero-elite', 'hiero-vision', 'hiero-vertex', 'hiero-premium', 'hiero-urban'];
+      const affordableTemplates = ['hiero-executive', 'hiero-nova', 'rishi', 'hiero-monethon', 'template4', 'hiero-timeline', 'hiero-studio', 'hiero-retail', 'hiero-essence', 'hiero-velocity', 'hiero-legion'];
+
+      let needsUpgrade = false;
+      if (premiumTemplates.includes(currentTemplateId)) {
+        if (!isPro || (plan !== 'premium' && plan !== '6months')) {
+          needsUpgrade = true;
+        }
+      } else if (affordableTemplates.includes(currentTemplateId)) {
+        if (!isPro || (plan !== 'affordable' && plan !== 'premium' && plan !== '6months')) {
+          needsUpgrade = true;
+        }
+      }
+
+      if (needsUpgrade) {
+        showUpgradeLoading(() => {
+          window.location.href = '/pricing.html';
+        });
+        return;
+      }
       try {
         const btn = document.getElementById('downloadDocxBtn');
-        const originalText = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
-        btn.disabled = true;
+        const originalText = btn ? btn.innerHTML : 'Download Word';
+        if (btn) {
+          btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+          btn.disabled = true;
+        }
+
+        let data = {};
+        try {
+          data = JSON.parse(localStorage.getItem('resumeData') || '{}');
+        } catch (e) {
+          console.error('Error reading resumeData from localStorage:', e);
+        }
+
+        // Fallback to collectFormData if localStorage has no personalInfo/data
+        if (!data || !data.personalInfo || !data.personalInfo.fullName) {
+          data = collectFormData();
+        }
+
+        // Ensure template is set
+        data.template = selectedTemplate || data.template || localStorage.getItem('selectedTemplate') || 'classic';
 
         const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
         const response = await fetch(`${BACKEND_URL}/download-docx`, {
@@ -3968,14 +4483,19 @@
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `${data.personalInfo.fullName || 'resume'}_${data.template}.doc`;
+        a.download = `${data.personalInfo?.fullName || 'resume'}_${data.template}.doc`;
         document.body.appendChild(a);
         a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
+        
+        setTimeout(() => {
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+        }, 100);
 
-        btn.innerHTML = originalText;
-        btn.disabled = false;
+        if (btn) {
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+        }
       } catch (error) {
         console.error('DOCX download error:', error);
         alert('Failed to download Word document. Please try again.');
@@ -3988,6 +4508,31 @@
     }
 
     async function downloadResume() {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      const isPro = !!user.isPro;
+      const plan = user.proPlan || '';
+      const currentTemplateId = selectedTemplate || localStorage.getItem('selectedTemplate') || 'classic';
+
+      const premiumTemplates = ['hiero-royal', 'hiero-signature', 'hiero-prestige', 'hiero-elite', 'hiero-vision', 'hiero-vertex', 'hiero-premium', 'hiero-urban'];
+      const affordableTemplates = ['hiero-executive', 'hiero-nova', 'rishi', 'hiero-monethon', 'template4', 'hiero-timeline', 'hiero-studio', 'hiero-retail', 'hiero-essence', 'hiero-velocity', 'hiero-legion'];
+
+      let needsUpgrade = false;
+      if (premiumTemplates.includes(currentTemplateId)) {
+        if (!isPro || (plan !== 'premium' && plan !== '6months')) {
+          needsUpgrade = true;
+        }
+      } else if (affordableTemplates.includes(currentTemplateId)) {
+        if (!isPro || (plan !== 'affordable' && plan !== 'premium' && plan !== '6months')) {
+          needsUpgrade = true;
+        }
+      }
+
+      if (needsUpgrade) {
+        showUpgradeLoading(() => {
+          window.location.href = '/pricing.html';
+        });
+        return;
+      }
       const btn = event.target;
       const originalText = btn.innerHTML;
 
@@ -4061,82 +4606,74 @@
     }
 
     async function previewResume() {
-      // 1. Open blank window immediately to satisfy mobile popup blockers
-      // This must happen synchronously in the click event
-      const previewWindow = window.open('', '_blank');
-
-      if (!previewWindow) {
-        alert('Popup blocked! Please allow popups to see your resume preview.');
+      // If we already have a cached blob URL from generation, use it instantly (no new fetch)
+      if (_generatedPdfBlobUrl) {
+        showPdfPreviewModal(_generatedPdfBlobUrl);
         return;
       }
 
-      previewWindow.document.write(`
-        <html>
-          <head>
-            <title>Hiero - Generating Preview</title>
-            <style>
-              body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #000; color: #fff; margin:0; }
-              .spinner { border: 4px solid rgba(42, 224, 35, 0.1); border-left-color: #2ae023; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 20px; }
-              @keyframes spin { to { transform: rotate(360deg); } }
-            </style>
-          </head>
-          <body>
-            <div class="spinner"></div>
-            <h3>Generating your premium preview...</h3>
-            <p style="color: #888; font-size: 14px;">This will take just a moment.</p>
-          </body>
-        </html>
-      `);
-
-      const btn = event.target;
-      const originalText = btn.innerHTML;
-      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading Preview...';
-      btn.disabled = true;
+      // Otherwise fetch a fresh preview (fallback)
+      const btn = document.getElementById('previewResumeBtn');
+      const originalText = btn ? btn.innerHTML : '';
+      if (btn) { btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...'; btn.disabled = true; }
 
       try {
         const data = collectFormData();
         data.template = selectedTemplate || localStorage.getItem('selectedTemplate') || 'classic';
 
-        console.log('Previewing resume with template:', data.template);
+        console.log('Fetching fresh preview for template:', data.template);
 
         const response = await fetch(`${BACKEND_URL}/preview-resume`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data)
         });
 
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({ error: 'Preview failed' }));
-          previewWindow.close();
           throw new Error(errorData.error || 'Preview failed');
         }
 
         const blob = await response.blob();
+        if (blob.size < 100) throw new Error('Server returned an invalid PDF.');
 
-        // Final fallback for empty response
-        if (blob.size < 100) {
-          previewWindow.close();
-          throw new Error('Server returned an invalid PDF.');
-        }
+        if (_generatedPdfBlobUrl) URL.revokeObjectURL(_generatedPdfBlobUrl);
+        _generatedPdfBlobUrl = URL.createObjectURL(blob);
 
-        const url = window.URL.createObjectURL(blob);
-
-        // 2. Redirect the already opened window to the blob URL
-        previewWindow.location.href = url;
-
-        // Clean up memory after a delay
-        setTimeout(() => window.URL.revokeObjectURL(url), 10000);
+        showPdfPreviewModal(_generatedPdfBlobUrl);
 
       } catch (error) {
-        if (previewWindow) previewWindow.close();
         console.error('Preview error:', error);
         alert(`Failed to preview resume: ${error.message}. Please try again.`);
       } finally {
-        btn.innerHTML = originalText;
-        btn.disabled = false;
+        if (btn) { btn.innerHTML = originalText; btn.disabled = false; }
       }
+    }
+
+    function showPdfPreviewModal(blobUrl) {
+      const modal = document.getElementById('pdfPreviewModal');
+      const iframe = document.getElementById('pdfPreviewIframe');
+      const newTabLink = document.getElementById('pdfOpenNewTab');
+
+      if (!modal || !iframe) return;
+
+      // Set iframe src to the blob URL
+      iframe.src = blobUrl;
+
+      // Set "open in new tab" link
+      if (newTabLink) newTabLink.href = blobUrl;
+
+      // Show modal as flex
+      modal.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closePdfPreview() {
+      const modal = document.getElementById('pdfPreviewModal');
+      const iframe = document.getElementById('pdfPreviewIframe');
+      if (modal) modal.style.display = 'none';
+      if (iframe) iframe.src = ''; // release iframe memory
+      document.body.style.overflow = '';
     }
   </script>
 </body>

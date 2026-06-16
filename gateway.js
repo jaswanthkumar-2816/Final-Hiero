@@ -9,12 +9,10 @@ const axios = require('axios');
 const multer = require('multer');
 const { createProxyMiddleware } = require('http-proxy-middleware');
 
-dotenv.config();
-
-// Backup: Try to load from login-system/.env if root .env didn't provide critical variables
-if (!process.env.GOOGLE_CLIENT_ID) {
-    dotenv.config({ path: path.join(__dirname, 'login-system', '.env') });
-}
+// ✅ FIXED: Always load login-system/.env FIRST (it has JWT_SECRET, EMAIL_USER, etc.)
+// Then load root .env which has RAZORPAY and MONGODB_URI overrides
+dotenv.config({ path: path.join(__dirname, 'login-system', '.env') });
+dotenv.config(); // root .env — existing vars are NOT overwritten, so login-system wins
 
 const app = express();
 const PORT = process.env.PORT || 2816;
@@ -198,8 +196,14 @@ app.get('/robots.txt', (req, res) => res.sendFile(path.join(landingDirPath, 'rob
 
 app.get(['/learn', '/learn.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'learn.html')));
 app.get(['/solve', '/solve.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'solve.html')));
-app.get(['/resume-builder', '/resume-builder.html', '/dashboard/resume-builder'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'resume-builder.html')));
-app.get(['/resume-form', '/resume-form.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'resume-form.html')));
+app.get(['/resume-builder', '/resume-builder.html', '/dashboard/resume-builder'], (req, res) => {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.sendFile(path.join(resumeBuilderPath, 'resume-builder.html'));
+});
+app.get(['/resume-form', '/resume-form.html'], (req, res) => {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.sendFile(path.join(resumeBuilderPath, 'resume-form.html'));
+});
 app.get(['/pricing', '/pricing.html'], (req, res) => res.sendFile(path.join(__dirname, 'pricing.html')));
 app.get(['/template-verifier', '/template-verifier.html'], (req, res) => res.sendFile(path.join(__dirname, 'template-verifier.html')));
 app.get(['/feedback', '/feedback.html'], (req, res) => res.sendFile(path.join(__dirname, 'feedback.html')));

@@ -1,5 +1,15 @@
 [
   {
+    "id": 99,
+    "name": "Hiero Tester",
+    "email": "hiero@test.com",
+    "password": "$2a$10$mmKkIpi/E7T3E.xk6.CAQu2s0KWRa3ZVs2ASTgarhLQtFRmEDYYmC",
+    "emailVerified": true,
+    "signupMethod": "email",
+    "isPro": true,
+    "proPlan": "premium"
+  },
+  {
     "id": 1,
     "name": "Test User",
     "email": "test@example.com",
@@ -90,5 +100,13 @@
     "emailVerified": true,
     "signupMethod": "google",
     "picture": "https://lh3.googleusercontent.com/a/ACg8ocIlRdy2BafMbeWXDRVWCI2bcPEVhg5PSKWRi5hV_GwDpEJfRQ=s96-c"
+  },
+  {
+    "id": 100,
+    "name": "hiero23",
+    "email": "hiero@test1.com",
+    "password": "$2a$10$letoDyzeuPK8asefyl8LN.KHbn5dRFLHMRsmDcxnQnGDW1JEjFRJq",
+    "emailVerified": false,
+    "signupMethod": "email"
   }
 ]

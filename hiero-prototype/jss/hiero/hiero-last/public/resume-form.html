@@ -846,6 +846,119 @@
         font-size: 13px;
       }
     }
+
+    /* =========================================
+       NEW NETFLIX-STYLE GLASSMORPHISM DESIGN
+       ========================================= */
+    .netflix-carousel {
+        display: flex !important;
+        overflow-x: auto;
+        gap: 25px;
+        padding-bottom: 30px;
+        padding-top: 10px;
+        padding-left: 10px;
+        padding-right: 10px;
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+        cursor: grab;
+        align-items: stretch !important;
+    }
+    .netflix-carousel:active {
+        cursor: grabbing;
+    }
+    
+    /* Hide scrollbar for a sleek look */
+    .netflix-carousel::-webkit-scrollbar {
+        height: 6px;
+    }
+    .netflix-carousel::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+    }
+    .netflix-carousel::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+    }
+    .netflix-carousel::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.4);
+    }
+
+    .netflix-carousel .template-card {
+        /* Default to 3 per row on desktop (gap is 25px, 2 gaps = 50px) */
+        flex: 0 0 calc((100% - 50px) / 3);
+        max-width: calc((100% - 50px) / 3);
+        min-width: calc((100% - 50px) / 3);
+        display: flex;
+        flex-direction: column;
+        scroll-snap-align: start;
+        
+        /* Glassmorphism overrides */
+        background: rgba(25, 25, 25, 0.6) !important;
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 2px solid rgba(255, 255, 255, 0.08); /* Removed !important to allow inline colored borders */
+        border-radius: 24px;
+        transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease, border-color 0.4s ease;
+    }
+    
+    .netflix-carousel .template-info {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+    }
+    
+    .netflix-carousel .start-building-btn {
+        margin-top: auto; /* Push button to the very bottom */
+    }
+    .netflix-carousel .template-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        z-index: 10;
+        border-color: rgba(255, 255, 255, 0.3) !important;
+    }
+    
+    .netflix-carousel .template-card.premium:hover {
+        box-shadow: 0 20px 40px rgba(242, 182, 109, 0.25);
+    }
+    
+    .netflix-carousel .template-card.affordable:hover {
+        box-shadow: 0 20px 40px rgba(108, 99, 255, 0.25);
+    }
+    
+    .netflix-carousel .template-card:not(.premium):not(.affordable):hover {
+        box-shadow: 0 20px 40px rgba(74, 222, 128, 0.25);
+    }
+
+    .netflix-carousel .template-preview {
+        height: 280px; /* Restore to original height to prevent iframe squishing */
+        border-radius: 16px;
+        background: rgba(0,0,0,0.3) !important;
+        border: 1px solid rgba(255,255,255,0.05);
+    }
+    
+    /* Responsive sizing for exactly 3, 2, or 1 cards per row */
+    @media (max-width: 1024px) {
+        .netflix-carousel .template-card {
+            flex: 0 0 calc((100% - 25px) / 2);
+            max-width: calc((100% - 25px) / 2);
+            min-width: calc((100% - 25px) / 2);
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .netflix-carousel .template-card {
+            /* 85% width on mobile so the next card peeks into view, encouraging swiping */
+            flex: 0 0 85%;
+            max-width: 85%;
+            min-width: 85%;
+            scroll-snap-align: center;
+        }
+        
+        .netflix-carousel {
+            gap: 15px;
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+    }
   </style>
 </head>
 
@@ -1554,15 +1667,16 @@
         if (freeTemplates.includes(templateId)) {
           card.classList.remove('premium');
           card.classList.remove('affordable');
-          card.style.borderColor = 'rgba(42, 224, 35, 0.2)';
+          card.style.borderColor = 'rgba(42, 224, 35, 0.5)';
+          card.style.boxShadow = '0 0 15px rgba(42, 224, 35, 0.1)';
           if (badgeEl) {
-            badgeEl.innerText = 'FREE';
+            badgeEl.innerHTML = '<del style="opacity:0.7;font-size:0.85em;margin-right:4px;">₹19</del> ₹0';
             badgeEl.style.background = 'linear-gradient(45deg, #2ae023, #1a8b17)';
             badgeEl.style.color = '#000';
           } else {
             const newBadge = document.createElement('div');
             newBadge.className = 'premium-badge';
-            newBadge.innerText = 'FREE';
+            newBadge.innerHTML = '<del style="opacity:0.7;font-size:0.85em;margin-right:4px;">₹19</del> ₹0';
             newBadge.style.background = 'linear-gradient(45deg, #2ae023, #1a8b17)';
             newBadge.style.color = '#000';
             card.insertBefore(newBadge, card.firstChild);
@@ -1576,18 +1690,19 @@
         } else if (affordableTemplates.includes(templateId)) {
           card.classList.remove('premium');
           card.classList.add('affordable');
-          card.style.borderColor = '#6C63FF';
+          card.style.borderColor = 'rgba(108, 99, 255, 0.6)';
+          card.style.boxShadow = '0 0 15px rgba(108, 99, 255, 0.15)';
           card.style.background = 'rgba(108, 99, 255, 0.03)';
           
           if (badgeEl) {
-            badgeEl.innerText = 'AFFORDABLE (₹9)';
+            badgeEl.innerHTML = 'PLUS <del style="opacity:0.7;font-size:0.85em;margin-left:4px;margin-right:4px;">₹49</del> ₹9';
             badgeEl.style.background = 'linear-gradient(45deg, #6C63FF, #4b44d1)';
             badgeEl.style.color = '#fff';
             badgeEl.style.animation = 'none';
           } else {
             const newBadge = document.createElement('div');
             newBadge.className = 'premium-badge';
-            newBadge.innerText = 'AFFORDABLE (₹9)';
+            newBadge.innerHTML = 'PLUS <del style="opacity:0.7;font-size:0.85em;margin-left:4px;margin-right:4px;">₹49</del> ₹9';
             newBadge.style.background = 'linear-gradient(45deg, #6C63FF, #4b44d1)';
             newBadge.style.color = '#fff';
             card.insertBefore(newBadge, card.firstChild);
@@ -1608,17 +1723,18 @@
         } else if (premiumTemplates.includes(templateId)) {
           card.classList.remove('affordable');
           card.classList.add('premium');
-          card.style.borderColor = '#ffd700';
+          card.style.borderColor = 'rgba(255, 215, 0, 0.6)';
+          card.style.boxShadow = '0 0 15px rgba(255, 215, 0, 0.1)';
           card.style.background = 'rgba(255, 215, 0, 0.03)';
 
           if (badgeEl) {
-            badgeEl.innerText = 'PREMIUM (₹25)';
+            badgeEl.innerHTML = 'PRO <del style="opacity:0.7;font-size:0.85em;margin-left:4px;margin-right:4px;">₹75</del> ₹25';
             badgeEl.style.background = 'linear-gradient(45deg, #ffd700, #ffed4e)';
             badgeEl.style.color = '#000';
           } else {
             const newBadge = document.createElement('div');
             newBadge.className = 'premium-badge';
-            newBadge.innerText = 'PREMIUM (₹25)';
+            newBadge.innerHTML = 'PRO <del style="opacity:0.7;font-size:0.85em;margin-left:4px;margin-right:4px;">₹75</del> ₹25';
             newBadge.style.background = 'linear-gradient(45deg, #ffd700, #ffed4e)';
             newBadge.style.color = '#000';
             card.insertBefore(newBadge, card.firstChild);
@@ -1633,16 +1749,109 @@
               btnEl.innerHTML = '<i class="fas fa-lock"></i> Unlock with ₹25';
               btnEl.setAttribute('onclick', `window.location.href="/pricing.html"`);
             }
-            btnEl.style.background = 'linear-gradient(135deg, #F2B66D 0%, #d4954a 100%)';
+            btnEl.style.background = 'linear-gradient(135deg, #ffd700 0%, #ffed4e 100%)';
             btnEl.style.color = '#000';
           }
         }
       });
     }
 
+    // Helper function to beautifully organize the grids
+    window.groupTemplatesBeautifully = function() {
+        const grid = document.getElementById('templatesGrid');
+        if (!grid || grid.classList.contains('beautiful-grouped')) return;
+        grid.classList.add('beautiful-grouped');
+        
+        const cards = Array.from(grid.querySelectorAll('.template-card'));
+
+        // Randomly shuffle the cards so templates appear in a random order
+        for (let i = cards.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [cards[i], cards[j]] = [cards[j], cards[i]];
+        }
+        
+        const createSection = (id, title, icon, color) => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'category-section-wrapper';
+            wrapper.id = 'wrapper-' + id;
+            wrapper.style.marginBottom = '60px';
+            
+            const header = document.createElement('div');
+            header.style.display = 'flex';
+            header.style.alignItems = 'center';
+            header.style.gap = '15px';
+            header.style.marginBottom = '20px';
+            header.style.paddingBottom = '15px';
+            header.style.borderBottom = `2px solid ${color}33`;
+            
+            header.innerHTML = `
+                <div style="background: ${color}20; width: 50px; height: 50px; border-radius: 14px; display: flex; align-items: center; justify-content: center;">
+                    <i class="fas ${icon}" style="font-size: 22px; color: ${color};"></i>
+                </div>
+                <div>
+                    <h2 style="margin: 0; color: #fff; font-size: 1.8rem; font-family: 'Outfit', sans-serif; font-weight: 700;">${title}</h2>
+                </div>
+            `;
+            
+            const innerGrid = document.createElement('div');
+            innerGrid.className = 'netflix-carousel inner-category-grid';
+            innerGrid.id = id;
+            
+            wrapper.appendChild(header);
+            wrapper.appendChild(innerGrid);
+            
+            // Enable drag-to-scroll logic
+            let isDown = false;
+            let startX;
+            let scrollLeft;
+            innerGrid.addEventListener('mousedown', (e) => {
+                isDown = true;
+                innerGrid.classList.add('active');
+                startX = e.pageX - innerGrid.offsetLeft;
+                scrollLeft = innerGrid.scrollLeft;
+            });
+            innerGrid.addEventListener('mouseleave', () => { isDown = false; innerGrid.classList.remove('active'); });
+            innerGrid.addEventListener('mouseup', () => { isDown = false; innerGrid.classList.remove('active'); });
+            innerGrid.addEventListener('mousemove', (e) => {
+                if (!isDown) return;
+                e.preventDefault();
+                const x = e.pageX - innerGrid.offsetLeft;
+                const walk = (x - startX) * 2;
+                innerGrid.scrollLeft = scrollLeft - walk;
+            });
+
+            return { wrapper, innerGrid };
+        };
+
+        const premiumSection = createSection('grid-premium', 'Pro Templates', 'fa-crown', '#F2B66D');
+        const affordableSection = createSection('grid-affordable', 'Plus Templates', 'fa-bolt', '#6C63FF');
+        const freeSection = createSection('grid-free', 'Free Templates', 'fa-gift', '#4ade80');
+
+        cards.forEach(card => {
+            if (card.classList.contains('affordable')) {
+                affordableSection.innerGrid.appendChild(card);
+            } else if (card.classList.contains('premium')) {
+                premiumSection.innerGrid.appendChild(card);
+            } else {
+                freeSection.innerGrid.appendChild(card);
+            }
+        });
+
+        const parent = grid.parentNode;
+        parent.insertBefore(freeSection.wrapper, grid);
+        parent.insertBefore(affordableSection.wrapper, grid);
+        parent.insertBefore(premiumSection.wrapper, grid);
+        
+        grid.style.display = 'none';
+    };
+
     // Initialize page - always start at Step 1 (template selection)
     function initializePage() {
       updateTemplateCardUI();
+      if (window.groupTemplatesBeautifully) {
+          window.groupTemplatesBeautifully();
+      }
+      
       // Always show template selection first
       document.getElementById('templateSelection').style.display = 'block';
       document.getElementById('formStepIndicator').style.display = 'none';
@@ -1773,6 +1982,14 @@
 
       // Category filtering
       document.querySelectorAll('.category-btn').forEach(btn => {
+        if (btn.id === 'shuffleBtn') {
+          btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            shuffleTemplates();
+          });
+          return;
+        }
+
         btn.addEventListener('click', function () {
           // Update active category
           document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
@@ -1783,15 +2000,26 @@
           const cards = document.querySelectorAll('.template-card');
 
           cards.forEach(card => {
-            if (category === 'all' || card.dataset.category === category) {
+            if (category === 'all' || card.dataset.category === category || card.dataset.type === category) {
               card.style.display = 'block';
             } else {
               card.style.display = 'none';
             }
           });
+          
+          // Hide empty sections
+          document.querySelectorAll('.category-section-wrapper').forEach(wrapper => {
+              const visibleCards = wrapper.querySelectorAll('.template-card[style*="display: block"]');
+              if (category === 'all' || visibleCards.length > 0) {
+                  wrapper.style.display = 'block';
+              } else {
+                  wrapper.style.display = 'none';
+              }
+          });
         });
       });
-
+      
+      
       // Load saved skip states
       ['summary', 'experience', 'education', 'skills', 'projects', 'additional'].forEach(sec => {
         if (localStorage.getItem('skip_section_' + sec) === 'true') {
@@ -1936,8 +2164,8 @@
       let modalBtnAction = `startBuilding('${templateId}'); this.closest('.preview-modal-overlay').remove();`;
       
       if (premiumTemplates.includes(templateId)) {
-        modalBtnStyle = "background: linear-gradient(135deg, #F2B66D 0%, #d4954a 100%); color: black; box-shadow: 0 4px 15px rgba(212,149,74,0.4);";
-        hoverShadow = "rgba(212,149,74,0.6)";
+        modalBtnStyle = "background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%); color: black; box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);";
+        hoverShadow = "rgba(255, 215, 0, 0.6)";
         modalSubtitle = "Premium Design (₹25) • High Fidelity Preview";
         
         const hasAccess = isPro && (plan === 'premium' || plan === '6months');
