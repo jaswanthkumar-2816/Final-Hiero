@@ -7031,24 +7031,6 @@
       }
     });
   </script>
-  <button onclick="adminTestBypass()" style="position:fixed; bottom:20px; right:20px; background:rgba(255,0,0,0.2); border:1px solid red; color:white; padding:8px 15px; border-radius:20px; font-size:12px; cursor:pointer; z-index:99999; backdrop-filter:blur(5px);">
-    <i class="fas fa-bug" style="margin-right:5px;"></i> Test Mode
-  </button>
-  <script>
-    function adminTestBypass() {
-        const pwd = prompt("Admin testing bypass:");
-        if (pwd === "hiero") {
-            const user = JSON.parse(localStorage.getItem('user') || '{}');
-            user.isPro = true;
-            user.proPlan = 'premium';
-            const future = new Date();
-            future.setDate(future.getDate() + 365);
-            user.proUntil = future.toISOString();
-            localStorage.setItem('user', JSON.stringify(user));
-            alert("Bypass activated! All templates unlocked for testing.");
-            window.location.reload();
-        }
-    }
-  </script>
+  
 </body>
 </html>
