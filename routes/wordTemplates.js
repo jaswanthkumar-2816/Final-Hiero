@@ -175,6 +175,21 @@ function generateTopDownWordHTML(data, config) {
                 <div class='section-title'>ACHIEVEMENTS</div>
                 <div class='content'><ul>${d.achievements.split(';').map(a => `<li>${a.trim()}</li>`).join('')}</ul></div>
             ` : ''}
+            
+            ${d.softSkills ? `
+                <div class='section-title'>SOFT SKILLS</div>
+                <div class='content'>${d.softSkills}</div>
+            ` : ''}
+
+            ${d.languages ? `
+                <div class='section-title'>LANGUAGES</div>
+                <div class='content'>${d.languages}</div>
+            ` : ''}
+
+            ${d.hobbies ? `
+                <div class='section-title'>HOBBIES & INTERESTS</div>
+                <div class='content'>${d.hobbies}</div>
+            ` : ''}
         </div>
     </body>
     </html>`;
@@ -226,6 +241,20 @@ function generateSidebarWordHTML(data, config) {
             <h3 style="color: ${c.sidebarAccent || '#ffffff'}; font-size: 11pt; font-weight: bold; border-bottom: 1.5pt solid ${c.sidebarAccent || '#ffffff'}; padding-bottom: 2pt; margin-top: 10pt; margin-bottom: 6pt; text-transform: uppercase;">CERTIFICATIONS</h3>
             <div style="font-size: 9pt; line-height: 1.4; margin-bottom: 12pt;">
                 ${d.certifications.split(',').slice(0, 3).map(s => `<div>• ${s.trim()}</div>`).join('')}
+            </div>
+            ` : ''}
+
+            ${d.softSkills ? `
+            <h3 style="color: ${c.sidebarAccent || '#ffffff'}; font-size: 11pt; font-weight: bold; border-bottom: 1.5pt solid ${c.sidebarAccent || '#ffffff'}; padding-bottom: 2pt; margin-top: 10pt; margin-bottom: 6pt; text-transform: uppercase;">SOFT SKILLS</h3>
+            <div style="font-size: 9pt; line-height: 1.4; margin-bottom: 12pt;">
+                ${d.softSkills.split(',').map(s => `<div>• ${s.trim()}</div>`).join('')}
+            </div>
+            ` : ''}
+
+            ${d.hobbies ? `
+            <h3 style="color: ${c.sidebarAccent || '#ffffff'}; font-size: 11pt; font-weight: bold; border-bottom: 1.5pt solid ${c.sidebarAccent || '#ffffff'}; padding-bottom: 2pt; margin-top: 10pt; margin-bottom: 6pt; text-transform: uppercase;">HOBBIES</h3>
+            <div style="font-size: 9pt; line-height: 1.4; margin-bottom: 12pt;">
+                ${d.hobbies.split(',').map(s => `<div>• ${s.trim()}</div>`).join('')}
             </div>
             ` : ''}
         </div>
@@ -3313,7 +3342,11 @@ function generateHieroPremiumWordHTML(data) {
     const roleTitle = p.roleTitle || '';
     const contactItems = [p.phone, p.email, p.address, p.linkedin, p.github, p.website].filter(Boolean);
     const skillsArr = d.technicalSkills ? d.technicalSkills.split(',').map(s => s.trim()).filter(Boolean) : [];
+    const softArr = d.softSkills ? d.softSkills.split(',').map(s => s.trim()).filter(Boolean) : [];
+    const achieveArr = d.achievements ? d.achievements.split(';').map(s => s.trim()).filter(Boolean) : [];
     const certArr = d.certifications ? d.certifications.split(',').map(s => s.trim()).filter(Boolean) : [];
+    const langArr = d.languages ? d.languages.split(',').map(s => s.trim()).filter(Boolean) : [];
+    const hobbyArr = d.hobbies ? d.hobbies.split(',').map(s => s.trim()).filter(Boolean) : [];
 
     function section(title, content) {
         return `<div style="margin-bottom:14pt;">
@@ -3360,6 +3393,8 @@ function generateHieroPremiumWordHTML(data) {
       ${proj.description ? proj.description.split('\n').filter(Boolean).map(l => bullet(l)).join('') : ''}
     </div>`).join('')) : ''}
   ${skillsArr.length > 0 ? section('Technical Skills', `<div style="line-height:1.8;">${skillsArr.map(s => `<span style="display:inline-block;font-size:8pt;background:${WHITE};color:${NAVY};border:1pt solid ${NAVY};padding:2pt 8pt;margin:2pt 3pt 2pt 0;border-radius:3pt;">${s}</span>`).join('')}</div>`) : ''}
+  ${softArr.length > 0 ? section('Soft Skills', `<div style="font-size:8.5pt;color:${TEXT};">${softArr.join(' • ')}</div>`) : ''}
+  ${achieveArr.length > 0 ? section('Achievements', achieveArr.map(a => `<div style="font-size:8.5pt;color:${TEXT};margin-bottom:3pt;">• ${a}</div>`).join('')) : ''}
   ${d.education.length > 0 ? section('Education', d.education.map(edu => `
     <div style="margin-bottom:6pt;">
       <table style="width:100%;"><tr>
@@ -3369,6 +3404,8 @@ function generateHieroPremiumWordHTML(data) {
       <div style="font-size:9pt;color:${STEEL};font-style:italic;">${edu.school||''}</div>
     </div>`).join('')) : ''}
   ${certArr.length > 0 ? section('Certifications', certArr.map(c => `<div style="font-size:8.5pt;color:${TEXT};margin-bottom:3pt;">• ${c}</div>`).join('')) : ''}
+  ${langArr.length > 0 ? section('Languages', `<div style="font-size:8.5pt;color:${TEXT};">${langArr.join(', ')}</div>`) : ''}
+  ${hobbyArr.length > 0 ? section('Hobbies & Interests', `<div style="font-size:8.5pt;color:${TEXT};">${hobbyArr.join(', ')}</div>`) : ''}
 </div></body></html>`;
 }
 

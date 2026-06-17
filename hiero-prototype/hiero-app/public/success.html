@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Successful - Hiero</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        body {
+            background-color: #000;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(108, 99, 255, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 85% 30%, rgba(42, 224, 35, 0.08) 0%, transparent 50%);
+        }
+
+        .success-card {
+            background: rgba(20, 20, 20, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 50px 40px;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            animation: slideUp 0.6s ease-out forwards;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        @keyframes slideUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .icon-container {
+            width: 100px;
+            height: 100px;
+            background: rgba(42, 224, 35, 0.1);
+            border: 2px solid #2ae023;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            box-shadow: 0 0 30px rgba(42, 224, 35, 0.2);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(42, 224, 35, 0.4); }
+            70% { box-shadow: 0 0 0 20px rgba(42, 224, 35, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(42, 224, 35, 0); }
+        }
+
+        .icon-container i {
+            font-size: 45px;
+            color: #2ae023;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, #fff 0%, #aaa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p {
+            color: #aaa;
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .template-name {
+            display: inline-block;
+            background: rgba(108, 99, 255, 0.1);
+            color: #818cf8;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+            margin: 10px 0;
+            border: 1px solid rgba(108, 99, 255, 0.3);
+        }
+
+        .action-btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #6C63FF 0%, #4b44d1 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(108, 99, 255, 0.3);
+            width: 100%;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 25px rgba(108, 99, 255, 0.4);
+        }
+
+        .countdown {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="success-card">
+        <div class="icon-container">
+            <i class="fas fa-check"></i>
+        </div>
+        
+        <h1>Payment Successful!</h1>
+        <p>Thank you for your purchase. You have successfully unlocked the <br>
+           <span class="template-name" id="templateNameDisplay">Premium Template</span>
+        </p>
+
+        <a href="#" id="continueBtn" class="action-btn">
+            <i class="fas fa-arrow-right" style="margin-right: 8px;"></i> Continue to Download
+        </a>
+
+        <div class="countdown" id="countdownText">Redirecting in <span id="timer">3</span> seconds...</div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            let templateId = urlParams.get('template') || 'Premium Template';
+            const format = urlParams.get('format') || 'pdf';
+
+            // Clean up template name for display (e.g. hiero-urban -> Hiero Urban)
+            const formatName = (str) => {
+                return str.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+            };
+            
+            document.getElementById('templateNameDisplay').innerText = formatName(templateId);
+
+            // Set up redirect URL
+            const returnUrl = `/resume-builder.html?autoDownload=true&format=${format}`;
+            document.getElementById('continueBtn').href = returnUrl;
+
+            // Handle countdown
+            let timeLeft = 3;
+            const timerEl = document.getElementById('timer');
+            
+            const countdownInterval = setInterval(() => {
+                timeLeft--;
+                timerEl.innerText = timeLeft;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(countdownInterval);
+                    window.location.href = returnUrl;
+                }
+            }, 1000);
+            
+            // Allow manual click to skip countdown
+            document.getElementById('continueBtn').addEventListener('click', () => {
+                clearInterval(countdownInterval);
+            });
+        });
+    </script>
+</body>
+</html>

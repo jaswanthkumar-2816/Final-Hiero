@@ -5,24 +5,65 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Hiero Resume Builder</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="theme.css">
+  <script src="theme.js"></script>
+  <script src="domain-mapping.js"></script>
+  <!-- Razorpay Checkout SDK -->
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <style>
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    :root {
+      --primary: #07e219;
+      --primary-glow: rgba(42, 224, 35, 0.4);
+      --bg-pure: #000000;
+      --text-main: #ffffff;
+      --text-dim: #b0b0b0;
+      --card-bg: rgba(15, 15, 15, 0.6);
+      --border-color: rgba(42, 224, 35, 0.1);
     }
 
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #000501 0%, #2cc42c 100%);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      margin: 0;
+      padding: 0;
       min-height: 100vh;
-      color: #0b0a0a;
+      color: var(--text-main, #fff);
       line-height: 1.6;
+      background-color: var(--bg-pure, #000);
+    }
+
+    /* Fix for Font Awesome icons being overridden by theme.js */
+    i.fas, i.fab, i.far, i.fal, i.fad {
+        font-family: "Font Awesome 6 Free" !important;
+        font-weight: 900 !important;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background:
+        radial-gradient(circle at 15% 15%, rgba(42, 224, 35, 0.12) 0%, transparent 50%),
+        radial-gradient(circle at 85% 85%, rgba(42, 224, 35, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(20, 20, 20, 0) 0%, rgba(0, 0, 0, 0.8) 100%),
+        linear-gradient(135deg, #050a05 0%, #0f2410 100%);
+      z-index: -1;
+      pointer-events: none;
     }
 
     .container {
-      max-width: 1400px;
+      max-width: 1600px;
       margin: 0 auto;
       padding: 20px;
     }
@@ -30,10 +71,10 @@
     /* Template Selection Styles */
     .template-selection {
       background: rgb(3, 2, 2);
-      border-radius: 24px;
-      padding: 40px;
+      border-radius: 32px;
+      padding: 30px;
       margin-bottom: 30px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.2);
       border: 1px solid rgba(45, 196, 44, 0.15);
     }
 
@@ -46,43 +87,71 @@
     }
 
     .category-btn {
-      padding: 12px 24px;
-      border: 2px solid rgba(45, 196, 44, 0.3);
-      background: transparent;
-      color: #2ae023;
-      border-radius: 12px;
+      padding: 10px 24px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.03);
+      color: #aaa;
+      border-radius: 50px;
       cursor: pointer;
-      font-weight: 600;
-      transition: all 0.3s ease;
-      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      font-size: 13px;
+      letter-spacing: 0.5px;
+      backdrop-filter: blur(5px);
     }
 
     .category-btn.active {
       background: #2ae023;
       color: #000;
       border-color: #2ae023;
+      font-weight: 700;
+      box-shadow: 0 0 20px rgba(42, 224, 35, 0.3);
     }
 
-    .category-btn:hover {
-      background: rgba(42, 224, 35, 0.1);
-      border-color: #2ae023;
+    .category-btn:hover:not(.active) {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      transform: translateY(-2px);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    /* Responsive Header Adjustments */
+    @media (max-width: 768px) {
+      .header {
+        padding: 80px 20px 20px;
+        /* Space for absolute nav */
+      }
+
+      .header-nav {
+        left: 50%;
+        transform: translateX(-50%);
+        top: 20px;
+        width: 100%;
+        justify-content: center;
+        right: auto;
+      }
+
+      .header h1 {
+        font-size: 2.2rem;
+      }
     }
 
     .templates-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 25px;
-      margin-bottom: 30px;
+      grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+      gap: 30px;
+      margin-bottom: 40px;
     }
 
     .template-card {
       background: rgba(255, 255, 255, 0.05);
       border: 2px solid rgba(45, 196, 44, 0.2);
-      border-radius: 16px;
-      padding: 20px;
+      border-radius: 20px;
+      padding: 30px;
       transition: all 0.3s ease;
       position: relative;
       overflow: hidden;
+      display: block;
     }
 
     .template-card:hover {
@@ -93,24 +162,30 @@
 
     .template-card.premium {
       border-color: #ffd700;
+      background: rgba(255, 215, 0, 0.03);
+      box-shadow: 0 5px 15px rgba(255, 215, 0, 0.05);
     }
 
     .template-card.premium:hover {
       border-color: #ffd700;
-      box-shadow: 0 15px 40px rgba(255, 215, 0, 0.2);
+      box-shadow: 0 15px 40px rgba(255, 215, 0, 0.25);
+      background: rgba(255, 215, 0, 0.08);
     }
 
     .template-card.affordable {
       border-color: #6C63FF;
       background: rgba(108, 99, 255, 0.03);
+      box-shadow: 0 5px 15px rgba(108, 99, 255, 0.05);
     }
 
     .template-card.affordable:hover {
       border-color: #6C63FF;
-      box-shadow: 0 15px 40px rgba(108, 99, 255, 0.2);
+      box-shadow: 0 15px 40px rgba(108, 99, 255, 0.25);
+      background: rgba(108, 99, 255, 0.08);
     }
 
     .premium-badge {
+      animation: pulsePremium 2s infinite ease-in-out;
       position: absolute;
       top: 15px;
       right: 15px;
@@ -121,11 +196,31 @@
       font-size: 11px;
       font-weight: 700;
       text-transform: uppercase;
+      z-index: 10;
+      letter-spacing: normal;
+      border: none;
+    }
+
+    @keyframes pulsePremium {
+      0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.4);
+      }
+
+      70% {
+        transform: scale(1.05);
+        box-shadow: 0 0 0 10px rgba(255, 215, 0, 0);
+      }
+
+      100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(255, 215, 0, 0);
+      }
     }
 
     .template-preview {
       width: 100%;
-      height: 200px;
+      height: 280px;
       background: rgba(255, 255, 255, 0.1);
       border-radius: 12px;
       margin-bottom: 20px;
@@ -146,6 +241,20 @@
       border-color: #2ae023;
     }
 
+    .template-card.premium .template-preview {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .template-preview i {
+      color: inherit;
+      transition: none;
+    }
+
+
+    .template-card.premium .template-preview i {
+      color: #ffd700;
+    }
+
     .preview-overlay {
       position: absolute;
       top: 0;
@@ -153,6 +262,7 @@
       right: 0;
       bottom: 0;
       background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: none;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -174,11 +284,21 @@
       font-weight: 600;
       cursor: pointer;
       transition: all 0.3s ease;
+      transform: none;
+    }
+
+    .template-preview:hover .preview-btn {
+      transform: none;
     }
 
     .preview-btn:hover {
       background: #2ae023;
       color: #000;
+      transform: none;
+    }
+
+    .template-info {
+      display: block;
     }
 
     .template-info h3 {
@@ -186,7 +306,14 @@
       font-size: 1.2rem;
       margin-bottom: 10px;
       font-weight: 700;
+      letter-spacing: normal;
     }
+
+    .template-card.premium .template-info h3 {
+      color: #2ae023;
+    }
+
+    /* Override for premium card title if desired, but request says "previous design" */
 
     .template-info p {
       color: #ccc;
@@ -209,6 +336,15 @@
       border-radius: 6px;
       font-size: 0.75rem;
       font-weight: 500;
+      text-transform: none;
+      letter-spacing: normal;
+      border: none;
+    }
+
+    .tag.premium {
+      background: rgba(255, 215, 0, 0.2);
+      color: #ffd700;
+      border: none;
     }
 
     .start-building-btn {
@@ -222,6 +358,19 @@
       font-size: 14px;
       cursor: pointer;
       transition: all 0.3s ease;
+      display: block;
+    }
+
+    .template-card.premium .start-building-btn {
+      background: linear-gradient(135deg, #2ae023 0%, #1a8b17 100%);
+      color: #000;
+      border: none;
+    }
+
+    .template-card.affordable .start-building-btn {
+      background: linear-gradient(135deg, #2ae023 0%, #1a8b17 100%);
+      color: #000;
+      border: none;
     }
 
     .start-building-btn:hover {
@@ -390,96 +539,127 @@
       box-shadow: 0 8px 25px rgba(42, 224, 35, 0.3);
     }
 
+    /* Header Styling */
     .header {
       text-align: center;
-      margin-bottom: 45px;
-      background: rgb(3, 2, 2);
-      padding: 70px 35px 35px 35px;
-      /* Extra top padding for buttons */
-      border-radius: 28px;
-      box-shadow: 0 25px 50px rgba(0, 0, 0, .2);
+      margin-bottom: 30px;
+      padding: 40px 20px 20px;
       position: relative;
+      background: rgba(5, 5, 5, 0.6);
+      border-radius: 30px;
+      border: 1px solid rgba(42, 224, 35, 0.1);
+      box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05),
+        0 0 100px rgba(42, 224, 35, 0.05);
+      backdrop-filter: blur(10px);
     }
 
     .header h1 {
-      font-size: 3rem;
-      color: #06a529;
-      font-weight: 800;
-      letter-spacing: -0.5px;
+      font-size: 4.2rem;
+      background: linear-gradient(135deg, #2ae023 0%, #00ff88 50%, #2ae023 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: 900;
+      letter-spacing: -2px;
+      margin-bottom: 16px;
+      filter: drop-shadow(0 0 30px rgba(42, 224, 35, 0.3));
+      animation: titleGlow 3s ease-in-out infinite;
+    }
+
+    @keyframes titleGlow {
+
+      0%,
+      100% {
+        filter: drop-shadow(0 0 30px rgba(42, 224, 35, 0.3));
+      }
+
+      50% {
+        filter: drop-shadow(0 0 50px rgba(42, 224, 35, 0.5));
+      }
     }
 
     .header p {
-      font-size: 1.2rem;
-      color: #ccc;
-      font-weight: 500;
-      max-width: 600px;
+      font-size: 1.15rem;
+      color: #b0b0b0;
+      font-weight: 400;
+      max-width: 560px;
       margin: 0 auto;
+      letter-spacing: 0.3px;
+      line-height: 1.6;
     }
 
-    /* Header Navigation Buttons - FIXED FOR MOBILE */
+    /* Navigation Buttons */
     .header-nav {
       position: absolute;
-      top: 15px;
-      right: 15px;
-      left: 15px;
+      top: 20px;
+      right: 20px;
       display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-      z-index: 10;
+      gap: 12px;
+      z-index: 20;
     }
 
     .header-nav button {
-      background: rgba(45, 196, 44, 0.2);
-      color: #2ae023;
-      border: 2px solid #2ae023;
-      padding: 10px 20px;
+      background: rgba(10, 10, 10, 0.4);
+      color: #ccc;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 8px 18px;
       border-radius: 8px;
       cursor: pointer;
-      font-size: 14px;
-      font-weight: 600;
-      transition: all 0.3s ease;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.2s ease;
       display: flex;
       align-items: center;
-      gap: 6px;
-      white-space: nowrap;
+      gap: 8px;
+      backdrop-filter: blur(8px);
     }
 
     .header-nav button:hover {
-      background: #2ae023;
-      color: #000;
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.2);
     }
 
     .header-nav button.logout-btn {
-      border-color: #ff6b6b;
+      border-color: rgba(255, 107, 107, 0.3);
       color: #ff6b6b;
-      background: rgba(255, 107, 107, 0.1);
+      background: rgba(255, 107, 107, 0.05);
     }
 
     .header-nav button.logout-btn:hover {
       background: #ff6b6b;
       color: white;
+      border-color: #ff6b6b;
+      box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
     }
 
+    /* Step Indicator */
     .step-indicator {
       text-align: center;
       margin-bottom: 40px;
       position: relative;
-      padding: 20px 150px;
-      /* Space for back button */
+      display: flex;
+      justify-content: center;
     }
 
     .step-text {
-      background: linear-gradient(135deg, #66ea75 0%, #07cf0d 100%);
-      color: rgb(37, 40, 37);
-      padding: 14px 30px;
+      background: rgba(42, 224, 35, 0.1);
+      color: #2ae023;
+      padding: 10px 30px;
       border-radius: 50px;
       font-weight: 700;
-      font-size: 1.15rem;
-      box-shadow: 0 6px 20px rgba(7, 207, 13, .3);
+      font-size: 1rem;
+      border: 1px solid rgba(42, 224, 35, 0.2);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      box-shadow: 0 0 20px rgba(42, 224, 35, 0.1);
+      backdrop-filter: blur(5px);
     }
 
     .form-section {
-      margin-bottom: 50px;
+      margin-bottom: 30px;
       position: relative;
       transition: all .4s ease;
     }
@@ -496,10 +676,10 @@
     }
 
     .section-title {
-      font-size: 2rem;
+      font-size: 1.8rem;
       color: #04ab07ee;
-      margin-bottom: 30px;
-      padding-bottom: 16px;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
       border-bottom: 4px solid #0d8705;
       display: flex;
       align-items: center;
@@ -531,6 +711,22 @@
       background: rgba(42, 224, 35, .15);
       border-radius: 12px;
       border: 1px solid rgba(42, 224, 35, .3);
+    }
+
+    /* Theme-aware icon colors as requested */
+    body.light-mode .section-icon {
+        color: #05a313 !important;
+    }
+    
+    body:not(.light-mode) .section-icon {
+        color: white !important;
+    }
+    
+    /* Ensure all badges and tags are visible */
+    .premium-badge, .tag, .photo-status, .step-text {
+        opacity: 1 !important;
+        visibility: visible !important;
+        display: inline-flex !important;
     }
 
     .skip-link {
@@ -565,7 +761,7 @@
     }
 
     .form-group {
-      margin-bottom: 26px;
+      margin-bottom: 20px;
       position: relative;
     }
 
@@ -583,6 +779,254 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 20px;
+    }
+
+    /* Photo Upload Section */
+    .photo-upload-section {
+      background: rgba(42, 224, 35, 0.05);
+      border: 2px dashed rgba(42, 224, 35, 0.3);
+      border-radius: 20px;
+      padding: 30px;
+      margin-bottom: 35px;
+    }
+
+    .photo-upload-container {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 30px;
+      align-items: start;
+    }
+
+    .photo-preview-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .photo-preview {
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      border: 3px solid rgba(42, 224, 35, 0.3);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      overflow: hidden;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .photo-preview:hover {
+      border-color: #2ae023;
+      box-shadow: 0 0 30px rgba(42, 224, 35, 0.2);
+      transform: scale(1.05);
+    }
+
+    .photo-preview i {
+      font-size: 50px;
+      color: rgba(42, 224, 35, 0.6);
+    }
+
+    .photo-preview.has-image i,
+    .photo-preview.has-image .photo-placeholder-text {
+      display: none;
+    }
+
+    .photo-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    .photo-placeholder-text {
+      color: #aaa;
+      font-size: 13px;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .photo-upload-btn {
+      padding: 12px 28px;
+      background: linear-gradient(135deg, #2ae023 0%, #1aa018 100%);
+      color: #000;
+      border: none;
+      border-radius: 50px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      box-shadow: 0 4px 15px rgba(42, 224, 35, 0.3);
+    }
+
+    .photo-upload-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(42, 224, 35, 0.5);
+    }
+
+    .ai-magic-btn {
+      padding: 12px 28px;
+      background: linear-gradient(135deg, #0f0f0f 0%, #222 100%);
+      color: #2ae023;
+      border: 1px solid #2ae023;
+      border-radius: 50px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 0 15px rgba(42, 224, 35, 0.2);
+    }
+
+    .ai-magic-btn:hover {
+      transform: translateY(-3px) scale(1.02);
+      background: linear-gradient(135deg, #1a1a1a 0%, #333 100%);
+      box-shadow: 0 0 30px rgba(42, 224, 35, 0.4);
+      color: #fff;
+    }
+
+    .ai-magic-btn .btn-shine {
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 50%;
+      height: 100%;
+      background: linear-gradient(to right, transparent, rgba(42, 224, 35, 0.2), transparent);
+      transform: skewX(-25deg);
+      transition: 0.5s;
+    }
+
+    .ai-magic-btn:hover .btn-shine {
+      animation: shine 1.5s infinite;
+    }
+
+    @keyframes shine {
+      100% {
+        left: 200%;
+      }
+    }
+
+    .ai-magic-btn i {
+      animation: pulseSparkle 2s infinite;
+    }
+
+    @keyframes pulseSparkle {
+
+      0%,
+      100% {
+        transform: scale(1);
+        opacity: 1;
+        text-shadow: 0 0 5px #2ae023;
+      }
+
+      50% {
+        transform: scale(1.2);
+        opacity: 0.8;
+        text-shadow: 0 0 15px #2ae023;
+      }
+    }
+
+    .photo-upload-info {
+      color: #ccc;
+    }
+
+    .photo-upload-info p {
+      margin-bottom: 12px;
+      color: #2ae023;
+      font-size: 14px;
+    }
+
+    .photo-upload-info ul {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 15px 0;
+    }
+
+    .photo-upload-info li {
+      padding: 6px 0;
+      font-size: 13px;
+      color: #aaa;
+      display: flex;
+      align-items: start;
+      gap: 10px;
+    }
+
+    .photo-upload-info li i {
+        color: var(--primary);
+        font-size: 11px;
+        margin-top: 3px;
+    }
+
+    .photo-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 15px;
+      border-radius: 50px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .photo-status.success {
+      background: rgba(42, 224, 35, 0.15);
+      color: #2ae023;
+      border: 1px solid rgba(42, 224, 35, 0.3);
+    }
+
+    .photo-status.error {
+      background: rgba(255, 107, 107, 0.15);
+      color: #ff6b6b;
+      border: 1px solid rgba(255, 107, 107, 0.3);
+    }
+
+    /* Mobile responsive */
+    @media (max-width: 768px) {
+      .photo-upload-container {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        text-align: center;
+      }
+
+      .photo-preview-wrapper {
+        margin: 0 auto;
+      }
+
+      .photo-upload-info {
+        text-align: left;
+      }
+    }
+
+    /* Two-Column Layout for Custom Details & References */
+    .two-column-sections {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      margin-bottom: 35px;
+    }
+
+    .two-column-sections .form-section {
+      margin-bottom: 0;
+    }
+
+    /* Mobile: Stack vertically */
+    @media (max-width: 1024px) {
+      .two-column-sections {
+        grid-template-columns: 1fr;
+        gap: 25px;
+      }
     }
 
     label {
@@ -742,6 +1186,18 @@
       transform: scale(1.05);
     }
 
+    /* Hide scrollbars for template previews while maintaining function */
+    .preview-scroll-container::-webkit-scrollbar {
+      display: none;
+    }
+
+    .preview-scroll-container {
+      -ms-overflow-style: none;
+      /* IE and Edge */
+      scrollbar-width: none;
+      /* Firefox */
+    }
+
     @media (max-width:768px) {
       .main-layout {
         grid-template-columns: 1fr;
@@ -824,6 +1280,22 @@
         font-size: 1.5rem;
         width: 40px;
         height: 40px;
+        color: var(--primary) !important;
+      }
+      
+      /* Theme-aware icon colors as requested */
+      body.light-mode .section-icon {
+          color: #05a313 !important;
+      }
+      
+      body:not(.light-mode) .section-icon {
+          color: white !important;
+      }
+      
+      /* Badge overrides */
+      .premium-badge, .tag {
+          opacity: 1 !important;
+          display: inline-block !important;
       }
 
       /* Mobile template grid */
@@ -846,7 +1318,7 @@
         font-size: 13px;
       }
     }
-
+    
     /* =========================================
        NEW NETFLIX-STYLE GLASSMORPHISM DESIGN
        ========================================= */
@@ -946,11 +1418,16 @@
     
     @media (max-width: 768px) {
         .netflix-carousel .template-card {
-            /* 85% width on mobile so the next card peeks into view, encouraging swiping */
-            flex: 0 0 85%;
-            max-width: 85%;
-            min-width: 85%;
+            /* Exactly 1 template visible at a time on mobile */
+            flex: 0 0 100%;
+            max-width: 100%;
+            min-width: 100%;
+            padding: 20px; /* Restore nice internal padding */
             scroll-snap-align: center;
+        }
+        
+        .netflix-carousel .template-preview {
+            height: 380px; /* Keep tall PDF preview */
         }
         
         .netflix-carousel {
@@ -966,10 +1443,10 @@
   <div class="container">
     <div class="header">
       <div class="header-nav">
-        <button onclick="window.location.href='/dashboard'">
-          <i class="fas fa-home"></i> Dashboard
+        <button onclick="window.location.href='index.html'">
+          <i class="fas fa-home"></i> Home
         </button>
-        <button onclick="logout()" style="border-color: #ff6b6b; color: #ff6b6b;">
+        <button onclick="logout()" class="logout-btn">
           <i class="fas fa-sign-out-alt"></i> Logout
         </button>
       </div>
@@ -983,13 +1460,11 @@
         <div class="step-text">Step 1: Choose Your Template</div>
       </div>
 
-      <div class="template-categories">
+      <div class="template-categories" id="filter-buttons-container">
         <button class="category-btn active" data-category="all">All Templates</button>
-        <button class="category-btn" data-category="modern">Modern</button>
-        <button class="category-btn" data-category="analytics">Analytics</button>
-        <button class="category-btn" data-category="professional">Professional</button>
-        <button class="category-btn" data-category="creative">Creative</button>
-        <button class="category-btn" data-category="premium">Premium</button>
+        <button class="category-btn" data-category="free" style="border-color: rgba(42, 224, 35, 0.4); color: #2ae023;">Free Templates</button>
+        <button class="category-btn" data-category="affordable" style="border-color: rgba(108, 99, 255, 0.4); color: #818cf8;">Plus Templates</button>
+        <button class="category-btn" data-category="premium" style="border-color: rgba(255, 215, 0, 0.4); color: #ffd700;">Pro Templates</button>
       </div>
 
       <div class="templates-grid" id="templatesGrid"
@@ -1013,6 +1488,105 @@
               <span class="tag">ATS-Friendly</span>
             </div>
             <button class="start-building-btn" onclick="startBuilding('rishi')"
+              style="background: linear-gradient(135deg, #6C63FF 0%, #4b44d1 100%); color: #fff; border: none;">
+              <i class="fas fa-arrow-right"></i> Start Building
+            </button>
+          </div>
+        </div>
+
+        <!-- Hiero Monethon Template -->
+        <div class="template-card premium" data-category="premium" data-template="hiero-monethon" data-type="affordable">
+          <div class="premium-badge">PREMIUM</div>
+          <div class="template-preview" onclick="previewTemplate('hiero-monethon')">
+            <i class="fas fa-file-invoice"></i>
+            <div class="preview-overlay">
+              <button class="preview-btn">Preview Template</button>
+            </div>
+          </div>
+          <div class="template-info">
+            <h3>Hiero Monolith</h3>
+            <p>Premium professional layout with orange header accents and a dark navy sidebar. Perfectly balanced for
+              high-impact roles.</p>
+            <div class="template-tags">
+              <span class="tag">Premium</span>
+              <span class="tag">Two Column</span>
+              <span class="tag">Corporate</span>
+            </div>
+            <button class="start-building-btn" onclick="startBuilding('hiero-monethon')"
+              style="background: linear-gradient(135deg, #6C63FF 0%, #4b44d1 100%); color: #fff; border: none;">
+              <i class="fas fa-arrow-right"></i> Start Building
+            </button>
+          </div>
+        </div>
+
+        <!-- Hiero Cool Template -->
+        <div class="template-card" data-category="premium" data-template="hiero-cool" data-type="free">
+          <div class="template-preview" onclick="previewTemplate('hiero-cool')">
+            <i class="fas fa-rocket" style="color: #6C63FF;"></i>
+            <div class="preview-overlay">
+              <button class="preview-btn">Preview Template</button>
+            </div>
+          </div>
+          <div class="template-info">
+            <h3>Hiero Cool</h3>
+            <p>A stunning modern template with a dark charcoal sidebar and vibrant purple accents. Features a unique
+              timeline layout and progress bars.</p>
+            <div class="template-tags">
+              <span class="tag">Modern</span>
+              <span class="tag">Purple</span>
+              <span class="tag">Sidebar</span>
+            </div>
+            <button class="start-building-btn" onclick="startBuilding('hiero-cool')"
+              style="background: linear-gradient(135deg, #2ae023 0%, #1a8b17 100%); color: #000; border: none;">
+              <i class="fas fa-arrow-right"></i> Start Building
+            </button>
+          </div>
+        </div>
+
+        <!-- Hiero Legion Template -->
+        <div class="template-card premium" data-category="premium" data-template="hiero-legion" data-type="affordable">
+          <div class="premium-badge">PREMIUM</div>
+          <div class="template-preview" onclick="previewTemplate('hiero-legion')">
+            <i class="fas fa-shield" style="color: #2ae023;"></i>
+            <div class="preview-overlay">
+              <button class="preview-btn">Preview Template</button>
+            </div>
+          </div>
+          <div class="template-info">
+            <h3>Hiero Legion</h3>
+            <p>A sophisticated monochrome design with a bold shield profile and a strong vertical badge. High-contrast
+              professional look.</p>
+            <div class="template-tags">
+              <span class="tag">Monochrome</span>
+              <span class="tag">Shield</span>
+              <span class="tag">Executive</span>
+            </div>
+            <button class="start-building-btn" onclick="startBuilding('hiero-legion')"
+              style="background: linear-gradient(135deg, #6C63FF 0%, #4b44d1 100%); color: #fff; border: none;">
+              <i class="fas fa-arrow-right"></i> Start Building
+            </button>
+          </div>
+        </div>
+
+        <!-- Hiero Nova Template -->
+        <div class="template-card premium" data-category="premium" data-template="hiero-nova" data-type="affordable">
+          <div class="premium-badge">PREMIUM</div>
+          <div class="template-preview" onclick="previewTemplate('hiero-nova')">
+            <i class="fas fa-sun" style="color: #f4b400;"></i>
+            <div class="preview-overlay">
+              <button class="preview-btn">Preview Template</button>
+            </div>
+          </div>
+          <div class="template-info">
+            <h3>Hiero Nova</h3>
+            <p>Modern editorial layout with a signature yellow header and deep charcoal sidebar. Bold and high-impact.
+            </p>
+            <div class="template-tags">
+              <span class="tag">Editorial</span>
+              <span class="tag">Yellow</span>
+              <span class="tag">Impact</span>
+            </div>
+            <button class="start-building-btn" onclick="startBuilding('hiero-nova')"
               style="background: linear-gradient(135deg, #6C63FF 0%, #4b44d1 100%); color: #fff; border: none;">
               <i class="fas fa-arrow-right"></i> Start Building
             </button>
@@ -1093,25 +1667,346 @@
           </div>
         </div>
 
+        <!-- Hiero Timeline Template -->
+        <div class="template-card premium" data-category="minimal" data-template="hiero-timeline" data-type="affordable">
+          <div class="premium-badge">PREMIUM</div>
+          <div class="template-preview" onclick="previewTemplate('hiero-timeline')">
+            <i class="fas fa-stream"></i>
+            <div class="preview-overlay">
+              <button class="preview-btn">Preview Template</button>
+            </div>
+          </div>
+          <div class="template-info">
+            <h3>Hiero Timeline</h3>
+            <p>Clean minimalist design with maximum white space. Emphasizes content with subtle sophistication.</p>
+            <div class="template-tags">
+              <span class="tag">Timeline</span>
+              <span class="tag">Minimalist</span>
+              <span class="tag">Corporate</span>
+            </div>
+            <button class="start-building-btn" onclick="startBuilding('hiero-timeline')"
+              style="background: linear-gradient(135deg, #6C63FF 0%, #4b44d1 100%); color: #fff; border: none;">
+              <i class="fas fa-arrow-right"></i> Start Building
+            </button>
+          </div>
+        </div>
+
+        <!-- Hiero Tech Template -->
+        <div class="template-card" data-category="creative" data-template="hiero-tech" data-type="free">
+          <div class="template-preview" onclick="previewTemplate('hiero-tech')">
+            <i class="fas fa-code"></i>
+            <div class="preview-overlay">
+              <button class="preview-btn">Preview Template</button>
+            </div>
+          </div>
+          <div class="template-info">
+            <h3>Hiero Tech</h3>
+            <p>Developer-focused template with code-style aesthetics. Optimized for software engineers and programmers.
+            </p>
+            <div class="template-tags">
+              <span class="tag">Tech</span>
+              <span class="tag">Developer</span>
+              <span class="tag">Coding</span>
+            </div>
+            <button class="start-building-btn" onclick="startBuilding('hiero-tech')"
+              style="background: linear-gradient(135deg, #2ae023 0%, #1a8b17 100%); color: #000; border: none;">
+              <i class="fas fa-arrow-right"></i> Start Building
+            </button>
+          </div>
+        </div>
+
+        <!-- Hiero Urban Template -->
+        <div class="template-card premium" data-category="modern" data-template="hiero-urban" data-type="premium">
+          <div class="premium-badge">PREMIUM</div>
+          <div class="template-preview" onclick="previewTemplate('hiero-urban')">
+            <i class="fas fa-briefcase"></i>
+            <div class="preview-overlay">
+              <button class="preview-btn">Preview Template</button>
+            </div>
+          </div>
+          <div class="template-info">
+            <h3>Hiero Urban</h3>
+            <p>Modern urban design with vibrant slate and sky blue accents. Perfect for making an attractive
+              professional statement.</p>
+            <div class="template-tags">
+              <span class="tag">Modern</span>
+              <span class="tag">Urban</span>
+              <span class="tag">Attractive</span>
+            </div>
+            <button class="start-building-btn" onclick="startBuilding('hiero-urban')"
+              style="background: linear-gradient(135deg, #F2B66D 0%, #d4954a 100%); color: #000; border: none;">
+              <i class="fas fa-arrow-right"></i> Start Building
+            </button>
+          </div>
+        </div>
+
+        <!-- Hiero Vertex Template -->
+        <div class="template-card premium" data-category="modern" data-template="hiero-vertex" data-type="premium">
+          <div class="premium-badge">PREMIUM</div>
+          <div class="template-preview" onclick="previewTemplate('hiero-vertex')">
+            <i class="fas fa-layer-group"></i>
+            <div class="preview-overlay">
+              <button class="preview-btn">Preview Template</button>
+            </div>
+          </div>
+          <div class="template-info">
+            <h3>Hiero Vertex</h3>
+            <p>A minimalist elegant design featuring a strong right charcoal sidebar. Highly attractive one-page resume.
+            </p>
+            <div class="template-tags">
+              <span class="tag">Modern</span>
+              <span class="tag">Creative</span>
+              <span class="tag">Sidebar</span>
+            </div>
+            <button class="start-building-btn" onclick="startBuilding('hiero-vertex')"
+              style="background: linear-gradient(135deg, #F2B66D 0%, #d4954a 100%); color: #000; border: none;">
+              <i class="fas fa-arrow-right"></i> Start Building
+            </button>
+          </div>
+        </div>
+
         <!-- Hiero Studio Template -->
         <div class="template-card premium" data-category="professional" data-template="hiero-studio" data-type="affordable">
           <div class="premium-badge">PREMIUM</div>
           <div class="template-preview" onclick="previewTemplate('hiero-studio')">
-            <i class="fas fa-laptop-code"></i>
+            <i class="fas fa-columns"></i>
             <div class="preview-overlay">
               <button class="preview-btn">Preview Template</button>
             </div>
           </div>
           <div class="template-info">
             <h3>Hiero Studio</h3>
-            <p>Modern professional layout with specialized technical sections. Ideal for developers and designers.</p>
+            <p>Distinctive Right Sidebar layout with a bold timeline. Perfect for showcasing a modern professional
+              profile.</p>
             <div class="template-tags">
+              <span class="tag">Sidebar</span>
               <span class="tag">Modern</span>
-              <span class="tag">Studio</span>
-              <span class="tag">Technical</span>
+              <span class="tag">Creative</span>
             </div>
             <button class="start-building-btn" onclick="startBuilding('hiero-studio')"
               style="background: linear-gradient(135deg, #6C63FF 0%, #4b44d1 100%); color: #fff; border: none;">
+              <i class="fas fa-arrow-right"></i> Start Building
+            </button>
+          </div>
+        </div>
+
+        <!-- Hiero Vision Template -->
+        <div class="template-card premium" data-category="creative" data-template="hiero-vision" data-type="premium">
+          <div class="premium-badge">PREMIUM</div>
+          <div class="template-preview" onclick="previewTemplate('hiero-vision')">
+            <i class="fas fa-eye"></i>
+            <div class="preview-overlay">
+              <button class="preview-btn">Preview Template</button>
+            </div>
+          </div>
+          <div class="template-info">
+            <h3>Hiero Vision</h3>
+            <p>Creative layout with visual storytelling approach. Perfect for designers and marketers.</p>
+            <div class="template-tags">
+              <span class="tag">Creative</span>
+              <span class="tag">Visual</span>
+              <span class="tag">Design</span>
+            </div>
+            <button class="start-building-btn" onclick="startBuilding('hiero-vision')"
+              style="background: linear-gradient(135deg, #F2B66D 0%, #d4954a 100%); color: #000; border: none;">
+              <i class="fas fa-arrow-right"></i> Start Building
+            </button>
+          </div>
+        </div>
+
+        <!-- Hiero Elite Template -->
+        <div class="template-card premium" data-category="premium" data-template="hiero-elite" data-type="premium">
+          <div class="premium-badge">PREMIUM</div>
+          <div class="template-preview" onclick="previewTemplate('hiero-elite')">
+            <i class="fas fa-crown"></i>
+            <div class="preview-overlay">
+              <button class="preview-btn">Preview Template</button>
+            </div>
+          </div>
+          <div class="template-info">
+            <h3>Hiero Elite</h3>
+            <p>Premium executive template with luxury design elements. Ideal for C-level executives and senior
+              management.</p>
+            <div class="template-tags">
+              <span class="tag premium">Premium</span>
+              <span class="tag premium">Executive</span>
+              <span class="tag premium">Luxury</span>
+            </div>
+            <button class="start-building-btn" onclick="startBuilding('hiero-elite')"
+              style="background: linear-gradient(135deg, #F2B66D 0%, #d4954a 100%); color: #000; border: none;">
+              <i class="fas fa-arrow-right"></i> Start Building
+            </button>
+          </div>
+        </div>
+
+        <!-- Hiero Premium Template -->
+        <div class="template-card premium" data-category="premium" data-template="hiero-premium" data-type="premium">
+          <div class="premium-badge">PREMIUM</div>
+          <div class="template-preview" onclick="previewTemplate('hiero-premium')">
+            <i class="fas fa-gem"></i>
+            <div class="preview-overlay">
+              <button class="preview-btn">Preview Template</button>
+            </div>
+          </div>
+          <div class="template-info">
+            <h3>Hiero Premium</h3>
+            <p>High-end professional design with sophisticated styling. Features elegant typography and premium
+              aesthetics.</p>
+            <div class="template-tags">
+              <span class="tag premium">Premium</span>
+              <span class="tag premium">Elegant</span>
+              <span class="tag premium">Refined</span>
+            </div>
+            <button class="start-building-btn" onclick="startBuilding('hiero-premium')"
+              style="background: linear-gradient(135deg, #F2B66D 0%, #d4954a 100%); color: #000; border: none;">
+              <i class="fas fa-arrow-right"></i> Start Building
+            </button>
+          </div>
+        </div>
+
+        <!-- Hiero Prestige Template -->
+        <div class="template-card premium" data-category="premium" data-template="hiero-prestige" data-type="premium">
+          <div class="premium-badge">PREMIUM</div>
+          <div class="template-preview" onclick="previewTemplate('hiero-prestige')">
+            <i class="fas fa-star"></i>
+            <div class="preview-overlay">
+              <button class="preview-btn">Preview Template</button>
+            </div>
+          </div>
+          <div class="template-info">
+            <h3>Hiero Prestige</h3>
+            <p>Distinguished design for top-tier professionals. Combines classic elegance with modern sophistication.
+            </p>
+            <div class="template-tags">
+              <span class="tag premium">Prestige</span>
+              <span class="tag premium">Distinguished</span>
+              <span class="tag premium">Elite</span>
+            </div>
+            <button class="start-building-btn" onclick="startBuilding('hiero-prestige')"
+              style="background: linear-gradient(135deg, #F2B66D 0%, #d4954a 100%); color: #000; border: none;">
+              <i class="fas fa-arrow-right"></i> Start Building
+            </button>
+          </div>
+        </div>
+
+        <!-- Hiero Signature Template -->
+        <div class="template-card premium" data-category="premium" data-template="hiero-signature" data-type="premium">
+          <div class="premium-badge">PREMIUM</div>
+          <div class="template-preview" onclick="previewTemplate('hiero-signature')">
+            <i class="fas fa-signature"></i>
+            <div class="preview-overlay">
+              <button class="preview-btn">Preview Template</button>
+            </div>
+          </div>
+          <div class="template-info">
+            <h3>Hiero Signature</h3>
+            <p>Modern minimalist A4 portrait with a bold two-column split layout. Features a grayscale aesthetic with
+              bold orange accents and a vertical timeline.</p>
+            <div class="template-tags">
+              <span class="tag premium">Minimalist</span>
+              <span class="tag premium">Split Layout</span>
+              <span class="tag premium">Modern</span>
+            </div>
+            <button class="start-building-btn" onclick="startBuilding('hiero-signature')"
+              style="background: linear-gradient(135deg, #F2B66D 0%, #d4954a 100%); color: #000; border: none;">
+              <i class="fas fa-arrow-right"></i> Start Building
+            </button>
+          </div>
+        </div>
+
+        <!-- Hiero Retail Template -->
+        <div class="template-card premium" data-category="professional" data-template="hiero-retail" data-type="affordable">
+          <div class="premium-badge">PREMIUM</div>
+          <div class="template-preview" onclick="previewTemplate('hiero-retail')">
+            <i class="fas fa-store"></i>
+            <div class="preview-overlay">
+              <button class="preview-btn">Preview Template</button>
+            </div>
+          </div>
+          <div class="template-info">
+            <h3>Hiero Retail</h3>
+            <p>Clean formatting with clear timeline layout. Ideal for retail professionals and customer-facing roles.
+            </p>
+            <div class="template-tags">
+              <span class="tag">Timeline</span>
+              <span class="tag">Retail</span>
+              <span class="tag">Professional</span>
+            </div>
+            <button class="start-building-btn" onclick="startBuilding('hiero-retail')"
+              style="background: linear-gradient(135deg, #6C63FF 0%, #4b44d1 100%); color: #fff; border: none;">
+              <i class="fas fa-arrow-right"></i> Start Building
+            </button>
+          </div>
+        </div>
+
+        <!-- Hiero Essence Template -->
+        <div class="template-card premium" data-category="premium" data-template="hiero-essence" data-type="affordable">
+          <div class="premium-badge">PREMIUM</div>
+          <div class="template-preview" onclick="previewTemplate('hiero-essence')">
+            <i class="fas fa-columns"></i>
+            <div class="preview-overlay">
+              <button class="preview-btn">Preview Template</button>
+            </div>
+          </div>
+          <div class="template-info">
+            <h3>Hiero Essence</h3>
+            <p>Modern corporate design featuring a sleek dark sidebar with professional orange accents.</p>
+            <div class="template-tags">
+              <span class="tag premium">Two-Column</span>
+              <span class="tag premium">Corporate</span>
+              <span class="tag premium">Premium</span>
+            </div>
+            <button class="start-building-btn" onclick="startBuilding('hiero-essence')"
+              style="background: linear-gradient(135deg, #6C63FF 0%, #4b44d1 100%); color: #fff; border: none;">
+              <i class="fas fa-arrow-right"></i> Start Building
+            </button>
+          </div>
+        </div>
+
+        <!-- Hiero Velocity -->
+        <div class="template-card premium" data-category="premium" data-template="hiero-velocity" data-type="affordable">
+          <div class="premium-badge">PREMIUM</div>
+          <div class="template-preview" onclick="previewTemplate('hiero-velocity')">
+            <i class="fas fa-bolt"></i>
+            <div class="preview-overlay">
+              <button class="preview-btn">Preview Template</button>
+            </div>
+          </div>
+          <div class="template-info">
+            <h3>Hiero Velocity</h3>
+            <p>Designed for fast-paced growth and startup agility. Clean lines and energetic spacing for movers.</p>
+            <div class="template-tags">
+              <span class="tag premium">Startup</span>
+              <span class="tag premium">Agile</span>
+              <span class="tag premium">Fast</span>
+            </div>
+            <button class="start-building-btn" onclick="startBuilding('hiero-velocity')"
+              style="background: linear-gradient(135deg, #6C63FF 0%, #4b44d1 100%); color: #fff; border: none;">
+              <i class="fas fa-arrow-right"></i> Start Building
+            </button>
+          </div>
+        </div>
+
+        <!-- Hiero Royal Template -->
+        <div class="template-card premium" data-category="classic" data-template="hiero-royal" data-type="premium">
+          <div class="premium-badge">PREMIUM</div>
+          <div class="template-preview" onclick="previewTemplate('hiero-royal')">
+            <i class="fas fa-crown"></i>
+            <div class="preview-overlay">
+              <button class="preview-btn">Preview Template</button>
+            </div>
+          </div>
+          <div class="template-info">
+            <h3>Hiero Royal</h3>
+            <p>Classic beige-toned template with elegant section icons, profile photo, strength tag pills and hobbies
+              row. Ideal for executive and classic professional profiles.</p>
+            <div class="template-tags">
+              <span class="tag">Classic</span>
+              <span class="tag">Elegant</span>
+              <span class="tag">Executive</span>
+            </div>
+            <button class="start-building-btn" onclick="startBuilding('hiero-royal')"
+              style="background: linear-gradient(135deg, #F2B66D 0%, #d4954a 100%); color: #000; border: none;">
               <i class="fas fa-arrow-right"></i> Start Building
             </button>
           </div>
@@ -1135,9 +2030,71 @@
               <i class="fas fa-user section-icon"></i> Personal Information
             </h2>
             <div class="form-content">
-              <div class="form-group">
-                <label for="fullName">Full Name <span class="required">*</span></label>
-                <input type="text" id="fullName" required placeholder="Enter your full name">
+              <!-- Photo Upload Section -->
+              <div class="form-group photo-upload-section">
+                <label>
+                  <i class="fas fa-camera"></i> Profile Photo
+                  <span class="field-skip" onclick="skipField('profilePhoto')">Skip</span>
+                </label>
+                <div class="photo-upload-container">
+                  <div class="photo-preview-wrapper">
+                    <div class="photo-preview" id="photoPreview">
+                      <i class="fas fa-user"></i>
+                      <span class="photo-placeholder-text">Upload Photo</span>
+                    </div>
+                    <input type="file" id="profilePhoto" accept="image/jpeg,image/png,image/jpg" style="display: none;"
+                      onchange="handlePhotoUpload(event)">
+                    <div class="photo-controls"
+                      style="margin-top: 15px; display: flex; flex-direction: column; gap: 10px;">
+                      <button type="button" class="photo-upload-btn"
+                        onclick="document.getElementById('profilePhoto').click()">
+                        <i class="fas fa-upload"></i> Choose Photo
+                      </button>
+                      <div style="margin: 5px 0; text-align: center; color: #444; font-size: 11px; font-weight: bold;">
+                        OR</div>
+                      <button type="button" class="ai-magic-btn"
+                        onclick="window.location.href='ai-photo-formalizer.html'"
+                        style="justify-content: center; width: 100%; border: 1px solid #2ae023;">
+                        <span class="btn-shine"></span>
+                        <i class="fas fa-wand-magic-sparkles"></i> ✨ Generate Executive Photo
+                      </button>
+                      <p style="font-size: 11px; color: var(--primary); text-align: center; margin-top: 5px; opacity: 0.8;">
+                        <i class="fas fa-crown"></i> Hiero Executive AI (Premium)
+                      </p>
+                    </div>
+                  </div>
+                  <div class="photo-upload-info">
+                    <p style="color: var(--primary); font-weight: 800; font-size: 15px; margin-bottom: 10px;">
+                      <i class="fas fa-camera"></i> Photo Required
+                    </p>
+                    <ul>
+                      <li><i class="fas fa-check"></i> Format: JPG or PNG</li>
+                      <li><i class="fas fa-check"></i> Recommended: Square headshot</li>
+                    </ul>
+                    <div id="aiPhotoBadge"
+                      style="display: none; margin-top: 10px; background: rgba(42, 224, 35, 0.1); border: 1px solid var(--primary); padding: 10px; border-radius: 8px; font-size: 11px; color: var(--primary);">
+                      <i class="fas fa-crown"></i> <strong>EXECUTIVE AI:</strong> Ready to formalize
+                    </div>
+                    <span class="photo-status" id="photoStatus"></span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="fullName">Full Name <span class="required">*</span></label>
+                  <input type="text" id="fullName" required placeholder="Enter your full name">
+                </div>
+                <div class="form-group">
+                  <label for="headline">Professional Title</label>
+                  <input type="text" id="headline" placeholder="e.g. Senior Software Engineer">
+                </div>
+              </div>
+
+              <!-- Added Headline Field -->
+              <div class="form-group" id="group-headline">
+                <label for="headline">Professional Headline</label>
+                <input type="text" id="headline" placeholder="e.g. Creative Director / Software Engineer">
               </div>
               <div class="form-row">
                 <div class="form-group">
@@ -1243,6 +2200,46 @@
               <button type="button" class="add-more-btn" onclick="addExperience()">Add Another Experience</button>
             </div>
           </div>
+
+          <!-- Internship Experience (NEW) -->
+          <div class="form-section" id="section-internships">
+            <h2 class="section-title">
+              <i class="fas fa-microchip section-icon"></i> Internship Experience
+              <span class="skip-link" onclick="toggleSection('internships')">Skip this section</span>
+            </h2>
+            <div class="form-content">
+              <div id="internshipsContainer">
+                <div class="internship-item">
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>Intern Role</label>
+                      <input type="text" name="internRole[]" placeholder="Software Intern">
+                    </div>
+                    <div class="form-group">
+                      <label>Organization</label>
+                      <input type="text" name="internOrg[]" placeholder="Tech Solutions">
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>Start Date</label>
+                      <input type="month" name="internStart[]">
+                    </div>
+                    <div class="form-group">
+                      <label>End Date</label>
+                      <input type="month" name="internEnd[]">
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label>Description</label>
+                    <textarea name="internDesc[]" rows="4" placeholder="Key contributions..."></textarea>
+                  </div>
+                </div>
+              </div>
+              <button type="button" class="add-more-btn" onclick="addInternship()">Add Another Internship</button>
+            </div>
+          </div>
+
 
           <!-- Education -->
           <div class="form-section" id="section-education">
@@ -1414,85 +2411,91 @@
           </div>
         </div>
 
-        <!-- References -->
-        <div class="form-section" id="section-references">
-          <h2 class="section-title">
-            <i class="fas fa-users section-icon"></i> References
-            <span class="skip-link" onclick="toggleSection('references')">Skip this section</span>
-          </h2>
-          <div class="form-content">
-            <div id="referencesContainer">
-              <div class="reference-item">
-                <div class="form-row">
-                  <div class="form-group">
-                    <label for="refName1">Reference Name</label>
-                    <input type="text" id="refName1" name="refName[]" placeholder="John Smith">
+        <!-- Two-Column Layout: Custom Details (Left) & References (Right) -->
+        <div class="two-column-sections">
+          <!-- Custom Details (Left Column) -->
+          <div class="form-section" id="section-custom">
+            <h2 class="section-title">
+              <i class="fas fa-edit section-icon"></i> Custom Details
+              <span class="skip-link" onclick="toggleSection('custom')">Skip this section</span>
+            </h2>
+            <div class="form-content">
+              <p style="color: #2ae023; font-size: 14px; margin-bottom: 20px;">
+                <i class="fas fa-info-circle"></i> Add any additional sections you need (e.g., Publications, Volunteer
+                Work, Awards, etc.)
+              </p>
+              <div id="customDetailsContainer">
+                <div class="custom-detail-item">
+                  <div class="form-group" id="customSectionTitleWrapper">
+                    <label for="customSectionTitle">Custom Section Title</label>
+                    <input type="text" id="customSectionTitle" placeholder="e.g., Publications">
                   </div>
                   <div class="form-group">
-                    <label for="refTitle1">Title/Position</label>
-                    <input type="text" id="refTitle1" name="refTitle[]" placeholder="Senior Manager">
-                  </div>
-                </div>
-                <div class="form-row">
-                  <div class="form-group">
-                    <label for="refCompany1">Company</label>
-                    <input type="text" id="refCompany1" name="refCompany[]" placeholder="Company Name">
+                    <label for="customHeading1">Item Heading</label>
+                    <input type="text" id="customHeading1" name="customHeading[]" placeholder="e.g., Research Paper A">
                   </div>
                   <div class="form-group">
-                    <label for="refPhone1">Phone</label>
-                    <input type="tel" id="refPhone1" name="refPhone[]" placeholder="(555) 123-4567"
-                      pattern="[\+]?[\d\s\-\(\)\.]+" title="Please enter a valid phone number">
+                    <label for="customContent1">Content</label>
+                    <textarea id="customContent1" name="customContent[]" rows="4"
+                      placeholder="Describe the details..."></textarea>
                   </div>
-                </div>
-                <div class="form-group">
-                  <label for="refEmail1">Email</label>
-                  <input type="email" id="refEmail1" name="refEmail[]" placeholder="reference@company.com"
-                    title="Please enter a valid email address">
                 </div>
               </div>
-            </div>
-            <button type="button" class="add-more-btn" onclick="addReference()">Add Another Reference</button>
-          </div>
-        </div>
+              <button type="button" class="add-more-btn" onclick="addCustomDetail()">Add Another Custom Item</button>
 
-        <!-- Custom Details -->
-        <div class="form-section" id="section-custom">
-          <h2 class="section-title">
-            <i class="fas fa-edit section-icon"></i> Custom Details
-            <span class="skip-link" onclick="toggleSection('custom')">Skip this section</span>
-          </h2>
-          <div class="form-content">
-            <p style="color: #2ae023; font-size: 14px; margin-bottom: 20px;">
-              <i class="fas fa-info-circle"></i> Add any additional sections you need (e.g., Publications, Volunteer
-              Work, Awards, etc.)
-            </p>
-            <div id="customDetailsContainer">
-              <div class="custom-detail-item">
-                <div class="form-group" id="customSectionTitleWrapper">
-                  <label for="customSectionTitle">Custom Section Title</label>
-                  <input type="text" id="customSectionTitle" placeholder="e.g., Publications">
-                </div>
+              <div style="margin-top: 20px; border-top: 1px dashed rgba(42,224,35,0.2); padding-top: 20px;">
                 <div class="form-group">
-                  <label for="customHeading1">Item Heading</label>
-                  <input type="text" id="customHeading1" name="customHeading[]" placeholder="e.g., Research Paper A">
+                  <label for="customSectionContent">Direct Custom Content (from AI)</label>
+                  <textarea id="customSectionContent" rows="6" placeholder="Spilled custom content..."></textarea>
                 </div>
-                <div class="form-group">
-                  <label for="customContent1">Content</label>
-                  <textarea id="customContent1" name="customContent[]" rows="4"
-                    placeholder="Describe the details..."></textarea>
-                </div>
-              </div>
-            </div>
-            <button type="button" class="add-more-btn" onclick="addCustomDetail()">Add Another Custom Item</button>
-
-            <div style="margin-top: 20px; border-top: 1px dashed rgba(42,224,35,0.2); padding-top: 20px;">
-              <div class="form-group">
-                <label for="customSectionContent">Direct Custom Content (from AI)</label>
-                <textarea id="customSectionContent" rows="6" placeholder="Spilled custom content..."></textarea>
               </div>
             </div>
           </div>
+
+          <!-- References (Right Column) -->
+          <div class="form-section" id="section-references">
+            <h2 class="section-title">
+              <i class="fas fa-users section-icon"></i> References
+              <span class="skip-link" onclick="toggleSection('references')">Skip this section</span>
+            </h2>
+            <div class="form-content">
+              <div id="referencesContainer">
+                <div class="reference-item">
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="refName1">Reference Name</label>
+                      <input type="text" id="refName1" name="refName[]" placeholder="John Smith">
+                    </div>
+                    <div class="form-group">
+                      <label for="refTitle1">Title/Position</label>
+                      <input type="text" id="refTitle1" name="refTitle[]" placeholder="Senior Manager">
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="refCompany1">Company</label>
+                      <input type="text" id="refCompany1" name="refCompany[]" placeholder="Company Name">
+                    </div>
+                    <div class="form-group">
+                      <label for="refPhone1">Phone</label>
+                      <input type="tel" id="refPhone1" name="refPhone[]" placeholder="(555) 123-4567"
+                        pattern="[\+]?[\d\s\-\(\)\.]+\" title="Please enter a valid phone number">
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label for="refEmail1">Email</label>
+                    <input type="email" id="refEmail1" name="refEmail[]" placeholder="reference@company.com"
+                      title="Please enter a valid email address">
+                  </div>
+                </div>
+              </div>
+              <button type="button" class="add-more-btn" onclick="addReference()">Add Another Reference</button>
+            </div>
+          </div>
         </div>
+
+        <!-- End of Two-Column Layout -->
+
       </div>
     </div>
   </div>
@@ -1508,114 +2511,72 @@
 
   <!-- Results -->
   <div id="resultsSection"
-    style="display:none; margin-top:40px; text-align:center; padding: 40px; background: rgba(0,0,0,0.4); border-radius: 20px; border: 1px solid rgba(42,224,35,0.2);">
-    <h2 style="color:#2ae023; font-size:2.4rem; margin-bottom:20px; font-weight: 700;">Resume Tailored Successfully!
+    style="display:none; margin-top:25px; text-align:center; padding: 30px; background: rgba(0,0,0,0.4); border-radius: 20px; border: 1px solid rgba(42,224,35,0.2);">
+    <h2 style="color:#2ae023; font-size:2.2rem; margin-bottom:15px; font-weight: 700;">Resume Tailored Successfully!
     </h2>
-    <p style="color: #cbd5e1; margin-bottom: 40px; font-size: 1.1rem;">Your professional ATS-friendly resume is ready.
+    <p style="color: #cbd5e1; margin-bottom: 30px; font-size: 1.1rem;">Your professional ATS-friendly resume is ready.
       Select your preferred format below.</p>
 
     <div style="display:flex; gap:25px; justify-content:center; flex-wrap:wrap;">
       <div class="download-card"
-        style="background: rgba(255,255,255,0.05); padding: 30px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); width: 220px; transition: all 0.3s;"
+        style="background: rgba(255,255,255,0.05); padding: 25px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); width: 220px; transition: all 0.3s;"
         onmouseover="this.style.borderColor='#2ae023'" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'">
         <i class="fas fa-file-pdf" style="font-size: 3rem; color: #ef4444; margin-bottom: 20px;"></i>
-        <h4 style="color: white; margin-bottom: 20px;">Standard PDF</h4>
+        <h4 style="color: white; margin-bottom: 15px;">Standard PDF</h4>
         <button class="btn btn-primary" onclick="downloadResume()" style="width: 100%;">Download</button>
       </div>
 
       <div class="download-card"
-        style="background: rgba(255,255,255,0.05); padding: 30px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); width: 220px; transition: all 0.3s;"
-        onmouseover="this.style.borderColor='#3b82f6'" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'">
-        <i class="fas fa-file-word" style="font-size: 3rem; color: #3b82f6; margin-bottom: 20px;"></i>
-        <h4 style="color: white; margin-bottom: 20px;">Microsoft Word</h4>
-        <button class="btn btn-primary" onclick="downloadDocx()"
-          style="width: 100%; background: #3b82f6; border-color: #3b82f6;">Download</button>
+        style="background: rgba(255,255,255,0.05); padding: 25px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); width: 220px; transition: all 0.3s;"
+        onmouseover="this.style.borderColor='#00CEC9'" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'">
+        <i class="fas fa-file-word" style="font-size: 3rem; color: #00CEC9; margin-bottom: 20px;"></i>
+        <h4 style="color: white; margin-bottom: 15px;">Microsoft Word</h4>
+        <button id="downloadDocxBtn" class="btn btn-primary" onclick="downloadDocx()"
+          style="width: 100%; background: #00CEC9; border-color: #00CEC9;">Download Word</button>
       </div>
 
       <div class="download-card"
-        style="background: rgba(255,255,255,0.05); padding: 30px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); width: 220px; transition: all 0.3s;"
+        style="background: rgba(255,255,255,0.05); padding: 25px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); width: 220px; transition: all 0.3s;"
         onmouseover="this.style.borderColor='#2ae023'" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'">
         <i class="fas fa-eye" style="font-size: 3rem; color: #2ae023; margin-bottom: 20px;"></i>
-        <h4 style="color: white; margin-bottom: 20px;">Live Preview</h4>
-        <button id="previewResumeBtn" class="btn btn-secondary" onclick="previewResume()" style="width: 100%;">View PDF</button>
+        <h4 style="color: white; margin-bottom: 15px;">Live Preview</h4>
+        <button class="btn btn-secondary" onclick="previewResume()" style="width: 100%;">View PDF</button>
       </div>
     </div>
 
-    <div style="margin-top: 40px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 30px;">
+    <div style="margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
       <button class="btn btn-secondary" onclick="editResume()" style="opacity: 0.7;">
         <i class="fas fa-edit"></i> Edit Details
       </button>
     </div>
   </div>
 
-  <!-- Live Preview Modal (in-page iframe, no popup) -->
-  <div id="pdfPreviewModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; z-index:200000; background:rgba(0,0,0,0.92); flex-direction:column;">
-    <div style="display:flex; align-items:center; justify-content:space-between; padding:14px 24px; background:#111; border-bottom:1px solid rgba(42,224,35,0.3); flex-shrink:0;">
-      <span style="color:#2ae023; font-weight:700; font-size:1.1rem;"><i class="fas fa-file-pdf"></i>&nbsp; Live Preview</span>
-      <div style="display:flex; gap:12px; align-items:center;">
-        <a id="pdfOpenNewTab" href="#" target="_blank" style="color:#aaa; font-size:13px; text-decoration:none;" title="Open in new tab"><i class="fas fa-external-link-alt"></i> Open in new tab</a>
-        <button onclick="closePdfPreview()" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); color:#fff; padding:8px 18px; border-radius:8px; cursor:pointer; font-size:14px; font-weight:600;"><i class="fas fa-times"></i> Close</button>
-      </div>
-    </div>
-    <div style="flex:1; position:relative; overflow:hidden;">
-      <iframe id="pdfPreviewIframe" src="" style="width:100%; height:100%; border:none; background:#fff;"></iframe>
-    </div>
-  </div>
-
   </div>
 
   <script>
-    // Version: 2024-12-02-v4 - Complete fillFormWithImportedData function fix
-    // Last updated: 2024-12-02 20:45
+    // Version: 2026-02-21-v5 - Added Hiero Cool Template
+    // Last updated: 2026-02-21 20:15
     // CACHE BUSTER: If you see broken code, hard refresh: Ctrl+Shift+R (Windows) or Cmd+Shift+R (Mac)
 
-    console.log('🔥 Resume Builder v4 Loaded - 2024-12-02 20:45');
-    console.log('✅ fillFormWithImportedData function: COMPLETE AND WORKING');
+    // console.log('ðŸ"¥ Resume Builder v5 Loaded - 2026-02-21 20:15');
+    // console.log('âœ… fillFormWithImportedData function: COMPLETE AND WORKING');
 
     // Global state
     let selectedTemplate = null;
-    let _generatedPdfBlobUrl = null; // cached blob URL from generation
 
     // ========== BACKEND CONFIGURATION ==========
     // Point to the integrated Gateway's Resume API
     const BACKEND_URL = window.location.origin + '/api/resume';
 
-    console.log('🌐 Backend URL:', BACKEND_URL);
-    console.log('🔧 Mode: Using Integrated Gateway');
-
-    // Add quick backend health ping (non-blocking, silent failure)
-    // Only run if page is loaded via http/https (not file://)
+    console.log('[INFO] Backend URL:', BACKEND_URL);
+    // Backend health check (non-blocking)
     (async () => {
-      // Skip health check if opened via file:// protocol (CORS will fail)
-      if (window.location.protocol === 'file:') {
-        console.log('ℹ️ Skipping health check (file:// protocol)');
-        return;
-      }
-
+      if (window.location.protocol === 'file:') { return; }
       try {
-        const backendUrl = BACKEND_URL;
-        console.log('🔍 Checking backend health at:', backendUrl + '/health');
-
-        const r = await fetch(backendUrl + '/health', {
-          cache: 'no-store',
-          method: 'GET',
-          mode: 'cors',
-          headers: {
-            'Accept': 'application/json'
-          }
-        });
-
-        if (r.ok) {
-          const data = await r.json();
-          console.log('✅ Backend health check passed:', backendUrl, data);
-        } else {
-          console.warn('⚠️ Health endpoint returned:', r.status, 'for', backendUrl);
-        }
+        const r = await fetch(BACKEND_URL + '/health', { cache: 'no-store', method: 'GET' });
+        if (r.ok) { console.log('[OK] Backend health check passed'); }
       } catch (e) {
-        // Silent failure - don't show error if backend is not accessible yet
-        // This is just a health check, not critical for functionality
-        // Common reasons: CORS, network error, server not running
-        console.debug('ℹ️ Backend health check skipped (non-critical):', e.message);
+        console.debug('[INFO] Backend health check skipped:', e.message);
       }
     })();
 
@@ -1643,7 +2604,7 @@
         // Not logged in - redirect to login
         alert('Please login to access the resume builder');
         window.location.href = '/dashboard/login.html';
-        return false;
+      return false;
       }
       return true;
     }
@@ -1653,8 +2614,8 @@
       const isPro = !!user.isPro;
       const plan = user.proPlan || '';
 
-      const premiumTemplates = ['hiero-royal', 'hiero-signature', 'hiero-prestige', 'hiero-elite', 'hiero-vision', 'hiero-vertex', 'hiero-premium', 'hiero-urban'];
-      const affordableTemplates = ['hiero-executive', 'hiero-nova', 'rishi', 'hiero-monethon', 'template4', 'hiero-timeline', 'hiero-studio', 'hiero-retail', 'hiero-essence', 'hiero-velocity', 'hiero-legion'];
+      const premiumTemplates = ['hiero-royal', 'hiero-signature', 'hiero-prestige', 'hiero-elite', 'hiero-vision', 'hiero-vertex', 'hiero-premium', 'rishi'];
+      const affordableTemplates = ['hiero-executive', 'hiero-nova', 'hiero-urban', 'hiero-monethon', 'template4', 'hiero-timeline', 'hiero-studio', 'hiero-retail', 'hiero-essence', 'hiero-velocity', 'hiero-legion'];
       const freeTemplates = ['hiero-cool', 'priya-analytics', 'hiero-tech'];
 
       document.querySelectorAll('.template-card').forEach(card => {
@@ -1708,15 +2669,9 @@
             card.insertBefore(newBadge, card.firstChild);
           }
 
-          const hasAccess = isPro && (plan === 'affordable' || plan === 'premium' || plan === '6months');
           if (btnEl) {
-            if (hasAccess) {
-              btnEl.innerHTML = '<i class="fas fa-arrow-right"></i> Start Building';
-              btnEl.setAttribute('onclick', `startBuilding('${templateId}')`);
-            } else {
-              btnEl.innerHTML = '<i class="fas fa-lock"></i> Unlock with ₹9';
-              btnEl.setAttribute('onclick', `window.location.href="/pricing.html"`);
-            }
+            btnEl.innerHTML = '<i class="fas fa-arrow-right"></i> Start Building';
+            btnEl.setAttribute('onclick', `startBuilding('${templateId}')`);
             btnEl.style.background = 'linear-gradient(135deg, #6C63FF 0%, #4b44d1 100%)';
             btnEl.style.color = '#fff';
           }
@@ -1740,15 +2695,9 @@
             card.insertBefore(newBadge, card.firstChild);
           }
 
-          const hasAccess = isPro && (plan === 'premium' || plan === '6months');
           if (btnEl) {
-            if (hasAccess) {
-              btnEl.innerHTML = '<i class="fas fa-arrow-right"></i> Start Building';
-              btnEl.setAttribute('onclick', `startBuilding('${templateId}')`);
-            } else {
-              btnEl.innerHTML = '<i class="fas fa-lock"></i> Unlock with ₹25';
-              btnEl.setAttribute('onclick', `window.location.href="/pricing.html"`);
-            }
+            btnEl.innerHTML = '<i class="fas fa-arrow-right"></i> Start Building';
+            btnEl.setAttribute('onclick', `startBuilding('${templateId}')`);
             btnEl.style.background = 'linear-gradient(135deg, #ffd700 0%, #ffed4e 100%)';
             btnEl.style.color = '#000';
           }
@@ -1759,16 +2708,23 @@
     // Helper function to beautifully organize the grids
     window.groupTemplatesBeautifully = function() {
         const grid = document.getElementById('templatesGrid');
-        if (!grid || grid.classList.contains('beautiful-grouped')) return;
-        grid.classList.add('beautiful-grouped');
-        
-        const cards = Array.from(grid.querySelectorAll('.template-card'));
-
-        // Randomly shuffle the cards so templates appear in a random order
-        for (let i = cards.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [cards[i], cards[j]] = [cards[j], cards[i]];
+        if (!grid) {
+            return;
         }
+        if (grid.classList.contains('beautiful-grouped')) {
+            return;
+        }
+        
+        try {
+            grid.classList.add('beautiful-grouped');
+            
+            const cards = Array.from(grid.querySelectorAll('.template-card'));
+            
+            // Randomly shuffle the cards so templates appear in a random order
+            for (let i = cards.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [cards[i], cards[j]] = [cards[j], cards[i]];
+            }
         
         const createSection = (id, title, icon, color) => {
             const wrapper = document.createElement('div');
@@ -1841,8 +2797,10 @@
         parent.insertBefore(freeSection.wrapper, grid);
         parent.insertBefore(affordableSection.wrapper, grid);
         parent.insertBefore(premiumSection.wrapper, grid);
-        
-        grid.style.display = 'none';
+            grid.style.display = 'none';
+        } catch (e) {
+            console.error("ERROR IN GROUPING: " + e.message);
+        }
     };
 
     // Initialize page - always start at Step 1 (template selection)
@@ -1868,6 +2826,19 @@
       // (User can select a different template)
       selectedTemplate = null;
 
+      // Reset category to 'all' and shuffle for a dynamic experience
+      const allBtn = document.querySelector('.category-btn[data-category="all"]');
+      if (allBtn) {
+        document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+        allBtn.classList.add('active');
+        const cards = document.querySelectorAll('.template-card');
+        cards.forEach(card => card.style.display = 'block');
+      }
+
+      if (typeof shuffleTemplates === 'function') {
+        shuffleTemplates();
+      }
+
       console.log('Page initialized - showing Step 1 (template selection)');
 
       // Ensure history state is set to Step 1
@@ -1876,8 +2847,77 @@
       }
     }
 
+    /**
+     * Applies domain-specific reordering and template suggestions
+     */
+    function applyDomainConfig() {
+      const selectedSubdomain = localStorage.getItem('selectedSubdomain');
+      if (!selectedSubdomain || !window.DOMAIN_CONFIG) return;
+
+      const config = window.DOMAIN_CONFIG[selectedSubdomain];
+      if (!config) {
+        console.log(`No specific config for subdomain: ${selectedSubdomain}`);
+        return;
+      }
+
+      console.log(`Applying domain config for: ${selectedSubdomain}`, config);
+
+      // 1. Store the section order globally for collectFormData to use
+      window.currentSectionOrder = config.sectionOrder;
+
+      // 2. Reorder Form Sections in the UI (for a tailored feel)
+      const reorderPane = (paneSelector, sections) => {
+        const pane = document.querySelector(paneSelector);
+        if (!pane) return;
+
+        sections.forEach(secKey => {
+          const sectionId = window.SECTION_ID_MAP[secKey];
+          if (!sectionId) return;
+
+          const sectionEl = document.getElementById(sectionId);
+          if (sectionEl && sectionEl.parentElement === pane) {
+            pane.appendChild(sectionEl); // Moving to the end of the pane in order
+          }
+        });
+      };
+
+      // Reorder within both panes if they exist
+      reorderPane('.left-pane .form-content-inner', config.sectionOrder);
+      reorderPane('.left-pane', config.sectionOrder);
+      reorderPane('.right-pane #resumeFormPart2', config.sectionOrder);
+      reorderPane('.right-pane', config.sectionOrder);
+
+      // 3. Suggest/Pre-select Template if on Step 1
+      if (config.templateStyle) {
+        // Find the button and click it to filter
+        const categoryBtn = document.querySelector(`.category-btn[data-category="${config.templateStyle}"]`);
+        if (categoryBtn) {
+          categoryBtn.click();
+        }
+      }
+
+      // 4. Highlight specific section
+      if (config.highlight) {
+        const targetId = window.SECTION_ID_MAP[config.highlight];
+        const targetEl = document.getElementById(targetId);
+        if (targetEl) {
+          targetEl.style.borderLeft = '6px solid var(--primary)';
+          targetEl.style.paddingLeft = '20px';
+          
+          const label = targetEl.querySelector('h2');
+          if (label) {
+            const badge = document.createElement('span');
+            badge.style.cssText = 'background: var(--primary); color: black; font-size: 10px; padding: 2px 8px; border-radius: 10px; margin-left: 10px; vertical-align: middle; text-transform: uppercase; font-weight: 800;';
+            badge.innerHTML = '<i class="fas fa-star"></i> Essential';
+            label.appendChild(badge);
+          }
+        }
+      }
+    }
+
     // Template selection functionality
     document.addEventListener('DOMContentLoaded', function () {
+      
       // Check if user is logged in
       if (!checkAuthentication()) {
         return; // Stop execution if not authenticated
@@ -1885,6 +2925,9 @@
 
       // Initialize page to Step 1
       initializePage();
+
+      // Apply domain-specific logic if redirected from domain selection
+      applyDomainConfig();
 
       // ==================== BROWSER BACK BUTTON HANDLING ====================
       // Push initial state to prevent direct back to index.html
@@ -1982,44 +3025,77 @@
 
       // Category filtering
       document.querySelectorAll('.category-btn').forEach(btn => {
-        if (btn.id === 'shuffleBtn') {
-          btn.addEventListener('click', function (e) {
-            e.preventDefault();
-            shuffleTemplates();
-          });
-          return;
-        }
-
-        btn.addEventListener('click', function () {
+        btn.addEventListener('click', function (e) {
+          e.preventDefault();
+          
           // Update active category
           document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
           this.classList.add('active');
 
-          // Filter templates
           const category = this.dataset.category;
-          const cards = document.querySelectorAll('.template-card');
-
-          cards.forEach(card => {
-            if (category === 'all' || card.dataset.category === category || card.dataset.type === category) {
-              card.style.display = 'block';
-            } else {
-              card.style.display = 'none';
-            }
-          });
           
-          // Hide empty sections
-          document.querySelectorAll('.category-section-wrapper').forEach(wrapper => {
-              const visibleCards = wrapper.querySelectorAll('.template-card[style*="display: block"]');
-              if (category === 'all' || visibleCards.length > 0) {
-                  wrapper.style.display = 'block';
-              } else {
-                  wrapper.style.display = 'none';
-              }
-          });
+          // Find the generated section wrappers
+          const freeWrapper = document.getElementById('wrapper-grid-free');
+          const plusWrapper = document.getElementById('wrapper-grid-affordable');
+          const proWrapper = document.getElementById('wrapper-grid-premium');
+          
+          if (!freeWrapper && !plusWrapper && !proWrapper) return;
+          
+          if (category === 'all') {
+              if (freeWrapper) freeWrapper.style.display = 'block';
+              if (plusWrapper) plusWrapper.style.display = 'block';
+              if (proWrapper) proWrapper.style.display = 'block';
+          } else if (category === 'free') {
+              if (freeWrapper) freeWrapper.style.display = 'block';
+              if (plusWrapper) plusWrapper.style.display = 'none';
+              if (proWrapper) proWrapper.style.display = 'none';
+          } else if (category === 'affordable') {
+              if (freeWrapper) freeWrapper.style.display = 'none';
+              if (plusWrapper) plusWrapper.style.display = 'block';
+              if (proWrapper) proWrapper.style.display = 'none';
+          } else if (category === 'premium') {
+              if (freeWrapper) freeWrapper.style.display = 'none';
+              if (plusWrapper) plusWrapper.style.display = 'none';
+              if (proWrapper) proWrapper.style.display = 'block';
+          }
         });
       });
       
       
+      function shuffleTemplates() {
+        const wrappers = document.querySelectorAll('.inner-category-grid');
+        
+        wrappers.forEach(grid => {
+            const cards = Array.from(grid.children);
+
+            // Fisher-Yates shuffle
+            for (let i = cards.length - 1; i > 0; i--) {
+              const j = Math.floor(Math.random() * (i + 1));
+              grid.appendChild(cards[j]);
+            }
+
+            // Add a nice animation effect
+            cards.forEach(card => {
+              card.style.animation = 'none';
+              card.offsetHeight; // trigger reflow
+              card.style.animation = 'premiumGlow 0.5s ease-out';
+            });
+        });
+      }
+
+      // Add the animation to CSS
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes premiumGlow {
+          0% { transform: scale(0.95); opacity: 0.5; filter: brightness(1.5); }
+          100% { transform: scale(1); opacity: 1; filter: brightness(1); }
+        }
+      `;
+      document.head.appendChild(style);
+
+      // Mix them up initially
+      shuffleTemplates();
+
       // Load saved skip states
       ['summary', 'experience', 'education', 'skills', 'projects', 'additional'].forEach(sec => {
         if (localStorage.getItem('skip_section_' + sec) === 'true') {
@@ -2124,34 +3200,182 @@
           description: 'Single-column layout with a grey top bar and bold section headings. Ideal for data-driven professionals.',
           style: 'Single-column, grey top bar, bold section headings with horizontal rules, matching the Priya Sharma data analyst resume style'
         },
+        'hiero-monethon': {
+          name: 'Hiero Monolith',
+          description: 'Premium layout with vibrant orange accents and a dominant navy sidebar.',
+          style: 'Two-column, orange profile header, navy sidebar with progress skill bars'
+        },
+        'hiero-cool': {
+          name: 'Hiero Cool',
+          description: 'A stunning modern template with a dark charcoal sidebar and vibrant purple accents.',
+          style: 'Two-column, charcoal sidebar, purple accents, unique timeline layout, skill progress bars'
+        },
+        'hiero-timeline': {
+          name: 'Hiero Timeline',
+          description: 'Elegant vertical timeline layout with a professional grayscale design. Ideal for clean, corporate presentation.',
+          style: 'Vertical timeline, grayscale design, circular nodes, and professional alignment.'
+        },
+
         'hiero-executive': {
           name: 'Hiero Executive',
           description: 'Premium corporate side-label layout inspired by Morgan Maxwell.',
           style: 'Left labels, clean headers, corporate type, and elegant delimiters.'
+        },
+        'hiero-studio': {
+          name: 'Hiero Studio',
+          description: 'Contemporary tech-focused side-label design for a modern professional look.',
+          style: 'Side-by-side structure, bold titles, and balanced professional spacing.'
+        },
+        'hiero-onyx': {
+          name: 'Hiero Onyx',
+          description: 'Bold high-contrast side-label design for maximum professional impact.',
+          style: 'Professional structure, high-contrast black accents, and premium spacing.'
         },
         'template4': {
           name: 'Hiero Academic',
           description: 'High-fidelity technical layout with centered headers and split subsections.',
           style: 'Times New Roman, centered header, academic split layout, and ATS-optimized structure.'
         },
-        'hiero-studio': {
-          name: 'Hiero Studio',
-          description: 'Modern professional layout with specialized technical sections. Ideal for developers and designers.',
-          style: 'Modern, clean, and technical.'
+        'hiero-urban': {
+          name: 'Hiero Urban',
+          description: 'Modern urban design with vibrant slate and sky blue accents. Perfect for making an attractive professional statement.',
+          style: 'Modern layout, slate & sky blue colours, stylish sections.'
+        },
+        'hiero-minimal': {
+          name: 'Hiero Minimal',
+          description: 'Clean minimalist design with maximum white space. Emphasizes content with subtle sophistication.',
+          style: 'Clean lines, lots of white space, modern typography.'
+        },
+        'hiero-tech': {
+          name: 'Hiero Tech',
+          description: 'Developer-focused template with code-style aesthetics. Optimized for software engineers.',
+          style: 'Monospace fonts, tech-inspired layout, project-focused.'
+        },
+        'hiero-bold': {
+          name: 'Hiero Bold',
+          description: 'Eye-catching design with bold typography and strong visual hierarchy.',
+          style: 'Bold fonts, high contrast, strong section headers.'
+        },
+        'hiero-elite': {
+          name: 'Hiero Elite',
+          description: 'Premium executive template with luxury design elements. Ideal for C-level executives.',
+          style: 'Luxury aesthetics, gold accents, premium typography.'
         },
         'hiero-retail': {
           name: 'Hiero Retail',
           description: 'Clean formatting with clear timeline layout. Ideal for retail professionals.',
           style: 'Timeline structure, left profile, distinctive border.'
+        },
+        'hiero-vision': {
+          name: 'Hiero Vision',
+          description: 'Creative layout with visual storytelling approach. Perfect for designers and marketers.',
+          style: 'Visual segments, creative spacing, storytelling layout.'
+        },
+        'hiero-compact': {
+          name: 'Hiero Compact',
+          description: 'Space-efficient design that fits more content in less space. Great for extensive history.',
+          style: 'Tight spacing, multi-column sections, compact fonts.'
+        },
+        'hiero-premium': {
+          name: 'Hiero Premium',
+          description: 'High-end professional design with sophisticated styling. Features elegant typography.',
+          style: 'Premium fonts, elegant layout, subtle sophisticated accents.'
+        },
+        'hiero-prestige': {
+          name: 'Hiero Prestige',
+          description: 'Distinguished design for top-tier professionals. Combines classic elegance with modern sophistication.',
+          style: 'Elegant sans-serif hierarchy, deep navy sidebar, premium gold accents, and a polished corporate timeline layout.'
+        },
+        'hiero-signature': {
+          name: 'Hiero Signature',
+          description: 'Modern minimalist A4 portrait with a bold two-column split layout. Features a grayscale aesthetic with bold orange accents and a vertical timeline.',
+          style: 'Two-column, orange accents, vertical section titles, grayscale profile photo.'
+        },
+        'hiero-essence': {
+          name: 'Hiero Essence',
+          description: 'Modern corporate design with a distinctive dark sidebar and orange accent bars. Perfect for a structured professional presentation.',
+          style: 'Two-column layout, dark sidebar (#1F1F1F), orange accents (#F5A623), clean typography.'
+        },
+        'hiero-aurora': {
+          name: 'Hiero Aurora',
+          description: 'Modern gradient design with fluid layouts. Perfect for forward-thinking professionals.',
+          style: 'Fluid gradients, soft shadows, modern sans-serif type.'
+        },
+        'hiero-zenith': {
+          name: 'Hiero Zenith',
+          description: 'Top-tier executive layout for industry leaders. Combines power with elegance.',
+          style: 'Bold headers, spacious layout, authoritative typography.'
+        },
+        'hiero-nebula': {
+          name: 'Hiero Nebula',
+          description: 'Space-inspired technical layout for space-tech and high-end engineering.',
+          style: 'Deep space accents, technical grids, futuristic feel.'
+        },
+        'hiero-quantum': {
+          name: 'Hiero Quantum',
+          description: 'Precision data-driven layout for scientists and analysts.',
+          style: 'Mathematical precision, grid-based layout, analytical fonts.'
+        },
+        'hiero-velocity': {
+          name: 'Hiero Velocity',
+          description: 'Fast-paced professional design for high-growth startup environments.',
+          style: 'Dynamic lines, energetic spacing, modern professional type.'
+        },
+        'hiero-prism': {
+          name: 'Hiero Prism',
+          description: 'Multi-faceted creative layout showcasing diverse skill sets.',
+          style: 'Colorful accents, multi-pane layout, creative flair.'
+        },
+        'hiero-orbit': {
+          name: 'Hiero Orbit',
+          description: 'Modern layout with circular design elements for a unique professional brand.',
+          style: 'Rounded corners, orbital layouts, soft professional colors.'
+        },
+        'hiero-titan': {
+          name: 'Hiero Titan',
+          description: 'Large, bold, and powerful layout for making a significant impact.',
+          style: 'Oversized headers, strong borders, impactful hierarchy.'
+        },
+        'hiero-apollo': {
+          name: 'Hiero Apollo',
+          description: 'Academic excellence and research-focused layout for scholars.',
+          style: 'Traditional?æœ¯ (academic) structure, refined serif type.'
+        },
+        'hiero-orion': {
+          name: 'Hiero Orion',
+          description: 'Stellar professional design for high-achievers across all fields.',
+          style: 'Clean professional structure, stellar accents, premium feel.'
+        },
+        'hiero-nova': {
+          name: 'Hiero Nova',
+          description: 'Modern editorial layout with a signature yellow header and deep charcoal sidebar.',
+          style: 'Yellow sidebar header, dark charcoal sidebar, bold editorial typography.'
+        },
+        'hiero-legion': {
+          name: 'Hiero Legion',
+          description: 'A sophisticated monochrome design with a bold shield profile and a strong vertical charcoal badge.',
+          style: 'Monochrome, charcoal sidebar, shield profile mask, high-contrast typography.'
+        },
+        'hiero-royal': {
+          name: 'Hiero Royal',
+          description: 'Classic beige-toned resume with elegant section icons, profile photo, strength tags and hobbies row. Ideal for classic and executive professionals.',
+          style: 'Warm beige (#EDE8D9) background, left date column, right content, rounded skill pills, hobbies row with circle icons.'
+        },
+        'hiero-vertex': {
+          name: 'Hiero Vertex',
+          description: 'A minimalist elegant design featuring a strong right charcoal sidebar. Highly attractive one-page resume.',
+          style: 'Two-column minimalist, charcoal sidebar, sleek top contact strip.'
         }
+
       };
+
 
       const template = templateDetails[templateId];
       if (!template) return;
 
       const freeTemplates = ['hiero-cool', 'priya-analytics', 'hiero-tech'];
-      const premiumTemplates = ['hiero-royal', 'hiero-signature', 'hiero-prestige', 'hiero-elite', 'hiero-vision', 'hiero-vertex', 'hiero-premium', 'hiero-urban'];
-      const affordableTemplates = ['hiero-executive', 'hiero-nova', 'rishi', 'hiero-monethon', 'template4', 'hiero-timeline', 'hiero-studio', 'hiero-retail', 'hiero-essence', 'hiero-velocity', 'hiero-legion'];
+      const premiumTemplates = ['hiero-royal', 'hiero-signature', 'hiero-prestige', 'hiero-elite', 'hiero-vision', 'hiero-vertex', 'hiero-premium', 'rishi'];
+      const affordableTemplates = ['hiero-executive', 'hiero-nova', 'hiero-urban', 'hiero-monethon', 'template4', 'hiero-timeline', 'hiero-studio', 'hiero-retail', 'hiero-essence', 'hiero-velocity', 'hiero-legion'];
 
       const user = JSON.parse(localStorage.getItem('user') || '{}');
       const isPro = !!user.isPro;
@@ -2160,29 +3384,21 @@
       let modalBtnStyle = "background: linear-gradient(135deg, #2ae023 0%, #1a8b17 100%); color: black; box-shadow: 0 4px 15px rgba(42,224,35,0.4);";
       let hoverShadow = "rgba(42,224,35,0.6)";
       let modalSubtitle = "Free Design • High Fidelity Preview";
-      let modalBtnText = "Use This Template";
+      let modalBtnText = "Start Building with This Template";
       let modalBtnAction = `startBuilding('${templateId}'); this.closest('.preview-modal-overlay').remove();`;
       
       if (premiumTemplates.includes(templateId)) {
         modalBtnStyle = "background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%); color: black; box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);";
         hoverShadow = "rgba(255, 215, 0, 0.6)";
-        modalSubtitle = "Premium Design (₹25) • High Fidelity Preview";
+        modalSubtitle = "Pro Design (₹25) • High Fidelity Preview";
         
-        const hasAccess = isPro && (plan === 'premium' || plan === '6months');
-        if (!hasAccess) {
-          modalBtnText = '<i class="fas fa-lock"></i> Unlock with ₹25';
-          modalBtnAction = `window.location.href="/pricing.html"`;
-        }
+        modalBtnText = "Start Building with This Template";
       } else if (affordableTemplates.includes(templateId)) {
         modalBtnStyle = "background: linear-gradient(135deg, #6C63FF 0%, #4b44d1 100%); color: white; box-shadow: 0 4px 15px rgba(108,99,255,0.4);";
         hoverShadow = "rgba(108,99,255,0.6)";
-        modalSubtitle = "Affordable Design (₹9) • High Fidelity Preview";
+        modalSubtitle = "Plus Design (₹9) • High Fidelity Preview";
 
-        const hasAccess = isPro && (plan === 'affordable' || plan === 'premium' || plan === '6months');
-        if (!hasAccess) {
-          modalBtnText = '<i class="fas fa-lock"></i> Unlock with ₹9';
-          modalBtnAction = `window.location.href="/pricing.html"`;
-        }
+        modalBtnText = "Start Building with This Template";
       }
 
       // Create modal with loading state
@@ -2235,7 +3451,8 @@
             </button>
           </div>
         </div>
-      `;
+`;
+
 
       modal.addEventListener('click', function (e) {
         if (e.target === modal) modal.remove();
@@ -2247,7 +3464,7 @@
       let previewLoaded = false;
 
       try {
-        console.log('🔍 Fetching preview for template:', templateId);
+    // console.log('ðŸ" Fetching preview for template:', templateId);
 
         // Sample data tailored for different templates
         let sampleData = {
@@ -2266,14 +3483,14 @@
               company: 'Tech Innovations Inc.',
               startDate: '2022-01',
               endDate: 'Present',
-              description: '• Led development of microservices architecture serving 1M+ users\n• Improved system performance by 40% through optimization\n• Mentored team of 5 junior developers'
+              description: ' Led development of microservices architecture serving 1M+ users\n Improved system performance by 40% through optimization\n Mentored team of 5 junior developers'
             },
             {
               jobTitle: 'Software Engineer',
               company: 'StartupXYZ',
               startDate: '2020-06',
               endDate: '2021-12',
-              description: '• Developed full-stack web applications using React and Node.js\n• Implemented RESTful APIs and database optimization\n• Collaborated with cross-functional teams in Agile environment'
+              description: ' Developed full-stack web applications using React and Node.js\n Implemented RESTful APIs and database optimization\n Collaborated with cross-functional teams in Agile environment'
             }
           ],
           education: [
@@ -2412,7 +3629,7 @@
         const controller = new AbortController();
         const timeoutId = setTimeout(() => {
           controller.abort();
-          console.warn('⏱️ Preview request timeout after 90 seconds');
+          console.warn('?? Preview request timeout after 90 seconds');
         }, 90000); // 90 seconds for ngrok
 
         const response = await fetch(`${BACKEND_URL}/preview-resume`, {
@@ -2434,7 +3651,7 @@
         const blob = await response.blob();
         const previewUrl = URL.createObjectURL(blob);
 
-        console.log('✅ Preview blob created for:', templateId);
+    // console.log('âœ… Preview blob created for:', templateId);
 
         // Update preview content with iframe
         const previewContent = modal.querySelector('#preview-content');
@@ -2460,9 +3677,36 @@
         } else {
           // Create iframe element for desktop
           const iframe = document.createElement('iframe');
-          iframe.style.cssText = 'width: 100%; height: 650px; border: none; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); background: white;';
-          iframe.src = previewUrl;
+          iframe.id = 'preview-iframe';
+          iframe.style.cssText = 'width: 100%; aspect-ratio: 1/1.4142; height: auto; border: none; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); background: white; transition: transform 0.2s ease; transform-origin: top center; transform: scale(1);';
+          iframe.src = previewUrl + '#toolbar=0&navpanes=0&scrollbar=0';
           previewContent.appendChild(iframe);
+
+          let currentZoom = 1.0;
+          window.updatePreviewZoom = function (delta, reset = false) {
+            if (reset) currentZoom = 1.0;
+            else currentZoom = Math.max(0.3, Math.min(2.0, currentZoom + delta));
+
+            const iframe = document.getElementById('preview-iframe');
+            const zoomText = document.getElementById('zoom-level-text');
+            if (iframe) {
+              iframe.style.transform = `scale(${currentZoom})`;
+              // Adjust container height to avoid scroll issues when zoomed in
+              previewContent.style.minHeight = (previewContent.offsetHeight * currentZoom) + 'px';
+            }
+            if (zoomText) {
+              zoomText.innerText = Math.round(currentZoom * 100) + '%';
+            }
+          };
+
+          // Add Ctrl + Wheel zoom support
+          previewContent.addEventListener('wheel', function (e) {
+            if (e.ctrlKey) {
+              e.preventDefault();
+              const delta = e.deltaY > 0 ? -0.1 : 0.1;
+              window.updatePreviewZoom(delta);
+            }
+          }, { passive: false });
 
           // Add a fallback link below the iframe just in case
           const fallback = document.createElement('div');
@@ -2481,7 +3725,7 @@
         };
 
       } catch (error) {
-        console.error('❌ Error fetching preview:', error, 'URL:', BACKEND_URL + '/preview-resume');
+    // console.error('âŒ Error fetching preview:', error, 'URL:', BACKEND_URL + '/preview-resume');
 
         const previewContent = modal.querySelector('#preview-content');
 
@@ -2521,9 +3765,9 @@
                   <h3 style="margin: 0 0 5px 0; color: #2c3e50; font-size: 16px; font-weight: 600;">Job Title</h3>
                   <p style="margin: 0 0 5px 0; color: #7f8c8d; font-size: 14px;">Company Name | 2020 - Present</p>
                   <p style="margin: 0; color: #555; font-size: 14px; line-height: 1.5;">
-                    • Your key responsibilities and achievements<br>
-                    • Measurable results and impacts<br>
-                    • Technologies and skills used
+                    â€¢ Your key responsibilities and achievements<br>
+                    â€¢ Measurable results and impacts<br>
+                    â€¢ Technologies and skills used
                   </p>
                 </div>
               </div>
@@ -2547,7 +3791,7 @@
             ${isNetworkError ? `
             <div style="margin-top: 20px; padding: 15px; background: #e8f5e9; border-radius: 6px; border-left: 4px solid #2ae023;">
               <p style="margin: 0 0 8px 0; color: #2c5e2e; font-size: 13px; font-weight: 600;">
-                💡 To see the actual template preview:
+                ðŸ'¡ To see the actual template preview:
               </p>
               <p style="margin: 0; color: #2c5e2e; font-size: 12px; line-height: 1.5;">
                 Make sure the backend server is running. You can still select this template to continue building your resume.
@@ -2564,7 +3808,7 @@
 
     // ========== Auto-fill imported resume data into form ==========
     function fillFormWithImportedData(data) {
-      console.log("🎯 Filling form with imported data:", data);
+    // console.log("ðŸŽ¯ Filling form with imported data:", data);
 
       // Personal Info
       document.getElementById("fullName").value = data.personalInfo?.fullName || "";
@@ -2578,9 +3822,14 @@
       document.getElementById("summary").value = data.summary || "";
 
       // Experience
+      const expSection = document.getElementById("section-experience");
+      if (data.experience && data.experience.length > 0 && expSection && expSection.classList.contains('skipped')) {
+        toggleSection('experience');
+      }
       const expContainer = document.getElementById("experienceContainer");
       expContainer.innerHTML = "";
       (data.experience || []).forEach((exp, i) => {
+
         addExperience();
         document.getElementsByName("jobTitle[]")[i].value = exp.jobTitle || "";
         document.getElementsByName("company[]")[i].value = exp.company || "";
@@ -2611,9 +3860,14 @@
       });
 
       // Education
+      const eduSection = document.getElementById("section-education");
+      if (data.education && data.education.length > 0 && eduSection && eduSection.classList.contains('skipped')) {
+        toggleSection('education');
+      }
       const eduContainer = document.getElementById("educationContainer");
       eduContainer.innerHTML = "";
       (data.education || []).forEach((edu, i) => {
+
         addEducation();
         document.getElementsByName("degree[]")[i].value = edu.degree || "";
         document.getElementsByName("school[]")[i].value = edu.school || "";
@@ -2626,9 +3880,14 @@
       document.getElementById("softSkills").value = data.softSkills || "";
 
       // Projects
+      const projSection = document.getElementById("section-projects");
+      if (data.projects && data.projects.length > 0 && projSection && projSection.classList.contains('skipped')) {
+        toggleSection('projects');
+      }
       const projContainer = document.getElementById("projectsContainer");
       projContainer.innerHTML = "";
       (data.projects || []).forEach((project, i) => {
+
         addProject();
         document.getElementsByName("projectName[]")[i].value = project.name || "";
         document.getElementsByName("projectTech[]")[i].value = project.tech || "";
@@ -2644,7 +3903,7 @@
       document.getElementById("achievements").value = data.achievements || "";
       document.getElementById("hobbies").value = data.hobbies || "";
 
-      console.log("✔️ Auto-fill completed successfully");
+      console.log('[OK] Auto-fill completed successfully');
     }
 
     // Start building with selected template
@@ -2654,7 +3913,7 @@
       // Save selected template to localStorage (for PDF generation)
       localStorage.setItem('selectedTemplate', templateId);
 
-      console.log('✅ Template selected:', templateId);
+    // console.log('âœ… Template selected:', templateId);
 
       // Show import resume modal first
       showImportResumeModal();
@@ -2673,11 +3932,14 @@
         'corporate-ats': 'Corporate ATS',
         'elegant-gradient': 'Elegant Gradient',
         'minimalist-mono': 'Minimalist Mono',
-        'rishi': 'Rishi Tech Modern',
+        'rishi': 'Hiero Modern',
         'priya': 'Priya Elegant',
-        'priya-analytics': 'Priya Analytics (Single Column)',
+        'priya-analytics': 'Hiero Analytics (Single Column)',
         'hiero-studio': 'Hiero Studio',
-        'template4': 'Hiero Academic'
+        'template4': 'Hiero Academic',
+        'hiero-monethon': 'Hiero Monethon',
+        'hiero-essence': 'Hiero Essence'
+
       };
       return names[templateId] || 'Selected';
     }
@@ -2735,14 +3997,14 @@
       // Close modal when clicking the backdrop (outside the content box)
       modal.addEventListener('click', function (e) {
         if (e.target === modal) {
-          console.log('🔵 Backdrop clicked, closing modal...');
+          // console.log('ðŸ"µ Backdrop clicked, closing modal...');
           closeImportModal();
         }
       });
 
       // Handle "No, I'll Fill It Manually" button click
       document.getElementById('proceedWithoutImportBtn').addEventListener('click', function (e) {
-        console.log('🟢 "No, I\'ll Fill It Manually" button clicked');
+    // console.log('ðŸŸ¢ "No, I\'ll Fill It Manually" button clicked');
         e.preventDefault();
         e.stopPropagation();
         proceedToFormWithoutImport();
@@ -2751,7 +4013,7 @@
       // Handle ESC key to close modal
       const escHandler = function (e) {
         if (e.key === 'Escape') {
-          console.log('🔵 ESC pressed, closing modal...');
+          // console.log('ðŸ"µ ESC pressed, closing modal...');
           closeImportModal();
           document.removeEventListener('keydown', escHandler);
         }
@@ -2781,7 +4043,7 @@
           // Use LOCAL backend for import to get "Perfect Extraction" logic
           // The production backend doesn't have the new AI logic yet.
           const IMPORT_URL = `${BACKEND_URL}/import`;
-          console.log('🚀 Importing resume via:', IMPORT_URL);
+    // console.log('ðŸš€ Importing resume via:', IMPORT_URL);
 
           const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
           const response = await fetch(IMPORT_URL, {
@@ -2877,26 +4139,26 @@
 
     // Close import modal
     function closeImportModal() {
-      console.log('🔵 Attempting to close import modal...');
+      // console.log('ðŸ"µ Attempting to close import modal...');
       const modal = document.getElementById('importResumeModal');
       if (modal) {
-        console.log('✅ Modal found, removing...');
+        // console.log('âœ… Modal found, removing...');
         modal.remove();
-        console.log('✅ Modal removed successfully');
+        // console.log('âœ… Modal removed successfully');
       } else {
-        console.warn('⚠️ Modal not found with id "importResumeModal"');
+    // console.warn('âš ? Modal not found with id "importResumeModal"');
       }
     }
 
     // Proceed to form without importing
     function proceedToFormWithoutImport() {
-      console.log('🔵 proceedToFormWithoutImport called');
+      // console.log('ðŸ"µ proceedToFormWithoutImport called');
       try {
         closeImportModal();
-        console.log('🔵 Modal closed, proceeding to form...');
+        // console.log('ðŸ"µ Modal closed, proceeding to form...');
         proceedToForm();
       } catch (error) {
-        console.error('❌ Error in proceedToFormWithoutImport:', error);
+    // console.error('âŒ Error in proceedToFormWithoutImport:', error);
         alert('Error: ' + error.message);
       }
     }
@@ -2926,10 +4188,10 @@
         <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
             <span style="font-size: 14px; opacity: 0.8;">JD Match Score</span>
-            <span style="font-weight: 800; color: #3b82f6;">${analysis.matchingScore}%</span>
+            <span style="font-weight: 800; color: #14b8a6;">${analysis.matchingScore}%</span>
           </div>
           <div style="height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
-            <div style="width: ${analysis.matchingScore}%; height: 100%; background: #3b82f6;"></div>
+            <div style="width: ${analysis.matchingScore}%; height: 100%; background: #14b8a6;"></div>
           </div>
         </div>
       ` : '';
@@ -2971,19 +4233,19 @@
 
     // Show the form (Step 2)
     function proceedToForm() {
-      console.log('🔵 Moving from Step 1 → Step 2');
-      console.log('🔵 Selected template:', selectedTemplate);
+      // console.log('ðŸ"µ Moving from Step 1 â†' Step 2');
+    // console.log('ðŸ"µ Selected template:', selectedTemplate);
 
       try {
         // Check if template is selected
         if (!selectedTemplate) {
           // Try to recover from localStorage
           selectedTemplate = localStorage.getItem('selectedTemplate');
-          console.log('🔄 Recovered template from localStorage:', selectedTemplate);
+    // console.log('ðŸ"" Recovered template from localStorage:', selectedTemplate);
         }
 
         if (!selectedTemplate) {
-          console.error('❌ No template selected!');
+    // console.error('âŒ No template selected!');
           alert('Please select a template first');
           // Fallback: show template selection
           document.getElementById('templateSelection').style.display = 'block';
@@ -2994,77 +4256,80 @@
         const templateSelection = document.getElementById('templateSelection');
         if (templateSelection) {
           templateSelection.style.display = 'none';
-          console.log('✅ Template selection hidden');
+          // console.log('âœ… Template selection hidden');
         } else {
-          console.error('❌ templateSelection element not found');
+    // console.error('âŒ templateSelection element not found');
         }
 
         // Show form step indicator and form (Step 2)
         const formStepIndicator = document.getElementById('formStepIndicator');
         if (formStepIndicator) {
           formStepIndicator.style.display = 'block';
-          console.log('✅ Form step indicator shown');
+          // console.log('âœ… Form step indicator shown');
         } else {
-          console.error('❌ formStepIndicator element not found');
+    // console.error('âŒ formStepIndicator element not found');
         }
 
         const mainLayout = document.querySelector('.main-layout');
         if (mainLayout) {
           mainLayout.style.display = 'grid';
-          console.log('✅ Main layout shown');
+          // console.log('âœ… Main layout shown');
         } else {
-          console.error('❌ main-layout element not found');
+    // console.error('âŒ main-layout element not found');
         }
 
         const bottomActions = document.querySelector('.bottom-actions');
         if (bottomActions) {
           bottomActions.style.display = 'flex';
-          console.log('✅ Bottom actions shown');
+          // console.log('âœ… Bottom actions shown');
         } else {
-          console.error('❌ bottom-actions element not found');
+    // console.error('âŒ bottom-actions element not found');
         }
+
+        // Initialize photo if previously uploaded
+        initPhotoFromStorage();
 
         // Update step indicator with template info
         const templateName = getTemplateName(selectedTemplate);
-        console.log('✅ Template name:', templateName);
+    // console.log('âœ… Template name:', templateName);
 
         const stepText = document.querySelector('#formStepIndicator .step-text');
         if (stepText) {
           stepText.textContent = `Step 2: Fill Your Information (Using ${templateName} template)`;
-          console.log('✅ Step text updated');
+          // console.log('âœ… Step text updated');
         } else {
-          console.error('❌ step-text element not found');
+    // console.error('âŒ step-text element not found');
         }
 
         // Add a back button to return to Step 1
         addBackToTemplatesButton();
-        console.log('✅ Back button added');
+        // console.log('âœ… Back button added');
 
         // Push history state for Step 2 (enables proper back button behavior)
         history.pushState({ step: 2, template: selectedTemplate }, '', '');
-        console.log('✅ History state pushed');
+        // console.log('âœ… History state pushed');
 
         // Scroll to form
         setTimeout(() => {
           const mainLayoutScroll = document.querySelector('.main-layout');
           if (mainLayoutScroll) {
             mainLayoutScroll.scrollIntoView({ behavior: 'smooth' });
-            console.log('✅ Scrolled to form');
+            // console.log('âœ… Scrolled to form');
           }
         }, 100);
 
-        console.log('✅✅✅ proceedToForm completed successfully!');
+        // console.log('âœ…âœ…âœ… proceedToForm completed successfully!');
 
       } catch (error) {
-        console.error('❌ Error in proceedToForm:', error);
+    // console.error('âŒ Error in proceedToForm:', error);
         alert('Error proceeding to form: ' + error.message);
       }
     }
 
-    // Fill form with imported resume data (Auto-fill) — v2025-12-02
+    // Fill form with imported resume data (Auto-fill) â€" v2025-12-02
     function fillFormWithImportedData(data) {
       try {
-        console.log("🎯 Filling form with imported data", data);
+    // console.log("ðŸŽ¯ Filling form with imported data", data);
 
         // Preserve selected template before clearing form
         const preservedTemplate = selectedTemplate || localStorage.getItem('selectedTemplate');
@@ -3075,7 +4340,7 @@
         if (preservedTemplate) {
           selectedTemplate = preservedTemplate;
           localStorage.setItem('selectedTemplate', preservedTemplate);
-          console.log("✅ Fixed: Preserved template during import:", selectedTemplate);
+    // console.log("âœ… Fixed: Preserved template during import:", selectedTemplate);
         }
 
         const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ""; };
@@ -3170,6 +4435,31 @@
           });
         }
 
+        // 5b. Internships (Dynamic)
+        const internContainer = document.getElementById("internshipsContainer");
+        if (internContainer) {
+          internContainer.innerHTML = "";
+          const internships = Array.isArray(data.internships) ? data.internships : [];
+          if (internships.length > 0) {
+            const section = document.getElementById('section-internships');
+            if (section && section.classList.contains('skipped')) toggleSection('internships');
+          }
+          internships.forEach((intern, i) => {
+            addInternship();
+            const roles = document.querySelectorAll("[name='internRole[]']");
+            const orgs = document.querySelectorAll("[name='internOrg[]']");
+            const starts = document.querySelectorAll("[name='internStart[]']");
+            const ends = document.querySelectorAll("[name='internEnd[]']");
+            const descs = document.querySelectorAll("[name='internDesc[]']");
+            if (roles[i]) roles[i].value = intern.jobTitle || intern.role || "";
+            if (orgs[i]) orgs[i].value = intern.company || intern.org || "";
+            if (starts[i]) starts[i].value = intern.startDate || intern.start || "";
+            if (ends[i]) ends[i].value = intern.endDate || intern.end || "";
+            if (descs[i]) descs[i].value = intern.description || intern.desc || "";
+          });
+        }
+
+
         // 6. Custom/Additional (Fallback System)
         if (data.customSectionContent) {
           const customArea = document.getElementById("customSectionContent");
@@ -3245,7 +4535,7 @@
         if (data.customSections && Array.isArray(data.customSections) && data.customSections.length > 0) {
           const first = data.customSections[0];
           setVal('customSectionTitle', first.title || 'Custom Section');
-          setVal('customSectionContent', Array.isArray(first.items) ? first.items.join('\n• ') : (first.items || ''));
+          setVal('customSectionContent', Array.isArray(first.items) ? first.items.join('\nâ€¢ ') : (first.items || ''));
 
           if (data.customSections.length > 1) {
             const others = data.customSections.slice(1).map(s => `${s.title}:\n${Array.isArray(s.items) ? s.items.join(', ') : s.items}`).join('\n\n');
@@ -3311,8 +4601,8 @@
           }
         });
 
-        console.log("✔️ Auto-fill completed successfully");
-        alert('✅ Imported resume data has been filled into the form. Review and generate your resume.');
+        console.log('[OK] Auto-fill completed successfully');
+        alert(' Imported resume data has been filled into the form. Review and generate your resume.');
 
         // 11. Final UI Update
         const templateSelection = document.getElementById('templateSelection');
@@ -3329,8 +4619,8 @@
         localStorage.setItem('resumeData', JSON.stringify(data));
 
       } catch (err) {
-        console.error('❌ Error in fillFormWithImportedData:', err);
-        alert('❌ Failed to auto-fill form: ' + err.message);
+    // console.error('âŒ Error in fillFormWithImportedData:', err);
+        alert(' Failed to auto-fill form: ' + err.message);
       }
     }
 
@@ -3392,8 +4682,143 @@
       localStorage.setItem('skip_section_' + section, willBeSkipped);
     }
 
+
+    // ----------  PHOTO UPLOAD HANDLER  ----------
+    let uploadedPhotoData = null; // Store photo as base64
+
+    function initPhotoFromStorage() {
+      const storedPhoto = localStorage.getItem('profilePhoto');
+      if (storedPhoto) {
+        uploadedPhotoData = storedPhoto;
+        const photoPreview = document.getElementById('photoPreview');
+        if (photoPreview) {
+          photoPreview.classList.add('has-image');
+          const existingImg = photoPreview.querySelector('img');
+          if (existingImg) {
+            existingImg.src = storedPhoto;
+          } else {
+            const img = document.createElement('img');
+            img.src = storedPhoto;
+            photoPreview.appendChild(img);
+          }
+        }
+
+        // Show AI Button & description (unless it's already an AI photo)
+        if (localStorage.getItem('ai_photo_formalized') === 'true') {
+          const badge = document.getElementById('aiPhotoBadge');
+          if (badge) {
+            badge.style.display = 'block';
+            badge.innerHTML = '<i class="fas fa-crown"></i> <strong>EXECUTIVE PHOTO:</strong> Your AI Formalized photo is active.';
+            badge.style.background = 'rgba(255, 215, 0, 0.1)';
+            badge.style.borderColor = '#ffd700';
+            badge.style.color = '#ffd700';
+          }
+        } else {
+          const aiBtn = document.getElementById('aiFormalizeBtn');
+          if (aiBtn) aiBtn.style.display = 'flex';
+          const aiDesc = document.getElementById('aiPhotoDesc');
+          if (aiDesc) aiDesc.style.display = 'block';
+        }
+      }
+    }
+
+    function handlePhotoUpload(event) {
+      const file = event.target.files[0];
+      const photoPreview = document.getElementById('photoPreview');
+      const photoStatus = document.getElementById('photoStatus');
+
+      // Clear previous status
+      photoStatus.textContent = '';
+      photoStatus.className = 'photo-status';
+
+      if (!file) return;
+
+      // Validate file type
+      const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+      if (!validTypes.includes(file.type)) {
+        photoStatus.textContent = ' Invalid format. Please upload JPG or PNG only.';
+        photoStatus.classList.add('error');
+        event.target.value = ''; // Clear the input
+        return;
+      }
+
+      // Validate file size (minimum 50KB)
+      const minSize = 50 * 1024; // 50KB in bytes
+      if (file.size < minSize) {
+        photoStatus.textContent = ` Photo too small. Minimum ${Math.round(minSize / 1024)}KB required.`;
+        photoStatus.classList.add('error');
+        event.target.value = '';
+        return;
+      }
+
+      // Maximum size check (5MB)
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (file.size > maxSize) {
+        photoStatus.textContent = ' Photo too large. Maximum 5MB allowed.';
+        photoStatus.classList.add('error');
+        event.target.value = '';
+        return;
+      }
+
+      // Read and display photo
+      const reader = new FileReader();
+
+      reader.onload = function (e) {
+        // Store photo data
+        uploadedPhotoData = e.target.result;
+
+        // Display preview
+        photoPreview.classList.add('has-image');
+        const existingImg = photoPreview.querySelector('img');
+        if (existingImg) {
+          existingImg.src = e.target.result;
+        } else {
+          const img = document.createElement('img');
+          img.src = e.target.result;
+          photoPreview.appendChild(img);
+        }
+
+        // Show success message
+        const fileSizeKB = Math.round(file.size / 1024);
+        photoStatus.textContent = ` Photo uploaded successfully (${fileSizeKB}KB)`;
+        photoStatus.classList.add('success');
+
+        // Show AI Button and Badge
+        document.getElementById('aiFormalizeBtn').style.display = 'flex';
+        document.getElementById('aiPhotoBadge').style.display = 'block';
+
+        // Save to localStorage
+        localStorage.setItem('profilePhoto', uploadedPhotoData);
+      };
+
+      reader.onerror = function () {
+        photoStatus.textContent = ' Failed to load photo. Please try again.';
+        photoStatus.classList.add('error');
+      };
+
+      reader.readAsDataURL(file);
+    }
+
     // ----------  FIELD SKIP / SHOW  ----------
     function skipField(field) {
+      // Special handling for photo upload
+      if (field === 'profilePhoto') {
+        const photoSection = document.querySelector('.photo-upload-section');
+        if (!photoSection) return;
+
+        const label = photoSection.querySelector('label');
+        const skipSpan = label?.querySelector('.field-skip');
+        if (!skipSpan) return;
+
+        const willBeSkipped = !photoSection.classList.contains('skipped');
+        photoSection.classList.toggle('skipped', willBeSkipped);
+        skipSpan.textContent = willBeSkipped ? 'Show' : 'Skip';
+
+        localStorage.setItem('skip_field_profilePhoto', willBeSkipped);
+        return;
+      }
+
+      // Normal field handling
       const group = document.getElementById('group-' + field);
       const input = document.getElementById(field);
       if (!group || !input) return;
@@ -3467,6 +4892,7 @@
       container.appendChild(div);
     }
 
+
     function addEducation() {
       eduCount++;
       const container = document.getElementById('educationContainer');
@@ -3485,6 +4911,26 @@
       `;
       container.appendChild(div);
     }
+
+    function addInternship() {
+      const container = document.getElementById('internshipsContainer');
+      const div = document.createElement('div');
+      div.className = 'internship-item';
+      div.innerHTML = `
+        <button type="button" class="remove-btn" aria-label="Remove entry" onclick="this.parentElement.remove()">Remove</button>
+        <div class="form-row">
+          <div class="form-group"><label>Intern Role</label><input type="text" name="internRole[]" placeholder="Software Intern"></div>
+          <div class="form-group"><label>Organization</label><input type="text" name="internOrg[]" placeholder="Tech Solutions"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Start Date</label><input type="month" name="internStart[]"></div>
+          <div class="form-group"><label>End Date</label><input type="month" name="internEnd[]"></div>
+        </div>
+        <div class="form-group"><label>Description</label><textarea name="internDesc[]" rows="4" placeholder="Key contributions..."></textarea></div>
+      `;
+      container.appendChild(div);
+    }
+
 
     // Add Reference
     let refCount = 1;
@@ -3571,7 +5017,7 @@
           return;
         }
 
-        console.log('🔄 Starting to fill sample data...');
+        // console.log('ðŸ"" Starting to fill sample data...');
 
         // Personal Information
         const fullNameEl = document.getElementById('fullName');
@@ -3579,7 +5025,7 @@
         const phoneEl = document.getElementById('phone');
 
         if (!fullNameEl || !emailEl || !phoneEl) {
-          console.error('❌ Required form elements not found');
+    // console.error('âŒ Required form elements not found');
           alert('Error: Form elements not found. Please refresh the page and try again.');
           return;
         }
@@ -3701,7 +5147,7 @@
             start: '2023-01',
             end: '',
             current: true,
-            description: '• Analyzed large datasets (50M+ rows) to identify trends and build predictive dashboards\n• Developed machine learning models (classification & regression) improving customer churn prediction by 18%\n• Performed feature engineering, model tuning, and evaluation using precision, recall, and ROC-AUC\n• Implemented A/B testing frameworks to measure product improvements; increased conversion rate by 6.5%\n• Built visualization dashboards using Matplotlib, Seaborn, and Tableau to support decision-making'
+            description: ' Analyzed large datasets (50M+ rows) to identify trends and build predictive dashboards\n Developed machine learning models (classification & regression) improving customer churn prediction by 18%\n Performed feature engineering, model tuning, and evaluation using precision, recall, and ROC-AUC\n Implemented A/B testing frameworks to measure product improvements; increased conversion rate by 6.5%\n Built visualization dashboards using Matplotlib, Seaborn, and Tableau to support decision-making'
           },
           {
             title: 'Junior Data Analyst',
@@ -3709,7 +5155,7 @@
             start: '2021-08',
             end: '2022-12',
             current: false,
-            description: '• Conducted exploratory data analysis (EDA) and identified business insights\n• Automated data cleaning and transformation pipelines using Python and SQL\n• Contributed to clustering models for customer segmentation'
+            description: ' Conducted exploratory data analysis (EDA) and identified business insights\n Automated data cleaning and transformation pipelines using Python and SQL\n Contributed to clustering models for customer segmentation'
           }
         ];
 
@@ -3771,6 +5217,44 @@
             if (allGPAs[index]) allGPAs[index].value = edu.gpa;
           }, 100 * index);
         });
+
+        // Fill Internship Sample Data
+        const internSection = document.getElementById('section-internships');
+        if (internSection && internSection.classList.contains('skipped')) {
+          toggleSection('internships');
+        }
+
+        const internships = [
+          {
+            role: 'Product Management Intern',
+            org: 'FinTech Solutions',
+            start: '2021-05',
+            end: '2021-07',
+            desc: 'Assisted in product roadmap development and conducted competitor analysis.'
+          }
+        ];
+
+        const internContainer = document.getElementById('internshipsContainer');
+        if (internContainer) {
+          internContainer.innerHTML = '';
+          internships.forEach((intern, index) => {
+            if (index > 0) addInternship();
+            setTimeout(() => {
+              const allRoles = document.querySelectorAll('input[name="internRole[]"]');
+              const allOrgs = document.querySelectorAll('input[name="internOrg[]"]');
+              const allStarts = document.querySelectorAll('input[name="internStart[]"]');
+              const allEnds = document.querySelectorAll('input[name="internEnd[]"]');
+              const allDescs = document.querySelectorAll('textarea[name="internDesc[]"]');
+
+              if (allRoles[index]) allRoles[index].value = intern.role;
+              if (allOrgs[index]) allOrgs[index].value = intern.org;
+              if (allStarts[index]) allStarts[index].value = intern.start;
+              if (allEnds[index]) allEnds[index].value = intern.end;
+              if (allDescs[index]) allDescs[index].value = intern.desc;
+            }, 100 * index);
+          });
+        }
+
 
         // Add references (un-skip the section first if it's skipped)
         const refSection = document.getElementById('section-references');
@@ -3854,8 +5338,8 @@
 
         // Show success message
         setTimeout(() => {
-          console.log('✅ Sample data filled successfully');
-          alert('✅ Sample data has been loaded successfully!\n\nYou can now preview or generate your resume with any template to see how it looks with comprehensive data.');
+          // console.log('âœ… Sample data filled successfully');
+          alert(' Sample data has been loaded successfully!\n\nYou can now preview or generate your resume with any template to see how it looks with comprehensive data.');
 
           // Scroll to top of form
           const mainLayout = document.querySelector('.main-layout');
@@ -3865,8 +5349,8 @@
         }, 2000);
 
       } catch (error) {
-        console.error('❌ Error filling sample data:', error);
-        alert('❌ Error filling sample data: ' + error.message + '\n\nPlease check the browser console for details.');
+    // console.error('âŒ Error filling sample data:', error);
+        alert(' Error filling sample data: ' + error.message + '\n\nPlease check the browser console for details.');
       }
     }
 
@@ -3915,7 +5399,7 @@
       }
 
       if (!valid) {
-        alert('Please fix the following errors:\n• ' + errors.join('\n• '));
+        alert('Please fix the following errors:\n ' + errors.join('\n '));
         return;
       }
 
@@ -3936,7 +5420,7 @@
       data.template = selectedTemplate;
       localStorage.setItem('resumeData', JSON.stringify(data));
 
-      console.log('🚀 Starting resume generation with in-page animation:', data);
+    // console.log('ðŸš€ Starting resume generation with in-page animation:', data);
       console.log('Backend URL:', BACKEND_URL);
 
       // Show beautiful loading overlay in same window (no popup!)
@@ -4003,20 +5487,16 @@
         const controller = new AbortController();
         const timeoutId = setTimeout(() => {
           controller.abort();
-          console.error('⏱️ Request timeout after 120 seconds');
-          statusEl.textContent = '❌ Request Timeout';
+          console.error('?? Request timeout after 120 seconds');
+          statusEl.textContent = ' Request Timeout';
           statusEl.style.color = '#ff6b6b';
           substatusEl.textContent = 'The server took too long to respond. Please try again or check your connection.';
           progressBar.style.background = 'linear-gradient(90deg, #ff6b6b, #c92a2a)';
         }, 120000); // 120 seconds for ngrok
 
         const downloadUrl = BACKEND_URL + '/download-resume';
-        console.log('📡 Generating resume at:', downloadUrl);
-        console.log('📦 Request data:', {
-          template: data.template,
-          name: data.personalInfo?.fullName,
-          dataSize: JSON.stringify(data).length
-        });
+    // console.log('[INFO] Generating resume at:', downloadUrl);
+    // console.log('[INFO] Request data:', { template: data.template, name: data.personalInfo?.fullName });
 
         // Test backend connectivity first
         try {
@@ -4026,12 +5506,12 @@
             cache: 'no-store'
           });
           if (healthCheck.ok) {
-            console.log('✅ Backend health check passed before download');
+            // console.log('âœ… Backend health check passed before download');
           } else {
-            console.warn('⚠️ Backend health check returned:', healthCheck.status);
+    // console.warn('âš ? Backend health check returned:', healthCheck.status);
           }
         } catch (healthError) {
-          console.error('❌ Backend health check failed:', healthError.message);
+    // console.error('âŒ Backend health check failed:', healthError.message);
           console.error('   This might indicate the backend is not accessible');
           throw new Error(`Backend server not accessible at ${BACKEND_URL}. Please check if the server is running.`);
         }
@@ -4064,16 +5544,16 @@
 
         // Check if response is actually PDF
         const contentType = response.headers.get('content-type');
-        console.log('📄 Response Content-Type:', contentType);
+    // console.log('ðŸ"" Response Content-Type:', contentType);
 
         if (!contentType || !contentType.includes('application/pdf')) {
           const text = await response.text();
-          console.error('❌ Response is not PDF! Content:', text.substring(0, 200));
+    // console.error('âŒ Response is not PDF! Content:', text.substring(0, 200));
           throw new Error('Server returned non-PDF response. Check console for details.');
         }
 
         const blob = await response.blob();
-        console.log('✅ PDF blob received, size:', blob.size, 'bytes');
+    // console.log('âœ… PDF blob received, size:', blob.size, 'bytes');
 
         // Verify blob is actually PDF
         if (blob.size === 0) {
@@ -4082,7 +5562,7 @@
 
         // Check if blob type is correct
         if (!blob.type || !blob.type.includes('pdf')) {
-          console.warn('⚠️ Blob type is not PDF:', blob.type);
+    // console.warn('âš ? Blob type is not PDF:', blob.type);
           // Try to read first bytes to verify
           const firstBytes = await blob.slice(0, 4).text();
           console.log('First 4 bytes:', firstBytes);
@@ -4095,15 +5575,20 @@
         statusEl.textContent = 'PDF ready!';
         substatusEl.textContent = 'Preparing download...';
 
-        // Cache the blob URL so Live Preview works instantly (no second fetch needed)
-        if (_generatedPdfBlobUrl) {
-          URL.revokeObjectURL(_generatedPdfBlobUrl);
+        const fileName = `${userName.replace(/[^a-zA-Z0-9]/g, '_')}_${templateName}_resume.pdf`;
+        // Download the file with proper error handling
+        try {
+          // Manual download disabled in generation - choice modal will handle it
+          // console.log('âœ… Generation successful - showing choice modal');
+          // skip a.click()
+        } catch (downloadError) {
+
+    // console.error('âŒ Download error:', downloadError);
+          throw new Error('Failed to trigger download: ' + downloadError.message);
         }
-        _generatedPdfBlobUrl = URL.createObjectURL(blob);
-        console.log('✅ PDF blob cached for live preview:', _generatedPdfBlobUrl);
 
         progressBar.style.width = '100%';
-        statusEl.textContent = '✅ Resume Ready!';
+        statusEl.textContent = ' Analysis Complete!';
         statusEl.style.color = '#2ae023';
         substatusEl.textContent = 'Preparing your download options...';
 
@@ -4134,28 +5619,28 @@
 
 
       } catch (error) {
-        console.error('❌ Generation error:', error);
-        console.error('❌ Error details:', {
-          name: error.name,
-          message: error.message,
-          stack: error.stack,
-          backendUrl: BACKEND_URL,
-          downloadUrl: BACKEND_URL + '/download-resume'
-        });
+    // console.error('❌ Generation error:', error);
+    // console.error('❌ Error details:', {
+    //          name: error.name,
+    //          message: error.message,
+    //          stack: error.stack,
+    //          backendUrl: BACKEND_URL,
+    //          downloadUrl: BACKEND_URL + '/download-resume'
+    //        });
 
         const statusEl = document.getElementById('overlayStatus');
         const substatusEl = document.getElementById('overlaySubstatus');
         const progressBar = document.getElementById('overlayProgressBar');
 
-        statusEl.textContent = '❌ Generation Failed';
+        statusEl.textContent = ' Generation Failed';
         statusEl.style.color = '#ff6b6b';
         progressBar.style.background = 'linear-gradient(90deg, #ff6b6b, #c92a2a)';
 
         if (error.name === 'AbortError') {
-          substatusEl.textContent = '⚠️ Request timed out - server took too long. This may be due to slow network or ngrok connection.';
+          substatusEl.textContent = ' Request timed out - server took too long. This may be due to slow network or ngrok connection.';
         } else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError') || error.message.includes('ERR_CONNECTION_REFUSED')) {
-          substatusEl.textContent = `⚠️ Cannot connect to backend at ${BACKEND_URL}. Check console for details.`;
-          console.error('🔍 Connection troubleshooting:');
+          substatusEl.textContent = ` Cannot connect to backend at ${BACKEND_URL}. Check console for details.`;
+    // console.error('🔍 Connection troubleshooting:');
           console.error('   1. Is backend server running? Check: curl ' + BACKEND_URL + '/health');
           console.error('   2. Is CORS configured correctly?');
           console.error('   3. Is firewall blocking port 5003?');
@@ -4169,9 +5654,9 @@
         setTimeout(() => {
           overlay.remove();
           const errorMsg = error.name === 'AbortError'
-            ? 'Request timed out. The server took too long to respond. This may be due to:\n• Slow network connection\n• ngrok tunnel issues\n• Server overload\n\nPlease try again or check your connection.'
+            ? 'Request timed out. The server took too long to respond. This may be due to:\nâ€¢ Slow network connection\nâ€¢ ngrok tunnel issues\nâ€¢ Server overload\n\nPlease try again or check your connection.'
             : `Failed to generate resume: \n\n${error.message} \n\nPlease ensure the integrated gateway is running.`;
-          alert('❌ ' + errorMsg);
+          alert(' ' + errorMsg);
         }, 3000);
       }
     }
@@ -4181,8 +5666,15 @@
 
       // Personal
       data.personalInfo.fullName = document.getElementById('fullName').value;
+      data.personalInfo.headline = document.getElementById('headline')?.value || '';
       data.personalInfo.email = document.getElementById('email').value;
       data.personalInfo.phone = document.getElementById('phone').value;
+
+      // Profile photo (if uploaded and not skipped)
+      const photoSection = document.querySelector('.photo-upload-section');
+      if (photoSection && !photoSection.classList.contains('skipped') && uploadedPhotoData) {
+        data.personalInfo.profilePhoto = uploadedPhotoData;
+      }
 
       // Optional fields (only if not skipped and not empty)
       const optional = ['address', 'linkedin', 'website', 'summary', 'technicalSkills', 'softSkills', 'certifications', 'languages', 'achievements', 'hobbies', 'extraCurricular', 'additionalInfo'];
@@ -4272,6 +5764,24 @@
         });
       }
 
+      // 4. Internships (Structured Capture)
+      data.internships = [];
+      const internSection = document.getElementById('section-internships');
+      if (internSection && !internSection.classList.contains('skipped')) {
+        document.querySelectorAll('input[name="internRole[]"]').forEach((el, i) => {
+          if (el.value.trim()) {
+            data.internships.push({
+              jobTitle: el.value,
+              company: document.querySelectorAll('input[name="internOrg[]"]')[i].value,
+              startDate: document.querySelectorAll('input[name="internStart[]"]')[i].value,
+              endDate: document.querySelectorAll('input[name="internEnd[]"]')[i].value,
+              description: document.querySelectorAll('textarea[name="internDesc[]"]')[i].value
+            });
+          }
+        });
+      }
+
+
       // References (only if section is not skipped)
       const refSection = document.getElementById('section-references');
       if (refSection && !refSection.classList.contains('skipped')) {
@@ -4308,6 +5818,11 @@
       const addInfo = document.getElementById('additionalInfo');
       if (addInfo && addInfo.value.trim()) {
         data.additionalInfo = addInfo.value.trim();
+      }
+
+      // ADDED: Include the section order for the backend to respect
+      if (window.currentSectionOrder) {
+        data.sectionOrder = window.currentSectionOrder;
       }
 
       return data;
@@ -4347,7 +5862,7 @@
 
         // UI Reset
         initializePage();
-        console.log('🧹 Form cleared successfully');
+        // console.log('ðŸ§¹ Form cleared successfully');
       }
     }
 
@@ -4367,7 +5882,7 @@
           <div id="overlayStatus" style="font-size:20px;color:#2ae023;margin-bottom:12px;font-weight:500;">Securing checkout portal...</div>
           <div id="overlaySubstatus" style="font-size:16px;opacity:0.8;margin-bottom:35px;">Redirecting you to payment options</div>
           <div style="width:100%;height:10px;background:rgba(255,255,255,0.15);border-radius:12px;overflow:hidden;box-shadow:inset 0 2px 4px rgba(0,0,0,0.3);">
-            <div id="overlayProgressBar" style="height:100%;background:linear-gradient(90deg,#2ae023,#1a8b17);width:0%;transition:width 0.4s ease;box-shadow:0 0 20px rgba(42, 224, 35, 0.6);"></div>
+            <div id="overlayProgressBar" style="height:100%;background:linear-gradient(90deg,#2ae023,#1a8b17);width:0%;transition:width 0.4s ease;box-shadow:0 0 20px rgba(42,224,35,0.6);"></div>
           </div>
           <div style="margin-top:20px;font-size:14px;opacity:0.6;">
             <i class="fas fa-spinner fa-spin"></i> Processing...
@@ -4418,30 +5933,332 @@
       document.querySelector('.bottom-actions').style.display = 'flex';
     }
 
+    async function initiateTemplateCheckout(templateId, planId, format) {
+      const overlay = document.createElement('div');
+      overlay.className = 'preview-modal-overlay';
+      overlay.style.cssText = `
+        position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
+        background: rgba(0,0,0,0.85); display: flex; flex-direction: column; align-items: center; 
+        justify-content: center; z-index: 10000; padding: 20px;
+        backdrop-filter: blur(10px); color: #fff;
+      `;
+      overlay.innerHTML = `
+        <div class="spinner" style="border: 4px solid rgba(108, 99, 255, 0.1); border-left-color: #6C63FF; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 20px;"></div>
+        <h2 style="margin-bottom: 10px;">Preparing Secure Checkout</h2>
+        <p style="color: #888;">Connecting to payment gateway...</p>
+      `;
+      document.body.appendChild(overlay);
+
+      try {
+          const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
+          
+          const response = await fetch('/api/payment/create-order', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+              body: JSON.stringify({ planId: planId })
+          });
+          const orderData = await response.json();
+          
+          if (!orderData.success) {
+              throw new Error(orderData.error || 'Failed to initialize payment.');
+          }
+
+          const options = {
+              "key": orderData.key_id,
+              "amount": orderData.amount,
+              "currency": orderData.currency,
+              "name": "Hiero Premium",
+              "description": `Unlock ${templateId} template`,
+              "order_id": orderData.order_id,
+              "handler": async function (response) {
+                  overlay.innerHTML = `
+                    <div class="spinner" style="border: 4px solid rgba(42, 224, 35, 0.1); border-left-color: #2ae023; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 20px;"></div>
+                    <h2 style="margin-bottom: 10px;">Verifying Payment</h2>
+                    <p style="color: #888;">Please wait, unlocking your template...</p>
+                  `;
+                  
+                  try {
+                      const verifyRes = await fetch('/api/payment/verify-payment', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                          body: JSON.stringify({
+                              razorpay_payment_id: response.razorpay_payment_id,
+                              razorpay_order_id: response.razorpay_order_id,
+                              razorpay_signature: response.razorpay_signature,
+                              planId: planId
+                          })
+                      });
+                      const verifyData = await verifyRes.json();
+                      
+                      if (verifyData.success) {
+                          const user = JSON.parse(localStorage.getItem('user') || '{}');
+                          user.isPro = true;
+                          user.proPlan = planId;
+                          user.proUntil = verifyData.proUntil;
+                          localStorage.setItem('user', JSON.stringify(user));
+                          
+                          // Redirect to Success Page
+                          window.location.href = `/success.html?template=${templateId}&format=${format}`;
+                      } else {
+                          throw new Error(verifyData.error || 'Verification failed');
+                      }
+                  } catch (err) {
+                      overlay.innerHTML = `
+                        <i class="fas fa-times-circle" style="font-size: 50px; color: #ff4444; margin-bottom: 20px;"></i>
+                        <h2 style="margin-bottom: 10px;">Payment Failed</h2>
+                        <p style="color: #888; margin-bottom: 20px;">${err.message}</p>
+                        <button onclick="document.body.removeChild(this.closest('.preview-modal-overlay'))" style="background: #333; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">Close</button>
+                      `;
+                  }
+              },
+              "theme": { "color": "#6C63FF" },
+              "modal": {
+                  "ondismiss": function() { document.body.removeChild(overlay); }
+              }
+          };
+          
+          const rzp = new Razorpay(options);
+          rzp.open();
+          
+      } catch (err) {
+          overlay.innerHTML = `
+            <i class="fas fa-exclamation-triangle" style="font-size: 50px; color: #ffb74d; margin-bottom: 20px;"></i>
+            <h2 style="margin-bottom: 10px;">Error</h2>
+            <p style="color: #888; margin-bottom: 20px;">${err.message}</p>
+            <button onclick="document.body.removeChild(this.closest('.preview-modal-overlay'))" style="background: #333; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">Close</button>
+          `;
+      }
+    }
+
+    function showPostDownloadModal(templateId, format, previewUrl = null) {
+        const formatName = (str) => {
+            if(!str) return 'Template';
+            return str.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+        };
+
+        // Calculate score and missing fields based on form data
+        let score = 0;
+        let missing = [];
+        try {
+            const data = JSON.parse(localStorage.getItem('resumeData') || '{}');
+            
+            if (data.personalInfo && data.personalInfo.fullName && data.personalInfo.email && data.personalInfo.phone) score += 20;
+            else missing.push("Contact Details (Name, Email, Phone)");
+            
+            if (!data.address) missing.push("Address / Location");
+
+            if (data.linkedin || data.website) score += 5;
+            else {
+                if (!data.linkedin) missing.push("LinkedIn Profile");
+                if (!data.website) missing.push("Personal Website");
+            }
+
+            if (data.summary && data.summary.trim().length > 10) score += 10;
+            else missing.push("Professional Summary");
+            
+            if (data.experience && data.experience.length > 0) score += 25;
+            else missing.push("Work Experience");
+            
+            if (data.education && data.education.length > 0) score += 15;
+            else missing.push("Education");
+            
+            if (data.skills && data.skills.length > 0) score += 10;
+            else missing.push("Technical Skills");
+
+            if (!data.softSkills) missing.push("Soft Skills");
+            
+            if (data.projects && data.projects.length > 0) score += 5;
+            else missing.push("Projects");
+            
+            if (data.certifications && data.certifications.length > 0) score += 5;
+            else missing.push("Certifications");
+            
+            if (data.languages && data.languages.length > 0) score += 5;
+            else missing.push("Languages");
+
+            if (!data.achievements) missing.push("Achievements");
+            if (!data.hobbies) missing.push("Hobbies");
+            if (!data.extraCurricular) missing.push("Extra-Curricular Activities");
+
+        } catch(e) {
+            score = 70; // Fallback
+            missing = ["Projects", "Languages", "Soft Skills", "Achievements"];
+        }
+
+        let scoreColor = score >= 80 ? '#2ae023' : score >= 60 ? '#ffb74d' : '#ff4444';
+        
+        let missingHtml = '';
+        if (missing.length > 0) {
+            missingHtml = `
+              <div style="margin-top: 15px; text-align: left; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.05);">
+                <div style="display: flex; align-items: center; color: #fff; font-size: 14px; font-weight: 600; margin-bottom: 12px;">
+                   <i class="fas fa-chart-line" style="color: ${scoreColor}; margin-right: 8px;"></i> Success Suggestions
+                </div>
+                <div style="background: rgba(255, 68, 68, 0.05); border: 1px dashed rgba(255, 68, 68, 0.3); border-radius: 12px; padding: 12px 15px;">
+                   <div style="color: #ff6b6b; font-size: 12px; font-weight: 600; margin-bottom: 8px; display: flex; align-items: center;">
+                      <i class="fas fa-exclamation-circle" style="margin-right: 6px;"></i> Missing Sections to Improve Score:
+                   </div>
+                   <ul style="margin: 0; padding-left: 20px; color: #ffb7b7; font-size: 13px; line-height: 1.6; max-height: 120px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(255,68,68,0.5) transparent;">
+                      ${missing.map(m => `<li>${m}</li>`).join('')}
+                   </ul>
+                   <div style="margin-top: 12px; font-size: 11px; color: #ff8888; font-style: italic;">
+                      Please refine your resume to include these fields for maximum ATS compatibility.
+                   </div>
+                </div>
+              </div>
+            `;
+        } else {
+            missingHtml = `
+              <div style="margin-top: 15px; text-align: left; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.05);">
+                <div style="display: flex; align-items: center; color: #2ae023; font-size: 14px; font-weight: 600;">
+                   <i class="fas fa-star" style="margin-right: 8px;"></i> Perfect Resume!
+                </div>
+                <p style="color: #aaa; font-size: 13px; margin-top: 5px;">You have filled out all recommended sections. Great job!</p>
+              </div>
+            `;
+        }
+
+        let thumbnailHtml = `
+            <div id="success-thumbnail-container" style="flex: 1; min-width: 220px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(255,255,255,0.02); border-left: 1px solid rgba(255,255,255,0.05); padding: 30px;">
+                <i class="fas fa-spinner fa-spin" style="font-size: 40px; color: ${scoreColor}; opacity: 0.5; margin-bottom: 20px;"></i>
+                <div style="font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600;">
+                    Rendering Image...
+                </div>
+            </div>
+        `;
+
+        const overlay = document.createElement('div');
+        overlay.className = 'preview-modal-overlay';
+        overlay.style.cssText = `
+          position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
+          background: rgba(0,0,0,0.85); display: flex; flex-direction: column; align-items: center; 
+          justify-content: center; z-index: 100000; padding: 20px;
+          backdrop-filter: blur(10px); color: #fff; text-align: center;
+          animation: slideUp 0.3s ease;
+        `;
+        overlay.innerHTML = `
+          <div style="background: #11111a; border: 1px solid ${scoreColor}30; border-radius: 24px; max-width: 750px; width: 100%; box-shadow: 0 25px 60px rgba(0,0,0,0.6), 0 0 40px ${scoreColor}15; position: relative; overflow: hidden; display: flex; flex-wrap: wrap;">
+              
+              <!-- Background Glow -->
+              <div style="position: absolute; top: -50px; left: 25%; transform: translateX(-50%); width: 200px; height: 200px; background: ${scoreColor}; filter: blur(100px); opacity: 0.15; z-index: 0; pointer-events: none;"></div>
+
+              <!-- Close X -->
+              <button onclick="this.closest('.preview-modal-overlay').remove()" style="position: absolute; top: 15px; right: 15px; background: rgba(255,68,68,0.1); border: 1px solid rgba(255,68,68,0.3); width: 32px; height: 32px; border-radius: 50%; color: #ff4444; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; z-index: 10;">
+                  <i class="fas fa-times"></i>
+              </button>
+
+              <!-- Left Column: Score & Details -->
+              <div style="flex: 1.5; min-width: 300px; padding: 40px; position: relative; z-index: 1; text-align: left;">
+                  <h3 style="font-size: 12px; text-transform: uppercase; letter-spacing: 1.5px; color: #888; margin-bottom: 5px;">ATS Strength Score</h3>
+                  <div style="font-size: 72px; font-weight: 800; color: ${scoreColor}; line-height: 1; margin-bottom: 5px; text-shadow: 0 0 20px ${scoreColor}30;">
+                      ${score}%
+                  </div>
+                  <p style="color: #aaa; font-size: 14px; margin-bottom: 20px;">
+                      Successfully downloaded <b>${formatName(templateId)}</b>.
+                  </p>
+
+                  ${missingHtml}
+                  
+                  <div style="margin-top: 30px; display: grid; grid-template-columns: 1fr; gap: 10px;">
+                      <div style="font-size: 11px; color: #555; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px;">Next Steps</div>
+                      
+                      <a href="/upload.html" style="background: linear-gradient(135deg, #6C63FF, #4b44d1); color: white; text-decoration: none; padding: 14px; border-radius: 12px; font-weight: 600; font-size: 14px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; box-shadow: 0 8px 20px rgba(108, 99, 255, 0.25);">
+                          <i class="fa-solid fa-microscope" style="margin-right: 10px;"></i> Advanced ATS Analysis
+                      </a>
+                      
+                      <a href="/mock-interview.html" style="background: linear-gradient(135deg, #ff8c00, #ff5e00); color: white; text-decoration: none; padding: 14px; border-radius: 12px; font-weight: 600; font-size: 14px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; box-shadow: 0 8px 20px rgba(255, 140, 0, 0.25);">
+                          <i class="fa-solid fa-microphone" style="margin-right: 10px;"></i> Start Mock Interview
+                      </a>
+                      
+                      <button onclick="this.closest('.preview-modal-overlay').remove(); document.querySelector('.main-layout').style.display='grid'; document.getElementById('resultsSection').style.display='none'; document.getElementById('formStepIndicator').style.display='flex';" style="background: transparent; color: #888; border: 1px dashed rgba(255, 255, 255, 0.1); padding: 12px; border-radius: 12px; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.2s; margin-top: 5px;">
+                          Got it, let's refine!
+                      </button>
+                  </div>
+              </div>
+
+              <!-- Right Column: Thumbnail -->
+              ${thumbnailHtml}
+
+          </div>
+        `;
+        document.body.appendChild(overlay);
+
+        const renderThumbnail = (url) => {
+            const container = overlay.querySelector('#success-thumbnail-container');
+            if (container) {
+                container.innerHTML = `
+                  <div style="width: 200px; height: 283px; position: relative; overflow: hidden; border-radius: 6px; box-shadow: 0 15px 35px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); background: #fff;">
+                      <iframe src="${url}#view=FitH&toolbar=0&navpanes=0&scrollbar=0" style="width: 667px; height: 943px; border: none; transform: scale(0.3); transform-origin: top left; pointer-events: none;"></iframe>
+                      <div style="position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.85); color: ${scoreColor}; padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; border: 1px solid ${scoreColor}40; backdrop-filter: blur(4px);">
+                          <i class="fas fa-file-download" style="margin-right: 4px;"></i> ${format}
+                      </div>
+                  </div>
+                  <div style="margin-top: 20px; font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600;">
+                      ${formatName(templateId)}
+                  </div>
+                `;
+            }
+        };
+
+        if (previewUrl) {
+            renderThumbnail(previewUrl);
+        } else {
+            // Async fetch the preview if no URL was passed (e.g. for docx or autoDownload)
+            try {
+                const data = JSON.parse(localStorage.getItem('resumeData') || '{}');
+                data.template = templateId;
+                fetch(BACKEND_URL + '/preview-resume', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/pdf' },
+                    body: JSON.stringify(data)
+                }).then(res => {
+                    if (res.ok) return res.blob();
+                    throw new Error('Failed to fetch preview');
+                }).then(blob => {
+                    const url = URL.createObjectURL(blob);
+                    renderThumbnail(url);
+                }).catch(e => {
+                    const container = overlay.querySelector('#success-thumbnail-container');
+                    if (container) {
+                        container.innerHTML = `
+                          <i class="fas fa-file-contract" style="font-size: 80px; color: ${scoreColor}; opacity: 0.8; margin-bottom: 20px;"></i>
+                          <div style="font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600;">
+                              ${formatName(templateId)}
+                          </div>
+                        `;
+                    }
+                });
+            } catch (e) {
+               // Ignore
+            }
+        }
+    }
+
     async function downloadDocx() {
       const user = JSON.parse(localStorage.getItem('user') || '{}');
       const isPro = !!user.isPro;
       const plan = user.proPlan || '';
       const currentTemplateId = selectedTemplate || localStorage.getItem('selectedTemplate') || 'classic';
 
-      const premiumTemplates = ['hiero-royal', 'hiero-signature', 'hiero-prestige', 'hiero-elite', 'hiero-vision', 'hiero-vertex', 'hiero-premium', 'hiero-urban'];
-      const affordableTemplates = ['hiero-executive', 'hiero-nova', 'rishi', 'hiero-monethon', 'template4', 'hiero-timeline', 'hiero-studio', 'hiero-retail', 'hiero-essence', 'hiero-velocity', 'hiero-legion'];
+      const premiumTemplates = ['hiero-royal', 'hiero-signature', 'hiero-prestige', 'hiero-elite', 'hiero-vision', 'hiero-vertex', 'hiero-premium', 'rishi'];
+      const affordableTemplates = ['hiero-executive', 'hiero-nova', 'hiero-urban', 'hiero-monethon', 'template4', 'hiero-timeline', 'hiero-studio', 'hiero-retail', 'hiero-essence', 'hiero-velocity', 'hiero-legion'];
 
       let needsUpgrade = false;
+      let upgradeTier = null;
       if (premiumTemplates.includes(currentTemplateId)) {
         if (!isPro || (plan !== 'premium' && plan !== '6months')) {
           needsUpgrade = true;
+          upgradeTier = 'premium';
         }
       } else if (affordableTemplates.includes(currentTemplateId)) {
         if (!isPro || (plan !== 'affordable' && plan !== 'premium' && plan !== '6months')) {
           needsUpgrade = true;
+          upgradeTier = 'affordable';
         }
       }
 
       if (needsUpgrade) {
-        showUpgradeLoading(() => {
-          window.location.href = '/pricing.html';
-        });
+        initiateTemplateCheckout(currentTemplateId, upgradeTier, 'docx');
         return;
       }
       try {
@@ -4462,6 +6279,7 @@
         // Fallback to collectFormData if localStorage has no personalInfo/data
         if (!data || !data.personalInfo || !data.personalInfo.fullName) {
           data = collectFormData();
+          localStorage.setItem('resumeData', JSON.stringify(data));
         }
 
         // Ensure template is set
@@ -4496,6 +6314,7 @@
           btn.innerHTML = originalText;
           btn.disabled = false;
         }
+        showPostDownloadModal(currentTemplateId, 'Word Document');
       } catch (error) {
         console.error('DOCX download error:', error);
         alert('Failed to download Word document. Please try again.');
@@ -4513,24 +6332,25 @@
       const plan = user.proPlan || '';
       const currentTemplateId = selectedTemplate || localStorage.getItem('selectedTemplate') || 'classic';
 
-      const premiumTemplates = ['hiero-royal', 'hiero-signature', 'hiero-prestige', 'hiero-elite', 'hiero-vision', 'hiero-vertex', 'hiero-premium', 'hiero-urban'];
-      const affordableTemplates = ['hiero-executive', 'hiero-nova', 'rishi', 'hiero-monethon', 'template4', 'hiero-timeline', 'hiero-studio', 'hiero-retail', 'hiero-essence', 'hiero-velocity', 'hiero-legion'];
+      const premiumTemplates = ['hiero-royal', 'hiero-signature', 'hiero-prestige', 'hiero-elite', 'hiero-vision', 'hiero-vertex', 'hiero-premium', 'rishi'];
+      const affordableTemplates = ['hiero-executive', 'hiero-nova', 'hiero-urban', 'hiero-monethon', 'template4', 'hiero-timeline', 'hiero-studio', 'hiero-retail', 'hiero-essence', 'hiero-velocity', 'hiero-legion'];
 
       let needsUpgrade = false;
+      let upgradeTier = null;
       if (premiumTemplates.includes(currentTemplateId)) {
         if (!isPro || (plan !== 'premium' && plan !== '6months')) {
           needsUpgrade = true;
+          upgradeTier = 'premium';
         }
       } else if (affordableTemplates.includes(currentTemplateId)) {
         if (!isPro || (plan !== 'affordable' && plan !== 'premium' && plan !== '6months')) {
           needsUpgrade = true;
+          upgradeTier = 'affordable';
         }
       }
 
       if (needsUpgrade) {
-        showUpgradeLoading(() => {
-          window.location.href = '/pricing.html';
-        });
+        initiateTemplateCheckout(currentTemplateId, upgradeTier, 'pdf');
         return;
       }
       const btn = event.target;
@@ -4541,7 +6361,17 @@
       btn.disabled = true;
 
       try {
-        const data = JSON.parse(localStorage.getItem('resumeData') || '{}');
+        let data = {};
+        try {
+          data = JSON.parse(localStorage.getItem('resumeData') || '{}');
+        } catch (e) {
+          console.error('Error reading resumeData from localStorage:', e);
+        }
+
+        if (!data || !data.personalInfo || !data.personalInfo.fullName) {
+          data = collectFormData();
+          localStorage.setItem('resumeData', JSON.stringify(data));
+        }
 
         // Ensure template is included
         if (!data.template) {
@@ -4549,7 +6379,7 @@
         }
 
         const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
-        console.log('📡 POST', `${BACKEND_URL}/download-resume`);
+    // console.log('ðŸ"¡ POST', `${BACKEND_URL}/download-resume`);
         const response = await fetch(`${BACKEND_URL}/download-resume`, {
           method: 'POST',
           headers: {
@@ -4562,22 +6392,22 @@
 
         if (!response.ok) {
           const errorText = await response.text();
-          console.error('❌ Server error:', errorText);
+    // console.error('âŒ Server error:', errorText);
           throw new Error(`Download failed: ${response.status} ${response.statusText}`);
         }
 
         // Check content type
         const contentType = response.headers.get('content-type');
-        console.log('📄 Response Content-Type:', contentType);
+    // console.log('ðŸ"" Response Content-Type:', contentType);
 
         if (!contentType || !contentType.includes('application/pdf')) {
           const text = await response.text();
-          console.error('❌ Response is not PDF!', text.substring(0, 200));
+    // console.error('âŒ Response is not PDF!', text.substring(0, 200));
           throw new Error('Server returned non-PDF response');
         }
 
         const blob = await response.blob();
-        console.log('✅ PDF blob received, size:', blob.size, 'bytes, type:', blob.type);
+    // console.log('✅ PDF blob received, size:', blob.size);
 
         if (blob.size === 0) {
           throw new Error('Received empty PDF file');
@@ -4592,9 +6422,12 @@
         a.click();
 
         setTimeout(() => {
-          window.URL.revokeObjectURL(url);
           document.body.removeChild(a);
         }, 100);
+        
+        // Pass the blob URL directly to the modal for instantaneous thumbnail rendering!
+        // We do NOT revoke the URL here so the modal can use it.
+        showPostDownloadModal(currentTemplateId, 'PDF Document', url);
 
       } catch (error) {
         console.error('Download error full:', error);
@@ -4606,76 +6439,758 @@
     }
 
     async function previewResume() {
-      // If we already have a cached blob URL from generation, use it instantly (no new fetch)
-      if (_generatedPdfBlobUrl) {
-        showPdfPreviewModal(_generatedPdfBlobUrl);
+      // 1. Open blank window immediately to satisfy mobile popup blockers
+      // This must happen synchronously in the click event
+      const previewWindow = window.open('', '_blank');
+
+      if (!previewWindow) {
+        alert('Popup blocked! Please allow popups to see your resume preview.');
         return;
       }
 
-      // Otherwise fetch a fresh preview (fallback)
-      const btn = document.getElementById('previewResumeBtn');
-      const originalText = btn ? btn.innerHTML : '';
-      if (btn) { btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...'; btn.disabled = true; }
+      previewWindow.document.write(`
+        <html>
+          <head>
+            <title>Hiero - Generating Preview</title>
+            <style>
+              body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #000; color: #fff; margin:0; }
+              .spinner { border: 4px solid rgba(42, 224, 35, 0.1); border-left-color: #2ae023; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 20px; }
+              @keyframes spin { to { transform: rotate(360deg); } }
+            </style>
+          </head>
+          <body>
+            <div class="spinner"></div>
+            <h3>Generating your premium preview...</h3>
+            <p style="color: #888; font-size: 14px;">This will take just a moment.</p>
+          </body>
+        </html>
+      `);
+
+      const btn = event.target;
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading Preview...';
+      btn.disabled = true;
 
       try {
         const data = collectFormData();
         data.template = selectedTemplate || localStorage.getItem('selectedTemplate') || 'classic';
 
-        console.log('Fetching fresh preview for template:', data.template);
+        console.log('Previewing resume with template:', data.template);
 
         const response = await fetch(`${BACKEND_URL}/preview-resume`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json'
+          },
           body: JSON.stringify(data)
         });
 
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({ error: 'Preview failed' }));
+          previewWindow.close();
           throw new Error(errorData.error || 'Preview failed');
         }
 
         const blob = await response.blob();
-        if (blob.size < 100) throw new Error('Server returned an invalid PDF.');
 
-        if (_generatedPdfBlobUrl) URL.revokeObjectURL(_generatedPdfBlobUrl);
-        _generatedPdfBlobUrl = URL.createObjectURL(blob);
+        // Final fallback for empty response
+        if (blob.size < 100) {
+          previewWindow.close();
+          throw new Error('Server returned an invalid PDF.');
+        }
 
-        showPdfPreviewModal(_generatedPdfBlobUrl);
+        const url = window.URL.createObjectURL(blob);
+
+        // 2. Redirect the already opened window to the blob URL
+        previewWindow.location.href = url;
+
+        // Clean up memory after a delay
+        setTimeout(() => window.URL.revokeObjectURL(url), 10000);
 
       } catch (error) {
+        if (previewWindow) previewWindow.close();
         console.error('Preview error:', error);
         alert(`Failed to preview resume: ${error.message}. Please try again.`);
       } finally {
-        if (btn) { btn.innerHTML = originalText; btn.disabled = false; }
+        btn.innerHTML = originalText;
+        btn.disabled = false;
       }
     }
+    document.addEventListener('DOMContentLoaded', async () => {
+      const targetTemplates = Array.from(new Set(Array.from(document.querySelectorAll('.template-card'))
+        .map(card => card.getAttribute('data-template'))
+        .filter(id => id)));
 
-    function showPdfPreviewModal(blobUrl) {
-      const modal = document.getElementById('pdfPreviewModal');
-      const iframe = document.getElementById('pdfPreviewIframe');
-      const newTabLink = document.getElementById('pdfOpenNewTab');
+      const sampleData = {
+        personalInfo: {
+          fullName: 'John Doe',
+          email: 'john.doe@example.com',
+          phone: '+1 555 123 4567',
+          address: 'New York, USA',
+          linkedin: 'linkedin.com/in/jaswanth',
+          website: 'hiero-resume.com',
+          roleTitle: 'SENIOR SOFTWARE ARCHITECT'
+        },
+        summary: 'Experienced Software Architect with over 8 years in full-stack development. Specialist in building high-scale distributed systems and beautiful user interfaces. Proven track record of leading teams and delivering complex projects on time.',
+        experience: [
+          {
+            jobTitle: 'Lead Developer',
+            company: 'Innovation Labs',
+            startDate: '2021-01',
+            endDate: 'Present',
+            description: ' Architected a microservices platform serving 1M+ users.\n Improved deployment efficiency by 50% using CI/CD.\n Managed a team of 15 engineers across three timezones.'
+          },
+          {
+            jobTitle: 'Senior Engineer',
+            company: 'Global Tech',
+            startDate: '2018-05',
+            endDate: '2020-12',
+            description: ' Developed core features for a flagship SaaS product.\n Optimized database queries, reducing latency by 30%.\n Mentored junior developers and conducted code reviews.'
+          }
+        ],
+        education: [
+          { degree: 'Master of Technology', school: 'IIT Bombay', gradYear: '2018', gpa: '9.2/10.0' },
+          { degree: 'Bachelor of Technology', school: 'NIT Warangal', gradYear: '2016', gpa: '8.8/10.0' }
+        ],
+        technicalSkills: ['JavaScript', 'React', 'Node.js', 'Python', 'AWS', 'Docker', 'Kubernetes'],
+        softSkills: ['Leadership', 'System Design', 'Public Speaking', 'Agile Management'],
+        projects: [
+          { title: 'Hiero Resume Builder', description: 'A state-of-the-art resume builder platform.', tech: 'Next.js, Node.js, PDFKit' },
+          { title: 'AI Chat System', description: 'Intelligent customer support bot.', tech: 'OpenAI API, socket.io' }
+        ]
+      };
 
-      if (!modal || !iframe) return;
+      // Load first few previews quickly, then lazy-load the rest on scroll.
+      const loadedTemplatePreviews = new Set();
+      async function loadTemplatePreview(templateId) {
+        if (!templateId || loadedTemplatePreviews.has(templateId)) return;
+        loadedTemplatePreviews.add(templateId);
 
-      // Set iframe src to the blob URL
-      iframe.src = blobUrl;
+        const previewAreas = document.querySelectorAll(`.template-card[data-template="${templateId}"] .template-preview`);
+        if (previewAreas.length === 0) return;
 
-      // Set "open in new tab" link
-      if (newTabLink) newTabLink.href = blobUrl;
+        try {
+          const res = await fetch(`${BACKEND_URL}/preview-resume`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...sampleData, template: templateId })
+          });
 
-      // Show modal as flex
-      modal.style.display = 'flex';
-      document.body.style.overflow = 'hidden';
+          if (!res.ok) return;
+          const blob = await res.blob();
+          const previewUrl = URL.createObjectURL(blob);
+
+          const isMobile = window.innerWidth <= 768;
+          const zoomLevel = isMobile ? '100' : '70';
+          
+          previewAreas.forEach(area => {
+            area.innerHTML = `
+              <div class="preview-scroll-container" style="width: 100%; height: 100%; overflow: hidden; position: relative;">
+                <iframe src="${previewUrl}#view=FitH&zoom=${zoomLevel}&toolbar=0&navpanes=0&scrollbar=0" 
+                         style="width: 100%; aspect-ratio: 1/1.4142; height: auto; border: none; pointer-events: none; z-index: 1; display: block;"></iframe>
+                <div style="position: absolute; inset: 0; z-index: 5; background: transparent; cursor: pointer;"></div>
+              </div>
+              <div class="preview-overlay" style="z-index: 10; pointer-events: none; opacity: 0; background: rgba(0,0,0,0.4); position: absolute; inset: 0; transition: opacity 0.3s; display: flex; align-items: center; justify-content: center;">
+                <button class="preview-btn" style="pointer-events: auto; transform: scale(0.8);">Preview Template</button>
+              </div>
+            `;
+
+            area.style.overflow = "hidden";
+            area.style.position = "relative";
+            area.onmouseenter = () => {
+              const overlay = area.querySelector('.preview-overlay');
+              if (overlay) overlay.style.opacity = "1";
+            };
+            area.onmouseleave = () => {
+              const overlay = area.querySelector('.preview-overlay');
+              if (overlay) overlay.style.opacity = "0";
+            };
+          });
+        } catch (e) {
+          console.error(`Failed to load PDF preview for ${templateId}:`, e);
+          loadedTemplatePreviews.delete(templateId);
+        }
+      }
+
+      // Prime the first few cards immediately.
+      await Promise.all(targetTemplates.slice(0, 6).map(loadTemplatePreview));
+
+      // Lazy-load the rest near viewport.
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (!entry.isIntersecting) return;
+          const templateId = entry.target.getAttribute('data-template');
+          loadTemplatePreview(templateId);
+          observer.unobserve(entry.target);
+        });
+      }, { rootMargin: '300px 0px', threshold: 0.05 });
+
+      document.querySelectorAll('.template-card[data-template]').forEach(card => {
+        const templateId = card.getAttribute('data-template');
+        if (!loadedTemplatePreviews.has(templateId)) observer.observe(card);
+      });
+    });
+  </script>
+
+  <!-- Premium Hiero Feedback Modal Overlay -->
+  <div id="hieroFeedbackModal" class="hiero-feedback-modal-overlay">
+    <div class="hiero-feedback-modal-card">
+      
+      <!-- Success View (Initially Hidden) -->
+      <div id="hieroFeedbackSuccess" class="hiero-feedback-success-overlay">
+        <div class="hiero-feedback-success-icon">
+          <i class="fa-solid fa-circle-check"></i>
+        </div>
+        <h2>Thank You!</h2>
+        <p>Your feedback was successfully submitted. Returning to your dashboard...</p>
+      </div>
+
+      <!-- Main Feedback Form View -->
+      <div class="hiero-feedback-form-content">
+        <div class="hiero-feedback-header">
+          <h2>HIERO <span style="color: #10b981;">CAREER</span></h2>
+          <p>Tell us about your experience</p>
+        </div>
+
+        <div class="hiero-feedback-stars-wrapper">
+          <span class="hiero-feedback-stars-label">Rate Your Experience</span>
+          <div class="hiero-feedback-stars-row" id="hieroStarsRow">
+            <i class="fa-solid fa-star hiero-star-btn" data-star="1"></i>
+            <i class="fa-solid fa-star hiero-star-btn" data-star="2"></i>
+            <i class="fa-solid fa-star hiero-star-btn" data-star="3"></i>
+            <i class="fa-solid fa-star hiero-star-btn" data-star="4"></i>
+            <i class="fa-solid fa-star hiero-star-btn" data-star="5"></i>
+          </div>
+        </div>
+
+        <!-- Readonly Display Info -->
+        <div class="hiero-feedback-field-group">
+          <label>YOUR NAME</label>
+          <input type="text" id="hieroFeedbackName" class="hiero-feedback-input-readonly" readonly placeholder="Guest User">
+        </div>
+        
+        <div class="hiero-feedback-field-group">
+          <label>EMAIL ADDRESS</label>
+          <input type="email" id="hieroFeedbackEmail" class="hiero-feedback-input-readonly" readonly placeholder="guest@example.com">
+        </div>
+
+        <div class="hiero-feedback-field-group">
+          <label>YOUR FEEDBACK / SUGGESTIONS</label>
+          <textarea id="hieroFeedbackText" class="hiero-feedback-textarea" placeholder="Tell us what you liked, or what we can improve..." maxlength="1000"></textarea>
+        </div>
+
+        <button id="hieroFeedbackSubmitBtn" class="hiero-feedback-submit-btn" disabled>
+          Submit Feedback <i class="fa-solid fa-arrow-right"></i>
+        </button>
+
+        <div id="hieroFeedbackStatus" class="hiero-feedback-status"></div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    /* Premium Feedback Modal Core Styles */
+    .hiero-feedback-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 99999;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      font-family: 'Plus Jakarta Sans', sans-serif;
     }
 
-    function closePdfPreview() {
-      const modal = document.getElementById('pdfPreviewModal');
-      const iframe = document.getElementById('pdfPreviewIframe');
-      if (modal) modal.style.display = 'none';
-      if (iframe) iframe.src = ''; // release iframe memory
-      document.body.style.overflow = '';
+    .hiero-feedback-modal-overlay.active {
+      display: flex;
+      opacity: 1;
+    }
+
+    .hiero-feedback-modal-card {
+      width: 90%;
+      max-width: 500px;
+      border-radius: 24px;
+      padding: 36px;
+      position: relative;
+      overflow: hidden;
+      transform: scale(0.9);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      background: rgba(18, 18, 18, 0.95);
+      border: 1px solid rgba(42, 224, 35, 0.2);
+      color: #ffffff;
+    }
+
+    .hiero-feedback-modal-overlay.active .hiero-feedback-modal-card {
+      transform: scale(1);
+    }
+
+    body.light-mode .hiero-feedback-modal-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      color: #0f172a;
+      box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.15);
+    }
+
+    .hiero-feedback-header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .hiero-feedback-header h2 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: none !important;
+      -webkit-text-fill-color: initial !important;
+      text-shadow: none !important;
+      margin-bottom: 6px;
+    }
+
+    body.light-mode .hiero-feedback-header h2 {
+      color: #0f172a !important;
+    }
+
+    body:not(.light-mode) .hiero-feedback-header h2 {
+      color: #ffffff !important;
+    }
+
+    .hiero-feedback-header p {
+      font-size: 13.5px;
+      color: #a0aec0;
+      font-weight: 500;
+    }
+
+    body.light-mode .hiero-feedback-header p {
+      color: #64748b;
+    }
+
+    .hiero-feedback-stars-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .hiero-feedback-stars-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: #a0aec0;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    body.light-mode .hiero-feedback-stars-label {
+      color: #64748b;
+    }
+
+    .hiero-feedback-stars-row {
+      display: flex;
+      gap: 12px;
+    }
+
+    .hiero-star-btn {
+      font-size: 32px;
+      color: #4a5568;
+      cursor: pointer;
+      transition: transform 0.15s ease, color 0.15s ease;
+    }
+
+    body.light-mode .hiero-star-btn {
+      color: #cbd5e1;
+    }
+
+    .hiero-star-btn:hover {
+      transform: scale(1.2);
+    }
+
+    .hiero-star-btn.active {
+      color: #fbbf24;
+      filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.4));
+    }
+
+    .hiero-feedback-field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 18px;
+      text-align: left;
+    }
+
+    .hiero-feedback-field-group label {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: #cbd5e1;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    body.light-mode .hiero-feedback-field-group label {
+      color: #475569;
+    }
+
+    .hiero-feedback-input-readonly {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #a0aec0;
+      border-radius: 10px;
+      padding: 11px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      outline: none;
+    }
+
+    body.light-mode .hiero-feedback-input-readonly {
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      color: #64748b;
+    }
+
+    .hiero-feedback-textarea {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #ffffff;
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: 13px;
+      line-height: 1.5;
+      font-family: inherit;
+      resize: none;
+      height: 100px;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    body.light-mode .hiero-feedback-textarea {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      color: #0f172a;
+    }
+
+    .hiero-feedback-textarea:focus {
+      border-color: #10b981;
+      box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.15);
+    }
+
+    .hiero-feedback-submit-btn {
+      width: 100%;
+      background: #10b981;
+      color: #ffffff;
+      border: none;
+      padding: 13px;
+      border-radius: 10px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.1s ease;
+    }
+
+    .hiero-feedback-submit-btn:hover:not(:disabled) {
+      background: #059669;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .hiero-feedback-submit-btn:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+
+    .hiero-feedback-submit-btn:disabled {
+      background: #4a5568;
+      color: #718096;
+      cursor: not-allowed;
+    }
+
+    body.light-mode .hiero-feedback-submit-btn:disabled {
+      background: #e2e8f0;
+      color: #94a3b8;
+    }
+
+    .hiero-feedback-status {
+      text-align: center;
+      font-size: 12.5px;
+      font-weight: 600;
+      margin-top: 12px;
+      min-height: 18px;
+    }
+
+    .hiero-feedback-status.error {
+      color: #ef4444;
+    }
+
+    .hiero-feedback-success-overlay {
+      position: absolute;
+      inset: 0;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 30px;
+      text-align: center;
+      z-index: 10;
+      background: rgba(18, 18, 18, 0.98);
+      animation: hieroFadeIn 0.3s ease forwards;
+    }
+
+    body.light-mode .hiero-feedback-success-overlay {
+      background: #ffffff;
+    }
+
+    @keyframes hieroFadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .hiero-feedback-success-icon {
+      width: 56px;
+      height: 56px;
+      background: rgba(16, 185, 129, 0.1);
+      color: #10b981;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      margin-bottom: 20px;
+      animation: hieroScalePop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+
+    @keyframes hieroScalePop {
+      from { transform: scale(0.6); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .hiero-feedback-success-overlay h2 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 22px;
+      font-weight: 800;
+      margin-bottom: 8px;
+      background: none !important;
+      -webkit-text-fill-color: initial !important;
+    }
+
+    body.light-mode .hiero-feedback-success-overlay h2 {
+      color: #0f172a !important;
+    }
+
+    body:not(.light-mode) .hiero-feedback-success-overlay h2 {
+      color: #ffffff !important;
+    }
+
+    .hiero-feedback-success-overlay p {
+      font-size: 13.5px;
+      color: #a0aec0;
+      line-height: 1.5;
+    }
+
+    body.light-mode .hiero-feedback-success-overlay p {
+      color: #64748b;
+    }
+  </style>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const isFeedbackFlow = urlParams.get('feedback') === 'true';
+      const feedbackEmail = urlParams.get('email') || '';
+      const feedbackName = urlParams.get('name') || '';
+
+      if (isFeedbackFlow && feedbackEmail) {
+        const modal = document.getElementById('hieroFeedbackModal');
+        const nameField = document.getElementById('hieroFeedbackName');
+        const emailField = document.getElementById('hieroFeedbackEmail');
+        
+        nameField.value = feedbackName || feedbackEmail.split('@')[0];
+        emailField.value = feedbackEmail;
+
+        modal.classList.add('active');
+        
+        let ratingSelected = parseInt(urlParams.get('rating')) || 0;
+        let isSubmitted = false;
+
+        const stars = document.querySelectorAll('#hieroStarsRow .hiero-star-btn');
+        stars.forEach(star => {
+          star.addEventListener('mouseover', () => {
+            const hoverVal = parseInt(star.getAttribute('data-star'));
+            updateStarsDisplay(hoverVal);
+          });
+
+          star.addEventListener('mouseout', () => {
+            updateStarsDisplay(ratingSelected);
+          });
+
+          star.addEventListener('click', () => {
+            ratingSelected = parseInt(star.getAttribute('data-star'));
+            updateStarsDisplay(ratingSelected);
+            validateFeedbackForm(ratingSelected);
+          });
+        });
+
+        function updateStarsDisplay(rating) {
+          stars.forEach(s => {
+            const sVal = parseInt(s.getAttribute('data-star'));
+            if (sVal <= rating) {
+              s.classList.add('active');
+            } else {
+              s.classList.remove('active');
+            }
+          });
+        }
+
+        const textarea = document.getElementById('hieroFeedbackText');
+        textarea.addEventListener('input', () => {
+          validateFeedbackForm(ratingSelected);
+        });
+
+        function validateFeedbackForm(rating) {
+          const text = textarea.value.trim();
+          const submitBtn = document.getElementById('hieroFeedbackSubmitBtn');
+          submitBtn.disabled = !(rating > 0 && text.length >= 3);
+        }
+
+        // Initialize state if redirected with pre-selected rating
+        if (ratingSelected > 0) {
+          updateStarsDisplay(ratingSelected);
+          validateFeedbackForm(ratingSelected);
+        }
+        
+        // Focus suggestion field immediately
+        setTimeout(() => {
+          textarea.focus();
+        }, 100);
+
+        window.addEventListener('beforeunload', (e) => {
+          const hasStarted = ratingSelected > 0 || textarea.value.trim().length > 0;
+          if (hasStarted && !isSubmitted) {
+            e.preventDefault();
+            e.returnValue = 'You have unsaved feedback. Are you sure you want to exit?';
+          }
+        });
+
+        const submitBtn = document.getElementById('hieroFeedbackSubmitBtn');
+        submitBtn.addEventListener('click', async () => {
+          const status = document.getElementById('hieroFeedbackStatus');
+          status.textContent = '';
+          status.className = 'hiero-feedback-status';
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+
+          try {
+            const response = await fetch('/api/feedback/submit', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                rating: ratingSelected,
+                reviewText: textarea.value.trim(),
+                email: feedbackEmail,
+                name: feedbackName
+              })
+            });
+
+            const data = await response.json();
+            if (!response.ok) {
+              throw new Error(data.error || 'Failed to submit feedback');
+            }
+
+            isSubmitted = true;
+            document.getElementById('hieroFeedbackSuccess').style.display = 'flex';
+
+            setTimeout(() => {
+              modal.style.opacity = '0';
+              setTimeout(() => {
+                modal.classList.remove('active');
+                modal.style.opacity = '';
+                
+                const cleanUrl = window.location.pathname;
+                window.history.replaceState({}, document.title, cleanUrl);
+              }, 300);
+            }, 2500);
+
+          } catch (err) {
+            console.error(err);
+            status.textContent = err.message || 'Submission failed. Please check connection.';
+            status.className = 'hiero-feedback-status error';
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'Submit Feedback <i class="fa-solid fa-arrow-right"></i>';
+          }
+        });
+      }
+    });
+  </script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('autoDownload') === 'true') {
+          const format = urlParams.get('format');
+          
+          setTimeout(() => {
+              // Jump straight to results UI
+              document.getElementById('templateSelection').style.display = 'none';
+              document.getElementById('formStepIndicator').style.display = 'none';
+              document.querySelector('.main-layout').style.display = 'none';
+              document.querySelector('.bottom-actions').style.display = 'none';
+              document.getElementById('resultsSection').style.display = 'block';
+
+              const overlay = document.createElement('div');
+              overlay.className = 'preview-modal-overlay';
+              overlay.style.cssText = `
+                position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
+                background: rgba(0,0,0,0.85); display: flex; flex-direction: column; align-items: center; 
+                justify-content: center; z-index: 10000; padding: 20px;
+                backdrop-filter: blur(10px); color: #fff;
+              `;
+              overlay.innerHTML = `
+                <div class="spinner" style="border: 4px solid rgba(42, 224, 35, 0.1); border-left-color: #2ae023; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 20px;"></div>
+                <h2 style="margin-bottom: 10px;">Downloading your Premium Resume...</h2>
+              `;
+              document.body.appendChild(overlay);
+
+              // Remove param to prevent loop on manual refresh
+              window.history.replaceState({}, document.title, window.location.pathname);
+
+              if (format === 'pdf') {
+                  downloadResume().finally(() => { if(document.body.contains(overlay)) document.body.removeChild(overlay); });
+              } else {
+                  downloadDocx().finally(() => { if(document.body.contains(overlay)) document.body.removeChild(overlay); });
+              }
+          }, 1000);
+      }
+    });
+  </script>
+  <button onclick="adminTestBypass()" style="position:fixed; bottom:20px; right:20px; background:rgba(255,0,0,0.2); border:1px solid red; color:white; padding:8px 15px; border-radius:20px; font-size:12px; cursor:pointer; z-index:99999; backdrop-filter:blur(5px);">
+    <i class="fas fa-bug" style="margin-right:5px;"></i> Test Mode
+  </button>
+  <script>
+    function adminTestBypass() {
+        const pwd = prompt("Admin testing bypass:");
+        if (pwd === "hiero") {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            user.isPro = true;
+            user.proPlan = 'premium';
+            const future = new Date();
+            future.setDate(future.getDate() + 365);
+            user.proUntil = future.toISOString();
+            localStorage.setItem('user', JSON.stringify(user));
+            alert("Bypass activated! All templates unlocked for testing.");
+            window.location.reload();
+        }
     }
   </script>
 </body>
-
 </html>
