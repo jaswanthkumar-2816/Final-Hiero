@@ -646,18 +646,34 @@
 
         // 4. Dynamic Content Logic
         const urlParams = new URLSearchParams(window.location.search);
-        const type = urlParams.get('type') || (window.location.pathname.includes('interview') ? 'interview' : 'project');
+        const path = window.location.pathname.toLowerCase();
+        let type = urlParams.get('type');
+        
+        if (!type) {
+            if (path.includes('interview')) type = 'interview';
+            else if (path.includes('solve')) type = 'solve';
+            else type = 'project';
+        }
+
         const titleEl = document.getElementById('main-title');
         const descEl = document.getElementById('main-desc');
         const iconEl = document.getElementById('main-icon');
 
         if (type === 'interview') {
-            titleEl.textContent = 'Voice Interview';
+            titleEl.textContent = 'Mock Interview System';
             descEl.textContent = "Your dedicated AI Interview Coach is undergoing final model training. Real-time conversational intelligence for ultimate career preparation.";
             iconEl.textContent = '🎙️';
-            document.title = 'Voice AI - Hiero';
-        } else {
+            document.title = 'Mock Interview - Hiero';
+        } else if (type === 'solve') {
+            titleEl.textContent = 'Problem Solving Engine';
+            descEl.textContent = "The intelligent problem-solving engine is currently powering up. Get ready to conquer complex algorithmic challenges with advanced AI guidance.";
             iconEl.innerHTML = '<img src="logo-hiero.png" style="width: 140px; height: 140px; object-fit: contain;">';
+            document.title = 'Solve - Hiero';
+        } else {
+            // Default project portal
+            titleEl.textContent = 'Projects Portal';
+            iconEl.innerHTML = '<img src="logo-hiero.png" style="width: 140px; height: 140px; object-fit: contain;">';
+            document.title = 'Projects - Hiero';
         }
 
         // 5. Interactive Tilt (Very subtle)
