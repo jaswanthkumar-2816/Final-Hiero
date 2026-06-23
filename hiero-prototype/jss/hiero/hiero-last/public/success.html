@@ -3,70 +3,213 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Download Success - Hiero</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <title>Download Success - Hiero Premium</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        :root {
+            --primary: #6C63FF;
+            --primary-dark: #5046e5;
+            --secondary: #00F0FF;
+            --accent: #FF3366;
+            --success: #00E676;
+            --bg-dark: #0A0A12;
+            --card-bg: rgba(25, 25, 35, 0.6);
+            --text-main: #FFFFFF;
+            --text-muted: #A0AEC0;
+        }
+
         body, html {
             margin: 0;
             padding: 0;
             width: 100%;
-            height: 100%;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: #1a1a1a;
-            background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
-            background-size: 40px 40px;
-            color: #fff;
+            min-height: 100vh;
+            font-family: 'Outfit', 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
             overflow-x: hidden;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
 
-        @keyframes float1 {
-            0% { transform: translate(0, 0) scale(1); }
-            33% { transform: translate(30px, -50px) scale(1.05); }
-            66% { transform: translate(-20px, 20px) scale(0.95); }
-            100% { transform: translate(0, 0) scale(1); }
+        /* Vibrant Animated Background */
+        .bg-gradient-1 {
+            position: absolute; top: -10%; left: -10%; width: 50vw; height: 50vw;
+            background: radial-gradient(circle, rgba(108, 99, 255, 0.4) 0%, transparent 70%);
+            filter: blur(80px); z-index: 0; animation: pulse 15s ease-in-out infinite alternate; pointer-events: none;
         }
-        @keyframes float2 {
-            0% { transform: translate(0, 0) scale(1); }
-            33% { transform: translate(-30px, 40px) scale(1.1); }
-            66% { transform: translate(20px, -20px) scale(0.9); }
-            100% { transform: translate(0, 0) scale(1); }
+        .bg-gradient-2 {
+            position: absolute; bottom: -20%; right: -10%; width: 60vw; height: 60vw;
+            background: radial-gradient(circle, rgba(0, 240, 255, 0.25) 0%, transparent 70%);
+            filter: blur(100px); z-index: 0; animation: pulse 20s ease-in-out infinite alternate-reverse; pointer-events: none;
         }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .bg-gradient-3 {
+            position: absolute; top: 40%; left: 50%; width: 40vw; height: 40vw; transform: translate(-50%, -50%);
+            background: radial-gradient(circle, rgba(255, 51, 102, 0.15) 0%, transparent 60%);
+            filter: blur(90px); z-index: 0; animation: pulse 12s ease-in-out infinite alternate; pointer-events: none;
+        }
 
+        .bg-grid {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px; z-index: 0; pointer-events: none;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1) translate(0, 0); opacity: 0.7; }
+            50% { transform: scale(1.1) translate(20px, -20px); opacity: 1; }
+            100% { transform: scale(0.95) translate(-20px, 20px); opacity: 0.8; }
+        }
+        @keyframes slideUpFade { 
+            from { opacity: 0; transform: translateY(40px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            70% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Navigation */
         .hiero-nav {
-            display: flex; justify-content: space-between; align-items: center; padding: 25px 50px; border-bottom: 1px solid rgba(255,255,255,0.05); width: 100%; box-sizing: border-box; z-index: 10; position: relative;
+            display: flex; justify-content: space-between; align-items: center; padding: 25px 50px; 
+            background: rgba(10, 10, 18, 0.5); backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255,255,255,0.05); width: 100%; box-sizing: border-box; z-index: 10; position: relative;
         }
         .hiero-nav-links { display: flex; gap: 40px; }
-        .hiero-nav-links a { color: #a0aec0; text-decoration: none; font-size: 15px; font-weight: 500; transition: color 0.2s; cursor: pointer; }
+        .hiero-nav-links a { color: var(--text-muted); text-decoration: none; font-size: 15px; font-weight: 500; transition: color 0.3s; cursor: pointer; }
         .hiero-nav-links a:hover { color: #fff; }
-        .hiero-nav-logo { display: flex; align-items: center; gap: 12px; color: #fff; font-weight: 600; font-size: 20px; text-decoration: none;}
-        .hiero-nav-logo-icon { width: 36px; height: 36px; background: #166534; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #4ade80; font-size: 18px;}
+        .hiero-nav-logo { display: flex; align-items: center; gap: 12px; color: #fff; font-weight: 700; font-size: 22px; text-decoration: none; font-family: 'Outfit', sans-serif;}
+        .hiero-nav-logo-icon { width: 40px; height: 40px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 20px; box-shadow: 0 4px 15px rgba(108, 99, 255, 0.4);}
         
-        .whats-next-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 25px; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #a0aec0; text-decoration: none; transition: all 0.2s; cursor: pointer; }
-        .whats-next-card:hover { background: rgba(255,255,255,0.06); color: #fff; border-color: rgba(255,255,255,0.1); transform: translateY(-2px); }
-        .whats-next-card i { font-size: 22px; margin-bottom: 12px; color: #a0aec0; }
+        /* Main Layout */
+        .main-content { 
+            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            width: 100%; max-width: 1000px; padding: 60px 40px; box-sizing: border-box; z-index: 1; text-align: center; 
+            animation: slideUpFade 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .success-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(0, 230, 118, 0.1); border: 1px solid rgba(0, 230, 118, 0.3);
+            color: var(--success); font-size: 14px; font-weight: 600; padding: 8px 16px; border-radius: 30px;
+            margin-bottom: 24px; text-transform: uppercase; letter-spacing: 1px;
+            animation: popIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            box-shadow: 0 0 20px rgba(0, 230, 118, 0.2);
+        }
+
+        .title {
+            font-size: 52px; font-weight: 800; margin: 0 0 15px 0; 
+            background: linear-gradient(to right, #ffffff, #e0e0e0);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            line-height: 1.1;
+        }
+        .subtitle {
+            font-size: 18px; color: var(--text-muted); max-width: 600px; margin: 0 auto 50px auto; line-height: 1.6; font-weight: 400;
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Presentation Area */
+        .presentation-area {
+            display: flex; gap: 40px; width: 100%; max-width: 900px; align-items: stretch; justify-content: center;
+            flex-wrap: wrap; margin-bottom: 60px;
+        }
+
+        /* Resume Card */
+        .resume-card-container { 
+            flex: 1; min-width: 300px; max-width: 400px; position: relative; 
+            border-radius: 20px; padding: 3px;
+            background: linear-gradient(135deg, rgba(108, 99, 255, 0.5), rgba(0, 240, 255, 0.5));
+            box-shadow: 0 30px 60px rgba(0,0,0,0.6), 0 0 40px rgba(108, 99, 255, 0.2); 
+        }
+        .resume-card { 
+            border-radius: 17px; overflow: hidden; display: flex; flex-direction: column; height: 100%;
+            background: #11111a; position: relative;
+        }
+        .resume-card-header { 
+            background: rgba(255,255,255,0.03); padding: 20px; text-align: center; color: #fff; 
+            font-weight: 600; font-size: 16px; border-bottom: 1px solid rgba(255,255,255,0.05); 
+            text-overflow: ellipsis; white-space: nowrap; overflow: hidden; font-family: 'Outfit', sans-serif;
+        }
+        .resume-card-body { 
+            padding: 30px 25px; display: flex; flex-direction: column; gap: 12px; 
+            background: #ffffff; height: 350px; position: relative; justify-content: center; align-items: center;
+        }
+        .skeleton-line { height: 8px; background: #e2e8f0; border-radius: 4px; opacity: 0.7; }
+        .resume-card-footer { 
+            background: rgba(10, 10, 18, 0.9); padding: 20px; display: flex; justify-content: center; gap: 40px; 
+            color: var(--text-muted); border-top: 1px solid rgba(255,255,255,0.05); position: absolute; bottom: 0; left: 0; right: 0; z-index: 2;
+            backdrop-filter: blur(10px);
+        }
+        .resume-card-footer i { cursor: pointer; transition: all 0.2s; font-size: 20px;}
+        .resume-card-footer i:hover { color: var(--secondary); transform: scale(1.1); text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);}
+        .score-badge { 
+            position: absolute; top: -20px; right: -20px; width: 70px; height: 70px; 
+            background: linear-gradient(135deg, var(--success), #00b35c); border-radius: 50%; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            color: #fff; font-weight: 800; font-size: 22px; 
+            box-shadow: 0 10px 25px rgba(0, 230, 118, 0.4); border: 4px solid var(--bg-dark); z-index: 5;
+            line-height: 1;
+        }
+        .score-badge span { font-size: 10px; font-weight: 600; opacity: 0.9; margin-top: 2px;}
+
+        /* Action Panel */
+        .action-panel {
+            flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 20px; text-align: left;
+        }
         
-        .resume-card-container { margin-top: 30px; position: relative; width: 340px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border-radius: 14px; border: 1px solid rgba(255,255,255,0.1); background: #fff; animation: slideUp 0.5s ease;}
-        .resume-card { border-radius: 14px; overflow: hidden; display: flex; flex-direction: column; height: 100%;}
-        .resume-card-header { background: #122a20; padding: 25px 20px; text-align: center; color: #fff; font-weight: 600; font-size: 16px; border-bottom: 1px solid rgba(255,255,255,0.1); text-overflow: ellipsis; white-space: nowrap; overflow: hidden;}
-        .resume-card-body { padding: 30px 25px; display: flex; flex-direction: column; gap: 12px; background: #fff; height: 250px;}
-        .skeleton-line { height: 6px; background: #e2e8f0; border-radius: 4px; }
-        .resume-card-footer { background: #262626; padding: 18px; display: flex; justify-content: center; gap: 35px; color: #a0aec0; border-top: 1px solid rgba(255,255,255,0.05); position: relative; z-index: 2;}
-        .resume-card-footer i { cursor: pointer; transition: color 0.2s; font-size: 16px;}
-        .resume-card-footer i:hover { color: #fff; }
-        .score-badge { position: absolute; top: -15px; right: -15px; width: 55px; height: 55px; background: #166534; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #4ade80; font-weight: 700; font-size: 16px; box-shadow: 0 10px 20px rgba(0,0,0,0.4); border: 4px solid #1a1a1a; z-index: 5;}
-        
-        .main-content { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; max-width: 850px; padding: 40px; box-sizing: border-box; z-index: 1; text-align: center; }
+        .main-action-btn {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white; border: none; padding: 20px 30px; border-radius: 16px; font-weight: 700; font-size: 18px; 
+            cursor: pointer; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex; align-items: center; justify-content: space-between;
+            box-shadow: 0 15px 30px rgba(108, 99, 255, 0.3); font-family: 'Outfit', sans-serif;
+            position: relative; overflow: hidden;
+        }
+        .main-action-btn::after {
+            content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.2), transparent);
+            transform: skewX(-20deg); animation: shine 3s infinite;
+        }
+        @keyframes shine { 0% { left: -100%; } 20% { left: 200%; } 100% { left: 200%; } }
+        .main-action-btn:hover { transform: translateY(-3px); box-shadow: 0 20px 40px rgba(108, 99, 255, 0.4); }
+        .main-action-btn i { font-size: 24px; }
+
+        .secondary-action-btn {
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            color: #fff; padding: 18px 25px; border-radius: 14px; font-weight: 600; font-size: 16px; 
+            cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 15px;
+            font-family: 'Inter', sans-serif; text-decoration: none;
+        }
+        .secondary-action-btn:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); transform: translateY(-2px); }
+        .secondary-action-btn i { font-size: 20px; color: var(--secondary); width: 24px; text-align: center;}
+
+        .info-card {
+            background: rgba(0, 240, 255, 0.05); border: 1px solid rgba(0, 240, 255, 0.15);
+            padding: 20px; border-radius: 14px; margin-top: auto;
+        }
+        .info-card h4 { margin: 0 0 10px 0; color: var(--secondary); font-size: 14px; text-transform: uppercase; letter-spacing: 1px;}
+        .info-card p { margin: 0; color: var(--text-muted); font-size: 14px; line-height: 1.5;}
+
+        /* Media Queries */
+        @media (max-width: 768px) {
+            .hiero-nav { padding: 20px; }
+            .hiero-nav-links { display: none; }
+            .title { font-size: 38px; }
+            .presentation-area { flex-direction: column; align-items: center; }
+            .action-panel { width: 100%; max-width: 400px; }
+        }
     </style>
 </head>
 <body>
-    <!-- Ambient Background Circles -->
-    <div style="position: absolute; top: -10%; right: -5%; width: 50vw; height: 50vw; background: #1a331a; border-radius: 50%; filter: blur(120px); opacity: 0.8; z-index: 0; pointer-events: none; animation: float1 20s ease-in-out infinite;"></div>
-    <div style="position: absolute; bottom: 0%; left: -5%; width: 35vw; height: 35vw; background: #172135; border-radius: 50%; filter: blur(100px); opacity: 0.9; z-index: 0; pointer-events: none; animation: float2 25s ease-in-out infinite alternate;"></div>
+    <!-- Ambient Background -->
+    <div class="bg-gradient-1"></div>
+    <div class="bg-gradient-2"></div>
+    <div class="bg-gradient-3"></div>
+    <div class="bg-grid"></div>
 
     <!-- Header Navigation -->
     <div class="hiero-nav">
@@ -76,66 +219,72 @@
         </a>
         <div class="hiero-nav-links">
             <a href="dashboard.html">Dashboard</a>
-            <a href="resume-builder.html" style="color: #fff;">Resume</a>
-            <a href="mock-interview.html">Interview prep</a>
+            <a href="resume-builder.html" style="color: #fff; font-weight: 600;">Resume</a>
+            <a href="mock-interview.html">Interview Prep</a>
         </div>
-        <div style="width: 38px; height: 38px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #a0aec0; cursor: pointer;">
-            <i class="fas fa-ellipsis-h"></i>
+        <div style="width: 42px; height: 42px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; cursor: pointer; backdrop-filter: blur(5px);">
+            <i class="fas fa-user"></i>
         </div>
     </div>
 
     <div class="main-content">
-        <div style="color: #4ade80; font-size: 15px; font-weight: 500; margin-bottom: 12px; letter-spacing: 0.5px;">Resume analysis complete</div>
-        <h1 style="font-size: 38px; font-weight: 700; margin: 0 0 45px 0; color: #fff;">Your resume is interview-ready</h1>
+        <div class="success-badge"><i class="fas fa-check-circle"></i> Download Ready</div>
+        <h1 class="title">Your premium resume<br>is unlocked.</h1>
+        <p class="subtitle" id="details-display">Your document has been generated in high-resolution PDF format with a verified ATS-friendly structure. You can download it directly below.</p>
 
-        <div class="resume-card-container" id="success-thumbnail-container">
-            <div class="resume-card" style="height: 250px; position: relative;">
-                <div class="resume-card-header" id="resume-name-placeholder">Priya Sharma</div>
-                <div class="resume-card-body" style="display: flex; justify-content: center; align-items: center; background: rgba(255,255,255,0.02); height: 100%;">
-                    <i class="fas fa-circle-notch fa-spin" style="font-size: 30px; color: #a0aec0;"></i>
+        <div class="presentation-area">
+            <!-- Left: Resume Preview Card -->
+            <div class="resume-card-container" id="success-thumbnail-container">
+                <div class="resume-card">
+                    <div class="resume-card-header" id="resume-name-placeholder">Processing...</div>
+                    <div class="resume-card-body" id="resume-preview-body">
+                        <!-- Loading State -->
+                        <div style="display:flex; flex-direction:column; align-items:center; gap: 15px;">
+                            <i class="fas fa-circle-notch fa-spin" style="font-size: 40px; color: var(--primary);"></i>
+                            <span style="color: #666; font-size: 14px; font-weight: 500;">Rendering Preview...</span>
+                        </div>
+                    </div>
+                    <div class="resume-card-footer">
+                        <i class="fas fa-search-plus" title="Zoom"></i>
+                        <i class="fas fa-cloud-download-alt" onclick="triggerDownload()" title="Download File" style="color: var(--primary); font-size: 24px;"></i>
+                        <i class="fas fa-share-alt" title="Share"></i>
+                    </div>
                 </div>
-                <div class="resume-card-footer" style="position: absolute; bottom: 0; left: 0; right: 0;">
-                    <i class="fas fa-expand"></i>
-                    <i class="fas fa-download" onclick="triggerDownload()"></i>
-                    <i class="fas fa-share-alt"></i>
+                <div class="score-badge" id="score-display">--<span>ATS</span></div>
+            </div>
+
+            <!-- Right: Action Panel -->
+            <div class="action-panel">
+                <button class="main-action-btn" onclick="triggerDownload()" id="mainDownloadBtn">
+                    <span>Download <span id="format-text">PDF</span></span>
+                    <i class="fas fa-arrow-down"></i>
+                </button>
+
+                <a href="mock-interview.html" class="secondary-action-btn">
+                    <i class="fas fa-microphone-alt"></i>
+                    <div>
+                        <div style="font-size: 16px;">Practice Interview</div>
+                        <div style="font-size: 12px; color: var(--text-muted); font-weight: 400; margin-top: 2px;">Test your new resume with AI</div>
+                    </div>
+                </a>
+
+                <a href="resume-builder.html" class="secondary-action-btn">
+                    <i class="fas fa-magic"></i>
+                    <div>
+                        <div style="font-size: 16px;" id="whats-next-text">Refine Details</div>
+                        <div style="font-size: 12px; color: var(--text-muted); font-weight: 400; margin-top: 2px;">Go back and edit content</div>
+                    </div>
+                </a>
+
+                <div class="info-card">
+                    <h4><i class="fas fa-shield-alt" style="margin-right: 5px;"></i> Lifetime Access</h4>
+                    <p>You can re-download this exact version anytime from your dashboard. Edits will require generating a new version.</p>
                 </div>
             </div>
-            <div class="score-badge" id="score-display">--</div>
         </div>
-
-        <div style="color: #d1d5db; font-size: 16px; margin-top: 40px; margin-bottom: 30px; line-height: 1.5; font-weight: 400;" id="details-display">
-            Saved as your Premium PDF, scored -- percent for<br>ATS strength.
-        </div>
-
-        <button onclick="window.location.href='mock-interview.html'" style="background: #166534; color: #4ade80; border: none; padding: 16px 36px; border-radius: 10px; font-weight: 600; font-size: 16px; cursor: pointer; transition: all 0.2s;">
-            Start mock interview
-        </button>
-
-        <div style="width: 100%; margin-top: 65px; text-align: left;">
-            <div style="font-size: 15px; color: #a0aec0; margin-bottom: 18px; font-weight: 500;">what's next</div>
-            <div style="display: flex; gap: 20px; width: 100%;">
-                <a href="analysis.html" class="whats-next-card">
-                    <i class="fas fa-search"></i>
-                    Advanced analysis
-                </a>
-                <a href="resume-builder.html" class="whats-next-card" id="refine-link">
-                    <i class="fas fa-lightbulb"></i>
-                    <span id="whats-next-text">Refine further</span>
-                </a>
-                <a href="resume-builder.html" class="whats-next-card">
-                    <i class="fas fa-edit"></i>
-                    Keep editing
-                </a>
-            </div>
-        </div>
-    </div>
-
-    <div style="margin-top: auto; padding: 40px; color: #6b7280; font-size: 14px; z-index: 1;">
-        Hiero — AI career prep
     </div>
 
     <script>
-        // Use relative URL to support local/prod transparently
         const BACKEND_URL = window.location.origin + '/api/resume';
 
         function formatTemplateName(id) {
@@ -146,10 +295,9 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            // Retrieve data from sessionStorage
             const successDataStr = sessionStorage.getItem('successData');
             if (!successDataStr) {
-                // If accessed directly without data, redirect to builder
+                // Redirect if accessed improperly
                 window.location.href = 'resume-builder.html';
                 return;
             }
@@ -160,78 +308,73 @@
             const resumeData = resumeDataStr ? JSON.parse(resumeDataStr) : {};
             const fullName = resumeData.personalInfo?.fullName || 'Your Resume';
 
-            // Populate UI
-            document.getElementById('score-display').innerText = score || '0';
-            document.getElementById('details-display').innerHTML = `Saved as your ${formatTemplateName(templateId)} ${format.toUpperCase()}, scored ${score} percent for<br>ATS strength.`;
+            // Populate UI Elements
+            document.getElementById('score-display').innerHTML = `${score || '0'}<span>ATS</span>`;
+            document.getElementById('resume-name-placeholder').innerText = fullName;
+            document.getElementById('format-text').innerText = (format || 'PDF').toUpperCase();
             
-            let whatsNextText = 'Add soft skills';
+            document.getElementById('details-display').innerHTML = 
+                `Your <b>${formatTemplateName(templateId)}</b> template has been generated in high-resolution <b>${(format||'PDF').toUpperCase()}</b> format. It achieved an ATS parse score of ${score}%.`;
+            
             if (missing && missing.length > 0) {
-                whatsNextText = 'Add ' + missing[0].toLowerCase();
-            } else {
-                whatsNextText = 'Refine further';
+                document.getElementById('whats-next-text').innerText = 'Add ' + missing[0].toLowerCase();
             }
-            document.getElementById('whats-next-text').innerText = whatsNextText;
 
-            // Thumbnail generation
-            const renderThumbnail = (url) => {
-                const container = document.getElementById('success-thumbnail-container');
-                if (container) {
-                    container.innerHTML = \`
-                      <div class="resume-card" style="height: 250px; position: relative;">
-                          <iframe src="\${url}#view=FitH&toolbar=0&navpanes=0&scrollbar=0" style="width: 667px; height: 800px; border: none; transform: scale(0.5); transform-origin: top left; pointer-events: none; background: #fff;"></iframe>
-                          <div class="resume-card-footer" style="position: absolute; bottom: 0; left: 0; right: 0;">
-                              <i class="fas fa-expand"></i>
-                              <i class="fas fa-download" onclick="triggerDownload()"></i>
-                              <i class="fas fa-share-alt"></i>
-                          </div>
-                      </div>
-                      <div class="score-badge">\${score}</div>
-                    \`;
+            // Fallback skeleton renderer
+            const renderSkeleton = () => {
+                const body = document.getElementById('resume-preview-body');
+                if(body) {
+                    body.innerHTML = `
+                        <div class="skeleton-line" style="width: 100%; margin-bottom: 20px;"></div>
+                        <div class="skeleton-line" style="width: 85%;"></div>
+                        <div class="skeleton-line" style="width: 50%;"></div>
+                        <div class="skeleton-line" style="width: 90%; margin-top: 25px;"></div>
+                        <div class="skeleton-line" style="width: 75%;"></div>
+                        <div class="skeleton-line" style="width: 60%;"></div>
+                        <div class="skeleton-line" style="width: 80%; margin-top: 25px;"></div>
+                        <div class="skeleton-line" style="width: 40%;"></div>
+                    `;
                 }
             };
 
+            // Fetch preview with timeout to prevent infinite hanging
             const generateAndRenderPreview = () => {
                 const data = resumeData;
                 data.template = templateId;
-                fetch(BACKEND_URL + '/preview-resume', {
+                
+                const fetchPromise = fetch(BACKEND_URL + '/preview-resume', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Accept': 'application/pdf' },
                     body: JSON.stringify(data)
-                }).then(res => {
+                });
+
+                const timeoutPromise = new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error('Preview rendering timed out')), 8000)
+                );
+
+                Promise.race([fetchPromise, timeoutPromise])
+                .then(res => {
                     if (res.ok) return res.blob();
                     throw new Error('Failed to fetch preview');
                 }).then(blob => {
                     const url = URL.createObjectURL(blob);
-                    renderThumbnail(url);
+                    const body = document.getElementById('resume-preview-body');
+                    if(body) {
+                        body.style.padding = '0';
+                        body.innerHTML = `
+                            <iframe src="${url}#view=FitH&toolbar=0&navpanes=0&scrollbar=0" style="width: 100%; height: 100%; border: none; transform: scale(1); pointer-events: none; background: #fff;"></iframe>
+                        `;
+                    }
                 }).catch(e => {
                     console.error('Preview error:', e);
-                    // Render fallback skeleton
-                    const container = document.getElementById('success-thumbnail-container');
-                    container.innerHTML = \`
-                      <div class="resume-card">
-                          <div class="resume-card-header">\${fullName}</div>
-                          <div class="resume-card-body">
-                              <div class="skeleton-line" style="width: 100%;"></div>
-                              <div class="skeleton-line" style="width: 85%;"></div>
-                              <div class="skeleton-line" style="width: 50%;"></div>
-                              <div class="skeleton-line" style="width: 90%; margin-top: 15px;"></div>
-                              <div class="skeleton-line" style="width: 75%;"></div>
-                          </div>
-                          <div class="resume-card-footer">
-                              <i class="fas fa-expand"></i>
-                              <i class="fas fa-download" onclick="triggerDownload()"></i>
-                              <i class="fas fa-share-alt"></i>
-                          </div>
-                      </div>
-                      <div class="score-badge">\${score}</div>
-                    \`;
+                    renderSkeleton();
                 });
             };
 
             generateAndRenderPreview();
         });
 
-        // Triggering another download from the success page
+        // Triggering download
         function triggerDownload() {
             const successDataStr = sessionStorage.getItem('successData');
             if (!successDataStr) return;
@@ -240,9 +383,11 @@
             data.template = templateId;
             data.format = format;
 
-            const btn = document.querySelector('.fa-download');
-            btn.classList.remove('fa-download');
-            btn.classList.add('fa-spinner', 'fa-spin');
+            const btn = document.getElementById('mainDownloadBtn');
+            const originalContent = btn.innerHTML;
+            btn.innerHTML = `<i class="fas fa-circle-notch fa-spin"></i> <span>Preparing file...</span>`;
+            btn.style.pointerEvents = 'none';
+            btn.style.opacity = '0.8';
 
             fetch(BACKEND_URL + '/download-resume', {
                 method: 'POST',
@@ -258,18 +403,24 @@
                 const a = document.createElement('a');
                 a.style.display = 'none';
                 a.href = url;
-                a.download = \`resume_\${templateId}.\${format}\`;
+                a.download = `resume_${templateId}.${format}`;
                 document.body.appendChild(a);
                 a.click();
                 window.URL.revokeObjectURL(url);
-                btn.classList.add('fa-download');
-                btn.classList.remove('fa-spinner', 'fa-spin');
+                
+                // Reset button
+                setTimeout(() => {
+                    btn.innerHTML = originalContent;
+                    btn.style.pointerEvents = 'all';
+                    btn.style.opacity = '1';
+                }, 1000);
             })
             .catch(error => {
                 console.error('Error:', error);
                 alert('Download failed. Please try again.');
-                btn.classList.add('fa-download');
-                btn.classList.remove('fa-spinner', 'fa-spin');
+                btn.innerHTML = originalContent;
+                btn.style.pointerEvents = 'all';
+                btn.style.opacity = '1';
             });
         }
     </script>
