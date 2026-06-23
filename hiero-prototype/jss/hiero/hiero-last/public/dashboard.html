@@ -1,740 +1,459 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard - Hiero</title>
-  <script src="authCheck.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --neon-green: #06e506f1;
-      --dark-green: #00cc00;
-      --black: #000000;
-      --card-bg: #0a0a0a;
-      --glow: 0 0 25px #00ff0093, 0 0 50px #00ff0093;
-      --radius: 12px;
-      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hiero Command Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #07e219;
+            --primary-glow: rgba(42, 224, 35, 0.4);
+            --bg-pure: #030503;
+            --card-bg: rgba(15, 20, 15, 0.7);
+            --card-border: rgba(42, 224, 35, 0.15);
+            --text-main: #FFFFFF;
+            --text-muted: #A0AEC0;
+            --danger: #ff4444;
+            --warning: #ffb84d;
+        }
 
-    * {
-      box-sizing: border-box;
-    }
+        body, html {
+            margin: 0; padding: 0;
+            font-family: 'Outfit', 'Inter', sans-serif;
+            background-color: var(--bg-pure);
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
 
-    body {
-      margin: 0;
-      background: linear-gradient(135deg, #000000 0%, #0a0a0a 100%);
-      color: var(--neon-green);
-      font-family: 'Inter', sans-serif;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
+        /* Ambient Background Grid */
+        body::before {
+            content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: 
+                linear-gradient(rgba(42, 224, 35, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(42, 224, 35, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -2; pointer-events: none;
+        }
+        
+        /* Dynamic Glows */
+        .ambient-glow {
+            position: fixed; border-radius: 50%; filter: blur(100px); opacity: 0.15; z-index: -1; pointer-events: none;
+        }
+        .glow-1 { top: -10%; left: -10%; width: 50vw; height: 50vw; background: var(--primary); animation: pulse 15s infinite alternate; }
+        .glow-2 { bottom: -20%; right: -10%; width: 60vw; height: 60vw; background: #0088ff; animation: pulse 20s infinite alternate-reverse; }
 
-    .header {
-      background: var(--card-bg);
-      border-bottom: 2px solid var(--neon-green);
-      padding: 20px;
-      box-shadow: var(--glow);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
+        @keyframes pulse {
+            0% { transform: scale(1) translate(0, 0); }
+            100% { transform: scale(1.1) translate(30px, 30px); }
+        }
 
-    .header-content {
-      max-width: 1200px;
-      margin: 0 auto;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+        /* Navigation */
+        .hiero-nav {
+            display: flex; justify-content: space-between; align-items: center; padding: 20px 50px; 
+            background: rgba(3, 5, 3, 0.8); backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--card-border); position: sticky; top: 0; z-index: 100;
+        }
+        .nav-logo { display: flex; align-items: center; gap: 12px; font-weight: 800; font-size: 24px; color: #fff; text-decoration: none; }
+        .nav-logo i { color: var(--primary); font-size: 28px; text-shadow: 0 0 15px var(--primary-glow); }
+        .nav-links { display: flex; gap: 30px; }
+        .nav-links a { color: var(--text-muted); text-decoration: none; font-weight: 500; transition: 0.3s; }
+        .nav-links a:hover, .nav-links a.active { color: var(--primary); text-shadow: 0 0 10px var(--primary-glow); }
+        .user-profile { display: flex; align-items: center; gap: 15px; }
+        .user-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: bold; color: #000; }
+        .logout-btn { background: transparent; border: 1px solid var(--card-border); color: var(--text-muted); padding: 8px 15px; border-radius: 8px; cursor: pointer; transition: 0.3s; }
+        .logout-btn:hover { background: rgba(255, 68, 68, 0.1); color: var(--danger); border-color: var(--danger); }
 
-    .logo {
-      font-size: 2rem;
-      font-weight: 700;
-      color: var(--neon-green);
-      text-shadow: var(--glow);
-    }
+        /* Dashboard Grid Layout */
+        .dashboard-container {
+            max-width: 1400px; margin: 40px auto; padding: 0 30px;
+            display: grid; grid-template-columns: 1fr 350px; gap: 30px;
+        }
 
-    .user-info {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-    }
+        /* Common Card Styles */
+        .card {
+            background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 24px; padding: 30px;
+            backdrop-filter: blur(10px); box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            position: relative; overflow: hidden; transition: transform 0.3s;
+        }
+        .card:hover { transform: translateY(-5px); border-color: rgba(42, 224, 35, 0.3); box-shadow: 0 20px 40px rgba(42, 224, 35, 0.1); }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px; }
+        .card-title { font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+        .card-title i { color: var(--primary); }
 
-    .user-name {
-      color: #fff;
-      font-weight: 600;
-    }
+        /* Left Column */
+        .main-col { display: flex; flex-direction: column; gap: 30px; }
+        
+        /* Welcome Banner */
+        .welcome-banner {
+            background: linear-gradient(135deg, rgba(42, 224, 35, 0.1), transparent);
+            border: 1px solid var(--primary); display: flex; justify-content: space-between; align-items: center;
+        }
+        .welcome-text h1 { font-size: 36px; margin: 0 0 10px 0; font-weight: 800; }
+        .welcome-text p { color: var(--text-muted); margin: 0; font-size: 16px; font-family: 'Inter'; }
+        
+        /* Quick Tools Grid */
+        .tools-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .tool-card {
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 25px;
+            text-align: center; text-decoration: none; color: #fff; transition: 0.3s; display: block;
+        }
+        .tool-card:hover { background: rgba(42, 224, 35, 0.05); border-color: var(--primary); transform: translateY(-5px); }
+        .tool-card i { font-size: 32px; color: var(--primary); margin-bottom: 15px; }
+        .tool-card h3 { margin: 0 0 10px 0; font-size: 18px; }
+        .tool-card p { margin: 0; color: var(--text-muted); font-size: 13px; }
 
-    .logout-btn {
-      background: transparent;
-      color: var(--neon-green);
-      border: 2px solid var(--neon-green);
-      padding: 8px 16px;
-      border-radius: var(--radius);
-      cursor: pointer;
-      font-weight: 600;
-      transition: var(--transition);
-    }
+        /* Stats Grid */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        
+        /* Resume History */
+        .resume-item {
+            background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 15px 20px;
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; transition: 0.3s;
+        }
+        .resume-item:hover { border-color: var(--primary); background: rgba(42, 224, 35, 0.05); }
+        .resume-info { display: flex; align-items: center; gap: 15px; }
+        .resume-icon { width: 40px; height: 40px; border-radius: 8px; background: rgba(42, 224, 35, 0.1); display: flex; align-items: center; justify-content: center; color: var(--primary); }
+        .resume-details h4 { margin: 0 0 5px 0; font-size: 16px; }
+        .resume-details p { margin: 0; color: var(--text-muted); font-size: 13px; }
+        .resume-actions a { color: var(--text-main); text-decoration: none; padding: 8px 15px; border-radius: 6px; background: rgba(255,255,255,0.1); font-size: 13px; transition: 0.3s; }
+        .resume-actions a:hover { background: var(--primary); color: #000; }
 
-    .logout-btn:hover {
-      background: var(--neon-green);
-      color: var(--black);
-    }
+        /* Right Column */
+        .side-col { display: flex; flex-direction: column; gap: 30px; }
 
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 30px 20px;
-    }
+        /* Subscription Card */
+        .sub-card { text-align: center; position: relative; }
+        .pro-badge { 
+            display: inline-block; background: linear-gradient(135deg, var(--primary), #00ff00); color: #000;
+            padding: 5px 15px; border-radius: 20px; font-weight: 800; font-size: 14px; text-transform: uppercase;
+            letter-spacing: 1px; margin-bottom: 15px; box-shadow: 0 0 15px var(--primary-glow);
+        }
+        .free-badge {
+            display: inline-block; background: rgba(255,255,255,0.1); color: #fff;
+            padding: 5px 15px; border-radius: 20px; font-weight: 600; font-size: 14px; text-transform: uppercase; margin-bottom: 15px;
+        }
+        .sub-details { color: var(--text-muted); font-size: 14px; margin-bottom: 25px; line-height: 1.6; }
+        .sub-details strong { color: #fff; }
+        .upgrade-btn {
+            display: block; width: 100%; background: linear-gradient(135deg, var(--primary), #1a8b17); color: #000;
+            text-decoration: none; padding: 15px; border-radius: 12px; font-weight: 700; font-size: 16px; transition: 0.3s;
+        }
+        .upgrade-btn:hover { transform: scale(1.02); box-shadow: 0 10px 20px var(--primary-glow); }
 
-    .welcome-section {
-      text-align: center;
-      margin-bottom: 40px;
-      animation: fadeInDown 0.6s ease-out;
-    }
+        /* Activity Feed */
+        .activity-feed { display: flex; flex-direction: column; gap: 15px; }
+        .activity-item { display: flex; gap: 15px; }
+        .activity-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--primary); margin-top: 5px; box-shadow: 0 0 10px var(--primary-glow); }
+        .activity-text p { margin: 0 0 5px 0; font-size: 14px; }
+        .activity-text span { font-size: 12px; color: var(--text-muted); }
 
-    .welcome-title {
-      font-size: 2.5rem;
-      font-weight: 700;
-      margin: 0 0 10px 0;
-      text-shadow: var(--glow);
-    }
-
-    .welcome-subtitle {
-      color: #fff;
-      font-size: 1.2rem;
-      margin-bottom: 20px;
-    }
-
-    .stats-overview {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 20px;
-      margin: 40px 0;
-    }
-
-    .stat-card {
-      background: var(--card-bg);
-      border: 1px solid var(--neon-green);
-      border-radius: var(--radius);
-      padding: 20px;
-      text-align: center;
-      box-shadow: var(--glow);
-      transition: var(--transition);
-      animation: fadeInUp 0.6s ease-out;
-    }
-
-    .stat-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 0 30px var(--neon-green);
-    }
-
-    .stat-value {
-      font-size: 2rem;
-      font-weight: 700;
-      color: var(--neon-green);
-      text-shadow: 0 0 10px var(--neon-green);
-    }
-
-    .stat-label {
-      color: #fff;
-      margin-top: 5px;
-      font-size: 0.9rem;
-    }
-
-    .quick-actions {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 30px;
-      margin: 40px 0;
-    }
-
-    .action-card {
-      background: var(--card-bg);
-      border: 1px solid var(--neon-green);
-      border-radius: var(--radius);
-      padding: 30px;
-      box-shadow: var(--glow);
-      transition: var(--transition);
-      animation: fadeInUp 0.8s ease-out;
-    }
-
-    .action-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 0 30px var(--neon-green);
-    }
-
-    .action-icon {
-      font-size: 3rem;
-      margin-bottom: 15px;
-      display: block;
-    }
-
-    .action-title {
-      font-size: 1.3rem;
-      font-weight: 600;
-      color: var(--neon-green);
-      margin-bottom: 10px;
-    }
-
-    .action-description {
-      color: #fff;
-      margin-bottom: 20px;
-      line-height: 1.5;
-    }
-
-    .action-btn {
-      background: linear-gradient(45deg, var(--neon-green), var(--dark-green));
-      color: var(--black);
-      padding: 12px 24px;
-      border: none;
-      border-radius: var(--radius);
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 14px;
-      box-shadow: var(--glow);
-      transition: var(--transition);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      text-decoration: none;
-      display: inline-block;
-      width: 100%;
-      text-align: center;
-    }
-
-    .action-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 0 25px var(--neon-green);
-    }
-
-    .recent-activity {
-      background: var(--card-bg);
-      border: 1px solid var(--neon-green);
-      border-radius: var(--radius);
-      padding: 30px;
-      margin: 40px 0;
-      box-shadow: var(--glow);
-      animation: fadeInUp 1s ease-out;
-    }
-
-    .section-title {
-      font-size: 1.5rem;
-      font-weight: 600;
-      color: var(--neon-green);
-      margin-bottom: 20px;
-      text-shadow: 0 0 10px var(--neon-green);
-    }
-
-    .activity-list {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-
-    .activity-item {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      padding: 15px 0;
-      border-bottom: 1px solid #333;
-      color: #fff;
-    }
-
-    .activity-item:last-child {
-      border-bottom: none;
-    }
-
-    .activity-icon {
-      font-size: 1.5rem;
-      width: 40px;
-      text-align: center;
-    }
-
-    .activity-content {
-      flex: 1;
-    }
-
-    .activity-title {
-      font-weight: 600;
-      margin-bottom: 5px;
-    }
-
-    .activity-date {
-      font-size: 0.9rem;
-      color: #aaa;
-    }
-
-    .badges-section {
-      background: var(--card-bg);
-      border: 1px solid var(--neon-green);
-      border-radius: var(--radius);
-      padding: 30px;
-      margin: 40px 0;
-      box-shadow: var(--glow);
-      animation: fadeInUp 1.2s ease-out;
-    }
-
-    .badges-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-      gap: 15px;
-      margin-top: 20px;
-    }
-
-    .badge-item {
-      background: rgba(6, 229, 6, 0.1);
-      border: 1px solid var(--neon-green);
-      border-radius: var(--radius);
-      padding: 15px;
-      text-align: center;
-      transition: var(--transition);
-    }
-
-    .badge-item:hover {
-      background: rgba(6, 229, 6, 0.2);
-      transform: scale(1.05);
-    }
-
-    .badge-emoji {
-      font-size: 2rem;
-      margin-bottom: 10px;
-      display: block;
-    }
-
-    .badge-name {
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: var(--neon-green);
-    }
-
-    /* Animations */
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(30px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes fadeInDown {
-      from {
-        opacity: 0;
-        transform: translateY(-30px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    /* Mobile Responsive */
-    @media (max-width: 768px) {
-      .header-content {
-        flex-direction: column;
-        gap: 15px;
-      }
-
-      .container {
-        padding: 20px 15px;
-      }
-
-      .welcome-title {
-        font-size: 2rem;
-      }
-
-      .quick-actions {
-        grid-template-columns: 1fr;
-      }
-
-      .stats-overview {
-        grid-template-columns: repeat(2, 1fr);
-      }
-
-      .badges-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-
-    @media (max-width: 480px) {
-      .stats-overview {
-        grid-template-columns: 1fr;
-      }
-
-      .badges-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-  </style>
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .dashboard-container { grid-template-columns: 1fr; }
+            .tools-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 768px) {
+            .tools-grid { grid-template-columns: 1fr; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .hiero-nav { padding: 20px; }
+            .nav-links { display: none; }
+        }
+    </style>
 </head>
-
 <body>
-  <header class="header">
-    <div class="header-content">
-      <div class="logo">🚀 HIERO</div>
-      <div class="user-info">
-        <span class="user-name" id="user-name">Loading...</span>
-        <button class="logout-btn" onclick="logout()">Logout</button>
-      </div>
+
+    <div class="ambient-glow glow-1"></div>
+    <div class="ambient-glow glow-2"></div>
+
+    <!-- Navigation -->
+    <nav class="hiero-nav">
+        <a href="dashboard.html" class="nav-logo">
+            <i class="fas fa-bolt"></i> Hiero
+        </a>
+        <div class="nav-links">
+            <a href="dashboard.html" class="active">Dashboard</a>
+            <a href="resume-builder.html">Resume Builder</a>
+            <a href="mock-interview.html">Interview Prep</a>
+            <a href="solve.html">Solve</a>
+            <a href="learn.html">Learn</a>
+        </div>
+        <div class="user-profile">
+            <span id="nav-user-name" style="font-weight: 500; font-size: 15px;">Loading...</span>
+            <div class="user-avatar" id="nav-avatar">U</div>
+            <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i></button>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        
+        <!-- Left Column: Main Content -->
+        <div class="main-col">
+            
+            <!-- Welcome Banner -->
+            <div class="card welcome-banner">
+                <div class="welcome-text">
+                    <h1>Welcome back, <span id="welcome-name" style="color: var(--primary);">User</span>!</h1>
+                    <p>Your premium command center. Track your progress and advance your career.</p>
+                </div>
+                <div style="font-size: 60px; color: var(--primary); opacity: 0.2;"><i class="fas fa-rocket"></i></div>
+            </div>
+
+            <!-- Quick Tools -->
+            <div class="tools-grid">
+                <a href="resume-builder.html" class="tool-card">
+                    <i class="fas fa-file-invoice"></i>
+                    <h3>Resume Builder</h3>
+                    <p>Create & download premium ATS resumes</p>
+                </a>
+                <a href="mock-interview.html" class="tool-card">
+                    <i class="fas fa-microphone-alt"></i>
+                    <h3>Mock Interview</h3>
+                    <p>Practice with real-time AI feedback</p>
+                </a>
+                <a href="solve.html" class="tool-card">
+                    <i class="fas fa-code"></i>
+                    <h3>Problem Solving</h3>
+                    <p>Master coding challenges</p>
+                </a>
+            </div>
+
+            <!-- Stats & Progress -->
+            <div class="stats-grid">
+                <!-- Resume Section -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title"><i class="fas fa-file-alt"></i> Resume Hub</div>
+                    </div>
+                    <div id="resume-container">
+                        <!-- Populated by JS -->
+                        <div style="text-align: center; color: var(--text-muted); padding: 20px;">
+                            <i class="fas fa-spinner fa-spin"></i> Loading data...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Learning Progress -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title"><i class="fas fa-graduation-cap"></i> Learning Progress</div>
+                        <a href="learn.html" style="color: var(--primary); text-decoration: none; font-size: 14px;">Browse Library <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 20px;">
+                        <div>
+                            <div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px;">
+                                <span>Advanced Data Structures</span>
+                                <span style="color: var(--primary);">65%</span>
+                            </div>
+                            <div style="width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
+                                <div style="width: 65%; height: 100%; background: var(--primary); box-shadow: 0 0 10px var(--primary-glow);"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px;">
+                                <span>System Design Basics</span>
+                                <span style="color: var(--primary);">30%</span>
+                            </div>
+                            <div style="width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
+                                <div style="width: 30%; height: 100%; background: var(--primary); box-shadow: 0 0 10px var(--primary-glow);"></div>
+                            </div>
+                        </div>
+                        
+                        <div style="background: rgba(42, 224, 35, 0.05); border: 1px solid rgba(42, 224, 35, 0.2); padding: 15px; border-radius: 12px; display: flex; gap: 15px; align-items: center; margin-top: 10px;">
+                            <div style="width: 50px; height: 50px; background: rgba(0,0,0,0.5); border-radius: 8px; display: flex; align-items: center; justify-content: center; position: relative;">
+                                <i class="fas fa-play" style="color: var(--primary); z-index: 2;"></i>
+                            </div>
+                            <div>
+                                <h4 style="margin: 0 0 5px 0; font-size: 15px;">Continue Watching</h4>
+                                <p style="margin: 0; font-size: 13px; color: var(--text-muted);">Dynamic Programming Intro • 12m left</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Right Column: Sidebar -->
+        <div class="side-col">
+            
+            <!-- Subscription Card -->
+            <div class="card sub-card">
+                <div class="card-header" style="justify-content: center;">
+                    <div class="card-title"><i class="fas fa-crown"></i> Subscription Status</div>
+                </div>
+                
+                <div id="sub-status-container">
+                    <div class="free-badge">Fetching...</div>
+                    <p class="sub-details">Loading your account details.</p>
+                </div>
+            </div>
+
+            <!-- Problem Solving Overview -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title"><i class="fas fa-laptop-code"></i> Solve Portal</div>
+                    <span style="font-size: 12px; background: rgba(255,255,255,0.1); padding: 3px 8px; border-radius: 10px;">Weekly Rank: 42</span>
+                </div>
+                <div style="display: flex; justify-content: space-around; margin-bottom: 20px; text-align: center;">
+                    <div>
+                        <div style="font-size: 24px; font-weight: 700; color: var(--primary);">24</div>
+                        <div style="font-size: 12px; color: var(--text-muted);">Easy</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 24px; font-weight: 700; color: var(--warning);">12</div>
+                        <div style="font-size: 12px; color: var(--text-muted);">Medium</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 24px; font-weight: 700; color: var(--danger);">3</div>
+                        <div style="font-size: 12px; color: var(--text-muted);">Hard</div>
+                    </div>
+                </div>
+                <a href="solve.html" style="display: block; width: 100%; padding: 12px; text-align: center; background: rgba(255,255,255,0.05); color: #fff; text-decoration: none; border-radius: 8px; font-size: 14px; transition: 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">Solve Daily Challenge</a>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title"><i class="fas fa-history"></i> Recent Activity</div>
+                </div>
+                <div class="activity-feed">
+                    <div class="activity-item">
+                        <div class="activity-dot"></div>
+                        <div class="activity-text">
+                            <p>Logged into Command Center</p>
+                            <span>Just now</span>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-dot" style="background: var(--warning); box-shadow: 0 0 10px var(--warning);"></div>
+                        <div class="activity-text">
+                            <p>Completed "Two Sum" challenge</p>
+                            <span>2 days ago</span>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-dot" style="background: #0088ff; box-shadow: 0 0 10px #0088ff;"></div>
+                        <div class="activity-text">
+                            <p>Downloaded PDF Resume</p>
+                            <span>3 days ago</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
     </div>
-  </header>
 
-  <div class="container">
-    <div class="welcome-section">
-      <h1 class="welcome-title">Welcome to Your Dashboard</h1>
-      <p class="welcome-subtitle">Track your learning progress, complete projects, and level up your skills</p>
-    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeDashboard();
+        });
 
-    <div class="stats-overview" id="stats-overview">
-      <!-- Stats will be loaded here -->
-    </div>
-
-    <div class="quick-actions">
-      <div class="action-card">
-        <span class="action-icon">📄</span>
-        <h3 class="action-title">Resume Builder</h3>
-        <p class="action-description">Create and improve your resume with our AI-powered builder</p>
-        <a href="resume-builder.html" class="action-btn">Build Resume</a>
-      </div>
-
-      <div class="action-card">
-        <span class="action-icon">📚</span>
-        <h3 class="action-title">Learn Skills</h3>
-        <p class="action-description">Master new skills with interactive lessons and projects</p>
-        <a href="learn.html" class="action-btn">Start Learning</a>
-      </div>
-
-      <div class="action-card">
-        <span class="action-icon">🚀</span>
-        <h3 class="action-title">Complete Projects</h3>
-        <p class="action-description">Build real-world projects to showcase your abilities</p>
-        <a href="coming-soon.html" class="action-btn">View Projects</a>
-      </div>
-
-      <div class="action-card">
-        <span class="action-icon">🏆</span>
-        <h3 class="action-title">Leaderboard</h3>
-        <p class="action-description">See how you rank against other learners</p>
-        <a href="leaderboard.html" class="action-btn">View Rankings</a>
-      </div>
-
-      <div class="action-card">
-        <span class="action-icon">🔍</span>
-        <h3 class="action-title">Resume Analysis</h3>
-        <p class="action-description">Get AI-powered insights to improve your resume</p>
-        <a href="upload.html" class="action-btn">Analyze Resume</a>
-      </div>
-
-      <div class="action-card">
-        <span class="action-icon">📊</span>
-        <h3 class="action-title">Progress Tracking</h3>
-        <p class="action-description">Monitor your learning journey and achievements</p>
-        <a href="#" onclick="showProgressModal()" class="action-btn">View Progress</a>
-      </div>
-    </div>
-
-    <div class="recent-activity">
-      <h2 class="section-title">Recent Activity</h2>
-      <ul class="activity-list" id="activity-list">
-        <!-- Activities will be loaded here -->
-      </ul>
-    </div>
-
-    <div class="badges-section">
-      <h2 class="section-title">Your Badges</h2>
-      <div class="badges-grid" id="badges-grid">
-        <!-- Badges will be loaded here -->
-      </div>
-    </div>
-  </div>
-
-  <!-- Progress Modal -->
-  <div id="progress-modal"
-    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000;">
-    <div
-      style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--card-bg); border: 2px solid var(--neon-green); border-radius: var(--radius); padding: 30px; max-width: 500px; width: 90%;">
-      <h3 style="color: var(--neon-green); margin-top: 0;">📊 Your Progress</h3>
-      <div id="progress-content">
-        <!-- Progress details will be loaded here -->
-      </div>
-      <button onclick="hideProgressModal()"
-        style="background: var(--neon-green); color: var(--black); border: none; padding: 10px 20px; border-radius: var(--radius); cursor: pointer; margin-top: 20px;">Close</button>
-    </div>
-  </div>
-
-  <script>
-    // Backend API configuration
-    const API_BASE_URL = 'http://localhost:5005/api';
-
-    // Global variables
-    let currentUser = null;
-    let userStats = null;
-
-    // Initialize the application
-    async function initializeApp() {
-      try {
-        // Get current user info
-        await getCurrentUser();
-
-        // Fetch user stats
-        await fetchUserStats();
-
-        // Render dashboard components
-        renderStatsOverview();
-        renderRecentActivity();
-        renderBadges();
-      } catch (error) {
-        console.error('Error initializing dashboard:', error);
-        showError('Failed to load dashboard data. Please try again.');
-      }
-    }
-
-    // Get current user info
-    async function getCurrentUser() {
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-          window.location.href = 'index.html';
-          return;
+        function formatTemplateName(id) {
+            if (!id) return "Premium Template";
+            const parts = id.split('-');
+            if (parts.length === 1) return parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
+            return parts.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
         }
 
-        // Decode token to get user info
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        currentUser = { id: payload.userId, username: payload.username };
+        function initializeDashboard() {
+            // 1. Auth Check & User Data
+            const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
+            const userStr = localStorage.getItem('user');
 
-        // Update user name in header
-        document.getElementById('user-name').textContent = currentUser.username;
-      } catch (error) {
-        console.error('Error getting current user:', error);
-        window.location.href = 'index.html';
-      }
-    }
+            if (!token || !userStr) {
+                window.location.href = '/dashboard/login.html';
+                return;
+            }
 
-    // Fetch user stats
-    async function fetchUserStats() {
-      try {
-        const token = localStorage.getItem('token');
-        const response = await fetch(`${API_BASE_URL}/scoring/user-stats`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
+            const user = JSON.parse(userStr);
+            const firstName = user.name ? user.name.split(' ')[0] : (user.username || 'User');
+            const initial = firstName.charAt(0).toUpperCase();
 
-        if (response.ok) {
-          const data = await response.json();
-          userStats = data.stats;
-        } else {
-          throw new Error('Failed to fetch user stats');
+            // Populate User info
+            document.getElementById('welcome-name').innerText = firstName;
+            document.getElementById('nav-user-name').innerText = user.name || user.username || 'User';
+            document.getElementById('nav-avatar').innerText = initial;
+
+            // 2. Subscription Status
+            const subContainer = document.getElementById('sub-status-container');
+            const isPro = !!user.isPro;
+            
+            if (isPro) {
+                let planName = "Premium";
+                if (user.proPlan === 'affordable') planName = "Basic Pro (1 Month)";
+                if (user.proPlan === 'premium') planName = "Elite Pro (3 Months)";
+                if (user.proPlan === '6months') planName = "Lifetime Pro (6 Months)";
+
+                let expiryDate = user.proUntil ? new Date(user.proUntil).toLocaleDateString() : "Lifetime";
+
+                subContainer.innerHTML = `
+                    <div class="pro-badge"><i class="fas fa-bolt"></i> PRO ACTIVE</div>
+                    <p class="sub-details">
+                        Plan: <strong>${planName}</strong><br>
+                        Valid until: <strong>${expiryDate}</strong><br>
+                        <span style="color: var(--primary); margin-top: 10px; display: inline-block;">All Premium Features Unlocked</span>
+                    </p>
+                    <a href="pricing.html" class="upgrade-btn" style="background: rgba(255,255,255,0.1); color: #fff;">Extend Subscription</a>
+                `;
+            } else {
+                subContainer.innerHTML = `
+                    <div class="free-badge">FREE ACCOUNT</div>
+                    <p class="sub-details">
+                        Unlock premium resume templates, advanced AI mock interviews, and ad-free learning.
+                    </p>
+                    <a href="pricing.html" class="upgrade-btn">Upgrade to PRO</a>
+                `;
+            }
+
+            // 3. Resume History
+            const resumeContainer = document.getElementById('resume-container');
+            const resumeDataStr = localStorage.getItem('resumeData');
+            const selectedTemplate = localStorage.getItem('selectedTemplate') || 'hiero-executive';
+            
+            if (resumeDataStr) {
+                const resumeData = JSON.parse(resumeDataStr);
+                const fullName = resumeData.personalInfo?.fullName || 'My Resume';
+                const templateName = formatTemplateName(selectedTemplate);
+
+                resumeContainer.innerHTML = `
+                    <div class="resume-item">
+                        <div class="resume-info">
+                            <div class="resume-icon"><i class="fas fa-file-pdf"></i></div>
+                            <div class="resume-details">
+                                <h4>${fullName}</h4>
+                                <p>Template: ${templateName}</p>
+                            </div>
+                        </div>
+                        <div class="resume-actions">
+                            <a href="resume-builder.html">Open Builder</a>
+                        </div>
+                    </div>
+                    <a href="resume-builder.html" style="display: block; width: 100%; padding: 12px; text-align: center; border: 1px dashed rgba(42, 224, 35, 0.4); color: var(--primary); text-decoration: none; border-radius: 8px; font-size: 14px; margin-top: 15px; transition: 0.3s;" onmouseover="this.style.background='rgba(42, 224, 35, 0.05)'" onmouseout="this.style.background='transparent'"><i class="fas fa-plus"></i> Create New Resume</a>
+                `;
+            } else {
+                resumeContainer.innerHTML = `
+                    <div style="text-align: center; padding: 20px;">
+                        <i class="fas fa-folder-open" style="font-size: 40px; color: rgba(255,255,255,0.1); margin-bottom: 15px;"></i>
+                        <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 15px;">No resumes created yet.</p>
+                        <a href="resume-builder.html" style="background: var(--primary); color: #000; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px;">Build First Resume</a>
+                    </div>
+                `;
+            }
         }
-      } catch (error) {
-        console.error('Error fetching user stats:', error);
-        // Set default stats
-        userStats = {
-          totalPoints: 0,
-          level: 1,
-          badges: [],
-          skillsCount: 0,
-          projectsCount: 0,
-          completedSkills: [],
-          completedProjects: []
-        };
-      }
-    }
 
-    // Render stats overview
-    function renderStatsOverview() {
-      if (!userStats) return;
-
-      const container = document.getElementById('stats-overview');
-      container.innerHTML = `
-        <div class="stat-card">
-          <div class="stat-value">${userStats.level}</div>
-          <div class="stat-label">Current Level</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value">${userStats.totalPoints.toLocaleString()}</div>
-          <div class="stat-label">Total Points</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value">${userStats.skillsCount || 0}</div>
-          <div class="stat-label">Skills Mastered</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value">${userStats.projectsCount || 0}</div>
-          <div class="stat-label">Projects Completed</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value">${userStats.badges.length}</div>
-          <div class="stat-label">Badges Earned</div>
-        </div>
-      `;
-    }
-
-    // Render recent activity
-    function renderRecentActivity() {
-      const container = document.getElementById('activity-list');
-
-      const activities = [];
-
-      // Add skill activities
-      if (userStats.completedSkills) {
-        userStats.completedSkills.slice(-3).forEach(skill => {
-          activities.push({
-            icon: '📚',
-            title: `Completed ${skill.skillName}`,
-            date: skill.completedAt ? new Date(skill.completedAt).toLocaleDateString() : 'Recently',
-            type: 'skill'
-          });
-        });
-      }
-
-      // Add project activities
-      if (userStats.completedProjects) {
-        userStats.completedProjects.slice(-3).forEach(project => {
-          activities.push({
-            icon: '🚀',
-            title: `Finished ${project.projectName}`,
-            date: project.completedAt ? new Date(project.completedAt).toLocaleDateString() : 'Recently',
-            type: 'project'
-          });
-        });
-      }
-
-      // Sort by date (most recent first)
-      activities.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-      if (activities.length === 0) {
-        container.innerHTML = `
-          <li class="activity-item">
-            <span class="activity-icon">🎯</span>
-            <div class="activity-content">
-              <div class="activity-title">Ready to start your journey?</div>
-              <div class="activity-date">Begin by learning new skills or building projects</div>
-            </div>
-          </li>
-        `;
-      } else {
-        container.innerHTML = activities.slice(0, 5).map(activity => `
-          <li class="activity-item">
-            <span class="activity-icon">${activity.icon}</span>
-            <div class="activity-content">
-              <div class="activity-title">${activity.title}</div>
-              <div class="activity-date">${activity.date}</div>
-            </div>
-          </li>
-        `).join('');
-      }
-    }
-
-    // Render badges
-    function renderBadges() {
-      const container = document.getElementById('badges-grid');
-
-      if (!userStats.badges || userStats.badges.length === 0) {
-        container.innerHTML = `
-          <div style="grid-column: 1 / -1; text-align: center; color: #fff; padding: 20px;">
-            <span style="font-size: 2rem; display: block; margin-bottom: 10px;">🏆</span>
-            <p>No badges earned yet. Complete skills and projects to earn your first badge!</p>
-          </div>
-        `;
-      } else {
-        container.innerHTML = userStats.badges.map(badge => {
-          const badgeEmoji = getBadgeEmoji(badge);
-          return `
-            <div class="badge-item">
-              <span class="badge-emoji">${badgeEmoji}</span>
-              <div class="badge-name">${badge}</div>
-            </div>
-          `;
-        }).join('');
-      }
-    }
-
-    // Get badge emoji based on badge name
-    function getBadgeEmoji(badgeName) {
-      if (badgeName.includes('First')) return '🏆';
-      if (badgeName.includes('Master')) return '👨‍🎓';
-      if (badgeName.includes('Enthusiast')) return '🔥';
-      if (badgeName.includes('Project')) return '🚀';
-      if (badgeName.includes('Skill')) return '📚';
-      return '🎖️';
-    }
-
-    // Show progress modal
-    function showProgressModal() {
-      const modal = document.getElementById('progress-modal');
-      const content = document.getElementById('progress-content');
-
-      const nextLevelPoints = (userStats.level * 100) - userStats.totalPoints;
-      const progressPercent = ((userStats.totalPoints % 100) / 100) * 100;
-
-      content.innerHTML = `
-        <div style="margin-bottom: 20px;">
-          <strong>Level Progress:</strong>
-          <div style="background: #333; height: 10px; border-radius: 5px; margin: 10px 0; overflow: hidden;">
-            <div style="background: var(--neon-green); height: 100%; width: ${progressPercent}%; transition: width 0.3s ease;"></div>
-          </div>
-          <small>${nextLevelPoints} points to next level</small>
-        </div>
-        <div><strong>Skills Completed:</strong> ${userStats.skillsCount || 0}</div>
-        <div><strong>Projects Completed:</strong> ${userStats.projectsCount || 0}</div>
-        <div><strong>Total Points:</strong> ${userStats.totalPoints.toLocaleString()}</div>
-        <div><strong>Badges Earned:</strong> ${userStats.badges.length}</div>
-      `;
-
-      modal.style.display = 'block';
-    }
-
-    // Hide progress modal
-    function hideProgressModal() {
-      document.getElementById('progress-modal').style.display = 'none';
-    }
-
-    // Logout function
-    function logout() {
-      localStorage.removeItem('token');
-      localStorage.removeItem('analysisResult');
-      window.location.href = 'logout.html';
-    }
-
-    // Show error notification
-    function showError(message) {
-      const errorDiv = document.createElement('div');
-      errorDiv.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: #ff4444;
-        color: white;
-        padding: 15px;
-        border-radius: 8px;
-        z-index: 1000;
-        box-shadow: 0 0 20px #ff4444;
-      `;
-      errorDiv.textContent = message;
-      document.body.appendChild(errorDiv);
-
-      setTimeout(() => {
-        errorDiv.remove();
-      }, 5000);
-    }
-
-    // Close modal when clicking outside
-    document.getElementById('progress-modal').addEventListener('click', (e) => {
-      if (e.target.id === 'progress-modal') {
-        hideProgressModal();
-      }
-    });
-
-    // Initialize the application
-    initializeApp();
-  </script>
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('jwtToken');
+                localStorage.removeItem('user');
+                window.location.href = '/dashboard/login.html';
+            }
+        }
+    </script>
 </body>
-
 </html>
