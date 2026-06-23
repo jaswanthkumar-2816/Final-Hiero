@@ -6007,8 +6007,8 @@
                           user.proUntil = verifyData.proUntil;
                           localStorage.setItem('user', JSON.stringify(user));
                           
-                          // Redirect to Success Page
-                          window.location.href = `/success.html?template=${templateId}&format=${format}`;
+                          // Setup success data and redirect
+                          showPostDownloadModal(templateId, format);
                       } else {
                           throw new Error(verifyData.error || 'Verification failed');
                       }
