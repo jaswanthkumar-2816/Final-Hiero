@@ -10,8 +10,8 @@ const router = express.Router();
 
 // Initialize Razorpay SDK instance
 const razorpay = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID || 'rzp_test_T1SJ4cbCLUHfPL',
-    key_secret: process.env.RAZORPAY_KEY_SECRET || 'qgfUCXrZMVYpaMvzSiFNvZlj'
+    key_id: process.env.RAZORPAY_KEY_ID || 'rzp_live_T1Sny5T0rJRQuw',
+    key_secret: process.env.RAZORPAY_KEY_SECRET || '6cFpqePtEeyOBcfRftetu9Zm'
 });
 
 const PLAN_PRICES = {
@@ -58,7 +58,7 @@ router.post('/create-order', async (req, res) => {
             order_id: order.id,
             amount: order.amount,
             currency: order.currency,
-            key_id: process.env.RAZORPAY_KEY_ID || 'rzp_test_T1SJ4cbCLUHfPL'
+            key_id: process.env.RAZORPAY_KEY_ID || 'rzp_live_T1Sny5T0rJRQuw'
         });
     } catch (err) {
         console.error('❌ Razorpay order creation failed:', err.message);
@@ -83,7 +83,7 @@ router.post('/verify-payment', authenticateToken, async (req, res) => {
         }
 
         // Validate the cryptographic signature
-        const secret = process.env.RAZORPAY_KEY_SECRET || 'qgfUCXrZMVYpaMvzSiFNvZlj';
+        const secret = process.env.RAZORPAY_KEY_SECRET || '6cFpqePtEeyOBcfRftetu9Zm';
         const generated_signature = crypto
             .createHmac('sha256', secret)
             .update(razorpay_order_id + "|" + razorpay_payment_id)
