@@ -6103,30 +6103,17 @@
     }
 
     async function downloadDocx() {
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
-      const isPro = !!user.isPro;
-      const plan = user.proPlan || '';
       const currentTemplateId = selectedTemplate || localStorage.getItem('selectedTemplate') || 'classic';
 
       const premiumTemplates = ['hiero-royal', 'hiero-signature', 'hiero-prestige', 'hiero-elite', 'hiero-vision', 'hiero-vertex', 'hiero-premium', 'rishi'];
       const affordableTemplates = ['hiero-executive', 'hiero-nova', 'hiero-urban', 'hiero-monethon', 'template4', 'hiero-timeline', 'hiero-studio', 'hiero-retail', 'hiero-essence', 'hiero-velocity', 'hiero-legion'];
 
-      let needsUpgrade = false;
-      let upgradeTier = null;
+      // Always require payment for paid templates on every download
       if (premiumTemplates.includes(currentTemplateId)) {
-        if (!isPro || (plan !== 'premium' && plan !== '6months')) {
-          needsUpgrade = true;
-          upgradeTier = 'premium';
-        }
+        initiateTemplateCheckout(currentTemplateId, 'premium', 'docx');
+        return;
       } else if (affordableTemplates.includes(currentTemplateId)) {
-        if (!isPro || (plan !== 'affordable' && plan !== 'premium' && plan !== '6months')) {
-          needsUpgrade = true;
-          upgradeTier = 'affordable';
-        }
-      }
-
-      if (needsUpgrade) {
-        initiateTemplateCheckout(currentTemplateId, upgradeTier, 'docx');
+        initiateTemplateCheckout(currentTemplateId, 'affordable', 'docx');
         return;
       }
       try {
@@ -6195,30 +6182,17 @@
     }
 
     async function downloadResume() {
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
-      const isPro = !!user.isPro;
-      const plan = user.proPlan || '';
       const currentTemplateId = selectedTemplate || localStorage.getItem('selectedTemplate') || 'classic';
 
       const premiumTemplates = ['hiero-royal', 'hiero-signature', 'hiero-prestige', 'hiero-elite', 'hiero-vision', 'hiero-vertex', 'hiero-premium', 'rishi'];
       const affordableTemplates = ['hiero-executive', 'hiero-nova', 'hiero-urban', 'hiero-monethon', 'template4', 'hiero-timeline', 'hiero-studio', 'hiero-retail', 'hiero-essence', 'hiero-velocity', 'hiero-legion'];
 
-      let needsUpgrade = false;
-      let upgradeTier = null;
+      // Always require payment for paid templates on every download
       if (premiumTemplates.includes(currentTemplateId)) {
-        if (!isPro || (plan !== 'premium' && plan !== '6months')) {
-          needsUpgrade = true;
-          upgradeTier = 'premium';
-        }
+        initiateTemplateCheckout(currentTemplateId, 'premium', 'pdf');
+        return;
       } else if (affordableTemplates.includes(currentTemplateId)) {
-        if (!isPro || (plan !== 'affordable' && plan !== 'premium' && plan !== '6months')) {
-          needsUpgrade = true;
-          upgradeTier = 'affordable';
-        }
-      }
-
-      if (needsUpgrade) {
-        initiateTemplateCheckout(currentTemplateId, upgradeTier, 'pdf');
+        initiateTemplateCheckout(currentTemplateId, 'affordable', 'pdf');
         return;
       }
       const btn = event.target;
