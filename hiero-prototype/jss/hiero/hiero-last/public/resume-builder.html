@@ -5963,6 +5963,11 @@
               throw new Error(orderData.error || 'Failed to initialize payment.');
           }
 
+          const userObj = JSON.parse(localStorage.getItem('user') || '{}');
+          const prefillName = document.getElementById('fullName')?.value || userObj.name || '';
+          const prefillEmail = document.getElementById('email')?.value || userObj.email || '';
+          const prefillPhone = document.getElementById('phone')?.value || '9999999999';
+
           const options = {
               "key": orderData.key_id,
               "amount": orderData.amount,
@@ -5970,6 +5975,11 @@
               "name": "Hiero Premium",
               "description": `Unlock ${templateId} template`,
               "order_id": orderData.order_id,
+              "prefill": {
+                  "name": prefillName,
+                  "email": prefillEmail,
+                  "contact": prefillPhone
+              },
               "handler": async function (response) {
                   overlay.innerHTML = `
                     <div class="spinner" style="border: 4px solid rgba(42, 224, 35, 0.1); border-left-color: #2ae023; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 20px;"></div>
