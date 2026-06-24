@@ -1596,7 +1596,16 @@
           ? 'http://localhost:2816'
           : 'https://hiero-resume-backend.onrender.com';
         
-        const res = await fetch(`${backend}/api/admin/dashboard`);
+        const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
+        const res = await fetch(`${backend}/api/admin/dashboard`, {
+          headers: {
+            'Authorization': token ? `Bearer ${token}` : ''
+          }
+        });
+
+        if (res.status === 401 || res.status === 403) {
+          throw new Error('Authentication Failed: Please login as an admin first on the main portal');
+        }
 
         if (!res.ok) throw new Error(`Gateway returned handshake status: ${res.status}`);
 
