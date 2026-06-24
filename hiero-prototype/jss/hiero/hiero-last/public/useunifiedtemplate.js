@@ -4,6 +4,9 @@
  * Single source of truth for populating the resume
  * builder form from imported / parsed resume data.
  *
+ * Implements smart limits for a perfect single-page
+ * layout and notifies the user of the adjustments.
+ *
  * Call: window.fillFormWithImportedData(data)
  * ─────────────────────────────────────────────────────
  */
@@ -21,6 +24,53 @@
     if (typeof v === 'object') return Object.keys(v).length > 0;
     return String(v).trim().length > 0;
   };
+
+  /* ── Page-Fit Statistics tracking ── */
+  let importStats = {};
+
+  /* Helper to limit array items and track stats */
+  function limitArray(list, max) {
+    const rawList = arr(list);
+    return {
+      items: rawList.slice(0, max),
+      total: rawList.length,
+      imported: Math.min(rawList.length, max),
+      truncated: rawList.length > max
+    };
+  }
+
+  /* Helper to limit flat strings/arrays and track stats */
+  function limitFlatField(v, maxItems) {
+    if (!v) return { text: '', total: 0, imported: 0, truncated: false };
+    const items = Array.isArray(v) ? v : String(v).split(/,\s*/).filter(Boolean);
+    const sliced = items.slice(0, maxItems);
+    return {
+      text: sliced.join(', '),
+      total: items.length,
+      imported: sliced.length,
+      truncated: items.length > maxItems
+    };
+  }
+
+  /* Helper to limit text content length and track stats */
+  function limitTextLength(text, maxChars) {
+    if (!text) return { text: '', total: 0, imported: 0, truncated: false };
+    const cleanText = String(text).trim();
+    if (cleanText.length <= maxChars) {
+      return { text: cleanText, total: cleanText.length, imported: cleanText.length, truncated: false };
+    }
+    let truncated = cleanText.substring(0, maxChars);
+    const lastSpace = truncated.lastIndexOf(' ');
+    if (lastSpace > 0) {
+      truncated = truncated.substring(0, lastSpace);
+    }
+    return {
+      text: truncated + '...',
+      total: cleanText.length,
+      imported: truncated.length,
+      truncated: true
+    };
+  }
 
   /* ── Show / hide a whole section ── */
   function setSection(id, visible) {
@@ -44,12 +94,17 @@
     if (!visible && !isSkipped) { if (typeof skipField === 'function') skipField(fieldKey); }
   }
 
-  /* ── Dynamic containers ── */
+  /* ── Dynamic containers with Smart Limits for Single Page ── */
   function fillExperience(data) {
     const container = document.getElementById('experienceContainer');
     if (!container) return;
     container.innerHTML = '';
-    arr(data.experience).forEach((exp, i) => {
+    
+    // Capped at 2 experiences for single page
+    const res = limitArray(data.experience, 2);
+    importStats.experience = res;
+
+    res.items.forEach((exp, i) => {
       if (typeof addExperience === 'function') addExperience();
       const jobTitles  = document.getElementsByName('jobTitle[]');
       const companies  = document.getElementsByName('company[]');
@@ -74,7 +129,12 @@
     const container = document.getElementById('educationContainer');
     if (!container) return;
     container.innerHTML = '';
-    arr(data.education).forEach((edu, i) => {
+
+    // Capped at 2 education entries for single page
+    const res = limitArray(data.education, 2);
+    importStats.education = res;
+
+    res.items.forEach((edu, i) => {
       if (typeof addEducation === 'function') addEducation();
       const degrees = document.getElementsByName('degree[]');
       const schools = document.getElementsByName('school[]');
@@ -90,10 +150,14 @@
   function fillInternships(data) {
     const container = document.getElementById('internshipsContainer');
     if (!container) return;
-    const interns = arr(data.internships);
-    if (!interns.length) return;
+
+    // Capped at 2 internships for single page
+    const res = limitArray(data.internships, 2);
+    importStats.internships = res;
+
+    if (!res.items.length) return;
     container.innerHTML = '';
-    interns.forEach((intern, i) => {
+    res.items.forEach((intern, i) => {
       if (typeof addInternship === 'function') addInternship();
       const roles  = document.getElementsByName('internRole[]');
       const orgs   = document.getElementsByName('internOrg[]');
@@ -112,7 +176,12 @@
     const container = document.getElementById('projectsContainer');
     if (!container) return;
     container.innerHTML = '';
-    arr(data.projects).forEach((project, i) => {
+
+    // Capped at 2 projects for single page
+    const res = limitArray(data.projects, 2);
+    importStats.projects = res;
+
+    res.items.forEach((project, i) => {
       if (typeof addProject === 'function') addProject();
       const names    = document.getElementsByName('projectName[]');
       const techs    = document.getElementsByName('projectTech[]');
@@ -130,11 +199,16 @@
   }
 
   function fillReferences(data) {
-    if (!arr(data.references).length) return;
     const container = document.getElementById('referencesContainer');
     if (!container) return;
+
+    // Capped at 1 reference for single page
+    const res = limitArray(data.references, 1);
+    importStats.references = res;
+
+    if (!res.items.length) return;
     container.innerHTML = '';
-    arr(data.references).forEach((ref, i) => {
+    res.items.forEach((ref, i) => {
       if (typeof addReference === 'function') addReference();
       const names     = document.getElementsByName('refName[]');
       const titles    = document.getElementsByName('refTitle[]');
@@ -150,11 +224,16 @@
   }
 
   function fillCustomDetails(data) {
-    if (!arr(data.customDetails).length) return;
     const container = document.getElementById('customDetailsContainer');
     if (!container) return;
+
+    // Capped at 1 custom detail for single page
+    const res = limitArray(data.customDetails, 1);
+    importStats.customDetails = res;
+
+    if (!res.items.length) return;
     container.innerHTML = '';
-    arr(data.customDetails).forEach((detail, i) => {
+    res.items.forEach((detail, i) => {
       if (typeof addCustomDetail === 'function') addCustomDetail();
       const headings = document.getElementsByName('customHeading[]');
       const contents = document.getElementsByName('customContent[]');
@@ -163,12 +242,106 @@
     });
   }
 
+  /* Render visual Page-Fit Warning/Notice banner */
+  function renderPageFitNotice() {
+    let banner = document.getElementById('pageFitNotice');
+    if (!banner) {
+      const form = document.getElementById('resumeForm');
+      if (!form) return;
+      banner = document.createElement('div');
+      banner.id = 'pageFitNotice';
+      banner.style.cssText = `
+        background: rgba(255, 173, 51, 0.08);
+        border: 1px solid rgba(255, 173, 51, 0.3);
+        border-radius: 12px;
+        padding: 18px;
+        margin-bottom: 25px;
+        color: #fff;
+        font-family: inherit;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        animation: fadeIn 0.4s ease;
+      `;
+      form.parentNode.insertBefore(banner, form);
+    }
+
+    let detailsHtml = '';
+    let anyTruncated = false;
+
+    const sections = [
+      { key: 'summary', name: 'Professional Summary', unit: 'characters' },
+      { key: 'experience', name: 'Work Experience', unit: 'items' },
+      { key: 'internships', name: 'Internships', unit: 'items' },
+      { key: 'projects', name: 'Projects', unit: 'items' },
+      { key: 'education', name: 'Education', unit: 'items' },
+      { key: 'technicalSkills', name: 'Technical Skills', unit: 'skills' },
+      { key: 'softSkills', name: 'Soft Skills', unit: 'skills' },
+      { key: 'certifications', name: 'Certifications', unit: 'items' },
+      { key: 'achievements', name: 'Achievements', unit: 'items' },
+      { key: 'publications', name: 'Publications', unit: 'items' },
+      { key: 'references', name: 'References', unit: 'items' }
+    ];
+
+    sections.forEach(sec => {
+      const stats = importStats[sec.key];
+      if (stats && stats.total > 0) {
+        if (stats.truncated) {
+          anyTruncated = true;
+          detailsHtml += `<li style="margin-bottom: 6px; color: #ffad33; display: flex; align-items: center; gap: 8px;">
+            <span style="display:inline-block; width:6px; height:6px; background:#ffad33; border-radius:50%;"></span>
+            <strong>${sec.name}</strong>: Capped at ${stats.imported} ${sec.unit} (out of ${stats.total} imported) to fit one page.
+          </li>`;
+        } else {
+          detailsHtml += `<li style="margin-bottom: 6px; color: #2ae023; display: flex; align-items: center; gap: 8px;">
+            <span style="display:inline-block; width:6px; height:6px; background:#2ae023; border-radius:50%;"></span>
+            <strong>${sec.name}</strong>: Filled all ${stats.imported} ${sec.unit}.
+          </li>`;
+        }
+      }
+    });
+
+    if (!anyTruncated) {
+      banner.style.background = 'rgba(42, 224, 35, 0.08)';
+      banner.style.borderColor = 'rgba(42, 224, 35, 0.3)';
+      banner.innerHTML = `
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+          <span style="font-weight: bold; font-size: 15px; display: flex; align-items: center; gap: 8px; color: #2ae023;">
+            <i class="fas fa-check-circle"></i> Perfect Page Fit!
+          </span>
+          <button type="button" onclick="document.getElementById('pageFitNotice').style.display='none'" style="background: none; border: none; color: #aaa; cursor: pointer; font-size: 18px; line-height: 1; outline: none;">&times;</button>
+        </div>
+        <p style="font-size: 13px; margin: 0; color: #ddd; line-height: 1.4;">
+          Your resume data fits perfectly within the single-page constraints! No sections were truncated.
+        </p>
+      `;
+    } else {
+      banner.style.background = 'rgba(255, 173, 51, 0.08)';
+      banner.style.borderColor = 'rgba(255, 173, 51, 0.3)';
+      banner.innerHTML = `
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+          <span style="font-weight: bold; font-size: 15px; display: flex; align-items: center; gap: 8px; color: #ffad33;">
+            <i class="fas fa-exclamation-triangle"></i> One-Page Layout Optimized
+          </span>
+          <button type="button" onclick="document.getElementById('pageFitNotice').style.display='none'" style="background: none; border: none; color: #aaa; cursor: pointer; font-size: 18px; line-height: 1; outline: none;">&times;</button>
+        </div>
+        <p style="font-size: 13px; margin: 0 0 10px 0; color: #ddd; line-height: 1.4;">
+          To ensure your resume fits perfectly on <strong>exactly one page</strong>, we optimized and capped content-heavy sections. You can review or manually adjust these limits below:
+        </p>
+        <ul style="font-size: 12px; margin: 0; padding-left: 5px; list-style: none; line-height: 1.6;">
+          ${detailsHtml}
+        </ul>
+      `;
+    }
+    banner.style.display = 'block';
+    banner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
   /* ══════════════════════════════════════════════════
      MAIN EXPORT: fillFormWithImportedData(data)
   ══════════════════════════════════════════════════ */
   window.fillFormWithImportedData = function (data) {
     try {
       console.log('[UnifiedTemplate] Filling form with data:', data);
+      importStats = {}; // Reset stats
 
       /* Preserve template */
       const preservedTemplate = (typeof selectedTemplate !== 'undefined' && selectedTemplate)
@@ -191,18 +364,46 @@
       val('professionalTitle',   pi.professionalTitle   || data.professionalTitle);
       val('professionalHeadline',pi.professionalHeadline|| data.professionalHeadline);
 
-      /* ── 2. Summary & Skills ── */
-      val('summary',        data.summary);
-      val('technicalSkills',str(data.technicalSkills || data.skills));
-      val('softSkills',     str(data.softSkills));
+      /* ── 2. Summary & Skills (with Smart Limits) ── */
+      // Cap summary at 350 chars (~50-60 words) to avoid page overflow
+      const summaryRes = limitTextLength(data.summary, 350);
+      importStats.summary = summaryRes;
+      val('summary', summaryRes.text);
 
-      /* ── 3. Additional flat fields ── */
-      val('certifications', str(data.certifications));
-      val('languages',      str(data.languages));
-      val('achievements',   str(data.achievements));
-      val('hobbies',        str(data.hobbies));
-      val('extraCurricular',str(data.extraCurricular));
-      val('publications',   str(data.publications));
+      // Skill caps
+      const techSkillsRes = limitFlatField(data.technicalSkills || data.skills, 15);
+      importStats.technicalSkills = techSkillsRes;
+      val('technicalSkills', techSkillsRes.text);
+
+      const softSkillsRes = limitFlatField(data.softSkills, 8);
+      importStats.softSkills = softSkillsRes;
+      val('softSkills', softSkillsRes.text);
+
+      /* ── 3. Additional flat fields (with Smart Limits) ── */
+      const certsRes = limitFlatField(data.certifications, 4);
+      importStats.certifications = certsRes;
+      val('certifications', certsRes.text);
+
+      const langRes = limitFlatField(data.languages, 4);
+      importStats.languages = langRes;
+      val('languages', langRes.text);
+
+      const achRes = limitFlatField(data.achievements, 4);
+      importStats.achievements = achRes;
+      val('achievements', achRes.text);
+
+      const hobRes = limitFlatField(data.hobbies, 4);
+      importStats.hobbies = hobRes;
+      val('hobbies', hobRes.text);
+
+      const extraRes = limitFlatField(data.extraCurricular, 3);
+      importStats.extraCurricular = extraRes;
+      val('extraCurricular', extraRes.text);
+
+      const pubRes = limitFlatField(data.publications, 2);
+      importStats.publications = pubRes;
+      val('publications', pubRes.text);
+
       val('additionalInfo', str(data.additionalInfo));
 
       /* ── 4. Dynamic sections ── */
@@ -271,7 +472,12 @@
       localStorage.setItem('resumeData', JSON.stringify(data));
 
       console.log('[UnifiedTemplate] ✅ Form filled successfully.');
-      alert('✅ Resume imported! Review your details and generate.');
+      
+      // Render our smart page fit notice banner at the top of the form
+      renderPageFitNotice();
+      
+      // Let the user know import was successful with optimizations
+      alert('✅ Resume imported! We adjusted some section lengths for a perfect single-page layout. Review details at the top of the form.');
     } catch (err) {
       console.error('[UnifiedTemplate] ❌ Error:', err);
     }
