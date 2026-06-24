@@ -4584,45 +4584,48 @@
 
         // 10. Auto-skip/show Logic
 
-        // Sections
+        // Sections — show section if ANY of its key fields have data
+        const sectionHasData = (keys) => keys.some(k => {
+          const v = data[k];
+          return v && !(Array.isArray(v) && v.length === 0) && !(typeof v === 'string' && !v.trim());
+        });
+
         const sectionsToCheck = [
-          { key: 'summary', id: 'section-summary' },
-          { key: 'experience', id: 'section-experience' },
-          { key: 'education', id: 'section-education' },
-          { key: 'projects', id: 'section-projects' },
-          { key: 'skills', id: 'section-skills', checkKey: 'technicalSkills' },
-          { key: 'additionalDetails', id: 'section-additional-details', checkKey: 'certifications' },
-          { key: 'additional', id: 'section-additional', checkKey: 'achievements' },
-          { key: 'references', id: 'section-references' },
-          { key: 'customDetails', id: 'section-custom' }
+          { id: 'section-summary',          keys: ['summary'] },
+          { id: 'section-experience',        keys: ['experience'] },
+          { id: 'section-education',         keys: ['education'] },
+          { id: 'section-projects',          keys: ['projects'] },
+          { id: 'section-skills',            keys: ['technicalSkills', 'softSkills'] },
+          { id: 'section-additional-details',keys: ['certifications', 'languages'] },
+          { id: 'section-additional',        keys: ['achievements', 'hobbies', 'extraCurricular', 'publications'] },
+          { id: 'section-references',        keys: ['references'] },
+          { id: 'section-custom',            keys: ['customDetails'] }
         ];
 
         sectionsToCheck.forEach(sec => {
-          const checkKey = sec.checkKey || sec.key;
-          const val = data[checkKey];
-          const isEmpty = !val || (Array.isArray(val) && val.length === 0) || (typeof val === 'string' && !val.trim());
-
+          const hasData = sectionHasData(sec.keys);
           const el = document.getElementById(sec.id);
           if (el) {
             const link = el.querySelector('.skip-link');
-            if (isEmpty) {
-              if (!el.classList.contains('skipped') && link) link.click();
-            } else {
-              if (el.classList.contains('skipped') && link) link.click();
-            }
+            if (!hasData && !el.classList.contains('skipped') && link) link.click();
+            if (hasData && el.classList.contains('skipped') && link) link.click();
           }
         });
 
-        // Individual Fields
+        // Individual Fields — show field if it has data, hide if empty
         const fieldsToCheck = [
-          { key: 'address', groupId: 'group-address', parent: 'personalInfo' },
-          { key: 'linkedin', groupId: 'group-linkedin', parent: 'personalInfo' },
-          { key: 'website', groupId: 'group-website', parent: 'personalInfo' },
-          { key: 'certifications', groupId: 'group-certifications' },
-          { key: 'languages', groupId: 'group-languages' },
-          { key: 'achievements', groupId: 'group-achievements' },
-          { key: 'hobbies', groupId: 'group-hobbies' },
-          { key: 'extraCurricular', groupId: 'group-extraCurricular' }
+          { key: 'address',              groupId: 'group-address',              parent: 'personalInfo' },
+          { key: 'linkedin',             groupId: 'group-linkedin',             parent: 'personalInfo' },
+          { key: 'github',               groupId: 'group-github',               parent: 'personalInfo' },
+          { key: 'website',              groupId: 'group-website',              parent: 'personalInfo' },
+          { key: 'professionalTitle',    groupId: 'group-professionalTitle',    parent: 'personalInfo' },
+          { key: 'professionalHeadline', groupId: 'group-professionalHeadline', parent: 'personalInfo' },
+          { key: 'certifications',       groupId: 'group-certifications' },
+          { key: 'languages',            groupId: 'group-languages' },
+          { key: 'achievements',         groupId: 'group-achievements' },
+          { key: 'hobbies',              groupId: 'group-hobbies' },
+          { key: 'extraCurricular',      groupId: 'group-extraCurricular' },
+          { key: 'publications',         groupId: 'group-publications' }
         ];
 
         fieldsToCheck.forEach(field => {
@@ -4631,11 +4634,10 @@
           const group = document.getElementById(field.groupId);
           if (group) {
             const skipSpan = group.querySelector('.field-skip');
-            if (isEmpty) {
-              if (!group.classList.contains('skipped') && skipSpan) skipField(field.key);
-            } else {
-              if (group.classList.contains('skipped') && skipSpan) skipField(field.key);
-            }
+            // Always ensure the field is VISIBLE if it has data
+            if (!isEmpty && group.classList.contains('skipped') && skipSpan) skipField(field.key);
+            // Hide field only if it was already skipped by default AND has no data
+            if (isEmpty && !group.classList.contains('skipped') && skipSpan) skipField(field.key);
           }
         });
 
