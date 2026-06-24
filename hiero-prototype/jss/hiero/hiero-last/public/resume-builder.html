@@ -2130,6 +2130,16 @@
                   </label>
                   <input type="url" id="linkedin" placeholder="https://linkedin.com/in/yourprofile">
                 </div>
+                <!-- Optional: GitHub -->
+                <div class="form-group" id="group-github">
+                  <label>
+                    GitHub
+                    <span class="field-skip" onclick="skipField('github')">Skip</span>
+                  </label>
+                  <input type="url" id="github" placeholder="https://github.com/yourusername">
+                </div>
+              </div>
+              <div class="form-row">
                 <!-- Optional: Website -->
                 <div class="form-group" id="group-website">
                   <label>
@@ -2138,6 +2148,22 @@
                   </label>
                   <input type="url" id="website" placeholder="https://yourwebsite.com">
                 </div>
+                <!-- Optional: Professional Title -->
+                <div class="form-group" id="group-professionalTitle">
+                  <label>
+                    Professional Title
+                    <span class="field-skip" onclick="skipField('professionalTitle')">Skip</span>
+                  </label>
+                  <input type="text" id="professionalTitle" placeholder="e.g. Full Stack Developer">
+                </div>
+              </div>
+              <!-- Optional: Professional Headline -->
+              <div class="form-group" id="group-professionalHeadline">
+                <label>
+                  Professional Headline
+                  <span class="field-skip" onclick="skipField('professionalHeadline')">Skip</span>
+                </label>
+                <input type="text" id="professionalHeadline" placeholder="e.g. Passionate engineer with 3+ years building scalable systems">
               </div>
             </div>
           </div>
@@ -2403,6 +2429,13 @@
                 <span class="field-skip" onclick="skipField('extraCurricular')">Skip</span>
               </label>
               <textarea id="extraCurricular" rows="2" placeholder="Clubs, sports, volunteering..."></textarea>
+            </div>
+            <div class="form-group" id="group-publications">
+              <label>
+                Publications
+                <span class="field-skip" onclick="skipField('publications')">Skip</span>
+              </label>
+              <textarea id="publications" rows="2" placeholder="Research papers, articles, books..."></textarea>
             </div>
             <div class="form-group">
               <label for="additionalInfo">Other Details (AI Summary)</label>
@@ -4360,8 +4393,11 @@
           data.personalInfo.website = 'https://' + data.personalInfo.website;
         }
         setVal("address", data.personalInfo?.address);
-        setVal("linkedin", data.personalInfo?.linkedin);
-        setVal("website", data.personalInfo?.website);
+        setVal("linkedin", data.personalInfo?.linkedin || data.linkedin);
+        setVal("github", data.personalInfo?.github || data.github);
+        setVal("website", data.personalInfo?.website || data.website);
+        setVal("professionalTitle", data.personalInfo?.professionalTitle || data.professionalTitle);
+        setVal("professionalHeadline", data.personalInfo?.professionalHeadline || data.professionalHeadline);
 
         // 2. Summary & Skills
         setVal("summary", data.summary);
@@ -4383,6 +4419,8 @@
 
         const extras = Array.isArray(data.extraCurricular) ? data.extraCurricular.join("\n") : (data.extraCurricular || "");
         setVal("extraCurricular", extras);
+        setVal("publications", data.publications);
+        setVal("additionalInfo", data.additionalInfo);
 
         // 4. Experience (Dynamic)
         const expContainer = document.getElementById("experienceContainer");
@@ -5677,21 +5715,22 @@
       }
 
       // Optional fields (only if not skipped and not empty)
-      const optional = ['address', 'linkedin', 'website', 'summary', 'technicalSkills', 'softSkills', 'certifications', 'languages', 'achievements', 'hobbies', 'extraCurricular', 'additionalInfo'];
+      const optional = ['address', 'linkedin', 'github', 'website', 'professionalTitle', 'professionalHeadline', 'summary', 'technicalSkills', 'softSkills', 'certifications', 'languages', 'achievements', 'hobbies', 'extraCurricular', 'publications', 'additionalInfo'];
       optional.forEach(field => {
-        // Find which group/section it belongs to
         let parentId = 'section-additional';
         if (field === 'summary') parentId = 'section-summary';
         if (field === 'technicalSkills' || field === 'softSkills') parentId = 'section-skills';
         if (field === 'certifications' || field === 'languages') parentId = 'section-additional-details';
-        if (['address', 'linkedin', 'website'].includes(field)) parentId = 'group-' + field;
-        if (field === 'achievements' || field === 'hobbies' || field === 'extraCurricular') parentId = 'group-' + field;
+        if (['address', 'linkedin', 'github', 'website', 'professionalTitle', 'professionalHeadline'].includes(field)) parentId = 'group-' + field;
+        if (field === 'achievements' || field === 'hobbies' || field === 'extraCurricular' || field === 'publications') parentId = 'group-' + field;
 
         const group = document.getElementById(parentId);
         const input = document.getElementById(field);
-        if (group && !group.classList.contains('skipped') && input && input.value.trim()) {
-          // Map 'technicalSkills' to 'skills' for backend compatibility
-          if (field === 'technicalSkills') {
+        if (input && input.value.trim()) {
+          // Personal info fields go into personalInfo object
+          if (['address', 'linkedin', 'github', 'website', 'professionalTitle', 'professionalHeadline'].includes(field)) {
+            data.personalInfo[field] = input.value.trim();
+          } else if (field === 'technicalSkills') {
             data.skills = input.value.trim();
           } else {
             data[field] = input.value.trim();

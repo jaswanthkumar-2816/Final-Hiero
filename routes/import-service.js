@@ -235,6 +235,41 @@ function parseResumeTextRuleBased(rawText) {
 }
 
 /**
+ * 🔗 Normalize all links in parsed data — ensure they start with https://
+ */
+function normalizeParsedLinks(data) {
+    const ensureHttps = (url) => {
+        if (!url || typeof url !== 'string') return url;
+        url = url.trim();
+        if (!url) return url;
+        // Already has a protocol
+        if (url.startsWith('http://') || url.startsWith('https://')) return url;
+        // Looks like a real URL (contains a dot and no spaces)
+        if (url.includes('.') && !url.includes(' ')) return 'https://' + url;
+        return url;
+    };
+
+    if (data.personalInfo) {
+        data.personalInfo.linkedin = ensureHttps(data.personalInfo.linkedin);
+        data.personalInfo.github   = ensureHttps(data.personalInfo.github);
+        data.personalInfo.website  = ensureHttps(data.personalInfo.website);
+    }
+    // Also handle flat-level links
+    if (data.linkedin) data.linkedin = ensureHttps(data.linkedin);
+    if (data.github)   data.github   = ensureHttps(data.github);
+    if (data.website)  data.website  = ensureHttps(data.website);
+
+    // Fix project links
+    if (Array.isArray(data.projects)) {
+        data.projects = data.projects.map(p => ({
+            ...p,
+            link: ensureHttps(p.link)
+        }));
+    }
+    return data;
+}
+
+/**
  * 👑 Perfect Extraction Engine (V16: Multi-AI Integrated)
  */
 async function parseResumeText(rawText) {
@@ -246,7 +281,9 @@ async function parseResumeText(rawText) {
        - Extract ALL Details: Personal Info, Experience, Education, Projects, Skills, Certifications.
        - Use "Present" for current roles.
        - REMOVE PDF headings like "Contact", "Address", "Portfolio", "Website". Do NOT include these literal words inside the extracted values (e.g. if the PDF says "Address\\nBengaluru", extract ONLY "Bengaluru").
-       - Capture full GitHub/LinkedIn/Portfolio links clearly as valid URLs (e.g. "https://example.com" instead of just "example.com").
+       - Capture full GitHub/LinkedIn/Portfolio links clearly as valid URLs. ALWAYS prepend https:// if missing (e.g. "linkedin.com/in/user" → "https://linkedin.com/in/user", "github.com/user" → "https://github.com/user").
+       - Extract GitHub URL into personalInfo.github separately from LinkedIn.
+       - Extract Professional Title (e.g. "Software Engineer") and Professional Headline if present.
        - Do NOT prepend made-up job titles (like "RETAIL PROFESSIONAL") to the summary.
 
     2. OPTIMIZATION RULES:
@@ -257,7 +294,7 @@ async function parseResumeText(rawText) {
 
     Structure MUST match this exactly:
     {
-      "personalInfo": { "fullName": "", "email": "", "phone": "", "address": "", "linkedin": "", "website": "" },
+      "personalInfo": { "fullName": "", "email": "", "phone": "", "address": "", "linkedin": "https://linkedin.com/in/...", "github": "https://github.com/...", "website": "https://...", "professionalTitle": "Software Engineer", "professionalHeadline": "Passionate developer with 3+ years..." },
       "summary": "Data Science professional with experience in predictive modeling...",
       "technicalSkills": "Programming: Python, Java; Web: HTML, CSS; Tools: Git",
       "softSkills": "Leadership, Communication, Team Management",
@@ -269,9 +306,11 @@ async function parseResumeText(rawText) {
       "achievements": "Recipient of Dean's List for 4 semesters",
       "hobbies": "Coding, Chess, Hiking",
       "extraCurricular": ["Co-Organized Nirmitee 2017", "Attended workshop on Autodesk Revit"],
+      "publications": "Research paper on ML published in JSR 2023",
       "references": [ { "name": "", "title": "", "company": "", "phone": "", "email": "" } ],
       "customDetails": [ { "heading": "Publications", "content": "Research paper on ML published in JSR" } ]
     }`;
+
 
     if (process.env.GROQ_API_KEY) {
         try {
@@ -282,7 +321,8 @@ async function parseResumeText(rawText) {
                 temperature: 0.1, response_format: { type: "json_object" }
             }, { headers: { 'Authorization': `Bearer ${process.env.GROQ_API_KEY}`, 'Content-Type': 'application/json' } });
             console.log('✅ Groq Extraction Complete.');
-            return JSON.parse(response.choices[0].message.content);
+            const parsed = JSON.parse(response.choices[0].message.content);
+            return normalizeParsedLinks(parsed);
         } catch (err) { console.error('⚠️ Groq failed:', err.message); }
     }
 
@@ -295,7 +335,8 @@ async function parseResumeText(rawText) {
                 temperature: 0.1, response_format: { type: "json_object" }
             }, { headers: { 'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`, 'Content-Type': 'application/json', 'HTTP-Referer': 'http://localhost:2816' } });
             console.log('✅ OpenRouter Extraction Complete.');
-            return JSON.parse(response.choices[0].message.content);
+            const parsed = JSON.parse(response.choices[0].message.content);
+            return normalizeParsedLinks(parsed);
         } catch (err) { console.error('⚠️ OpenRouter failed:', err.message); }
     }
 
