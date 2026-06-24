@@ -1,4 +1,30 @@
 // wordTemplates.js — v3-FULL — 4293 lines — deployed 2026-05-30 — DO NOT REMOVE THIS LINE
+function splitSkills(str) {
+    if (!str) return [];
+    const result = [];
+    let current = '';
+    let parenDepth = 0;
+    for (let i = 0; i < str.length; i++) {
+        const char = str[i];
+        if (char === '(') {
+            parenDepth++;
+        } else if (char === ')') {
+            if (parenDepth > 0) parenDepth--;
+        }
+        
+        if ((char === ',' || char === ';' || char === '\n') && parenDepth === 0) {
+            const trimmed = current.trim();
+            if (trimmed) result.push(trimmed);
+            current = '';
+        } else {
+            current += char;
+        }
+    }
+    const trimmed = current.trim();
+    if (trimmed) result.push(trimmed);
+    return result;
+}
+
 function normalizeWordData(data) {
     const {
         personalInfo = {},
@@ -19,46 +45,55 @@ function normalizeWordData(data) {
     let certifications = data.certifications || '';
     let languages = data.languages || '';
     let hobbies = data.hobbies || data.interests || '';
+    let publications = data.publications || '';
+    let references = data.references || [];
 
     // Slice all arrays to guarantee strict single-page parity
     if (Array.isArray(experience)) experience = experience.slice(0, 3);
     if (Array.isArray(education)) education = education.slice(0, 2);
     if (Array.isArray(projects)) projects = projects.slice(0, 2);
+    if (Array.isArray(references)) references = references.slice(0, 2);
 
     if (Array.isArray(technicalSkills)) {
-        technicalSkills = technicalSkills.slice(0, 12).map(s => typeof s === 'object' ? (s.name || s.skill || '') : s).join(', ');
+        technicalSkills = technicalSkills.slice(0, 15).map(s => typeof s === 'object' ? (s.name || s.skill || '') : s).join(', ');
     } else if (typeof technicalSkills === 'string') {
-        technicalSkills = technicalSkills.split(/[\n,;]/).map(s => s.trim()).filter(Boolean).slice(0, 12).join(', ');
+        technicalSkills = splitSkills(technicalSkills).slice(0, 15).join(', ');
     }
 
     if (Array.isArray(softSkills)) {
-        softSkills = softSkills.slice(0, 5).join(', ');
+        softSkills = softSkills.slice(0, 8).join(', ');
     } else if (typeof softSkills === 'string') {
-        softSkills = softSkills.split(/[\n,;]/).map(s => s.trim()).filter(Boolean).slice(0, 5).join(', ');
+        softSkills = splitSkills(softSkills).slice(0, 8).join(', ');
     }
 
     if (Array.isArray(achievements)) {
-        achievements = achievements.slice(0, 3).join('; ');
+        achievements = achievements.slice(0, 4).join('; ');
     } else if (typeof achievements === 'string') {
-        achievements = achievements.split(/[\n;]/).map(s => s.trim()).filter(Boolean).slice(0, 3).join('; ');
+        achievements = splitSkills(achievements).slice(0, 4).join('; ');
     }
 
     if (Array.isArray(certifications)) {
-        certifications = certifications.slice(0, 3).map(c => typeof c === 'object' ? (c.name || c.title || '') : c).join(', ');
+        certifications = certifications.slice(0, 4).map(c => typeof c === 'object' ? (c.name || c.title || '') : c).join(', ');
     } else if (typeof certifications === 'string') {
-        certifications = certifications.split(/[\n,;]/).map(s => s.trim()).filter(Boolean).slice(0, 3).join(', ');
+        certifications = splitSkills(certifications).slice(0, 4).join(', ');
     }
 
     if (Array.isArray(languages)) {
         languages = languages.slice(0, 4).join(', ');
     } else if (typeof languages === 'string') {
-        languages = languages.split(/[\n,;]/).map(s => s.trim()).filter(Boolean).slice(0, 4).join(', ');
+        languages = splitSkills(languages).slice(0, 4).join(', ');
     }
 
     if (Array.isArray(hobbies)) {
         hobbies = hobbies.slice(0, 4).join(', ');
     } else if (typeof hobbies === 'string') {
-        hobbies = hobbies.split(/[\n,;]/).map(s => s.trim()).filter(Boolean).slice(0, 4).join(', ');
+        hobbies = splitSkills(hobbies).slice(0, 4).join(', ');
+    }
+
+    if (Array.isArray(publications)) {
+        publications = publications.slice(0, 3).join('; ');
+    } else if (typeof publications === 'string') {
+        publications = splitSkills(publications).slice(0, 3).join('; ');
     }
 
     return {
@@ -72,7 +107,9 @@ function normalizeWordData(data) {
         achievements,
         certifications,
         languages,
-        hobbies
+        hobbies,
+        publications,
+        references
     };
 }
 
@@ -3654,6 +3691,16 @@ function generateHieroVertexWordHTML(data) {
       <div style="font-size:9pt;color:${MED};font-style:italic;">${edu.school||''}</div>
     </div>`).join('')) : ''}
   ${certArr.length > 0 ? section('Certifications', certArr.map(c => `<div style="font-size:8.5pt;color:${MED};margin-bottom:3pt;">• ${c}</div>`).join('')) : ''}
+  ${d.softSkills ? section('Soft Skills', `<div style="font-size:9pt;color:${MED};line-height:1.5;margin-bottom:6pt;">${d.softSkills}</div>`) : ''}
+  ${d.languages ? section('Languages', `<div style="font-size:9pt;color:${MED};line-height:1.5;margin-bottom:6pt;">${d.languages}</div>`) : ''}
+  ${d.achievements ? section('Achievements', `<div style="font-size:9pt;color:${MED};line-height:1.5;margin-bottom:6pt;">${d.achievements}</div>`) : ''}
+  ${d.publications ? section('Publications', `<div style="font-size:9pt;color:${MED};line-height:1.5;margin-bottom:6pt;">${d.publications}</div>`) : ''}
+  ${d.hobbies ? section('Hobbies & Interests', `<div style="font-size:9pt;color:${MED};line-height:1.5;margin-bottom:6pt;">${d.hobbies}</div>`) : ''}
+  ${d.references && d.references.length > 0 ? section('References', d.references.map(ref => `
+    <div style="margin-bottom:6pt;background:${WHITE};padding:6pt 10pt;border-radius:3pt;font-size:8.5pt;color:${MED};">
+      <strong>${ref.name || ''}</strong>${ref.title ? ` - ${ref.title}` : ''}${ref.company ? `, ${ref.company}` : ''}
+      ${ref.email || ref.phone ? `<br>${[ref.email, ref.phone].filter(Boolean).join('  |  ')}` : ''}
+    </div>`).join('')) : ''}
 </div></body></html>`;
 }
 
@@ -3726,6 +3773,16 @@ function generatePriyaAnalyticsWordHTML(data) {
       <div style="font-size:9pt;color:${LIGHT_MED};font-style:italic;">${edu.school||''}</div>
     </div>`).join('')) : ''}
   ${certArr.length > 0 ? section('Certifications', certArr.map(c => `<div style="font-size:8.5pt;color:${MED};margin-bottom:3pt;">• ${c}</div>`).join('')) : ''}
+  ${d.softSkills ? section('Soft Skills', `<div style="font-size:9pt;color:${MED};line-height:1.5;margin-bottom:6pt;">${d.softSkills}</div>`) : ''}
+  ${d.languages ? section('Languages', `<div style="font-size:9pt;color:${MED};line-height:1.5;margin-bottom:6pt;">${d.languages}</div>`) : ''}
+  ${d.achievements ? section('Achievements', `<div style="font-size:9pt;color:${MED};line-height:1.5;margin-bottom:6pt;">${d.achievements}</div>`) : ''}
+  ${d.publications ? section('Publications', `<div style="font-size:9pt;color:${MED};line-height:1.5;margin-bottom:6pt;">${d.publications}</div>`) : ''}
+  ${d.hobbies ? section('Hobbies & Interests', `<div style="font-size:9pt;color:${MED};line-height:1.5;margin-bottom:6pt;">${d.hobbies}</div>`) : ''}
+  ${d.references && d.references.length > 0 ? section('References', d.references.map(ref => `
+    <div style="margin-bottom:6pt;font-size:8.5pt;color:${MED};">
+      <strong>${ref.name || ''}</strong>${ref.title ? ` - ${ref.title}` : ''}${ref.company ? `, ${ref.company}` : ''}
+      ${ref.email || ref.phone ? `<br>${[ref.email, ref.phone].filter(Boolean).join('  |  ')}` : ''}
+    </div>`).join('')) : ''}
 </div></body></html>`;
 }
 
@@ -3801,6 +3858,16 @@ function generateHieroExecutiveWordHTML(data) {
       <div style="font-size:9pt;color:${MED};font-style:italic;">${edu.school||''}</div>
     </div>`).join('')) : ''}
   ${certArr.length > 0 ? section('Certifications', certArr.map(c => `<div style="font-size:8.5pt;color:${MED};margin-bottom:3pt;">• ${c}</div>`).join('')) : ''}
+  ${d.softSkills ? section('Soft Skills', `<div style="font-size:9pt;color:${MED};line-height:1.5;margin-bottom:6pt;">${d.softSkills}</div>`) : ''}
+  ${d.languages ? section('Languages', `<div style="font-size:9pt;color:${MED};line-height:1.5;margin-bottom:6pt;">${d.languages}</div>`) : ''}
+  ${d.achievements ? section('Achievements', `<div style="font-size:9pt;color:${MED};line-height:1.5;margin-bottom:6pt;">${d.achievements}</div>`) : ''}
+  ${d.publications ? section('Publications', `<div style="font-size:9pt;color:${MED};line-height:1.5;margin-bottom:6pt;">${d.publications}</div>`) : ''}
+  ${d.hobbies ? section('Hobbies & Interests', `<div style="font-size:9pt;color:${MED};line-height:1.5;margin-bottom:6pt;">${d.hobbies}</div>`) : ''}
+  ${d.references && d.references.length > 0 ? section('References', d.references.map(ref => `
+    <div style="margin-bottom:6pt;font-size:8.5pt;color:${MED};">
+      <strong>${ref.name || ''}</strong>${ref.title ? ` - ${ref.title}` : ''}${ref.company ? `, ${ref.company}` : ''}
+      ${ref.email || ref.phone ? `<br>${[ref.email, ref.phone].filter(Boolean).join('  |  ')}` : ''}
+    </div>`).join('')) : ''}
 </div></body></html>`;
 }
 
