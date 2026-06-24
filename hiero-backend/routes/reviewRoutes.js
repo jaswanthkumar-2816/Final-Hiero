@@ -29,7 +29,10 @@ const authenticateToken = (req, res, next) => {
 const requireAdmin = (req, res, next) => {
   const ADMIN_EMAILS = [
     process.env.ADMIN_EMAIL,
-    'jaswanthkumarmuthoju@gmail.com'
+    'jaswanthkumarmuthoju@gmail.com',
+    'hiero@test.com',
+    'admin@hiero.com',
+    'jaswanthkumar@example.com'
   ];
   if (!ADMIN_EMAILS.includes(req.user.email)) {
     return res.status(403).json({ error: 'Admin access required' });
@@ -354,8 +357,10 @@ router.get('/admin/check', authenticateToken, async (req, res) => {
 
     const ADMIN_EMAILS = [
       process.env.ADMIN_EMAIL,
-      'jaswanthkumar@example.com',
-      'admin@hiero.com'
+      'jaswanthkumarmuthoju@gmail.com',
+      'hiero@test.com',
+      'admin@hiero.com',
+      'jaswanthkumar@example.com'
     ];
 
     const isAdmin = ADMIN_EMAILS.includes(userEmail);

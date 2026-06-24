@@ -1624,7 +1624,11 @@
         console.error(err);
         loading.style.display = 'none';
         error.style.display = 'block';
-        errorMsg.textContent = err.message + '. Ensure the local server or Render container is running.';
+        if (err.message.includes('Authentication Failed')) {
+          errorMsg.innerHTML = `${err.message}.<br><br><a href="/login.html" class="btn btn-primary" style="margin-top: 15px; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">Go to Login Portal</a>`;
+        } else {
+          errorMsg.textContent = err.message + '. Ensure the local server or Render container is running.';
+        }
         addLog("warning", `Sync failure: ${err.message}`);
       }
     }
