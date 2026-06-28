@@ -651,83 +651,181 @@
       opacity: 1;
     }
 
-    /* Split-screen Video Player & ChatGPT Modal */
     .yt-player-modal {
       display: none;
       position: fixed;
       inset: 0;
       z-index: 10000;
-      background: radial-gradient(circle at center, rgba(3, 20, 10, 0.95), rgba(0, 0, 0, 0.98));
-      backdrop-filter: blur(25px);
+      background: rgba(0, 0, 0, .95);
+      backdrop-filter: blur(20px);
       align-items: center;
       justify-content: center;
-      padding: 30px;
-      overflow: hidden;
+      padding: 40px;
     }
 
     .yt-player-modal.active {
       display: flex;
     }
 
-    .modal-bg-canvas {
-      position: absolute;
-      inset: 0;
-      z-index: -1;
-      pointer-events: none;
-    }
-
-    .player-wrap {
+    .yt-player-modal .modal-wrap {
       width: 100%;
-      max-width: 1400px;
+      max-width: 1350px;
       position: relative;
     }
 
-    .modal-container {
+    .yt-player-modal .modal-container {
       display: flex;
-      gap: 30px;
+      gap: 24px;
       width: 100%;
-      align-items: center;
+      align-items: stretch;
       justify-content: center;
     }
 
-    .modal-video-side {
+    @media (max-width: 960px) {
+      .yt-player-modal .modal-container {
+        flex-direction: column;
+      }
+      .yt-player-modal .modal-chat-side {
+        height: 380px !important;
+      }
+    }
+
+    .yt-player-modal .modal-video-side {
       flex: 1.6;
       min-width: 0;
       display: flex;
       flex-direction: column;
+      justify-content: center;
     }
 
-    .aspect-16-9 {
-      position: relative;
-      padding-bottom: 56.25%;
-      height: 0;
-      background: #000;
-      border-radius: 20px;
-      overflow: hidden;
-      box-shadow: 0 0 50px rgba(0, 230, 118, 0.25);
-      border: 1px solid rgba(0, 230, 118, 0.35);
-    }
-
-    .aspect-16-9 iframe {
-      position: absolute;
-      top: 0;
-      left: 0;
+    .yt-player-modal .aspect-16-9 {
       width: 100%;
-      height: 100%;
-      border: none;
+      aspect-ratio: 16/9;
+      background: #000;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
     }
 
-    .modal-chat-side {
+    .yt-player-modal .modal-chat-side {
       flex: 0.9;
       background: rgba(13, 17, 24, 0.7);
-      border: 1.5px solid rgba(255, 255, 255, 0.08);
-      border-radius: 28px;
-      height: 520px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      height: auto;
+      min-height: 450px;
       display: flex;
       flex-direction: column;
       overflow: hidden;
       box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
       backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .yt-player-modal .tutor-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .yt-player-modal .tutor-avatar {
+      width: 36px;
+      height: 36px;
+      background: var(--primary);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 15px rgba(0, 230, 118, 0.3);
+    }
+
+    .yt-player-modal .tutor-avatar svg {
+      width: 20px;
+      height: 20px;
+      fill: #000;
+    }
+
+    .yt-player-modal .tutor-header-text h3 {
+      font-size: 15px;
+      font-weight: 700;
+      margin: 0 0 2px 0;
+      color: #fff;
+    }
+
+    .yt-player-modal .online-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .yt-player-modal .status-dot {
+      width: 5px;
+      height: 5px;
+      background: var(--primary);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--primary);
+      animation: pulse 2s infinite;
+    }
+
+    .yt-player-modal .chat-body {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-height: 380px;
+    }
+
+    .yt-player-modal .chat-footer-input {
+      padding: 16px 20px;
+      background: rgba(0, 0, 0, 0.2);
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      gap: 10px;
+    }
+
+    .yt-player-modal .modal-chat-input-field {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #fff;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      outline: none;
+      transition: all 0.3s;
+    }
+
+    .yt-player-modal .modal-chat-input-field:focus {
+      border-color: var(--primary);
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .yt-player-modal .modal-chat-send-btn {
+      background: var(--primary);
+      color: #000;
+      border: none;
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .yt-player-modal .modal-chat-send-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 10px rgba(0, 230, 118, 0.3);
     }
 
     .close-player {
@@ -735,152 +833,12 @@
       top: -50px;
       right: 0;
       color: #fff;
-      font-size: 16px;
+      font-weight: 700;
       cursor: pointer;
       display: flex;
       align-items: center;
       gap: 8px;
-      font-weight: 700;
-      opacity: 0.7;
-      transition: 0.3s;
-    }
-
-    .close-player:hover {
-      opacity: 1;
-      color: #00e676;
-    }
-
-    .tutor-header {
-      padding: 20px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-
-    .tutor-avatar {
-      width: 40px;
-      height: 40px;
-      background: #00e676;
-      border-radius: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 0 20px rgba(0, 230, 118, 0.3);
-    }
-
-    .tutor-avatar svg {
-      width: 24px;
-      height: 24px;
-      fill: #000;
-    }
-
-    .tutor-header-text h3 {
       font-size: 16px;
-      font-weight: 800;
-      margin: 0;
-      color: #fff;
-    }
-
-    .online-status {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 11px;
-      color: #00e676;
-      font-weight: 700;
-    }
-
-    .status-dot {
-      width: 6px;
-      height: 6px;
-      background: #00e676;
-      border-radius: 50%;
-      box-shadow: 0 0 8px #00e676;
-      animation: pulse 2s infinite;
-    }
-
-    .modal-chat-body {
-      flex: 1;
-      overflow-y: auto;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      scrollbar-width: none;
-    }
-
-    .modal-chat-body::-webkit-scrollbar {
-      display: none;
-    }
-
-    .modal-message {
-      max-width: 85%;
-      padding: 12px 16px;
-      border-radius: 20px;
-      font-size: 13.5px;
-      line-height: 1.5;
-      position: relative;
-    }
-
-    .modal-message.bot {
-      background: rgba(255, 255, 255, 0.05);
-      color: #fff;
-      align-self: flex-start;
-      border-top-left-radius: 4px;
-    }
-
-    .modal-message.user {
-      background: #00e676;
-      color: #000;
-      align-self: flex-end;
-      border-top-right-radius: 4px;
-      font-weight: 600;
-      box-shadow: 0 8px 20px rgba(0, 230, 118, 0.15);
-    }
-
-    .modal-chat-footer {
-      padding: 20px;
-      background: rgba(0, 0, 0, 0.2);
-      border-top: 1px solid rgba(255, 255, 255, 0.08);
-      display: flex;
-      gap: 12px;
-    }
-
-    .modal-chat-input {
-      flex: 1;
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      color: #fff;
-      padding: 12px 16px;
-      border-radius: 14px;
-      font-size: 13.5px;
-      outline: none;
-      transition: all 0.3s;
-    }
-
-    .modal-chat-input:focus {
-      border-color: #00e676;
-      background: rgba(255, 255, 255, 0.06);
-    }
-
-    .modal-send-btn {
-      background: #00e676;
-      color: #000;
-      border: none;
-      width: 44px;
-      height: 44px;
-      border-radius: 14px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.3s;
-    }
-
-    .modal-send-btn:hover {
-      transform: scale(1.05);
-      box-shadow: 0 0 20px rgba(0, 230, 118, 0.4);
     }
 
     /* SKELETON */
@@ -2774,7 +2732,7 @@
       document.getElementById('yt-body').innerHTML = d.videos.slice(0, 5).map((v, i) => {
         const thumb = v.thumbnail || (v.videoId ? `https://i.ytimg.com/vi/${v.videoId}/hqdefault.jpg` : '');
         return `
-          <div class="item-card yt" onclick="openVideoPlayer('${v.videoId}')" style="animation-delay:${i * .08}s">
+          <div class="item-card yt" onclick="openVideoPlayer('${v.videoId}', '${v.title.replace(/'/g, "\\'").replace(/"/g, '&quot;')}')" style="animation-delay:${i * .08}s">
             <div class="yt-thumb">
               <img src="${thumb}" class="yt-thumb-img" onerror="this.src='https://via.placeholder.com/480x270/01121e/00e676?text=Preview'">
               <div class="yt-play">
@@ -2795,35 +2753,71 @@
       }).join('');
     }
 
-    let modalCH = [];
-    let modalSending = false;
+    let MCH = [], modalSending = false;
 
-    function openVideoPlayer(vid) {
+    function initModalChat(videoTitle) {
+      MCH = [];
+      const container = document.getElementById('modal-chat-container');
+      if (container) {
+        container.innerHTML = `
+          <div class="mg bot">
+            <span class="mlbl">ORBIT AI</span>
+            <div>I'm right here while you watch! Is there anything in this video <strong>"${esc(videoTitle)}"</strong> you'd like me to explain further?</div>
+          </div>
+        `;
+      }
+    }
+
+    function addModalM(role, text) {
+      const container = document.getElementById('modal-chat-container');
+      if (!container) return;
+      const row = document.createElement('div');
+      row.className = 'mg ' + (role === 'assistant' ? 'bot' : 'user');
+      row.innerHTML = `<span class="mlbl">${role === 'assistant' ? 'ORBIT AI' : 'YOU'}</span><div>${esc(text)}</div>`;
+      container.appendChild(row);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    async function sendModalChat() {
+      if (modalSending) return;
+      const inp = document.getElementById('modal-chat-input');
+      if (!inp) return;
+      const text = inp.value.trim(); if (!text) return;
+      inp.value = ''; modalSending = true;
+      const sendBtn = document.getElementById('modal-chat-send');
+      if (sendBtn) sendBtn.disabled = true;
+      
+      addModalM('user', text); MCH.push({ role: 'user', content: text });
+      
+      const container = document.getElementById('modal-chat-container');
+      const tg = document.createElement('div'); tg.className = 'mg bot'; tg.id = 'mtg';
+      tg.innerHTML = '<span class="mlbl">ORBIT AI</span><div class="typ-wrap"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div></div>';
+      container.appendChild(tg); container.scrollTop = container.scrollHeight;
+      
+      try {
+        const systemPrompt = `You are Orbit, Hiero's AI tutor. The user is watching a tutorial video about the project "${RAW_NAME}". Answer questions specifically related to this tutorial video and project development. Be helpful and technical.`;
+        const fullMessages = [{ role: 'system', content: systemPrompt }, ...MCH];
+        
+        const r = await fetch('/api/projects/chat', { 
+          method: 'POST', 
+          headers: { 'Content-Type': 'application/json' }, 
+          body: JSON.stringify({ messages: fullMessages, projectTitle: RAW_NAME, tags: M.tags }) 
+        });
+        const d = await r.json(); const reply = d.reply || 'No response.';
+        document.getElementById('mtg')?.remove(); MCH.push({ role: 'assistant', content: reply }); addModalM('assistant', reply);
+      } catch {
+        document.getElementById('mtg')?.remove(); addModalM('assistant', '<span style="color:#ffb347">⚠ Could not connect to Orbit AI. Please try again.</span>');
+      } finally { modalSending = false; if (sendBtn) sendBtn.disabled = false; inp.focus(); }
+    }
+
+    function openVideoPlayer(vid, title) {
       if(!vid || vid.includes(' ')) return alert('No direct playback available for this video query.');
       const modal = document.getElementById('playerModal');
       const wrap = document.getElementById('playerWrapper');
       wrap.innerHTML = `<iframe src="https://www.youtube.com/embed/${vid}?autoplay=1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="width:100%; height:100%; border:none;"></iframe>`;
-      
-      // Reset modal chat
-      const chatContainer = document.getElementById('modal-chat-container');
-      chatContainer.innerHTML = `
-        <div class="modal-message bot">
-          I'm right here while you watch! Is there anything in this video you'd like me to explain further?
-        </div>
-      `;
-      modalCH = [];
-      
+      initModalChat(title || 'Tutorial');
       modal.classList.add('active');
       document.body.style.overflow = 'hidden';
-      
-      // Focus chat input and bind enter key
-      setTimeout(() => {
-        const inp = document.getElementById('modal-chat-input');
-        if (inp) {
-          inp.focus();
-          inp.onkeypress = (e) => { if (e.key === 'Enter') sendModalChat(); };
-        }
-      }, 500);
     }
 
     function closePlayer() {
@@ -2832,54 +2826,6 @@
       wrap.innerHTML = '';
       modal.classList.remove('active');
       document.body.style.overflow = 'auto';
-    }
-
-    async function sendModalChat() {
-      if (modalSending) return;
-      const inp = document.getElementById('modal-chat-input');
-      const text = inp.value.trim();
-      if (!text) return;
-      inp.value = '';
-      modalSending = true;
-      document.getElementById('modal-chat-send').disabled = true;
-
-      const bodyEl = document.getElementById('modal-chat-container');
-      const uMsg = document.createElement('div');
-      uMsg.className = 'modal-message user';
-      uMsg.textContent = text;
-      bodyEl.appendChild(uMsg);
-      bodyEl.scrollTop = bodyEl.scrollHeight;
-
-      modalCH.push({ role: 'user', content: text });
-
-      const loadingMsg = document.createElement('div');
-      loadingMsg.className = 'modal-message bot';
-      loadingMsg.innerHTML = '<div class="typ-wrap"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div></div>';
-      bodyEl.appendChild(loadingMsg);
-      bodyEl.scrollTop = bodyEl.scrollHeight;
-
-      try {
-        const r = await fetch('/api/projects/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            messages: modalCH,
-            projectTitle: RAW_NAME,
-            tags: M.tags
-          })
-        });
-        const d = await r.json();
-        const reply = d.reply || 'No response.';
-        loadingMsg.innerHTML = reply;
-        modalCH.push({ role: 'assistant', content: reply });
-      } catch {
-        loadingMsg.innerHTML = '<span style="color:#ffb347">⚠ Connection error. Could not reach Orbit AI.</span>';
-      } finally {
-        modalSending = false;
-        document.getElementById('modal-chat-send').disabled = false;
-        bodyEl.scrollTop = bodyEl.scrollHeight;
-        inp.focus();
-      }
     }
 
     function loadGH() {
@@ -3141,108 +3087,20 @@
         const nxtBtn = document.querySelector(`[data-sec="${sectList[nextIdx]}"]`);
         if (nxtBtn) go(sectList[nextIdx], nxtBtn);
       }
-    // ========== MODAL BACKGROUND ANIMATION (Neural Circuit) ==========
-    (function () {
-      const canvas = document.getElementById('modal-bg-canvas');
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      let particles = [];
-      const mouse = { x: null, y: null, radius: 200 };
-
-      window.addEventListener('mousemove', (e) => {
-        mouse.x = e.x;
-        mouse.y = e.y;
-      });
-
-      function resize() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-      }
-      window.addEventListener('resize', resize);
-      resize();
-
-      class Particle {
-        constructor() {
-          this.x = Math.random() * canvas.width;
-          this.y = Math.random() * canvas.height;
-          this.size = Math.random() * 1.5 + 0.5;
-          this.speedX = (Math.random() * 0.6) - 0.3;
-          this.speedY = (Math.random() * 0.6) - 0.3;
-        }
-        update() {
-          this.x += this.speedX;
-          this.y += this.speedY;
-          if (this.x > canvas.width) this.x = 0; else if (this.x < 0) this.x = canvas.width;
-          if (this.y > canvas.height) this.y = 0; else if (this.y < 0) this.y = canvas.height;
-        }
-        draw() {
-          ctx.fillStyle = 'rgba(0, 230, 118, 0.4)';
-          ctx.beginPath();
-          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-          ctx.fill();
-        }
-      }
-
-      function initM() {
-        particles = [];
-        for (let i = 0; i < 100; i++) particles.push(new Particle());
-      }
-
-      function animateM() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        particles.forEach(p => {
-          p.update();
-          p.draw();
-        });
-        connectM();
-        requestAnimationFrame(animateM);
-      }
-
-      function connectM() {
-        for (let a = 0; a < particles.length; a++) {
-          for (let b = a + 1; b < particles.length; b++) {
-            let dx = particles[a].x - particles[b].x;
-            let dy = particles[a].y - particles[b].y;
-            let d = Math.sqrt(dx * dx + dy * dy);
-            if (d < 180) {
-              let opacity = 1 - (d / 180);
-              ctx.strokeStyle = `rgba(0, 230, 118, ${opacity * 0.15})`;
-              ctx.beginPath();
-              ctx.moveTo(particles[a].x, particles[a].y);
-              ctx.lineTo(particles[b].x, particles[b].y);
-              ctx.stroke();
-
-              // Interactive proximity effect
-              let mdx = mouse.x - particles[a].x;
-              let mdy = mouse.y - particles[a].y;
-              let md = Math.sqrt(mdx * mdx + mdy * mdy);
-              if (md < mouse.radius) {
-                ctx.strokeStyle = `rgba(0, 230, 118, ${(1 - md / mouse.radius) * 0.4})`;
-                ctx.lineWidth = 1.5;
-                ctx.stroke();
-                ctx.lineWidth = 1;
-              }
-            }
-          }
-        }
-      }
-      initM();
-      animateM();
-    })();
+    }, { passive: true });
   </script>
 
   <!-- Video Player Modal -->
   <div class="yt-player-modal" id="playerModal">
-    <canvas id="modal-bg-canvas" class="modal-bg-canvas"></canvas>
-    <div class="player-wrap">
+    <div class="modal-wrap">
       <div class="close-player" onclick="closePlayer()">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+          stroke-linecap="round" stroke-linejoin="round">
           <line x1="18" y1="6" x2="6" y2="18"></line>
           <line x1="6" y1="6" x2="18" y2="18"></line>
         </svg>
         CLOSE
       </div>
-      
       <div class="modal-container">
         <!-- Video Side (Left) -->
         <div class="modal-video-side">
@@ -3254,23 +3112,24 @@
         <!-- Orbit Side (Right) -->
         <div class="modal-chat-side">
           <div class="tutor-header">
-            <div class="tutor-avatar">
+            <div class="tutor-avatar" style="width: 38px; height: 38px;">
                <svg viewBox="0 0 24 24"><path d="M12,2A10,10,0,0,0,2,12a9.89,9.89,0,0,0,2.26,6.33l-2,2a1,1,0,0,0,-1 1.05A1,1,0,0,0,2.15,22h19.7a1,1,0,0,0,.85-1.52l-2-2A10,10,0,0,0,12,2Zm0,18a8,8,0,0,1,-5.55,-2.25l1.42,-1.42a1,1,0,0,0,-1.42,-1.42L5,16.33A8,8,0,1,1,12,20Z" /><circle cx="12" cy="11" r="3" /></svg>
             </div>
             <div class="tutor-header-text">
-               <h3>Orbit AI Tutor</h3>
-               <div class="online-status"><div class="status-dot"></div>Explain Video Concepts</div>
+               <h3 style="font-size: 15px; margin: 0; color: #fff;">Orbit Video Tutor</h3>
+               <div class="online-status"><div class="status-dot"></div>Ask doubts about the video</div>
             </div>
           </div>
-          <div class="modal-chat-body" id="modal-chat-container">
-            <div class="modal-message bot">
-              I'm right here while you watch! Is there anything in this video you'd like me to explain further?
+          <div class="chat-body" id="modal-chat-container">
+            <div class="mg bot">
+              <span class="mlbl">ORBIT AI</span>
+              <div>I'm right here while you watch! Is there anything in this video you'd like me to explain further?</div>
             </div>
           </div>
-          <div class="modal-chat-footer">
-            <input type="text" class="modal-chat-input" id="modal-chat-input" placeholder="Ask about this video...">
-            <button class="modal-send-btn" id="modal-chat-send" onclick="sendModalChat()">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <div class="chat-footer-input">
+            <input type="text" class="modal-chat-input-field" id="modal-chat-input" placeholder="Ask about this video..." onkeydown="if(event.key==='Enter'){event.preventDefault();sendModalChat();}">
+            <button class="modal-chat-send-btn" id="modal-chat-send" onclick="sendModalChat()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
                 <line x1="22" y1="2" x2="11" y2="13"></line>
                 <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
               </svg>
