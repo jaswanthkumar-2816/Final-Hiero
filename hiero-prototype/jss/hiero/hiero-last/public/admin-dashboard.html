@@ -404,12 +404,13 @@
                 <th>Total Logins</th>
                 <th>Last Login</th>
                 <th>Member Since</th>
+                <th>Plan</th>
                 <th>Status</th>
               </tr>
             </thead>
             <tbody id="usersTable">
               <tr>
-                <td colspan="6" class="no-data">Loading users...</td>
+                <td colspan="7" class="no-data">Loading users...</td>
               </tr>
             </tbody>
           </table>
@@ -554,7 +555,7 @@
       const usersTable = document.getElementById('usersTable');
 
       if (users.length === 0) {
-        usersTable.innerHTML = '<tr><td colspan="6" class="no-data">No users found</td></tr>';
+        usersTable.innerHTML = '<tr><td colspan="7" class="no-data">No users found</td></tr>';
         return;
       }
 
@@ -570,6 +571,11 @@
             <td>${user.loginCount || 0}</td>
             <td>${lastLogin}</td>
             <td>${memberSince}</td>
+            <td>
+              <span class="badge ${user.isPro ? 'active' : 'inactive'}">
+                ${user.isPro ? `👑 ${(user.proPlan || 'Pro').toUpperCase()}` : 'Free'}
+              </span>
+            </td>
             <td>
               <span class="badge ${isActive ? 'active' : 'inactive'}">
                 ${isActive ? 'Active' : 'Inactive'}

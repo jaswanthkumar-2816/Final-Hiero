@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const mongoose = require('mongoose');
 const nodemailer = require('nodemailer');
+const axios = require('axios');
 
 const Review = require('../models/Review');
 const LoginTracking = require('../models/LoginTracking');
@@ -34,6 +35,13 @@ const TEST_EMAILS_EXACT = [
     'default@example.com',
     'demo@hiero.com',
     'admin@hiero.com',
+    'souvikkhaitan@gmail.com',
+    'aayushsharma80359@gmail.com',
+    'aravindaariv0904@gmail.com',
+    'crazzyidea017@gmail.com',
+    'chatterjeesaswata5@gmail.com',
+    'krishnasaimani2005@gmail.com',
+    'hiero@test1.com'
 ];
 
 function isTestAccount(email = '') {
@@ -674,7 +682,10 @@ function mergeUsers(mongoUsers, localUsers) {
                 username: u.name || u.email.split('@')[0],
                 email: u.email,
                 loginCount: u.loginCount || 1,
-                lastLogin: u.lastLogin || new Date().toISOString()
+                lastLogin: u.lastLogin || new Date().toISOString(),
+                isPro: !!u.isPro,
+                proPlan: u.proPlan || '',
+                proUntil: u.proUntil || ''
             });
         }
     });
@@ -689,7 +700,10 @@ function mergeUsers(mongoUsers, localUsers) {
                 username: u.username || u.email.split('@')[0],
                 email: u.email,
                 loginCount: 1,
-                lastLogin: u.createdAt
+                lastLogin: u.createdAt,
+                isPro: !!u.isPro,
+                proPlan: u.proPlan || '',
+                proUntil: u.proUntil || ''
             };
 
             if (!existing) {
@@ -702,7 +716,10 @@ function mergeUsers(mongoUsers, localUsers) {
                     username: mongoUser.username,
                     email: mongoUser.email,
                     loginCount: (existing.loginCount || 1) + 1,
-                    lastLogin: mongoTime > existingTime ? mongoUser.lastLogin : existing.lastLogin
+                    lastLogin: mongoTime > existingTime ? mongoUser.lastLogin : existing.lastLogin,
+                    isPro: mongoUser.isPro || existing.isPro,
+                    proPlan: mongoUser.proPlan || existing.proPlan,
+                    proUntil: mongoUser.proUntil || existing.proUntil
                 });
             }
         }
@@ -711,14 +728,39 @@ function mergeUsers(mongoUsers, localUsers) {
     return Array.from(mergedMap.values());
 }
 
+async function fetchRazorpayPayments() {
+    let payments = [];
+    try {
+        const KEY_ID = process.env.RAZORPAY_KEY_ID || 'rzp_live_T1Sny5T0rJRQuw';
+        const KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || '6cFpqePtEeyOBcfRftetu9Zm';
+        const auth = Buffer.from(`${KEY_ID}:${KEY_SECRET}`).toString('base64');
+        const rpRes = await axios.get('https://api.razorpay.com/v1/payments?count=100', {
+            headers: { 'Authorization': `Basic ${auth}` },
+            timeout: 5000
+        });
+        payments = (rpRes.data.items || []).filter(p => p.status === 'captured').map(p => ({
+            id: p.id,
+            amount: p.amount / 100,
+            email: p.email || 'N/A',
+            contact: p.contact || 'N/A',
+            orderId: p.order_id || 'N/A',
+            createdAt: new Date(p.created_at * 1000).toISOString()
+        }));
+    } catch (pErr) {
+        console.error('⚠️ Failed to fetch Razorpay payments for admin dashboard:', pErr.message);
+    }
+    return payments;
+}
+
 // Helper to serve local JSON fallback for Admin Dashboard
-function serveLocalDashboard(res) {
+async function serveLocalDashboard(res) {
     try {
         const authObj = require('./auth');
         const localUsers = authObj.users || [];
         
         const logins = getLocalLogins();
         const allReviews = getLocalReviews().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        const payments = await fetchRazorpayPayments();
         
         // Map Mongoose User structure format for response compat (filter test accounts)
         const usersData = localUsers
@@ -728,7 +770,10 @@ function serveLocalDashboard(res) {
                 username: u.name || u.email.split('@')[0],
                 email: u.email,
                 loginCount: u.loginCount || 1, // Fallback default to 1 if tracked
-                lastLogin: u.lastLogin || new Date().toISOString()
+                lastLogin: u.lastLogin || new Date().toISOString(),
+                isPro: !!u.isPro,
+                proPlan: u.proPlan || '',
+                proUntil: u.proUntil || ''
             }));
 
         const totalUsers = localUsers.length;
@@ -742,10 +787,13 @@ function serveLocalDashboard(res) {
                 totalVisits, 
                 averageRating: parseFloat(avgRating), 
                 totalReviews: allReviews.length,
-                uniqueUsersCount: totalUsers
+                uniqueUsersCount: totalUsers,
+                totalSales: payments.reduce((sum, p) => sum + p.amount, 0),
+                paidDownloadsCount: payments.length
             },
             users: usersData,
-            reviews: allReviews
+            reviews: allReviews,
+            payments: payments
         });
     } catch (err) {
         console.error('Error in serveLocalDashboard:', err);
@@ -765,6 +813,7 @@ router.get('/admin/dashboard', authenticateToken, requireAdmin, async (req, res)
             const mongoReviews = await Review.find().sort({ createdAt: -1 });
             const mongoUsers = await User.find();
             const mongoLogins = await LoginTracking.find();
+            const payments = await fetchRazorpayPayments();
 
             // Merge reviews and users seamlessly
             const allReviews = mergeReviews(mongoReviews, localReviews);
@@ -781,17 +830,20 @@ router.get('/admin/dashboard', authenticateToken, requireAdmin, async (req, res)
                     totalVisits, 
                     averageRating: parseFloat(avgRating), 
                     totalReviews: allReviews.length,
-                    uniqueUsersCount: totalUsers
+                    uniqueUsersCount: totalUsers,
+                    totalSales: payments.reduce((sum, p) => sum + p.amount, 0),
+                    paidDownloadsCount: payments.length
                 },
                 users: usersData,
-                reviews: allReviews
+                reviews: allReviews,
+                payments: payments
             });
         } else {
-            return serveLocalDashboard(res);
+            return await serveLocalDashboard(res);
         }
     } catch (error) {
         console.warn('⚠️ MongoDB Admin Dashboard query failed (falling back to JSON persistence):', error.message);
-        return serveLocalDashboard(res);
+        return await serveLocalDashboard(res);
     }
 });
 

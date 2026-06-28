@@ -400,12 +400,13 @@
                 <th>Total Logins</th>
                 <th>Last Login</th>
                 <th>Member Since</th>
+                <th>Plan</th>
                 <th>Status</th>
               </tr>
             </thead>
             <tbody id="usersTable">
               <tr>
-                <td colspan="6" class="no-data">Loading users...</td>
+                <td colspan="7" class="no-data">Loading users...</td>
               </tr>
             </tbody>
           </table>
@@ -550,7 +551,7 @@
       const usersTable = document.getElementById('usersTable');
       
       if (users.length === 0) {
-        usersTable.innerHTML = '<tr><td colspan="6" class="no-data">No users found</td></tr>';
+        usersTable.innerHTML = '<tr><td colspan="7" class="no-data">No users found</td></tr>';
         return;
       }
 
@@ -558,7 +559,7 @@
         const lastLogin = user.lastLogin ? new Date(user.lastLogin).toLocaleString() : 'Never';
         const memberSince = new Date(user.createdAt).toLocaleDateString();
         const isActive = user.lastLogin && (Date.now() - new Date(user.lastLogin).getTime()) < 7 * 24 * 60 * 60 * 1000; // Active in last 7 days
-        
+
         return `
           <tr>
             <td><strong>${user.username || 'N/A'}</strong></td>
@@ -566,6 +567,11 @@
             <td>${user.loginCount || 0}</td>
             <td>${lastLogin}</td>
             <td>${memberSince}</td>
+            <td>
+              <span class="badge ${user.isPro ? 'active' : 'inactive'}">
+                ${user.isPro ? `👑 ${(user.proPlan || 'Pro').toUpperCase()}` : 'Free'}
+              </span>
+            </td>
             <td>
               <span class="badge ${isActive ? 'active' : 'inactive'}">
                 ${isActive ? 'Active' : 'Inactive'}

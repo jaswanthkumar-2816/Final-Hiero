@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Arjun Krishnamurthy - Resume</title>
+<style>
+  @page { margin: 0.6in; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, sans-serif; font-size: 10.5pt; color: #1a1a1a; line-height: 1.4; }
+  
+  /* Header */
+  .header { background: #1a1a2e; color: white; padding: 22px 28px; }
+  .name { font-size: 24pt; font-weight: 700; letter-spacing: 1px; }
+  .title { font-size: 12pt; color: #a8d5ff; margin-top: 4px; }
+  .contact-row { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 10px; font-size: 9.5pt; color: #d0e8ff; }
+  .contact-row span::before { content: "• "; }
+  .contact-row span:first-child::before { content: ""; }
+  
+  /* Sections */
+  .section { padding: 12px 28px; border-bottom: 1px solid #e0e0e0; }
+  .section:last-child { border-bottom: none; }
+  .section-title {
+    font-size: 11pt; font-weight: 700; color: #1a1a2e;
+    text-transform: uppercase; letter-spacing: 1px;
+    border-bottom: 2px solid #1a1a2e; padding-bottom: 4px; margin-bottom: 10px;
+  }
+
+  /* Summary */
+  .summary { font-size: 10pt; color: #333; line-height: 1.6; }
+
+  /* Experience / Internship items */
+  .item { margin-bottom: 12px; }
+  .item-header { display: flex; justify-content: space-between; align-items: flex-start; }
+  .item-title { font-weight: 700; font-size: 10.5pt; }
+  .item-org { color: #555; font-size: 10pt; }
+  .item-date { font-size: 9.5pt; color: #777; white-space: nowrap; }
+  .item-bullets { margin-top: 5px; padding-left: 18px; }
+  .item-bullets li { margin-bottom: 3px; font-size: 10pt; }
+
+  /* Projects */
+  .project-item { margin-bottom: 12px; }
+  .project-name { font-weight: 700; }
+  .project-tech { font-size: 9.5pt; color: #1a1a2e; background: #e8f0fe; padding: 1px 6px; border-radius: 3px; display: inline-block; margin-bottom: 4px; }
+  .project-link { font-size: 9pt; color: #0066cc; }
+
+  /* Skills */
+  .skills-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .skill-row { font-size: 10pt; }
+  .skill-label { font-weight: 700; color: #1a1a2e; }
+
+  /* Education */
+  .edu-item { display: flex; justify-content: space-between; }
+  .edu-degree { font-weight: 700; }
+  .edu-gpa { color: #1a1a2e; font-weight: 600; }
+
+  /* Two col */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  
+  /* Tags */
+  .tag { display: inline-block; background: #f0f4ff; border: 1px solid #c0d0f0; padding: 1px 7px; border-radius: 10px; font-size: 9pt; margin: 2px; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="name">Arjun Krishnamurthy</div>
+  <div class="title">Full Stack Developer &amp; ML Enthusiast | B.Tech Computer Science</div>
+  <div class="contact-row">
+    <span>arjun.krishnamurthy@gmail.com</span>
+    <span>+91 98765 43210</span>
+    <span>Bengaluru, Karnataka</span>
+    <span>linkedin.com/in/arjunkrishnamurthy</span>
+    <span>github.com/arjunkrishna-dev</span>
+    <span>arjundev.in</span>
+  </div>
+</div>
+
+<!-- SUMMARY -->
+<div class="section">
+  <div class="section-title">Professional Summary</div>
+  <p class="summary">
+    Highly motivated final-year B.Tech Computer Science student at PES University with a strong academic record (CGPA 9.1/10). 
+    Demonstrated experience across 4 internships in full-stack development, machine learning, and cloud computing. 
+    Built 8+ end-to-end projects including an AI-powered resume analyzer and a real-time collaborative IDE. 
+    Published researcher with 2 papers in IEEE and Springer. Active open-source contributor with 450+ GitHub commits.
+  </p>
+</div>
+
+<!-- INTERNSHIP EXPERIENCE -->
+<div class="section">
+  <div class="section-title">Internship Experience</div>
+
+  <div class="item">
+    <div class="item-header">
+      <div><span class="item-title">Software Engineer Intern</span> — <span class="item-org">Zepto (Startup, Y Combinator W21)</span></div>
+      <div class="item-date">Jan 2024 – Present</div>
+    </div>
+    <ul class="item-bullets">
+      <li>Built a real-time inventory management dashboard using React.js and Node.js, reducing stock-out incidents by 23%.</li>
+      <li>Developed a ML-based demand forecasting microservice (Python, FastAPI) deployed on AWS Lambda, serving 2M+ predictions/day.</li>
+      <li>Optimized PostgreSQL query performance reducing p99 latency from 450ms to 80ms using index tuning and query rewriting.</li>
+      <li>Collaborated in Agile sprints with 8-person cross-functional team; merged 37 PRs with zero critical incidents.</li>
+    </ul>
+  </div>
+
+  <div class="item">
+    <div class="item-header">
+      <div><span class="item-title">Machine Learning Intern</span> — <span class="item-org">Samsung R&amp;D Institute India</span></div>
+      <div class="item-date">May 2023 – Jul 2023</div>
+    </div>
+    <ul class="item-bullets">
+      <li>Developed an on-device NLP model for smart text prediction on Galaxy devices using TensorFlow Lite, achieving 91% accuracy.</li>
+      <li>Reduced model inference time by 40% by applying quantization and pruning techniques.</li>
+      <li>Presented research findings to a panel of 15 senior engineers; model shipped in One UI 6.0 beta build.</li>
+    </ul>
+  </div>
+
+  <div class="item">
+    <div class="item-header">
+      <div><span class="item-title">Full Stack Intern</span> — <span class="item-org">HealthKart (E-commerce, Series D)</span></div>
+      <div class="item-date">Nov 2022 – Jan 2023</div>
+    </div>
+    <ul class="item-bullets">
+      <li>Re-architected the product recommendations engine from monolith to microservices using Spring Boot, improving response time by 35%.</li>
+      <li>Implemented A/B testing framework (Python + Redis) that increased conversion rate by 12% over 6 weeks.</li>
+      <li>Built CI/CD pipeline using GitHub Actions and Docker; reduced deployment time from 45 mins to under 8 mins.</li>
+    </ul>
+  </div>
+
+  <div class="item">
+    <div class="item-header">
+      <div><span class="item-title">Cloud &amp; DevOps Intern</span> — <span class="item-org">Infosys (BFS Unit)</span></div>
+      <div class="item-date">May 2022 – Jul 2022</div>
+    </div>
+    <ul class="item-bullets">
+      <li>Automated infrastructure provisioning for 3 banking clients using Terraform and AWS CloudFormation, saving 20+ hours/week.</li>
+      <li>Set up centralized observability stack (Prometheus + Grafana) reducing MTTR by 60%.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- PROJECTS -->
+<div class="section">
+  <div class="section-title">Projects</div>
+
+  <div class="project-item">
+    <div class="item-header">
+      <div>
+        <span class="project-name">HireAI — AI-Powered Resume Analyzer &amp; Job Matcher</span><br>
+        <span class="project-tech">Python · FastAPI · OpenAI GPT-4 · React.js · PostgreSQL · Docker</span>
+      </div>
+      <div class="item-date">Dec 2023</div>
+    </div>
+    <div class="project-link">🔗 github.com/arjunkrishna-dev/hire-ai | Live: hireai.arjundev.in</div>
+    <ul class="item-bullets">
+      <li>Built an end-to-end resume analysis platform that parses PDFs, scores ATS compatibility, and matches JDs using GPT-4.</li>
+      <li>Processed 10,000+ resumes in beta; 4.8★ rating from 200+ beta users.</li>
+      <li>Deployed on GCP with autoscaling; handles 500 concurrent users with 99.9% uptime.</li>
+    </ul>
+  </div>
+
+  <div class="project-item">
+    <div class="item-header">
+      <div>
+        <span class="project-name">CollabIDE — Real-Time Collaborative Code Editor</span><br>
+        <span class="project-tech">React.js · Node.js · Socket.IO · Monaco Editor · Redis · Kubernetes</span>
+      </div>
+      <div class="item-date">Sep 2023</div>
+    </div>
+    <div class="project-link">🔗 github.com/arjunkrishna-dev/collab-ide</div>
+    <ul class="item-bullets">
+      <li>Implemented OT (Operational Transformation) algorithm for conflict-free real-time collaboration across 50+ simultaneous users.</li>
+      <li>Integrated code execution engine supporting 12 languages via Judge0 API with isolated Docker containers.</li>
+      <li>Featured on ProductHunt (#4 of the day), 1,200+ GitHub stars in first week.</li>
+    </ul>
+  </div>
+
+  <div class="project-item">
+    <div class="item-header">
+      <div>
+        <span class="project-name">FarmSense — IoT-based Precision Agriculture Platform</span><br>
+        <span class="project-tech">Raspberry Pi · Python · MQTT · Django · React Native · AWS IoT Core</span>
+      </div>
+      <div class="item-date">Mar 2023</div>
+    </div>
+    <div class="project-link">🔗 github.com/arjunkrishna-dev/farmsense</div>
+    <ul class="item-bullets">
+      <li>Designed IoT sensor network collecting soil moisture, temperature, and pH data at 1-minute intervals.</li>
+      <li>Built LSTM model predicting crop yield 3 weeks in advance with 87% accuracy; piloted with 5 farms in Tumkur district.</li>
+      <li>Won 1st Prize at IISc Hack4Impact Hackathon 2023 (120 teams).</li>
+    </ul>
+  </div>
+
+  <div class="project-item">
+    <div class="item-header">
+      <div>
+        <span class="project-name">SecureVault — Zero-Knowledge End-to-End Encrypted Notes App</span><br>
+        <span class="project-tech">Next.js · TypeScript · AES-256 · WebCrypto API · Supabase</span>
+      </div>
+      <div class="item-date">Jul 2023</div>
+    </div>
+    <div class="project-link">🔗 github.com/arjunkrishna-dev/securevault | 890 GitHub stars</div>
+    <ul class="item-bullets">
+      <li>Implemented client-side AES-256-GCM encryption so no plaintext ever reaches the server.</li>
+      <li>2,100+ registered users within 30 days of launch with zero security incidents.</li>
+    </ul>
+  </div>
+
+</div>
+
+<!-- EDUCATION -->
+<div class="section">
+  <div class="section-title">Education</div>
+
+  <div class="item">
+    <div class="edu-item">
+      <div>
+        <div class="edu-degree">B.Tech in Computer Science &amp; Engineering</div>
+        <div class="item-org">PES University, Bengaluru</div>
+      </div>
+      <div style="text-align:right">
+        <div class="item-date">2021 – 2025 (Expected)</div>
+        <div class="edu-gpa">CGPA: 9.1 / 10.0</div>
+      </div>
+    </div>
+    <ul class="item-bullets" style="margin-top:6px">
+      <li>Specialization: Artificial Intelligence &amp; Machine Learning</li>
+      <li>Relevant Coursework: Data Structures, Operating Systems, DBMS, Computer Networks, Cloud Computing, Deep Learning</li>
+      <li>Merit Scholarship recipient (Top 5% of department) for 4 consecutive semesters</li>
+    </ul>
+  </div>
+
+  <div class="item" style="margin-top:8px">
+    <div class="edu-item">
+      <div>
+        <div class="edu-degree">Class XII (CBSE) — Science with CS</div>
+        <div class="item-org">Delhi Public School, Bengaluru</div>
+      </div>
+      <div style="text-align:right">
+        <div class="item-date">2021</div>
+        <div class="edu-gpa">97.4%</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SKILLS -->
+<div class="section">
+  <div class="section-title">Technical Skills</div>
+  <div class="skills-grid">
+    <div class="skill-row"><span class="skill-label">Languages:</span> Python, JavaScript, TypeScript, Java, C++, SQL, Bash</div>
+    <div class="skill-row"><span class="skill-label">Frontend:</span> React.js, Next.js, Tailwind CSS, Redux, React Native</div>
+    <div class="skill-row"><span class="skill-label">Backend:</span> Node.js, FastAPI, Django, Spring Boot, GraphQL, REST APIs</div>
+    <div class="skill-row"><span class="skill-label">ML/AI:</span> PyTorch, TensorFlow, Scikit-learn, HuggingFace, LangChain, OpenAI</div>
+    <div class="skill-row"><span class="skill-label">Cloud/DevOps:</span> AWS (EC2, S3, Lambda, RDS), GCP, Docker, Kubernetes, Terraform, GitHub Actions</div>
+    <div class="skill-row"><span class="skill-label">Databases:</span> PostgreSQL, MongoDB, Redis, Elasticsearch, Pinecone (VectorDB)</div>
+  </div>
+  <div style="margin-top:8px">
+    <span class="skill-label">Soft Skills:</span> Technical Leadership, System Design, Agile/Scrum, Public Speaking, Cross-functional Collaboration, Mentoring
+  </div>
+</div>
+
+<!-- CERTIFICATIONS -->
+<div class="section">
+  <div class="section-title">Certifications</div>
+  <ul class="item-bullets">
+    <li>AWS Certified Solutions Architect – Associate (2023)</li>
+    <li>Google Professional ML Engineer (2023)</li>
+    <li>Meta Frontend Developer Professional Certificate (2022)</li>
+    <li>Stanford Online – Machine Learning Specialization (Andrew Ng, 2022)</li>
+    <li>Certified Kubernetes Application Developer (CKAD) – In progress</li>
+  </ul>
+</div>
+
+<!-- PUBLICATIONS -->
+<div class="section">
+  <div class="section-title">Publications &amp; Research</div>
+  <ul class="item-bullets">
+    <li><strong>Arjun K., Priya S.</strong> — "Federated Learning for Privacy-Preserving Medical Image Classification" — <em>IEEE ICSICT 2024</em> (Accepted)</li>
+    <li><strong>Arjun K., Dr. Ramesh N.</strong> — "LSTM-Based Crop Yield Prediction Using Multi-Modal IoT Sensor Data" — <em>Springer LNCS Vol. 14521, 2023</em></li>
+  </ul>
+</div>
+
+<!-- ACHIEVEMENTS -->
+<div class="section">
+  <div class="section-title">Achievements &amp; Awards</div>
+  <ul class="item-bullets">
+    <li>🥇 1st Place — IISc Hack4Impact 2023 (120 teams competing)</li>
+    <li>🥇 Winner — Smart India Hackathon 2022 (Government of India, 1 lakh prize)</li>
+    <li>🥈 Runner-Up — Google Solution Challenge 2023 (South Asia Region, Top 10 globally)</li>
+    <li>🏅 Best Paper Award — ICSICT 2024 (IEEE International Conference)</li>
+    <li>⭐ 5-Star Coder on HackerRank (Python, Problem Solving, SQL)</li>
+    <li>LeetCode: 650+ problems solved | Rating: 1987 (Knight badge)</li>
+  </ul>
+</div>
+
+<!-- EXTRA CURRICULAR -->
+<div class="section">
+  <div class="section-title">Extra-Curricular Activities</div>
+  <ul class="item-bullets">
+    <li>Technical Lead — Google Developer Student Club (GDSC), PES University (2023–24): Organized 12 workshops, mentored 80+ juniors</li>
+    <li>Core Member — ACM PES Student Chapter: Conducted weekly competitive programming contests with 150+ participants</li>
+    <li>Open Source: Contributed to VS Code, React Query, and FastAPI repositories (35+ merged PRs, 1.2K+ GitHub followers)</li>
+    <li>Technical Writer — Published 18 articles on Medium (35,000+ total views) covering system design and ML engineering</li>
+    <li>TEDx Speaker — Spoke at TEDxPESU 2023 on "The Future of AI in Healthcare"</li>
+  </ul>
+</div>
+
+<!-- HOBBIES -->
+<div class="section">
+  <div class="section-title">Hobbies &amp; Interests</div>
+  <p>Competitive Programming, Open Source Development, Technical Blogging, Photography (DSLR), Chess (Elo ~1600), Trekking</p>
+</div>
+
+<!-- REFERENCES -->
+<div class="section">
+  <div class="section-title">References</div>
+  <div class="two-col">
+    <div>
+      <div class="item-title">Dr. Ramesh Narayana</div>
+      <div class="item-org">Professor &amp; Research Supervisor, PES University</div>
+      <div style="font-size:9.5pt; margin-top:3px">📧 ramesh.narayana@pes.edu | 📞 +91 98450 12345</div>
+    </div>
+    <div>
+      <div class="item-title">Deepa Sharma</div>
+      <div class="item-org">Engineering Manager, Zepto (Internship Manager)</div>
+      <div style="font-size:9.5pt; margin-top:3px">📧 deepa.sharma@zepto.in | 📞 +91 97301 56789</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

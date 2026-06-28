@@ -2577,9 +2577,15 @@
       </div>
     </div>
 
-    <div style="margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
+    <div style="margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; align-items: center;">
       <button class="btn btn-secondary" onclick="editResume()" style="opacity: 0.7;">
         <i class="fas fa-edit"></i> Edit Details
+      </button>
+      <a href="analysis.html" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 8px; text-decoration: none; color: #cbd5e1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 8px; font-weight: 500; font-size: 0.95rem; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">
+        <i class="fas fa-chart-line" style="color: #2ae023;"></i> Analyse Resume
+      </a>
+      <button id="resultsBypassBtn" class="btn" style="background: rgba(42, 224, 35, 0.15); color: #2ae023; border: 1px solid #2ae023; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 8px; transition: all 0.3s;" onmouseover="this.style.background='rgba(42, 224, 35, 0.3)'" onmouseout="this.style.background='rgba(42, 224, 35, 0.15)'" onclick="activateTestModeUpgrade()">
+        <i class="fas fa-flask"></i> Test Mode: Unlock Premium
       </button>
     </div>
   </div>
@@ -5968,6 +5974,44 @@
       }, 1800);
     }
 
+    async function activateTestModeUpgrade() {
+      const btn = document.getElementById('resultsBypassBtn');
+      const originalText = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Activating...';
+      const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
+      try {
+        const verifyRes = await fetch('/api/payment/verify-payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+          body: JSON.stringify({
+            razorpay_payment_id: 'pay_mock_test_mode',
+            razorpay_order_id: 'order_mock_test_mode',
+            razorpay_signature: 'sig_mock_test_mode',
+            planId: 'premium'
+          })
+        });
+        const verifyData = await verifyRes.json();
+        if (verifyData.success) {
+          const user = JSON.parse(localStorage.getItem('user') || '{}');
+          user.isPro = true;
+          user.proPlan = 'premium';
+          user.proUntil = verifyData.proUntil;
+          localStorage.setItem('user', JSON.stringify(user));
+          alert('✅ Test Mode: Premium status activated successfully! Premium templates are now unlocked.');
+          btn.innerHTML = '<i class="fas fa-check"></i> Unlocked';
+          btn.style.background = 'rgba(42, 224, 35, 0.4)';
+          btn.style.color = '#fff';
+        } else {
+          throw new Error(verifyData.error || 'Upgrade failed.');
+        }
+      } catch (err) {
+        alert('❌ Test Mode activation failed: ' + err.message);
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+      }
+    }
+
     function editResume() {
       document.getElementById('resultsSection').style.display = 'none';
       document.querySelector('.main-layout').style.display = 'grid';
@@ -6180,17 +6224,30 @@
     }
 
     async function downloadDocx() {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      const isPro = !!user.isPro;
+      const plan = user.proPlan || '';
       const currentTemplateId = selectedTemplate || localStorage.getItem('selectedTemplate') || 'classic';
 
       const premiumTemplates = ['hiero-royal', 'hiero-signature', 'hiero-prestige', 'hiero-elite', 'hiero-vision', 'hiero-vertex', 'hiero-premium', 'rishi'];
       const affordableTemplates = ['hiero-executive', 'hiero-nova', 'hiero-urban', 'hiero-monethon', 'template4', 'hiero-timeline', 'hiero-studio', 'hiero-retail', 'hiero-essence', 'hiero-velocity', 'hiero-legion'];
 
-      // Always require payment for paid templates on every download
+      let needsUpgrade = false;
+      let upgradeTier = null;
       if (premiumTemplates.includes(currentTemplateId)) {
-        initiateTemplateCheckout(currentTemplateId, 'premium', 'docx');
-        return;
+        if (!isPro || (plan !== 'premium' && plan !== '6months')) {
+          needsUpgrade = true;
+          upgradeTier = 'premium';
+        }
       } else if (affordableTemplates.includes(currentTemplateId)) {
-        initiateTemplateCheckout(currentTemplateId, 'affordable', 'docx');
+        if (!isPro || (plan !== 'affordable' && plan !== 'premium' && plan !== '6months')) {
+          needsUpgrade = true;
+          upgradeTier = 'affordable';
+        }
+      }
+
+      if (needsUpgrade) {
+        initiateTemplateCheckout(currentTemplateId, upgradeTier, 'docx');
         return;
       }
       try {
@@ -6259,17 +6316,30 @@
     }
 
     async function downloadResume() {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      const isPro = !!user.isPro;
+      const plan = user.proPlan || '';
       const currentTemplateId = selectedTemplate || localStorage.getItem('selectedTemplate') || 'classic';
 
       const premiumTemplates = ['hiero-royal', 'hiero-signature', 'hiero-prestige', 'hiero-elite', 'hiero-vision', 'hiero-vertex', 'hiero-premium', 'rishi'];
       const affordableTemplates = ['hiero-executive', 'hiero-nova', 'hiero-urban', 'hiero-monethon', 'template4', 'hiero-timeline', 'hiero-studio', 'hiero-retail', 'hiero-essence', 'hiero-velocity', 'hiero-legion'];
 
-      // Always require payment for paid templates on every download
+      let needsUpgrade = false;
+      let upgradeTier = null;
       if (premiumTemplates.includes(currentTemplateId)) {
-        initiateTemplateCheckout(currentTemplateId, 'premium', 'pdf');
-        return;
+        if (!isPro || (plan !== 'premium' && plan !== '6months')) {
+          needsUpgrade = true;
+          upgradeTier = 'premium';
+        }
       } else if (affordableTemplates.includes(currentTemplateId)) {
-        initiateTemplateCheckout(currentTemplateId, 'affordable', 'pdf');
+        if (!isPro || (plan !== 'affordable' && plan !== 'premium' && plan !== '6months')) {
+          needsUpgrade = true;
+          upgradeTier = 'affordable';
+        }
+      }
+
+      if (needsUpgrade) {
+        initiateTemplateCheckout(currentTemplateId, upgradeTier, 'pdf');
         return;
       }
       const btn = event.target;

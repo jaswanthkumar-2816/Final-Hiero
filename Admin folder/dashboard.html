@@ -1130,6 +1130,9 @@
       <div class="nav-item" onclick="switchTab('reviews')">
         <i class="fa-solid fa-star-half-stroke"></i> System Reviews
       </div>
+      <div class="nav-item" onclick="switchTab('payments')">
+        <i class="fa-solid fa-credit-card"></i> Razorpay Payments
+      </div>
     </nav>
     
     <div class="sidebar-footer">
@@ -1201,6 +1204,12 @@
             <i class="fas fa-star-half-stroke stat-icon"></i>
             <div class="stat-value" id="avgRating">0.0</div>
             <div class="stat-label">Average Star</div>
+          </div>
+
+          <div class="stat-card" style="border-left: 4px solid #10b981; background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 25px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative;">
+            <i class="fas fa-download stat-icon" style="color: #10b981;"></i>
+            <div class="stat-value" id="paidDownloads" style="color: #10b981; font-weight: 700;">0</div>
+            <div class="stat-label">Paid Downloads</div>
           </div>
         </div>
 
@@ -1336,6 +1345,31 @@
 
       </div>
 
+      <!-- Live Payments Tab View -->
+      <div id="paymentsView" style="display: none; width: 100%;" class="dashboard-panel">
+        
+        <div class="section" style="width: 100%;">
+          <div class="section-header">
+            <div class="section-title">
+              <i class="fa-solid fa-credit-card"></i> Razorpay Payment History
+            </div>
+            <span class="count-badge" id="paymentsCount">0 Transactions</span>
+          </div>
+          
+          <div class="filter-search-row">
+            <div class="search-input-wrapper">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" id="paymentsSearchInput" class="filter-input" placeholder="Search payments by email, contact, or ID..." oninput="filterPayments()">
+            </div>
+          </div>
+
+          <div id="paymentsContainer" class="list-container">
+            <div class="state-message">No payments recorded yet</div>
+          </div>
+        </div>
+
+      </div>
+
     </div>
   </main>
 
@@ -1358,6 +1392,7 @@
     const dataView = document.getElementById('dataView');
     const usersView = document.getElementById('usersView');
     const reviewsView = document.getElementById('reviewsView');
+    const paymentsView = document.getElementById('paymentsView');
     const errorMsg = document.getElementById('errorMessage');
     const pinError = document.getElementById('passwordError');
     const refreshBtn = document.getElementById('refreshBtn');
@@ -1442,17 +1477,19 @@
       const navItems = document.querySelectorAll('.nav-item');
       navItems.forEach(item => item.classList.remove('active'));
       
-      const index = tabName === 'dashboard' ? 0 : tabName === 'users' ? 1 : 2;
+      const index = tabName === 'dashboard' ? 0 : tabName === 'users' ? 1 : tabName === 'reviews' ? 2 : 3;
       navItems[index].classList.add('active');
       
       // Hide all panels
       dataView.classList.remove('active');
       usersView.classList.remove('active');
       reviewsView.classList.remove('active');
+      paymentsView.classList.remove('active');
       
       dataView.style.display = 'none';
       usersView.style.display = 'none';
       reviewsView.style.display = 'none';
+      paymentsView.style.display = 'none';
       
       // Show matching panel
       const titleEl = document.getElementById('currentTabTitle');
@@ -1475,6 +1512,12 @@
         titleEl.textContent = "System Reviews";
         descEl.textContent = "Live user feedback logs, system star ratings, and suggestions.";
         filterReviews();
+      } else if (tabName === 'payments') {
+        paymentsView.style.display = 'flex';
+        paymentsView.classList.add('active');
+        titleEl.textContent = "Razorpay Payments";
+        descEl.textContent = "Live list of all successful upgrades/resumes processed via Razorpay API.";
+        filterPayments();
       }
       
       addLog("info", `View switched to: ${tabName}`);
@@ -1640,6 +1683,7 @@
       document.getElementById('uniqueUsers').textContent = stats.uniqueUsersCount || stats.totalUsers || 0;
       document.getElementById('totalVisits').textContent = stats.totalVisits || 0;
       document.getElementById('avgRating').textContent = stats.averageRating ? stats.averageRating.toFixed(1) : '0.0';
+      document.getElementById('paidDownloads').textContent = stats.paidDownloadsCount || 0;
       
       // Calculate rating distribution
       const reviews = (data.reviews || []).filter(r => !r.userEmail.toLowerCase().includes(ADMIN_EMAIL.toLowerCase()));
@@ -1665,6 +1709,7 @@
       // Render lists
       renderUsersList();
       renderReviewsList();
+      renderPaymentsList();
     }
 
     // --- Lists Filtering & Rendering ---
@@ -1703,6 +1748,10 @@
                   <div class="user-stat-pill">
                     <i class="fas fa-clock"></i>
                     ${u.lastLogin ? new Date(u.lastLogin).toLocaleDateString() : 'Never'}
+                  </div>
+                  <div class="user-stat-pill" style="${u.isPro ? 'color: #10b981; font-weight: 700;' : ''}">
+                    <i class="${u.isPro ? 'fas fa-crown' : 'fas fa-user'}" style="${u.isPro ? 'color: #10b981;' : ''}"></i>
+                    ${u.isPro ? `Premium (${(u.proPlan || 'Pro').toUpperCase()})` : 'Free Tier'}
                   </div>
                 </div>
               </div>
@@ -1750,6 +1799,74 @@
             <div class="review-text">"${r.reviewText}"</div>
           </div>`;
       }).join('');
+    }
+
+    function renderPaymentsList(filteredPayments = null) {
+      const paymentsContainer = document.getElementById('paymentsContainer');
+      if (!globalData) return;
+      
+      let payments = globalData.payments || [];
+      if (filteredPayments) payments = filteredPayments;
+      
+      document.getElementById('paymentsCount').textContent = `${payments.length} Transactions`;
+
+      if (payments.length === 0) {
+        paymentsContainer.innerHTML = '<div class="state-message">No matching transactions found</div>';
+        return;
+      }
+
+      paymentsContainer.innerHTML = payments.map(p => {
+        const initials = p.email ? p.email.substring(0, 2).toUpperCase() : 'PAY';
+        const dateStr = new Date(p.createdAt).toLocaleString();
+        
+        return `
+          <div class="user-card">
+            <div class="user-card-left">
+              <div class="user-card-avatar" style="background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1.5px solid rgba(16, 185, 129, 0.2); font-weight: 700;">
+                <i class="fas fa-receipt"></i>
+              </div>
+              <div class="user-details">
+                <div class="user-display-name">Amount: ₹${p.amount}</div>
+                <div class="user-display-email">Email: ${p.email} | Contact: ${p.contact}</div>
+                <div class="user-card-stats">
+                  <div class="user-stat-pill">
+                    <i class="fas fa-key"></i> Payment ID: ${p.id}
+                  </div>
+                  <div class="user-stat-pill">
+                    <i class="fas fa-barcode"></i> Order ID: ${p.orderId}
+                  </div>
+                  <div class="user-stat-pill">
+                    <i class="fas fa-calendar-alt"></i> Date: ${dateStr}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <span class="user-active-badge active" style="background: rgba(16, 185, 129, 0.1); color: #10b981; font-weight: 700; border: none; padding: 4px 8px; border-radius: 6px;">
+              SUCCESS
+            </span>
+          </div>`;
+      }).join('');
+    }
+
+    function filterPayments() {
+      const query = document.getElementById('paymentsSearchInput').value.toLowerCase().trim();
+      if (!globalData) return;
+      
+      const allPayments = globalData.payments || [];
+      
+      if (!query) {
+        renderPaymentsList(allPayments);
+        return;
+      }
+      
+      const filtered = allPayments.filter(p => 
+        (p.email && p.email.toLowerCase().includes(query)) ||
+        (p.contact && p.contact.toLowerCase().includes(query)) ||
+        (p.id && p.id.toLowerCase().includes(query)) ||
+        (p.orderId && p.orderId.toLowerCase().includes(query))
+      );
+      
+      renderPaymentsList(filtered);
     }
 
     function filterUsers() {
@@ -1812,10 +1929,12 @@
           ? 'http://localhost:2816'
           : 'https://hiero-resume-backend.onrender.com';
           
+        const token = localStorage.getItem('token');
         const res = await fetch(`${backend}/api/admin/send-feedback-email`, {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
           },
           body: JSON.stringify({ emails })
         });
