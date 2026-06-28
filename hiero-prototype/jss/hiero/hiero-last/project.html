@@ -2782,14 +2782,21 @@
         </style></head>
         <body>${exportContent}</body></html>`;
       
-      const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
+      const blob = new Blob(['\ufeff', html], { type: 'application/octet-stream' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = RAW_NAME.replace(/[^a-z0-9]/gi, '_') + '_Documentation.doc';
+      
+      const cleanName = RAW_NAME.replace(/[^a-z0-9]/gi, '_').replace(/_+/g, '_').slice(0, 50);
+      link.download = (cleanName || 'Project') + '_Documentation.doc';
+      
       document.body.appendChild(link);
       link.click();
-      document.body.removeChild(link);
+      
+      setTimeout(() => {
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }, 100);
     }
 
     function go(id, btn) {

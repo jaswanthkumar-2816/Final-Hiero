@@ -32,7 +32,46 @@ router.post('/youtube', async (req, res) => {
 
     // Fallback if no API key
     if (!YOUTUBE_API_KEY) {
-        console.warn('[projects/youtube] YOUTUBE_API_KEY missing, using AI suggestions');
+        console.warn('[projects/youtube] YOUTUBE_API_KEY missing, trying keyless search scraper first');
+        try {
+            const query = `${projectTitle} ${tags.join(' ')} tutorial`.trim();
+            const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
+            const ytRes = await axios.get(url, {
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36'
+                }
+            });
+            const html = ytRes.data;
+            const match = html.match(/var\s+ytInitialData\s*=\s*({[\s\S]+?});/);
+            if (match) {
+                const parsed = JSON.parse(match[1]);
+                const contents = parsed.contents?.twoColumnSearchResultsRenderer?.primaryContents?.sectionListRenderer?.contents?.[0]?.itemSectionRenderer?.contents;
+                if (contents && contents.length > 0) {
+                    const scrapedVideos = [];
+                    for (const item of contents) {
+                        if (item.videoRenderer) {
+                            const v = item.videoRenderer;
+                            scrapedVideos.push({
+                                title: v.title?.runs?.[0]?.text || '',
+                                channel: v.ownerText?.runs?.[0]?.text || '',
+                                duration: v.lengthText?.simpleText || 'Tutorial',
+                                description: v.detailedMetadataSnippets?.[0]?.snippetText?.runs?.map(r => r.text).join('') || '',
+                                videoId: v.videoId,
+                                thumbnail: v.thumbnail?.thumbnails?.[v.thumbnail.thumbnails.length - 1]?.url || v.thumbnail?.thumbnails?.[0]?.url || ''
+                            });
+                        }
+                    }
+                    if (scrapedVideos.length > 0) {
+                        return res.json({ videos: scrapedVideos.slice(0, 5) });
+                    }
+                }
+            }
+        } catch (scrapeErr) {
+            console.error('[projects/youtube] Keyless search failed, falling back to Groq:', scrapeErr.message);
+        }
+
+        // Final fallback to Groq suggestions
+        console.warn('[projects/youtube] Scraper failed or returned no results, falling back to Groq suggestions');
         try {
             const messages = [
                 { role: 'system', content: 'Return valid JSON only.' },
