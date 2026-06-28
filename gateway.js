@@ -160,6 +160,26 @@ app.use('/api', reviewRouter); // Handles /api/review, /api/login-track, /api/ad
 const analysisRouter = require('./routes/analysis');
 app.use('/api/analysis', analysisRouter); // Supports /api/analysis/analyze
 
+// Projects API (Integrated)
+const projectsRouter = require('./routes/projects');
+app.use('/api/projects', projectsRouter); // Supports /youtube, /github, /docs, /chat
+
+// Scoring API (Integrated)
+const scoringRouter = require('./routes/scoring');
+app.use('/api/scoring', scoringRouter); // Supports /user-stats, /project-complete
+
+// Chat API (Integrated)
+const chatRouter = require('./routes/chat');
+app.use('/api/chat', chatRouter);
+
+// Reel API (Integrated)
+const reelRouter = require('./routes/reel');
+app.use('/api/reel', reelRouter);
+
+// Run API (Integrated)
+const runRouter = require('./routes/run');
+app.use('/api/run', runRouter);
+
 // AI Photo Formalizer API (New!)
 const aiPhotoRouter = require('./routes/ai-photo');
 app.use('/api', aiPhotoRouter); // Handles /api/generate-executive-photo
@@ -189,13 +209,14 @@ app.get('/get-started', (req, res) => {
     res.sendFile(path.join(landingDirPath, 'role-selection.html'));
 });
 
-app.get(['/mock-interview', '/mock-interview.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'coming-soon.html')));
+app.get(['/mock-interview', '/mock-interview.html'], (req, res) => res.sendFile(path.join(__dirname, 'mock-interview.html')));
+app.get(['/result', '/result.html'], (req, res) => res.sendFile(path.join(__dirname, 'result.html')));
 app.get(['/session', '/session.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'session.html')));
 app.get('/sitemap.xml', (req, res) => res.sendFile(path.join(landingDirPath, 'sitemap.xml')));
 app.get('/robots.txt', (req, res) => res.sendFile(path.join(landingDirPath, 'robots.txt')));
 
 app.get(['/learn', '/learn.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'learn.html')));
-app.get(['/solve', '/solve.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'coming-soon.html')));
+app.get(['/solve', '/solve.html'], (req, res) => res.sendFile(path.join(__dirname, 'solve.html')));
 app.get(['/resume-builder', '/resume-builder.html', '/dashboard/resume-builder'], (req, res) => {
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     res.sendFile(path.join(resumeBuilderPath, 'resume-builder.html'));
@@ -208,7 +229,7 @@ app.get(['/pricing', '/pricing.html'], (req, res) => res.sendFile(path.join(__di
 app.get(['/template-verifier', '/template-verifier.html'], (req, res) => res.sendFile(path.join(__dirname, 'template-verifier.html')));
 app.get(['/feedback', '/feedback.html'], (req, res) => res.sendFile(path.join(__dirname, 'feedback.html')));
 app.get(['/design-tester', '/design-tester.html'], (req, res) => res.sendFile(path.join(__dirname, 'design-tester.html')));
-app.get(['/project', '/project.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'coming-soon.html')));
+app.get(['/project', '/project.html'], (req, res) => res.sendFile(path.join(__dirname, 'project.html')));
 app.get(['/analysis', '/analysis.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'analysis.html')));
 app.get(['/ai-photo-formalizer', '/ai-photo-formalizer.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'ai-photo-formalizer.html')));
 

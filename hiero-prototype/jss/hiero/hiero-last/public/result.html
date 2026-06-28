@@ -1133,7 +1133,7 @@
       (data.projectSuggestions || []).slice(0, 3).forEach((p, i) => {
         const name = typeof p === 'string' ? p : (p.title || p.name);
         projectContainer.innerHTML += `
-          <a href="#" class="project-card">
+          <a href="#" class="project-card" data-project="${sanitize(name).replace(/"/g, '&quot;')}" onclick="window.location.href='project.html?name=' + encodeURIComponent(this.getAttribute('data-project')); return false;">
             <div class="proj-icon"><i class="fa-solid fa-code-merge"></i></div>
             <div class="proj-text">
               <h4>${sanitize(name)}</h4>

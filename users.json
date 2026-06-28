@@ -1,19 +1,9 @@
 [
   {
-    "id": 99,
-    "name": "Hiero Tester",
-    "email": "hiero@test.com",
-    "password": "$2a$10$mmKkIpi/E7T3E.xk6.CAQu2s0KWRa3ZVs2ASTgarhLQtFRmEDYYmC",
-    "emailVerified": true,
-    "signupMethod": "email",
-    "isPro": true,
-    "proPlan": "premium"
-  },
-  {
     "id": 1,
     "name": "Test User",
     "email": "test@example.com",
-    "password": "$2a$10$MOpr..icHp8o3FQBbbKqwepYoCblA/Wrdzx4fGZUWesGjNqkqQL0a",
+    "password": "$2a$10$0fDn686gksWhTuIm8Sj6eO5kwKwyIHIvIbPAbDSORPRr54jwgl93.",
     "emailVerified": true,
     "signupMethod": "email"
   },
@@ -24,12 +14,7 @@
     "name": "Jaswanth Kumar",
     "emailVerified": true,
     "signupMethod": "google",
-    "picture": "https://lh3.googleusercontent.com/a/ACg8ocIcKje_SWSe0k7qVBlvrwjEGH9jykcYVcL0ZJEgDS7OOzcAjnKowg=s96-c",
-    "loginCount": 1,
-    "lastLogin": "2026-06-08T17:43:07.858Z",
-    "isPro": true,
-    "proUntil": "2026-06-15T09:38:22.242Z",
-    "proPlan": "single"
+    "picture": "https://lh3.googleusercontent.com/a/ACg8ocL3ajwWFzPTsUQb4QH6Z1DuNGq9Xot5wdUnSI4Q-cRLBDrN94IDSQ=s96-c"
   },
   {
     "id": 3,
@@ -72,7 +57,9 @@
     "name": "Aravind Aariv",
     "emailVerified": true,
     "signupMethod": "google",
-    "picture": "https://lh3.googleusercontent.com/a/ACg8ocJR1LBHwFaw4Hck6lEYp6d8MjfJwlP2mRtLRlOMvjoQ2MDdFCY=s96-c"
+    "picture": "https://lh3.googleusercontent.com/a/ACg8ocIldRr9TsfqIeeHTfj6OxOCPh2oDXUI7dIt_6YsLe5jt4-2vpom=s96-c",
+    "loginCount": 10,
+    "lastLogin": "2026-06-27T12:20:33.776Z"
   },
   {
     "id": 8,
@@ -102,11 +89,86 @@
     "picture": "https://lh3.googleusercontent.com/a/ACg8ocIlRdy2BafMbeWXDRVWCI2bcPEVhg5PSKWRi5hV_GwDpEJfRQ=s96-c"
   },
   {
-    "id": 100,
-    "name": "hiero23",
-    "email": "hiero@test1.com",
-    "password": "$2a$10$letoDyzeuPK8asefyl8LN.KHbn5dRFLHMRsmDcxnQnGDW1JEjFRJq",
+    "id": 11,
+    "name": "Test User",
+    "email": "testuser@example.com",
+    "password": "$2a$10$zhYGbALrbDeVV07onKSWpeJjmaDNaQys249TbfcZ7w1lv41Yb/2Hu",
     "emailVerified": false,
     "signupMethod": "email"
+  },
+  {
+    "id": 12,
+    "name": "Test User",
+    "email": "testuser_gemini@example.com",
+    "password": "$2a$10$0fDn686gksWhTuIm8Sj6eO5kwKwyIHIvIbPAbDSORPRr54jwgl93.",
+    "emailVerified": false,
+    "signupMethod": "email"
+  },
+  {
+    "id": 13,
+    "name": "Test User Two",
+    "email": "testuser2@example.com",
+    "password": "$2a$10$xx7xJm/1sz7aEp/jTSpsyOh3OLsJjM0erKKeoHa4kuYfkGuRC8uF6",
+    "emailVerified": false,
+    "signupMethod": "email"
+  },
+  {
+    "id": 14,
+    "name": "Gemini Test User",
+    "email": "gemini_test_random_12345@gmail.com",
+    "password": "$2a$10$8TMF2IXHh6Rx3idLECo/FOPFVnyptEnRBigwK0KkvfVvhSGmCG1RS",
+    "emailVerified": false,
+    "signupMethod": "email"
+  },
+  {
+    "id": 15,
+    "name": "geminitest",
+    "email": "geminitest@example.com",
+    "password": "$2a$10$WVubRnepoTgQrfhY3sdH1.CCIEepn4BHZ8rglU3hMW4dWYIBWXmbu",
+    "emailVerified": false,
+    "signupMethod": "email"
+  },
+  {
+    "id": 16,
+    "name": "New User",
+    "email": "newuser@example.com",
+    "password": "$2a$10$2bxyZhbEIPl1Sc7uiH3S1evdqgDDW1yiGr.HUX4KMGbMHGmVihmC.",
+    "emailVerified": false,
+    "signupMethod": "email"
+  },
+  {
+    "id": 17,
+    "name": "John Doe",
+    "email": "johndoe@example.com",
+    "password": "$2a$10$ACQK/FypWQMdZCynZRKSCuRMJgzzh4nY6ypDyBxE6zu7AZriiOhVq",
+    "emailVerified": false,
+    "signupMethod": "email"
+  },
+  {
+    "id": 18,
+    "name": "John",
+    "email": "john@test.com",
+    "password": "$2a$10$dYhFMIsisqdaoEml1lr.L.x0qmwiAN0EGLW1r.L08znpS03K3oRzG",
+    "emailVerified": false,
+    "signupMethod": "email"
+  },
+  {
+    "id": 19,
+    "name": "Admin",
+    "email": "admin@hiero.com",
+    "password": "$2a$10$8anhRTLHvQBoUvidU0UEv.NIkD6VIwxJ7HHgZeFLVSzAh6Ms44EmK",
+    "emailVerified": false,
+    "signupMethod": "email"
+  },
+  {
+    "id": 20,
+    "googleId": "113687467736020890731",
+    "email": "99250040566@klu.ac.in",
+    "name": "VEJANDLA ARAVIND AARIV 2025-CSE",
+    "emailVerified": true,
+    "signupMethod": "google",
+    "picture": "https://lh3.googleusercontent.com/a/ACg8ocKOexTBx2fuJ1O1ued7TiC5z6be7NjNOqygwd4QDWcHGls0Rg=s96-c",
+    "loginCount": 6,
+    "lastLogin": "2026-06-28T08:45:49.451Z"
   }
 ]
