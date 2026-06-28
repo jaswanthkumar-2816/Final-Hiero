@@ -6,12 +6,14 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+const GROQ_API_KEY = process.env.GROQ_API_KEY;
+const groq = GROQ_API_KEY ? new Groq({ apiKey: GROQ_API_KEY }) : null;
 const MODEL = process.env.AI_MODEL || 'llama-3.3-70b-versatile';
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
 
 // ── Helper ──────────────────────────────────────────────────────────────────
 async function askGroq(messages, jsonMode = false) {
+    if (!groq) throw new Error("GROQ_API_KEY is not configured");
     const opts = {
         model: MODEL,
         messages,

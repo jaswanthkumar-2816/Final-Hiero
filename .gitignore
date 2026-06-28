@@ -41,3 +41,5 @@ test_*.js
 # Allow mock interview workspace
 !mock_interview/
 !mock_interview/**
+!UPDATE.md
+

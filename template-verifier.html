@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -186,6 +186,7 @@
       background: var(--surface2);
       border-bottom: 1px solid var(--border);
       cursor: pointer;
+      -webkit-user-select: none;
       user-select: none;
     }
 
@@ -663,6 +664,9 @@
       <button class="btn btn-green" id="runBtn" onclick="runAll()">
         <i class="fas fa-play"></i> Test All 22 Templates
       </button>
+      <button class="btn" style="background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;" onclick="sendToResumeBuilder()">
+        <i class="fas fa-paper-plane"></i> Send to Resume Builder
+      </button>
     </div>
   </div>
 
@@ -894,9 +898,14 @@
       <div class="data-panel" style="display:flex; flex-direction:column; padding:0; background:var(--surface);">
         <div class="data-panel-header" style="display:flex; justify-content:space-between; align-items:center; background:var(--surface2); padding:10px 16px; border-bottom:1px solid var(--border);">
           <span><i class="fas fa-edit" style="color:var(--blue)"></i>&nbsp; EDIT TEST DATA (JSON)</span>
-          <button class="btn btn-outline" style="padding:4px 8px; font-size:10px; color:var(--green); border-color:rgba(42,224,35,0.4);" onclick="event.stopPropagation(); syncJsonToAll('${tmpl.id}')">
-            <i class="fas fa-sync"></i> Sync to All
-          </button>
+          <div style="display:flex;gap:6px;">
+            <button class="btn btn-outline" style="padding:4px 8px; font-size:10px; color:var(--green); border-color:rgba(42,224,35,0.4);" onclick="event.stopPropagation(); syncJsonToAll('${tmpl.id}')">
+              <i class="fas fa-sync"></i> Sync to All
+            </button>
+            <button class="btn btn-outline" style="padding:4px 8px; font-size:10px; color:#a5b4fc; border-color:rgba(99,102,241,0.4);" onclick="event.stopPropagation(); sendToResumeBuilder('${tmpl.id}')">
+              <i class="fas fa-paper-plane"></i> Send to Builder
+            </button>
+          </div>
         </div>
         <textarea id="json-${tmpl.id}" style="width:100%; flex:1; min-height:480px; background:#0c0f13; color:#f1f5f9; border:none; padding:15px; font-family:var(--mono); font-size:11px; line-height:1.6; resize:vertical; outline:none; scrollbar-width:thin; scrollbar-color:#232a35 #0c0f13;"></textarea>
       </div>
@@ -1273,6 +1282,24 @@
       } catch (err) {
         alert('❌ Invalid JSON format: ' + err.message);
       }
+    }
+
+    // Send current INPUT_DATA to Resume Builder via localStorage
+    function sendToResumeBuilder(specificId) {
+      var sourceId = specificId || TEMPLATES[0].id;
+      var textarea = document.getElementById('json-' + sourceId);
+      if (!textarea) { alert('Could not find the JSON editor.'); return; }
+      var dataToSend;
+      try {
+        dataToSend = JSON.parse(textarea.value);
+      } catch (err) {
+        alert('Invalid JSON - fix it before sending:\n\n' + err.message);
+        return;
+      }
+      INPUT_DATA = dataToSend;
+      localStorage.setItem('verifierResumeData', JSON.stringify(dataToSend));
+      var ok = confirm('Data saved!\n\nClick OK to open Resume Builder in a new tab.');
+      if (ok) { window.open('/resume-builder.html', '_blank'); }
     }
 
     // ── Initialize ────────────────────────────────────────────────────────────────
