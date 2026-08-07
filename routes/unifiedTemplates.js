@@ -594,7 +594,7 @@ function normalizeData(data = {}) {
                 profilePhotoBuffer: photoBuffer
             },
             summary: getStr(data.summary, ['aboutMe', 'personalSummary', 'about', 'objective', 'professionalSummary', 'career_summary']),
-            experience: getArr(data.experience, ['workHistory', 'workExperience', 'experienceList', 'work', 'employmentHistory']).slice(0, 3).map(exp => {
+            experience: getArr(data.experience, ['workHistory', 'workExperience', 'experienceList', 'work', 'employmentHistory']).map(exp => {
                 const dates = String(exp.dates || '');
                 return {
                     jobTitle: exp.jobTitle || exp.title || exp.position || exp.role || '',
@@ -605,7 +605,7 @@ function normalizeData(data = {}) {
                     location: exp.location || ''
                 };
             }),
-            education: getArr(data.education, ['academicDetails', 'educationList', 'academics', 'academicHistory', 'edu']).slice(0, 2).map(edu => {
+            education: getArr(data.education, ['academicDetails', 'educationList', 'academics', 'academicHistory', 'edu']).map(edu => {
                 const dates = String(edu.dates || '');
                 return {
                     degree: edu.degree || edu.course || edu.title || '',
@@ -615,13 +615,13 @@ function normalizeData(data = {}) {
                     location: edu.location || ''
                 };
             }),
-            skills: getArr(data.skills, ['technicalSkills', 'professionalSkills', 'skillsList', 'coreCompetencies', 'expertise', 'techSkills']).slice(0, 12),
+            skills: getArr(data.skills, ['technicalSkills', 'professionalSkills', 'skillsList', 'coreCompetencies', 'expertise', 'techSkills']),
             skillsCategorized: (typeof data.technicalSkills === 'string' ? parseCategorizedSkills(data.technicalSkills) : null) 
                                || (typeof data.skills === 'string' ? parseCategorizedSkills(data.skills) : null),
-            softSkills: getArr(data.softSkills, ['managementSkills', 'interpersonalSkills', 'softSkillsList', 'personalSkills', 'soft_skills']).slice(0, 5),
-            certifications: getArr(data.certifications, ['certificates', 'personalCertifications', 'awards', 'certificationList']).map(c => typeof c === 'string' ? { name: c } : c).slice(0, 3),
-            achievements: getArr(data.achievements, ['honors', 'accolades', 'achievementList', 'accomplishments', 'awards']).slice(0, 3),
-            projects: getArr(data.projects, ['projectList', 'customDetails', 'personalProjects', 'portfolios']).filter(proj => !proj.heading || proj.heading.toLowerCase().includes('project')).slice(0, 2).map(proj => {
+            softSkills: getArr(data.softSkills, ['managementSkills', 'interpersonalSkills', 'softSkillsList', 'personalSkills', 'soft_skills']),
+            certifications: getArr(data.certifications, ['certificates', 'personalCertifications', 'awards', 'certificationList']).map(c => typeof c === 'string' ? { name: c } : c),
+            achievements: getArr(data.achievements, ['honors', 'accolades', 'achievementList', 'accomplishments', 'awards']),
+            projects: getArr(data.projects, ['projectList', 'customDetails', 'personalProjects', 'portfolios']).filter(proj => !proj.heading || proj.heading.toLowerCase().includes('project')).map(proj => {
                 return {
                     title: proj.title || proj.projectName || proj.name || proj.heading || '',
                     description: proj.description || proj.details || proj.content || '',
@@ -629,10 +629,10 @@ function normalizeData(data = {}) {
                     duration: proj.duration || proj.date || ''
                 };
             }),
-            hobbies: getArr(data.hobbies, ['interests', 'hobbiesList', 'activities']).slice(0, 4),
-            extraCurricular: getArr(data.extraCurricular, ['activities', 'volunteerWork']).slice(0, 2),
+            hobbies: getArr(data.hobbies, ['interests', 'hobbiesList', 'activities']),
+            extraCurricular: getArr(data.extraCurricular, ['activities', 'volunteerWork']),
             socialLinks: getArr(data.socialLinks, ['socials', 'links', 'onlinePortfolios']),
-            languages: getArr(data.languages, ['languagesKnown', 'languagesList']).slice(0, 4),
+            languages: getArr(data.languages, ['languagesKnown', 'languagesList']),
             referencesText: data.referencesText || (Array.isArray(data.references) && data.references.length > 0 ? '' : 'Available upon request'),
             references: Array.isArray(data.references) ? data.references : []
         };
@@ -3401,7 +3401,7 @@ async function renderTemplate_HieroNova(doc, rawData) {
             const exp = getSafeArray(data.experience);
             if (exp.length > 0) {
                 mSecH('EXPERIENCE');
-                exp.slice(0, 3).forEach(e => {
+                exp.forEach(e => {
                     doc.circle(mX - 25, mY + 6, 4).fill(yellow);
                     doc.fillColor(textBlack).font('Helvetica-Bold').fontSize(11.5).text((e.jobTitle || "").toUpperCase(), mX, mY, { continued: true });
                     doc.fillColor(greyText).font('Helvetica').fontSize(9.5).text(` (${e.startDate || ""} - ${e.endDate || "Present"})`);
@@ -3421,7 +3421,7 @@ async function renderTemplate_HieroNova(doc, rawData) {
             const projs = getSafeArray(data.projects);
             if (projs.length > 0) {
                 mSecH('PROJECTS');
-                projs.slice(0, 2).forEach(p => {
+                projs.forEach(p => {
                     doc.circle(mX - 25, mY + 6, 4).fill(yellow);
                     doc.fillColor('#333333').font('Helvetica').fontSize(11.5).text((p.title || p.name || "").toUpperCase(), mX, mY);
                     if (p.tech) doc.fillColor(yellow).font('Helvetica-Bold').fontSize(8.5).text(`TECH: ${p.tech.toUpperCase()}`, mX, doc.y + 1);
@@ -3441,7 +3441,7 @@ async function renderTemplate_HieroNova(doc, rawData) {
             const edu = getSafeArray(data.education);
             if (edu.length > 0) {
                 mSecH('EDUCATION');
-                edu.slice(0, 2).forEach(e => {
+                edu.forEach(e => {
                     doc.circle(mX - 25, mY + 6, 4).fill(yellow);
                     doc.fillColor(textBlack).font('Helvetica-Bold').fontSize(11).text((e.degree || "").toUpperCase(), mX, mY);
                     doc.fillColor('#444444').font('Helvetica').fontSize(10.5).text(`${e.school || ""} (${e.gradYear || ""})`, mX, doc.y + 1);

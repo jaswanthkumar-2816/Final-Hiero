@@ -1,0 +1,486 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>HIERO - Smart India Hackathon (SIH) Master Handbook</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Fira+Code:wght@400;600&display=swap');
+        
+        @page {
+            size: A4;
+            margin: 15mm 15mm 15mm 15mm;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: #1e293b;
+            line-height: 1.5;
+            font-size: 10pt;
+            background: #ffffff;
+        }
+
+        .cover-page {
+            page-break-after: always;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #311042 100%);
+            color: #ffffff;
+            margin: -15mm -15mm;
+            padding: 40px;
+        }
+
+        .cover-badge {
+            background: rgba(99, 102, 241, 0.2);
+            border: 1px solid #818cf8;
+            color: #c7d2fe;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 10pt;
+            font-weight: 600;
+            letter-spacing: 1px;
+            margin-bottom: 24px;
+            text-transform: uppercase;
+        }
+
+        .cover-title {
+            font-size: 36pt;
+            font-weight: 800;
+            margin: 0;
+            color: #ffffff;
+            letter-spacing: -1px;
+        }
+
+        .cover-subtitle {
+            font-size: 16pt;
+            color: #94a3b8;
+            margin-top: 12px;
+            margin-bottom: 40px;
+            font-weight: 400;
+        }
+
+        .cover-meta {
+            margin-top: 40px;
+            font-size: 10pt;
+            color: #cbd5e1;
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            padding-top: 20px;
+            width: 80%;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 18pt;
+            color: #0f172a;
+            font-weight: 800;
+            margin-top: 25px;
+            margin-bottom: 12px;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 4px;
+            page-break-after: avoid;
+        }
+
+        h2 {
+            font-size: 13pt;
+            color: #4338ca;
+            font-weight: 700;
+            margin-top: 18px;
+            margin-bottom: 8px;
+            page-break-after: avoid;
+        }
+
+        p, li {
+            font-size: 9.5pt;
+            color: #334155;
+        }
+
+        ul, ol {
+            margin-top: 4px;
+            margin-bottom: 10px;
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 4px;
+        }
+
+        .callout {
+            background: #f8fafc;
+            border-left: 4px solid #6366f1;
+            padding: 10px 14px;
+            margin: 12px 0;
+            border-radius: 0 6px 6px 0;
+        }
+
+        .callout-title {
+            font-weight: 700;
+            color: #4338ca;
+            font-size: 10pt;
+            margin-bottom: 4px;
+        }
+
+        .qa-card {
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            padding: 12px 15px;
+            margin-bottom: 14px;
+            page-break-inside: avoid;
+        }
+
+        .qa-num {
+            display: inline-block;
+            background: #4338ca;
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 8.5pt;
+            padding: 2px 7px;
+            border-radius: 4px;
+            margin-right: 6px;
+        }
+
+        .qa-question {
+            font-size: 10.5pt;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 6px;
+        }
+
+        .qa-answer {
+            font-size: 9pt;
+            color: #334155;
+            background: #f8fafc;
+            padding: 8px 10px;
+            border-radius: 5px;
+            border-left: 3px solid #10b981;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12px 0;
+            font-size: 9pt;
+        }
+
+        th {
+            background: #1e293b;
+            color: #ffffff;
+            text-align: left;
+            padding: 7px 9px;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 7px 9px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        code {
+            font-family: 'Fira Code', monospace;
+            background: #f1f5f9;
+            color: #0f172a;
+            padding: 1px 4px;
+            border-radius: 3px;
+            font-size: 8.5pt;
+        }
+
+        .page-break {
+            page-break-after: always;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- COVER PAGE -->
+    <div class="cover-page">
+        <div class="cover-badge">Smart India Hackathon (SIH) 2026 Master Handbook</div>
+        <h1 class="cover-title">HIERO</h1>
+        <div class="cover-subtitle">AI-Powered Career Readiness & Smart Resume Ecosystem</div>
+        <p style="color: #cbd5e1; max-width: 600px; font-size: 11pt;">
+            Comprehensive Technical Guide, System Architecture, 6-Member Team Roles, Score Math Formulas, and 15 Master Jury Q&As for SIH Finals.
+        </p>
+        <div class="cover-meta">
+            <p><strong>Prepared for:</strong> 6-Member SIH Team</p>
+            <p><strong>Alignment:</strong> Skill India | Digital India | NEP 2020</p>
+            <p><strong>Architecture:</strong> Express Unified Gateway + Groq/OpenRouter AI + MongoDB Atlas + Puppeteer PDF</p>
+        </div>
+    </div>
+
+    <!-- CHAPTER 1: SIH OVERVIEW & PROBLEM STATEMENT -->
+    <h1>1. Smart India Hackathon & Problem Statement</h1>
+    
+    <div class="callout">
+        <div class="callout-title">🇮🇳 Core National Impact & Problem Statement</div>
+        <p>Over 80% of Indian engineering and degree graduates face severe employability challenges due to a gap between academic curricula and evolving industry Job Descriptions (JDs). Students in Tier-2 & Tier-3 cities lack affordable career counseling, regional language guidance, and ATS resume formatting expertise.</p>
+    </div>
+
+    <h2>Government Initiative Alignment</h2>
+    <ul>
+        <li><strong>Skill India Initiative:</strong> Identifies individual skill gaps and maps customized learning paths.</li>
+        <li><strong>National Education Policy (NEP 2020):</strong> Promotes regional language learning by providing tutorial video roadmaps in <strong>5 Indian languages</strong> (English, Hindi, Telugu, Tamil, Kannada).</li>
+        <li><strong>Digital India:</strong> Democratizes top-tier placement tools to any student with internet access at zero cost.</li>
+    </ul>
+
+    <!-- CHAPTER 2: SOLUTION OVERVIEW & PITCH DECKS -->
+    <h1>2. Solution Overview & Pitch Scripts</h1>
+
+    <h2>What is HIERO?</h2>
+    <p>HIERO is an end-to-end AI career companion that parses resumes against target job descriptions, calculates a 0-100 fit score, generates localized regional learning roadmaps, builds 22+ ATS-ready resumes, and conducts interactive AI voice mock interviews.</p>
+
+    <div class="qa-card">
+        <div class="qa-question">⏱️ 30-Second Elevator Pitch</div>
+        <div class="qa-answer">
+            "HIERO is an AI-powered career readiness ecosystem built for Indian students. It solves the employability gap by analyzing resume-to-JD fit, generating localized upskilling roadmaps in 5 regional languages (English, Hindi, Telugu, Tamil, Kannada), crafting 22+ ATS-friendly resumes, and conducting interactive AI voice mock interviews."
+        </div>
+    </div>
+
+    <div class="qa-card">
+        <div class="qa-question">⏱️ 3-Minute SIH Jury Pitch Script</div>
+        <div class="qa-answer">
+            <strong>Minute 1 (Problem & Pitch):</strong> "Respected Judges, 80%+ of Indian graduates fail initial placement rounds due to skill gaps and ATS rejection. Tier-2/3 students lack mentorship. HIERO bridges this gap."<br><br>
+            <strong>Minute 2 (Live Demonstration):</strong> "We upload a resume + JD. HIERO calculates a 0-100 score, extracts missing skills, and auto-curates YouTube video roadmaps in 5 regional languages. In our Resume Builder, students can auto-fill data, pick from 22 ATS templates, and export high-fidelity PDFs."<br><br>
+            <strong>Minute 3 (AI Voice & Tech Architecture):</strong> "Students practice role-specific interviews with our AI Voice Mock Interviewer. Our unified Express gateway connects Groq Llama-3.3-70B AI, MongoDB Atlas, and Puppeteer PDF rendering."
+        </div>
+    </div>
+
+    <div class="page-break"></div>
+
+    <!-- CHAPTER 3: TECHNICAL ARCHITECTURE -->
+    <h1>3. Technical Architecture & Tech Stack</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Layer</th>
+                <th>Technology</th>
+                <th>Justification / Role</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Frontend</strong></td>
+                <td>HTML5, Vanilla JS (ES6+), Glassmorphism CSS3</td>
+                <td>Ultra-fast page loads, dark-mode neon theme, responsive UI without heavy framework bloat.</td>
+            </tr>
+            <tr>
+                <td><strong>Server Gateway</strong></td>
+                <td>Node.js & Express.js (<code>gateway.js</code>)</td>
+                <td>Unified Gateway architecture running on Port 2816; routes API requests, serves static files, handles CORS & compression.</td>
+            </tr>
+            <tr>
+                <td><strong>AI Engine</strong></td>
+                <td>Groq SDK (<code>llama-3.3-70b</code>) & OpenRouter (<code>gpt-4o-mini</code>)</td>
+                <td>Sub-second LLM resume parsing, gap identification, and coding problem generation with fallback rules.</td>
+            </tr>
+            <tr>
+                <td><strong>OCR Engine</strong></td>
+                <td>Tesseract.js</td>
+                <td>Extracts text from scanned/image-based PDF resumes when text content is under 50 chars.</td>
+            </tr>
+            <tr>
+                <td><strong>Database</strong></td>
+                <td>MongoDB Atlas & Mongoose ODM</td>
+                <td>Cloud NoSQL database storing user profiles, ratings, interview logs, and tracking data.</td>
+            </tr>
+            <tr>
+                <td><strong>PDF Engine</strong></td>
+                <td>Puppeteer & PDFKit</td>
+                <td>Renders 22+ ATS resume templates inside headless Chromium for pixel-perfect PDF export.</td>
+            </tr>
+            <tr>
+                <td><strong>Voice & Audio</strong></td>
+                <td>Web Speech API (STT & TTS)</td>
+                <td>Real-time speech recognition and text-to-speech synthesis for AI mock interviews.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- CHAPTER 4: SCORE CALCULATION MATHEMATICAL FORMULA -->
+    <h1>4. Score Calculation Formulas & Parameters</h1>
+
+    <h2>1. Overall Match Score Formula (0 - 100)</h2>
+    <p><code>Final Score = Min(100, SkillsPts + ProjPts + ExpPts + EduPts + BonusPts)</code></p>
+    <ul>
+        <li><strong>Skills Match (40 Pts):</strong> <code>(Matched Skills / Total JD Skills) * 40</code></li>
+        <li><strong>Projects (25 Pts):</strong> Base 15 Pts for having projects + 10 Pts for JD skill alignment.</li>
+        <li><strong>Work Experience (15 Pts):</strong> Base 9 Pts + 2 Pts per year of experience (Max +6 Pts).</li>
+        <li><strong>Education (9 Pts):</strong> Presence of recognized degree (B.Tech, M.Tech, B.Sc, Diploma).</li>
+        <li><strong>Extra Skill Bonus (10 Pts):</strong> +1.5 Pts per extra technical skill beyond JD demands.</li>
+    </ul>
+
+    <h2>2. ATS Compatibility Score Formula (0 - 100)</h2>
+    <p><code>ATS Score = (0.30 * Keywords) + (0.20 * Structure) + (0.20 * Readability) + (0.20 * Formatting) + (0.10 * Action Verbs)</code></p>
+    <ul>
+        <li><strong>Structure (20%):</strong> Detects standard headers (Experience, Education, Skills, Projects, Summary).</li>
+        <li><strong>Action Verbs (10%):</strong> Detects power verbs (Built, Developed, Optimized, Architected, Automated).</li>
+        <li><strong>Quantifiable Impact (20%):</strong> Scans for metrics (%, $, 500+ users, 2x growth).</li>
+        <li><strong>Formatting (20%):</strong> Word count range (300-800 words = 95 Pts optimal).</li>
+        <li><strong>Readability (20%):</strong> Average words per line (8-20 words/line = 92 Pts).</li>
+    </ul>
+
+    <!-- CHAPTER 5: 6-MEMBER TEAM ROLES -->
+    <h1>5. 6-Member Team Roles & Responsibilities</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Member</th>
+                <th>SIH Role</th>
+                <th>Primary Focus During Evaluation</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Member 1</strong></td>
+                <td>Team Lead & Pitcher</td>
+                <td>Problem statement, Skill India alignment, opening/closing pitch, judge transition control.</td>
+            </tr>
+            <tr>
+                <td><strong>Member 2</strong></td>
+                <td>Live Demo Driver</td>
+                <td>Operates laptop live; uploads PDF, switches templates, triggers AI voice mock interview.</td>
+            </tr>
+            <tr>
+                <td><strong>Member 3</strong></td>
+                <td>AI & Backend Lead</td>
+                <td>Explains Groq/OpenRouter LLM prompts, hybrid parsing, Express gateway routing, fallback logic.</td>
+            </tr>
+            <tr>
+                <td><strong>Member 4</strong></td>
+                <td>Database & Security Lead</td>
+                <td>MongoDB Atlas schemas, OAuth 2.0 (Google/GitHub), JWT security, user data privacy.</td>
+            </tr>
+            <tr>
+                <td><strong>Member 5</strong></td>
+                <td>UI/UX & Multilingual Lead</td>
+                <td>22+ ATS templates, 5-language playlist builder (Hindi, Telugu, Tamil, Kannada, English), UI styling.</td>
+            </tr>
+            <tr>
+                <td><strong>Member 6</strong></td>
+                <td>Impact & Future Scope Lead</td>
+                <td>Scalability, Tier-2/3 deployment strategy, government partnerships, future mobile app roadmap.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="page-break"></div>
+
+    <!-- CHAPTER 6: TOP 15 MASTER SIH JURY QUESTIONS & ANSWERS -->
+    <h1>6. Top 15 SIH Jury Questions & Answers</h1>
+
+    <div class="qa-card">
+        <div class="qa-question"><span class="qa-num">Q1</span> What national problem does HIERO solve for Smart India Hackathon?</div>
+        <div class="qa-answer">
+            <strong>Answer:</strong> HIERO bridges the employability gap for Indian students by evaluating skill alignment against real-world Job Descriptions. It directly supports Skill India, Digital India, and NEP 2020 by providing free, localized upskilling roadmaps in 5 regional languages (English, Hindi, Telugu, Tamil, Kannada) for students in Tier-2 and Tier-3 cities.
+        </div>
+    </div>
+
+    <div class="qa-card">
+        <div class="qa-question"><span class="qa-num">Q2</span> How is HIERO different from ChatGPT or generic resume builders?</div>
+        <div class="qa-answer">
+            <strong>Answer:</strong> ChatGPT only provides generic text advice without verified resource links or ATS PDF rendering. Generic resume builders only format text without skill gap analysis. HIERO is an end-to-end pipeline: it extracts text from PDFs, calculates a mathematical match score, curates real 5-language YouTube video playlists and LeetCode problem links, and compiles 22 ATS-optimized PDF templates.
+        </div>
+    </div>
+
+    <div class="qa-card">
+        <div class="qa-question"><span class="qa-num">Q3</span> How do you extract text from uploaded resumes (including scanned PDFs)?</div>
+        <div class="qa-answer">
+            <strong>Answer:</strong> We use a hybrid extraction engine. Vector PDFs are parsed using <code>pdf-parse</code>, and DOCX files are extracted via <code>mammoth.js</code>. If the extracted text has fewer than 50 characters (indicating a scanned image-based PDF), our system automatically triggers <strong>Tesseract.js OCR</strong> to extract image text accurately.
+        </div>
+    </div>
+
+    <div class="qa-card">
+        <div class="qa-question"><span class="qa-num">Q4</span> How is the Overall Match Score calculated mathematically?</div>
+        <div class="qa-answer">
+            <strong>Answer:</strong> The score (0-100%) is calculated across 5 parameters: Technical Skill Overlap (Max 40 Pts), Project Skill Alignment (Max 25 Pts), Work Experience & Years (Max 15 Pts), Degree Qualification (Max 9 Pts), and Extra Skill Bonus (Max 10 Pts).
+        </div>
+    </div>
+
+    <div class="qa-card">
+        <div class="qa-question"><span class="qa-num">Q5</span> How does the 5-language regional tutorial generator avoid hallucinations?</div>
+        <div class="qa-answer">
+            <strong>Answer:</strong> We do not rely on LLMs to generate video URLs. Instead, our backend queries the YouTube Data API v3 dynamically using skill keywords combined with regional language parameters (e.g., <em>"SQL tutorial in Telugu"</em>, <em>"React tutorial in Hindi"</em>), guaranteeing 100% real, active video tutorials.
+        </div>
+    </div>
+
+    <div class="qa-card">
+        <div class="qa-question"><span class="qa-num">Q6</span> Which AI models power HIERO, and what happens if the AI API fails?</div>
+        <div class="qa-answer">
+            <strong>Answer:</strong> We use Groq SDK (<code>llama-3.3-70b</code>) as primary for sub-second parsing and OpenRouter (<code>gpt-4o-mini</code>) as secondary. If internet or API limits occur, our custom regex & pattern-matching parser (<code>parseResumeTextRuleBased</code>) takes over seamlessly with zero system downtime.
+        </div>
+    </div>
+
+    <div class="qa-card">
+        <div class="qa-question"><span class="qa-num">Q7</span> How does the AI Voice Mock Interview system work technically?</div>
+        <div class="qa-answer">
+            <strong>Answer:</strong> The frontend uses the browser's native <strong>Web Speech API</strong> for Speech-to-Text (STT) and Text-to-Speech (TTS). Candidate spoken answers are sent to our Express backend, evaluated against job role criteria by Groq AI, and returned with immediate score ratings and constructive feedback.
+        </div>
+    </div>
+
+    <div class="qa-card">
+        <div class="qa-question"><span class="qa-num">Q8</span> How does the Resume Builder render and export 22+ ATS templates as PDF?</div>
+        <div class="qa-answer">
+            <strong>Answer:</strong> The frontend dynamically renders live HTML/CSS resume templates. When the user clicks "Download PDF", our backend uses <strong>Puppeteer</strong> (headless Chrome) to compile the DOM into a high-resolution, vector PDF document.
+        </div>
+    </div>
+
+    <div class="qa-card">
+        <div class="qa-question"><span class="qa-num">Q9</span> Why did you build a Unified Gateway (<code>gateway.js</code>) instead of separate microservices?</div>
+        <div class="qa-answer">
+            <strong>Answer:</strong> A single Express Gateway (port 2816) eliminates cross-port CORS issues, reduces server memory footprint, simplifies cloud deployment (Render/Railway), and centralizes authentication and static file serving.
+        </div>
+    </div>
+
+    <div class="qa-card">
+        <div class="qa-question"><span class="qa-num">Q10</span> How does MongoDB Atlas store and organize your application data?</div>
+        <div class="qa-answer">
+            <strong>Answer:</strong> MongoDB Atlas stores schemas for User Profiles, Auth Credentials, Saved Resumes, Review Ratings, and Analytics Logs using Mongoose ODM with indexed fields for fast data retrieval.
+        </div>
+    </div>
+
+    <div class="qa-card">
+        <div class="qa-question"><span class="qa-num">Q11</span> How do you handle user authentication and session security?</div>
+        <div class="qa-answer">
+            <strong>Answer:</strong> We implement Passport.js supporting <strong>Google OAuth 2.0</strong> and <strong>GitHub OAuth</strong>, along with traditional email/password sign-in hashed using <code>bcryptjs</code> and stateless <strong>JSON Web Tokens (JWT)</strong>.
+        </div>
+    </div>
+
+    <div class="qa-card">
+        <div class="qa-question"><span class="qa-num">Q12</span> How will HIERO scale to millions of Indian college students?</div>
+        <div class="qa-answer">
+            <strong>Answer:</strong> HIERO's lightweight Node.js gateway is stateless and horizontal-scaling ready. Static assets are compressed via gzip/brotli, and database queries are indexed on MongoDB Atlas, allowing thousands of concurrent users per node instance.
+        </div>
+    </div>
+
+    <div class="qa-card">
+        <div class="qa-question"><span class="qa-num">Q13</span> What is your deployment architecture and cost model?</div>
+        <div class="qa-answer">
+            <strong>Answer:</strong> HIERO is deployed on Render/Cloud VM using Docker containers. Resource curation relies on open YouTube and public coding APIs, keeping operational costs extremely low (~0.01 per user analysis).
+        </div>
+    </div>
+
+    <div class="qa-card">
+        <div class="qa-question"><span class="qa-num">Q14</span> How can state government placement cells or universities adopt HIERO?</div>
+        <div class="qa-answer">
+            <strong>Answer:</strong> HIERO can be white-labeled and integrated into university placement portals via REST APIs, allowing institutional placement officers to view aggregated skill analytics across entire graduating batches.
+        </div>
+    </div>
+
+    <div class="qa-card">
+        <div class="qa-question"><span class="qa-num">Q15</span> What is the future roadmap for HIERO post-hackathon?</div>
+        <div class="qa-answer">
+            <strong>Answer:</strong> Our roadmap includes developing a native React Native mobile app, expanding regional support to 10+ Indian languages, integrating automated GitHub portfolio verification, and building enterprise recruiter search dashboards.
+        </div>
+    </div>
+
+</body>
+</html>
+    

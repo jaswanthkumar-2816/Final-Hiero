@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 const { generateWordHTML } = require('./wordTemplates');
+const { renderResumeWithPagination } = require('./renderResume');
 
 let sharedBrowserPromise = null;
 
@@ -186,22 +187,7 @@ async function generatePuppeteerPDF(data, templateId) {
     }
 
     try {
-        await page.emulateMediaType('screen');
-        await page.setContent(html, { waitUntil: 'domcontentloaded', timeout: 20000 });
-        await new Promise(r => setTimeout(r, 800));
-        await page.evaluateHandle('document.fonts.ready');
-        
-        const pdfBuffer = await page.pdf({
-            format: 'A4',
-            printBackground: true,
-            timeout: 20000,
-            margin: {
-                top: '0px',
-                right: '0px',
-                bottom: '0px',
-                left: '0px'
-            }
-        });
+        const pdfBuffer = await renderResumeWithPagination(page, html);
 
         await page.close().catch(() => {});
         if (isDedicatedBrowser) {
@@ -228,22 +214,7 @@ async function generatePuppeteerPDF(data, templateId) {
                 recoveryBrowser = await launchFreshBrowser();
                 recoveryPage = await recoveryBrowser.newPage();
                 
-                await recoveryPage.emulateMediaType('screen');
-                await recoveryPage.setContent(html, { waitUntil: 'domcontentloaded', timeout: 25000 });
-                await new Promise(r => setTimeout(r, 800));
-                await recoveryPage.evaluateHandle('document.fonts.ready');
-                
-                const recoveredBuffer = await recoveryPage.pdf({
-                    format: 'A4',
-                    printBackground: true,
-                    timeout: 25000,
-                    margin: {
-                        top: '0px',
-                        right: '0px',
-                        bottom: '0px',
-                        left: '0px'
-                    }
-                });
+                const recoveredBuffer = await renderResumeWithPagination(recoveryPage, html);
 
                 await recoveryPage.close().catch(() => {});
                 await recoveryBrowser.close().catch(() => {});

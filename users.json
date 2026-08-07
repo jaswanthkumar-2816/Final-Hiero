@@ -28,7 +28,7 @@
     "loginCount": 1,
     "lastLogin": "2026-06-08T17:43:07.858Z",
     "isPro": true,
-    "proUntil": "2026-09-22T06:07:06.990Z",
+    "proUntil": "2026-10-04T19:22:55.873Z",
     "proPlan": "premium"
   },
   {
@@ -129,5 +129,13 @@
     "picture": "https://lh3.googleusercontent.com/a/ACg8ocKOexTBx2fuJ1O1ued7TiC5z6be7NjNOqygwd4QDWcHGls0Rg=s96-c",
     "loginCount": 6,
     "lastLogin": "2026-06-28T08:45:49.451Z"
+  },
+  {
+    "id": 100,
+    "name": "Jaswanth",
+    "email": "jashu@gmail.com",
+    "password": "$2a$10$jpNBL8yBZGcUoqkBe1a5d.XbWdYtg7YLNJ9ER5HjMJfH6o5i5nOly",
+    "emailVerified": false,
+    "signupMethod": "email"
   }
 ]

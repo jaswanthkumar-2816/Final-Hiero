@@ -5712,7 +5712,12 @@
 
       // Personal
       data.personalInfo.fullName = document.getElementById('fullName').value;
-      data.personalInfo.headline = document.getElementById('headline')?.value || '';
+      
+      // Fix for duplicate headline IDs: get the first one that has a value
+      const headlines = Array.from(document.querySelectorAll('#headline'));
+      const activeHeadline = headlines.find(h => h.value?.trim()) || headlines[0];
+      data.personalInfo.headline = activeHeadline?.value?.trim() || '';
+      
       data.personalInfo.email = document.getElementById('email').value;
       data.personalInfo.phone = document.getElementById('phone').value;
 
@@ -5750,15 +5755,16 @@
       const projectsSection = document.getElementById('section-projects');
       if (projectsSection && !projectsSection.classList.contains('skipped')) {
         data.projects = [];
-        document.querySelectorAll('input[name="projectName[]"]').forEach((el, i) => {
-          if (el.value.trim()) {
+        document.querySelectorAll('.project-item').forEach(item => {
+          const nameInput = item.querySelector('input[name="projectName[]"]');
+          if (nameInput && nameInput.value.trim()) {
             const project = {
-              name: el.value.trim(),
-              technologies: document.querySelectorAll('input[name="projectTech[]"]')[i]?.value || '',
-              duration: document.querySelectorAll('input[name="projectDuration[]"]')[i]?.value || '',
-              description: document.querySelectorAll('textarea[name="projectDescription[]"]')[i]?.value || '',
-              link: document.querySelectorAll('input[name="projectLink[]"]')[i]?.value || '',
-              achievement: document.querySelectorAll('input[name="projectAchievement[]"]')[i]?.value || ''
+              name: nameInput.value.trim(),
+              technologies: item.querySelector('input[name="projectTech[]"]')?.value?.trim() || '',
+              duration: item.querySelector('input[name="projectDuration[]"]')?.value?.trim() || '',
+              description: item.querySelector('textarea[name="projectDescription[]"]')?.value?.trim() || '',
+              link: item.querySelector('input[name="projectLink[]"]')?.value?.trim() || '',
+              achievement: item.querySelector('input[name="projectAchievement[]"]')?.value?.trim() || ''
             };
             data.projects.push(project);
           }

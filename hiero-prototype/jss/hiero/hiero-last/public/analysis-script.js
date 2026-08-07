@@ -113,25 +113,57 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const result = await response.json();
+        // Unwrap backend's { success: true, data: {...} } wrapper if present
+        const raw = (result && result.data) ? result.data : result;
 
         // Finish animation before redirect
-        await finishLoadingAnimation(animationState, result.score || 0);
+        await finishLoadingAnimation(animationState, raw.score || result.score || 0);
+
+        const rawMatched = Array.isArray(raw.matchedSkills)  ? raw.matchedSkills
+                         : Array.isArray(raw.matched)        ? raw.matched
+                         : Array.isArray(raw.presentSkills)  ? raw.presentSkills
+                         : [];
+
+        const rawMissing = Array.isArray(raw.missingSkills) ? raw.missingSkills
+                         : Array.isArray(raw.missing)        ? raw.missing
+                         : [];
+
+        const rawResume  = Array.isArray(raw.resumeSkills) ? raw.resumeSkills : [];
+        const rawJD      = Array.isArray(raw.jdSkills)     ? raw.jdSkills     : [];
+
+        // Extra skills = skills in resume NOT found in JD (bonus skills)
+        const matchedSet = new Set(rawMatched.map(s => s.toLowerCase().trim()));
+        const jdSet      = new Set(rawJD.map(s => s.toLowerCase().trim()));
+        const computedExtra = rawResume.filter(s =>
+          s && !jdSet.has(s.toLowerCase().trim()) && !matchedSet.has(s.toLowerCase().trim())
+        );
+        const rawExtra = Array.isArray(raw.extraSkills) && raw.extraSkills.length > 0
+          ? raw.extraSkills : computedExtra;
 
         const transformedData = {
-          score: Math.min(Math.max(parseInt(result.score) || 0, 0), 100),
-          domain: result.domain || 'it',
-          jdSkills: Array.isArray(result.jdSkills) ? result.jdSkills : [],
-          resumeSkills: Array.isArray(result.resumeSkills) ? result.resumeSkills : [],
-          matchedSkills: Array.isArray(result.matchedSkills) ? result.matchedSkills : (Array.isArray(result.matched) ? result.matched : []),
-          missingSkills: Array.isArray(result.missingSkills) ? result.missingSkills : (Array.isArray(result.missing) ? result.missing : []),
-          extraSkills: Array.isArray(result.extraSkills) ? result.extraSkills : [],
-          skillToLearnFirst: (result.skillToLearnFirst) ? result.skillToLearnFirst : ((result.missingSkills && result.missingSkills.length > 0) ? result.missingSkills[0] : 'JavaScript'),
-          projectSuggestions: generateProjectSuggestions(result)
+          score:              Math.min(Math.max(parseInt(raw.score) || 0, 0), 100),
+          domain:             raw.domain || 'it',
+          jdSkills:           rawJD,
+          resumeSkills:       rawResume,
+          matchedSkills:      rawMatched,
+          missingSkills:      rawMissing,
+          extraSkills:        rawExtra,
+          skillToLearnFirst:  raw.skillToLearnFirst || rawMissing[0] || 'JavaScript',
+          projectSuggestions: generateProjectSuggestions(raw),
+          atsScore:           raw.atsScore        || null,
+          atsKeywords:        raw.atsKeywords     || null,
+          atsFormatting:      raw.atsFormatting   || null,
+          atsReadability:     raw.atsReadability  || null,
+          atsStructure:       raw.atsStructure    || null,
+          atsActionVerbs:     raw.atsActionVerbs  || null,
+          experience:         raw.experience      || [],
+          education:          raw.education       || [],
+          summary:            raw.summary         || null,
         };
 
-        const storageData = { success: true, data: transformedData, rawData: result, learningPlan: result.learningPlan || [], timestamp: new Date().toISOString() };
+        const storageData = { success: true, data: transformedData, rawData: raw, learningPlan: raw.learningPlan || [], timestamp: new Date().toISOString() };
         localStorage.setItem('analysisResult', JSON.stringify(storageData));
-        localStorage.setItem('hieroLearningPlan', JSON.stringify(result.learningPlan || []));
+        localStorage.setItem('hieroLearningPlan', JSON.stringify(raw.learningPlan || []));
 
         setTimeout(() => { window.location.href = 'result.html'; }, 800);
       } catch (error) {

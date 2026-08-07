@@ -147,7 +147,7 @@ function parseResumeTextRuleBased(rawText) {
     });
 
     data.summary = sections.summary.join(' ').slice(0, 1000).trim();
-    if (sections.skills.length > 0) data.technicalSkills = sections.skills.map(s => s.replace(/^[\s•\-\+\*#>]+\s*/, '').trim()).join(', ');
+    if (sections.skills.length > 0) data.technicalSkills = sections.skills.map(s => s.replace(/^[\s•\-\+\*#>]+\s*/, '').trim()).join('\n');
     data.achievements = sections.achievements.join('\n').trim();
     data.hobbies = sections.hobbies.join(', ').trim();
     data.languages = sections.languages.map(s => s.replace(/^[\s•\-\+\*#>]+\s*/, '').trim()).filter(s => s.length > 1);
@@ -370,3 +370,5 @@ router.post('/import', (req, res) => {
 });
 
 module.exports = router;
+module.exports.parseResumeText = parseResumeText;
+module.exports.parseResumeTextRuleBased = parseResumeTextRuleBased;

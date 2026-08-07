@@ -25,6 +25,95 @@ function splitSkills(str) {
     return result;
 }
 
+function parseCategorizedSkills(skillsInput) {
+    if (!skillsInput) return [];
+
+    if (Array.isArray(skillsInput)) {
+        const categories = [];
+        skillsInput.forEach(item => {
+            if (typeof item === 'string') {
+                categories.push(...parseCategorizedSkills(item));
+            } else if (typeof item === 'object' && item !== null) {
+                const cat = item.category || item.label || item.name || item.heading || item.title || '';
+                const val = Array.isArray(item.skills || item.items || item.value)
+                    ? (item.skills || item.items || item.value).join(', ')
+                    : String(item.skills || item.items || item.value || item.content || '');
+                if (val) categories.push({ category: cat, value: val });
+            }
+        });
+        if (categories.length > 0) return categories;
+    }
+
+    if (typeof skillsInput === 'object' && skillsInput !== null && !Array.isArray(skillsInput)) {
+        const categories = [];
+        for (const [cat, val] of Object.entries(skillsInput)) {
+            const strVal = Array.isArray(val) ? val.join(', ') : String(val);
+            if (strVal) categories.push({ category: cat, value: strVal });
+        }
+        if (categories.length > 0) return categories;
+    }
+
+    if (typeof skillsInput === 'string') {
+        const str = skillsInput.trim();
+        if (!str) return [];
+
+        if (str.includes(':')) {
+            const lines = str.split(/[\n;]+/).map(l => l.trim()).filter(Boolean);
+            const categories = [];
+
+            lines.forEach(line => {
+                const colonIdx = line.indexOf(':');
+                if (colonIdx > 0 && colonIdx < line.length - 1) {
+                    const cat = line.substring(0, colonIdx).replace(/^[\*\-\•\–\►]\s*/, '').trim();
+                    const val = line.substring(colonIdx + 1).replace(/^[\*\-\•\–\►]\s*/, '').trim();
+                    if (cat && val) {
+                        categories.push({ category: cat, value: val });
+                    }
+                } else {
+                    const clean = line.replace(/^[\*\-\•\–\►]\s*/, '').trim();
+                    if (clean) {
+                        if (categories.length > 0) {
+                            categories.push({ category: 'Other', value: clean });
+                        } else {
+                            categories.push({ category: '', value: clean });
+                        }
+                    }
+                }
+            });
+
+            if (categories.length > 0) return categories;
+        }
+    }
+
+    const flatStr = typeof skillsInput === 'string' ? skillsInput : String(skillsInput);
+    return [{ category: '', value: flatStr }];
+}
+
+function renderCategorizedSkillsHTML(skillsInput, options = {}) {
+    const {
+        labelColor = '',
+        valueColor = '',
+        fontSize = '9.5pt',
+        marginBottom = '4pt',
+        bulletPrefix = ''
+    } = options;
+
+    const categories = parseCategorizedSkills(skillsInput);
+    if (categories.length === 0) return '';
+
+    return categories.map(c => {
+        const labelHtml = c.category 
+            ? `<strong style="${labelColor ? 'color:' + labelColor + ';' : ''} font-weight: bold;">${c.category}:</strong> ` 
+            : '';
+        const prefixHtml = bulletPrefix ? `<span style="margin-right: 4pt;">${bulletPrefix}</span>` : '';
+        return `
+            <div style="font-size: ${fontSize}; margin-bottom: ${marginBottom}; line-height: 1.35; ${valueColor ? 'color:' + valueColor + ';' : ''}">
+                ${prefixHtml}${labelHtml}${c.value}
+            </div>
+        `;
+    }).join('');
+}
+
 function normalizeWordData(data) {
     const {
         personalInfo = {},
@@ -39,7 +128,18 @@ function normalizeWordData(data) {
     } else if (!Array.isArray(projects)) {
         projects = [];
     }
-    let technicalSkills = data.skills || data.technicalSkills || '';
+    let rawSkills = data.skills || data.technicalSkills || '';
+    let categorizedSkills = parseCategorizedSkills(rawSkills);
+    let technicalSkills = '';
+
+    if (categorizedSkills.some(c => c.category)) {
+        technicalSkills = categorizedSkills.map(c => c.category ? `${c.category}: ${c.value}` : c.value).join('\n');
+    } else if (Array.isArray(rawSkills)) {
+        technicalSkills = rawSkills.map(s => typeof s === 'object' ? (s.name || s.skill || '') : s).join(', ');
+    } else if (typeof rawSkills === 'string') {
+        technicalSkills = rawSkills;
+    }
+
     let softSkills = data.softSkills || '';
     let achievements = data.achievements || '';
     let certifications = data.certifications || '';
@@ -47,53 +147,49 @@ function normalizeWordData(data) {
     let hobbies = data.hobbies || data.interests || '';
     let publications = data.publications || '';
     let references = data.references || [];
-
-    // Slice all arrays to guarantee strict single-page parity
-    if (Array.isArray(experience)) experience = experience.slice(0, 3);
-    if (Array.isArray(education)) education = education.slice(0, 2);
-    if (Array.isArray(projects)) projects = projects.slice(0, 2);
-    if (Array.isArray(references)) references = references.slice(0, 2);
-
-    if (Array.isArray(technicalSkills)) {
-        technicalSkills = technicalSkills.slice(0, 15).map(s => typeof s === 'object' ? (s.name || s.skill || '') : s).join(', ');
-    } else if (typeof technicalSkills === 'string') {
-        technicalSkills = splitSkills(technicalSkills).slice(0, 15).join(', ');
-    }
+    let extraCurricular = data.extraCurricular || data.activities || '';
+    let additionalInfo = data.additionalInfo || '';
 
     if (Array.isArray(softSkills)) {
-        softSkills = softSkills.slice(0, 8).join(', ');
+        softSkills = softSkills.join(', ');
     } else if (typeof softSkills === 'string') {
-        softSkills = splitSkills(softSkills).slice(0, 8).join(', ');
+        softSkills = splitSkills(softSkills).join(', ');
     }
 
     if (Array.isArray(achievements)) {
-        achievements = achievements.slice(0, 4).join('; ');
+        achievements = achievements.join('; ');
     } else if (typeof achievements === 'string') {
-        achievements = splitSkills(achievements).slice(0, 4).join('; ');
+        achievements = splitSkills(achievements).join('; ');
     }
 
     if (Array.isArray(certifications)) {
-        certifications = certifications.slice(0, 4).map(c => typeof c === 'object' ? (c.name || c.title || '') : c).join(', ');
+        certifications = certifications.map(c => typeof c === 'object' ? (c.name || c.title || '') : c).join(', ');
     } else if (typeof certifications === 'string') {
-        certifications = splitSkills(certifications).slice(0, 4).join(', ');
+        certifications = splitSkills(certifications).join(', ');
     }
 
     if (Array.isArray(languages)) {
-        languages = languages.slice(0, 4).join(', ');
+        languages = languages.join(', ');
     } else if (typeof languages === 'string') {
-        languages = splitSkills(languages).slice(0, 4).join(', ');
+        languages = splitSkills(languages).join(', ');
     }
 
     if (Array.isArray(hobbies)) {
-        hobbies = hobbies.slice(0, 4).join(', ');
+        hobbies = hobbies.join(', ');
     } else if (typeof hobbies === 'string') {
-        hobbies = splitSkills(hobbies).slice(0, 4).join(', ');
+        hobbies = splitSkills(hobbies).join(', ');
+    }
+
+    if (Array.isArray(extraCurricular)) {
+        extraCurricular = extraCurricular.join('; ');
+    } else if (typeof extraCurricular === 'string') {
+        extraCurricular = splitSkills(extraCurricular).join('; ');
     }
 
     if (Array.isArray(publications)) {
-        publications = publications.slice(0, 3).join('; ');
+        publications = publications.join('; ');
     } else if (typeof publications === 'string') {
-        publications = splitSkills(publications).slice(0, 3).join('; ');
+        publications = splitSkills(publications).join('; ');
     }
 
     return {
@@ -108,6 +204,8 @@ function normalizeWordData(data) {
         certifications,
         languages,
         hobbies,
+        extraCurricular,
+        additionalInfo,
         publications,
         references
     };
@@ -200,7 +298,7 @@ function generateTopDownWordHTML(data, config) {
 
             ${d.technicalSkills ? `
                 <div class='section-title'>TECHNICAL SKILLS</div>
-                <div class='content'>${d.technicalSkills}</div>
+                <div class='content'>${renderCategorizedSkillsHTML(d.technicalSkills, { labelColor: c.primary || '#000000', fontSize: '9.5pt' })}</div>
             ` : ''}
 
             ${d.certifications ? `
@@ -253,7 +351,7 @@ function generateSidebarWordHTML(data, config) {
             ${d.technicalSkills ? `
             <h3 style="color: ${c.sidebarAccent || '#ffffff'}; font-size: 11pt; font-weight: bold; border-bottom: 1.5pt solid ${c.sidebarAccent || '#ffffff'}; padding-bottom: 2pt; margin-top: 10pt; margin-bottom: 6pt; text-transform: uppercase;">SKILLS</h3>
             <div style="font-size: 9pt; line-height: 1.4; margin-bottom: 12pt;">
-                ${d.technicalSkills.split(',').slice(0, 10).map(s => `<div>• ${s.trim()}</div>`).join('')}
+                ${d.technicalSkills.split(',').map(s => `<div>• ${s.trim()}</div>`).join('')}
             </div>
             ` : ''}
 
@@ -277,7 +375,7 @@ function generateSidebarWordHTML(data, config) {
             ${d.certifications ? `
             <h3 style="color: ${c.sidebarAccent || '#ffffff'}; font-size: 11pt; font-weight: bold; border-bottom: 1.5pt solid ${c.sidebarAccent || '#ffffff'}; padding-bottom: 2pt; margin-top: 10pt; margin-bottom: 6pt; text-transform: uppercase;">CERTIFICATIONS</h3>
             <div style="font-size: 9pt; line-height: 1.4; margin-bottom: 12pt;">
-                ${d.certifications.split(',').slice(0, 3).map(s => `<div>• ${s.trim()}</div>`).join('')}
+                ${d.certifications.split(',').map(s => `<div>• ${s.trim()}</div>`).join('')}
             </div>
             ` : ''}
 
@@ -292,6 +390,13 @@ function generateSidebarWordHTML(data, config) {
             <h3 style="color: ${c.sidebarAccent || '#ffffff'}; font-size: 11pt; font-weight: bold; border-bottom: 1.5pt solid ${c.sidebarAccent || '#ffffff'}; padding-bottom: 2pt; margin-top: 10pt; margin-bottom: 6pt; text-transform: uppercase;">HOBBIES</h3>
             <div style="font-size: 9pt; line-height: 1.4; margin-bottom: 12pt;">
                 ${d.hobbies.split(',').map(s => `<div>• ${s.trim()}</div>`).join('')}
+            </div>
+            ` : ''}
+
+            ${d.extraCurricular ? `
+            <h3 style="color: ${c.sidebarAccent || '#ffffff'}; font-size: 11pt; font-weight: bold; border-bottom: 1.5pt solid ${c.sidebarAccent || '#ffffff'}; padding-bottom: 2pt; margin-top: 10pt; margin-bottom: 6pt; text-transform: uppercase;">EXTRA-CURRICULAR</h3>
+            <div style="font-size: 9pt; line-height: 1.4; margin-bottom: 12pt;">
+                ${d.extraCurricular.split(';').map(s => `<div>• ${s.trim()}</div>`).join('')}
             </div>
             ` : ''}
         </div>
@@ -511,23 +616,10 @@ function generateHieroUrbanWordHTML(data, config) {
                       </div>
                     ` : ''}
 
-                    ${techSkills.length > 0 ? `
+                    ${d.technicalSkills ? `
                       <div style="color: ${ACCENT}; font-size: 10.5pt; font-weight: bold; letter-spacing: 1.5px; margin-bottom: 5pt; border-bottom: 2px solid ${ACCENT}; padding-bottom: 2pt; text-transform: uppercase;">SKILLS</div>
-                      <div style="font-size: 8.5pt; line-height: 1.4; margin-bottom: 15pt;">
-                        ${techSkills.slice(0, 5).map((sk, i) => {
-                          const pct = [95, 85, 75, 65, 55][i] || 60;
-                          return `
-                            <div style="margin-bottom: 6pt;">
-                              <div style="color: ${WHITE}; margin-bottom: 2pt; font-size: 8.5pt;">${sk}</div>
-                              <table cellpadding="0" cellspacing="0" border="0" style="width: 100%; border: 1px solid ${ACCENT}; height: 5px;">
-                                <tr>
-                                  <td style="width: ${pct}%; background-color: ${ACCENT}; height: 5px; font-size: 0px;">&nbsp;</td>
-                                  <td style="width: ${100 - pct}%; background-color: transparent; height: 5px; font-size: 0px;">&nbsp;</td>
-                                </tr>
-                              </table>
-                            </div>
-                          `;
-                        }).join('')}
+                      <div style="font-size: 8.5pt; line-height: 1.4; margin-bottom: 15pt; color: ${WHITE};">
+                        ${renderCategorizedSkillsHTML(d.technicalSkills, { labelColor: ACCENT, valueColor: WHITE, fontSize: '8.5pt', marginBottom: '4pt' })}
                       </div>
                     ` : ''}
 
@@ -1783,8 +1875,8 @@ function generateHieroCoolWordHTML(data, config) {
             <div class='section-title'>Skills & Expertise</div>
             <div class='section-line'>&nbsp;</div>
             <div class='content' style="line-height: 1.55; color: ${GRAY_TEXT}; font-family: Arial, sans-serif;">
-              <strong>Technical Skills:</strong> ${d.technicalSkills}
-              ${d.softSkills ? `<br/><strong>Soft Skills:</strong> ${d.softSkills}` : ''}
+              ${renderCategorizedSkillsHTML(d.technicalSkills, { labelColor: PRIMARY, fontSize: '9.5pt' })}
+              ${d.softSkills ? `<div style="margin-top: 4pt;"><strong style="color: ${PRIMARY};">Soft Skills:</strong> ${d.softSkills}</div>` : ''}
             </div>
         ` : ''}
 
@@ -1835,7 +1927,7 @@ function generateHieroNovaWordHTML(data, config) {
                 </div>
                 <div style="border-bottom: 1.5px solid #cccccc; margin-bottom: 12pt; height: 0; overflow: hidden;"></div>
             `;
-            d.experience.slice(0, 3).forEach(exp => {
+            d.experience.forEach(exp => {
                 const descLines = exp.description ? exp.description.split('\n').filter(l => l.trim()) : [];
                 let descHTML = '';
                 if (descLines.length > 0) {
@@ -1880,7 +1972,7 @@ function generateHieroNovaWordHTML(data, config) {
                 </div>
                 <div style="border-bottom: 1.5px solid #cccccc; margin-bottom: 12pt; height: 0; overflow: hidden;"></div>
             `;
-            d.projects.slice(0, 2).forEach(proj => {
+            d.projects.forEach(proj => {
                 const descLines = proj.description ? proj.description.split('\n').filter(l => l.trim()) : [];
                 let descHTML = '';
                 if (descLines.length > 0) {
@@ -1928,7 +2020,7 @@ function generateHieroNovaWordHTML(data, config) {
                 </div>
                 <div style="border-bottom: 1.5px solid #cccccc; margin-bottom: 12pt; height: 0; overflow: hidden;"></div>
             `;
-            d.education.slice(0, 2).forEach(edu => {
+            d.education.forEach(edu => {
                 sectionsHTML += `
                     <div style="margin-bottom: 10pt;">
                         <table cellpadding="0" cellspacing="0" border="0" style="width: 100%;">
@@ -1982,75 +2074,17 @@ function generateHieroNovaWordHTML(data, config) {
         }
     });
 
-    // Parse Skills into rating bars
-    let rawSkills = data.skills;
-    if (!rawSkills || (Array.isArray(rawSkills) && rawSkills.length === 0)) rawSkills = data.technicalSkills;
-    let parsedSkills = [];
-    if (typeof rawSkills === 'string') {
-        parsedSkills = rawSkills.split(/[\n,]/).map(s => s.trim()).filter(Boolean);
-    } else if (Array.isArray(rawSkills)) {
-        parsedSkills = rawSkills.map(s => typeof s === 'string' ? s : (s.name || '')).filter(Boolean);
-    }
-
     let skillsHTML = '';
-    if (parsedSkills.length > 0) {
-        let skillsTableRows = '';
-        const slicedSkills = parsedSkills.slice(0, 8);
-        for (let i = 0; i < slicedSkills.length; i += 2) {
-            const s1 = slicedSkills[i];
-            const s2 = slicedSkills[i + 1];
-            skillsTableRows += `
-                <tr>
-                    <!-- Skill 1 -->
-                    <td style="width: 50%; padding-bottom: 8pt; padding-right: 15pt; vertical-align: middle; padding-left: 0;">
-                        ${s1 ? `
-                            <table cellpadding="0" cellspacing="0" border="0" style="width: 100%;">
-                                <tr>
-                                    <td style="font-size: 9.5pt; font-weight: bold; color: ${textBlack}; text-transform: uppercase; vertical-align: middle; padding: 0;">
-                                        ${s1}
-                                    </td>
-                                    <td style="width: 45pt; text-align: right; vertical-align: middle; padding: 0;">
-                                        <!-- Progress bar container -->
-                                        <div style="display: inline-block; width: 40pt; height: 4.5pt; background-color: #f0f0f0; border-radius: 2pt; overflow: hidden; vertical-align: middle; position: relative;">
-                                            <div style="position: absolute; left: 0; top: 0; height: 4.5pt; width: 30pt; background-color: ${yellow}; border-radius: 2pt;"></div>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </table>
-                        ` : ''}
-                    </td>
-                    <!-- Skill 2 -->
-                    <td style="width: 50%; padding-bottom: 8pt; vertical-align: middle; padding-left: 0;">
-                        ${s2 ? `
-                            <table cellpadding="0" cellspacing="0" border="0" style="width: 100%;">
-                                <tr>
-                                    <td style="font-size: 9.5pt; font-weight: bold; color: ${textBlack}; text-transform: uppercase; vertical-align: middle; padding: 0;">
-                                        ${s2}
-                                    </td>
-                                    <td style="width: 45pt; text-align: right; vertical-align: middle; padding: 0;">
-                                        <!-- Progress bar container -->
-                                        <div style="display: inline-block; width: 40pt; height: 4.5pt; background-color: #f0f0f0; border-radius: 2pt; overflow: hidden; vertical-align: middle; position: relative;">
-                                            <div style="position: absolute; left: 0; top: 0; height: 4.5pt; width: 30pt; background-color: ${yellow}; border-radius: 2pt;"></div>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </table>
-                        ` : ''}
-                    </td>
-                </tr>
-            `;
-        }
-
+    if (d.technicalSkills) {
         skillsHTML = `
             <!-- SKILLS -->
-            <div style="font-family: 'Times New Roman', serif; font-size: 14pt; font-weight: bold; color: ${textBlack}; letter-spacing: 1.5px; text-transform: uppercase; margin-top: 18pt; margin-bottom: 2pt;">
+            <div style="font-family: 'Times New Roman', serif; font-size: 14pt; font-weight: bold; color: ${textBlack}; letter-spacing: 1.5px; text-transform: uppercase; margin-top: 16pt; margin-bottom: 2pt;">
                 SKILLS
             </div>
             <div style="border-bottom: 1.5px solid #cccccc; margin-bottom: 12pt; height: 0; overflow: hidden;"></div>
-            
-            <table cellpadding="0" cellspacing="0" border="0" style="width: 100%; border-collapse: collapse; font-family: 'Helvetica', 'Arial', sans-serif;">
-                ${skillsTableRows}
-            </table>
+            <div style="font-family: 'Helvetica', 'Arial', sans-serif; font-size: 9.5pt; color: #333333; line-height: 1.4; margin-bottom: 14pt;">
+                ${renderCategorizedSkillsHTML(d.technicalSkills, { labelColor: textBlack, valueColor: '#444444', fontSize: '9.5pt', marginBottom: '4pt' })}
+            </div>
         `;
     }
 
@@ -2421,7 +2455,7 @@ function generateHieroMonethonWordHTML(data) {
         </div>`).join('')):''}
     </td>
     <td style="width:35%;padding:16pt 15pt;background:${LIGHT};border-left:1pt solid #edd8a8;">
-      ${skills.length?sSec('Skills',skills.map(s=>`<div style="font-size:8.5pt;color:${TEXT};margin-bottom:3pt;">• ${s}</div>`).join('')):''}
+      ${d.technicalSkills?sSec('Skills',renderCategorizedSkillsHTML(d.technicalSkills,{labelColor:NAVY,valueColor:TEXT,fontSize:'8.5pt',marginBottom:'3pt'})):''}
       ${d.education.length?sSec('Education',d.education.map(e=>`
         <div style="margin-bottom:8pt;">
           <div style="font-size:9pt;font-weight:bold;color:${NAVY};">${e.degree||''}</div>
@@ -4149,6 +4183,8 @@ function makeOverflowAdaptive(html) {
   .page { height: auto !important; overflow: visible !important; }
   table { page-break-inside: auto !important; }
   tr, td, div, section, article { break-inside: auto !important; page-break-inside: auto !important; }
+  ul, ol { padding-left: 1.4em !important; margin-top: 3pt !important; margin-bottom: 4pt !important; list-style-position: outside !important; }
+  li { margin-bottom: 3.5pt !important; padding-left: 0 !important; text-indent: 0 !important; page-break-inside: avoid !important; break-inside: avoid !important; word-break: break-word !important; overflow-wrap: break-word !important; }
   * { overflow-wrap: anywhere; word-break: break-word; }
 </style>`;
 

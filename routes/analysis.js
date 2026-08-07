@@ -673,29 +673,245 @@ router.post(['/analyze', '/analyze-full'], upload.fields([{ name: 'resume' }, { 
             allProblems[skill] = problems[skill] || await generateAIProblems(skill);
         }
 
+        // === Compute Advanced Analysis Metrics ===
+        const ACTION_VERBS = [
+            'built','developed','designed','implemented','deployed','optimized','improved',
+            'created','led','managed','architected','reduced','increased','automated',
+            'engineered','launched','delivered','integrated','maintained','collaborated',
+            'analyzed','achieved','established','streamlined','accelerated'
+        ];
+
+        const METRIC_PATTERNS = [
+            /\d+\s*%/gi,
+            /\$\s*\d+/gi,
+            /\d+\s*(users|clients|customers|projects|months|years|hours|days|requests|ms|seconds)/gi,
+            /\d+x\s*(faster|improvement|increase|decrease|growth)/gi,
+            /(increased|decreased|improved|reduced|grew|boosted)\s+by\s+\d+/gi
+        ];
+
+        // 1. Compute ATS Score
+        const tResume = resumeText.toLowerCase();
+        const requiredSections = ['experience','education','skills','projects','summary','objective','achievements'];
+        const foundSections    = requiredSections.filter(s => tResume.includes(s));
+        const structureScore   = Math.round((foundSections.length / requiredSections.length) * 100);
+
+        const verbsFound       = ACTION_VERBS.filter(v => new RegExp(`\\b${v}\\w*\\b`, 'i').test(resumeText));
+        const actionVerbsScore = Math.min(100, Math.round((verbsFound.length / 10) * 100));
+
+        const metricMatches    = METRIC_PATTERNS.reduce((c, p) => c + (resumeText.match(p) || []).length, 0);
+        const achievementsScore = Math.min(100, metricMatches * 15);
+
+        const wordCount        = resumeText.split(/\s+/).filter(Boolean).length;
+        const formattingScore  = wordCount < 150 ? 50 : wordCount < 300 ? 70 : wordCount < 800 ? 95 : 85;
+
+        const avgWordsPerLine  = wordCount / Math.max(resumeText.split('\n').length, 1);
+        const readabilityScore = avgWordsPerLine > 20 ? 75 : avgWordsPerLine > 8 ? 92 : 80;
+
+        const keywordsScore    = Math.min(100, Math.round(structureScore * 0.5 + actionVerbsScore * 0.3 + Math.min(achievementsScore, 30)));
+
+        const finalATS = Math.round(
+            keywordsScore    * 0.30 +
+            formattingScore  * 0.20 +
+            readabilityScore * 0.20 +
+            structureScore   * 0.20 +
+            actionVerbsScore * 0.10
+        );
+
+        const atsScore = Math.max(50, Math.min(100, finalATS));
+
+        // 2. Extra Skills (Bonus Skills)
+        const jdSetLower = new Set(jdSkills.map(s => s.toLowerCase().trim()));
+        const extraSkills = resumeSkills.filter(s => s && !jdSetLower.has(s.toLowerCase().trim()));
+
+        // 3. Score Breakdown & Weighted Final Score
+        const matchPct = (matchedSkills.length / Math.max(jdSkills.length, 1)) * 100;
+        const skillsPts = Math.round((matchPct / 100) * 40);
+
+        const hasProjects      = /project|built|developed|created|implemented|github|deployed/i.test(resumeText);
+        const projectKeywords  = jdSkills.filter(s => resumeText.toLowerCase().includes(s.toLowerCase()));
+        const projPts          = hasProjects
+            ? Math.min(25, Math.round(15 + (projectKeywords.length / Math.max(jdSkills.length, 1)) * 10))
+            : 8;
+
+        const hasExp   = /experience|internship|worked at|employed|company|organization|role|position|junior|senior/i.test(resumeText);
+        const yearsMatch = resumeText.match(/(\d+)\s*\+?\s*years?\s+(of\s+)?experience/i);
+        const years    = yearsMatch ? parseInt(yearsMatch[1]) : 0;
+        const expPts   = hasExp ? Math.min(15, 9 + Math.min(years * 2, 6)) : 5;
+
+        const hasEdu   = /education|university|college|degree|bachelor|master|b\.tech|m\.tech|b\.e|m\.e|bsc|msc|phd/i.test(resumeText);
+        const eduPts   = hasEdu ? 9 : 5;
+        const bonusPts = Math.min(10, Math.round(extraSkills.length * 1.5));
+
+        const finalScore = Math.min(100, skillsPts + projPts + expPts + eduPts + bonusPts);
+
+        // 4. Job Description Skills with Importance Tiers
+        const tJD = jdText.toLowerCase();
+        const scoredJdSkills = jdSkills.map(skill => {
+            const escaped = skill.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const regex = new RegExp(escaped, 'gi');
+            const freq = (tJD.match(regex) || []).length;
+            const pos  = tJD.indexOf(skill.toLowerCase());
+            const posScore = pos === -1 ? 0 : Math.max(0, 100 - Math.round((pos / tJD.length) * 100));
+            return { skill, score: freq * 10 + posScore };
+        }).sort((a, b) => b.score - a.score);
+
+        const nSkills = scoredJdSkills.length;
+        const critBound = Math.max(1, Math.round(nSkills * 0.35));
+        const impBound  = Math.max(critBound + 1, Math.round(nSkills * 0.70));
+
+        const jdSkillsWithImportance = scoredJdSkills.map((item, idx) => ({
+            skill:      item.skill,
+            importance: idx < critBound ? 'Critical' : idx < impBound ? 'Important' : 'Optional'
+        }));
+
+        // 5. Recruiter Insights
+        const strengths = [];
+        const concerns  = [];
+        if (matchedSkills.length >= 5)                   strengths.push('Strong technical skill alignment with JD');
+        if (/internship|intern/i.test(resumeText))       strengths.push('Relevant internship experience');
+        if (/project|github|portfolio/i.test(resumeText)) strengths.push('Has project portfolio / GitHub');
+        if (extraSkills.length >= 3)                     strengths.push(`Brings ${extraSkills.length} extra bonus skills beyond requirements`);
+        if (/machine learning|ai|deep learning|llm|nlp/i.test(resumeText)) strengths.push('Strong AI/ML background');
+        if (/full.?stack|backend.*frontend|frontend.*backend/i.test(resumeText)) strengths.push('Full stack development capabilities');
+        if (strengths.length === 0)                      strengths.push('Good educational background');
+
+        if (metricMatches < 2)  concerns.push('Projects lack measurable metrics — add numbers (e.g. 500+ users, 40% faster)');
+        const sqlMissing = missingUnion.find(s => /sql|database|db/i.test(s));
+        if (sqlMissing)       concerns.push(`No ${sqlMissing} mentioned in resume`);
+        const cloudMissing = missingUnion.find(s => /cloud|aws|azure|gcp/i.test(s));
+        if (cloudMissing)     concerns.push('No cloud deployment experience mentioned');
+        if (!/agile|scrum/i.test(resumeText)) concerns.push('No Agile/Scrum methodology mentioned');
+        if (concerns.length === 0 && missingUnion.length > 0) concerns.push(`Missing ${missingUnion.slice(0, 2).join(' and ')}`);
+
+        const proTip = missingUnion.length > 0
+            ? `Add ${missingUnion.slice(0, 3).join(', ')} to your skills and quantify project results to reach the top 10% of candidates.`
+            : 'Excellent profile! Add measurable numbers to your bullet points to stand out even more.';
+
+        // 6. Project Suggestions (Personalized with Reason and Tags)
+        const PROJECT_MAP = {
+            'AWS':              { title: 'Deploy ML Model on AWS',                tags: ['AWS', 'EC2', 'S3', 'SageMaker'],     reason: 'missing Cloud Computing (AWS)' },
+            'Cloud Computing':  { title: 'Cloud-Based Web App on AWS/GCP',        tags: ['AWS', 'Firebase', 'Serverless'],     reason: 'missing Cloud Computing' },
+            'Docker':           { title: 'Containerized App with Docker Compose',  tags: ['Docker', 'Docker Compose', 'CI/CD'], reason: 'missing Docker' },
+            'Kubernetes':       { title: 'Kubernetes Cluster Deployment',          tags: ['K8s', 'Helm', 'Docker', 'GKE'],     reason: 'missing Kubernetes' },
+            'Machine Learning': { title: 'End-to-End ML Pipeline',                tags: ['Scikit-learn', 'Pandas', 'MLflow'],  reason: 'missing Machine Learning' },
+            'SQL':              { title: 'Analytics Dashboard with SQL + Python',  tags: ['MySQL', 'PostgreSQL', 'Pandas'],     reason: 'missing SQL' },
+            'React':            { title: 'React SPA with REST API Integration',   tags: ['React', 'Redux', 'Axios', 'Tailwind'], reason: 'missing React.js' },
+            'React.js':         { title: 'React SPA with REST API Integration',   tags: ['React', 'Redux', 'Axios', 'Tailwind'], reason: 'missing React.js' },
+            'Node.js':          { title: 'Node.js REST API with Auth & Tests',    tags: ['Node.js', 'Express', 'JWT', 'MongoDB'], reason: 'missing Node.js' },
+            'Agile':            { title: 'Agile Sprint Board App',                tags: ['Scrum', 'Jira', 'Kanban'],           reason: 'missing Agile/Scrum' },
+            'Agile / Scrum':    { title: 'Agile Sprint Board App',                tags: ['Scrum', 'Jira', 'Kanban'],           reason: 'missing Agile/Scrum' },
+            'TypeScript':       { title: 'TypeScript Full-Stack App',             tags: ['TypeScript', 'Next.js', 'Prisma'],   reason: 'missing TypeScript' },
+            'GraphQL':          { title: 'GraphQL API with Apollo',               tags: ['GraphQL', 'Apollo', 'React'],        reason: 'missing GraphQL' },
+            'Python':           { title: 'Python Automation & Data Pipeline',     tags: ['Python', 'Pandas', 'FastAPI'],       reason: 'missing Python' },
+            'Pandas':           { title: 'Data Analysis Project with Pandas',     tags: ['Pandas', 'NumPy', 'Matplotlib'],     reason: 'missing Pandas' },
+            'TensorFlow':       { title: 'Image Classifier with TensorFlow',      tags: ['TensorFlow', 'Keras', 'CNN'],        reason: 'missing TensorFlow' }
+        };
+
+        const projectSuggestions = [];
+        const seenProj = new Set();
+        for (const skill of missingUnion) {
+            if (projectSuggestions.length >= 3) break;
+            const proj = PROJECT_MAP[skill];
+            if (proj && !seenProj.has(proj.title)) {
+                seenProj.add(proj.title);
+                projectSuggestions.push({ ...proj, skillGap: skill, impact: projectSuggestions.length === 0 ? 'High Impact' : 'Recommended' });
+            }
+        }
+        const defaultProjects = domain === 'tech'
+            ? [
+                { title: 'Personal Portfolio Website',       tags: ['React', 'CSS', 'GitHub Pages'], reason: 'showcase your projects',   skillGap: 'Portfolio',    impact: 'Recommended' },
+                { title: 'Full-Stack CRUD App with Auth',    tags: ['Node.js', 'React', 'MongoDB'],  reason: 'demonstrate full-stack skills', skillGap: 'Full Stack', impact: 'Recommended' },
+                { title: 'Data Dashboard with Charts',       tags: ['Python', 'Pandas', 'Streamlit'], reason: 'show data analysis skills', skillGap: 'Data',        impact: 'Medium Impact' }
+            ]
+            : [
+                { title: 'Excel KPI Tracking Dashboard',     tags: ['Excel', 'Pivot Tables'],        reason: 'demonstrate data skills',  skillGap: 'Data',         impact: 'Recommended' },
+                { title: 'Process Improvement Case Study',   tags: ['Flowchart', 'Analysis'],        reason: 'show analytical thinking', skillGap: 'Operations',   impact: 'Recommended' }
+            ];
+        for (const d of defaultProjects) {
+            if (projectSuggestions.length >= 3) break;
+            if (!seenProj.has(d.title)) { seenProj.add(d.title); projectSuggestions.push(d); }
+        }
+
+        // 7. Learning Track
+        const learningTrack = [
+            ...matchedSkills.slice(0, 2).map(skill => {
+                const escaped  = skill.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                const mentions = (tResume.match(new RegExp(escaped, 'gi')) || []).length;
+                return { skill, progress: Math.min(95, 50 + mentions * 15), priority: 'High', status: 'In Progress' };
+            }),
+            ...missingUnion.slice(0, 3).map((skill, i) => ({
+                skill, progress: 0, priority: i === 0 ? 'High' : 'Medium', status: 'Not Started'
+            }))
+        ];
+
+        // 8. Career Readiness Metrics
+        const missingCriticalCount = jdSkillsWithImportance.filter(j => j.importance === 'Critical' && missingUnion.includes(j.skill)).length;
+        const interviewChance = Math.min(98, Math.max(30, Math.round(finalScore * 0.5 + atsScore * 0.3 + 20 - missingCriticalCount * 5)));
+        const ppoReadiness = Math.round(interviewChance * 0.97);
+        const profileStrength = Math.round((finalScore + atsScore) / 2);
+
         const payload = {
             success: true,
-            score: aiResult.score,
+            score: finalScore,
             domain,
             jdSkills,
             resumeSkills,
             matchedSkills,
             missingSkills: missingUnion,
-            projectSuggestions: aiResult.projectSuggestions,
-            skillToLearnFirst: aiResult.skillToLearnFirst,
+            extraSkills,
+            jdSkillsWithImportance,
+            atsScore,
+            atsKeywords: Math.max(50, Math.min(100, keywordsScore)),
+            atsFormatting: Math.max(60, Math.min(100, formattingScore)),
+            atsReadability: Math.max(55, Math.min(100, readabilityScore)),
+            atsStructure: Math.max(50, Math.min(100, structureScore)),
+            atsActionVerbs: Math.max(40, Math.min(100, actionVerbsScore)),
+            scoreBreakdown: {
+                skillsMatch:      { pts: skillsPts, max: 40, pct: Math.round((skillsPts / 40) * 100) },
+                projectRelevance: { pts: projPts,   max: 25, pct: Math.round((projPts / 25) * 100) },
+                experience:       { pts: expPts,    max: 15, pct: Math.round((expPts / 15) * 100) },
+                education:        { pts: eduPts,    max: 10, pct: Math.round((eduPts / 10) * 100) },
+                bonusSkills:      { pts: bonusPts,  max: 10, pct: Math.round((bonusPts / 10) * 100) }
+            },
+            recruiterInsights: { strengths: strengths.slice(0, 5), concerns: concerns.slice(0, 4), proTip },
+            learningTrack,
+            projectSuggestions,
+            skillToLearnFirst: aiResult.skillToLearnFirst || missingUnion[0] || 'JavaScript',
+            interviewChance,
+            ppoReadiness,
+            profileStrength,
             videos: allVideos,
             problems: allProblems,
             warnings: [],
             data: {
-                // Duplicate data for frontend compatibility if needed
-                score: aiResult.score,
+                score: finalScore,
                 domain,
                 jdSkills,
                 resumeSkills,
                 matchedSkills,
                 missingSkills: missingUnion,
-                projectSuggestions: aiResult.projectSuggestions,
-                skillToLearnFirst: aiResult.skillToLearnFirst,
+                extraSkills,
+                jdSkillsWithImportance,
+                atsScore,
+                atsKeywords: Math.max(50, Math.min(100, keywordsScore)),
+                atsFormatting: Math.max(60, Math.min(100, formattingScore)),
+                atsReadability: Math.max(55, Math.min(100, readabilityScore)),
+                atsStructure: Math.max(50, Math.min(100, structureScore)),
+                atsActionVerbs: Math.max(40, Math.min(100, actionVerbsScore)),
+                scoreBreakdown: {
+                    skillsMatch:      { pts: skillsPts, max: 40, pct: Math.round((skillsPts / 40) * 100) },
+                    projectRelevance: { pts: projPts,   max: 25, pct: Math.round((projPts / 25) * 100) },
+                    experience:       { pts: expPts,    max: 15, pct: Math.round((expPts / 15) * 100) },
+                    education:        { pts: eduPts,    max: 10, pct: Math.round((eduPts / 10) * 100) },
+                    bonusSkills:      { pts: bonusPts,  max: 10, pct: Math.round((bonusPts / 10) * 100) }
+                },
+                recruiterInsights: { strengths: strengths.slice(0, 5), concerns: concerns.slice(0, 4), proTip },
+                learningTrack,
+                projectSuggestions,
+                skillToLearnFirst: aiResult.skillToLearnFirst || missingUnion[0] || 'JavaScript',
+                interviewChance,
+                ppoReadiness,
+                profileStrength,
                 videos: allVideos,
                 problems: allProblems,
                 warnings: []

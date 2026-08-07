@@ -1014,6 +1014,7 @@
 
     function updateThemeUI(theme) {
       const btn = document.getElementById('theme-switch');
+      if (!btn) return;
       if (theme === 'light') {
         btn.innerHTML = '<i class="fa-solid fa-sun"></i>';
       } else {

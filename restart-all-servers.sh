@@ -13,7 +13,7 @@ sleep 2
 
 # Start Frontend Server (Port 8082)
 echo "📱 Starting Frontend Server (Port 8082)..."
-cd "$BASE_DIR/hiero last prtotype/jss/hiero/hiero last"
+cd "$BASE_DIR/hiero-prototype/jss/hiero/hiero-last"
 nohup node frontend-server.js > frontend.log 2>&1 &
 FRONTEND_PID=$!
 sleep 2
@@ -21,13 +21,16 @@ sleep 2
 # Start Auth Service (Port 3000)  
 echo "🔐 Starting Auth Service (Port 3000)..."
 cd "$BASE_DIR/login system"
+if [ -f "$BASE_DIR/.env" ]; then
+    export $(grep -v '^#' "$BASE_DIR/.env" | xargs)
+fi
 nohup node main.js > auth.log 2>&1 &
 AUTH_PID=$!
 sleep 2
 
 # Start Gateway (Port 2816)
 echo "🌐 Starting Gateway (Port 2816)..."
-cd "$BASE_DIR/hiero last prtotype/jss/hiero/hiero last"
+cd "$BASE_DIR/hiero-prototype/jss/hiero/hiero-last"
 nohup node gateway.js > gateway.log 2>&1 &
 GATEWAY_PID=$!
 sleep 3
@@ -48,7 +51,7 @@ if lsof -i :8082 >/dev/null 2>&1; then
     FRONTEND_RUNNING=true
 else
     echo "❌ Frontend (8082) - Failed to start"
-    echo "   Check: $BASE_DIR/hiero last prtotype/jss/hiero/hiero last/frontend.log"
+    echo "   Check: $BASE_DIR/hiero-prototype/jss/hiero/hiero-last/frontend.log"
 fi
 
 if lsof -i :3000 >/dev/null 2>&1; then
@@ -64,7 +67,7 @@ if lsof -i :2816 >/dev/null 2>&1; then
     GATEWAY_RUNNING=true
 else
     echo "❌ Gateway (2816) - Failed to start"
-    echo "   Check: $BASE_DIR/hiero last prtotype/jss/hiero/hiero last/gateway.log"
+    echo "   Check: $BASE_DIR/hiero-prototype/jss/hiero/hiero-last/gateway.log"
 fi
 
 echo "─────────────────────────────────────────"
@@ -87,7 +90,7 @@ else
 fi
 
 echo "📝 View Logs:"
-echo "   Frontend: tail -f \"$BASE_DIR/hiero last prtotype/jss/hiero/hiero last/frontend.log\""
+echo "   Frontend: tail -f \"$BASE_DIR/hiero-prototype/jss/hiero/hiero-last/frontend.log\""
 echo "   Auth:     tail -f \"$BASE_DIR/login system/auth.log\""
-echo "   Gateway:  tail -f \"$BASE_DIR/hiero last prtotype/jss/hiero/hiero last/gateway.log\""
+echo "   Gateway:  tail -f \"$BASE_DIR/hiero-prototype/jss/hiero/hiero-last/gateway.log\""
 echo ""
