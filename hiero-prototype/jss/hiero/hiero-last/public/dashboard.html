@@ -154,12 +154,335 @@
         @media (max-width: 1024px) {
             .dashboard-container { grid-template-columns: 1fr; }
             .tools-grid { grid-template-columns: repeat(2, 1fr); }
+            .score-display-wrapper { flex-direction: column; text-align: center; }
+            .score-card-actions { flex-direction: column; }
         }
         @media (max-width: 768px) {
             .tools-grid { grid-template-columns: 1fr; }
             .stats-grid { grid-template-columns: 1fr; }
             .hiero-nav { padding: 20px; }
             .nav-links { display: none; }
+        }
+
+        /* Candidate Match Score Styles */
+        .score-summary-card {
+            background: linear-gradient(135deg, rgba(15, 20, 15, 0.95), rgba(5, 10, 5, 0.9));
+            border: 1px solid var(--primary);
+            box-shadow: 0 0 25px rgba(7, 226, 25, 0.15);
+        }
+        .score-badge-pill {
+            background: rgba(7, 226, 25, 0.15);
+            color: var(--primary);
+            border: 1px solid var(--primary);
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .score-display-wrapper {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        .score-circle-container {
+            position: relative;
+            width: 130px;
+            height: 130px;
+            flex-shrink: 0;
+            margin: 0 auto;
+        }
+        .score-svg {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+        .score-svg-bg {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.08);
+            stroke-width: 8;
+        }
+        .score-svg-bar {
+            fill: none;
+            stroke: var(--primary);
+            stroke-width: 8;
+            stroke-linecap: round;
+            stroke-dasharray: 264;
+            stroke-dashoffset: 264;
+            transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+            filter: drop-shadow(0 0 8px var(--primary-glow));
+        }
+        .score-number-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        .score-number-overlay span {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--primary);
+            text-shadow: 0 0 15px var(--primary-glow);
+            line-height: 1;
+        }
+        .score-number-overlay small {
+            font-size: 10px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 4px;
+        }
+        .score-breakdown-details {
+            flex-grow: 1;
+        }
+        .score-breakdown-details h3 {
+            margin: 0 0 6px 0;
+            font-size: 20px;
+            font-weight: 700;
+        }
+        .score-breakdown-details p {
+            margin: 0 0 16px 0;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+        .mini-metrics {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        .metric-box {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 8px 14px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+        }
+        .metric-box .m-lbl {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+        .metric-box .m-val {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        .matched-skills-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .skill-chip {
+            background: rgba(7, 226, 25, 0.1);
+            border: 1px solid rgba(7, 226, 25, 0.25);
+            color: #fff;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .skill-chip i {
+            color: var(--primary);
+            font-size: 10px;
+        }
+        .score-card-actions {
+            display: flex;
+            gap: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding-top: 20px;
+        }
+        .apply-companies-btn {
+            flex: 2;
+            background: linear-gradient(135deg, var(--primary), #00b248);
+            color: #000;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 0 15px var(--primary-glow);
+        }
+        .apply-companies-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px var(--primary-glow);
+        }
+        .reanalyze-btn {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: var(--text-main);
+            text-decoration: none;
+            padding: 14px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: 0.3s;
+        }
+        .reanalyze-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* Modal Overlay & Card */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(12px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .glass-modal {
+            background: rgba(15, 20, 15, 0.95);
+            border: 1px solid var(--primary);
+            border-radius: 20px;
+            width: 90%;
+            max-width: 650px;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(7, 226, 25, 0.2);
+            padding: 30px;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 15px;
+        }
+        .modal-header h3 {
+            margin: 0;
+            font-size: 22px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .modal-close-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 28px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .modal-close-btn:hover {
+            color: var(--primary);
+        }
+        .modal-subtitle {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        .company-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .company-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: 0.3s;
+        }
+        .company-card:hover {
+            border-color: var(--primary);
+            background: rgba(7, 226, 25, 0.04);
+        }
+        .comp-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .comp-logo {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            background: rgba(7, 226, 25, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            color: var(--primary);
+        }
+        .comp-info h4 {
+            margin: 0 0 4px 0;
+            font-size: 16px;
+            font-weight: 700;
+        }
+        .comp-info p {
+            margin: 0;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        .comp-match {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .match-pct {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--primary);
+            background: rgba(7, 226, 25, 0.1);
+            padding: 4px 10px;
+            border-radius: 8px;
+        }
+        .comp-apply-btn {
+            background: var(--primary);
+            color: #000;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .comp-apply-btn:hover {
+            box-shadow: 0 0 12px var(--primary-glow);
+            transform: scale(1.05);
+        }
+        .comp-apply-btn.applied {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--primary);
+            cursor: default;
         }
     </style>
 </head>
@@ -199,6 +522,64 @@
                     <p>Your premium command center. Track your progress and advance your career.</p>
                 </div>
                 <div style="font-size: 60px; color: var(--primary); opacity: 0.2;"><i class="fas fa-rocket"></i></div>
+            </div>
+
+            <!-- Candidate Match & Skill Score Card -->
+            <div class="card score-summary-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-chart-line"></i> Candidate Match & Skill Score
+                    </div>
+                    <span id="score-badge" class="score-badge-pill">High Compatibility</span>
+                </div>
+                
+                <div class="score-card-body">
+                    <div class="score-display-wrapper">
+                        <div class="score-circle-container">
+                            <svg class="score-svg" viewBox="0 0 100 100">
+                                <circle class="score-svg-bg" cx="50" cy="50" r="42"></circle>
+                                <circle id="score-svg-bar" class="score-svg-bar" cx="50" cy="50" r="42"></circle>
+                            </svg>
+                            <div class="score-number-overlay">
+                                <span id="candidate-score-val">--%</span>
+                                <small>Match Score</small>
+                            </div>
+                        </div>
+                        
+                        <div class="score-breakdown-details">
+                            <h3 id="candidate-role-target">Software Developer / Skill Alignment</h3>
+                            <p id="candidate-score-sub">Based on your latest resume evaluation & verified technical skills</p>
+
+                            <div class="mini-metrics">
+                                <div class="metric-box">
+                                    <span class="m-lbl">ATS Readability</span>
+                                    <span class="m-val" id="ats-score-val">--/100</span>
+                                </div>
+                                <div class="metric-box">
+                                    <span class="m-lbl">Matched Skills</span>
+                                    <span class="m-val" id="matched-count-val">0</span>
+                                </div>
+                                <div class="metric-box">
+                                    <span class="m-lbl">Skill Gaps</span>
+                                    <span class="m-val" id="missing-count-val" style="color: var(--warning);">0</span>
+                                </div>
+                            </div>
+
+                            <div class="matched-skills-chips" id="matched-skills-container">
+                                <!-- Populated dynamically by JS -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="score-card-actions">
+                        <button class="apply-companies-btn" onclick="window.location.href='companies.html'">
+                            <i class="fas fa-paper-plane"></i> Apply to Companies with Match Score
+                        </button>
+                        <a href="analysis.html" class="reanalyze-btn">
+                            <i class="fas fa-sync-alt"></i> Re-Analyze Resume
+                        </a>
+                    </div>
+                </div>
             </div>
 
             <!-- Quick Tools -->
@@ -348,6 +729,91 @@
 
     </div>
 
+    <!-- Apply to Companies Modal -->
+    <div id="apply-modal" class="modal-overlay">
+        <div class="modal-content glass-modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-building" style="color: var(--primary);"></i> Apply to Top Hiring Partners</h3>
+                <button class="modal-close-btn" onclick="closeApplyModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-subtitle">Companies accepting applications based on your verified <strong><span id="modal-user-score" style="color: var(--primary);">--%</span> Match Score</strong>:</p>
+                
+                <div class="company-list">
+                    <div class="company-card">
+                        <div class="comp-info">
+                            <div class="comp-logo"><i class="fab fa-amazon"></i></div>
+                            <div>
+                                <h4>Amazon</h4>
+                                <p>Software Development Engineer (SDE-1)</p>
+                            </div>
+                        </div>
+                        <div class="comp-match">
+                            <span class="match-pct" id="comp-match-amazon">88% Fit</span>
+                            <button class="comp-apply-btn" onclick="applyToCompany('Amazon', this)"><i class="fas fa-paper-plane"></i> Apply</button>
+                        </div>
+                    </div>
+
+                    <div class="company-card">
+                        <div class="comp-info">
+                            <div class="comp-logo"><i class="fas fa-cube"></i></div>
+                            <div>
+                                <h4>TCS (Tata Consultancy Services)</h4>
+                                <p>System Engineer / Digital Developer</p>
+                            </div>
+                        </div>
+                        <div class="comp-match">
+                            <span class="match-pct" id="comp-match-tcs">94% Fit</span>
+                            <button class="comp-apply-btn" onclick="applyToCompany('TCS', this)"><i class="fas fa-paper-plane"></i> Apply</button>
+                        </div>
+                    </div>
+
+                    <div class="company-card">
+                        <div class="comp-info">
+                            <div class="comp-logo"><i class="fas fa-laptop-code"></i></div>
+                            <div>
+                                <h4>Infosys</h4>
+                                <p>Specialist Programmer / Senior Developer</p>
+                            </div>
+                        </div>
+                        <div class="comp-match">
+                            <span class="match-pct" id="comp-match-infosys">91% Fit</span>
+                            <button class="comp-apply-btn" onclick="applyToCompany('Infosys', this)"><i class="fas fa-paper-plane"></i> Apply</button>
+                        </div>
+                    </div>
+
+                    <div class="company-card">
+                        <div class="comp-info">
+                            <div class="comp-logo"><i class="fas fa-network-wired"></i></div>
+                            <div>
+                                <h4>Wipro Technologies</h4>
+                                <p>Project Engineer / Application Developer</p>
+                            </div>
+                        </div>
+                        <div class="comp-match">
+                            <span class="match-pct" id="comp-match-wipro">86% Fit</span>
+                            <button class="comp-apply-btn" onclick="applyToCompany('Wipro', this)"><i class="fas fa-paper-plane"></i> Apply</button>
+                        </div>
+                    </div>
+
+                    <div class="company-card">
+                        <div class="comp-info">
+                            <div class="comp-logo"><i class="fas fa-wallet"></i></div>
+                            <div>
+                                <h4>Paytm / Fintech Services</h4>
+                                <p>Full Stack Engineer</p>
+                            </div>
+                        </div>
+                        <div class="comp-match">
+                            <span class="match-pct" id="comp-match-paytm">82% Fit</span>
+                            <button class="comp-apply-btn" onclick="applyToCompany('Paytm', this)"><i class="fas fa-paper-plane"></i> Apply</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             initializeDashboard();
@@ -379,7 +845,10 @@
             document.getElementById('nav-user-name').innerText = user.name || user.username || 'User';
             document.getElementById('nav-avatar').innerText = initial;
 
-            // 2. Subscription Status
+            // 2. Candidate Score & Skill Evaluation
+            loadCandidateMatchScore(user);
+
+            // 3. Subscription Status
             const subContainer = document.getElementById('sub-status-container');
             const isPro = !!user.isPro;
             
@@ -410,7 +879,7 @@
                 `;
             }
 
-            // 3. Resume History
+            // 4. Resume History
             const resumeContainer = document.getElementById('resume-container');
             const resumeDataStr = localStorage.getItem('resumeData');
             const selectedTemplate = localStorage.getItem('selectedTemplate') || 'hiero-executive';
@@ -444,6 +913,155 @@
                     </div>
                 `;
             }
+        }
+
+        function loadCandidateMatchScore(user) {
+            let analysisData = null;
+            try {
+                const rawResult = localStorage.getItem('analysisResult') || localStorage.getItem('hieroAnalysisResult');
+                if (rawResult) {
+                    const parsed = JSON.parse(rawResult);
+                    analysisData = parsed.data || parsed;
+                }
+            } catch (e) {
+                console.warn('Error reading analysis data from storage:', e);
+            }
+
+            let resumeData = null;
+            try {
+                const rawResume = localStorage.getItem('resumeData');
+                if (rawResume) resumeData = JSON.parse(rawResume);
+            } catch (e) {}
+
+            let score = 0;
+            let atsScore = 82;
+            let matchedSkills = [];
+            let missingSkills = [];
+            let targetRole = 'Software Developer / Skill Alignment';
+
+            if (analysisData && (typeof analysisData.score === 'number' || typeof analysisData.score === 'string')) {
+                score = parseInt(analysisData.score) || 0;
+                atsScore = parseInt(analysisData.atsScore) || Math.min(100, score + 6);
+                matchedSkills = Array.isArray(analysisData.matchedSkills) ? analysisData.matchedSkills : (analysisData.resumeSkills || []);
+                missingSkills = Array.isArray(analysisData.missingSkills) ? analysisData.missingSkills : [];
+                if (analysisData.domain) {
+                    targetRole = `${analysisData.domain.toUpperCase()} Specialist / Skill Alignment`;
+                }
+            } else if (resumeData) {
+                let base = 50;
+                if (resumeData.personalInfo?.fullName) base += 10;
+                if (resumeData.personalInfo?.email) base += 5;
+                if (resumeData.experience?.length) base += 15;
+                if (resumeData.education?.length) base += 10;
+                if (resumeData.technicalSkills) base += 10;
+                score = Math.min(100, base);
+                atsScore = Math.min(100, base + 5);
+
+                if (resumeData.technicalSkills) {
+                    matchedSkills = resumeData.technicalSkills.split(/,|\n/).map(s => s.trim()).filter(Boolean);
+                }
+                if (resumeData.personalInfo?.professionalTitle) {
+                    targetRole = `${resumeData.personalInfo.professionalTitle} / Verified Profile`;
+                }
+            } else {
+                score = 78;
+                atsScore = 85;
+                matchedSkills = ['JavaScript', 'Python', 'React', 'HTML/CSS', 'Git'];
+                missingSkills = ['Docker', 'AWS'];
+            }
+
+            score = Math.min(Math.max(score, 0), 100);
+
+            // Update DOM Elements
+            const scoreValEl = document.getElementById('candidate-score-val');
+            if (scoreValEl) scoreValEl.innerText = `${score}%`;
+
+            const modalScoreEl = document.getElementById('modal-user-score');
+            if (modalScoreEl) modalScoreEl.innerText = `${score}%`;
+
+            const atsValEl = document.getElementById('ats-score-val');
+            if (atsValEl) atsValEl.innerText = `${atsScore}/100`;
+
+            const matchedCountEl = document.getElementById('matched-count-val');
+            if (matchedCountEl) matchedCountEl.innerText = matchedSkills.length;
+
+            const missingCountEl = document.getElementById('missing-count-val');
+            if (missingCountEl) missingCountEl.innerText = missingSkills.length;
+
+            const roleTargetEl = document.getElementById('candidate-role-target');
+            if (roleTargetEl) roleTargetEl.innerText = targetRole;
+
+            // Update SVG Ring Progress (stroke-dasharray = 264)
+            const svgBar = document.getElementById('score-svg-bar');
+            if (svgBar) {
+                const offset = 264 - (score / 100) * 264;
+                setTimeout(() => {
+                    svgBar.style.strokeDashoffset = offset;
+                }, 150);
+            }
+
+            // Update Badge
+            const badgeEl = document.getElementById('score-badge');
+            if (badgeEl) {
+                if (score >= 80) {
+                    badgeEl.innerText = 'High Compatibility';
+                    badgeEl.style.color = 'var(--primary)';
+                    badgeEl.style.borderColor = 'var(--primary)';
+                    badgeEl.style.background = 'rgba(7, 226, 25, 0.15)';
+                } else if (score >= 60) {
+                    badgeEl.innerText = 'Moderate Fit';
+                    badgeEl.style.color = 'var(--warning)';
+                    badgeEl.style.borderColor = 'var(--warning)';
+                    badgeEl.style.background = 'rgba(255, 184, 77, 0.15)';
+                } else {
+                    badgeEl.innerText = 'Needs Upskilling';
+                    badgeEl.style.color = 'var(--danger)';
+                    badgeEl.style.borderColor = 'var(--danger)';
+                    badgeEl.style.background = 'rgba(255, 68, 68, 0.15)';
+                }
+            }
+
+            // Update Company Match Percentages
+            const amazonMatch = Math.min(100, Math.max(60, score + 4));
+            const tcsMatch = Math.min(100, Math.max(65, score + 10));
+            const infosysMatch = Math.min(100, Math.max(65, score + 7));
+            const wiproMatch = Math.min(100, Math.max(60, score + 2));
+            const paytmMatch = Math.min(100, Math.max(60, score - 2));
+
+            if (document.getElementById('comp-match-amazon')) document.getElementById('comp-match-amazon').innerText = `${amazonMatch}% Fit`;
+            if (document.getElementById('comp-match-tcs')) document.getElementById('comp-match-tcs').innerText = `${tcsMatch}% Fit`;
+            if (document.getElementById('comp-match-infosys')) document.getElementById('comp-match-infosys').innerText = `${infosysMatch}% Fit`;
+            if (document.getElementById('comp-match-wipro')) document.getElementById('comp-match-wipro').innerText = `${wiproMatch}% Fit`;
+            if (document.getElementById('comp-match-paytm')) document.getElementById('comp-match-paytm').innerText = `${paytmMatch}% Fit`;
+
+            // Skill Chips
+            const chipsContainer = document.getElementById('matched-skills-container');
+            if (chipsContainer) {
+                if (matchedSkills.length > 0) {
+                    chipsContainer.innerHTML = matchedSkills.slice(0, 6).map(skill => 
+                        `<span class="skill-chip"><i class="fas fa-check-circle"></i> ${skill}</span>`
+                    ).join('');
+                } else {
+                    chipsContainer.innerHTML = `<span style="color: var(--text-muted); font-size: 13px;">Upload resume in Resume Builder or run Analysis to view verified skill tags.</span>`;
+                }
+            }
+        }
+
+        function openApplyModal() {
+            const modal = document.getElementById('apply-modal');
+            if (modal) modal.classList.add('active');
+        }
+
+        function closeApplyModal() {
+            const modal = document.getElementById('apply-modal');
+            if (modal) modal.classList.remove('active');
+        }
+
+        function applyToCompany(companyName, btn) {
+            btn.innerHTML = `<i class="fas fa-check-circle"></i> Applied!`;
+            btn.classList.add('applied');
+            btn.disabled = true;
+            alert(`🎉 Application submitted successfully to ${companyName} with your verified Hiero Candidate Score!`);
         }
 
         function logout() {

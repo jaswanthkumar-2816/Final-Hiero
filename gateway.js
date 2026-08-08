@@ -231,6 +231,7 @@ app.get(['/feedback', '/feedback.html'], (req, res) => res.sendFile(path.join(__
 app.get(['/design-tester', '/design-tester.html'], (req, res) => res.sendFile(path.join(__dirname, 'design-tester.html')));
 app.get(['/project', '/project.html'], (req, res) => res.sendFile(path.join(__dirname, 'project.html')));
 app.get(['/analysis', '/analysis.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'analysis.html')));
+app.get(['/companies', '/companies.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'companies.html')));
 app.get(['/ai-photo-formalizer', '/ai-photo-formalizer.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'ai-photo-formalizer.html')));
 
 // ======================
