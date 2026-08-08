@@ -1,20 +1,1230 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hiero - Dashboard</title>
-  <link rel="stylesheet" href="styles.css">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hiero Command Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="theme.css">
+    <script src="theme.js"></script>
+    <style>
+        :root {
+            --primary: #07e219;
+            --primary-glow: rgba(42, 224, 35, 0.4);
+            --bg-pure: #030503;
+            --card-bg: rgba(15, 20, 15, 0.7);
+            --card-border: rgba(42, 224, 35, 0.15);
+            --text-main: #FFFFFF;
+            --text-muted: #A0AEC0;
+            --danger: #ff4444;
+            --warning: #ffb84d;
+        }
+
+        body, html {
+            margin: 0; padding: 0;
+            font-family: 'Outfit', 'Inter', sans-serif;
+            background-color: var(--bg-pure);
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Ambient Background Grid */
+        body::before {
+            content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: 
+                linear-gradient(rgba(42, 224, 35, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(42, 224, 35, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -2; pointer-events: none;
+        }
+        
+        /* Dynamic Glows */
+        .ambient-glow {
+            position: fixed; border-radius: 50%; filter: blur(100px); opacity: 0.15; z-index: -1; pointer-events: none;
+        }
+        .glow-1 { top: -10%; left: -10%; width: 50vw; height: 50vw; background: var(--primary); animation: pulse 15s infinite alternate; }
+        .glow-2 { bottom: -20%; right: -10%; width: 60vw; height: 60vw; background: #0088ff; animation: pulse 20s infinite alternate-reverse; }
+
+        @keyframes pulse {
+            0% { transform: scale(1) translate(0, 0); }
+            100% { transform: scale(1.1) translate(30px, 30px); }
+        }
+
+        /* Navigation */
+        .hiero-nav {
+            display: flex; justify-content: space-between; align-items: center; padding: 20px 50px; 
+            background: rgba(3, 5, 3, 0.8); backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--card-border); position: sticky; top: 0; z-index: 100;
+        }
+        .nav-logo { display: flex; align-items: center; gap: 12px; font-weight: 800; font-size: 24px; color: #fff; text-decoration: none; }
+        .nav-logo i { color: var(--primary); font-size: 28px; text-shadow: 0 0 15px var(--primary-glow); }
+        .nav-links { display: flex; gap: 30px; }
+        .nav-links a { color: var(--text-muted); text-decoration: none; font-weight: 500; transition: 0.3s; }
+        .nav-links a:hover, .nav-links a.active { color: var(--primary); text-shadow: 0 0 10px var(--primary-glow); }
+        .user-profile { display: flex; align-items: center; gap: 15px; }
+        .user-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: bold; color: #000; }
+        .logout-btn { background: transparent; border: 1px solid var(--card-border); color: var(--text-muted); padding: 8px 15px; border-radius: 8px; cursor: pointer; transition: 0.3s; }
+        .logout-btn:hover { background: rgba(255, 68, 68, 0.1); color: var(--danger); border-color: var(--danger); }
+
+        /* Dashboard Grid Layout */
+        .dashboard-container {
+            max-width: 1400px; margin: 40px auto; padding: 0 30px;
+            display: grid; grid-template-columns: 1fr 350px; gap: 30px;
+        }
+
+        /* Common Card Styles */
+        .card {
+            background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 24px; padding: 30px;
+            backdrop-filter: blur(10px); box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            position: relative; overflow: hidden; transition: transform 0.3s;
+        }
+        .card:hover { transform: translateY(-5px); border-color: rgba(42, 224, 35, 0.3); box-shadow: 0 20px 40px rgba(42, 224, 35, 0.1); }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px; }
+        .card-title { font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+        .card-title i { color: var(--primary); }
+
+        /* Left Column */
+        .main-col { display: flex; flex-direction: column; gap: 30px; }
+        
+        /* Welcome Banner */
+        .welcome-banner {
+            background: linear-gradient(135deg, rgba(42, 224, 35, 0.1), transparent);
+            border: 1px solid var(--primary); display: flex; justify-content: space-between; align-items: center;
+        }
+        .welcome-text h1 { font-size: 36px; margin: 0 0 10px 0; font-weight: 800; }
+        .welcome-text p { color: var(--text-muted); margin: 0; font-size: 16px; font-family: 'Inter'; }
+        
+        /* Quick Tools Grid */
+        .tools-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .tool-card {
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 25px;
+            text-align: center; text-decoration: none; color: #fff; transition: 0.3s; display: block;
+        }
+        .tool-card:hover { background: rgba(42, 224, 35, 0.05); border-color: var(--primary); transform: translateY(-5px); }
+        .tool-card i { font-size: 32px; color: var(--primary); margin-bottom: 15px; }
+        .tool-card h3 { margin: 0 0 10px 0; font-size: 18px; }
+        .tool-card p { margin: 0; color: var(--text-muted); font-size: 13px; }
+
+        /* Stats Grid */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        
+        /* Resume History */
+        .resume-item {
+            background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 15px 20px;
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; transition: 0.3s;
+        }
+        .resume-item:hover { border-color: var(--primary); background: rgba(42, 224, 35, 0.05); }
+        .resume-info { display: flex; align-items: center; gap: 15px; }
+        .resume-icon { width: 40px; height: 40px; border-radius: 8px; background: rgba(42, 224, 35, 0.1); display: flex; align-items: center; justify-content: center; color: var(--primary); }
+        .resume-details h4 { margin: 0 0 5px 0; font-size: 16px; }
+        .resume-details p { margin: 0; color: var(--text-muted); font-size: 13px; }
+        .resume-actions a { color: var(--text-main); text-decoration: none; padding: 8px 15px; border-radius: 6px; background: rgba(255,255,255,0.1); font-size: 13px; transition: 0.3s; }
+        .resume-actions a:hover { background: var(--primary); color: #000; }
+
+        /* Right Column */
+        .side-col { display: flex; flex-direction: column; gap: 30px; }
+
+        /* Subscription Card */
+        .sub-card { text-align: center; position: relative; }
+        .pro-badge { 
+            display: inline-block; background: linear-gradient(135deg, var(--primary), #00ff00); color: #000;
+            padding: 5px 15px; border-radius: 20px; font-weight: 800; font-size: 14px; text-transform: uppercase;
+            letter-spacing: 1px; margin-bottom: 15px; box-shadow: 0 0 15px var(--primary-glow);
+        }
+        .free-badge {
+            display: inline-block; background: rgba(255,255,255,0.1); color: #fff;
+            padding: 5px 15px; border-radius: 20px; font-weight: 600; font-size: 14px; text-transform: uppercase; margin-bottom: 15px;
+        }
+        .sub-details { color: var(--text-muted); font-size: 14px; margin-bottom: 25px; line-height: 1.6; }
+        .sub-details strong { color: #fff; }
+        .upgrade-btn {
+            display: block; width: 100%; background: linear-gradient(135deg, var(--primary), #1a8b17); color: #000;
+            text-decoration: none; padding: 15px; border-radius: 12px; font-weight: 700; font-size: 16px; transition: 0.3s;
+        }
+        .upgrade-btn:hover { transform: scale(1.02); box-shadow: 0 10px 20px var(--primary-glow); }
+
+        /* Activity Feed */
+        .activity-feed { display: flex; flex-direction: column; gap: 15px; }
+        .activity-item { display: flex; gap: 15px; }
+        .activity-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--primary); margin-top: 5px; box-shadow: 0 0 10px var(--primary-glow); }
+        .activity-text p { margin: 0 0 5px 0; font-size: 14px; }
+        .activity-text span { font-size: 12px; color: var(--text-muted); }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .dashboard-container { grid-template-columns: 1fr; }
+            .tools-grid { grid-template-columns: repeat(2, 1fr); }
+            .score-display-wrapper { flex-direction: column; text-align: center; }
+            .score-card-actions { flex-direction: column; }
+        }
+        @media (max-width: 768px) {
+            .tools-grid { grid-template-columns: 1fr; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .hiero-nav { padding: 20px; }
+            .nav-links { display: none; }
+        }
+
+        /* Candidate Match Score Styles */
+        .score-summary-card {
+            background: linear-gradient(135deg, rgba(15, 20, 15, 0.95), rgba(5, 10, 5, 0.9));
+            border: 1px solid var(--primary);
+            box-shadow: 0 0 25px rgba(7, 226, 25, 0.15);
+        }
+        .score-badge-pill {
+            background: rgba(7, 226, 25, 0.15);
+            color: var(--primary);
+            border: 1px solid var(--primary);
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .score-display-wrapper {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        .score-circle-container {
+            position: relative;
+            width: 130px;
+            height: 130px;
+            flex-shrink: 0;
+            margin: 0 auto;
+        }
+        .score-svg {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+        .score-svg-bg {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.08);
+            stroke-width: 8;
+        }
+        .score-svg-bar {
+            fill: none;
+            stroke: var(--primary);
+            stroke-width: 8;
+            stroke-linecap: round;
+            stroke-dasharray: 264;
+            stroke-dashoffset: 264;
+            transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+            filter: drop-shadow(0 0 8px var(--primary-glow));
+        }
+        .score-number-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        .score-number-overlay span {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--primary);
+            text-shadow: 0 0 15px var(--primary-glow);
+            line-height: 1;
+        }
+        .score-number-overlay small {
+            font-size: 10px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 4px;
+        }
+        .score-breakdown-details {
+            flex-grow: 1;
+        }
+        .score-breakdown-details h3 {
+            margin: 0 0 6px 0;
+            font-size: 20px;
+            font-weight: 700;
+        }
+        .score-breakdown-details p {
+            margin: 0 0 16px 0;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+        .mini-metrics {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        .metric-box {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 8px 14px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+        }
+        .metric-box .m-lbl {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+        .metric-box .m-val {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        .matched-skills-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .skill-chip {
+            background: rgba(7, 226, 25, 0.1);
+            border: 1px solid rgba(7, 226, 25, 0.25);
+            color: #fff;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .skill-chip i {
+            color: var(--primary);
+            font-size: 10px;
+        }
+        .score-card-actions {
+            display: flex;
+            gap: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding-top: 20px;
+        }
+        .apply-companies-btn {
+            flex: 2;
+            background: linear-gradient(135deg, var(--primary), #00b248);
+            color: #000;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 0 15px var(--primary-glow);
+        }
+        .apply-companies-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px var(--primary-glow);
+        }
+        .reanalyze-btn {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: var(--text-main);
+            text-decoration: none;
+            padding: 14px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: 0.3s;
+        }
+        .reanalyze-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* Modal Overlay & Card */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(12px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .glass-modal {
+            background: rgba(15, 20, 15, 0.95);
+            border: 1px solid var(--primary);
+            border-radius: 20px;
+            width: 90%;
+            max-width: 650px;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(7, 226, 25, 0.2);
+            padding: 30px;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 15px;
+        }
+        .modal-header h3 {
+            margin: 0;
+            font-size: 22px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .modal-close-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 28px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .modal-close-btn:hover {
+            color: var(--primary);
+        }
+        .modal-subtitle {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        .company-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .company-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: 0.3s;
+        }
+        .company-card:hover {
+            border-color: var(--primary);
+            background: rgba(7, 226, 25, 0.04);
+        }
+        .comp-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .comp-logo {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            background: rgba(7, 226, 25, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            color: var(--primary);
+        }
+        .comp-info h4 {
+            margin: 0 0 4px 0;
+            font-size: 16px;
+            font-weight: 700;
+        }
+        .comp-info p {
+            margin: 0;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        .comp-match {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .match-pct {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--primary);
+            background: rgba(7, 226, 25, 0.1);
+            padding: 4px 10px;
+            border-radius: 8px;
+        }
+        .comp-apply-btn {
+            background: var(--primary);
+            color: #000;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .comp-apply-btn:hover {
+            box-shadow: 0 0 12px var(--primary-glow);
+            transform: scale(1.05);
+        }
+        .comp-apply-btn.applied {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--primary);
+            cursor: default;
+        }
+    </style>
 </head>
 <body>
-  <div class="screen">
-    <div class="card">
-      <h2>Hiero Dashboard</h2>
-      <button id="create-resume-btn" class="action-btn">Create Resume</button>
-      <button id="analyze-resume-btn" class="action-btn">Analyze Resume</button>
+
+    <div class="ambient-glow glow-1"></div>
+    <div class="ambient-glow glow-2"></div>
+
+    <!-- Navigation -->
+    <nav class="hiero-nav">
+        <a href="dashboard.html" class="nav-logo">
+            <i class="fas fa-bolt"></i> Hiero
+        </a>
+        <div class="nav-links">
+            <a href="dashboard.html" class="active">Dashboard</a>
+            <a href="resume-builder.html">Resume Builder</a>
+            <a href="mock-interview.html">Interview Prep</a>
+            <a href="solve.html">Solve</a>
+            <a href="learn.html">Learn</a>
+        </div>
+        <div class="user-profile">
+            <button class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Theme" style="background: rgba(255,255,255,0.08); border: 1px solid var(--card-border); color: #fff; padding: 8px 12px; border-radius: 8px; cursor: pointer; transition: 0.3s; margin-right: 8px;">
+                <i class="fas fa-sun"></i>
+            </button>
+            <span id="nav-user-name" class="user-name-full" style="font-weight: 500; font-size: 15px; cursor: pointer;" onclick="window.location.href='dashboard.html'">Loading...</span>
+            <div class="user-avatar" id="nav-avatar" onclick="window.location.href='dashboard.html'" style="cursor: pointer; box-shadow: 0 0 10px var(--primary-glow);" title="Go to User Dashboard">U</div>
+            <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i></button>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        
+        <!-- Left Column: Main Content -->
+        <div class="main-col">
+            
+            <!-- Welcome Banner -->
+            <div class="card welcome-banner">
+                <div class="welcome-text">
+                    <h1>Welcome back, <span id="welcome-name" style="color: var(--primary);">User</span>!</h1>
+                    <p>Your premium command center. Track your progress and advance your career.</p>
+                </div>
+                <div style="font-size: 60px; color: var(--primary); opacity: 0.2;"><i class="fas fa-rocket"></i></div>
+            </div>
+
+            <!-- Applied Companies Section -->
+            <div class="card applied-jobs-card" id="applied-jobs-section" style="background: linear-gradient(135deg, rgba(7, 226, 25, 0.08), rgba(13, 18, 28, 0.9)); border: 1px solid rgba(7, 226, 25, 0.35); border-radius: 24px; padding: 24px 30px;">
+                <div class="card-header" style="border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+                    <div class="card-title" style="font-size: 20px; font-weight: 800; color: #fff;">
+                        <i class="fas fa-check-circle" style="color: var(--primary);"></i> Successfully Applied Companies & Hiring Drives
+                    </div>
+                    <a href="companies.html" style="color: var(--primary); font-weight: 700; text-decoration: none; font-size: 14px; background: rgba(7,226,25,0.12); padding: 6px 14px; border-radius: 100px; border: 1px solid rgba(7,226,25,0.3);">Apply for More Companies →</a>
+                </div>
+                <div id="applied-companies-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;">
+                    <!-- Populated dynamically by JS -->
+                </div>
+            </div>
+
+            <!-- Candidate Match & Skill Score Card -->
+            <div class="card score-summary-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-chart-line"></i> Candidate Match & Skill Score
+                    </div>
+                    <span id="score-badge" class="score-badge-pill">High Compatibility</span>
+                </div>
+                
+                <div class="score-card-body">
+                    <div class="score-display-wrapper">
+                        <div class="score-circle-container">
+                            <svg class="score-svg" viewBox="0 0 100 100">
+                                <circle class="score-svg-bg" cx="50" cy="50" r="42"></circle>
+                                <circle id="score-svg-bar" class="score-svg-bar" cx="50" cy="50" r="42"></circle>
+                            </svg>
+                            <div class="score-number-overlay">
+                                <span id="candidate-score-val">--%</span>
+                                <small>Match Score</small>
+                            </div>
+                        </div>
+                        
+                        <div class="score-breakdown-details">
+                            <h3 id="candidate-role-target">Software Developer / Skill Alignment</h3>
+                            <p id="candidate-score-sub">Based on your latest resume evaluation & verified technical skills</p>
+
+                            <div class="mini-metrics">
+                                <div class="metric-box">
+                                    <span class="m-lbl">ATS Readability</span>
+                                    <span class="m-val" id="ats-score-val">--/100</span>
+                                </div>
+                                <div class="metric-box">
+                                    <span class="m-lbl">Matched Skills</span>
+                                    <span class="m-val" id="matched-count-val">0</span>
+                                </div>
+                                <div class="metric-box">
+                                    <span class="m-lbl">Skill Gaps</span>
+                                    <span class="m-val" id="missing-count-val" style="color: var(--warning);">0</span>
+                                </div>
+                            </div>
+
+                            <div class="matched-skills-chips" id="matched-skills-container">
+                                <!-- Populated dynamically by JS -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="score-card-actions">
+                        <button class="apply-companies-btn" onclick="handleApplyToCompanies(this)">
+                            <i class="fas fa-paper-plane"></i> Apply to Companies with Match Score
+                        </button>
+                        <a href="analysis.html" class="reanalyze-btn">
+                            <i class="fas fa-sync-alt"></i> Re-Analyze Resume
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Tools -->
+            <div class="tools-grid">
+                <a href="resume-builder.html" class="tool-card">
+                    <i class="fas fa-file-invoice"></i>
+                    <h3>Resume Builder</h3>
+                    <p>Create & download premium ATS resumes</p>
+                </a>
+                <a href="mock-interview.html" class="tool-card">
+                    <i class="fas fa-microphone-alt"></i>
+                    <h3>Mock Interview</h3>
+                    <p>Practice with real-time AI feedback</p>
+                </a>
+                <a href="solve.html" class="tool-card">
+                    <i class="fas fa-code"></i>
+                    <h3>Problem Solving</h3>
+                    <p>Master coding challenges</p>
+                </a>
+            </div>
+
+            <!-- Stats & Progress -->
+            <div class="stats-grid">
+                <!-- Resume Section -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title"><i class="fas fa-file-alt"></i> Resume Hub</div>
+                    </div>
+                    <div id="resume-container">
+                        <!-- Populated by JS -->
+                        <div style="text-align: center; color: var(--text-muted); padding: 20px;">
+                            <i class="fas fa-spinner fa-spin"></i> Loading data...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Learning Progress -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title"><i class="fas fa-graduation-cap"></i> Learning Progress</div>
+                        <a href="learn.html" style="color: var(--primary); text-decoration: none; font-size: 14px;">Browse Library <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 20px;">
+                        <div>
+                            <div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px;">
+                                <span>Advanced Data Structures</span>
+                                <span style="color: var(--primary);">65%</span>
+                            </div>
+                            <div style="width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
+                                <div style="width: 65%; height: 100%; background: var(--primary); box-shadow: 0 0 10px var(--primary-glow);"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px;">
+                                <span>System Design Basics</span>
+                                <span style="color: var(--primary);">30%</span>
+                            </div>
+                            <div style="width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
+                                <div style="width: 30%; height: 100%; background: var(--primary); box-shadow: 0 0 10px var(--primary-glow);"></div>
+                            </div>
+                        </div>
+                        
+                        <div style="background: rgba(42, 224, 35, 0.05); border: 1px solid rgba(42, 224, 35, 0.2); padding: 15px; border-radius: 12px; display: flex; gap: 15px; align-items: center; margin-top: 10px;">
+                            <div style="width: 50px; height: 50px; background: rgba(0,0,0,0.5); border-radius: 8px; display: flex; align-items: center; justify-content: center; position: relative;">
+                                <i class="fas fa-play" style="color: var(--primary); z-index: 2;"></i>
+                            </div>
+                            <div>
+                                <h4 style="margin: 0 0 5px 0; font-size: 15px;">Continue Watching</h4>
+                                <p style="margin: 0; font-size: 13px; color: var(--text-muted);">Dynamic Programming Intro • 12m left</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Right Column: Sidebar -->
+        <div class="side-col">
+            
+            <!-- Subscription Card -->
+            <div class="card sub-card">
+                <div class="card-header" style="justify-content: center;">
+                    <div class="card-title"><i class="fas fa-crown"></i> Subscription Status</div>
+                </div>
+                
+                <div id="sub-status-container">
+                    <div class="free-badge">Fetching...</div>
+                    <p class="sub-details">Loading your account details.</p>
+                </div>
+            </div>
+
+            <!-- Problem Solving Overview -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title"><i class="fas fa-laptop-code"></i> Solve Portal</div>
+                    <span style="font-size: 12px; background: rgba(255,255,255,0.1); padding: 3px 8px; border-radius: 10px;">Weekly Rank: 42</span>
+                </div>
+                <div style="display: flex; justify-content: space-around; margin-bottom: 20px; text-align: center;">
+                    <div>
+                        <div style="font-size: 24px; font-weight: 700; color: var(--primary);">24</div>
+                        <div style="font-size: 12px; color: var(--text-muted);">Easy</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 24px; font-weight: 700; color: var(--warning);">12</div>
+                        <div style="font-size: 12px; color: var(--text-muted);">Medium</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 24px; font-weight: 700; color: var(--danger);">3</div>
+                        <div style="font-size: 12px; color: var(--text-muted);">Hard</div>
+                    </div>
+                </div>
+                <a href="solve.html" style="display: block; width: 100%; padding: 12px; text-align: center; background: rgba(255,255,255,0.05); color: #fff; text-decoration: none; border-radius: 8px; font-size: 14px; transition: 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">Solve Daily Challenge</a>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title"><i class="fas fa-history"></i> Recent Activity</div>
+                </div>
+                <div class="activity-feed">
+                    <div class="activity-item">
+                        <div class="activity-dot"></div>
+                        <div class="activity-text">
+                            <p>Logged into Command Center</p>
+                            <span>Just now</span>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-dot" style="background: var(--warning); box-shadow: 0 0 10px var(--warning);"></div>
+                        <div class="activity-text">
+                            <p>Completed "Two Sum" challenge</p>
+                            <span>2 days ago</span>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-dot" style="background: #0088ff; box-shadow: 0 0 10px #0088ff;"></div>
+                        <div class="activity-text">
+                            <p>Downloaded PDF Resume</p>
+                            <span>3 days ago</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
     </div>
-  </div>
-  <script src="script.js"></script>
+
+    <!-- Apply to Companies Modal -->
+    <div id="apply-modal" class="modal-overlay">
+        <div class="modal-content glass-modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-building" style="color: var(--primary);"></i> Apply to Top Hiring Partners</h3>
+                <button class="modal-close-btn" onclick="closeApplyModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-subtitle">Companies accepting applications based on your verified <strong><span id="modal-user-score" style="color: var(--primary);">--%</span> Match Score</strong>:</p>
+                
+                <div class="company-list">
+                    <div class="company-card">
+                        <div class="comp-info">
+                            <div class="comp-logo"><i class="fab fa-amazon"></i></div>
+                            <div>
+                                <h4>Amazon</h4>
+                                <p>Software Development Engineer (SDE-1)</p>
+                            </div>
+                        </div>
+                        <div class="comp-match">
+                            <span class="match-pct" id="comp-match-amazon">88% Fit</span>
+                            <button class="comp-apply-btn" onclick="applyToCompany('Amazon', this)"><i class="fas fa-paper-plane"></i> Apply</button>
+                        </div>
+                    </div>
+
+                    <div class="company-card">
+                        <div class="comp-info">
+                            <div class="comp-logo"><i class="fas fa-cube"></i></div>
+                            <div>
+                                <h4>TCS (Tata Consultancy Services)</h4>
+                                <p>System Engineer / Digital Developer</p>
+                            </div>
+                        </div>
+                        <div class="comp-match">
+                            <span class="match-pct" id="comp-match-tcs">94% Fit</span>
+                            <button class="comp-apply-btn" onclick="applyToCompany('TCS', this)"><i class="fas fa-paper-plane"></i> Apply</button>
+                        </div>
+                    </div>
+
+                    <div class="company-card">
+                        <div class="comp-info">
+                            <div class="comp-logo"><i class="fas fa-laptop-code"></i></div>
+                            <div>
+                                <h4>Infosys</h4>
+                                <p>Specialist Programmer / Senior Developer</p>
+                            </div>
+                        </div>
+                        <div class="comp-match">
+                            <span class="match-pct" id="comp-match-infosys">91% Fit</span>
+                            <button class="comp-apply-btn" onclick="applyToCompany('Infosys', this)"><i class="fas fa-paper-plane"></i> Apply</button>
+                        </div>
+                    </div>
+
+                    <div class="company-card">
+                        <div class="comp-info">
+                            <div class="comp-logo"><i class="fas fa-network-wired"></i></div>
+                            <div>
+                                <h4>Wipro Technologies</h4>
+                                <p>Project Engineer / Application Developer</p>
+                            </div>
+                        </div>
+                        <div class="comp-match">
+                            <span class="match-pct" id="comp-match-wipro">86% Fit</span>
+                            <button class="comp-apply-btn" onclick="applyToCompany('Wipro', this)"><i class="fas fa-paper-plane"></i> Apply</button>
+                        </div>
+                    </div>
+
+                    <div class="company-card">
+                        <div class="comp-info">
+                            <div class="comp-logo"><i class="fas fa-wallet"></i></div>
+                            <div>
+                                <h4>Paytm / Fintech Services</h4>
+                                <p>Full Stack Engineer</p>
+                            </div>
+                        </div>
+                        <div class="comp-match">
+                            <span class="match-pct" id="comp-match-paytm">82% Fit</span>
+                            <button class="comp-apply-btn" onclick="applyToCompany('Paytm', this)"><i class="fas fa-paper-plane"></i> Apply</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeDashboard();
+        });
+
+        function renderAppliedCompaniesSection() {
+            const container = document.getElementById('applied-companies-list');
+            if (!container) return;
+
+            let applied = [];
+            try {
+                const stored = localStorage.getItem('hieroAppliedCompanies');
+                if (stored) applied = JSON.parse(stored);
+            } catch(e) {}
+
+            if (!applied || applied.length === 0) {
+                applied = ['Meta', 'Amazon', 'Microsoft'];
+            }
+
+            container.innerHTML = applied.map(comp => `
+                <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(7, 226, 25, 0.25); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 10px; transition: 0.3s;" onmouseover="this.style.borderColor='#07e219'" onmouseout="this.style.borderColor='rgba(7, 226, 25, 0.25)'">
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <h4 style="margin: 0; font-size: 16px; font-weight: 800; color: #fff;">${comp}</h4>
+                        <span style="background: rgba(7, 226, 25, 0.15); border: 1px solid rgba(7, 226, 25, 0.4); color: #07e219; padding: 3px 10px; border-radius: 100px; font-size: 11px; font-weight: 700;">✓ Applied & Confirmed</span>
+                    </div>
+                    <p style="margin: 0; font-size: 13px; color: var(--text-muted);">Target Role: Senior Development Engineer • Hiero Match: 88%</p>
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 4px;">
+                        <span style="font-size: 11px; color: #64748b;">Ref #HIO-2026-CONFIRMED</span>
+                        <a href="job_success.html?company=${encodeURIComponent(comp)}&role=Senior%20Development%20Engineer&score=88%25" style="color: #07e219; font-size: 12px; font-weight: 700; text-decoration: none;">View Receipt →</a>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function formatTemplateName(id) {
+            if (!id) return "Premium Template";
+            const parts = id.split('-');
+            if (parts.length === 1) return parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
+            return parts.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
+        }
+
+        function initializeDashboard() {
+            renderAppliedCompaniesSection();
+            // Check for OAuth token/user in URL query params
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlToken = urlParams.get('token');
+            const urlUser = urlParams.get('user');
+            if (urlToken) {
+                localStorage.setItem('token', urlToken);
+                localStorage.setItem('jwtToken', urlToken);
+            }
+            if (urlUser) {
+                try {
+                    localStorage.setItem('user', decodeURIComponent(urlUser));
+                } catch(e) {
+                    localStorage.setItem('user', urlUser);
+                }
+            }
+            if (urlToken || urlUser) {
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+
+            // 1. Auth Check & User Data
+            const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
+            const userStr = localStorage.getItem('user');
+
+            if (!token || !userStr) {
+                window.location.href = '/login.html';
+                return;
+            }
+
+            let user = {};
+            try {
+                user = typeof userStr === 'string' ? JSON.parse(userStr) : userStr;
+            } catch(e) {
+                user = { name: 'User' };
+            }
+            const firstName = user.name ? user.name.split(' ')[0] : (user.username || 'User');
+            const initial = (firstName || 'U').charAt(0).toUpperCase();
+
+            // Populate User info
+            const fullName = user.name || user.username || 'User';
+            document.getElementById('welcome-name').innerText = firstName;
+            document.getElementById('nav-user-name').innerText = fullName;
+
+            const avatarEl = document.getElementById('nav-avatar');
+            if (avatarEl) {
+                if (user.picture) {
+                    avatarEl.innerHTML = `<img src="${user.picture}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" onerror="this.onerror=null;this.parentElement.innerText='${initial}';">`;
+                    avatarEl.style.padding = '0';
+                    avatarEl.style.overflow = 'hidden';
+                } else {
+                    avatarEl.innerText = initial;
+                }
+            }
+
+            if (typeof updateGlobalUserProfile === 'function') {
+                updateGlobalUserProfile();
+            }
+
+            // 2. Candidate Score & Skill Evaluation
+            loadCandidateMatchScore(user);
+
+            // 3. Subscription Status
+            const subContainer = document.getElementById('sub-status-container');
+            const isPro = !!user.isPro;
+            
+            if (isPro) {
+                let planName = "Premium";
+                if (user.proPlan === 'affordable') planName = "Basic Pro (1 Month)";
+                if (user.proPlan === 'premium') planName = "Elite Pro (3 Months)";
+                if (user.proPlan === '6months') planName = "Lifetime Pro (6 Months)";
+
+                let expiryDate = user.proUntil ? new Date(user.proUntil).toLocaleDateString() : "Lifetime";
+
+                subContainer.innerHTML = `
+                    <div class="pro-badge"><i class="fas fa-bolt"></i> PRO ACTIVE</div>
+                    <p class="sub-details">
+                        Plan: <strong>${planName}</strong><br>
+                        Valid until: <strong>${expiryDate}</strong><br>
+                        <span style="color: var(--primary); margin-top: 10px; display: inline-block;">All Premium Features Unlocked</span>
+                    </p>
+                    <a href="pricing.html" class="upgrade-btn" style="background: rgba(255,255,255,0.1); color: #fff;">Extend Subscription</a>
+                `;
+            } else {
+                subContainer.innerHTML = `
+                    <div class="free-badge">FREE ACCOUNT</div>
+                    <p class="sub-details">
+                        Unlock premium resume templates, advanced AI mock interviews, and ad-free learning.
+                    </p>
+                    <a href="pricing.html" class="upgrade-btn">Upgrade to PRO</a>
+                `;
+            }
+
+            // 4. Resume History
+            const resumeContainer = document.getElementById('resume-container');
+            const resumeDataStr = localStorage.getItem('resumeData');
+            const selectedTemplate = localStorage.getItem('selectedTemplate') || 'hiero-executive';
+            
+            if (resumeDataStr) {
+                const resumeData = JSON.parse(resumeDataStr);
+                const fullName = resumeData.personalInfo?.fullName || 'My Resume';
+                const templateName = formatTemplateName(selectedTemplate);
+
+                resumeContainer.innerHTML = `
+                    <div class="resume-item">
+                        <div class="resume-info">
+                            <div class="resume-icon"><i class="fas fa-file-pdf"></i></div>
+                            <div class="resume-details">
+                                <h4>${fullName}</h4>
+                                <p>Template: ${templateName}</p>
+                            </div>
+                        </div>
+                        <div class="resume-actions">
+                            <a href="resume-builder.html">Open Builder</a>
+                        </div>
+                    </div>
+                    <a href="resume-builder.html" style="display: block; width: 100%; padding: 12px; text-align: center; border: 1px dashed rgba(42, 224, 35, 0.4); color: var(--primary); text-decoration: none; border-radius: 8px; font-size: 14px; margin-top: 15px; transition: 0.3s;" onmouseover="this.style.background='rgba(42, 224, 35, 0.05)'" onmouseout="this.style.background='transparent'"><i class="fas fa-plus"></i> Create New Resume</a>
+                `;
+            } else {
+                resumeContainer.innerHTML = `
+                    <div style="text-align: center; padding: 20px;">
+                        <i class="fas fa-folder-open" style="font-size: 40px; color: rgba(255,255,255,0.1); margin-bottom: 15px;"></i>
+                        <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 15px;">No resumes created yet.</p>
+                        <a href="resume-builder.html" style="background: var(--primary); color: #000; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px;">Build First Resume</a>
+                    </div>
+                `;
+            }
+        }
+
+        function loadCandidateMatchScore(user) {
+            let analysisData = null;
+            try {
+                const rawResult = localStorage.getItem('analysisResult') || localStorage.getItem('hieroAnalysisResult');
+                if (rawResult) {
+                    const parsed = JSON.parse(rawResult);
+                    analysisData = parsed.data || parsed;
+                }
+            } catch (e) {
+                console.warn('Error reading analysis data from storage:', e);
+            }
+
+            let resumeData = null;
+            try {
+                const rawResume = localStorage.getItem('resumeData');
+                if (rawResume) resumeData = JSON.parse(rawResume);
+            } catch (e) {}
+
+            let score = 0;
+            let atsScore = 82;
+            let matchedSkills = [];
+            let missingSkills = [];
+            let targetRole = 'Software Developer / Skill Alignment';
+
+            if (analysisData && (typeof analysisData.score === 'number' || typeof analysisData.score === 'string')) {
+                score = parseInt(analysisData.score) || 0;
+                atsScore = parseInt(analysisData.atsScore) || Math.min(100, score + 6);
+                matchedSkills = Array.isArray(analysisData.matchedSkills) ? analysisData.matchedSkills : (analysisData.resumeSkills || []);
+                missingSkills = Array.isArray(analysisData.missingSkills) ? analysisData.missingSkills : [];
+                if (analysisData.domain) {
+                    targetRole = `${analysisData.domain.toUpperCase()} Specialist / Skill Alignment`;
+                }
+            } else if (resumeData) {
+                let base = 50;
+                if (resumeData.personalInfo?.fullName) base += 10;
+                if (resumeData.personalInfo?.email) base += 5;
+                if (resumeData.experience?.length) base += 15;
+                if (resumeData.education?.length) base += 10;
+                if (resumeData.technicalSkills) base += 10;
+                score = Math.min(100, base);
+                atsScore = Math.min(100, base + 5);
+
+                if (resumeData.technicalSkills) {
+                    matchedSkills = resumeData.technicalSkills.split(/,|\n/).map(s => s.trim()).filter(Boolean);
+                }
+                if (resumeData.personalInfo?.professionalTitle) {
+                    targetRole = `${resumeData.personalInfo.professionalTitle} / Verified Profile`;
+                }
+            } else {
+                score = 78;
+                atsScore = 85;
+                matchedSkills = ['JavaScript', 'Python', 'React', 'HTML/CSS', 'Git'];
+                missingSkills = ['Docker', 'AWS'];
+            }
+
+            score = Math.min(Math.max(score, 0), 100);
+
+            // Update DOM Elements
+            const scoreValEl = document.getElementById('candidate-score-val');
+            if (scoreValEl) scoreValEl.innerText = `${score}%`;
+
+            const modalScoreEl = document.getElementById('modal-user-score');
+            if (modalScoreEl) modalScoreEl.innerText = `${score}%`;
+
+            const atsValEl = document.getElementById('ats-score-val');
+            if (atsValEl) atsValEl.innerText = `${atsScore}/100`;
+
+            const matchedCountEl = document.getElementById('matched-count-val');
+            if (matchedCountEl) matchedCountEl.innerText = matchedSkills.length;
+
+            const missingCountEl = document.getElementById('missing-count-val');
+            if (missingCountEl) missingCountEl.innerText = missingSkills.length;
+
+            const roleTargetEl = document.getElementById('candidate-role-target');
+            if (roleTargetEl) roleTargetEl.innerText = targetRole;
+
+            // Update SVG Ring Progress (stroke-dasharray = 264)
+            const svgBar = document.getElementById('score-svg-bar');
+            if (svgBar) {
+                const offset = 264 - (score / 100) * 264;
+                setTimeout(() => {
+                    svgBar.style.strokeDashoffset = offset;
+                }, 150);
+            }
+
+            // Update Badge
+            const badgeEl = document.getElementById('score-badge');
+            if (badgeEl) {
+                if (score >= 80) {
+                    badgeEl.innerText = 'High Compatibility';
+                    badgeEl.style.color = 'var(--primary)';
+                    badgeEl.style.borderColor = 'var(--primary)';
+                    badgeEl.style.background = 'rgba(7, 226, 25, 0.15)';
+                } else if (score >= 60) {
+                    badgeEl.innerText = 'Moderate Fit';
+                    badgeEl.style.color = 'var(--warning)';
+                    badgeEl.style.borderColor = 'var(--warning)';
+                    badgeEl.style.background = 'rgba(255, 184, 77, 0.15)';
+                } else {
+                    badgeEl.innerText = 'Needs Upskilling';
+                    badgeEl.style.color = 'var(--danger)';
+                    badgeEl.style.borderColor = 'var(--danger)';
+                    badgeEl.style.background = 'rgba(255, 68, 68, 0.15)';
+                }
+            }
+
+            // Update Company Match Percentages
+            const amazonMatch = Math.min(100, Math.max(60, score + 4));
+            const tcsMatch = Math.min(100, Math.max(65, score + 10));
+            const infosysMatch = Math.min(100, Math.max(65, score + 7));
+            const wiproMatch = Math.min(100, Math.max(60, score + 2));
+            const paytmMatch = Math.min(100, Math.max(60, score - 2));
+
+            if (document.getElementById('comp-match-amazon')) document.getElementById('comp-match-amazon').innerText = `${amazonMatch}% Fit`;
+            if (document.getElementById('comp-match-tcs')) document.getElementById('comp-match-tcs').innerText = `${tcsMatch}% Fit`;
+            if (document.getElementById('comp-match-infosys')) document.getElementById('comp-match-infosys').innerText = `${infosysMatch}% Fit`;
+            if (document.getElementById('comp-match-wipro')) document.getElementById('comp-match-wipro').innerText = `${wiproMatch}% Fit`;
+            if (document.getElementById('comp-match-paytm')) document.getElementById('comp-match-paytm').innerText = `${paytmMatch}% Fit`;
+
+            // Skill Chips
+            const chipsContainer = document.getElementById('matched-skills-container');
+            if (chipsContainer) {
+                if (matchedSkills.length > 0) {
+                    chipsContainer.innerHTML = matchedSkills.slice(0, 6).map(skill => 
+                        `<span class="skill-chip"><i class="fas fa-check-circle"></i> ${skill}</span>`
+                    ).join('');
+                } else {
+                    chipsContainer.innerHTML = `<span style="color: var(--text-muted); font-size: 13px;">Upload resume in Resume Builder or run Analysis to view verified skill tags.</span>`;
+                }
+            }
+        }
+
+        function openApplyModal() {
+            const modal = document.getElementById('apply-modal');
+            if (modal) modal.classList.add('active');
+        }
+
+        function closeApplyModal() {
+            const modal = document.getElementById('apply-modal');
+            if (modal) modal.classList.remove('active');
+        }
+
+        async function handleApplyToCompanies(btn) {
+            if (btn) {
+                btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Saving Resume to Backend...`;
+                btn.disabled = true;
+            }
+
+            try {
+                const userStr = localStorage.getItem('user');
+                const user = userStr ? JSON.parse(userStr) : {};
+                
+                let analysisData = null;
+                try {
+                    const rawResult = localStorage.getItem('analysisResult') || localStorage.getItem('hieroAnalysisResult');
+                    if (rawResult) analysisData = JSON.parse(rawResult).data || JSON.parse(rawResult);
+                } catch(e) {}
+
+                let resumeData = null;
+                try {
+                    const rawResume = localStorage.getItem('resumeData');
+                    if (rawResume) resumeData = JSON.parse(rawResume);
+                } catch(e) {}
+
+                const currentScoreVal = document.getElementById('candidate-score-val')?.innerText?.replace('%','') || '78';
+                const currentAtsVal = document.getElementById('ats-score-val')?.innerText?.split('/')[0] || '85';
+                const currentTargetDomain = document.getElementById('candidate-role-target')?.innerText || 'TECH Specialist';
+
+                let matchedSkills = [];
+                if (analysisData?.matchedSkills?.length) matchedSkills = analysisData.matchedSkills;
+                else if (resumeData?.technicalSkills) matchedSkills = String(resumeData.technicalSkills).split(/,|\n/).map(s => s.trim()).filter(Boolean);
+                else matchedSkills = ['Python', 'JavaScript', 'React', 'HTML/CSS', 'Git', 'Data Science'];
+
+                const payload = {
+                    userId: user.id || user.userId || user.email || 'user_' + Date.now(),
+                    fullName: user.name || user.username || resumeData?.personalInfo?.fullName || 'Jaswanth Kumar',
+                    email: user.email || resumeData?.personalInfo?.email || 'jaswanth@hiero.ai',
+                    phone: resumeData?.personalInfo?.phone || '',
+                    targetDomain: currentTargetDomain,
+                    score: parseInt(currentScoreVal) || 78,
+                    atsScore: parseInt(currentAtsVal) || 85,
+                    matchedSkills: matchedSkills,
+                    resumeData: resumeData || {}
+                };
+
+                const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
+                await fetch('/api/resume/save-user-resume', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                    },
+                    body: JSON.stringify(payload)
+                });
+            } catch(err) {
+                console.warn('Backend sync warning (proceeding to companies page):', err);
+            }
+
+            window.location.href = 'companies.html';
+        }
+
+        function applyToCompany(companyName, btn) {
+            btn.innerHTML = `<i class="fas fa-check-circle"></i> Applied!`;
+            btn.classList.add('applied');
+            btn.disabled = true;
+            setTimeout(() => {
+                window.location.href = `job_success.html?company=${encodeURIComponent(companyName)}&role=${encodeURIComponent('Senior Software Engineer')}&score=85%25`;
+            }, 450);
+        }
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('jwtToken');
+                localStorage.removeItem('user');
+                window.location.href = '/login.html';
+            }
+        }
+    </script>
+
+    <!-- Theme Toggle Floating Button -->
+    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Theme">
+        <i class="fas fa-sun"></i>
+    </button>
 </body>
 </html>

@@ -461,13 +461,26 @@
 
       <div style="display: flex; align-items: center; gap: 15px;">
         <a href="/Admin/dashboard.html" id="adminLink" style="display: none; color: #ff3b30; font-weight: 700; text-decoration: none; font-size: 13px; border: 1px solid #ff3b30; padding: 8px 16px; border-radius: 20px; transition: all 0.2s; background: rgba(255, 59, 48, 0.1);" onmouseover="this.style.background='rgba(255, 59, 48, 0.2)'" onmouseout="this.style.background='rgba(255, 59, 48, 0.1)'">Admin Dashboard</a>
+
+        <a href="dashboard.html" class="dashboard-nav-btn" style="display: flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #07e219, #00b248); color: #000; font-weight: 800; font-size: 13.5px; text-decoration: none; padding: 9px 20px; border-radius: 100px; box-shadow: 0 0 16px rgba(7, 226, 25, 0.35); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">
+          <i class="fa-solid fa-gauge-high"></i> Dashboard
+        </a>
         
-        <div class="user-access-pill" onclick="toggleUserDropdown()" id="userPill">
-          <div class="user-avatar-initial" id="userAvatarContainer">U</div>
-          <span class="user-name-label" id="userNameLabel">User Profile</span>
+        <div class="user-access-pill" id="userPill">
+          <div class="user-avatar-initial" id="userAvatarContainer" onclick="window.location.href='dashboard.html'" style="cursor: pointer;" title="Go to Dashboard">U</div>
+          <span class="user-name-label" id="userNameLabel" onclick="window.location.href='dashboard.html'" style="cursor: pointer;" title="Go to Dashboard">User Profile</span>
+          <i class="fa-solid fa-chevron-down" onclick="toggleUserDropdown()" style="font-size: 12px; color: var(--text-muted); margin-left: 6px; cursor: pointer;"></i>
           
-          <div class="logout-box" id="userDropdown">
-            <div class="logout-trigger" onclick="handleLogout()">Logout</div>
+          <div class="logout-box" id="userDropdown" style="background: #0d121c; border: 1px solid rgba(7, 226, 25, 0.35); border-radius: 14px; padding: 8px; width: 220px; box-shadow: 0 12px 36px rgba(0,0,0,0.7); position: absolute; top: 110%; right: 0; z-index: 1000; display: none;">
+            <div onclick="window.location.href='dashboard.html'" style="display: flex; align-items: center; gap: 10px; padding: 12px 14px; color: #07e219; font-weight: 800; font-size: 13.5px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.08); border-radius: 8px; transition: 0.2s;" onmouseover="this.style.background='rgba(7,226,25,0.12)'" onmouseout="this.style.background='transparent'">
+              <i class="fa-solid fa-house"></i> Go to Dashboard
+            </div>
+            <div onclick="window.location.href='companies.html'" style="display: flex; align-items: center; gap: 10px; padding: 12px 14px; color: #ffffff; font-weight: 700; font-size: 13.5px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.08); border-radius: 8px; transition: 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='transparent'">
+              <i class="fa-solid fa-building"></i> Target Companies
+            </div>
+            <div class="logout-trigger" onclick="handleLogout()" style="display: flex; align-items: center; gap: 10px; padding: 12px 14px; color: #ff4d4d; font-weight: 700; font-size: 13.5px; cursor: pointer; border-radius: 8px; transition: 0.2s;" onmouseover="this.style.background='rgba(255,77,77,0.12)'" onmouseout="this.style.background='transparent'">
+              <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
+            </div>
           </div>
         </div>
       </div>
@@ -490,7 +503,7 @@
         <div class="skill-pill">Resume Builder</div>
         <div class="skill-pill">Resume Match Score</div>
         <div class="skill-pill">AI Mock Interviews</div>
-        <div class="skill-pill">Skill Learning</div>
+        <div class="skill-pill" onclick="window.location.href='companies.html'" style="cursor: pointer;">Target Companies & Jobs</div>
       </div>
 
       <div class="grid-layout">
@@ -513,6 +526,13 @@
           <h3>Mock Interview</h3>
           <p>Practice AI Interviews tailored to your resume</p>
           <div class="card-act-btn ghost-outline">Practice <i class="fa-solid fa-arrow-right"></i></div>
+        </a>
+
+        <a href="/companies.html" class="grid-card">
+          <i class="fa-solid fa-building" style="font-size: 28px; color: var(--primary); margin-bottom: 12px;"></i>
+          <h3>Target Companies</h3>
+          <p>Benchmark engineering fit & apply directly to top tech companies</p>
+          <div class="card-act-btn ghost-outline">Apply Now <i class="fa-solid fa-arrow-right"></i></div>
         </a>
       </div>
     </main>
