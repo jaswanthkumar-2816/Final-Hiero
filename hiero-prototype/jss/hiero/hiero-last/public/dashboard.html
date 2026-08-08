@@ -577,7 +577,7 @@
                     </div>
 
                     <div class="score-card-actions">
-                        <button class="apply-companies-btn" onclick="window.location.href='companies.html'">
+                        <button class="apply-companies-btn" onclick="handleApplyToCompanies(this)">
                             <i class="fas fa-paper-plane"></i> Apply to Companies with Match Score
                         </button>
                         <a href="analysis.html" class="reanalyze-btn">
@@ -1075,6 +1075,65 @@
         function closeApplyModal() {
             const modal = document.getElementById('apply-modal');
             if (modal) modal.classList.remove('active');
+        }
+
+        async function handleApplyToCompanies(btn) {
+            if (btn) {
+                btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Saving Resume to Backend...`;
+                btn.disabled = true;
+            }
+
+            try {
+                const userStr = localStorage.getItem('user');
+                const user = userStr ? JSON.parse(userStr) : {};
+                
+                let analysisData = null;
+                try {
+                    const rawResult = localStorage.getItem('analysisResult') || localStorage.getItem('hieroAnalysisResult');
+                    if (rawResult) analysisData = JSON.parse(rawResult).data || JSON.parse(rawResult);
+                } catch(e) {}
+
+                let resumeData = null;
+                try {
+                    const rawResume = localStorage.getItem('resumeData');
+                    if (rawResume) resumeData = JSON.parse(rawResume);
+                } catch(e) {}
+
+                const currentScoreVal = document.getElementById('candidate-score-val')?.innerText?.replace('%','') || '78';
+                const currentAtsVal = document.getElementById('ats-score-val')?.innerText?.split('/')[0] || '85';
+                const currentTargetDomain = document.getElementById('candidate-role-target')?.innerText || 'TECH Specialist';
+
+                let matchedSkills = [];
+                if (analysisData?.matchedSkills?.length) matchedSkills = analysisData.matchedSkills;
+                else if (resumeData?.technicalSkills) matchedSkills = String(resumeData.technicalSkills).split(/,|\n/).map(s => s.trim()).filter(Boolean);
+                else matchedSkills = ['Python', 'JavaScript', 'React', 'HTML/CSS', 'Git', 'Data Science'];
+
+                const payload = {
+                    userId: user.id || user.userId || user.email || 'user_' + Date.now(),
+                    fullName: user.name || user.username || resumeData?.personalInfo?.fullName || 'Jaswanth Kumar',
+                    email: user.email || resumeData?.personalInfo?.email || 'jaswanth@hiero.ai',
+                    phone: resumeData?.personalInfo?.phone || '',
+                    targetDomain: currentTargetDomain,
+                    score: parseInt(currentScoreVal) || 78,
+                    atsScore: parseInt(currentAtsVal) || 85,
+                    matchedSkills: matchedSkills,
+                    resumeData: resumeData || {}
+                };
+
+                const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
+                await fetch('/api/resume/save-user-resume', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                    },
+                    body: JSON.stringify(payload)
+                });
+            } catch(err) {
+                console.warn('Backend sync warning (proceeding to companies page):', err);
+            }
+
+            window.location.href = 'companies.html';
         }
 
         function applyToCompany(companyName, btn) {

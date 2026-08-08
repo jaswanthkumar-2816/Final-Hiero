@@ -142,8 +142,6 @@ app.get('/dashboard', authObj.authenticateToken, (req, res, next) => {
 // 📄 Resume API (Integrated!)
 // Mount Import Service FIRST to handle /import requests effectively
 const importRouter = require('./routes/import-service');
-app.use('/api/resume', importRouter);
-
 const resumeRouter = require('./routes/resume');
 app.use('/api/resume', resumeRouter);
 

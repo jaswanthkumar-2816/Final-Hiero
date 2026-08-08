@@ -643,7 +643,7 @@
             }
         ];
 
-        function initializeCompaniesPage() {
+        async function initializeCompaniesPage() {
             // Read Auth & Profile
             const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
             const userStr = localStorage.getItem('user');
@@ -654,7 +654,16 @@
                     const displayName = user.name || user.username || 'Candidate';
                     document.getElementById('user-display-name').innerText = displayName;
                     document.getElementById('nav-user-name').innerText = displayName;
-                    document.getElementById('nav-avatar').innerText = displayName.charAt(0).toUpperCase();
+                    if (user.picture) {
+                        const avatarEl = document.getElementById('nav-avatar');
+                        if (avatarEl) {
+                            avatarEl.innerHTML = `<img src="${user.picture}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+                            avatarEl.style.padding = '0';
+                            avatarEl.style.overflow = 'hidden';
+                        }
+                    } else {
+                        document.getElementById('nav-avatar').innerText = displayName.charAt(0).toUpperCase();
+                    }
                 } catch(e) {}
             }
 
@@ -666,7 +675,7 @@
                 }
             } catch(e) {}
 
-            // Load Candidate Score & Skills from Storage
+            // Load Candidate Score & Skills from Local Storage first
             let analysisData = null;
             try {
                 const rawResult = localStorage.getItem('analysisResult') || localStorage.getItem('hieroAnalysisResult');
@@ -701,6 +710,27 @@
             } else {
                 candidateScore = 71;
                 candidateSkills = ["analysis", "data science", "machine learning", "python", "pytorch"];
+            }
+
+            // Fetch stored user resume from Backend API (Overrides with verified server details)
+            try {
+                const response = await fetch('/api/resume/get-user-resume', {
+                    headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+                });
+                if (response.ok) {
+                    const resData = await response.json();
+                    if (resData.success && resData.data) {
+                        const backendData = resData.data;
+                        candidateScore = backendData.score || candidateScore;
+                        if (Array.isArray(backendData.matchedSkills) && backendData.matchedSkills.length > 0) {
+                            candidateSkills = backendData.matchedSkills;
+                        }
+                        if (backendData.fullName) document.getElementById('user-display-name').innerText = backendData.fullName;
+                        if (backendData.targetDomain) document.getElementById('user-target-domain').innerText = backendData.targetDomain;
+                    }
+                }
+            } catch(err) {
+                console.warn('Fallback to local candidate score:', err);
             }
 
             document.getElementById('user-score-num').innerText = `${candidateScore}%`;
@@ -780,7 +810,34 @@
             }).join('');
         }
 
-        function applyToCompany(companyName, btn) {
+        async function applyToCompany(companyName, btn) {
+            btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Submitting...`;
+            btn.disabled = true;
+
+            try {
+                const userStr = localStorage.getItem('user');
+                const user = userStr ? JSON.parse(userStr) : {};
+                const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
+
+                await fetch('/api/resume/apply-company', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                    },
+                    body: JSON.stringify({
+                        companyName: companyName,
+                        jobRole: 'Software Engineer',
+                        matchScore: `${candidateScore}%`,
+                        userId: user.id || user.userId || user.email || 'user_123',
+                        email: user.email || 'jaswanth@hiero.ai',
+                        fullName: document.getElementById('user-display-name')?.innerText || user.name || 'Jaswanth Kumar'
+                    })
+                });
+            } catch(err) {
+                console.warn('Backend application log error:', err);
+            }
+
             btn.innerHTML = `<i class="fas fa-check-circle"></i> Applied`;
             btn.classList.add('applied');
             btn.disabled = true;
