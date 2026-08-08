@@ -6,6 +6,8 @@
     <title>Hiero Command Center</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="theme.css">
+    <script src="theme.js"></script>
     <style>
         :root {
             --primary: #07e219;
@@ -504,7 +506,10 @@
             <a href="learn.html">Learn</a>
         </div>
         <div class="user-profile">
-            <span id="nav-user-name" style="font-weight: 500; font-size: 15px;">Loading...</span>
+            <button class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Theme" style="background: rgba(255,255,255,0.08); border: 1px solid var(--card-border); color: #fff; padding: 8px 12px; border-radius: 8px; cursor: pointer; transition: 0.3s; margin-right: 8px;">
+                <i class="fas fa-sun"></i>
+            </button>
+            <span id="nav-user-name" class="user-name-full" style="font-weight: 500; font-size: 15px;">Loading...</span>
             <div class="user-avatar" id="nav-avatar">U</div>
             <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i></button>
         </div>
@@ -1073,5 +1078,10 @@
             }
         }
     </script>
+
+    <!-- Theme Toggle Floating Button -->
+    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Theme">
+        <i class="fas fa-sun"></i>
+    </button>
 </body>
 </html>
