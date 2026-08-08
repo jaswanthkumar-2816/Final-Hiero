@@ -832,18 +832,42 @@
         }
 
         function initializeDashboard() {
+            // Check for OAuth token/user in URL query params
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlToken = urlParams.get('token');
+            const urlUser = urlParams.get('user');
+            if (urlToken) {
+                localStorage.setItem('token', urlToken);
+                localStorage.setItem('jwtToken', urlToken);
+            }
+            if (urlUser) {
+                try {
+                    localStorage.setItem('user', decodeURIComponent(urlUser));
+                } catch(e) {
+                    localStorage.setItem('user', urlUser);
+                }
+            }
+            if (urlToken || urlUser) {
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+
             // 1. Auth Check & User Data
             const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
             const userStr = localStorage.getItem('user');
 
             if (!token || !userStr) {
-                window.location.href = '/dashboard/login.html';
+                window.location.href = '/login.html';
                 return;
             }
 
-            const user = JSON.parse(userStr);
+            let user = {};
+            try {
+                user = typeof userStr === 'string' ? JSON.parse(userStr) : userStr;
+            } catch(e) {
+                user = { name: 'User' };
+            }
             const firstName = user.name ? user.name.split(' ')[0] : (user.username || 'User');
-            const initial = firstName.charAt(0).toUpperCase();
+            const initial = (firstName || 'U').charAt(0).toUpperCase();
 
             // Populate User info
             const fullName = user.name || user.username || 'User';
@@ -1148,7 +1172,7 @@
                 localStorage.removeItem('token');
                 localStorage.removeItem('jwtToken');
                 localStorage.removeItem('user');
-                window.location.href = '/dashboard/login.html';
+                window.location.href = '/login.html';
             }
         }
     </script>

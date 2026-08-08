@@ -137,5 +137,33 @@
     "password": "$2a$10$jpNBL8yBZGcUoqkBe1a5d.XbWdYtg7YLNJ9ER5HjMJfH6o5i5nOly",
     "emailVerified": false,
     "signupMethod": "email"
+  },
+  {
+    "id": 101,
+    "googleId": "101125817092435061074",
+    "email": "rahulchavan22468@gmail.com",
+    "name": "rahul chavan",
+    "emailVerified": true,
+    "signupMethod": "google",
+    "picture": "https://lh3.googleusercontent.com/a/ACg8ocKKJYbs8dJTiZ5n8jyNWf7ClxMOBbx0EJUpNOtVD3YS5_GB89GP=s96-c"
+  },
+  {
+    "id": 102,
+    "name": "Test Speed",
+    "email": "testuser_1786122789642@example.com",
+    "password": "$2a$10$BzEDyiXWbmhhWbP1u/e9Je20GSR7UyzS0PRLwP43c5vgkFMv6HhmK",
+    "emailVerified": true,
+    "signupMethod": "email"
+  },
+  {
+    "id": 103,
+    "googleId": "117692295317482917698",
+    "email": "str.hackathon150823@gmail.com",
+    "name": "Hackathon",
+    "emailVerified": true,
+    "signupMethod": "google",
+    "picture": "https://lh3.googleusercontent.com/a/ACg8ocIbZOMpxYIIM0nWaWQPPwNN26vZ9a0H0TFuyDpBKUB6jbMw1i4=s96-c",
+    "loginCount": 2,
+    "lastLogin": "2026-08-07T17:37:08.804Z"
   }
 ]

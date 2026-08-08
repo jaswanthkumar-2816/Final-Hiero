@@ -149,12 +149,14 @@
   </div>
 
   <script>
-    // ✅ Splash screen delay
+    // ✅ Splash screen delay (fast transition)
     window.addEventListener("DOMContentLoaded", () => {
       setTimeout(() => {
-        document.getElementById("splash-screen").style.display = "none";
-        document.getElementById("main-content").style.display = "flex";
-      }, 3000);
+        const splash = document.getElementById("splash-screen");
+        if (splash) splash.style.display = "none";
+        const main = document.getElementById("main-content");
+        if (main) main.style.display = "flex";
+      }, 300);
     });
 
     // ✅ Login logic
@@ -174,7 +176,7 @@
         if (res.ok) {
           localStorage.setItem("token", result.token);
           localStorage.setItem("user", JSON.stringify(result.user));
-          window.location.href = "/dashboard";
+          window.location.href = "/index.html";
         } else {
           alert("❌ " + (result.error || "Login failed"));
         }

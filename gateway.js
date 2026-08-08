@@ -200,7 +200,10 @@ app.get('/', (req, res) => {
 // Explicit UI Routes
 app.get(['/login', '/login.html'], (req, res) => res.sendFile(path.join(landingDirPath, 'login.html')));
 app.get(['/signup', '/signup.html'], (req, res) => res.sendFile(path.join(landingDirPath, 'signup.html')));
-app.get('/dashboard.html', (req, res) => res.sendFile(path.join(resumeBuilderPath, 'dashboard.html')));
+app.get(['/index.html', '/dashboard', '/dashboard.html'], (req, res) => {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.sendFile(path.join(resumeBuilderPath, 'index.html'));
+});
 
 // Route /get-started to the role selection page
 app.get('/get-started', (req, res) => {
@@ -209,6 +212,7 @@ app.get('/get-started', (req, res) => {
 
 app.get(['/mock-interview', '/mock-interview.html'], (req, res) => res.sendFile(path.join(__dirname, 'mock-interview.html')));
 app.get(['/result', '/result.html'], (req, res) => res.sendFile(path.join(__dirname, 'result.html')));
+app.get(['/companies', '/companies.html'], (req, res) => res.sendFile(path.join(__dirname, 'companies.html')));
 app.get(['/session', '/session.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'session.html')));
 app.get('/sitemap.xml', (req, res) => res.sendFile(path.join(landingDirPath, 'sitemap.xml')));
 app.get('/robots.txt', (req, res) => res.sendFile(path.join(landingDirPath, 'robots.txt')));

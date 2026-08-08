@@ -67,7 +67,7 @@ async function sendFeedbackRequestEmail(email, name) {
     }
 
     const userName = name || email.split('@')[0];
-    const appUrl = process.env.PUBLIC_URL || 'https://hiero.in';
+    const appUrl = process.env.PUBLIC_URL || 'http://localhost:2816';
     const feedbackUrl = `${appUrl}/feedback.html?email=${encodeURIComponent(email)}&name=${encodeURIComponent(userName)}`;
 
     const mailOptions = {

@@ -304,7 +304,7 @@ router.post('/signup', async (req, res) => {
         name: name.trim(),
         email: email.trim().toLowerCase(),
         password: hashedPassword,
-        emailVerified: false,
+        emailVerified: true, // Auto-verified for instant access
         signupMethod: 'email',
     };
     users.push(user);
@@ -313,17 +313,17 @@ router.post('/signup', async (req, res) => {
     const token = jwt.sign({ email: user.email, userId: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
     const link = `${PUBLIC_URL}/verify-email?token=${token}`;
 
-    try {
-        await transporter.sendMail({
+    // Send email non-blocking in background
+    if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+        transporter.sendMail({
             from: process.env.EMAIL_USER,
             to: user.email,
-            subject: `Verify Your Hiero Account`,
-            html: `<p>Please <a href="${link}">click here</a> to verify your account.</p>`
-        });
-        res.status(201).json({ message: 'Account created! Check your email.' });
-    } catch (err) {
-        res.status(201).json({ message: 'Account created! (Email sending failed)', verificationLink: link });
+            subject: `Welcome to Hiero!`,
+            html: `<p>Welcome to Hiero! Your account is active. <a href="${PUBLIC_URL}/login.html">Click here to log in</a>.</p>`
+        }).catch(err => console.warn('Email notification warning:', err.message));
     }
+
+    res.status(201).json({ message: 'Account created successfully! You can now log in.', user: { id: user.id, name: user.name, email: user.email } });
 });
 
 // Verify Email
@@ -334,7 +334,8 @@ router.get('/verify-email', (req, res) => {
         const user = users.find(u => u.id === userId && u.email === email);
         if (!user) return res.status(400).json({ error: 'Invalid token' });
         user.emailVerified = true;
-        res.redirect('/login?verified=true');
+        saveUsers();
+        res.redirect('/login.html?verified=true');
     } catch {
         res.status(400).json({ error: 'Invalid or expired token' });
     }
@@ -349,14 +350,12 @@ router.post('/login', async (req, res) => {
     const match = await bcrypt.compare(password.trim(), user.password);
     if (!match) return res.status(400).json({ error: 'Incorrect password' });
 
-    if (!user.emailVerified) return res.status(400).json({ error: 'Email not verified' });
-
     const token = jwt.sign({ userId: user.id, name: user.name, email: user.email }, process.env.JWT_SECRET, { expiresIn: '7d' });
     res.json({ token, user: { id: user.id, name: user.name, email: user.email, picture: user.picture } });
 });
 
 // OAuth callbacks
-router.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+router.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'], prompt: 'select_account' }));
 router.get('/auth/google/callback', passport.authenticate('google', { session: false }), (req, res) => {
     const user = { id: req.user.id, name: req.user.name, email: req.user.email, picture: req.user.picture };
     const token = jwt.sign({ userId: user.id, name: user.name, email: user.email }, process.env.JWT_SECRET, { expiresIn: '7d' });
