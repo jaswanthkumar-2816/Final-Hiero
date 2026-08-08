@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <circle cx="100" cy="100" r="98" fill="#FFFFFF" stroke="#CCCCCC" stroke-width="2"/>
+  <defs>
+    <linearGradient id="sapBlue" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#00A1E0"/>
+      <stop offset="100%" stop-color="#005EA6"/>
+    </linearGradient>
+    <clipPath id="circ"><circle cx="100" cy="100" r="96"/></clipPath>
+  </defs>
+  <polygon points="22,68 178,68 148,140 22,140" fill="url(#sapBlue)" clip-path="url(#circ)"/>
+  <text x="34" y="128" font-family="Arial Black, Impact, sans-serif" font-size="58" font-weight="900" fill="#FFFFFF" clip-path="url(#circ)">SAP</text>
+</svg>
