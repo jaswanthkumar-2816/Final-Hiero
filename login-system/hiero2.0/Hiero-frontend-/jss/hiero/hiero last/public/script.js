@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // Use the main backend which now includes analysis server
-  const BACKEND_URL = "https://hiero-analysis-part.onrender.com";
+  // Use current gateway origin as backend
+  const BACKEND_URL = window.location.origin;
   console.log("🔍 Using backend:", BACKEND_URL);
   const form = document.getElementById("analyze-form");
   const loadingOverlay = document.getElementById("loading-overlay");

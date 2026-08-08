@@ -61,7 +61,7 @@ document.addEventListener("DOMContentLoaded", () => {
     formData.append("jd", jdFile);
 
     try {
-      const response = await fetch("http://localhost:5001/api/analyze", {
+      const response = await fetch("/api/analysis/analyze", {
         method: "POST",
         body: formData,
       });
