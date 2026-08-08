@@ -1164,7 +1164,9 @@
             btn.innerHTML = `<i class="fas fa-check-circle"></i> Applied!`;
             btn.classList.add('applied');
             btn.disabled = true;
-            alert(`🎉 Application submitted successfully to ${companyName} with your verified Hiero Candidate Score!`);
+            setTimeout(() => {
+                window.location.href = 'success.html';
+            }, 600);
         }
 
         function logout() {

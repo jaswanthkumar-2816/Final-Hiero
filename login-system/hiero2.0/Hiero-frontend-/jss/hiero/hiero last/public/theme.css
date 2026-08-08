@@ -390,3 +390,95 @@ body.light-mode .chat-input {
     background: #f1f3f5 !important;
     color: #333 !important;
 }
+
+/* =========================================================
+   GLOBAL LIGHT MODE HIGH-CONTRAST TEXT & UI FIX
+   ========================================================= */
+[data-theme="light"],
+body.light-mode,
+html[data-theme="light"] body {
+    background-color: #f8fafc !important;
+    background: #f8fafc !important;
+    color: #0f172a !important;
+}
+
+[data-theme="light"] h1, [data-theme="light"] h2, [data-theme="light"] h3, [data-theme="light"] h4, [data-theme="light"] h5, [data-theme="light"] h6,
+body.light-mode h1, body.light-mode h2, body.light-mode h3, body.light-mode h4, body.light-mode h5, body.light-mode h6,
+[data-theme="light"] .page-title, [data-theme="light"] .hero-title, [data-theme="light"] .title, [data-theme="light"] .card-title,
+body.light-mode .page-title, body.light-mode .hero-title, body.light-mode .title, body.light-mode .card-title {
+    color: #0f172a !important;
+    -webkit-text-fill-color: #0f172a !important;
+    text-shadow: none !important;
+}
+
+[data-theme="light"] .accent-highlight, [data-theme="light"] span.accent, [data-theme="light"] .primary-text,
+body.light-mode .accent-highlight, body.light-mode span.accent, body.light-mode .primary-text {
+    color: #05a313 !important;
+    -webkit-text-fill-color: #05a313 !important;
+}
+
+[data-theme="light"] p, [data-theme="light"] span, [data-theme="light"] label, [data-theme="light"] div, [data-theme="light"] li,
+body.light-mode p, body.light-mode span, body.light-mode label, body.light-mode div, body.light-mode li {
+    color: #334155;
+}
+
+[data-theme="light"] .page-subtitle, [data-theme="light"] .subtext, [data-theme="light"] .sub-details, [data-theme="light"] .text-muted,
+body.light-mode .page-subtitle, body.light-mode .subtext, body.light-mode .sub-details, body.light-mode .text-muted {
+    color: #475569 !important;
+}
+
+[data-theme="light"] .company-card, [data-theme="light"] .kpi-benchmark-deck, [data-theme="light"] .card, [data-theme="light"] .container-card,
+body.light-mode .company-card, body.light-mode .kpi-benchmark-deck, body.light-mode .card, body.light-mode .container-card {
+    background: #ffffff !important;
+    border-color: #e2e8f0 !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05) !important;
+    color: #0f172a !important;
+}
+
+[data-theme="light"] .comp-title-info h3, [data-theme="light"] .comp-title-info p, [data-theme="light"] .job-role-info h4,
+body.light-mode .comp-title-info h3, body.light-mode .comp-title-info p, body.light-mode .job-role-info h4 {
+    color: #0f172a !important;
+    -webkit-text-fill-color: #0f172a !important;
+}
+
+[data-theme="light"] .search-box input, [data-theme="light"] input[type="text"], [data-theme="light"] textarea,
+body.light-mode .search-box input, body.light-mode input[type="text"], body.light-mode textarea {
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    color: #0f172a !important;
+}
+
+[data-theme="light"] .filter-btn, [data-theme="light"] .meta-pill, [data-theme="light"] .req-chip, [data-theme="light"] .candidate-meta-pill,
+body.light-mode .filter-btn, body.light-mode .meta-pill, body.light-mode .req-chip, body.light-mode .candidate-meta-pill {
+    background: #f1f5f9 !important;
+    border: 1px solid #cbd5e1 !important;
+    color: #1e293b !important;
+}
+
+[data-theme="light"] .filter-btn.active, body.light-mode .filter-btn.active {
+    background: rgba(7, 226, 25, 0.15) !important;
+    border-color: #07e219 !important;
+    color: #047857 !important;
+}
+
+[data-theme="light"] .req-chip.matched, body.light-mode .req-chip.matched {
+    background: rgba(7, 226, 25, 0.15) !important;
+    border-color: rgba(7, 226, 25, 0.4) !important;
+    color: #047857 !important;
+}
+
+[data-theme="light"] .kpi-stat-value, [data-theme="light"] .kpi-stat-lbl, [data-theme="light"] .stat-num, [data-theme="light"] .stat-lbl,
+body.light-mode .kpi-stat-value, body.light-mode .kpi-stat-lbl, body.light-mode .stat-num, body.light-mode .stat-lbl {
+    color: #0f172a !important;
+    -webkit-text-fill-color: #0f172a !important;
+}
+
+[data-theme="light"] .breadcrumb-row, [data-theme="light"] .breadcrumb-row span,
+body.light-mode .breadcrumb-row, body.light-mode .breadcrumb-row span {
+    color: #475569 !important;
+}
+
+[data-theme="light"] .breadcrumb-row span.current, body.light-mode .breadcrumb-row span.current {
+    color: #0f172a !important;
+    font-weight: 600;
+}

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<<<<<<<< HEAD <html lang="en">
+<<html lang="en">
 
   <head>
     <meta charset="UTF-8">
@@ -1005,7 +1005,11 @@
         appliedCompanies.add(companyName);
         localStorage.setItem('hieroAppliedCompanies', JSON.stringify(Array.from(appliedCompanies)));
 
-        showToast(`🎉 Application submitted to ${companyName} with your ${candidateScore}% Hiero Match Score!`);
+        showToast(`🎉 Application submitted to ${companyName} with your ${candidateScore}% Hiero Match Score! Redirecting...`);
+
+        setTimeout(() => {
+          window.location.href = 'success.html';
+        }, 800);
       }
 
       function showToast(message) {
@@ -4550,5 +4554,3 @@
           render();
         }
       </script>
-      >>>>>>> e0f33f9 (Add official company logos for Microsoft, Amazon, Google, Meta, Apple, IBM, Oracle, SAP,
-      Deloitte, Accenture, and more)

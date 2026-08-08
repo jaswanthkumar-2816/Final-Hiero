@@ -200,9 +200,9 @@ app.get('/', (req, res) => {
 // Explicit UI Routes
 app.get(['/login', '/login.html'], (req, res) => res.sendFile(path.join(landingDirPath, 'login.html')));
 app.get(['/signup', '/signup.html'], (req, res) => res.sendFile(path.join(landingDirPath, 'signup.html')));
-app.get(['/index.html', '/dashboard', '/dashboard.html'], (req, res) => {
+app.get(['/index', '/index.html', '/dashboard', '/dashboard.html'], (req, res) => {
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-    res.sendFile(path.join(resumeBuilderPath, 'index.html'));
+    res.sendFile(path.join(resumeBuilderPath, 'dashboard.html'));
 });
 
 // Route /get-started to the role selection page
@@ -213,7 +213,8 @@ app.get('/get-started', (req, res) => {
 app.get(['/mock-interview', '/mock-interview.html'], (req, res) => res.sendFile(path.join(__dirname, 'mock-interview.html')));
 app.get(['/result', '/result.html'], (req, res) => res.sendFile(path.join(__dirname, 'result.html')));
 app.get(['/companies', '/companies.html'], (req, res) => res.sendFile(path.join(__dirname, 'companies.html')));
-app.get(['/session', '/session.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'session.html')));
+app.get(['/company', '/company.html'], (req, res) => res.sendFile(path.join(__dirname, 'company.html')));
+app.get(['/success', '/success.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'success.html')));
 app.get('/sitemap.xml', (req, res) => res.sendFile(path.join(landingDirPath, 'sitemap.xml')));
 app.get('/robots.txt', (req, res) => res.sendFile(path.join(landingDirPath, 'robots.txt')));
 
@@ -239,6 +240,7 @@ app.get(['/ai-photo-formalizer', '/ai-photo-formalizer.html'], (req, res) => res
 // ======================
 // STATIC FILES
 // ======================
+app.use(express.static(__dirname, { index: false }));           // ← root SVGs (microsoft.svg, google.svg etc.)
 app.use(express.static(landingDirPath, { index: false }));
 app.use(express.static(resumeBuilderPath, { index: false }));
 app.use('/public', express.static(resumeBuilderPath));
