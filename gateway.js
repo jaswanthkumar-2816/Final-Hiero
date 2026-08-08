@@ -200,7 +200,12 @@ app.get('/', (req, res) => {
 // Explicit UI Routes
 app.get(['/login', '/login.html'], (req, res) => res.sendFile(path.join(landingDirPath, 'login.html')));
 app.get(['/signup', '/signup.html'], (req, res) => res.sendFile(path.join(landingDirPath, 'signup.html')));
-app.get(['/index', '/index.html', '/dashboard', '/dashboard.html'], (req, res) => {
+app.get(['/index', '/index.html'], (req, res) => {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.sendFile(path.join(resumeBuilderPath, 'index.html'));
+});
+
+app.get(['/dashboard', '/dashboard.html'], (req, res) => {
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     res.sendFile(path.join(resumeBuilderPath, 'dashboard.html'));
 });
