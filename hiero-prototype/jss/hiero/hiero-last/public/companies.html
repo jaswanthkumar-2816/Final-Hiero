@@ -1,3436 +1,921 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
-
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hiero | Target Companies & Top Engineering Roles</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap"
-    rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="theme.css">
-  <script src="theme.js"></script>
-  <style>
-    :root {
-      --font-main: 'Plus Jakarta Sans', -apple-system, sans-serif;
-      --font-display: 'Outfit', sans-serif;
-      --transition-speed: 0.25s;
-
-      /* Dark Mode Palette with Exact Brand Electric Neon Green (#07e219) */
-      --bg-color: #07090e;
-      --surface-1: #0d121c;
-      --surface-2: #131b28;
-      --surface-subtle: rgba(255, 255, 255, 0.025);
-      --nav-bg: rgba(7, 9, 14, 0.88);
-
-      --card-bg: rgba(13, 18, 28, 0.65);
-      --card-bg-hover: rgba(19, 27, 40, 0.85);
-      --card-border: rgba(255, 255, 255, 0.07);
-      --card-border-hover: rgba(7, 226, 25, 0.4);
-      --card-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.5);
-      --card-shadow-hover: 0 20px 40px -10px rgba(7, 226, 25, 0.15);
-
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-      --text-subtle: #64748b;
-      --border-color: rgba(255, 255, 255, 0.07);
-      --divider-color: rgba(255, 255, 255, 0.05);
-
-      --primary-accent: #07e219;
-      --primary-accent-glow: rgba(7, 226, 25, 0.35);
-      --primary-accent-subtle: rgba(7, 226, 25, 0.12);
-      --nav-active-bg: rgba(7, 226, 25, 0.12);
-      --nav-active-text: #07e219;
-      --glow-top: rgba(7, 226, 25, 0.12);
-      --glow-bottom: rgba(56, 189, 248, 0.06);
-
-      --sub-card-bg: rgba(255, 255, 255, 0.02);
-      --sub-card-border: rgba(255, 255, 255, 0.05);
-
-      --c-green: #07e219;
-      --c-green-bg: rgba(7, 226, 25, 0.12);
-      --c-orange: #f59e0b;
-      --c-orange-bg: rgba(245, 158, 11, 0.1);
-      --c-purple: #a855f7;
-      --c-purple-bg: rgba(168, 85, 247, 0.1);
-      --c-red: #ef4444;
-      --c-red-bg: rgba(239, 68, 68, 0.1);
-      --c-blue: #38bdf8;
-      --c-blue-bg: rgba(56, 189, 248, 0.1);
-    }
-
-    [data-theme="light"],
-    body.light-mode {
-      --bg-color: #f8fafc;
-      --surface-1: #ffffff;
-      --surface-2: #f1f5f9;
-      --surface-subtle: #f8fafc;
-      --nav-bg: rgba(255, 255, 255, 0.9);
-
-      --card-bg: #ffffff;
-      --card-bg-hover: #ffffff;
-      --card-border: #e2e8f0;
-      --card-border-hover: rgba(5, 190, 20, 0.4);
-      --card-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
-      --card-shadow-hover: 0 16px 32px -6px rgba(5, 190, 20, 0.12);
-
-      --text-main: #0f172a;
-      --text-muted: #475569;
-      --text-subtle: #94a3b8;
-      --border-color: #e2e8f0;
-      --divider-color: #f1f5f9;
-
-      --primary-accent: #05be14;
-      --primary-accent-glow: rgba(5, 190, 20, 0.25);
-      --primary-accent-subtle: rgba(5, 190, 20, 0.08);
-      --nav-active-bg: rgba(5, 190, 20, 0.08);
-      --nav-active-text: #05be14;
-      --glow-top: rgba(5, 190, 20, 0.05);
-      --glow-bottom: rgba(56, 189, 248, 0.03);
-
-      --sub-card-bg: #f8fafc;
-      --sub-card-border: #edf2f7;
-
-      --c-green: #05be14;
-      --c-green-bg: rgba(5, 190, 20, 0.1);
-      --c-orange: #d97706;
-      --c-orange-bg: rgba(217, 119, 6, 0.08);
-      --c-purple: #7c3aed;
-      --c-purple-bg: rgba(124, 58, 237, 0.08);
-      --c-red: #dc2626;
-      --c-red-bg: rgba(220, 38, 38, 0.08);
-      --c-blue: #0284c7;
-      --c-blue-bg: rgba(2, 132, 199, 0.08);
-    }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: var(--font-main);
-      -webkit-font-smoothing: antialiased;
-    }
-
-    body {
-      background-color: var(--bg-color);
-      color: var(--text-main);
-      font-size: 14.5px;
-      line-height: 1.6;
-      min-height: 100vh;
-      overflow-x: hidden;
-      position: relative;
-      transition: background-color var(--transition-speed), color var(--transition-speed);
-    }
-
-    /* Ambient Background Mesh */
-    #ambient-canvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 0;
-      pointer-events: none;
-      opacity: 0.5;
-    }
-
-    .ambient-glow-1 {
-      position: fixed;
-      top: -120px;
-      left: 20%;
-      width: 600px;
-      height: 600px;
-      border-radius: 50%;
-      background: radial-gradient(circle, var(--glow-top) 0%, transparent 70%);
-      pointer-events: none;
-      z-index: 0;
-      filter: blur(80px);
-    }
-
-    .ambient-glow-2 {
-      position: fixed;
-      bottom: -150px;
-      right: 15%;
-      width: 700px;
-      height: 700px;
-      border-radius: 50%;
-      background: radial-gradient(circle, var(--glow-bottom) 0%, transparent 70%);
-      pointer-events: none;
-      z-index: 0;
-      filter: blur(90px);
-    }
-
-       CAPSULE TOP NAVIGATION
-    .nav-header {
-      position: sticky;
-      top: 0;
-      left: 0;
-      width: 100%;
-      z-index: 100;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 40px;
-      background: var(--nav-bg);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border-bottom: 1px solid var(--border-color);
-      transition: all var(--transition-speed);
-    }
-
-    .app-brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      text-decoration: none;
-      color: var(--text-main);
-      font-weight: 800;
-      font-size: 1.25rem;
-      letter-spacing: -0.5px;
-      font-family: var(--font-display);
-    }
-
-    .app-logo-box {
-      width: 38px;
-      height: 38px;
-      background: var(--surface-1);
-      border: 1px solid rgba(7, 226, 25, 0.35);
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      box-shadow: 0 4px 14px rgba(7, 226, 25, 0.18);
-      overflow: hidden;
-    }
-
-    .app-logo-box img {
-      width: 26px;
-      height: 26px;
-      object-fit: contain;
-      filter: drop-shadow(0 0 6px rgba(7, 226, 25, 0.45));
-    }
-
-    .nav-menu {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      background: var(--surface-1);
-      padding: 5px 8px;
-      border-radius: 100px;
-      border: 1px solid var(--border-color);
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-    }
-
-    .nav-btn {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 7px 16px;
-      border-radius: 100px;
-      color: var(--text-muted);
-      text-decoration: none;
-      font-size: 13px;
-      font-weight: 600;
-      transition: all 0.2s ease;
-      position: relative;
-    }
-
-    .nav-btn:hover {
-      color: var(--text-main);
-      background: var(--surface-subtle);
-    }
-
-    .nav-btn.active {
-      color: var(--nav-active-text);
-      background: var(--nav-active-bg);
-      font-weight: 700;
-    }
-
-    .nav-btn.active .active-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--primary-accent);
-      box-shadow: 0 0 8px var(--primary-accent);
-      display: inline-block;
-    }
-
-    .nav-actions {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-
-    .nav-theme-toggle {
-      width: 36px !important;
-      height: 36px !important;
-      border-radius: 50% !important;
-      border: 1px solid var(--border-color) !important;
-      background: var(--sub-card-bg) !important;
-      color: var(--text-muted) !important;
-      cursor: pointer !important;
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      font-size: 15px !important;
-      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
-    }
-
-    .nav-theme-toggle:hover {
-      transform: scale(1.08) rotate(15deg) !important;
-      border-color: var(--primary-accent) !important;
-      color: var(--primary-accent) !important;
-      background: var(--primary-accent-subtle) !important;
-    }
-
-    .primary-action-btn {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 18px;
-      background: var(--primary-accent);
-      border: none;
-      color: #000000;
-      border-radius: 100px;
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-      box-shadow: 0 4px 14px var(--primary-accent-glow);
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-      text-decoration: none;
-    }
-
-    .primary-action-btn:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 6px 18px var(--primary-accent-glow);
-      filter: brightness(1.05);
-    }
-
-       USER PROFILE & CONFIGURED EMAIL PILL & DROPDOWN
-    .profile-dropdown-wrapper {
-      position: relative;
-    }
-
-    .user-profile-pill {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 5px 14px 5px 7px;
-      border-radius: 100px;
-      background: var(--surface-1);
-      border: 1px solid var(--border-color);
-      color: var(--text-main);
-      cursor: pointer;
-      transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-    }
-
-    .user-profile-pill:hover {
-      border-color: var(--primary-accent);
-      background: var(--surface-2);
-      box-shadow: 0 0 14px var(--primary-accent-subtle);
-    }
-
-    .user-mail-badge {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      background: var(--primary-accent-subtle);
-      border: 1.5px solid var(--primary-accent);
-      color: var(--primary-accent);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.78rem;
-      flex-shrink: 0;
-      box-shadow: 0 0 8px rgba(7, 226, 25, 0.25);
-    }
-
-    .nav-user-email-text {
-      font-size: 0.82rem;
-      font-weight: 700;
-      color: var(--text-main);
-      letter-spacing: -0.2px;
-      max-width: 200px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .profile-arrow-icon {
-      font-size: 0.65rem;
-      color: var(--text-subtle);
-      transition: transform 0.2s ease;
-    }
-
-    .profile-dropdown-wrapper.open .profile-arrow-icon {
-      transform: rotate(180deg);
-      color: var(--primary-accent);
-    }
-
-    /* Flyout Profile Card */
-    .profile-flyout-card {
-      position: absolute;
-      top: calc(100% + 10px);
-      right: 0;
-      width: 290px;
-      background: var(--surface-1);
-      border: 1px solid var(--border-color);
-      border-radius: 16px;
-      padding: 18px;
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
-      backdrop-filter: blur(16px);
-      z-index: 1000;
-      display: none;
-      flex-direction: column;
-      gap: 14px;
-      animation: flyoutSlideIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    @keyframes flyoutSlideIn {
-      from { opacity: 0; transform: translateY(-8px) scale(0.97); }
-      to { opacity: 1; transform: translateY(0) scale(1); }
-    }
-
-    .profile-flyout-card.active {
-      display: flex;
-    }
-
-    .profile-flyout-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid var(--border-color);
-    }
-
-    .profile-flyout-avatar {
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      background: var(--primary-accent-subtle);
-      border: 2px solid var(--primary-accent);
-      color: var(--primary-accent);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 800;
-      font-size: 1.15rem;
-      overflow: hidden;
-      flex-shrink: 0;
-    }
-
-    .profile-flyout-details {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-      overflow: hidden;
-    }
-
-    .profile-flyout-details h4 {
-      font-family: var(--font-display);
-      font-size: 0.95rem;
-      font-weight: 700;
-      color: var(--text-main);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .profile-flyout-details p {
-      font-size: 0.75rem;
-      color: var(--primary-accent);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .profile-role-tag {
-      font-size: 0.66rem;
-      padding: 2px 6px;
-      border-radius: 4px;
-      background: var(--sub-card-bg);
-      color: var(--text-muted);
-      margin-top: 4px;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      width: fit-content;
-    }
-
-    .profile-config-section {
-      background: var(--sub-card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 10px;
-      padding: 10px 12px;
-    }
-
-    .config-section-title {
-      font-size: 0.72rem;
-      font-weight: 700;
-      color: var(--text-muted);
-      margin-bottom: 6px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .email-config-input-row {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .email-config-field {
-      flex: 1;
-      background: var(--surface-1);
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-      padding: 6px 8px;
-      font-size: 0.74rem;
-      color: var(--text-main);
-      outline: none;
-      transition: border-color 0.2s;
-    }
-
-    .email-config-field:focus {
-      border-color: var(--primary-accent);
-    }
-
-    .email-save-btn {
-      background: var(--primary-accent);
-      border: none;
-      color: #000;
-      padding: 6px 10px;
-      border-radius: 6px;
-      font-size: 0.74rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: transform 0.15s;
-    }
-
-    .email-save-btn:hover {
-      transform: scale(1.05);
-    }
-
-    .profile-menu-links {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .profile-menu-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 7px 10px;
-      border-radius: 8px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      text-decoration: none;
-      background: transparent;
-      border: none;
-      cursor: pointer;
-      width: 100%;
-      text-align: left;
-      transition: all 0.18s;
-    }
-
-    .profile-menu-item:hover {
-      background: var(--surface-2);
-      color: var(--text-main);
-    }
-
-    .profile-menu-item i {
-      font-size: 0.85rem;
-      color: var(--primary-accent);
-      width: 16px;
-    }
-
-    .profile-menu-divider {
-      height: 1px;
-      background: var(--border-color);
-      margin: 4px 0;
-    }
-
-    .logout-item:hover {
-      color: #ef4444 !important;
-      background: rgba(239, 68, 68, 0.1) !important;
-    }
-
-    .logout-item:hover i {
-      color: #ef4444 !important;
-    }
-
-    body > .theme-toggle {
-      display: none !important;
-    }
-
-       PAGE CONTAINER & MASTHEAD
-    .container {
-      width: 100%;
-      max-width: 1560px;
-      margin: 0 auto;
-      padding: 32px 40px 90px;
-      position: relative;
-      z-index: 10;
-    }
-
-    .masthead-header {
-      margin-bottom: 28px;
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      flex-wrap: wrap;
-      gap: 20px;
-      padding-bottom: 24px;
-      border-bottom: 1px solid var(--divider-color);
-    }
-
-    .masthead-left {
-      max-width: 820px;
-    }
-
-    .breadcrumb-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.72rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: var(--text-subtle);
-      margin-bottom: 8px;
-    }
-
-    .breadcrumb-row span.current {
-      color: var(--primary-accent);
-    }
-
-    .page-title {
-      font-family: var(--font-display);
-      font-size: 2.35rem;
-      font-weight: 800;
-      letter-spacing: -0.8px;
-      line-height: 1.15;
-      color: var(--text-main);
-      margin-bottom: 8px;
-    }
-
-    .page-title span.accent-highlight {
-      color: var(--primary-accent);
-      background: linear-gradient(135deg, var(--primary-accent) 0%, #38bdf8 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .page-subtitle {
-      color: var(--text-muted);
-      font-size: 0.94rem;
-      line-height: 1.5;
-    }
-
-    .masthead-right {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 8px;
-    }
-
-    .candidate-role-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 14px;
-      border-radius: 100px;
-      background: var(--surface-1);
-      border: 1px solid rgba(7, 226, 25, 0.25);
-      color: var(--primary-accent);
-      font-size: 0.78rem;
-      font-weight: 700;
-      letter-spacing: 0.3px;
-    }
-
-    .role-readiness-badge {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .role-readiness-badge b {
-      color: var(--c-green);
-    }
-
-       EXECUTIVE KPI BENCHMARK DECK
-    .kpi-benchmark-deck {
-      background: var(--surface-1);
-      border: 1px solid var(--border-color);
-      border-left: 4px solid var(--primary-accent);
-      border-radius: 18px;
-      padding: 24px 30px;
-      margin-bottom: 32px;
-      box-shadow: var(--card-shadow);
-      display: grid;
-      grid-template-columns: 2.2fr 1fr 1fr 1fr 1fr;
-      gap: 24px;
-      align-items: center;
-    }
-
-    @media (max-width: 1200px) {
-      .kpi-benchmark-deck { grid-template-columns: 1fr 1fr 1fr; }
-    }
-    @media (max-width: 768px) {
-      .kpi-benchmark-deck { grid-template-columns: 1fr; }
-    }
-
-    .kpi-narrative h4 {
-      font-family: var(--font-display);
-      font-size: 1.18rem;
-      font-weight: 800;
-      color: var(--text-main);
-      margin-bottom: 6px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .kpi-narrative p {
-      font-size: 0.84rem;
-      color: var(--text-muted);
-      line-height: 1.45;
-    }
-
-    .kpi-stat-block {
-      border-left: 1px solid var(--divider-color);
-      padding-left: 20px;
-    }
-
-    .kpi-stat-value {
-      font-family: var(--font-display);
-      font-size: 1.7rem;
-      font-weight: 800;
-      color: var(--text-main);
-      line-height: 1.1;
-      margin-bottom: 4px;
-    }
-
-    .kpi-stat-label {
-      font-size: 0.74rem;
-      font-weight: 700;
-      color: var(--text-subtle);
-      text-transform: uppercase;
-      letter-spacing: 0.4px;
-    }
-
-    .kpi-stat-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 0.72rem;
-      font-weight: 700;
-      margin-top: 4px;
-      color: var(--c-green);
-    }
-
-       INTERACTIVE COMMAND & FILTER CENTER
-    .filter-command-center {
-      background: var(--surface-1);
-      border: 1px solid var(--border-color);
-      border-radius: 20px;
-      padding: 22px 26px;
-      margin-bottom: 28px;
-      box-shadow: var(--card-shadow);
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-    }
-
-    .command-top-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      flex-wrap: wrap;
-    }
-
-    .search-input-wrapper {
-      flex: 1;
-      min-width: 280px;
-      position: relative;
-    }
-
-    .search-input-wrapper i {
-      position: absolute;
-      left: 16px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--text-subtle);
-      font-size: 0.88rem;
-    }
-
-    .company-search-input {
-      width: 100%;
-      padding: 11px 16px 11px 42px;
-      background: var(--sub-card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      color: var(--text-main);
-      font-size: 0.88rem;
-      font-weight: 500;
-      outline: none;
-      transition: all 0.2s ease;
-    }
-
-    .company-search-input:focus {
-      border-color: var(--primary-accent);
-      background: var(--surface-2);
-      box-shadow: 0 0 14px var(--primary-accent-subtle);
-    }
-
-    .command-controls-group {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .sort-select-wrapper {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--sub-card-bg);
-      border: 1px solid var(--border-color);
-      padding: 8px 14px;
-      border-radius: 10px;
-      color: var(--text-muted);
-      font-size: 0.82rem;
-      font-weight: 600;
-    }
-
-    .sort-select-wrapper select {
-      background: transparent;
-      border: none;
-      color: var(--text-main);
-      font-size: 0.82rem;
-      font-weight: 700;
-      outline: none;
-      cursor: pointer;
-    }
-
-    .sort-select-wrapper select option {
-      background: var(--surface-1);
-      color: var(--text-main);
-    }
-
-    .view-mode-tabs {
-      display: flex;
-      align-items: center;
-      background: var(--sub-card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 10px;
-      padding: 3px;
-      gap: 4px;
-    }
-
-    .view-tab-btn {
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      padding: 6px 12px;
-      border-radius: 8px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      transition: all 0.2s ease;
-    }
-
-    .view-tab-btn.active {
-      background: var(--primary-accent);
-      color: #000000;
-      font-weight: 700;
-    }
-
-    /* Tier & Category Pills Bar */
-    .filter-pills-bar {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-      padding-top: 12px;
-      border-top: 1px solid var(--divider-color);
-    }
-
-    .filter-bar-label {
-      font-size: 0.72rem;
-      font-weight: 800;
-      color: var(--text-subtle);
-      text-transform: uppercase;
-      letter-spacing: 0.6px;
-      margin-right: 4px;
-    }
-
-    .filter-chip {
-      background: var(--sub-card-bg);
-      border: 1px solid var(--border-color);
-      color: var(--text-muted);
-      padding: 6px 14px;
-      border-radius: 100px;
-      font-size: 0.78rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .filter-chip:hover {
-      border-color: var(--primary-accent);
-      color: var(--text-main);
-      background: var(--surface-2);
-    }
-
-    .filter-chip.active {
-      background: var(--primary-accent-subtle);
-      border-color: var(--primary-accent);
-      color: var(--primary-accent);
-      font-weight: 700;
-    }
-
-    .filter-chip-count {
-      background: rgba(255, 255, 255, 0.08);
-      padding: 1px 6px;
-      border-radius: 100px;
-      font-size: 0.68rem;
-    }
-
-    .filter-chip.active .filter-chip-count {
-      background: var(--primary-accent);
-      color: #000000;
-      font-weight: 800;
-    }
-
-       COMPANY CARDS GRID
-    .companies-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(460px, 1fr));
-      gap: 24px;
-      margin-bottom: 40px;
-    }
-
-    @media (max-width: 580px) {
-      .companies-grid { grid-template-columns: 1fr; }
-    }
-
-    .company-card {
-      background: var(--surface-1);
-      border: 1px solid var(--border-color);
-      border-radius: 20px;
-      padding: 26px 28px;
-      box-shadow: var(--card-shadow);
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .company-card:hover {
-      border-color: var(--card-border-hover);
-      box-shadow: var(--card-shadow-hover);
-      transform: translateY(-3px);
-    }
-
-    .company-card-top {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 16px;
-      margin-bottom: 16px;
-    }
-
-    .company-brand-info {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-
-    .company-logo-avatar {
-      width: 48px;
-      height: 48px;
-      border-radius: 12px;
-      background: var(--surface-2);
-      border: 1px solid var(--border-color);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.4rem;
-      font-weight: 800;
-      font-family: var(--font-display);
-      color: var(--primary-accent);
-      box-shadow: 0 4px 14px rgba(0,0,0,0.2);
-    }
-
-    .company-name-group h3 {
-      font-family: var(--font-display);
-      font-size: 1.25rem;
-      font-weight: 800;
-      color: var(--text-main);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .company-tier-badge {
-      font-size: 0.68rem;
-      font-weight: 700;
-      padding: 2px 8px;
-      border-radius: 100px;
-      text-transform: uppercase;
-      letter-spacing: 0.4px;
-    }
-
-    .tier-faang {
-      background: var(--c-purple-bg);
-      color: var(--c-purple);
-      border: 1px solid rgba(168, 85, 247, 0.3);
-    }
-
-    .tier-ai {
-      background: var(--c-green-bg);
-      color: var(--c-green);
-      border: 1px solid rgba(7, 226, 25, 0.3);
-    }
-
-    .tier-enterprise {
-      background: rgba(56, 189, 248, 0.12);
-      color: #38bdf8;
-      border: 1px solid rgba(56, 189, 248, 0.35);
-    }
-
-    .tier-unicorn {
-      background: rgba(168, 85, 247, 0.12);
-      color: #c084fc;
-      border: 1px solid rgba(192, 132, 252, 0.3);
-    }
-
-    .tier-fintech {
-      background: var(--c-orange-bg);
-      color: var(--c-orange);
-      border: 1px solid rgba(245, 158, 11, 0.3);
-    }
-
-    .tier-consulting {
-      background: rgba(16, 185, 129, 0.12);
-      color: #10b981;
-      border: 1px solid rgba(16, 185, 129, 0.35);
-    }
-
-    .company-location {
-      font-size: 0.78rem;
-      color: var(--text-subtle);
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      margin-top: 2px;
-    }
-
-    .company-hiring-bar {
-      text-align: right;
-    }
-
-    .hiring-bar-score {
-      font-family: var(--font-display);
-      font-size: 1.15rem;
-      font-weight: 800;
-      color: var(--c-green);
-    }
-
-    .hiring-bar-label {
-      font-size: 0.65rem;
-      font-weight: 700;
-      color: var(--text-subtle);
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
-    }
-
-    .company-summary-text {
-      font-size: 0.84rem;
-      color: var(--text-muted);
-      line-height: 1.48;
-      margin-bottom: 18px;
-    }
-
-    .company-interview-strip {
-      background: var(--sub-card-bg);
-      border: 1px solid var(--sub-card-border);
-      border-radius: 10px;
-      padding: 10px 14px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 18px;
-      font-size: 0.76rem;
-    }
-
-    .interview-strip-item {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      color: var(--text-muted);
-    }
-
-    .interview-strip-item i {
-      color: var(--primary-accent);
-      font-size: 0.8rem;
-    }
-
-    /* Roles Nested in Company Card */
-    .company-roles-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-bottom: 18px;
-    }
-
-    .role-row-item {
-      background: var(--surface-2);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      padding: 12px 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      text-decoration: none;
-      color: inherit;
-    }
-
-    .role-row-item:hover {
-      border-color: var(--primary-accent);
-      background: var(--surface-subtle);
-      transform: translateX(3px);
-    }
-
-    .role-title-meta {
-      flex: 1;
-    }
-
-    .role-title-line {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 3px;
-      flex-wrap: wrap;
-    }
-
-    .role-name {
-      font-weight: 700;
-      font-size: 0.88rem;
-      color: var(--text-main);
-    }
-
-    .role-level-tag {
-      font-size: 0.68rem;
-      font-weight: 800;
-      padding: 1px 7px;
-      border-radius: 6px;
-      background: rgba(255, 255, 255, 0.08);
-      color: var(--text-muted);
-    }
-
-    .role-comp-meta {
-      font-size: 0.76rem;
-      color: var(--text-subtle);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .role-comp-meta b {
-      color: var(--c-green);
-    }
-
-    .role-match-score-badge {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      min-width: 75px;
-    }
-
-    .match-percent-val {
-      font-family: var(--font-display);
-      font-size: 0.95rem;
-      font-weight: 800;
-      color: var(--c-green);
-    }
-
-    .match-percent-val.match-high { color: var(--c-green); }
-    .match-percent-val.match-mid { color: var(--c-orange); }
-
-    .match-sublabel {
-      font-size: 0.65rem;
-      font-weight: 700;
-      color: var(--text-subtle);
-      text-transform: uppercase;
-    }
-
-    .company-card-actions {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      padding-top: 14px;
-      border-top: 1px solid var(--divider-color);
-    }
-
-    .card-secondary-btn {
-      background: transparent;
-      border: 1px solid var(--border-color);
-      color: var(--text-muted);
-      padding: 6px 12px;
-      border-radius: 8px;
-      font-size: 0.76rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .card-secondary-btn:hover {
-      border-color: var(--primary-accent);
-      color: var(--text-main);
-    }
-
-    .card-primary-cta {
-      background: var(--primary-accent-subtle);
-      border: 1px solid var(--primary-accent);
-      color: var(--primary-accent);
-      padding: 6px 14px;
-      border-radius: 8px;
-      font-size: 0.76rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      text-decoration: none;
-    }
-
-    .card-primary-cta:hover {
-      background: var(--primary-accent);
-      color: #000000;
-    }
-
-       ROLE MATRIX VIEW (FLAT LIST)
-    .role-matrix-view {
-      display: none;
-      flex-direction: column;
-      gap: 12px;
-      margin-bottom: 40px;
-    }
-
-    .matrix-role-card {
-      background: var(--surface-1);
-      border: 1px solid var(--border-color);
-      border-radius: 16px;
-      padding: 18px 24px;
-      display: grid;
-      grid-template-columns: 2fr 1.2fr 1fr 1fr 1fr auto;
-      gap: 16px;
-      align-items: center;
-      transition: all 0.2s ease;
-    }
-
-    .matrix-role-card:hover {
-      border-color: var(--primary-accent);
-      transform: translateY(-2px);
-      box-shadow: var(--card-shadow);
-    }
-
-    @media (max-width: 1080px) {
-      .matrix-role-card { grid-template-columns: 1fr 1fr; }
-    }
-
-       COMPANY COMPARISON BENCHMARK TABLE
-    .comparison-view-section {
-      display: none;
-      margin-bottom: 40px;
-    }
-
-    .comparison-table-surface {
-      background: var(--surface-1);
-      border: 1px solid var(--border-color);
-      border-radius: 20px;
-      padding: 24px;
-      overflow-x: auto;
-      box-shadow: var(--card-shadow);
-    }
-
-    .compare-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.85rem;
-    }
-
-    .compare-table th {
-      text-align: left;
-      padding: 14px 18px;
-      border-bottom: 2px solid var(--border-color);
-      font-family: var(--font-display);
-      font-size: 0.88rem;
-      font-weight: 800;
-      color: var(--text-main);
-    }
-
-    .compare-table td {
-      padding: 14px 18px;
-      border-bottom: 1px solid var(--divider-color);
-      color: var(--text-muted);
-      vertical-align: middle;
-    }
-
-    .compare-table tr:hover td {
-      background: var(--surface-subtle);
-      color: var(--text-main);
-    }
-
-       ROLE DETAIL INSPECTION DRAWER / MODAL
-    .drawer-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.75);
-      backdrop-filter: blur(8px);
-      z-index: 999;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s ease;
-    }
-
-    .drawer-overlay.active {
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    .role-detail-drawer {
-      position: fixed;
-      top: 0;
-      right: 0;
-      width: 680px;
-      max-width: 95vw;
-      height: 100%;
-      background: var(--surface-1);
-      border-left: 1px solid var(--border-color);
-      box-shadow: -10px 0 40px rgba(0, 0, 0, 0.6);
-      z-index: 1000;
-      transform: translateX(100%);
-      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-
-    .role-detail-drawer.active {
-      transform: translateX(0);
-    }
-
-    .drawer-header {
-      padding: 24px 28px;
-      border-bottom: 1px solid var(--border-color);
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 16px;
-      background: var(--surface-2);
-    }
-
-    .drawer-title-group h3 {
-      font-family: var(--font-display);
-      font-size: 1.45rem;
-      font-weight: 800;
-      color: var(--text-main);
-      margin-bottom: 4px;
-    }
-
-    .drawer-company-meta {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 0.82rem;
-      color: var(--text-muted);
-    }
-
-    .drawer-close-btn {
-      background: var(--sub-card-bg);
-      border: 1px solid var(--border-color);
-      color: var(--text-muted);
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.1rem;
-      transition: all 0.2s ease;
-    }
-
-    .drawer-close-btn:hover {
-      color: var(--primary-accent);
-      border-color: var(--primary-accent);
-      transform: scale(1.08);
-    }
-
-    .drawer-body {
-      padding: 28px;
-      overflow-y: auto;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 24px;
-    }
-
-    .drawer-section-title {
-      font-family: var(--font-display);
-      font-size: 0.95rem;
-      font-weight: 800;
-      color: var(--text-main);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .drawer-section-title i {
-      color: var(--primary-accent);
-    }
-
-    .drawer-stat-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-    }
-
-    .drawer-stat-card {
-      background: var(--surface-2);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      padding: 14px 16px;
-    }
-
-    .drawer-stat-card .val {
-      font-family: var(--font-display);
-      font-size: 1.25rem;
-      font-weight: 800;
-      color: var(--c-green);
-    }
-
-    .drawer-stat-card .lbl {
-      font-size: 0.72rem;
-      font-weight: 700;
-      color: var(--text-subtle);
-      text-transform: uppercase;
-    }
-
-    /* Interview Round Timeline */
-    .interview-timeline {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      position: relative;
-    }
-
-    .round-card {
-      background: var(--surface-2);
-      border: 1px solid var(--border-color);
-      border-left: 3px solid var(--primary-accent);
-      border-radius: 12px;
-      padding: 14px 18px;
-    }
-
-    .round-card-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 6px;
-    }
-
-    .round-card-header h5 {
-      font-size: 0.88rem;
-      font-weight: 700;
-      color: var(--text-main);
-    }
-
-    .round-duration {
-      font-size: 0.72rem;
-      font-weight: 700;
-      color: var(--primary-accent);
-      background: var(--primary-accent-subtle);
-      padding: 2px 8px;
-      border-radius: 100px;
-    }
-
-    .round-card p {
-      font-size: 0.82rem;
-      color: var(--text-muted);
-      line-height: 1.4;
-    }
-
-    .drawer-footer {
-      padding: 20px 28px;
-      border-top: 1px solid var(--border-color);
-      background: var(--surface-2);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 14px;
-    }
-
-       CUSTOM TARGET COMPANY & ROLE MODAL
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.75);
-      backdrop-filter: blur(8px);
-      z-index: 999;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s ease;
-    }
-
-    .modal-overlay.active {
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    .custom-modal-content {
-      background: var(--surface-1);
-      border: 1px solid var(--border-color);
-      border-radius: 20px;
-      width: 600px;
-      max-width: 90vw;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
-      overflow: hidden;
-    }
-
-    .modal-header {
-      padding: 20px 24px;
-      border-bottom: 1px solid var(--border-color);
-      background: var(--surface-2);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .modal-header h3 {
-      font-family: var(--font-display);
-      font-size: 1.25rem;
-      font-weight: 800;
-      color: var(--text-main);
-    }
-
-    .modal-body {
-      padding: 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .form-group label {
-      font-size: 0.78rem;
-      font-weight: 700;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
-    }
-
-    .form-group input,
-    .form-group select,
-    .form-group textarea {
-      background: var(--surface-2);
-      border: 1px solid var(--border-color);
-      border-radius: 10px;
-      padding: 10px 14px;
-      color: var(--text-main);
-      font-size: 0.85rem;
-      font-family: var(--font-main);
-      outline: none;
-    }
-
-    .form-group input:focus,
-    .form-group select:focus,
-    .form-group textarea:focus {
-      border-color: var(--primary-accent);
-      box-shadow: 0 0 12px var(--primary-accent-subtle);
-    }
-
-    .modal-footer {
-      padding: 18px 24px;
-      border-top: 1px solid var(--border-color);
-      background: var(--surface-2);
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 12px;
-    }
-
-    /* Mobile Polish */
-    @media (max-width: 768px) {
-      .nav-header { padding: 12px 20px; }
-      .container { padding: 20px 16px 60px; }
-      .page-title { font-size: 1.85rem; }
-      .nav-menu { display: none; }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hiring Partners & Companies - Hiero</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="theme.css">
+    <script src="theme.js"></script>
+    <style>
+        :root {
+            --primary: #07e219;
+            --primary-glow: rgba(42, 224, 35, 0.4);
+            --bg-pure: #030503;
+            --card-bg: rgba(15, 20, 15, 0.7);
+            --card-border: rgba(42, 224, 35, 0.15);
+            --text-main: #FFFFFF;
+            --text-muted: #A0AEC0;
+            --danger: #ff4444;
+            --warning: #ffb84d;
+        }
+
+        body, html {
+            margin: 0; padding: 0;
+            font-family: 'Outfit', 'Inter', sans-serif;
+            background-color: var(--bg-pure);
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Background Grid */
+        body::before {
+            content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: 
+                linear-gradient(rgba(42, 224, 35, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(42, 224, 35, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -2; pointer-events: none;
+        }
+        
+        .ambient-glow {
+            position: fixed; border-radius: 50%; filter: blur(100px); opacity: 0.15; z-index: -1; pointer-events: none;
+        }
+        .glow-1 { top: -10%; left: -10%; width: 50vw; height: 50vw; background: var(--primary); animation: pulse 15s infinite alternate; }
+        .glow-2 { bottom: -20%; right: -10%; width: 60vw; height: 60vw; background: #0088ff; animation: pulse 20s infinite alternate-reverse; }
+
+        @keyframes pulse {
+            0% { transform: scale(1) translate(0, 0); }
+            100% { transform: scale(1.1) translate(30px, 30px); }
+        }
+
+        /* Navigation */
+        .hiero-nav {
+            display: flex; justify-content: space-between; align-items: center; padding: 20px 50px; 
+            background: rgba(3, 5, 3, 0.85); backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--card-border); position: sticky; top: 0; z-index: 100;
+        }
+        .nav-logo { display: flex; align-items: center; gap: 12px; font-weight: 800; font-size: 24px; color: #fff; text-decoration: none; }
+        .nav-logo i { color: var(--primary); font-size: 28px; text-shadow: 0 0 15px var(--primary-glow); }
+        .nav-links { display: flex; gap: 30px; }
+        .nav-links a { color: var(--text-muted); text-decoration: none; font-weight: 500; transition: 0.3s; }
+        .nav-links a:hover, .nav-links a.active { color: var(--primary); text-shadow: 0 0 10px var(--primary-glow); }
+        .user-profile { display: flex; align-items: center; gap: 15px; }
+        .user-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: bold; color: #000; }
+        .logout-btn { background: transparent; border: 1px solid var(--card-border); color: var(--text-muted); padding: 8px 15px; border-radius: 8px; cursor: pointer; transition: 0.3s; }
+        .logout-btn:hover { background: rgba(255, 68, 68, 0.1); color: var(--danger); border-color: var(--danger); }
+
+        /* Main Container */
+        .container {
+            max-width: 1300px;
+            margin: 40px auto;
+            padding: 0 30px;
+        }
+
+        /* Hero Banner */
+        .hero-banner {
+            background: linear-gradient(135deg, rgba(7, 226, 25, 0.12), rgba(0, 0, 0, 0.6));
+            border: 1px solid var(--primary);
+            border-radius: 24px;
+            padding: 35px;
+            margin-bottom: 35px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 0 30px rgba(7, 226, 25, 0.15);
+        }
+        .banner-info h1 {
+            font-size: 32px;
+            font-weight: 800;
+            margin: 0 0 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .banner-info p {
+            color: var(--text-muted);
+            font-size: 15px;
+            margin: 0 0 20px 0;
+        }
+        .candidate-meta-pills {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .meta-pill {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .meta-pill strong {
+            color: var(--primary);
+        }
+
+        .score-box-highlight {
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid var(--primary);
+            border-radius: 20px;
+            padding: 20px 30px;
+            text-align: center;
+            box-shadow: 0 0 20px var(--primary-glow);
+            min-width: 180px;
+        }
+        .score-box-highlight .score-num {
+            font-size: 42px;
+            font-weight: 900;
+            color: var(--primary);
+            text-shadow: 0 0 15px var(--primary-glow);
+            line-height: 1;
+        }
+        .score-box-highlight .score-lbl {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 6px;
+        }
+
+        /* Filter Controls */
+        .controls-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .search-box {
+            position: relative;
+            flex-grow: 1;
+            max-width: 500px;
+        }
+        .search-box i {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+        .search-box input {
+            width: 100%;
+            background: rgba(15, 20, 15, 0.8);
+            border: 1px solid var(--card-border);
+            color: #fff;
+            padding: 14px 20px 14px 48px;
+            border-radius: 12px;
+            font-size: 14px;
+            outline: none;
+            transition: 0.3s;
+        }
+        .search-box input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 15px var(--primary-glow);
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .filter-btn {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-muted);
+            padding: 10px 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+        .filter-btn:hover, .filter-btn.active {
+            background: rgba(7, 226, 25, 0.15);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* Section Titles */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .section-header h2 {
+            font-size: 22px;
+            font-weight: 700;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .section-header h2 i {
+            color: var(--primary);
+        }
+
+        /* Company Cards Grid */
+        .companies-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 25px;
+            margin-bottom: 50px;
+        }
+
+        .company-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            transition: 0.3s;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+        }
+        .company-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 15px 30px rgba(7, 226, 25, 0.15);
+        }
+
+        .comp-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+        .comp-brand {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .comp-icon-box {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            background: rgba(7, 226, 25, 0.1);
+            border: 1px solid rgba(7, 226, 25, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            color: var(--primary);
+        }
+        .comp-title-info h3 {
+            margin: 0 0 4px 0;
+            font-size: 18px;
+            font-weight: 700;
+        }
+        .comp-title-info p {
+            margin: 0;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .match-badge {
+            background: rgba(7, 226, 25, 0.15);
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .job-role-info {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 12px 15px;
+            margin-bottom: 15px;
+        }
+        .job-role-info h4 {
+            margin: 0 0 6px 0;
+            font-size: 15px;
+            color: #fff;
+        }
+        .job-tags {
+            display: flex;
+            gap: 15px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .skills-required {
+            margin-bottom: 20px;
+        }
+        .skills-required-lbl {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+        .skills-flex {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .req-chip {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-muted);
+            padding: 3px 8px;
+            border-radius: 8px;
+            font-size: 11px;
+        }
+        .req-chip.matched {
+            background: rgba(7, 226, 25, 0.15);
+            border-color: rgba(7, 226, 25, 0.4);
+            color: #fff;
+        }
+
+        .comp-card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding-top: 15px;
+        }
+        .salary-tag {
+            font-size: 14px;
+            font-weight: 700;
+            color: #fff;
+        }
+        .apply-btn {
+            background: linear-gradient(135deg, var(--primary), #00b248);
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .apply-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px var(--primary-glow);
+        }
+        .apply-btn.applied {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--primary);
+            border: 1px solid var(--primary);
+            cursor: default;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: rgba(15, 20, 15, 0.95);
+            border: 1px solid var(--primary);
+            color: #fff;
+            padding: 16px 24px;
+            border-radius: 14px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 20px rgba(7, 226, 25, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            z-index: 1000;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        .toast i {
+            color: var(--primary);
+            font-size: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .hero-banner { flex-direction: column; text-align: center; gap: 20px; }
+            .candidate-meta-pills { justify-content: center; }
+            .hiero-nav { padding: 15px 20px; }
+            .nav-links { display: none; }
+            .companies-grid { grid-template-columns: 1fr; }
+        }
+    </style>
 </head>
-
 <body>
-  <!-- Ambient Canvas Background -->
-  <canvas id="ambient-canvas"></canvas>
-  <div class="ambient-glow-1"></div>
-  <div class="ambient-glow-2"></div>
 
-  <!-- Capsule Top Navigation -->
-  <header class="nav-header">
-    <a href="index.html" class="app-brand">
-      <div class="app-logo-box">
-        <img src="logo-hiero.png" alt="Hiero Logo" onerror="this.onerror=null; this.src='hiero-prototype/jss/hiero/hiero-last/public/logo-hiero.png';">
-      </div>
-      <span>HIERO</span>
-    </a>
+    <div class="ambient-glow glow-1"></div>
+    <div class="ambient-glow glow-2"></div>
 
-    <!-- Centered Capsule Menu -->
-    <nav class="nav-menu">
-      <a href="resume-builder.html" class="nav-btn">
-        <i class="fa-solid fa-file-invoice"></i> Resume Builder
-      </a>
-      <a href="result.html" class="nav-btn">
-        <i class="fa-solid fa-chart-line"></i> Analyse Resume
-      </a>
-      <a href="companies.html" class="nav-btn active">
-        <span class="active-dot"></span>
-        <i class="fa-solid fa-building"></i> Target Companies
-      </a>
-      <a href="mock-interview.html" class="nav-btn">
-        <i class="fa-solid fa-microphone"></i> Mock Interview
-      </a>
-      <a href="learn.html" class="nav-btn">
-        <i class="fa-solid fa-book-open"></i> Learn Skills
-      </a>
+    <!-- Navigation -->
+    <nav class="hiero-nav">
+        <a href="dashboard.html" class="nav-logo">
+            <i class="fas fa-bolt"></i> Hiero
+        </a>
+        <div class="nav-links">
+            <a href="dashboard.html">Dashboard</a>
+            <a href="resume-builder.html">Resume Builder</a>
+            <a href="mock-interview.html">Interview Prep</a>
+            <a href="solve.html">Solve</a>
+            <a href="learn.html">Learn</a>
+            <a href="companies.html" class="active">Companies</a>
+        </div>
+        <div class="user-profile">
+            <button class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Theme" style="background: rgba(255,255,255,0.08); border: 1px solid var(--card-border); color: #fff; padding: 8px 12px; border-radius: 8px; cursor: pointer; transition: 0.3s; margin-right: 8px;">
+                <i class="fas fa-sun"></i>
+            </button>
+            <span id="nav-user-name" class="user-name-full" style="font-weight: 500; font-size: 15px;">Loading...</span>
+            <div class="user-avatar" id="nav-avatar">U</div>
+            <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i></button>
+        </div>
     </nav>
 
-    <!-- Top Right Actions -->
-    <div class="nav-actions">
-      <button class="nav-theme-toggle" id="theme-switch" onclick="window.toggleTheme()" aria-label="Toggle Dark/Light Mode">
-        <i class="fa-solid fa-moon"></i>
-      </button>
-
-      <button class="primary-action-btn" onclick="openAddCompanyModal()">
-        <i class="fa-solid fa-plus"></i>
-        <span>Target Company</span>
-      </button>
-
-      <!-- User Profile & Configured Email Dropdown -->
-      <div class="profile-dropdown-wrapper" id="profile-dropdown-wrapper">
-        <button class="user-profile-pill" id="user-profile-btn" onclick="toggleProfileDropdown(event)" aria-label="User Account">
-          <div class="user-mail-badge" id="nav-user-avatar">
-            <i class="fa-solid fa-envelope"></i>
-          </div>
-          <span class="nav-user-email-text" id="nav-user-email">rahul.dev@hiero.ai</span>
-          <i class="fa-solid fa-chevron-down profile-arrow-icon" id="profile-arrow"></i>
-        </button>
-
-        <!-- Interactive Profile Flyout Card -->
-        <div class="profile-flyout-card" id="profile-flyout">
-          <div class="profile-flyout-header">
-            <div class="profile-flyout-avatar">
-              <i class="fa-solid fa-envelope"></i>
+    <div class="container">
+        
+        <!-- Candidate Match Banner -->
+        <div class="hero-banner">
+            <div class="banner-info">
+                <h1><i class="fas fa-building" style="color: var(--primary);"></i> Top Hiring Partners for You</h1>
+                <p>Submit your verified Hiero Match Score & ATS Resume directly to partner companies.</p>
+                
+                <div class="candidate-meta-pills">
+                    <div class="meta-pill"><i class="fas fa-user"></i> Candidate: <strong id="user-display-name">Jaswanth</strong></div>
+                    <div class="meta-pill"><i class="fas fa-bullseye"></i> Role Target: <strong id="user-target-domain">TECH Specialist</strong></div>
+                    <div class="meta-pill"><i class="fas fa-check-circle"></i> Verified Skills: <strong id="user-skill-count">0 Skills</strong></div>
+                </div>
             </div>
-            <div class="profile-flyout-details">
-              <h4 id="flyout-name">rahul.dev@hiero.ai</h4>
-              <p id="flyout-email">Authenticated Candidate Account</p>
-              <span class="profile-role-tag"><i class="fa-solid fa-code"></i> Full Stack & AI Systems</span>
+
+            <div class="score-box-highlight">
+                <div class="score-num" id="user-score-num">--%</div>
+                <div class="score-lbl">Verified Match Score</div>
             </div>
-          </div>
+        </div>
 
-          <!-- Quick Email Configuration / Sync -->
-          <div class="profile-config-section">
-            <div class="config-section-title">
-              <i class="fa-solid fa-envelope" style="color: var(--primary-accent);"></i> Configured Account Email
+        <!-- Filter Controls -->
+        <div class="controls-bar">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="company-search-input" placeholder="Search companies, roles, or required skills (e.g. Amazon, React, Python)..." onkeyup="filterCompanies()">
             </div>
-            <div class="email-config-input-row">
-              <input type="email" id="quick-email-input" placeholder="Configure your email address..." class="email-config-field" value="rahul.dev@hiero.ai">
-              <button class="email-save-btn" onclick="saveConfiguredEmail()" title="Save configured email">
-                <i class="fa-solid fa-check"></i>
-              </button>
+
+            <div class="filter-buttons">
+                <button class="filter-btn active" onclick="setFilter('all', this)">All Partners</button>
+                <button class="filter-btn" onclick="setFilter('match', this)">High Match (>80%)</button>
+                <button class="filter-btn" onclick="filterCategory('tech', this)">Tech MNCs</button>
+                <button class="filter-btn" onclick="filterCategory('fintech', this)">Fintech & Startups</button>
             </div>
-          </div>
-
-          <div class="profile-menu-links">
-            <a href="resume-builder.html" class="profile-menu-item">
-              <i class="fa-solid fa-file-invoice"></i> Resume Builder
-            </a>
-            <a href="result.html" class="profile-menu-item">
-              <i class="fa-solid fa-chart-line"></i> Analyse Resume
-            </a>
-            <a href="companies.html" class="profile-menu-item">
-              <i class="fa-solid fa-building"></i> Target Companies
-            </a>
-            <a href="mock-interview.html" class="profile-menu-item">
-              <i class="fa-solid fa-microphone"></i> Mock Interview
-            </a>
-            <div class="profile-menu-divider"></div>
-            <button class="profile-menu-item logout-item" onclick="handleUserLogout()">
-              <i class="fa-solid fa-arrow-right-from-bracket"></i> Switch / Reset Account
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </header>
-
-  <!-- Main Content Container -->
-  <main class="container">
-
-    <!-- Page Masthead -->
-    <section class="masthead-header">
-      <div class="masthead-left">
-        <div class="breadcrumb-row">
-          <span>Dashboard</span>
-          <i class="fa-solid fa-chevron-right" style="font-size: 0.6rem;"></i>
-          <span>Hiring Intelligence</span>
-          <i class="fa-solid fa-chevron-right" style="font-size: 0.6rem;"></i>
-          <span class="current">Target Companies & Top Roles</span>
-        </div>
-        <h1 class="page-title">
-          Target <span class="accent-highlight">Companies & Top Roles</span>
-        </h1>
-        <p class="page-subtitle">
-          Benchmark your engineering profile against Tier-1 tech giants, AI research labs, and high-growth unicorns. Analyze interview formats, level expectations, tech stacks, and live match readiness.
-        </p>
-      </div>
-
-      <div class="masthead-right">
-        <div class="candidate-role-pill">
-          <i class="fa-solid fa-crosshairs"></i>
-          <span>Target Profile: Full Stack & AI Systems</span>
-        </div>
-        <div class="role-readiness-badge">
-          <span>Overall Readiness:</span>
-          <b>78% Qualified for Tier-1</b>
-        </div>
-      </div>
-    </section>
-
-    <!-- Executive KPI Benchmark Deck -->
-    <section class="kpi-benchmark-deck">
-      <div class="kpi-narrative">
-        <h4>
-          <i class="fa-solid fa-award" style="color: var(--primary-accent);"></i>
-          <span>Tier-1 Engineering Benchmark</span>
-        </h4>
-        <p>
-          Curated intelligence across 17 global leaders and 50+ flagship roles including Big Tech, AI Labs, Enterprise Cloud, and Global Consulting.
-        </p>
-      </div>
-
-      <div class="kpi-stat-block">
-        <div class="kpi-stat-value" id="kpi-companies-count">17</div>
-        <div class="kpi-stat-label">Tracked Orgs</div>
-        <div class="kpi-stat-badge"><i class="fa-solid fa-check"></i> FAANG, AI & Enterprise</div>
-      </div>
-
-      <div class="kpi-stat-block">
-        <div class="kpi-stat-value" id="kpi-roles-count">50+</div>
-        <div class="kpi-stat-label">Active Roles</div>
-        <div class="kpi-stat-badge"><i class="fa-solid fa-arrow-trend-up"></i> High Demand</div>
-      </div>
-
-      <div class="kpi-stat-block">
-        <div class="kpi-stat-value">$295K</div>
-        <div class="kpi-stat-label">Median Total Comp</div>
-        <div class="kpi-stat-badge"><i class="fa-solid fa-bolt"></i> Base + Equity / Bonus</div>
-      </div>
-
-      <div class="kpi-stat-block">
-        <div class="kpi-stat-value" style="color: var(--primary-accent);">15 Roles</div>
-        <div class="kpi-stat-label">High Synergy (&gt;80%)</div>
-        <div class="kpi-stat-badge"><i class="fa-solid fa-circle-check"></i> Ready to Target</div>
-      </div>
-    </section>
-
-    <!-- Interactive Command & Filter Center -->
-    <section class="filter-command-center">
-      <div class="command-top-row">
-        <!-- Live Search Input -->
-        <div class="search-input-wrapper">
-          <i class="fa-solid fa-magnifying-glass"></i>
-          <input type="text" id="company-search-input" class="company-search-input" placeholder="Search companies (IBM, Deloitte, Oracle, SAP, Accenture, Google, OpenAI, etc.), roles, skills..." oninput="filterCompanies()">
         </div>
 
-        <!-- Controls Group -->
-        <div class="command-controls-group">
-          <!-- Sort Dropdown -->
-          <div class="sort-select-wrapper">
-            <i class="fa-solid fa-arrow-down-short-wide"></i>
-            <span>Sort:</span>
-            <select id="sort-select" onchange="filterCompanies()">
-              <option value="match-desc">Highest Match %</option>
-              <option value="comp-desc">Top Compensation</option>
-              <option value="rigor-desc">Hiring Bar Rigor</option>
-              <option value="name-asc">Company Name (A-Z)</option>
-              <option value="openings-desc">Most Openings</option>
-            </select>
-          </div>
-
-          <!-- View Mode Switcher -->
-          <div class="view-mode-tabs">
-            <button class="view-tab-btn active" id="btn-view-grid" onclick="setViewMode('grid')">
-              <i class="fa-solid fa-border-all"></i> Grid
-            </button>
-            <button class="view-tab-btn" id="btn-view-matrix" onclick="setViewMode('matrix')">
-              <i class="fa-solid fa-list-ul"></i> Roles List
-            </button>
-            <button class="view-tab-btn" id="btn-view-compare" onclick="setViewMode('compare')">
-              <i class="fa-solid fa-code-compare"></i> Compare
-            </button>
-          </div>
+        <!-- Section 1: Matching Companies -->
+        <div class="section-header">
+            <h2><i class="fas fa-star"></i> Recommended Skill-Matched Companies</h2>
+            <span style="color: var(--text-muted); font-size: 13px;" id="companies-count-lbl">Showing matched job drives</span>
         </div>
-      </div>
 
-      <!-- Category Filter Pills Bar -->
-      <div class="filter-pills-bar">
-        <span class="filter-bar-label">Company Tier:</span>
-        <button class="filter-chip active" data-filter-tier="all" onclick="setTierFilter('all', this)">
-          All Tiers <span class="filter-chip-count" id="count-all">17</span>
-        </button>
-        <button class="filter-chip" data-filter-tier="faang" onclick="setTierFilter('faang', this)">
-          Big Tech (FAANG+) <span class="filter-chip-count">5</span>
-        </button>
-        <button class="filter-chip" data-filter-tier="ai" onclick="setTierFilter('ai', this)">
-          AI & Frontier Labs <span class="filter-chip-count">3</span>
-        </button>
-        <button class="filter-chip" data-filter-tier="enterprise" onclick="setTierFilter('enterprise', this)">
-          Enterprise Cloud & Tech (IBM, Oracle, SAP) <span class="filter-chip-count">3</span>
-        </button>
-        <button class="filter-chip" data-filter-tier="unicorn" onclick="setTierFilter('unicorn', this)">
-          High-Growth Unicorns <span class="filter-chip-count">4</span>
-        </button>
-        <button class="filter-chip" data-filter-tier="fintech" onclick="setTierFilter('fintech', this)">
-          Fintech & Core Infra <span class="filter-chip-count">1</span>
-        </button>
-        <button class="filter-chip" data-filter-tier="consulting" onclick="setTierFilter('consulting', this)">
-          Consulting & Global Tech (Deloitte, Accenture) <span class="filter-chip-count">2</span>
-        </button>
-      </div>
-
-      <!-- Domain Specialization Pills Bar -->
-      <div class="filter-pills-bar" style="padding-top: 10px;">
-        <span class="filter-bar-label">Role Focus:</span>
-        <button class="filter-chip active" data-filter-domain="all" onclick="setDomainFilter('all', this)">
-          All Domains
-        </button>
-        <button class="filter-chip" data-filter-domain="fullstack" onclick="setDomainFilter('fullstack', this)">
-          Full-Stack & Web
-        </button>
-        <button class="filter-chip" data-filter-domain="backend" onclick="setDomainFilter('backend', this)">
-          Backend & Systems
-        </button>
-        <button class="filter-chip" data-filter-domain="ai" onclick="setDomainFilter('ai', this)">
-          AI / ML & LLMs
-        </button>
-        <button class="filter-chip" data-filter-domain="cloud" onclick="setDomainFilter('cloud', this)">
-          Cloud & DevOps
-        </button>
-        <button class="filter-chip" data-filter-domain="data" onclick="setDomainFilter('data', this)">
-          Data Platforms
-        </button>
-      </div>
-    </section>
-
-    <!-- Company Cards Grid View -->
-    <section class="companies-grid" id="companies-grid-container">
-      <!-- Dynamically populated via JavaScript -->
-    </section>
-
-    <!-- Role Matrix Flat List View -->
-    <section class="role-matrix-view" id="role-matrix-container">
-      <!-- Dynamically populated via JavaScript -->
-    </section>
-
-    <!-- Company Comparison Matrix Section -->
-    <section class="comparison-view-section" id="comparison-section">
-      <div class="comparison-table-surface">
-        <h3 style="font-family: var(--font-display); font-size: 1.25rem; font-weight: 800; margin-bottom: 16px; color: var(--text-main);">
-          <i class="fa-solid fa-code-compare" style="color: var(--primary-accent); margin-right: 8px;"></i>
-          Tier-1 Architectural & Hiring Comparison Matrix
-        </h3>
-        <table class="compare-table" id="comparison-table">
-          <thead>
-            <tr>
-              <th>Company</th>
-              <th>Tier</th>
-              <th>L5 Total Comp (Median)</th>
-              <th>Hiring Bar Rigor</th>
-              <th>Primary Interview Focus</th>
-              <th>Remote Policy</th>
-              <th>Your Profile Match</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody id="comparison-table-body">
-            <!-- Dynamically populated -->
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-  </main>
-
-  <!-- Role Detail Inspection Drawer -->
-  <div class="drawer-overlay" id="drawer-overlay" onclick="closeRoleDrawer()"></div>
-  <aside class="role-detail-drawer" id="role-detail-drawer">
-    <div class="drawer-header">
-      <div class="drawer-title-group">
-        <h3 id="drawer-role-title">Role Title</h3>
-        <div class="drawer-company-meta">
-          <span id="drawer-company-name">Company</span>
-          <span>•</span>
-          <span id="drawer-role-level" style="color: var(--primary-accent); font-weight: 700;">Level</span>
-          <span>•</span>
-          <span id="drawer-role-location">Location</span>
+        <div class="companies-grid" id="companies-grid-container">
+            <!-- Populated dynamically by JavaScript -->
         </div>
-      </div>
-      <button class="drawer-close-btn" onclick="closeRoleDrawer()" aria-label="Close Drawer">
-        <i class="fa-solid fa-xmark"></i>
-      </button>
+
+        <!-- Section 2: Broad Hiring Directory -->
+        <div class="section-header" style="margin-top: 50px;">
+            <h2><i class="fas fa-globe"></i> Additional Hiring Partners Drive</h2>
+            <span style="color: var(--text-muted); font-size: 13px;">Explore broader tech openings</span>
+        </div>
+
+        <div class="companies-grid" id="secondary-companies-grid">
+            <!-- Populated dynamically by JavaScript -->
+        </div>
+
     </div>
 
-    <div class="drawer-body" id="drawer-body-content">
-      <!-- Dynamic Drawer Content -->
+    <!-- Toast Notification -->
+    <div id="toast-notify" class="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toast-message">Application submitted!</span>
     </div>
 
-    <div class="drawer-footer">
-      <a href="resume-builder.html" class="card-secondary-btn" id="drawer-btn-resume">
-        <i class="fa-solid fa-pen-to-square"></i> Optimize Resume for This Role
-      </a>
-      <a href="mock-interview.html" class="primary-action-btn" id="drawer-btn-interview">
-        <i class="fa-solid fa-microphone"></i> Start Role Mock Interview
-      </a>
-    </div>
-  </aside>
+    <!-- Theme Toggle Floating Button -->
+    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Theme">
+        <i class="fas fa-sun"></i>
+    </button>
 
-  <!-- Add Custom Target Company Modal -->
-  <div class="modal-overlay" id="add-company-modal">
-    <div class="custom-modal-content">
-      <div class="modal-header">
-        <h3><i class="fa-solid fa-plus" style="color: var(--primary-accent); margin-right: 8px;"></i> Add Target Company / Role</h3>
-        <button class="drawer-close-btn" onclick="closeAddCompanyModal()" style="width: 30px; height: 30px;">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-      </div>
-
-      <div class="modal-body">
-        <div class="form-group">
-          <label>Company Name</label>
-          <input type="text" id="new-comp-name" placeholder="e.g. Anthropic, Snowflake, Palantir...">
-        </div>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-          <div class="form-group">
-            <label>Tier Category</label>
-            <select id="new-comp-tier">
-              <option value="faang">Big Tech (FAANG+)</option>
-              <option value="ai" selected>AI & Frontier Labs</option>
-              <option value="unicorn">High-Growth Unicorn</option>
-              <option value="fintech">Fintech & Infra</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Headquarters / Mode</label>
-            <input type="text" id="new-comp-loc" placeholder="e.g. San Francisco / Remote">
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label>Flagship Role Title</label>
-          <input type="text" id="new-role-title" placeholder="e.g. Senior AI Infrastructure Engineer">
-        </div>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-          <div class="form-group">
-            <label>Seniority Level</label>
-            <input type="text" id="new-role-level" placeholder="e.g. L5 / Senior">
-          </div>
-          <div class="form-group">
-            <label>Compensation Range</label>
-            <input type="text" id="new-role-comp" placeholder="e.g. $320K - $450K TC">
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label>Key Tech Stack Tags (comma separated)</label>
-          <input type="text" id="new-role-tags" placeholder="e.g. Python, PyTorch, Kubernetes, Ray, Go">
-        </div>
-      </div>
-
-      <div class="modal-footer">
-        <button class="card-secondary-btn" onclick="closeAddCompanyModal()">Cancel</button>
-        <button class="primary-action-btn" onclick="saveCustomCompany()">Add to Target Pool</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- JavaScript Intelligence & Engine -->
-  <script>
-    // 1. COMPREHENSIVE TIER-1 COMPANY DATASET
-    const COMPANIES_DATA = [
-      {
-        id: 'google',
-        name: 'Google',
-        avatarText: 'G',
-        tier: 'faang',
-        tierLabel: 'Big Tech / FAANG',
-        location: 'Mountain View, CA • Hybrid / Remote',
-        hiringBar: '9.2 / 10',
-        summary: 'Global search, distributed cloud platforms, and frontier Gemini multi-modal models requiring planetary-scale distributed systems and high concurrency.',
-        interviewFormat: '1 Tech Screen + 3 DSA Rounds + 1 System Design + 1 Googliness',
-        culture: 'Deep Engineering Research, 20% Project Innovation, Global Scale Impact',
-        l5Comp: '$285,000 - $380,000',
-        remoteFlex: 'Hybrid (3 days in office) / Select Remote',
-        roles: [
-          {
-            id: 'goog-swe-l5',
-            title: 'Senior Software Engineer (L5)',
-            domain: 'backend',
-            level: 'L5 / Senior',
-            comp: '$280K - $360K TC',
-            matchScore: 84,
-            location: 'Mountain View / Remote',
-            techStack: ['Go', 'C++', 'Kubernetes', 'Spanner', 'gRPC', 'Microservices'],
-            description: 'Architect and scale planetary-scale infrastructure services powering Google Cloud and core compute engines.',
-            rounds: [
-              { name: 'Round 1: Technical Phone Screen', duration: '45 min', desc: 'Algorithmic problem solving, data structures, and optimal time complexity.' },
-              { name: 'Round 2: Algorithmic Systems & Trees/Graphs', duration: '45 min', desc: 'Deep dive into complex graph traversal, dynamic programming, and memory efficiency.' },
-              { name: 'Round 3: Concurrency & Low-Level Primitives', duration: '45 min', desc: 'Multi-threading, mutex locking, race condition mitigation, and thread safety.' },
-              { name: 'Round 4: Large-Scale Distributed System Design', duration: '60 min', desc: 'Designing globally distributed key-value stores with strong consistency and multi-region replication.' },
-              { name: 'Round 5: Googliness & Leadership', duration: '45 min', desc: 'Collaboration, handling ambiguity, navigating cross-functional team trade-offs.' }
-            ]
-          },
-          {
-            id: 'goog-ml-l5',
-            title: 'Machine Learning Systems Engineer (L5)',
-            domain: 'ai',
-            level: 'L5 / Senior',
-            comp: '$310K - $420K TC',
-            matchScore: 78,
-            location: 'Sunnyvale, CA',
-            techStack: ['Python', 'PyTorch', 'JAX', 'TPU Clusters', 'Distributed Training'],
-            description: 'Optimize training pipelines and inference engines for Gemini large multimodal models.',
-            rounds: [
-              { name: 'Round 1: ML Systems Fundamentals', duration: '45 min', desc: 'Gradient computation, backprop optimizations, CUDA kernel concepts.' },
-              { name: 'Round 2: Distributed Model Training Design', duration: '60 min', desc: 'Data parallelism, pipeline parallelism, tensor parallelism across TPU v5 pods.' },
-              { name: 'Round 3: Coding & PyTorch/JAX Implementation', duration: '45 min', desc: 'Vectorized custom attention mechanisms, memory pinning, KV cache optimizations.' },
-              { name: 'Round 4: Googliness & Research Alignment', duration: '45 min', desc: 'Ethics in AI, handling research velocity versus production stability.' }
-            ]
-          },
-          {
-            id: 'goog-fe-l6',
-            title: 'Staff Frontend Engineer (L6)',
-            domain: 'fullstack',
-            level: 'L6 / Staff',
-            comp: '$360K - $490K TC',
-            matchScore: 88,
-            location: 'Sunnyvale / Remote',
-            techStack: ['TypeScript', 'React', 'Angular', 'Web Vitals', 'WASM'],
-            description: 'Lead technical vision for developer-facing portals across Google Cloud Console and Developer Cloud.',
-            rounds: [
-              { name: 'Round 1: JavaScript & Engine Internals', duration: '45 min', desc: 'V8 event loop, microtask queues, memory leak profiling, garbage collection.' },
-              { name: 'Round 2: Frontend Architecture & Micro-frontends', duration: '60 min', desc: 'Modular micro-frontend orchestration, state synchronization, caching layers.' },
-              { name: 'Round 3: Staff Leadership & System Influence', duration: '45 min', desc: 'Driving architectural decisions across 50+ engineers, design reviews, cross-team roadmaps.' }
-            ]
-          }
-        ]
-      },
-      {
-        id: 'meta',
-        name: 'Meta',
-        avatarText: 'M',
-        tier: 'faang',
-        tierLabel: 'Big Tech / FAANG',
-        location: 'Menlo Park, CA • Remote First Available',
-        hiringBar: '9.1 / 10',
-        summary: 'Billions of global users across Instagram, WhatsApp, and Llama open frontier AI models with ultra-fast iterative engineering velocity.',
-        interviewFormat: '1 Fast Coding Screen + 2 Coding Rounds + 1 System Design + 1 Behavioral',
-        culture: 'Move Fast, Ship to 3B Users, High Ownership, Exceptional Equity Packages',
-        l5Comp: '$290,000 - $390,000',
-        remoteFlex: 'Remote First / Office Hubs in MPK, NYC, SEA',
-        roles: [
-          {
-            id: 'meta-prod-e5',
-            title: 'Production Engineer (E5) - Infrastructure',
-            domain: 'cloud',
-            level: 'E5 / Senior',
-            comp: '$295K - $385K TC',
-            matchScore: 85,
-            location: 'Menlo Park / Remote',
-            techStack: ['Python', 'C++', 'Linux Internals', 'Kubernetes', 'Distributed Telemetry'],
-            description: 'Bridge software engineering and distributed infrastructure reliability across Meta data centers.',
-            rounds: [
-              { name: 'Round 1: Linux Systems & Troubleshooting', duration: '45 min', desc: 'Kernel debugging, memory pagination, network socket tracing (tcpdump/strace).' },
-              { name: 'Round 2: Live Coding (2 Problems)', duration: '45 min', desc: 'Rapid bug-free coding in Python/C++ under high time pressure.' },
-              { name: 'Round 3: Large-Scale Infrastructure Architecture', duration: '60 min', desc: 'Design automated cluster provisioning for 100K+ GPU nodes.' },
-              { name: 'Round 4: Meta Values & Behavioral', duration: '45 min', desc: 'Live examples of moving fast with stable infrastructure, conflict resolution.' }
-            ]
-          },
-          {
-            id: 'meta-fullstack-e5',
-            title: 'Senior Full-Stack Engineer (E5) - AI Products',
-            domain: 'fullstack',
-            level: 'E5 / Senior',
-            comp: '$290K - $380K TC',
-            matchScore: 86,
-            location: 'Menlo Park / Seattle',
-            techStack: ['React', 'Relay', 'GraphQL', 'Hack/PHP', 'Python', 'FastAPI'],
-            description: 'Deliver rich, real-time AI assistant experiences integrated natively across WhatsApp and Instagram.',
-            rounds: [
-              { name: 'Round 1: Rapid Algorithmic Coding', duration: '45 min', desc: 'Two Medium/Hard questions solved with clean modular functions.' },
-              { name: 'Round 2: Frontend Product Architecture', duration: '60 min', desc: 'Design an end-to-end real-time collaborative chat canvas with optimistic UI and streaming responses.' },
-              { name: 'Round 3: Full Stack System Design', duration: '60 min', desc: 'GraphQL schema federation, websocket gateway scaling, database sharding.' },
-              { name: 'Round 4: Behavioral & Culture Fit', duration: '45 min', desc: 'Focus on impact, building for the next billion users.' }
-            ]
-          }
-        ]
-      },
-      {
-        id: 'openai',
-        name: 'OpenAI',
-        avatarText: 'AI',
-        tier: 'ai',
-        tierLabel: 'AI & Frontier Labs',
-        location: 'San Francisco, CA • Hybrid (SF Mission)',
-        hiringBar: '9.6 / 10',
-        summary: 'Frontier research lab behind GPT-4, ChatGPT, and Sora pushing towards general artificial intelligence with extreme compute density.',
-        interviewFormat: 'Practical Deep Coding + Navigation of Complex Codebases + Non-Deterministic Systems Design',
-        culture: 'Intense Mission Focus, Uncapped Super-Equity Grants, Lean Highly Autonomous Teams',
-        l5Comp: '$450,000 - $700,000',
-        remoteFlex: 'In-Person Preferred in San Francisco / Hybrid',
-        roles: [
-          {
-            id: 'oai-infra-mts',
-            title: 'Member of Technical Staff (MTS) - Supercomputing',
-            domain: 'ai',
-            level: 'MTS / Senior L5+',
-            comp: '$420K - $650K TC',
-            matchScore: 79,
-            location: 'San Francisco, CA',
-            techStack: ['Python', 'Rust', 'Kubernetes', 'SLURM', 'NCCL', 'CUDA'],
-            description: 'Scale supercomputer clusters orchestrating tens of thousands of H100/B200 GPUs with zero-downtime checkpoints.',
-            rounds: [
-              { name: 'Round 1: Practical Codebase Debugging', duration: '60 min', desc: 'Navigate a live multi-threaded repository, identify race conditions and memory leaks.' },
-              { name: 'Round 2: Distributed GPU Cluster Design', duration: '60 min', desc: 'High-throughput InfiniBand interconnects, GPUDirect RDMA, and automated node failover.' },
-              { name: 'Round 3: Low-Level Systems & Networking', duration: '45 min', desc: 'Custom network protocols for tensor communication, CUDA memory pinning.' },
-              { name: 'Round 4: Mission Alignment & Research Collaboration', duration: '45 min', desc: 'Safety philosophy, working alongside researchers in high-uncertainty problem spaces.' }
-            ]
-          },
-          {
-            id: 'oai-product-mts',
-            title: 'Full-Stack Product Engineer - ChatGPT Platforms',
-            domain: 'fullstack',
-            level: 'MTS / Senior',
-            comp: '$380K - $560K TC',
-            matchScore: 89,
-            location: 'San Francisco, CA',
-            techStack: ['TypeScript', 'Next.js', 'React', 'FastAPI', 'Python', 'Vector DBs'],
-            description: 'Build user-facing interfaces, voice canvases, and developer tools powering the ChatGPT ecosystem.',
-            rounds: [
-              { name: 'Round 1: Real-time UI Engineering', duration: '45 min', desc: 'Server-sent events (SSE), streaming chunk parsers, markdown token renderers.' },
-              { name: 'Round 2: End-to-End System Design', duration: '60 min', desc: 'Architect an AI Agent execution engine with tool-calling sandbox and latency bounds.' },
-              { name: 'Round 3: Product Sense & Speed of Delivery', duration: '45 min', desc: 'Rapid prototyping trade-offs, intuitive developer DX, reliability under 100M+ DAU spikes.' }
-            ]
-          }
-        ]
-      },
-      {
-        id: 'stripe',
-        name: 'Stripe',
-        avatarText: 'S',
-        tier: 'fintech',
-        tierLabel: 'Fintech & Core Infra',
-        location: 'San Francisco / Seattle / Remote',
-        hiringBar: '9.3 / 10',
-        summary: 'The financial infrastructure of the internet processing hundreds of billions in GDP with 99.999% availability requirements.',
-        interviewFormat: 'Live Code Modification + Real-World System Design + Bug Hunting + Manager Chat',
-        culture: 'Craftsmanship, Meticulous API Design, Transparent Written Culture, High Autonomy',
-        l5Comp: '$310,000 - $440,000',
-        remoteFlex: 'Remote First Across US, Canada, Europe',
-        roles: [
-          {
-            id: 'stripe-infra-l4',
-            title: 'Staff Infrastructure Engineer (L4/L5) - Global Ledger',
-            domain: 'backend',
-            level: 'L5 / Staff',
-            comp: '$330K - $460K TC',
-            matchScore: 87,
-            location: 'Remote / SF',
-            techStack: ['Ruby', 'Go', 'Java', 'ACID Databases', 'Distributed Transactions', 'Kafka'],
-            description: 'Design immutable ledger pipelines ensuring zero financial drift across heterogeneous banking networks.',
-            rounds: [
-              { name: 'Round 1: Practical Code Modification', duration: '60 min', desc: 'Pair programming: extend an existing codebase with new features and tests.' },
-              { name: 'Round 2: Bug Finding & Debugging', duration: '60 min', desc: 'Locate subtle race conditions and ledger discrepancies in a live mock system.' },
-              { name: 'Round 3: Financial-Grade System Design', duration: '60 min', desc: 'Design idempotent payment processing with two-phase commit and disaster recovery.' },
-              { name: 'Round 4: Stripe Operating Principles & Values', duration: '45 min', desc: 'Focus on rigorous thinking, high standards, user obsession.' }
-            ]
-          },
-          {
-            id: 'stripe-frontend-l4',
-            title: 'Senior Frontend Engineer - Developer Dashboard',
-            domain: 'fullstack',
-            level: 'L4 / Senior',
-            comp: '$290K - $390K TC',
-            matchScore: 91,
-            location: 'Remote Worldwide',
-            techStack: ['TypeScript', 'React', 'CSS Architecture', 'SDK Design', 'Webpack'],
-            description: 'Craft world-renowned developer dashboards and embedded payment element SDKs.',
-            rounds: [
-              { name: 'Round 1: Live Frontend Component Crafting', duration: '60 min', desc: 'Build an accessible, high-performance UI component from scratch with pure TypeScript.' },
-              { name: 'Round 2: Frontend System Architecture', duration: '60 min', desc: 'Design an embeddable iframe/Web Component SDK with strict isolation and zero dependencies.' },
-              { name: 'Round 3: Behavioral & Stripe Culture', duration: '45 min', desc: 'Emphasis on design aesthetics, micro-interactions, and empathy for developers.' }
-            ]
-          }
-        ]
-      },
-      {
-        id: 'netflix',
-        name: 'Netflix',
-        avatarText: 'N',
-        tier: 'unicorn',
-        tierLabel: 'High-Growth / Streaming',
-        location: 'Los Gatos, CA • Remote US',
-        hiringBar: '9.4 / 10',
-        summary: 'Global entertainment streaming platform pioneer known for its high-performance culture and industry-leading all-cash compensation.',
-        interviewFormat: '2 Technical Rounds + 2 System Design + 2 Culture & Leadership Memo Interviews',
-        culture: 'Freedom & Responsibility, Top of Market Compensation (All Cash), Highly Senior Teams',
-        l5Comp: '$450,000 - $550,000 All-Cash',
-        remoteFlex: 'Work From Anywhere (US)',
-        roles: [
-          {
-            id: 'nflx-edge-l5',
-            title: 'Senior Software Engineer (L5) - Edge Infrastructure',
-            domain: 'backend',
-            level: 'L5 / Senior Only',
-            comp: '$480K - $540K All-Cash',
-            matchScore: 86,
-            location: 'Remote / Los Gatos',
-            techStack: ['Java', 'Go', 'gRPC', 'AWS', 'Edge Routing', 'Kafka', 'Envoy'],
-            description: 'Direct global traffic from 300M+ households across Netflix Open Connect appliances and AWS edge proxies.',
-            rounds: [
-              { name: 'Round 1: High-Throughput Java/Go Systems', duration: '60 min', desc: 'Non-blocking I/O (Netty), memory management, zero-copy packet serialization.' },
-              { name: 'Round 2: Global Content Routing Design', duration: '60 min', desc: 'Design global anycast CDN routing with sub-millisecond failover.' },
-              { name: 'Round 3: Culture Memo Deep Dive (Part 1)', duration: '45 min', desc: 'Thorough discussion on context not control, stunning colleagues, giving candid feedback.' },
-              { name: 'Round 4: Culture & Engineering Leadership (Part 2)', duration: '45 min', desc: 'High stakes decision making, handling production incidents with extreme ownership.' }
-            ]
-          }
-        ]
-      },
-      {
-        id: 'amazon',
-        name: 'Amazon',
-        avatarText: 'A',
-        tier: 'faang',
-        tierLabel: 'Big Tech / FAANG',
-        location: 'Seattle, WA • Hybrid (3 Days)',
-        hiringBar: '8.9 / 10',
-        summary: 'World leader in cloud computing (AWS) and e-commerce infrastructure with rigorous focus on operational excellence and leadership principles.',
-        interviewFormat: '1 Online Assessment + 1 Tech Screen + 4-Round Virtual Onsite (DSA, Design, Bar Raiser)',
-        culture: '14 Leadership Principles, Customer Obsession, Ownership, Frugality, Deliver Results',
-        l5Comp: '$240,000 - $320,000',
-        remoteFlex: 'Hybrid (3 Days in Office)',
-        roles: [
-          {
-            id: 'amzn-sde2-aws',
-            title: 'Software Development Engineer II (SDE-2) - AWS Core',
-            domain: 'backend',
-            level: 'SDE-2 / L5',
-            comp: '$245K - $315K TC',
-            matchScore: 83,
-            location: 'Seattle / Austin',
-            techStack: ['Java', 'C++', 'DynamoDB', 'AWS EC2', 'Distributed Systems'],
-            description: 'Build foundational AWS services handling petabytes of telemetry with sub-millisecond SLAs.',
-            rounds: [
-              { name: 'Round 1: Data Structures & Algorithms', duration: '45 min', desc: 'Graph traversal, priority queues, algorithmic optimization + 15 min LP questions.' },
-              { name: 'Round 2: Object-Oriented Design & Clean Code', duration: '45 min', desc: 'Design pattern implementation (Strategy, Factory) with modular extensibility.' },
-              { name: 'Round 3: Distributed System Design', duration: '60 min', desc: 'Design scalable rate-limiters, consistent hashing rings, and dead letter queues.' },
-              { name: 'Round 4: Bar Raiser & Leadership Principles', duration: '45 min', desc: 'Customer Obsession, Bias for Action, Have Backbone; Disagree and Commit.' }
-            ]
-          }
-        ]
-      },
-      {
-        id: 'microsoft',
-        name: 'Microsoft',
-        avatarText: 'MS',
-        tier: 'faang',
-        tierLabel: 'Big Tech / Enterprise',
-        location: 'Redmond, WA • Hybrid / Remote',
-        hiringBar: '8.8 / 10',
-        summary: 'Enterprise cloud giant powering Azure, GitHub, Microsoft 365 Copilot, and foundational enterprise software globally.',
-        interviewFormat: '1 Technical Screen + 4 Onsite Rounds (Coding, Cloud Architecture, System Design)',
-        culture: 'Growth Mindset, Work-Life Balance, Deep Enterprise Cloud Integration',
-        l5Comp: '$250,000 - $330,000',
-        remoteFlex: 'Hybrid / High Remote Flexibility',
-        roles: [
-          {
-            id: 'msft-cloud-l63',
-            title: 'Senior Cloud Solutions Engineer (L63) - Azure AI',
-            domain: 'cloud',
-            level: 'L63 / Senior',
-            comp: '$255K - $325K TC',
-            matchScore: 86,
-            location: 'Redmond / Remote',
-            techStack: ['C#', 'Go', 'Azure Kubernetes', 'Terraform', 'Azure OpenAI'],
-            description: 'Architect secure, enterprise-grade AI deployment pipelines for Fortune 500 customers on Azure.',
-            rounds: [
-              { name: 'Round 1: Algorithmic Coding', duration: '45 min', desc: 'Clean coding, edge case handling, tree/matrix manipulation.' },
-              { name: 'Round 2: Cloud Infrastructure & Security Architecture', duration: '60 min', desc: 'Zero trust architecture, private endpoints, multi-tenant RBAC design.' },
-              { name: 'Round 3: Distributed Systems & Azure Internals', duration: '45 min', desc: 'Service Fabric, Cosmos DB partition keys, resilient microservice choreography.' },
-              { name: 'Round 4: Growth Mindset & Collaboration', duration: '45 min', desc: 'Cross-group collaboration, customer empathy, learning from setbacks.' }
-            ]
-          }
-        ]
-      },
-      {
-        id: 'apple',
-        name: 'Apple',
-        avatarText: '',
-        tier: 'faang',
-        tierLabel: 'Big Tech / Hardware & Cloud',
-        location: 'Cupertino, CA • Hybrid (3 Days)',
-        hiringBar: '9.0 / 10',
-        summary: 'Pioneering consumer electronics, Apple Silicon, and Apple Intelligence with strict privacy standards and hardware-software optimization.',
-        interviewFormat: 'Team-Specific Deep Technical Screener + 5-6 Round Virtual Onsite',
-        culture: 'Extreme Attention to Detail, Secrecy, Perfectionism, Deep Domain Mastery',
-        l5Comp: '$275,000 - $370,000',
-        remoteFlex: 'Hybrid (3 Days in Cupertino / Seattle)',
-        roles: [
-          {
-            id: 'aapl-ict4-ai',
-            title: 'Senior Software Engineer (ICT4) - Apple Intelligence',
-            domain: 'ai',
-            level: 'ICT4 / Senior',
-            comp: '$280K - $365K TC',
-            matchScore: 80,
-            location: 'Cupertino / Seattle',
-            techStack: ['Swift', 'C++', 'Python', 'CoreML', 'Private Cloud Compute'],
-            description: 'Build on-device and Private Cloud Compute models delivering privacy-first intelligent features in iOS.',
-            rounds: [
-              { name: 'Round 1: Low-Level Memory & Concurrency', duration: '45 min', desc: 'ARC memory semantics, cache coherency, Grand Central Dispatch / async-await.' },
-              { name: 'Round 2: Algorithmic Complexity', duration: '45 min', desc: 'Graph algorithms, bit manipulation, high-efficiency data structures.' },
-              { name: 'Round 3: On-Device & Cloud Hybrid Architecture', duration: '60 min', desc: 'Partitioning workloads between local neural engine and secure cloud enclaves.' },
-              { name: 'Round 4: Privacy & Cultural Alignment', duration: '45 min', desc: 'Designing privacy-first metrics, collaborative perfectionism.' }
-            ]
-          }
-        ]
-      },
-      {
-        id: 'nvidia',
-        name: 'NVIDIA',
-        avatarText: 'NV',
-        tier: 'ai',
-        tierLabel: 'AI & Hardware Platform',
-        location: 'Santa Clara, CA • High Flexibility / Remote',
-        hiringBar: '9.1 / 10',
-        summary: 'The bedrock of global AI computing providing GPUs, CUDA platforms, DGX SuperPODs, and enterprise accelerated computing.',
-        interviewFormat: 'Technical Phone Screen + 4 Rounds Onsite (Concurrency, Architecture, CUDA/C++, Culture)',
-        culture: 'First Principles Thinking, Fast Flat Hierarchy, Highest Market Cap Growth',
-        l5Comp: '$300,000 - $440,000',
-        remoteFlex: 'High Remote Flexibility Across US',
-        roles: [
-          {
-            id: 'nvda-systems-ic4',
-            title: 'Senior Systems Engineer - DGX Cloud Platforms',
-            domain: 'cloud',
-            level: 'IC4 / Senior',
-            comp: '$310K - $420K TC',
-            matchScore: 82,
-            location: 'Santa Clara / Remote',
-            techStack: ['Go', 'Python', 'Kubernetes', 'InfiniBand', 'Slurm', 'Ansible'],
-            description: 'Orchestrate multi-tenant supercomputing instances for enterprise AI foundation model training.',
-            rounds: [
-              { name: 'Round 1: Distributed Cluster Troubleshooting', duration: '45 min', desc: 'Hardware fault detection, GPU health metrics, InfiniBand link recovery.' },
-              { name: 'Round 2: Kubernetes Operator Architecture', duration: '60 min', desc: 'Custom CRDs for GPU topology discovery, NUMA node binding, SLURM integration.' },
-              { name: 'Round 3: Low-Level C++ / Python Concurrency', duration: '45 min', desc: 'Zero-overhead shared memory IPC, asynchronous I/O.' },
-              { name: 'Round 4: NVIDIA First Principles Culture', duration: '45 min', desc: 'Solving complex engineering problems from first physical principles.' }
-            ]
-          }
-        ]
-      },
-      {
-        id: 'uber',
-        name: 'Uber',
-        avatarText: 'U',
-        tier: 'unicorn',
-        tierLabel: 'High-Growth / Mobility',
-        location: 'San Francisco, CA • Hybrid / Remote',
-        hiringBar: '8.9 / 10',
-        summary: 'Real-time global transportation and delivery marketplace matching millions of riders and couriers per second with sub-second geospatial algorithms.',
-        interviewFormat: '1 Coding Screen + 2 DSA + 1 System Design + 1 Behavioral',
-        culture: 'Go-Getters, High Throughput Microservices, Real-Time Distributed Architecture',
-        l5Comp: '$270,000 - $360,000',
-        remoteFlex: 'Hybrid / Select Remote',
-        roles: [
-          {
-            id: 'uber-geo-l5a',
-            title: 'Senior Software Engineer (L5A) - Marketplace Routing',
-            domain: 'backend',
-            level: 'L5A / Senior',
-            comp: '$275K - $365K TC',
-            matchScore: 84,
-            location: 'San Francisco / Remote',
-            techStack: ['Go', 'Java', 'Kafka', 'Redis', 'Geospatial H3', 'Microservices'],
-            description: 'Power real-time dispatch, dynamic pricing, and shortest-path routing for 150M+ monthly active platform users.',
-            rounds: [
-              { name: 'Round 1: Algorithmic Problem Solving', duration: '45 min', desc: 'Graph algorithms (Dijkstra/A*), spatial indexing, caching strategies.' },
-              { name: 'Round 2: Distributed High-Throughput Design', duration: '60 min', desc: 'Design a real-time driver tracking pipeline processing 1M updates/sec with Kafka and Redis.' },
-              { name: 'Round 3: Concurrency & Resiliency in Go/Java', duration: '45 min', desc: 'Circuit breakers, backpressure, rate-limiting, and graceful degradation.' },
-              { name: 'Round 4: Uber Values & Leadership', duration: '45 min', desc: 'Build with passion, act like an owner, champion diversity.' }
-            ]
-          }
-        ]
-      },
-      {
-        id: 'databricks',
-        name: 'Databricks',
-        avatarText: 'DB',
-        tier: 'unicorn',
-        tierLabel: 'Data & AI Platform',
-        location: 'San Francisco, CA • Hybrid / Remote',
-        hiringBar: '9.2 / 10',
-        summary: 'Data and AI lakehouse pioneer created by the founders of Apache Spark, Delta Lake, and MLflow.',
-        interviewFormat: '1 Coding Screen + 2 Deep Coding Rounds + 1 Distributed Systems + 1 Culture Fit',
-        culture: 'Deep Engineering Pedigree, Open Source Community Champions, High Growth',
-        l5Comp: '$310,000 - $430,000',
-        remoteFlex: 'Hybrid / Select Remote',
-        roles: [
-          {
-            id: 'db-spark-sr',
-            title: 'Senior Software Engineer - Unified Lakehouse Platform',
-            domain: 'data',
-            level: 'Senior SWE',
-            comp: '$315K - $425K TC',
-            matchScore: 81,
-            location: 'San Francisco / Remote',
-            techStack: ['Scala', 'Java', 'Spark', 'Delta Lake', 'Kubernetes', 'Go'],
-            description: 'Optimize high-performance distributed query execution engines handling exabytes of data.',
-            rounds: [
-              { name: 'Round 1: Complex Coding & Algorithms', duration: '45 min', desc: 'Concurrency, custom memory allocators, lock-free queues.' },
-              { name: 'Round 2: Distributed Query Engine Design', duration: '60 min', desc: 'Vectorized execution, parquet column chunk pruning, distributed shuffle scaling.' },
-              { name: 'Round 3: Core Databricks Culture', duration: '45 min', desc: 'Relentless customer focus, rigorous peer review culture.' }
-            ]
-          }
-        ]
-      },
-      {
-        id: 'airbnb',
-        name: 'Airbnb',
-        avatarText: 'AB',
-        tier: 'unicorn',
-        tierLabel: 'High-Growth / Hospitality',
-        location: 'Live and Work Anywhere (Global Remote)',
-        hiringBar: '9.1 / 10',
-        summary: 'Global hospitality platform revolutionizing travel with an industry-leading Live & Work Anywhere policy and world-class product design.',
-        interviewFormat: '1 Technical Screen + 2 Coding + 1 System Design + 2 Core Values Interviews',
-        culture: 'Live and Work Anywhere, Design Excellence, Be a Host, Champion the Mission',
-        l5Comp: '$285,000 - $385,000',
-        remoteFlex: '100% Live & Work Anywhere Worldwide',
-        roles: [
-          {
-            id: 'ab-fullstack-l5',
-            title: 'Senior Full-Stack Engineer (L5) - Guest Experience',
-            domain: 'fullstack',
-            level: 'L5 / Senior',
-            comp: '$290K - $380K TC',
-            matchScore: 89,
-            location: 'Remote Worldwide',
-            techStack: ['TypeScript', 'React', 'Java', 'GraphQL', 'MySQL', 'Aurora'],
-            description: 'Design intuitive, responsive search and booking flows experienced by millions of global travelers.',
-            rounds: [
-              { name: 'Round 1: Practical Frontend Coding', duration: '45 min', desc: 'Custom hooks, state normalization, accessible components, client caching.' },
-              { name: 'Round 2: End-to-End System Design', duration: '60 min', desc: 'Design global listing search with faceted filters, dynamic pricing, and zero double-booking.' },
-              { name: 'Round 3: Core Values Interview (Be a Host)', duration: '45 min', desc: 'Belong anywhere philosophy, empathy in engineering, cross-discipline collaboration.' }
-            ]
-          }
-        ]
-      },
-      {
-        id: 'ibm',
-        name: 'IBM',
-        avatarText: 'IBM',
-        tier: 'enterprise',
-        tierLabel: 'Enterprise Cloud & AI',
-        location: 'Armonk, NY / San Jose • Remote & Hybrid',
-        hiringBar: '8.7 / 10',
-        summary: 'Global pioneer in enterprise AI (watsonx), Red Hat OpenShift hybrid cloud architectures, quantum computing platforms, and mission-critical enterprise modernizations.',
-        interviewFormat: 'Cognitive Screening + Coding Challenge + Technical Deep Dive + Hybrid Cloud Architecture + Culture',
-        culture: 'Enterprise Reliability, Red Hat Open Source Heritage, Hybrid Cloud Strategy, Patent Leadership',
-        l5Comp: '$195,000 - $285,000',
-        remoteFlex: 'High Remote Flexibility Across US & Global',
-        roles: [
-          {
-            id: 'ibm-openshift-b8',
-            title: 'Senior Cloud Infrastructure Engineer (Band 8/9) - Red Hat OpenShift',
-            domain: 'cloud',
-            level: 'Band 8 / Senior',
-            comp: '$195K - $265K TC',
-            matchScore: 86,
-            location: 'San Jose / Remote',
-            techStack: ['OpenShift', 'Kubernetes', 'Go', 'Python', 'Terraform', 'Linux KVM'],
-            description: 'Build scalable multicloud deployment control planes and automated Kubernetes operators across AWS, Azure, and IBM Cloud.',
-            rounds: [
-              { name: 'Round 1: Technical & Linux Screener', duration: '45 min', desc: 'Linux networking, container namespaces, cgroups, and bash scripting.' },
-              { name: 'Round 2: Kubernetes Operators & CRD Design', duration: '60 min', desc: 'Build and reconcile custom controllers in Go, handle state reconciliation loops.' },
-              { name: 'Round 3: Multi-Cloud Hybrid Architecture', duration: '60 min', desc: 'Design zero-downtime workload failover across hybrid on-prem and public cloud clusters.' },
-              { name: 'Round 4: IBM Values & Client Leadership', duration: '45 min', desc: 'Client trust, security compliance, cross-functional collaboration.' }
-            ]
-          },
-          {
-            id: 'ibm-watsonx-b9',
-            title: 'Senior AI Solutions Architect - watsonx & Enterprise LLMs',
-            domain: 'ai',
-            level: 'Band 9 / Staff',
-            comp: '$220K - $310K TC',
-            matchScore: 81,
-            location: 'New York / Remote',
-            techStack: ['Python', 'watsonx.ai', 'PyTorch', 'RAG Architectures', 'Vector DBs', 'HuggingFace'],
-            description: 'Design governance-ready enterprise generative AI pipelines and RAG microservices for Fortune 500 banks and healthcare.',
-            rounds: [
-              { name: 'Round 1: ML Systems & Python Coding', duration: '45 min', desc: 'Vectorized embeddings, batch inference optimization, prompt evaluation metrics.' },
-              { name: 'Round 2: Enterprise RAG Architecture & Governance', duration: '60 min', desc: 'Design privacy-compliant RAG search with role-based document chunking and audit trails.' },
-              { name: 'Round 3: Executive Stakeholder Presentation', duration: '45 min', desc: 'Communicating AI ROI, model risk governance, and hallucination safeguards to enterprise leadership.' }
-            ]
-          },
-          {
-            id: 'ibm-quantum-fullstack',
-            title: 'Senior Full-Stack Cloud Engineer - IBM Quantum Platform',
-            domain: 'fullstack',
-            level: 'Band 8 / Senior',
-            comp: '$185K - $250K TC',
-            matchScore: 87,
-            location: 'Austin / Remote',
-            techStack: ['TypeScript', 'React', 'Node.js', 'FastAPI', 'Docker', 'GraphQL'],
-            description: 'Develop high-performance web consoles orchestrating quantum circuit experiments and hybrid high-performance computing jobs.',
-            rounds: [
-              { name: 'Round 1: Frontend Architecture & State', duration: '45 min', desc: 'Complex interactive canvases, graph visualizations, WebGL state synchronization.' },
-              { name: 'Round 2: Full-Stack API & Real-Time Events', duration: '60 min', desc: 'Websocket streaming of quantum circuit calibration metrics and job status queues.' },
-              { name: 'Round 3: Collaboration & Growth Mindset', duration: '45 min', desc: 'Navigating frontier scientific concepts with engineering rigor.' }
-            ]
-          }
-        ]
-      },
-      {
-        id: 'oracle',
-        name: 'Oracle',
-        avatarText: 'ORCL',
-        tier: 'enterprise',
-        tierLabel: 'Enterprise Cloud & Database',
-        location: 'Austin, TX / Seattle, WA • Remote First Available',
-        hiringBar: '9.0 / 10',
-        summary: 'High-performance Oracle Cloud Infrastructure (OCI), Autonomous Database engines, Exadata hardware-software co-design, and massive 32,000+ GPU superclusters for training frontier AI.',
-        interviewFormat: '1 HackerRank / OA + 1 Tech Phone Screen + 4-Round Virtual Onsite (DSA, Distributed Systems, Concurrency, Architecture)',
-        culture: 'High Performance Engineering at OCI, Database Excellence, Strong Compensation & Equity Packages',
-        l5Comp: '$260,000 - $350,000',
-        remoteFlex: 'Remote First across US, Canada, Europe, India',
-        roles: [
-          {
-            id: 'orcl-oci-ic4',
-            title: 'Principal Distributed Systems Engineer (IC4/IC5) - OCI Core Compute',
-            domain: 'backend',
-            level: 'IC4 / Senior',
-            comp: '$270K - $360K TC',
-            matchScore: 85,
-            location: 'Seattle / Remote',
-            techStack: ['Java', 'Go', 'C++', 'Distributed Storage', 'eBPF', 'RDMA', 'Microservices'],
-            description: 'Architect ultra-low latency compute orchestration and software-defined networking at planetary scale across 50+ global OCI regions.',
-            rounds: [
-              { name: 'Round 1: Data Structures & Algorithms', duration: '45 min', desc: 'Optimal time/space complexity, graph theory, customized memory structures.' },
-              { name: 'Round 2: Concurrency & Thread Synchronization', duration: '45 min', desc: 'Lock-free queues, memory barriers, atomic primitives in Java/C++.' },
-              { name: 'Round 3: Distributed Systems Design (Multi-Region)', duration: '60 min', desc: 'Design global control plane for provisioning thousands of bare-metal instances in sub-second time.' },
-              { name: 'Round 4: Bar Raiser & OCI Leadership', duration: '45 min', desc: 'Customer obsession, architectural conviction, ownership under incident pressure.' }
-            ]
-          },
-          {
-            id: 'orcl-db-ic4',
-            title: 'Senior Database Cloud Platform Engineer (IC4) - Autonomous Database',
-            domain: 'data',
-            level: 'IC4 / Senior',
-            comp: '$240K - $320K TC',
-            matchScore: 83,
-            location: 'Austin / Remote',
-            techStack: ['C', 'C++', 'SQL Internals', 'PostgreSQL', 'Linux Kernel', 'Raft/Paxos'],
-            description: 'Engineer core transaction engines, write-ahead logging (WAL), and automated failure recovery for mission-critical cloud databases.',
-            rounds: [
-              { name: 'Round 1: Database Storage Internals', duration: '45 min', desc: 'B+ Trees, LSM Trees, buffer pool replacement algorithms, disk I/O optimization.' },
-              { name: 'Round 2: Distributed Transaction Protocols', duration: '60 min', desc: 'Two-phase commit, multi-version concurrency control (MVCC), distributed deadlock detection.' },
-              { name: 'Round 3: Low-Level C/C++ Systems & Memory', duration: '45 min', desc: 'Custom allocators, memory leak profiling with Valgrind/GDB, cache locality.' }
-            ]
-          },
-          {
-            id: 'orcl-ai-gpu-ic4',
-            title: 'Senior AI Cloud Infrastructure Engineer (IC4) - OCI Superclusters',
-            domain: 'cloud',
-            level: 'IC4 / Senior',
-            comp: '$280K - $370K TC',
-            matchScore: 82,
-            location: 'Santa Clara / Remote',
-            techStack: ['Python', 'Go', 'Kubernetes', 'InfiniBand RDMA', 'RoCEv2', 'Slurm'],
-            description: 'Scale 32,000+ GPU superclusters for training frontier foundation models with zero network dropouts.',
-            rounds: [
-              { name: 'Round 1: High Performance Networking & RDMA', duration: '45 min', desc: 'RoCEv2 congestion notification (ECN/PFC), packet loss recovery, telemetry.' },
-              { name: 'Round 2: Cluster Orchestration & Custom Operators', duration: '60 min', desc: 'Design automated GPU node health auto-remediation and MPI job scheduling.' },
-              { name: 'Round 3: Systems Architecture & Scaling', duration: '45 min', desc: 'Handling multi-tenant compute isolation with hardware SR-IOV virtualization.' }
-            ]
-          }
-        ]
-      },
-      {
-        id: 'sap',
-        name: 'SAP',
-        avatarText: 'SAP',
-        tier: 'enterprise',
-        tierLabel: 'Enterprise ERP & Cloud',
-        location: 'Walldorf, Germany / Palo Alto, CA • Remote Worldwide',
-        hiringBar: '8.8 / 10',
-        summary: 'Market leader in enterprise application software, powering 87% of the world total commerce through SAP S/4HANA, Business Technology Platform (BTP), and Joule AI.',
-        interviewFormat: 'Online Technical Assessment + 1 Screener + 3-4 Rounds (Core Coding, S/4HANA / Cloud Architecture, Design Patterns, Behavioral)',
-        culture: 'Mission-Critical Reliability, Global Commerce Scale, Sustainable Tech, Comprehensive Employee Benefits',
-        l5Comp: '$210,000 - $295,000',
-        remoteFlex: 'Pledge to Flex / High Remote Flexibility Worldwide',
-        roles: [
-          {
-            id: 'sap-btp-t3',
-            title: 'Senior Cloud Platform Engineer (T3/T4) - SAP BTP Integration',
-            domain: 'cloud',
-            level: 'T3 / Senior',
-            comp: '$215K - $285K TC',
-            matchScore: 86,
-            location: 'Palo Alto / Remote',
-            techStack: ['Java', 'Go', 'Kubernetes', 'Cloud Foundry', 'PostgreSQL', 'Kafka', 'Microservices'],
-            description: 'Build multi-tenant cloud microservices and event-driven integration meshes on SAP Business Technology Platform.',
-            rounds: [
-              { name: 'Round 1: Java & Go Coding Fundamentals', duration: '45 min', desc: 'Clean coding, object-oriented principles, design patterns (Strategy, Adapter).' },
-              { name: 'Round 2: Microservices & Event-Driven Architecture', duration: '60 min', desc: 'Design an event mesh connecting on-prem ERP systems to cloud analytics with Kafka.' },
-              { name: 'Round 3: Multi-Tenancy & Data Isolation', duration: '45 min', desc: 'Tenant routing, database schema isolation, GDPR/compliance security.' },
-              { name: 'Round 4: Team Collaboration & Client Focus', duration: '45 min', desc: 'Building durable solutions for international business operations.' }
-            ]
-          },
-          {
-            id: 'sap-joule-fullstack',
-            title: 'Senior Full-Stack Engineer (T3) - S/4HANA Cloud & Joule AI',
-            domain: 'fullstack',
-            level: 'T3 / Senior',
-            comp: '$200K - $270K TC',
-            matchScore: 88,
-            location: 'Palo Alto / Remote',
-            techStack: ['TypeScript', 'React', 'SAP UI5', 'Node.js', 'GraphQL', 'Python', 'Vector DBs'],
-            description: 'Craft responsive web interfaces and embedded generative AI Copilots (Joule) for global enterprise supply chain workflows.',
-            rounds: [
-              { name: 'Round 1: Frontend Architecture & State Management', duration: '45 min', desc: 'Complex enterprise forms, table virtualization, state management.' },
-              { name: 'Round 2: REST / OData & GraphQL API Integration', duration: '60 min', desc: 'Optimizing high-throughput data tables with debounced querying and client caching.' },
-              { name: 'Round 3: Behavioral & SAP Core Values', duration: '45 min', desc: 'Inclusion, client success, and sustainable engineering practices.' }
-            ]
-          },
-          {
-            id: 'sap-hana-t4',
-            title: 'Senior Data Platform Architect (T4) - SAP HANA In-Memory Engine',
-            domain: 'data',
-            level: 'T4 / Staff Architect',
-            comp: '$250K - $330K TC',
-            matchScore: 82,
-            location: 'Walldorf / Remote',
-            techStack: ['C++', 'Columnar In-Memory DB', 'Distributed Query Engines', 'SQL', 'Linux'],
-            description: 'Optimize column-store data compression, vector processing, and parallel calculation engines in the flagship SAP HANA database.',
-            rounds: [
-              { name: 'Round 1: In-Memory Data Structures & Algorithms', duration: '45 min', desc: 'Dictionary encoding, bit-packed integer compression, lock-free hash tables.' },
-              { name: 'Round 2: Distributed Query Planning & SIMD Vectorization', duration: '60 min', desc: 'Parallel SQL execution trees, cost-based optimizer heuristics, cache-conscious processing.' },
-              { name: 'Round 3: Architectural Review & Leadership', duration: '45 min', desc: 'Driving architectural consensus across global engineering teams.' }
-            ]
-          }
-        ]
-      },
-      {
-        id: 'deloitte',
-        name: 'Deloitte',
-        avatarText: 'D',
-        tier: 'consulting',
-        tierLabel: 'Enterprise Advisory & Cloud',
-        location: 'New York, NY / Chicago / Dallas / London / Remote',
-        hiringBar: '8.6 / 10',
-        summary: 'Global leader in digital transformation, enterprise cloud engineering, cybersecurity, and strategic AI implementation for Fortune 100 leaders and governments.',
-        interviewFormat: 'Technical Screener + Case Study Analysis + Coding & Cloud Architecture + Partner / Executive Behavioral',
-        culture: 'Client Impact, Rapid Career Trajectory, Cross-Industry Domain Exposure, Advisory Excellence',
-        l5Comp: '$175,000 - $245,000',
-        remoteFlex: 'Hybrid Client-Driven / High Remote Flexibility',
-        roles: [
-          {
-            id: 'deloitte-cloud-lead',
-            title: 'Senior Cloud Solutions Consultant / Lead - AWS & Azure Migration',
-            domain: 'cloud',
-            level: 'Senior Consultant / Lead',
-            comp: '$180K - $240K TC',
-            matchScore: 89,
-            location: 'New York / Remote',
-            techStack: ['AWS', 'Azure', 'Terraform', 'Kubernetes', 'Python', 'CI/CD Pipelines', 'IAM'],
-            description: 'Lead large-scale datacenter migrations and automated infrastructure-as-code landing zones for enterprise banking and healthcare clients.',
-            rounds: [
-              { name: 'Round 1: Cloud Architecture Screener', duration: '45 min', desc: 'AWS Well-Architected Framework, multi-region failover, cost optimization.' },
-              { name: 'Round 2: Enterprise Cloud Migration Case Study', duration: '60 min', desc: 'Assess a legacy 500-server monolithic system and design a 3-phase cloud migration roadmap.' },
-              { name: 'Round 3: Multi-Account Security & Disaster Recovery', duration: '45 min', desc: 'Zero-trust network architecture, transit gateways, KMS envelope encryption.' },
-              { name: 'Round 4: Partner & Leadership Behavioral', duration: '45 min', desc: 'Executive client presence, scope management, leading engineering squads.' }
-            ]
-          },
-          {
-            id: 'deloitte-ai-lead',
-            title: 'Lead AI & Data Engineering Consultant - Enterprise Analytics & RAG',
-            domain: 'ai',
-            level: 'Manager / Lead',
-            comp: '$200K - $265K TC',
-            matchScore: 84,
-            location: 'Chicago / Remote',
-            techStack: ['Python', 'Databricks', 'PySpark', 'Snowflake', 'Azure OpenAI', 'dbt', 'Airflow'],
-            description: 'Architect end-to-end data lakehouses and private enterprise LLM pipelines delivering business intelligence.',
-            rounds: [
-              { name: 'Round 1: Data Pipeline Coding & Optimization', duration: '45 min', desc: 'PySpark optimization, shuffle partitions, incremental ETL with Delta Lake.' },
-              { name: 'Round 2: Enterprise AI Solution Case Study', duration: '60 min', desc: 'Design an automated contract analysis and regulatory compliance assistant with Azure OpenAI.' },
-              { name: 'Round 3: Client Communication & Executive Stakeholders', duration: '45 min', desc: 'Presenting complex technical tradeoffs to non-technical business executives.' }
-            ]
-          },
-          {
-            id: 'deloitte-fullstack-sr',
-            title: 'Senior Full-Stack Digital Transformation Engineer',
-            domain: 'fullstack',
-            level: 'Senior Consultant',
-            comp: '$175K - $235K TC',
-            matchScore: 87,
-            location: 'Dallas / Remote',
-            techStack: ['React', 'TypeScript', 'Node.js', 'NestJS', 'PostgreSQL', 'Docker', 'REST APIs'],
-            description: 'Modernize legacy enterprise portals into modern cloud-native micro-frontends with high test coverage and sub-second rendering.',
-            rounds: [
-              { name: 'Round 1: Live Full-Stack Coding', duration: '45 min', desc: 'Full-stack feature build: React UI component + NestJS endpoint + SQL query.' },
-              { name: 'Round 2: Enterprise Portal Architecture', duration: '60 min', desc: 'Modular micro-frontends, single sign-on (SSO/OAuth2), caching strategies.' },
-              { name: 'Round 3: Leadership & Consulting Delivery', duration: '45 min', desc: 'Mentoring junior developers, agile delivery, client sprint planning.' }
-            ]
-          }
-        ]
-      },
-      {
-        id: 'accenture',
-        name: 'Accenture',
-        avatarText: 'ACN',
-        tier: 'consulting',
-        tierLabel: 'Global Technology & Cloud Services',
-        location: 'New York / San Francisco / Dublin / London / Remote',
-        hiringBar: '8.5 / 10',
-        summary: 'Global technology services powerhouse specializing in enterprise cloud reinvention, custom software engineering, managed operations, and applied AI at global scale.',
-        interviewFormat: 'Aptitude & Coding Assessment + Technical Subject Matter Interview + System Design + Leadership/Managerial',
-        culture: 'Continuous Upskilling, Global Delivery Network, High Velocity Projects, Technology Innovation Centers',
-        l5Comp: '$170,000 - $240,000',
-        remoteFlex: 'Hybrid / Remote Project-Based Across Global Hubs',
-        roles: [
-          {
-            id: 'acn-cloud-arch',
-            title: 'Lead Cloud Architect / Manager - Multi-Cloud Infrastructure & DevOps',
-            domain: 'cloud',
-            level: 'Associate Director / Lead',
-            comp: '$185K - $250K TC',
-            matchScore: 88,
-            location: 'San Francisco / Remote',
-            techStack: ['Kubernetes', 'Terraform', 'AWS/GCP', 'Docker', 'GitOps / ArgoCD', 'Python'],
-            description: 'Direct complex cloud-native architectures, container orchestration, and zero-trust security postures for multi-national enterprise clients.',
-            rounds: [
-              { name: 'Round 1: Technical & DevOps Screener', duration: '45 min', desc: 'Infrastructure as Code best practices, container security, CI/CD pipeline automation.' },
-              { name: 'Round 2: Enterprise Cloud Case & Failure Modes', duration: '60 min', desc: 'Design resilient multi-cloud architecture with automated cross-cloud failover.' },
-              { name: 'Round 3: Cloud FinOps & Cost Governance', duration: '45 min', desc: 'Right-sizing cloud instances, spot instance orchestration, reserved capacity planning.' },
-              { name: 'Round 4: Managing Engineering Squads & Leadership', duration: '45 min', desc: 'Leading 15+ distributed engineers, client stakeholder management.' }
-            ]
-          },
-          {
-            id: 'acn-fullstack-l8',
-            title: 'Senior Full-Stack Software Engineer (Level 8/7) - Modern Application Delivery',
-            domain: 'fullstack',
-            level: 'Senior SWE (Level 8)',
-            comp: '$165K - $225K TC',
-            matchScore: 90,
-            location: 'New York / Remote',
-            techStack: ['TypeScript', 'React', 'Java / Spring Boot', 'PostgreSQL', 'Microservices', 'Redis'],
-            description: 'Build scalable digital products, customer-facing web platforms, and RESTful microservices for premier banking and retail enterprises.',
-            rounds: [
-              { name: 'Round 1: Algorithms & Clean Coding in Java/TypeScript', duration: '45 min', desc: 'Data manipulation, algorithmic optimization, unit test writing.' },
-              { name: 'Round 2: Spring Boot & React System Design', duration: '60 min', desc: 'Design an e-commerce order processing pipeline with distributed locking and Redis caching.' },
-              { name: 'Round 3: API Security & Resilience', duration: '45 min', desc: 'OAuth2/JWT authorization, rate limiting, circuit breakers with Resilience4j.' },
-              { name: 'Round 4: Behavioral & Client Delivery', duration: '45 min', desc: 'Handling changing requirements, agile collaboration.' }
-            ]
-          },
-          {
-            id: 'acn-genai-l7',
-            title: 'Senior Applied AI & Generative AI Engineer - Enterprise GenAI Studios',
-            domain: 'ai',
-            level: 'Level 7 / Lead Specialist',
-            comp: '$195K - $260K TC',
-            matchScore: 83,
-            location: 'Remote Worldwide',
-            techStack: ['Python', 'LangChain', 'LlamaIndex', 'FastAPI', 'Azure OpenAI', 'Vector Databases'],
-            description: 'Deploy autonomous agents, multi-modal search engines, and compliance-first RAG solutions across enterprise customer workflows.',
-            rounds: [
-              { name: 'Round 1: GenAI Architecture & Prompt Orchestration', duration: '45 min', desc: 'Function calling, prompt chaining, guardrails, token cost optimization.' },
-              { name: 'Round 2: Vector Search Scalability & Chunking', duration: '60 min', desc: 'Hybrid dense/sparse search (HNSW + BM25), re-ranking models, vector database scaling.' },
-              { name: 'Round 3: Client Advisory & AI Ethics', duration: '45 min', desc: 'Explainability, data privacy compliance, enterprise deployment roadmaps.' }
-            ]
-          }
-        ]
-      }
-    ];
-
-    // Current Active Filters State
-    let currentTier = 'all';
-    let currentDomain = 'all';
-    let currentSearch = '';
-    let currentSort = 'match-desc';
-    let currentView = 'grid'; // 'grid' | 'matrix' | 'compare'
-
-    // 2. RENDER FUNCTIONS
-    function getFilteredCompanies() {
-      return COMPANIES_DATA.map(company => {
-        // Filter roles inside company
-        const filteredRoles = company.roles.filter(role => {
-          // Domain filter
-          if (currentDomain !== 'all' && role.domain !== currentDomain) return false;
-          // Search filter
-          if (currentSearch) {
-            const query = currentSearch.toLowerCase();
-            const matchName = company.name.toLowerCase().includes(query);
-            const matchTitle = role.title.toLowerCase().includes(query);
-            const matchTech = role.techStack.some(t => t.toLowerCase().includes(query));
-            const matchDesc = (role.description || '').toLowerCase().includes(query);
-            if (!matchName && !matchTitle && !matchTech && !matchDesc) return false;
-          }
-          return true;
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeCompaniesPage();
         });
 
-        return { ...company, matchingRoles: filteredRoles };
-      }).filter(company => {
-        // Tier filter
-        if (currentTier !== 'all' && company.tier !== currentTier) return false;
-        // Keep only companies with at least one matching role
-        return company.matchingRoles.length > 0;
-      });
-    }
+        let candidateSkills = [];
+        let candidateScore = 78;
+        let appliedCompanies = new Set();
 
-    function renderCompaniesGrid() {
-      const container = document.getElementById('companies-grid-container');
-      let filtered = getFilteredCompanies();
+        const PRIMARY_COMPANIES = [
+            {
+                name: "Amazon India",
+                logoIcon: "fab fa-amazon",
+                role: "Software Development Engineer (SDE-1)",
+                location: "Bengaluru / Hybrid",
+                salary: "₹18 - ₹28 LPA",
+                category: "tech",
+                reqSkills: ["Python", "Data Science", "Machine Learning", "Data Mining", "AWS", "SQL"],
+                baseMatch: 88
+            },
+            {
+                name: "TCS (Tata Consultancy Services)",
+                logoIcon: "fas fa-cube",
+                role: "System Engineer / Digital Developer",
+                location: "Hyderabad / Pune",
+                salary: "₹7 - ₹12 LPA",
+                category: "tech",
+                reqSkills: ["Python", "JavaScript", "SQL", "HTML/CSS", "Git"],
+                baseMatch: 94
+            },
+            {
+                name: "Infosys",
+                logoIcon: "fas fa-laptop-code",
+                role: "Specialist Programmer / Data Analyst",
+                location: "Bengaluru / Mysuru",
+                salary: "₹9.5 - ₹16 LPA",
+                category: "tech",
+                reqSkills: ["Machine Learning", "Python", "Data Analysis", "SQL", "React"],
+                baseMatch: 91
+            },
+            {
+                name: "Wipro Technologies",
+                logoIcon: "fas fa-network-wired",
+                role: "Project Engineer / AI Developer",
+                location: "Chennai / Remote",
+                salary: "₹8 - ₹14 LPA",
+                category: "tech",
+                reqSkills: ["Python", "PyTorch", "Data Science", "Git", "REST APIs"],
+                baseMatch: 86
+            },
+            {
+                name: "Paytm / One97 Communications",
+                logoIcon: "fas fa-wallet",
+                role: "Full Stack / Backend Engineer",
+                location: "Noida / Hybrid",
+                salary: "₹14 - ₹22 LPA",
+                category: "fintech",
+                reqSkills: ["JavaScript", "Node.js", "React", "MongoDB", "SQL"],
+                baseMatch: 84
+            },
+            {
+                name: "Google India",
+                logoIcon: "fab fa-google",
+                role: "Associate Software Engineer",
+                location: "Bengaluru / Hyderabad",
+                salary: "₹24 - ₹36 LPA",
+                category: "tech",
+                reqSkills: ["Python", "Machine Learning", "Data Structures", "Algorithms", "Cloud"],
+                baseMatch: 82
+            }
+        ];
 
-      // Sorting
-      if (currentSort === 'match-desc') {
-        filtered.sort((a, b) => {
-          const maxA = Math.max(...a.matchingRoles.map(r => r.matchScore), 0);
-          const maxB = Math.max(...b.matchingRoles.map(r => r.matchScore), 0);
-          return maxB - maxA;
-        });
-      } else if (currentSort === 'comp-desc') {
-        filtered.sort((a, b) => b.l5Comp.localeCompare(a.l5Comp));
-      } else if (currentSort === 'rigor-desc') {
-        filtered.sort((a, b) => b.hiringBar.localeCompare(a.hiringBar));
-      } else if (currentSort === 'name-asc') {
-        filtered.sort((a, b) => a.name.localeCompare(b.name));
-      } else if (currentSort === 'openings-desc') {
-        filtered.sort((a, b) => b.matchingRoles.length - a.matchingRoles.length);
-      }
+        const SECONDARY_COMPANIES = [
+            {
+                name: "Microsoft India",
+                logoIcon: "fab fa-microsoft",
+                role: "Software Engineer - Azure / Data Platforms",
+                location: "Hyderabad / Hybrid",
+                salary: "₹22 - ₹34 LPA",
+                category: "tech",
+                reqSkills: ["C#", "Python", "Azure", "SQL", "Machine Learning"],
+                baseMatch: 85
+            },
+            {
+                name: "Meta / Facebook",
+                logoIcon: "fab fa-meta",
+                role: "Frontend Engineer - React Infrastructure",
+                location: "Remote / India",
+                salary: "₹28 - ₹42 LPA",
+                category: "tech",
+                reqSkills: ["JavaScript", "React", "HTML/CSS", "System Design"],
+                baseMatch: 80
+            },
+            {
+                name: "Flipkart",
+                logoIcon: "fas fa-shopping-bag",
+                role: "SDE-1 (Search & Recommendations)",
+                location: "Bengaluru",
+                salary: "₹18 - ₹26 LPA",
+                category: "fintech",
+                reqSkills: ["Python", "Data Science", "Machine Learning", "SQL", "Redis"],
+                baseMatch: 87
+            },
+            {
+                name: "Zoho Corporation",
+                logoIcon: "fas fa-code-branch",
+                role: "Software Developer",
+                location: "Chennai / Tenkasi",
+                salary: "₹8 - ₹14 LPA",
+                category: "tech",
+                reqSkills: ["Java", "JavaScript", "Python", "SQL", "HTML/CSS"],
+                baseMatch: 90
+            },
+            {
+                name: "Razorpay",
+                logoIcon: "fas fa-credit-card",
+                role: "Software Engineer - Payments Pipeline",
+                location: "Bengaluru / Remote",
+                salary: "₹16 - ₹24 LPA",
+                category: "fintech",
+                reqSkills: ["Node.js", "Python", "SQL", "Docker", "REST APIs"],
+                baseMatch: 83
+            },
+            {
+                name: "Swiggy / Bundl Technologies",
+                logoIcon: "fas fa-utensils",
+                role: "Data Scientist - Logistics & Routing",
+                location: "Bengaluru",
+                salary: "₹16 - ₹25 LPA",
+                category: "fintech",
+                reqSkills: ["Python", "Data Science", "Machine Learning", "PyTorch", "SQL"],
+                baseMatch: 89
+            }
+        ];
 
-      if (filtered.length === 0) {
-        container.innerHTML = `
-          <div style="grid-column: 1 / -1; padding: 60px 20px; text-align: center; background: var(--surface-1); border: 1px dashed var(--border-color); border-radius: 20px;">
-            <i class="fa-solid fa-magnifying-glass" style="font-size: 2.2rem; color: var(--text-subtle); margin-bottom: 16px;"></i>
-            <h3 style="font-family: var(--font-display); font-size: 1.25rem; font-weight: 700; margin-bottom: 8px;">No matching target companies or roles found</h3>
-            <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 18px;">Try clearing filters or search terms, or add a custom company.</p>
-            <button class="primary-action-btn" onclick="resetFilters()" style="display: inline-flex;">Reset All Filters</button>
-          </div>
-        `;
-        return;
-      }
+        async function initializeCompaniesPage() {
+            // Read Auth & Profile
+            const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
+            const userStr = localStorage.getItem('user');
 
-      container.innerHTML = filtered.map(company => {
-        const tierClass = `tier-${company.tier}`;
+            if (userStr) {
+                try {
+                    const user = JSON.parse(userStr);
+                    const displayName = user.name || user.username || 'Candidate';
+                    document.getElementById('user-display-name').innerText = displayName;
+                    document.getElementById('nav-user-name').innerText = displayName;
+                    if (user.picture) {
+                        const avatarEl = document.getElementById('nav-avatar');
+                        if (avatarEl) {
+                            avatarEl.innerHTML = `<img src="${user.picture}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+                            avatarEl.style.padding = '0';
+                            avatarEl.style.overflow = 'hidden';
+                        }
+                    } else {
+                        document.getElementById('nav-avatar').innerText = displayName.charAt(0).toUpperCase();
+                    }
+                } catch(e) {}
+            }
 
-        const rolesHtml = company.matchingRoles.map(role => `
-          <div class="role-row-item" onclick="openRoleDrawer('${company.id}', '${role.id}')">
-            <div class="role-title-meta">
-              <div class="role-title-line">
-                <span class="role-name">${role.title}</span>
-                <span class="role-level-tag">${role.level}</span>
-              </div>
-              <div class="role-comp-meta">
-                <span><i class="fa-solid fa-money-bill-wave" style="color: var(--primary-accent); margin-right: 4px;"></i><b>${role.comp}</b></span>
-                <span>•</span>
-                <span>${role.location}</span>
-              </div>
-            </div>
-            <div class="role-match-score-badge">
-              <span class="match-percent-val match-high">${role.matchScore}%</span>
-              <span class="match-sublabel">Match Fit</span>
-            </div>
-          </div>
-        `).join('');
+            // Read Applied Companies
+            try {
+                const storedApplied = localStorage.getItem('hieroAppliedCompanies');
+                if (storedApplied) {
+                    appliedCompanies = new Set(JSON.parse(storedApplied));
+                }
+            } catch(e) {}
 
-        return `
-          <article class="company-card">
-            <div>
-              <div class="company-card-top">
-                <div class="company-brand-info">
-                  <div class="company-logo-avatar">${company.avatarText}</div>
-                  <div class="company-name-group">
-                    <h3>
-                      <span>${company.name}</span>
-                      <span class="company-tier-badge ${tierClass}">${company.tierLabel}</span>
-                    </h3>
-                    <div class="company-location">
-                      <i class="fa-solid fa-location-dot"></i>
-                      <span>${company.location}</span>
+            // Load Candidate Score & Skills from Local Storage first
+            let analysisData = null;
+            try {
+                const rawResult = localStorage.getItem('analysisResult') || localStorage.getItem('hieroAnalysisResult');
+                if (rawResult) {
+                    const parsed = JSON.parse(rawResult);
+                    analysisData = parsed.data || parsed;
+                }
+            } catch (e) {}
+
+            let resumeData = null;
+            try {
+                const rawResume = localStorage.getItem('resumeData');
+                if (rawResume) resumeData = JSON.parse(rawResume);
+            } catch (e) {}
+
+            if (analysisData && (typeof analysisData.score === 'number' || typeof analysisData.score === 'string')) {
+                candidateScore = parseInt(analysisData.score) || 75;
+                candidateSkills = Array.isArray(analysisData.matchedSkills) ? analysisData.matchedSkills : (analysisData.resumeSkills || []);
+                if (analysisData.domain) {
+                    document.getElementById('user-target-domain').innerText = `${analysisData.domain.toUpperCase()} Specialist`;
+                }
+            } else if (resumeData) {
+                let base = 50;
+                if (resumeData.personalInfo?.fullName) base += 10;
+                if (resumeData.experience?.length) base += 15;
+                if (resumeData.education?.length) base += 10;
+                if (resumeData.technicalSkills) base += 15;
+                candidateScore = Math.min(100, base);
+                if (resumeData.technicalSkills) {
+                    candidateSkills = resumeData.technicalSkills.split(/,|\n/).map(s => s.trim()).filter(Boolean);
+                }
+            } else {
+                candidateScore = 71;
+                candidateSkills = ["analysis", "data science", "machine learning", "python", "pytorch"];
+            }
+
+            // Fetch stored user resume from Backend API (Overrides with verified server details)
+            try {
+                const response = await fetch('/api/resume/get-user-resume', {
+                    headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+                });
+                if (response.ok) {
+                    const resData = await response.json();
+                    if (resData.success && resData.data) {
+                        const backendData = resData.data;
+                        candidateScore = backendData.score || candidateScore;
+                        if (Array.isArray(backendData.matchedSkills) && backendData.matchedSkills.length > 0) {
+                            candidateSkills = backendData.matchedSkills;
+                        }
+                        if (backendData.fullName) document.getElementById('user-display-name').innerText = backendData.fullName;
+                        if (backendData.targetDomain) document.getElementById('user-target-domain').innerText = backendData.targetDomain;
+                    }
+                }
+            } catch(err) {
+                console.warn('Fallback to local candidate score:', err);
+            }
+
+            document.getElementById('user-score-num').innerText = `${candidateScore}%`;
+            document.getElementById('user-skill-count').innerText = `${candidateSkills.length} Verified Skills`;
+
+            renderCompanyList(PRIMARY_COMPANIES, 'companies-grid-container');
+            renderCompanyList(SECONDARY_COMPANIES, 'secondary-companies-grid');
+        }
+
+        function calculateDynamicMatch(comp) {
+            if (!candidateSkills || candidateSkills.length === 0) return comp.baseMatch;
+            
+            const lowerUserSkills = candidateSkills.map(s => s.toLowerCase().trim());
+            let matches = 0;
+            comp.reqSkills.forEach(req => {
+                if (lowerUserSkills.some(us => us.includes(req.toLowerCase()) || req.toLowerCase().includes(us))) {
+                    matches++;
+                }
+            });
+
+            const matchRatio = matches / comp.reqSkills.length;
+            const calculatedScore = Math.round(candidateScore * 0.5 + matchRatio * 50);
+            return Math.min(99, Math.max(65, calculatedScore));
+        }
+
+        function renderCompanyList(list, containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            container.innerHTML = list.map(comp => {
+                const computedFit = calculateDynamicMatch(comp);
+                const isApplied = appliedCompanies.has(comp.name);
+
+                const skillChipsHtml = comp.reqSkills.map(req => {
+                    const isMatched = candidateSkills.some(us => us.toLowerCase().includes(req.toLowerCase()) || req.toLowerCase().includes(us.toLowerCase()));
+                    return `<span class="req-chip ${isMatched ? 'matched' : ''}">${isMatched ? '✓ ' : ''}${req}</span>`;
+                }).join('');
+
+                return `
+                    <div class="company-card" data-name="${comp.name.toLowerCase()}" data-role="${comp.role.toLowerCase()}" data-skills="${comp.reqSkills.join(' ').toLowerCase()}" data-category="${comp.category}">
+                        <div>
+                            <div class="comp-top">
+                                <div class="comp-brand">
+                                    <div class="comp-icon-box"><i class="${comp.logoIcon}"></i></div>
+                                    <div class="comp-title-info">
+                                        <h3>${comp.name}</h3>
+                                        <p><i class="fas fa-map-marker-alt" style="color: var(--primary);"></i> ${comp.location}</p>
+                                    </div>
+                                </div>
+                                <span class="match-badge">${computedFit}% Fit</span>
+                            </div>
+
+                            <div class="job-role-info">
+                                <h4>${comp.role}</h4>
+                                <div class="job-tags">
+                                    <span><i class="fas fa-briefcase"></i> Full Time</span>
+                                    <span><i class="fas fa-clock"></i> Active Drive</span>
+                                </div>
+                            </div>
+
+                            <div class="skills-required">
+                                <div class="skills-required-lbl">Required Skill Stack:</div>
+                                <div class="skills-flex">
+                                    ${skillChipsHtml}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="comp-card-footer">
+                            <span class="salary-tag">${comp.salary}</span>
+                            <button class="apply-btn ${isApplied ? 'applied' : ''}" onclick="applyToCompany('${comp.name}', this)" ${isApplied ? 'disabled' : ''}>
+                                ${isApplied ? '<i class="fas fa-check-circle"></i> Applied' : '<i class="fas fa-paper-plane"></i> Apply Now'}
+                            </button>
+                        </div>
                     </div>
-                  </div>
-                </div>
-
-                <div class="company-hiring-bar">
-                  <div class="hiring-bar-score">${company.hiringBar}</div>
-                  <div class="hiring-bar-label">Hiring Bar</div>
-                </div>
-              </div>
-
-              <p class="company-summary-text">${company.summary}</p>
-
-              <div class="company-interview-strip">
-                <div class="interview-strip-item">
-                  <i class="fa-solid fa-diagram-project"></i>
-                  <span><b>Format:</b> ${company.interviewFormat}</span>
-                </div>
-              </div>
-
-              <div class="company-roles-list">
-                ${rolesHtml}
-              </div>
-            </div>
-
-            <div class="company-card-actions">
-              <button class="card-secondary-btn" onclick="openRoleDrawer('${company.id}', '${company.matchingRoles[0]?.id}')">
-                <i class="fa-solid fa-circle-info"></i> Interview Rounds
-              </button>
-              <a href="mock-interview.html" class="card-primary-cta">
-                <i class="fa-solid fa-microphone"></i> Mock Prep →
-              </a>
-            </div>
-          </article>
-        `;
-      }).join('');
-    }
-
-    function renderRoleMatrix() {
-      const container = document.getElementById('role-matrix-container');
-      const filteredCompanies = getFilteredCompanies();
-      const allRoles = [];
-
-      filteredCompanies.forEach(c => {
-        c.matchingRoles.forEach(r => {
-          allRoles.push({ company: c, role: r });
-        });
-      });
-
-      if (allRoles.length === 0) {
-        container.innerHTML = `<div style="text-align: center; padding: 40px; color: var(--text-muted);">No roles match the selected criteria.</div>`;
-        return;
-      }
-
-      container.innerHTML = allRoles.map(({ company, role }) => `
-        <div class="matrix-role-card">
-          <div style="display: flex; align-items: center; gap: 12px;">
-            <div class="company-logo-avatar" style="width: 38px; height: 38px; font-size: 1rem;">${company.avatarText}</div>
-            <div>
-              <div style="font-weight: 700; font-size: 0.94rem; color: var(--text-main);">${role.title}</div>
-              <div style="font-size: 0.76rem; color: var(--text-subtle);">${company.name} • ${role.level}</div>
-            </div>
-          </div>
-
-          <div>
-            <div style="font-size: 0.85rem; font-weight: 700; color: var(--c-green);">${role.comp}</div>
-            <div style="font-size: 0.72rem; color: var(--text-subtle);">${role.location}</div>
-          </div>
-
-          <div>
-            <div style="font-size: 0.76rem; font-weight: 700; color: var(--text-muted);">${company.tierLabel}</div>
-            <div style="font-size: 0.72rem; color: var(--text-subtle);">Bar: ${company.hiringBar}</div>
-          </div>
-
-          <div style="display: flex; flex-wrap: wrap; gap: 4px;">
-            ${role.techStack.slice(0, 3).map(t => `<span style="font-size: 0.68rem; padding: 2px 6px; background: var(--sub-card-bg); border: 1px solid var(--border-color); border-radius: 4px;">${t}</span>`).join('')}
-          </div>
-
-          <div>
-            <div style="font-family: var(--font-display); font-size: 1.05rem; font-weight: 800; color: var(--c-green);">${role.matchScore}%</div>
-            <div style="font-size: 0.65rem; color: var(--text-subtle); font-weight: 700; text-transform: uppercase;">Match Fit</div>
-          </div>
-
-          <div style="display: flex; gap: 8px;">
-            <button class="card-secondary-btn" onclick="openRoleDrawer('${company.id}', '${role.id}')">Inspect</button>
-            <a href="resume-builder.html" class="card-primary-cta">Target</a>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    function renderComparisonTable() {
-      const tbody = document.getElementById('comparison-table-body');
-      tbody.innerHTML = COMPANIES_DATA.map(comp => {
-        const topRole = comp.roles[0];
-        const match = topRole ? topRole.matchScore : 80;
-        return `
-          <tr>
-            <td>
-              <div style="display: flex; align-items: center; gap: 10px;">
-                <div class="company-logo-avatar" style="width: 32px; height: 32px; font-size: 0.9rem;">${comp.avatarText}</div>
-                <strong style="color: var(--text-main); font-size: 0.9rem;">${comp.name}</strong>
-              </div>
-            </td>
-            <td><span class="company-tier-badge tier-${comp.tier}">${comp.tierLabel}</span></td>
-            <td><b style="color: var(--c-green);">${comp.l5Comp}</b></td>
-            <td><span style="font-weight: 700; color: var(--text-main);">${comp.hiringBar}</span></td>
-            <td style="max-width: 260px; font-size: 0.78rem;">${comp.interviewFormat}</td>
-            <td style="font-size: 0.78rem;">${comp.remoteFlex}</td>
-            <td><b style="color: var(--c-green); font-size: 0.95rem;">${match}%</b></td>
-            <td>
-              <button class="card-secondary-btn" onclick="openRoleDrawer('${comp.id}', '${topRole.id}')">
-                Details →
-              </button>
-            </td>
-          </tr>
-        `;
-      }).join('');
-    }
-
-    // 3. INTERACTIVE CONTROLS & EVENT HANDLERS
-    function filterCompanies() {
-      currentSearch = document.getElementById('company-search-input').value;
-      currentSort = document.getElementById('sort-select').value;
-      renderCompaniesGrid();
-      renderRoleMatrix();
-    }
-
-    function setTierFilter(tier, btn) {
-      currentTier = tier;
-      document.querySelectorAll('[data-filter-tier]').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      renderCompaniesGrid();
-      renderRoleMatrix();
-    }
-
-    function setDomainFilter(domain, btn) {
-      currentDomain = domain;
-      document.querySelectorAll('[data-filter-domain]').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      renderCompaniesGrid();
-      renderRoleMatrix();
-    }
-
-    function setViewMode(mode) {
-      currentView = mode;
-      document.getElementById('btn-view-grid').classList.toggle('active', mode === 'grid');
-      document.getElementById('btn-view-matrix').classList.toggle('active', mode === 'matrix');
-      document.getElementById('btn-view-compare').classList.toggle('active', mode === 'compare');
-
-      document.getElementById('companies-grid-container').style.display = mode === 'grid' ? 'grid' : 'none';
-      document.getElementById('role-matrix-container').style.display = mode === 'matrix' ? 'flex' : 'none';
-      document.getElementById('comparison-section').style.display = mode === 'compare' ? 'block' : 'none';
-
-      if (mode === 'grid') renderCompaniesGrid();
-      if (mode === 'matrix') renderRoleMatrix();
-      if (mode === 'compare') renderComparisonTable();
-    }
-
-    function resetFilters() {
-      document.getElementById('company-search-input').value = '';
-      currentSearch = '';
-      currentTier = 'all';
-      currentDomain = 'all';
-      document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-      document.querySelector('[data-filter-tier="all"]')?.classList.add('active');
-      document.querySelector('[data-filter-domain="all"]')?.classList.add('active');
-      renderCompaniesGrid();
-      renderRoleMatrix();
-    }
-
-    // 4. ROLE DETAIL INSPECTION DRAWER
-    function openRoleDrawer(companyId, roleId) {
-      const company = COMPANIES_DATA.find(c => c.id === companyId);
-      if (!company) return;
-      const role = company.roles.find(r => r.id === roleId) || company.roles[0];
-      if (!role) return;
-
-      document.getElementById('drawer-role-title').textContent = role.title;
-      document.getElementById('drawer-company-name').textContent = company.name;
-      document.getElementById('drawer-role-level').textContent = role.level;
-      document.getElementById('drawer-role-location').textContent = role.location;
-
-      const techPills = role.techStack.map(t => `
-        <span style="display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; background: var(--surface-2); border: 1px solid var(--border-color); border-radius: 100px; font-size: 0.78rem; font-weight: 600; color: var(--text-main);">
-          <i class="fa-solid fa-check" style="color: var(--primary-accent); font-size: 0.65rem;"></i> ${t}
-        </span>
-      `).join('');
-
-      const roundsHtml = (role.rounds || []).map((round, idx) => `
-        <div class="round-card">
-          <div class="round-card-header">
-            <h5>${round.name}</h5>
-            <span class="round-duration">${round.duration}</span>
-          </div>
-          <p>${round.desc}</p>
-        </div>
-      `).join('');
-
-      document.getElementById('drawer-body-content').innerHTML = `
-        <div class="drawer-stat-grid">
-          <div class="drawer-stat-card">
-            <div class="val">${role.matchScore}%</div>
-            <div class="lbl">Candidate Fit</div>
-          </div>
-          <div class="drawer-stat-card">
-            <div class="val">${role.comp.split(' ')[0]}</div>
-            <div class="lbl">Total Comp (Est.)</div>
-          </div>
-          <div class="drawer-stat-card">
-            <div class="val" style="color: var(--text-main);">${company.hiringBar}</div>
-            <div class="lbl">Hiring Bar</div>
-          </div>
-        </div>
-
-        <div>
-          <div class="drawer-section-title">
-            <i class="fa-solid fa-align-left"></i> Role Architecture & Mission
-          </div>
-          <p style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.55;">
-            ${role.description || company.summary}
-          </p>
-        </div>
-
-        <div>
-          <div class="drawer-section-title">
-            <i class="fa-solid fa-layer-group"></i> Expected Core Tech Stack
-          </div>
-          <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-            ${techPills}
-          </div>
-        </div>
-
-        <div>
-          <div class="drawer-section-title">
-            <i class="fa-solid fa-list-check"></i> Exact Stage-by-Stage Interview Process
-          </div>
-          <div class="interview-timeline">
-            ${roundsHtml || `<p style="color: var(--text-muted); font-size: 0.84rem;">${company.interviewFormat}</p>`}
-          </div>
-        </div>
-
-        <div style="background: var(--surface-2); border: 1px solid var(--border-color); border-radius: 14px; padding: 18px;">
-          <div class="drawer-section-title" style="margin-bottom: 8px;">
-            <i class="fa-solid fa-lightbulb" style="color: var(--c-orange);"></i> Key Preparation Strategy
-          </div>
-          <p style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.45;">
-            Focus on demonstrating high-concurrency patterns, trade-off analysis between latency and consistency, and practical clean code under time constraints.
-          </p>
-        </div>
-      `;
-
-      document.getElementById('drawer-overlay').classList.add('active');
-      document.getElementById('role-detail-drawer').classList.add('active');
-    }
-
-    function closeRoleDrawer() {
-      document.getElementById('drawer-overlay').classList.remove('active');
-      document.getElementById('role-detail-drawer').classList.remove('active');
-    }
-
-    // 5. CUSTOM COMPANY ADDITION MODAL
-    function openAddCompanyModal() {
-      document.getElementById('add-company-modal').classList.add('active');
-    }
-
-    function closeAddCompanyModal() {
-      document.getElementById('add-company-modal').classList.remove('active');
-    }
-
-    function saveCustomCompany() {
-      const name = document.getElementById('new-comp-name').value.trim();
-      const tier = document.getElementById('new-comp-tier').value;
-      const location = document.getElementById('new-comp-loc').value.trim() || 'Remote / Hybrid';
-      const roleTitle = document.getElementById('new-role-title').value.trim();
-      const level = document.getElementById('new-role-level').value.trim() || 'Senior (L5)';
-      const comp = document.getElementById('new-role-comp').value.trim() || '$280K - $380K TC';
-      const tagsStr = document.getElementById('new-role-tags').value.trim();
-
-      if (!name || !roleTitle) {
-        alert('Please provide at least a Company Name and Flagship Role Title.');
-        return;
-      }
-
-      const tags = tagsStr ? tagsStr.split(',').map(s => s.trim()) : ['Python', 'Go', 'Kubernetes', 'Microservices'];
-      const id = name.toLowerCase().replace(/[^a-z0-9]/g, '');
-
-      const newCompany = {
-        id: id + '-' + Date.now(),
-        name: name,
-        avatarText: name.slice(0, 2).toUpperCase(),
-        tier: tier,
-        tierLabel: tier === 'faang' ? 'Big Tech / FAANG' : (tier === 'ai' ? 'AI & Frontier Labs' : 'High-Growth Tech'),
-        location: location,
-        hiringBar: '9.0 / 10',
-        summary: `Custom targeted organization in ${location}. Highly aligned with your engineering profile.`,
-        interviewFormat: '1 Technical Screen + 2 Coding + 1 System Design + 1 Culture Fit',
-        culture: 'High Performance & Technical Autonomy',
-        l5Comp: comp,
-        remoteFlex: 'Flexible / Hybrid',
-        roles: [
-          {
-            id: 'role-' + Date.now(),
-            title: roleTitle,
-            domain: 'backend',
-            level: level,
-            comp: comp,
-            matchScore: 85,
-            location: location,
-            techStack: tags,
-            description: `Target role at ${name} specializing in ${tags.slice(0, 3).join(', ')}.`,
-            rounds: [
-              { name: 'Round 1: Technical Screener', duration: '45 min', desc: 'Core architecture and programming fundamentals.' },
-              { name: 'Round 2: Distributed System Design', duration: '60 min', desc: 'High availability, throughput, and database schema scalability.' },
-              { name: 'Round 3: Behavioral & Values Alignment', duration: '45 min', desc: 'Leadership, collaboration, and ownership.' }
-            ]
-          }
-        ]
-      };
-
-      COMPANIES_DATA.unshift(newCompany);
-      document.getElementById('kpi-companies-count').textContent = COMPANIES_DATA.length;
-      document.getElementById('count-all').textContent = COMPANIES_DATA.length;
-
-      closeAddCompanyModal();
-      renderCompaniesGrid();
-      renderRoleMatrix();
-      renderComparisonTable();
-
-      // Clear inputs
-      document.getElementById('new-comp-name').value = '';
-      document.getElementById('new-role-title').value = '';
-      document.getElementById('new-role-tags').value = '';
-    }
-
-    // 6. USER PROFILE & CONFIGURED EMAIL INTELLIGENCE
-    function loadUserProfileData() {
-      let userName = 'Rahul Kumar';
-      let userEmail = 'rahul.dev@hiero.ai';
-      let userPicture = '';
-
-      // 1. Check localStorage for user object or keys
-      const savedUserStr = localStorage.getItem('user');
-      if (savedUserStr) {
-        try {
-          const u = typeof savedUserStr === 'string' && savedUserStr.startsWith('{') ? JSON.parse(savedUserStr) : { name: savedUserStr };
-          if (u.name) userName = u.name;
-          if (u.email) userEmail = u.email;
-          if (u.picture || u.photo) userPicture = u.picture || u.photo;
-        } catch (e) {
-          userName = savedUserStr;
+                `;
+            }).join('');
         }
-      }
 
-      // 2. Check explicit email/name overrides in localStorage
-      if (localStorage.getItem('email')) userEmail = localStorage.getItem('email');
-      if (localStorage.getItem('userEmail')) userEmail = localStorage.getItem('userEmail');
-      if (localStorage.getItem('userName')) userName = localStorage.getItem('userName');
-      if (localStorage.getItem('profilePhoto')) userPicture = localStorage.getItem('profilePhoto');
+        async function applyToCompany(companyName, btn) {
+            btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Submitting...`;
+            btn.disabled = true;
 
-      // 3. Fetch from /api/me or /dashboard if token present
-      const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
-      if (token) {
-        fetch('/api/me', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        })
-        .then(res => res.ok ? res.json() : null)
-        .then(data => {
-          if (data && data.email) {
-            applyUserProfile(data.name || userName, data.email, data.picture || userPicture);
-          }
-        })
-        .catch(() => {});
-      }
+            try {
+                const userStr = localStorage.getItem('user');
+                const user = userStr ? JSON.parse(userStr) : {};
+                const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
 
-      applyUserProfile(userName, userEmail, userPicture);
-    }
+                await fetch('/api/resume/apply-company', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                    },
+                    body: JSON.stringify({
+                        companyName: companyName,
+                        jobRole: 'Software Engineer',
+                        matchScore: `${candidateScore}%`,
+                        userId: user.id || user.userId || user.email || 'user_123',
+                        email: user.email || 'jaswanth@hiero.ai',
+                        fullName: document.getElementById('user-display-name')?.innerText || user.name || 'Jaswanth Kumar'
+                    })
+                });
+            } catch(err) {
+                console.warn('Backend application log error:', err);
+            }
 
-    function applyUserProfile(name, email, picture) {
-      const emailEl = document.getElementById('nav-user-email');
-      const flyName = document.getElementById('flyout-name');
-      const inputEl = document.getElementById('quick-email-input');
+            btn.innerHTML = `<i class="fas fa-check-circle"></i> Applied`;
+            btn.classList.add('applied');
+            btn.disabled = true;
 
-      if (emailEl) emailEl.textContent = email || 'rahul.dev@hiero.ai';
-      if (flyName) flyName.textContent = email || 'rahul.dev@hiero.ai';
-      if (inputEl && !inputEl.value) inputEl.value = email || 'rahul.dev@hiero.ai';
-    }
+            appliedCompanies.add(companyName);
+            localStorage.setItem('hieroAppliedCompanies', JSON.stringify(Array.from(appliedCompanies)));
 
-    function toggleProfileDropdown(e) {
-      if (e) e.stopPropagation();
-      const flyout = document.getElementById('profile-flyout');
-      const wrapper = document.getElementById('profile-dropdown-wrapper');
-      if (flyout && wrapper) {
-        flyout.classList.toggle('active');
-        wrapper.classList.toggle('open');
-      }
-    }
-
-    function saveConfiguredEmail() {
-      const inputEl = document.getElementById('quick-email-input');
-      if (!inputEl) return;
-      const newEmail = inputEl.value.trim();
-      if (!newEmail) return;
-
-      localStorage.setItem('email', newEmail);
-      localStorage.setItem('userEmail', newEmail);
-      
-      // Update stored user object if it exists
-      const savedUserStr = localStorage.getItem('user');
-      let userObj = {};
-      try { userObj = JSON.parse(savedUserStr || '{}'); } catch(e) {}
-      userObj.email = newEmail;
-      localStorage.setItem('user', JSON.stringify(userObj));
-
-      const name = document.getElementById('nav-user-name')?.textContent || 'Rahul Kumar';
-      applyUserProfile(name, newEmail, '');
-      
-      inputEl.style.borderColor = 'var(--primary-accent)';
-      setTimeout(() => {
-        const flyout = document.getElementById('profile-flyout');
-        const wrapper = document.getElementById('profile-dropdown-wrapper');
-        if (flyout) flyout.classList.remove('active');
-        if (wrapper) wrapper.classList.remove('open');
-      }, 350);
-    }
-
-    function handleUserLogout() {
-      localStorage.removeItem('token');
-      localStorage.removeItem('jwtToken');
-      localStorage.removeItem('user');
-      localStorage.removeItem('email');
-      localStorage.removeItem('userEmail');
-      window.location.href = 'index.html';
-    }
-
-    // Close flyout on outside click
-    document.addEventListener('click', (e) => {
-      const flyout = document.getElementById('profile-flyout');
-      const wrapper = document.getElementById('profile-dropdown-wrapper');
-      if (flyout && flyout.classList.contains('active')) {
-        if (!e.target.closest('#profile-dropdown-wrapper')) {
-          flyout.classList.remove('active');
-          if (wrapper) wrapper.classList.remove('open');
+            showToast(`🎉 Application submitted to ${companyName} with your ${candidateScore}% Hiero Match Score!`);
         }
-      }
-    });
 
-    // 7. INITIALIZATION & AMBIENT CANVAS
-    window.addEventListener('DOMContentLoaded', () => {
-      loadUserProfileData();
-      renderCompaniesGrid();
-      renderRoleMatrix();
-      renderComparisonTable();
-      initAmbientCanvas();
-    });
-
-    function initAmbientCanvas() {
-      const canvas = document.getElementById('ambient-canvas');
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      let width = (canvas.width = window.innerWidth);
-      let height = (canvas.height = window.innerHeight);
-
-      window.addEventListener('resize', () => {
-        width = canvas.width = window.innerWidth;
-        height = canvas.height = window.innerHeight;
-      });
-
-      const dots = [];
-      const count = 35;
-      for (let i = 0; i < count; i++) {
-        dots.push({
-          x: Math.random() * width,
-          y: Math.random() * height,
-          vx: (Math.random() - 0.5) * 0.35,
-          vy: (Math.random() - 0.5) * 0.35,
-          radius: Math.random() * 1.5 + 0.8
-        });
-      }
-
-      function render() {
-        ctx.clearRect(0, 0, width, height);
-        const isLight = document.documentElement.getAttribute('data-theme') === 'light';
-        ctx.fillStyle = isLight ? 'rgba(5, 190, 20, 0.25)' : 'rgba(7, 226, 25, 0.25)';
-
-        for (let i = 0; i < count; i++) {
-          const d = dots[i];
-          d.x += d.vx;
-          d.y += d.vy;
-
-          if (d.x < 0) d.x = width;
-          if (d.x > width) d.x = 0;
-          if (d.y < 0) d.y = height;
-          if (d.y > height) d.y = 0;
-
-          ctx.beginPath();
-          ctx.arc(d.x, d.y, d.radius, 0, Math.PI * 2);
-          ctx.fill();
+        function showToast(message) {
+            const toast = document.getElementById('toast-notify');
+            const msgEl = document.getElementById('toast-message');
+            if (toast && msgEl) {
+                msgEl.innerText = message;
+                toast.classList.add('show');
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 4000);
+            }
         }
-        requestAnimationFrame(render);
-      }
-      render();
-    }
-  </script>
+
+        function filterCompanies() {
+            const query = document.getElementById('company-search-input').value.toLowerCase().trim();
+            const allCards = document.querySelectorAll('.company-card');
+
+            let count = 0;
+            allCards.forEach(card => {
+                const name = card.getAttribute('data-name');
+                const role = card.getAttribute('data-role');
+                const skills = card.getAttribute('data-skills');
+
+                if (name.includes(query) || role.includes(query) || skills.includes(query)) {
+                    card.style.display = 'flex';
+                    count++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            document.getElementById('companies-count-lbl').innerText = `Showing ${count} hiring partner drives`;
+        }
+
+        function setFilter(type, btn) {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            const allCards = document.querySelectorAll('.company-card');
+            allCards.forEach(card => {
+                if (type === 'all') {
+                    card.style.display = 'flex';
+                } else if (type === 'match') {
+                    const badgeText = card.querySelector('.match-badge').innerText;
+                    const pct = parseInt(badgeText) || 0;
+                    card.style.display = pct >= 80 ? 'flex' : 'none';
+                }
+            });
+        }
+
+        function filterCategory(cat, btn) {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            const allCards = document.querySelectorAll('.company-card');
+            allCards.forEach(card => {
+                const cardCat = card.getAttribute('data-category');
+                card.style.display = cardCat === cat ? 'flex' : 'none';
+            });
+        }
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('jwtToken');
+                localStorage.removeItem('user');
+                window.location.href = '/dashboard/login.html';
+            }
+        }
+    </script>
 </body>
 </html>
