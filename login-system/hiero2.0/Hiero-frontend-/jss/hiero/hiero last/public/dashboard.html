@@ -846,9 +846,24 @@
             const initial = firstName.charAt(0).toUpperCase();
 
             // Populate User info
+            const fullName = user.name || user.username || 'User';
             document.getElementById('welcome-name').innerText = firstName;
-            document.getElementById('nav-user-name').innerText = user.name || user.username || 'User';
-            document.getElementById('nav-avatar').innerText = initial;
+            document.getElementById('nav-user-name').innerText = fullName;
+
+            const avatarEl = document.getElementById('nav-avatar');
+            if (avatarEl) {
+                if (user.picture) {
+                    avatarEl.innerHTML = `<img src="${user.picture}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" onerror="this.onerror=null;this.parentElement.innerText='${initial}';">`;
+                    avatarEl.style.padding = '0';
+                    avatarEl.style.overflow = 'hidden';
+                } else {
+                    avatarEl.innerText = initial;
+                }
+            }
+
+            if (typeof updateGlobalUserProfile === 'function') {
+                updateGlobalUserProfile();
+            }
 
             // 2. Candidate Score & Skill Evaluation
             loadCandidateMatchScore(user);
