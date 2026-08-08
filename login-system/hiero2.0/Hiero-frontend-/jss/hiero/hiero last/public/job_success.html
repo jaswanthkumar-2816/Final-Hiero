@@ -684,10 +684,15 @@
           </div>
         </div>
 
-        <div class="receipt-grid">
+        <div class="receipt-grid" style="grid-template-columns: repeat(4, 1fr);">
           <div class="receipt-item">
             <div class="receipt-label">Candidate Name</div>
             <div class="receipt-value" id="receipt-candidate-name">Jaswanth Kumar</div>
+          </div>
+
+          <div class="receipt-item">
+            <div class="receipt-label">Registered Email</div>
+            <div class="receipt-value" id="receipt-candidate-email" style="font-size: 0.82rem; word-break: break-all;">jaswanth@hiero.ai</div>
           </div>
 
           <div class="receipt-item">
@@ -791,14 +796,40 @@
         avatarText.textContent = company.slice(0, 2).toUpperCase();
       }
 
-      // User profile sync
+      // User profile & logged-in email sync
+      let userName = 'Jaswanth Kumar';
+      let userEmail = 'jaswanthkumarmuthoju@gmail.com';
+      let userPicture = '';
+
       const savedUserStr = localStorage.getItem('user');
       if (savedUserStr) {
         try {
           const user = JSON.parse(savedUserStr);
-          const userName = user.name || user.fullName || (user.email ? user.email.split('@')[0] : 'Jaswanth Kumar');
-          document.getElementById('receipt-candidate-name').textContent = userName;
+          if (user.name || user.fullName) userName = user.name || user.fullName;
+          if (user.email) userEmail = user.email;
+          if (user.picture || user.photo) userPicture = user.picture || user.photo;
         } catch(e) {}
+      }
+
+      if (localStorage.getItem('email')) userEmail = localStorage.getItem('email');
+      if (localStorage.getItem('userEmail')) userEmail = localStorage.getItem('userEmail');
+      if (localStorage.getItem('userName')) userName = localStorage.getItem('userName');
+      if (localStorage.getItem('profilePhoto')) userPicture = localStorage.getItem('profilePhoto');
+
+      document.getElementById('receipt-candidate-name').textContent = userName;
+      document.getElementById('receipt-candidate-email').textContent = userEmail;
+      
+      const navEmail = document.getElementById('nav-user-email');
+      if (navEmail) navEmail.textContent = userEmail;
+
+      const avatarBox = document.querySelector('.user-mail-badge');
+      if (avatarBox) {
+        if (userPicture) {
+          avatarBox.innerHTML = `<img src="${userPicture}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;" onerror="this.outerHTML='<i class=\"fa-solid fa-user\"></i>'">`;
+        } else {
+          const initials = userName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+          avatarBox.innerHTML = `<span style="font-size: 0.72rem; font-weight: 800;">${initials}</span>`;
+        }
       }
 
       // Generate random ref ID & date
