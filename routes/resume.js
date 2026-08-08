@@ -182,95 +182,74 @@ router.get('/get-user-resume', async (req, res) => {
     }
 });
 
+// Email Transporter for Application Notifications
 const nodemailer = require('nodemailer');
-
-const mailTransporter = nodemailer.createTransport({
+const appTransporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-    },
+        pass: process.env.EMAIL_PASS
+    }
 });
 
-// POST /api/resume/apply-company - Submit Job Application to Backend
+// POST /api/resume/apply-company - Submit Job Application & Send Email Confirmation
 router.post('/apply-company', async (req, res) => {
     try {
         const { companyName, jobRole, matchScore, userId, email, fullName } = req.body || {};
         
-        const applicantEmail = email || 'jaswanthkumarmuthoju@gmail.com';
-        const applicantName = fullName || 'Jaswanth Kumar';
-        const targetCompany = companyName || 'Target Company';
-        const roleName = jobRole || 'Software Development Engineer';
-        const fitScore = matchScore || '88%';
+        const targetEmail = email || 'jaswanthkumarmuthoju@gmail.com';
+        const targetName = fullName || 'Jaswanth Kumar';
+        const refId = 'HIO-2026-' + Math.floor(1000 + Math.random() * 9000);
 
         const applicationRecord = {
-            id: 'APP_' + Date.now(),
-            companyName: targetCompany,
-            jobRole: roleName,
-            matchScore: fitScore,
-            userId: userId || 'user_123',
-            applicantName: applicantName,
-            applicantEmail: applicantEmail,
+            id: refId,
+            companyName: companyName || 'Hiring Partner',
+            jobRole: jobRole || 'Software Development Engineer',
+            matchScore: matchScore || '88%',
+            userId: userId || targetEmail,
+            applicantName: targetName,
+            applicantEmail: targetEmail,
             appliedAt: new Date().toISOString(),
             status: 'Submitted to Recruiter'
         };
 
         companyApplicationsBackendStore.push(applicationRecord);
 
-        // --- Dispatch Confirmation Email to Candidate ---
+        // Dispatch Email Confirmation to registered email ID
         if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-            try {
-                await mailTransporter.sendMail({
-                    from: `"Hiero Talent Systems" <${process.env.EMAIL_USER}>`,
-                    to: applicantEmail,
-                    subject: `🎉 Application Confirmed: ${targetCompany} (${roleName})`,
-                    html: `
-                    <div style="font-family: 'Plus Jakarta Sans', Arial, sans-serif; background-color: #07090e; color: #f8fafc; padding: 40px; border-radius: 16px; max-width: 600px; margin: auto; border: 1px solid rgba(7, 226, 25, 0.3);">
-                        <div style="text-align: center; margin-bottom: 24px;">
-                            <h2 style="color: #07e219; margin: 0; font-size: 24px;">HIERO CAREER INTELLIGENCE</h2>
-                            <p style="color: #94a3b8; font-size: 14px; margin-top: 4px;">Direct Candidate Referral Dispatch</p>
-                        </div>
-                        
-                        <div style="background: #0d121c; padding: 24px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); margin-bottom: 24px;">
-                            <h3 style="color: #ffffff; margin-top: 0; font-size: 18px;">Application Confirmed for ${targetCompany}!</h3>
-                            <p style="color: #94a3b8; font-size: 14px; line-height: 1.6;">Hello <strong>${applicantName}</strong>,</p>
-                            <p style="color: #94a3b8; font-size: 14px; line-height: 1.6;">Your verified Hiero candidate profile and ATS benchmarked resume have been successfully submitted for the <strong>${roleName}</strong> position at <strong>${targetCompany}</strong>.</p>
-                            
-                            <table style="width: 100%; margin-top: 16px; font-size: 14px; border-collapse: collapse;">
-                                <tr>
-                                    <td style="color: #94a3b8; padding: 6px 0;">Target Company:</td>
-                                    <td style="color: #ffffff; font-weight: 700; text-align: right;">${targetCompany}</td>
-                                </tr>
-                                <tr>
-                                    <td style="color: #94a3b8; padding: 6px 0;">Role Applied:</td>
-                                    <td style="color: #ffffff; font-weight: 700; text-align: right;">${roleName}</td>
-                                </tr>
-                                <tr>
-                                    <td style="color: #94a3b8; padding: 6px 0;">Hiero Match Fit:</td>
-                                    <td style="color: #07e219; font-weight: 800; text-align: right;">${fitScore}</td>
-                                </tr>
-                                <tr>
-                                    <td style="color: #94a3b8; padding: 6px 0;">Application Ref:</td>
-                                    <td style="color: #ffffff; font-weight: 700; text-align: right;">${applicationRecord.id}</td>
-                                </tr>
-                            </table>
-                        </div>
-
-                        <div style="text-align: center; margin-top: 24px;">
-                            <a href="http://localhost:2816/job_success.html?company=${encodeURIComponent(targetCompany)}&role=${encodeURIComponent(roleName)}&score=${encodeURIComponent(fitScore)}" style="background: #07e219; color: #000000; text-decoration: none; padding: 12px 28px; border-radius: 100px; font-weight: 800; display: inline-block; font-size: 14px;">View Application Status →</a>
-                        </div>
+            const htmlContent = `
+            <div style="font-family: 'Plus Jakarta Sans', Arial, sans-serif; background-color: #07090e; color: #f8fafc; padding: 40px 20px; text-align: center;">
+                <div style="max-width: 600px; margin: 0 auto; background-color: #0d121c; border: 1px solid rgba(7, 226, 25, 0.3); border-radius: 20px; padding: 40px 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
+                    <div style="width: 60px; height: 60px; border-radius: 50%; background: rgba(7, 226, 25, 0.15); border: 2px solid #07e219; color: #07e219; font-size: 28px; line-height: 60px; margin: 0 auto 20px;">✓</div>
+                    <span style="background: rgba(7, 226, 25, 0.12); border: 1px solid rgba(7, 226, 25, 0.35); color: #07e219; font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 100px; text-transform: uppercase; letter-spacing: 1px;">Application Confirmed</span>
+                    <h2 style="font-size: 26px; font-weight: 800; color: #ffffff; margin: 16px 0 8px;">Application Submitted to ${companyName}</h2>
+                    <p style="color: #94a3b8; font-size: 14px; margin-bottom: 30px; line-height: 1.6;">Hello <strong>${targetName}</strong>, your application payload and verified Hiero ATS resume have been successfully delivered to <strong>${companyName}</strong>.</p>
+                    
+                    <div style="background: #131b28; border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 20px; text-align: left; margin-bottom: 30px;">
+                        <div style="margin-bottom: 12px;"><span style="color: #64748b; font-size: 12px;">Target Company:</span> <strong style="color: #07e219; font-size: 15px; float: right;">${companyName}</strong></div>
+                        <div style="margin-bottom: 12px;"><span style="color: #64748b; font-size: 12px;">Applied Role:</span> <strong style="color: #ffffff; font-size: 14px; float: right;">${jobRole || 'Software Development Engineer'}</strong></div>
+                        <div style="margin-bottom: 12px;"><span style="color: #64748b; font-size: 12px;">Hiero Match Score:</span> <strong style="color: #07e219; font-size: 14px; float: right;">${matchScore || '88%'}</strong></div>
+                        <div><span style="color: #64748b; font-size: 12px;">Reference ID:</span> <strong style="color: #ffffff; font-size: 13px; float: right;">#${refId}</strong></div>
                     </div>
-                    `
-                });
-                console.log(`✅ Application confirmation email dispatched to ${applicantEmail}`);
-            } catch (mailErr) {
-                console.warn('⚠️ Nodemailer mail dispatch warning:', mailErr.message);
-            }
+
+                    <a href="http://localhost:2816/job_success.html?company=${encodeURIComponent(companyName)}&role=${encodeURIComponent(jobRole || 'Software Engineer')}&score=${encodeURIComponent(matchScore || '88%')}" style="display: inline-block; background: linear-gradient(135deg, #07e219, #00b248); color: #000; font-weight: 800; font-size: 14px; text-decoration: none; padding: 14px 30px; border-radius: 100px; box-shadow: 0 0 20px rgba(7, 226, 25, 0.3);">View Application Receipt →</a>
+                    <p style="color: #64748b; font-size: 12px; margin-top: 30px;">© 2026 Hiero Career Intelligence Platform. All rights reserved.</p>
+                </div>
+            </div>
+            `;
+
+            appTransporter.sendMail({
+                from: `"Hiero Talent Network" <${process.env.EMAIL_USER}>`,
+                to: targetEmail,
+                subject: `🎉 Job Application Confirmed: ${companyName} (${jobRole || 'Software Engineer'}) - Hiero AI`,
+                html: htmlContent
+            }).then(() => console.log(`✅ Application confirmation email dispatched to ${targetEmail}`))
+              .catch(e => console.warn('Email dispatch warning:', e.message));
         }
 
         return res.json({
             success: true,
-            message: `Application submitted to ${targetCompany} recruiter backend`,
+            message: `Application submitted to ${companyName} recruiter backend & confirmation email queued`,
             application: applicationRecord
         });
     } catch (error) {
