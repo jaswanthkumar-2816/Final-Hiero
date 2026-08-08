@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Application Submitted | Hiero Career Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="theme.css">
+  <script src="theme.js"></script>
+  <!-- Canvas Confetti Library -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <style>
+    :root {
+      --font-main: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      --font-display: 'Outfit', sans-serif;
+      --transition-speed: 0.25s;
+
+      --bg-color: #07090e;
+      --surface-1: #0d121c;
+      --surface-2: #131b28;
+      --card-bg: rgba(13, 18, 28, 0.75);
+      --card-border: rgba(255, 255, 255, 0.08);
+
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-subtle: #64748b;
+      --border-color: rgba(255, 255, 255, 0.08);
+
+      --primary-accent: #07e219;
+      --primary-accent-glow: rgba(7, 226, 25, 0.35);
+      --primary-accent-subtle: rgba(7, 226, 25, 0.12);
+    }
+
+    [data-theme="light"],
+    body.light-mode {
+      --bg-color: #f8fafc;
+      --surface-1: #ffffff;
+      --surface-2: #f1f5f9;
+      --card-bg: #ffffff;
+      --card-border: #e2e8f0;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --text-subtle: #64748b;
+      --border-color: #cbd5e1;
+      --primary-accent: #05be14;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: var(--font-main);
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      overflow-x: hidden;
+      transition: background-color var(--transition-speed), color var(--transition-speed);
+    }
+
+    /* Ambient Background Mesh */
+    #ambient-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .ambient-glow-1 {
+      position: fixed;
+      top: -15%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 70vw;
+      height: 45vw;
+      background: radial-gradient(circle, rgba(7, 226, 25, 0.14) 0%, transparent 70%);
+      filter: blur(100px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .ambient-glow-2 {
+      position: fixed;
+      bottom: -20%;
+      right: -10%;
+      width: 50vw;
+      height: 50vw;
+      background: radial-gradient(circle, rgba(56, 189, 248, 0.08) 0%, transparent 70%);
+      filter: blur(100px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Navigation Bar */
+    .nav-header {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 48px;
+      background: var(--surface-1);
+      border-bottom: 1px solid var(--border-color);
+      backdrop-filter: blur(16px);
+      position: relative;
+      z-index: 10;
+    }
+
+    .app-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text-main);
+      font-weight: 800;
+      font-size: 1.3rem;
+      font-family: var(--font-display);
+    }
+
+    .app-logo-box {
+      width: 40px;
+      height: 40px;
+      background: var(--surface-2);
+      border: 1px solid rgba(7, 226, 25, 0.35);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 16px rgba(7, 226, 25, 0.2);
+      overflow: hidden;
+    }
+
+    .app-logo-box img {
+      width: 26px;
+      height: 26px;
+      object-fit: contain;
+    }
+
+    .nav-menu {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--surface-2);
+      padding: 5px 8px;
+      border-radius: 100px;
+      border: 1px solid var(--border-color);
+    }
+
+    .nav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 18px;
+      border-radius: 100px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: all var(--transition-speed);
+    }
+
+    .nav-btn:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .nav-btn.active {
+      background: var(--primary-accent-subtle);
+      color: var(--primary-accent);
+      border: 1px solid rgba(7, 226, 25, 0.3);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .nav-theme-toggle {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--surface-2);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .nav-theme-toggle:hover {
+      border-color: var(--primary-accent);
+      color: var(--primary-accent);
+    }
+
+    .user-profile-pill {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 14px 6px 8px;
+      background: var(--surface-2);
+      border: 1px solid var(--border-color);
+      border-radius: 100px;
+      color: var(--text-main);
+      font-size: 0.82rem;
+      font-weight: 600;
+    }
+
+    .user-mail-badge {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--primary-accent-subtle);
+      border: 1px solid rgba(7, 226, 25, 0.4);
+      color: var(--primary-accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+    }
+
+    /* Main Container & Hero Card */
+    .main-wrapper {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 900px;
+      margin: 40px auto 80px;
+      padding: 0 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .success-card {
+      width: 100%;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 28px;
+      padding: 48px 40px;
+      box-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(20px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      animation: slideUpFade 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes slideUpFade {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Success Icon Check Circle */
+    .success-icon-wrapper {
+      position: relative;
+      width: 100px;
+      height: 100px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .success-icon-circle {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(7, 226, 25, 0.2), rgba(0, 230, 118, 0.05));
+      border: 2px solid var(--primary-accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary-accent);
+      font-size: 2.5rem;
+      box-shadow: 0 0 30px var(--primary-accent-glow);
+      animation: popIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .success-icon-pulse {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 2px solid var(--primary-accent);
+      opacity: 0.6;
+      animation: ringPulse 2s infinite ease-out;
+    }
+
+    @keyframes ringPulse {
+      0% {
+        transform: scale(0.9);
+        opacity: 0.8;
+      }
+      100% {
+        transform: scale(1.4);
+        opacity: 0;
+      }
+    }
+
+    @keyframes popIn {
+      0% {
+        transform: scale(0.6);
+        opacity: 0;
+      }
+      70% {
+        transform: scale(1.1);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .success-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 18px;
+      border-radius: 100px;
+      background: var(--primary-accent-subtle);
+      border: 1px solid rgba(7, 226, 25, 0.35);
+      color: var(--primary-accent);
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    .success-title {
+      font-family: var(--font-display);
+      font-size: 2.3rem;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 10px;
+      letter-spacing: -0.5px;
+    }
+
+    .success-subtitle {
+      font-size: 1rem;
+      color: var(--text-muted);
+      max-width: 620px;
+      line-height: 1.6;
+      margin-bottom: 36px;
+    }
+
+    /* Receipt Details Grid */
+    .receipt-box {
+      width: 100%;
+      background: var(--surface-1);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 28px 32px;
+      margin-bottom: 36px;
+      text-align: left;
+    }
+
+    .receipt-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 20px;
+    }
+
+    .receipt-title-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .company-logo-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: var(--surface-2);
+      border: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1.2rem;
+      color: var(--primary-accent);
+      overflow: hidden;
+    }
+
+    .company-logo-avatar img {
+      width: 32px;
+      height: 32px;
+      object-fit: contain;
+    }
+
+    .receipt-company-info h3 {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 2px;
+    }
+
+    .receipt-company-info p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .match-score-badge {
+      padding: 8px 18px;
+      border-radius: 12px;
+      background: var(--primary-accent-subtle);
+      border: 1px solid rgba(7, 226, 25, 0.4);
+      text-align: right;
+    }
+
+    .match-score-num {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--primary-accent);
+    }
+
+    .match-score-lbl {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .receipt-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+
+    .receipt-item {
+      background: var(--surface-2);
+      padding: 14px 18px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+    }
+
+    .receipt-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+
+    .receipt-value {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    /* Status Timeline */
+    .timeline-card {
+      width: 100%;
+      background: var(--surface-1);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 24px 32px;
+      margin-bottom: 36px;
+      text-align: left;
+    }
+
+    .timeline-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .timeline-steps {
+      display: flex;
+      justify-content: space-between;
+      position: relative;
+      gap: 12px;
+    }
+
+    .timeline-step {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
+      position: relative;
+    }
+
+    .step-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 100px;
+      font-size: 0.76rem;
+      font-weight: 700;
+    }
+
+    .step-completed {
+      background: var(--primary-accent-subtle);
+      border: 1px solid rgba(7, 226, 25, 0.4);
+      color: var(--primary-accent);
+    }
+
+    .step-pending {
+      background: var(--surface-2);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+    }
+
+    .step-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .step-desc {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    /* Action CTAs */
+    .action-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      width: 100%;
+      flex-wrap: wrap;
+    }
+
+    .cta-btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 32px;
+      border-radius: 100px;
+      background: linear-gradient(135deg, var(--primary-accent), #00b248);
+      color: #000;
+      font-weight: 800;
+      font-size: 0.95rem;
+      text-decoration: none;
+      box-shadow: 0 0 24px var(--primary-accent-glow);
+      transition: all 0.25s;
+    }
+
+    .cta-btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 32px var(--primary-accent-glow);
+    }
+
+    .cta-btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 28px;
+      border-radius: 100px;
+      background: var(--surface-2);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      font-weight: 700;
+      font-size: 0.95rem;
+      text-decoration: none;
+      transition: all 0.25s;
+    }
+
+    .cta-btn-secondary:hover {
+      border-color: var(--primary-accent);
+      color: var(--primary-accent);
+    }
+
+    @media (max-width: 768px) {
+      .nav-header { padding: 14px 20px; }
+      .nav-menu { display: none; }
+      .receipt-grid { grid-template-columns: 1fr; }
+      .timeline-steps { flex-direction: column; gap: 16px; }
+      .success-card { padding: 32px 20px; }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Ambient Canvas Background -->
+  <canvas id="ambient-canvas"></canvas>
+  <div class="ambient-glow-1"></div>
+  <div class="ambient-glow-2"></div>
+
+  <!-- Capsule Navigation -->
+  <header class="nav-header">
+    <a href="index.html" class="app-brand">
+      <div class="app-logo-box">
+        <img src="logo-hiero.png" alt="Hiero Logo" onerror="this.onerror=null; this.src='hiero-prototype/jss/hiero/hiero-last/public/logo-hiero.png';">
+      </div>
+      <span>HIERO</span>
+    </a>
+
+    <nav class="nav-menu">
+      <a href="resume-builder.html" class="nav-btn"><i class="fa-solid fa-file-invoice"></i> Resume Builder</a>
+      <a href="result.html" class="nav-btn"><i class="fa-solid fa-chart-line"></i> Analyse Resume</a>
+      <a href="companies.html" class="nav-btn active"><i class="fa-solid fa-building"></i> Target Companies</a>
+      <a href="mock-interview.html" class="nav-btn"><i class="fa-solid fa-microphone"></i> Mock Interview</a>
+      <a href="learn.html" class="nav-btn"><i class="fa-solid fa-book-open"></i> Learn Skills</a>
+    </nav>
+
+    <div class="nav-actions">
+      <button class="nav-theme-toggle" onclick="window.toggleTheme()" aria-label="Toggle Theme">
+        <i class="fa-solid fa-moon"></i>
+      </button>
+
+      <div class="user-profile-pill">
+        <div class="user-mail-badge"><i class="fa-solid fa-user"></i></div>
+        <span id="nav-user-email" class="user-name">Jaswanth Kumar</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="main-wrapper">
+    <div class="success-card">
+
+      <!-- Animated Icon Checkmark -->
+      <div class="success-icon-wrapper">
+        <div class="success-icon-pulse"></div>
+        <div class="success-icon-circle">
+          <i class="fa-solid fa-check"></i>
+        </div>
+      </div>
+
+      <div class="success-badge">
+        <i class="fa-solid fa-circle-check"></i> Application Verified & Dispatched
+      </div>
+
+      <h1 class="success-title">Application Submitted Successfully!</h1>
+      <p class="success-subtitle">
+        Your verified engineering profile, benchmarked ATS resume, and Hiero skill matrix have been directly submitted to the talent acquisition portal.
+      </p>
+
+      <!-- Application Receipt Card -->
+      <div class="receipt-box">
+        <div class="receipt-header">
+          <div class="receipt-title-row">
+            <div class="company-logo-avatar" id="company-logo-box">
+              <span id="company-avatar-text">HI</span>
+            </div>
+            <div class="receipt-company-info">
+              <h3 id="target-company-name">Meta Platforms</h3>
+              <p id="target-role-title">Production Engineer (E5) • Full-Time & Hybrid</p>
+            </div>
+          </div>
+
+          <div class="match-score-badge">
+            <div class="match-score-num" id="verified-match-score">88%</div>
+            <div class="match-score-lbl">Hiero Match Fit</div>
+          </div>
+        </div>
+
+        <div class="receipt-grid">
+          <div class="receipt-item">
+            <div class="receipt-label">Candidate Name</div>
+            <div class="receipt-value" id="receipt-candidate-name">Jaswanth Kumar</div>
+          </div>
+
+          <div class="receipt-item">
+            <div class="receipt-label">Application Reference ID</div>
+            <div class="receipt-value" id="receipt-ref-id">#HIO-2026-9842</div>
+          </div>
+
+          <div class="receipt-item">
+            <div class="receipt-label">Submission Timestamp</div>
+            <div class="receipt-value" id="receipt-timestamp">Just Now</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Application Progress Checklist -->
+      <div class="timeline-card">
+        <div class="timeline-title">
+          <i class="fa-solid fa-list-check" style="color: var(--primary-accent);"></i> Application Lifecycle Progress
+        </div>
+
+        <div class="timeline-steps">
+          <div class="timeline-step">
+            <span class="step-pill step-completed"><i class="fa-solid fa-check"></i> Completed</span>
+            <div class="step-title">Profile Dispatched</div>
+            <div class="step-desc">Direct referral payload sent to ATS</div>
+          </div>
+
+          <div class="timeline-step">
+            <span class="step-pill step-completed"><i class="fa-solid fa-check"></i> Active</span>
+            <div class="step-title">Recruiter Review</div>
+            <div class="step-desc">Est. response within 24-48 hours</div>
+          </div>
+
+          <div class="timeline-step">
+            <span class="step-pill step-pending"><i class="fa-solid fa-clock"></i> Next Step</span>
+            <div class="step-title">Technical Interview</div>
+            <div class="step-desc">Prepare with AI Mock Simulator</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="action-row">
+        <a href="mock-interview.html" class="cta-btn-primary">
+          <i class="fa-solid fa-microphone"></i> Start Mock Interview Prep →
+        </a>
+
+        <a href="companies.html" class="cta-btn-secondary">
+          <i class="fa-solid fa-building"></i> Target More Companies
+        </a>
+
+        <a href="dashboard.html" class="cta-btn-secondary">
+          <i class="fa-solid fa-house"></i> Go to Dashboard
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    // 1. Dynamic Search Params Parsing
+    window.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const company = urlParams.get('company') || 'Meta';
+      const role = urlParams.get('role') || 'Senior Software Engineer / AI Systems';
+      const score = urlParams.get('score') || '88%';
+
+      // Update UI elements
+      document.getElementById('target-company-name').textContent = company;
+      document.getElementById('target-role-title').textContent = `${role} • Target Hiring Drive`;
+      document.getElementById('verified-match-score').textContent = score;
+
+      // Update Company Logo or Initials Avatar
+      const logoBox = document.getElementById('company-logo-box');
+      const avatarText = document.getElementById('company-avatar-text');
+      
+      const compSlug = company.toLowerCase().replace(/[^a-z0-9]/g, '');
+      const svgMap = {
+        meta: 'meta.png',
+        microsoft: 'microsoft.svg',
+        google: 'google.svg',
+        amazon: 'amazon.png',
+        apple: 'apple.svg',
+        ibm: 'ibm.svg',
+        oracle: 'oracle.svg',
+        sap: 'sap.svg',
+        deloitte: 'deloitte.svg',
+        accenture: 'accenture.svg',
+        stripe: 'stripe.svg',
+        airbnb: 'airbnb.svg',
+        uber: 'uber.svg',
+        nvidia: 'nvidia.svg',
+        openai: 'openai.svg',
+        anthropic: 'anthropic.svg',
+        databricks: 'databricks.svg'
+      };
+
+      if (svgMap[compSlug]) {
+        logoBox.innerHTML = `<img src="${svgMap[compSlug]}" alt="${company} Logo" onerror="this.outerHTML='<span>${company.slice(0,2).toUpperCase()}</span>'">`;
+      } else {
+        avatarText.textContent = company.slice(0, 2).toUpperCase();
+      }
+
+      // User profile sync
+      const savedUserStr = localStorage.getItem('user');
+      if (savedUserStr) {
+        try {
+          const user = JSON.parse(savedUserStr);
+          const userName = user.name || user.fullName || (user.email ? user.email.split('@')[0] : 'Jaswanth Kumar');
+          document.getElementById('receipt-candidate-name').textContent = userName;
+        } catch(e) {}
+      }
+
+      // Generate random ref ID & date
+      const refNum = Math.floor(1000 + Math.random() * 9000);
+      document.getElementById('receipt-ref-id').textContent = `#HIO-2026-${refNum}`;
+      document.getElementById('receipt-timestamp').textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+      // Trigger Confetti Fireworks
+      if (typeof confetti === 'function') {
+        confetti({
+          particleCount: 80,
+          spread: 70,
+          origin: { y: 0.6 },
+          colors: ['#07e219', '#00e676', '#38bdf8', '#ffffff']
+        });
+      }
+    });
+
+    // 2. Ambient Particles Canvas
+    const canvas = document.getElementById('ambient-canvas');
+    if (canvas) {
+      const ctx = canvas.getContext('2d');
+      let width = (canvas.width = window.innerWidth);
+      let height = (canvas.height = window.innerHeight);
+
+      window.addEventListener('resize', () => {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+      });
+
+      const dots = Array.from({ length: 45 }, () => ({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        radius: Math.random() * 1.5 + 0.5,
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: (Math.random() - 0.5) * 0.3,
+        alpha: Math.random() * 0.5 + 0.1
+      }));
+
+      function renderCanvas() {
+        ctx.clearRect(0, 0, width, height);
+        dots.forEach(d => {
+          d.x += d.vx;
+          d.y += d.vy;
+          if (d.x < 0) d.x = width;
+          if (d.x > width) d.x = 0;
+          if (d.y < 0) d.y = height;
+          if (d.y > height) d.y = 0;
+
+          ctx.fillStyle = `rgba(7, 226, 25, ${d.alpha})`;
+          ctx.beginPath();
+          ctx.arc(d.x, d.y, d.radius, 0, Math.PI * 2);
+          ctx.fill();
+        });
+        requestAnimationFrame(renderCanvas);
+      }
+      renderCanvas();
+    }
+  </script>
+</body>
+</html>

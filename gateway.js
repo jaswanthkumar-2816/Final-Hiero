@@ -214,6 +214,7 @@ app.get(['/mock-interview', '/mock-interview.html'], (req, res) => res.sendFile(
 app.get(['/result', '/result.html'], (req, res) => res.sendFile(path.join(__dirname, 'result.html')));
 app.get(['/companies', '/companies.html'], (req, res) => res.sendFile(path.join(__dirname, 'companies.html')));
 app.get(['/company', '/company.html'], (req, res) => res.sendFile(path.join(__dirname, 'company.html')));
+app.get(['/job_success', '/job_success.html'], (req, res) => res.sendFile(path.join(__dirname, 'job_success.html')));
 app.get(['/success', '/success.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'success.html')));
 app.get('/sitemap.xml', (req, res) => res.sendFile(path.join(landingDirPath, 'sitemap.xml')));
 app.get('/robots.txt', (req, res) => res.sendFile(path.join(landingDirPath, 'robots.txt')));

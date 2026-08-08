@@ -1165,8 +1165,8 @@
             btn.classList.add('applied');
             btn.disabled = true;
             setTimeout(() => {
-                window.location.href = 'success.html';
-            }, 600);
+                window.location.href = `job_success.html?company=${encodeURIComponent(companyName)}&role=${encodeURIComponent('Senior Software Engineer')}&score=85%25`;
+            }, 450);
         }
 
         function logout() {
