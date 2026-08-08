@@ -18,8 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const response = await fetch("/api/analysis/health");
 
       if (response.ok) {
-
-        connectionStatus.style.display = "block";
+        if (connectionStatus) connectionStatus.style.display = "none";
         connectionStatus.style.backgroundColor = "#d4edda";
         connectionStatus.style.color = "#155724";
         statusText.textContent = "✅ Backend connected";

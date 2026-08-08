@@ -16,11 +16,11 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       // Just check if backend root is up
       const response = await fetch("http://localhost:5001/");
-      if (response.ok || response.status === 404) { // 404 is fine for root
-        connectionStatus.style.display = "block";
+      if (response.ok) {
+        if (connectionStatus) connectionStatus.style.display = "none";
         connectionStatus.style.backgroundColor = "#d4edda";
         connectionStatus.style.color = "#155724";
-        statusText.textContent = "✅ Backend connected successfully";
+        statusText.textContent = "✅ ";
         analyzeBtn.disabled = false;
       } else {
         throw new Error("Backend not responding");
