@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const data = await response.json();
       console.log('📋 Health check response:', data);
       if (response.ok) {
-        connectionStatus.style.display = "block";
+        if (connectionStatus) connectionStatus.style.display = "none";
         connectionStatus.style.backgroundColor = "black";
         connectionStatus.style.color = "#00ff00";
         statusText.textContent = "✅ Backend Ready";

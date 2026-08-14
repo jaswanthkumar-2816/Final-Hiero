@@ -37,8 +37,8 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       const response = await fetch(`${BACKEND_URL}/api/analysis/health`);
       const data = await response.json();
-      if (response.ok && data.status === 'ok') {
-        connectionStatus.style.display = "block";
+      if (response.ok) {
+        if (connectionStatus) connectionStatus.style.display = "none";
         connectionStatus.style.backgroundColor = "black";
         connectionStatus.style.color = "#00ff00";
         statusText.textContent = "✅ Backend Ready";

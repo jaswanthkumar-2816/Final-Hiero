@@ -45,7 +45,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (statusText) statusText.textContent = "AI Engine Online";
         if (analyzeBtn) analyzeBtn.disabled = false;
       } else {
-        throw new Error("Health check failed");
+        throw new Error("Backend not responding");
       }
     } catch (error) {
       console.warn("Primary health check warning:", error.message);
@@ -73,13 +73,8 @@ document.addEventListener("DOMContentLoaded", () => {
   // Test connection when page loads
   testBackendConnection();
 
-  // Enhanced Analysis Form Handler with Detailed Logging
-  const analyzeForm = document.getElementById('analyze-form');
-  if (analyzeForm) {
-    analyzeForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      // Reset validation box
-      if (validationBox) { validationBox.style.display = 'none'; validationText.innerHTML = ''; }
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
       const resume = document.getElementById('resume')?.files?.[0];
       const jdFile = document.getElementById('jd')?.files?.[0];
@@ -88,22 +83,49 @@ document.addEventListener("DOMContentLoaded", () => {
 
       console.log('📝 Analysis Form submitted');
 
-      // Validation
-      if (!resume) { alert("Please upload your resume PDF."); return; }
-      if (jdMode === 'file' && !jdFile) { alert("Please upload the job description file or switch to text mode."); return; }
-      if (jdMode === 'text' && (!jdTextEl || !jdTextEl.value.trim())) { alert("Please paste the job description text."); return; }
+    if (!loadingOverlay) {
+      console.error("Loading overlay not found.");
+      alert("Loading animation failed to start.");
+      return;
+    }
 
-      if (!loadingOverlay) { console.error("Loading overlay not found."); return; }
+    loadingOverlay.classList.add("visible");
+
+    const formData = new FormData();
+    formData.append("resume", resumeFile);
+    formData.append("jd", jdFile);
+
+    try {
+      const response = await fetch("http://localhost:5001/api/analyze", {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || `Server error: ${response.status}`);
+      }
+
+      if (result.success && result.data) {
+        localStorage.setItem("analysisResult", JSON.stringify(result.data));
+        console.log("✅ Stored in localStorage:", result.data);
+        window.location.href = "result.html";
+      } else {
+        throw new Error(result.error || 'No analysis data returned');
+      }
+
+    } catch (error) {
+      console.error("Analysis error:", error);
       
-      // Start dynamic animation
-      const animationState = startLoadingAnimation();
-
-      const formData = new FormData();
-      if (jdMode === 'text') {
-        const text = jdTextEl.value.trim();
-        formData.append('jd_text', text);
-        formData.append('jd', text); 
-        formData.append('description', text); 
+      // Show more specific error messages
+      let errorMessage = "Failed to analyze resume";
+      if (error.message.includes("Failed to fetch")) {
+        errorMessage = "Cannot connect to backend server. Please ensure the server is running on port 5001.";
+      } else if (error.message.includes("NetworkError")) {
+        errorMessage = "Network error. Please check your internet connection.";
+      } else {
+        errorMessage = error.message;
       }
       
       formData.append('resume', resume);
