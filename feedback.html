@@ -1,29 +1,61 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hiero | Share Your Feedback</title>
-  
-  <!-- Premium Fonts -->
+  <title>Hiero | Interview Review Dashboard</title>
+
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
+
+  <!-- html2pdf for Professional Client-Side PDF Report Generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
   <style>
     :root {
-      --primary: #10b981;          /* Hiero Emerald Green */
-      --primary-hover: #059669;
-      --bg-dark: #f8fafc;           /* Clean Slate Light BG */
-      --bg-card: #ffffff;
+      /* Theme Tokens - Modern Premium Dark Aesthetic */
+      --bg-body: #030503;
+      --bg-card: rgba(15, 23, 17, 0.78);
+      --bg-card-hover: rgba(22, 34, 25, 0.88);
+      --bg-input: #0a110c;
+      --border-color: rgba(42, 224, 35, 0.18);
+      --border-accent: rgba(7, 226, 25, 0.45);
+      --text-main: #ffffff;
+      --text-muted: #94a3b8;
+      --text-sub: #cbd5e1;
+      --primary: #07e219;
+      --primary-glow: rgba(7, 226, 25, 0.35);
+      --accent-cyan: #06b6d4;
+      --accent-yellow: #f59e0b;
+      --accent-rose: #f43f5e;
+      --accent-purple: #8b5cf6;
+      --card-shadow: 0 12px 32px 0 rgba(0, 0, 0, 0.55);
+      --glass-backdrop: blur(16px);
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 22px;
+      --font-heading: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+      --font-body: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    [data-theme="light"] {
+      --bg-body: #f8fafc;
+      --bg-card: rgba(255, 255, 255, 0.95);
+      --bg-card-hover: #ffffff;
+      --bg-input: #f1f5f9;
+      --border-color: rgba(7, 226, 25, 0.25);
+      --border-accent: rgba(7, 226, 25, 0.55);
       --text-main: #0f172a;
       --text-muted: #64748b;
-      --border: #e2e8f0;
-      --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+      --text-sub: #334155;
+      --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08);
+      --primary-glow: rgba(7, 226, 25, 0.2);
     }
 
     * {
@@ -33,418 +65,1015 @@
     }
 
     body {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      background-color: var(--bg-dark);
+      font-family: var(--font-body);
+      background-color: var(--bg-body);
       color: var(--text-main);
       min-height: 100vh;
+      line-height: 1.5;
+      overflow-x: hidden;
+      transition: background-color 0.3s ease, color 0.3s ease;
+      position: relative;
+    }
+
+    /* Radial Dot Grid Background Overlay */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image: radial-gradient(rgba(7, 226, 25, 0.07) 1px, transparent 1px);
+      background-size: 30px 30px;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* Print Styles for PDF Generation */
+    @media print {
+      body {
+        background: #ffffff !important;
+        color: #000000 !important;
+      }
+      .no-print, header, button, input, .theme-toggle {
+        display: none !important;
+      }
+      .dashboard-container {
+        padding: 0 !important;
+        max-width: 100% !important;
+      }
+      .glass-card, .accordion-item {
+        background: #ffffff !important;
+        border: 1px solid #ccc !important;
+        box-shadow: none !important;
+        break-inside: avoid;
+        color: #000000 !important;
+      }
+      .accordion-body-content {
+        display: block !important;
+      }
+    }
+
+    /* Container */
+    .dashboard-container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 24px 28px 60px;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* Glassmorphism Card Utility */
+    .glass-card {
+      background: var(--bg-card);
+      backdrop-filter: var(--glass-backdrop);
+      -webkit-backdrop-filter: var(--glass-backdrop);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--card-shadow);
+      padding: 28px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+    }
+
+    .glass-card:hover {
+      border-color: var(--border-accent);
+      box-shadow: 0 14px 35px var(--primary-glow);
+    }
+
+    /* Sticky Header Bar */
+    .header-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 16px 28px;
+      margin-bottom: 28px;
+      border-radius: var(--radius-md);
+      background: var(--bg-card);
+      backdrop-filter: var(--glass-backdrop);
+      border: 1px solid var(--border-color);
+      box-shadow: var(--card-shadow);
+      position: sticky;
+      top: 16px;
+      z-index: 100;
+    }
+
+    .logo-box {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+
+    .logo-icon {
+      width: 42px;
+      height: 42px;
+      background: linear-gradient(135deg, var(--primary), var(--accent-cyan));
+      border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 20px;
+      color: #000000;
+      font-size: 20px;
+      box-shadow: 0 0 20px var(--primary-glow);
     }
 
-    .form-container {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 40px;
-      width: 100%;
-      max-width: 520px;
-      box-shadow: var(--shadow);
-      position: relative;
-      animation: slideUp 0.4s ease forwards;
-    }
-
-    @keyframes slideUp {
-      from { opacity: 0; transform: translateY(12px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .brand-header {
-      text-align: center;
-      margin-bottom: 30px;
-    }
-
-    .brand-header h1 {
-      font-family: 'Outfit', sans-serif;
-      font-size: 26px;
+    .brand-title {
+      font-family: var(--font-heading);
+      font-size: 22px;
       font-weight: 800;
+      color: var(--text-main);
       letter-spacing: -0.5px;
-      color: #0f172a;
     }
 
-    .brand-header h1 span {
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    /* Theme Toggle - Symbol Only */
+    .theme-toggle-icon-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .theme-toggle-icon-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      transform: scale(1.05);
+    }
+
+    /* Primary Action Button (Single Download Button) */
+    .btn-primary-download {
+      background: linear-gradient(135deg, var(--primary), #05a313);
+      color: #000000;
+      border: none;
+      border-radius: 99px;
+      padding: 10px 22px;
+      font-family: var(--font-heading);
+      font-weight: 800;
+      font-size: 14px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 16px var(--primary-glow);
+      text-decoration: none;
+    }
+
+    .btn-primary-download:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px rgba(7, 226, 25, 0.5);
+    }
+
+    /* Section Header */
+    .card-section-title {
+      font-family: var(--font-heading);
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .card-section-title i {
       color: var(--primary);
     }
 
-    .brand-header p {
-      color: var(--text-muted);
-      font-size: 14px;
-      margin-top: 6px;
-      font-weight: 500;
-    }
-
-    /* Star Rating Selector */
-    .star-rating-wrapper {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+    /* -------------------------------------------------------------
+       TWO-COLUMN TOP LAYOUT (Candidate Info + Question Summary)
+    ------------------------------------------------------------- */
+    .top-two-column-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
       margin-bottom: 28px;
     }
 
-    .star-label {
-      font-size: 13.5px;
-      font-weight: 700;
-      color: var(--text-muted);
-      margin-bottom: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+    @media (max-width: 900px) {
+      .top-two-column-grid {
+        grid-template-columns: 1fr;
+      }
     }
 
-    .stars-row {
+    /* Left Card: Candidate Information */
+    .candidate-info-list {
       display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .info-row-item {
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      transition: border-color 0.2s ease;
+    }
+
+    .info-row-item:hover {
+      border-color: var(--border-accent);
+    }
+
+    .info-label-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .info-label-group i {
+      color: var(--primary);
+      font-size: 15px;
+    }
+
+    .info-value-text {
+      font-family: var(--font-heading);
+      font-size: 14.5px;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .resume-upload-box {
+      cursor: pointer;
+    }
+
+    .resume-upload-box:hover {
+      background: rgba(7, 226, 25, 0.05);
+      border-color: var(--primary);
+    }
+
+    /* Right Card: Question Summary Metric Cards */
+    .stats-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
       gap: 12px;
     }
 
-    .star-btn {
-      font-size: 34px;
-      color: #cbd5e1;
-      cursor: pointer;
-      transition: all 0.15s ease;
+    @media (max-width: 600px) {
+      .stats-summary-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
     }
 
-    .star-btn:hover {
-      transform: scale(1.15);
-    }
-
-    .star-btn.active {
-      color: #fbbf24; /* Warm Gold */
-      filter: drop-shadow(0 0 4px rgba(251, 191, 36, 0.3));
-    }
-
-    /* Form Fields */
-    .input-group {
+    .stat-metric-card {
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 16px 14px;
+      text-align: center;
       display: flex;
       flex-direction: column;
-      gap: 8px;
-      margin-bottom: 24px;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s ease;
     }
 
-    .input-label {
-      font-size: 12.5px;
+    .stat-metric-card:hover {
+      border-color: var(--border-accent);
+      transform: translateY(-2px);
+    }
+
+    .stat-metric-number {
+      font-family: var(--font-heading);
+      font-size: 24px;
+      font-weight: 900;
+      color: var(--text-main);
+      line-height: 1;
+    }
+
+    .stat-metric-label {
+      font-size: 11.5px;
       font-weight: 700;
-      color: #334155;
-    }
-
-    .field-readonly {
-      background: #f1f5f9;
-      border: 1px solid var(--border);
       color: var(--text-muted);
-      border-radius: 10px;
-      padding: 12px 14px;
-      font-size: 13.5px;
-      font-family: inherit;
-      font-weight: 600;
-      outline: none;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
     }
 
-    .textarea-field {
-      background: #ffffff;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 14px;
+    /* Performance Badge */
+    .perf-badge {
+      font-size: 13px;
+      font-weight: 800;
+      padding: 4px 12px;
+      border-radius: 99px;
+      background: rgba(7, 226, 25, 0.15);
+      color: var(--primary);
+      border: 1px solid rgba(7, 226, 25, 0.35);
+    }
+
+    /* -------------------------------------------------------------
+       QUESTIONS REVIEW SECTION (Question, Response, Review)
+    ------------------------------------------------------------- */
+    .questions-review-section {
+      margin-bottom: 28px;
+    }
+
+    .question-review-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      margin-bottom: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      transition: all 0.2s ease;
+    }
+
+    .question-review-card:hover {
+      border-color: var(--border-accent);
+    }
+
+    .q-header-title {
+      font-family: var(--font-heading);
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--text-main);
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .q-number-pill {
+      font-size: 12px;
+      font-weight: 900;
+      background: rgba(7, 226, 25, 0.15);
+      color: var(--primary);
+      padding: 3px 10px;
+      border-radius: 99px;
+      border: 1px solid rgba(7, 226, 25, 0.3);
+      white-space: nowrap;
+    }
+
+    .block-response {
+      background: var(--bg-input);
+      border-left: 3px solid var(--accent-cyan);
+      border-radius: var(--radius-sm);
+      padding: 14px 18px;
+      font-size: 14px;
+      color: var(--text-sub);
+    }
+
+    .block-response-label {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--accent-cyan);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+      display: block;
+    }
+
+    .block-review {
+      background: rgba(7, 226, 25, 0.04);
+      border-left: 3px solid var(--primary);
+      border-radius: var(--radius-sm);
+      padding: 14px 18px;
+      font-size: 13.5px;
+      color: var(--text-main);
+    }
+
+    .block-review-label {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--primary);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+      display: block;
+    }
+
+    /* -------------------------------------------------------------
+       COLLAPSIBLE ACCORDIONS (Transcript & Screen Recording)
+    ------------------------------------------------------------- */
+    .accordion-item {
+      background: var(--bg-card);
+      backdrop-filter: var(--glass-backdrop);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--card-shadow);
+      margin-bottom: 20px;
+      overflow: hidden;
+      transition: border-color 0.3s ease;
+    }
+
+    .accordion-item:hover {
+      border-color: var(--border-accent);
+    }
+
+    .accordion-header-bar {
+      padding: 20px 28px;
+      font-family: var(--font-heading);
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--text-main);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      user-select: none;
+      background: rgba(255, 255, 255, 0.015);
+      transition: background 0.2s ease;
+    }
+
+    .accordion-header-bar:hover {
+      background: rgba(7, 226, 25, 0.05);
+    }
+
+    .accordion-header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .accordion-header-left i {
+      color: var(--primary);
+      font-size: 18px;
+    }
+
+    .chevron-icon {
+      color: var(--primary);
+      font-size: 16px;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .accordion-item.open .chevron-icon {
+      transform: rotate(180deg);
+    }
+
+    .accordion-body-content {
+      display: none;
+      padding: 24px 28px;
+      background: var(--bg-input);
+      border-top: 1px solid var(--border-color);
+    }
+
+    .accordion-item.open .accordion-body-content {
+      display: block;
+    }
+
+    /* Transcript Box */
+    .search-transcript-input {
+      background: var(--bg-body);
+      border: 1px solid var(--border-color);
+      border-radius: 99px;
+      padding: 10px 18px 10px 40px;
       color: var(--text-main);
       font-size: 13.5px;
-      line-height: 1.5;
-      font-family: inherit;
-      resize: none;
-      height: 120px;
       outline: none;
-      transition: all 0.2s ease;
-    }
-
-    .textarea-field:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.1);
-    }
-
-    .btn-submit {
       width: 100%;
-      background: var(--primary);
-      color: #ffffff;
-      border: none;
-      padding: 14px;
-      border-radius: 10px;
-      font-family: 'Outfit', sans-serif;
-      font-size: 14.5px;
-      font-weight: 700;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: all 0.2s ease;
+      margin-bottom: 16px;
+      transition: border-color 0.2s ease;
     }
 
-    .btn-submit:hover {
-      background: var(--primary-hover);
-      box-shadow: 0 6px 15px -4px rgba(16, 185, 129, 0.35);
-      transform: translateY(-1px);
+    .search-transcript-input:focus {
+      border-color: var(--primary);
     }
 
-    .btn-submit:active {
-      transform: translateY(1px);
+    .search-wrapper {
+      position: relative;
+      margin-bottom: 16px;
     }
 
-    .btn-submit:disabled {
-      background: #cbd5e1;
-      color: #94a3b8;
-      cursor: not-allowed;
-      box-shadow: none;
-      transform: none;
-    }
-
-    .status-msg {
-      text-align: center;
-      font-size: 13px;
-      font-weight: 600;
-      margin-top: 15px;
-      min-height: 20px;
-    }
-
-    .status-msg.success { color: #15803d; }
-    .status-msg.error { color: #b91c1c; }
-
-    /* Success Overstate Screen */
-    .success-overlay {
+    .search-wrapper i {
       position: absolute;
-      inset: 0;
-      background: #ffffff;
-      border-radius: 20px;
-      display: none;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .transcript-scroll-area {
+      max-height: 380px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding-right: 6px;
+    }
+
+    .transcript-line-item {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      padding: 12px 16px;
+      border-radius: var(--radius-md);
+      font-size: 13.5px;
+    }
+
+    .time-stamp {
+      font-family: monospace;
+      font-size: 11.5px;
+      color: var(--text-muted);
+      background: var(--bg-body);
+      padding: 3px 8px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      white-space: nowrap;
+    }
+
+    .speaker-label {
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .speaker-interviewer { color: var(--primary); }
+    .speaker-candidate { color: var(--accent-cyan); }
+
+    .speaker-text {
+      color: var(--text-sub);
+    }
+
+    /* Screen Recording Video Player */
+    .screen-rec-wrapper {
+      display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      padding: 40px;
-      text-align: center;
-      z-index: 10;
+      gap: 14px;
     }
 
-    .success-icon {
-      width: 64px;
-      height: 64px;
-      background: #ecfdf5;
-      color: var(--primary);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 28px;
-      margin-bottom: 24px;
-      animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    .video-viewport {
+      width: 100%;
+      max-width: 860px;
+      aspect-ratio: 16 / 9;
+      background: #000000;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.7);
     }
 
-    @keyframes pop {
-      from { transform: scale(0.6); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
+    .video-viewport video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
 
-    .success-overlay h2 {
-      font-family: 'Outfit', sans-serif;
-      font-size: 22px;
-      font-weight: 800;
-      color: #0f172a;
-      margin-bottom: 8px;
+    /* Skeletons */
+    .skeleton-loader {
+      background: linear-gradient(90deg, var(--bg-input) 25%, rgba(255,255,255,0.05) 50%, var(--bg-input) 75%);
+      background-size: 200% 100%;
+      animation: skeletonShimmer 1.5s infinite;
+      border-radius: 8px;
+      height: 20px;
+      width: 100%;
     }
 
-    .success-overlay p {
-      color: var(--text-muted);
-      font-size: 13.5px;
-      line-height: 1.5;
+    @keyframes skeletonShimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
     }
   </style>
 </head>
 
 <body>
 
-  <div class="form-container">
-    
-    <!-- Animated success screen -->
-    <div id="successOverlay" class="success-overlay">
-      <div class="success-icon">
-        <i class="fa-solid fa-circle-check"></i>
-      </div>
-      <h2>Thank You!</h2>
-      <p id="successSub">Your feedback was successfully submitted. Redirecting you back to your dashboard now...</p>
-    </div>
+  <div class="dashboard-container">
 
-    <!-- Header -->
-    <header class="brand-header">
-      <h1>HIERO <span>CAREER</span></h1>
-      <p>Share Your App Experience</p>
+    <!-- Sticky Header Navigation -->
+    <header class="header-bar no-print">
+      <a href="/dashboard.html" class="logo-box">
+        <div class="logo-icon">
+          <i class="fa-solid fa-brain"></i>
+        </div>
+        <div class="brand-title">Hiero</div>
+      </a>
+
+      <div class="header-actions">
+        <!-- Theme Toggle Button (Symbol Only) -->
+        <button class="theme-toggle-icon-btn" onclick="toggleTheme()" id="themeBtn" title="Toggle Theme">
+          <i class="fa-solid fa-moon" id="themeIcon"></i>
+        </button>
+
+        <!-- SINGLE Download Button -->
+        <button class="btn-primary-download" onclick="exportAnalysisPDF()">
+          <i class="fa-solid fa-download"></i> Download Analysis
+        </button>
+      </div>
     </header>
 
-    <!-- Star Selector -->
-    <div class="star-rating-wrapper">
-      <div class="star-label">Rate Your Experience</div>
-      <div class="stars-row" id="starsRow">
-        <i class="fa-solid fa-star star-btn" onclick="setRating(1)" onmouseover="hoverStars(1)" onmouseout="resetStars()"></i>
-        <i class="fa-solid fa-star star-btn" onclick="setRating(2)" onmouseover="hoverStars(2)" onmouseout="resetStars()"></i>
-        <i class="fa-solid fa-star star-btn" onclick="setRating(3)" onmouseover="hoverStars(3)" onmouseout="resetStars()"></i>
-        <i class="fa-solid fa-star star-btn" onclick="setRating(4)" onmouseover="hoverStars(4)" onmouseout="resetStars()"></i>
-        <i class="fa-solid fa-star star-btn" onclick="setRating(5)" onmouseover="hoverStars(5)" onmouseout="resetStars()"></i>
+    <!-- CLEAN TWO-COLUMN TOP LAYOUT (Candidate Info Card + Question Summary Card) -->
+    <div class="top-two-column-grid">
+
+      <!-- LEFT CARD: Candidate Information Card -->
+      <div class="glass-card">
+        <div class="card-section-title">
+          <i class="fa-solid fa-user-check"></i> Candidate Information
+        </div>
+
+        <div class="candidate-info-list">
+          <div class="info-row-item">
+            <div class="info-label-group">
+              <i class="fa-solid fa-user"></i> Name
+            </div>
+            <div class="info-value-text" id="valCandidateName">Rishika BS</div>
+          </div>
+
+          <!-- Resume Upload Row -->
+          <div class="info-row-item resume-upload-box" onclick="triggerResumeUpload()" title="Click to upload resume">
+            <input type="file" id="resumeFileInput" accept=".pdf,.docx" style="display: none;" onchange="handleResumeFileSelect(event)">
+            <div class="info-label-group">
+              <i class="fa-solid fa-file-pdf"></i> Resume
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span class="info-value-text" id="valResumeFileName">Resume.pdf</span>
+              <i class="fa-solid fa-cloud-arrow-up" style="color: var(--primary); font-size: 14px;"></i>
+            </div>
+          </div>
+
+          <div class="info-row-item">
+            <div class="info-label-group">
+              <i class="fa-solid fa-briefcase"></i> Target Role
+            </div>
+            <div class="info-value-text" id="valTargetRole">Software Engineer</div>
+          </div>
+
+          <div class="info-row-item">
+            <div class="info-label-group">
+              <i class="fa-solid fa-clock"></i> Start Time
+            </div>
+            <div class="info-value-text" id="valStartTime">10:00 AM</div>
+          </div>
+
+          <div class="info-row-item">
+            <div class="info-label-group">
+              <i class="fa-solid fa-hourglass-end"></i> End Time
+            </div>
+            <div class="info-value-text" id="valEndTime">10:25 AM</div>
+          </div>
+
+          <div class="info-row-item">
+            <div class="info-label-group">
+              <i class="fa-solid fa-stopwatch"></i> Duration
+            </div>
+            <div class="info-value-text" id="valDuration">25 Minutes</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT CARD: Question Summary Card -->
+      <div class="glass-card">
+        <div class="card-section-title">
+          <i class="fa-solid fa-chart-simple"></i> Question Summary
+        </div>
+
+        <div class="stats-summary-grid">
+          <div class="stat-metric-card">
+            <span class="stat-metric-number" id="statTotalQ">5</span>
+            <span class="stat-metric-label">Total Asked</span>
+          </div>
+
+          <div class="stat-metric-card">
+            <span class="stat-metric-number" style="color: var(--primary);" id="statAttempted">5</span>
+            <span class="stat-metric-label">Attempted</span>
+          </div>
+
+          <div class="stat-metric-card">
+            <span class="stat-metric-number" style="color: var(--accent-yellow);" id="statSkipped">0</span>
+            <span class="stat-metric-label">Skipped</span>
+          </div>
+
+          <div class="stat-metric-card">
+            <span class="stat-metric-number" style="color: var(--accent-cyan);" id="statCorrect">4</span>
+            <span class="stat-metric-label">Correct</span>
+          </div>
+
+          <div class="stat-metric-card">
+            <span class="stat-metric-number" style="color: var(--accent-purple);" id="statConfidence">88%</span>
+            <span class="stat-metric-label">Confidence</span>
+          </div>
+
+          <div class="stat-metric-card">
+            <span class="perf-badge" id="statOverallPerf">Excellent</span>
+            <span class="stat-metric-label" style="margin-top: 4px;">Overall</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- QUESTIONS REVIEW SECTION (Question, Response, Review) -->
+    <section class="questions-review-section">
+      <div class="card-section-title" style="margin-left: 4px;">
+        <i class="fa-solid fa-comments"></i> Questions & Review
+      </div>
+
+      <div id="questionsReviewContainer">
+        <!-- Dynamically Populated Cards -->
+      </div>
+    </section>
+
+    <!-- COLLAPSIBLE SECTION: TRANSCRIPT -->
+    <div class="accordion-item open" id="accTranscript">
+      <div class="accordion-header-bar" onclick="toggleAccordion('accTranscript')">
+        <div class="accordion-header-left">
+          <i class="fa-solid fa-quote-left"></i>
+          <span>Interview Transcript</span>
+        </div>
+        <i class="fa-solid fa-chevron-down chevron-icon"></i>
+      </div>
+      <div class="accordion-body-content">
+        <div class="search-wrapper">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" class="search-transcript-input" id="searchTranscriptInput" placeholder="Search transcript..." onkeyup="filterTranscript()">
+        </div>
+
+        <div class="transcript-scroll-area" id="transcriptScrollArea">
+          <!-- Dynamically Populated Transcript -->
+        </div>
       </div>
     </div>
 
-    <!-- Fields -->
-    <div class="input-group">
-      <label class="input-label">YOUR NAME</label>
-      <input type="text" id="userNameField" class="field-readonly" readonly placeholder="Guest User">
+    <!-- COLLAPSIBLE SECTION: SCREEN RECORDING -->
+    <div class="accordion-item" id="accScreenRecording">
+      <div class="accordion-header-bar" onclick="toggleAccordion('accScreenRecording')">
+        <div class="accordion-header-left">
+          <i class="fa-solid fa-video"></i>
+          <span>Screen Recording</span>
+        </div>
+        <i class="fa-solid fa-chevron-down chevron-icon"></i>
+      </div>
+      <div class="accordion-body-content">
+        <div class="screen-rec-wrapper">
+          <div class="video-viewport">
+            <video id="screenVideoPlayer" controls poster="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=1200&q=80">
+              <source id="screenVideoSource" src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" type="video/mp4">
+              Your browser does not support HTML5 video playback.
+            </video>
+          </div>
+        </div>
+      </div>
     </div>
-
-    <div class="input-group">
-      <label class="input-label">EMAIL ADDRESS</label>
-      <input type="email" id="userEmailField" class="field-readonly" readonly placeholder="guest@example.com">
-    </div>
-
-    <div class="input-group">
-      <label class="input-label">YOUR FEEDBACK / SUGGESTIONS</label>
-      <textarea id="feedbackTextField" class="textarea-field" placeholder="Tell us what you liked, or where we can improve..." oninput="checkFormProgress()"></textarea>
-    </div>
-
-    <!-- Button -->
-    <button id="submitBtn" class="btn-submit" disabled onclick="submitFeedback()">
-      Submit Feedback <i class="fa-solid fa-arrow-right"></i>
-    </button>
-
-    <div id="statusMsg" class="status-msg"></div>
 
   </div>
 
+  <!-- JAVASCRIPT LOGIC & DYNAMIC API INTEGRATION -->
   <script>
-    // Grab URL params
-    const urlParams = new URLSearchParams(window.location.search);
-    const userEmail = urlParams.get('email') || '';
-    const userName = urlParams.get('name') || '';
+    let fetchedDashboardData = null;
 
-    // Initialize Fields
-    if (userEmail) document.getElementById('userEmailField').value = userEmail;
-    if (userName) document.getElementById('userNameField').value = userName;
-
-    let selectedRating = parseInt(urlParams.get('rating')) || 0;
-    let isSubmitted = false;
-
-    // --- Star Rating Handling ---
-
-    function setRating(rating) {
-      selectedRating = rating;
-      updateStarsDisplay(rating);
-      checkFormProgress();
+    // Theme Toggle Handler (Symbol Only)
+    function toggleTheme() {
+      const html = document.documentElement;
+      const themeIcon = document.getElementById('themeIcon');
+      const currentTheme = html.getAttribute('data-theme');
+      const nextTheme = currentTheme === 'light' ? 'dark' : 'light';
+      
+      html.setAttribute('data-theme', nextTheme);
+      if (nextTheme === 'light') {
+        themeIcon.className = 'fa-solid fa-sun';
+      } else {
+        themeIcon.className = 'fa-solid fa-moon';
+      }
     }
 
-    function hoverStars(rating) {
-      updateStarsDisplay(rating);
+    // Accordion Toggle
+    function toggleAccordion(accordionId) {
+      const item = document.getElementById(accordionId);
+      if (item) {
+        item.classList.toggle('open');
+      }
     }
 
-    function resetStars() {
-      updateStarsDisplay(selectedRating);
+    // Resume Upload Click & Select Handlers
+    function triggerResumeUpload() {
+      document.getElementById('resumeFileInput').click();
     }
 
-    function updateStarsDisplay(rating) {
-      const stars = document.querySelectorAll('#starsRow i');
-      stars.forEach((star, idx) => {
-        if (idx < rating) {
-          star.classList.add('active');
+    function handleResumeFileSelect(event) {
+      const file = event.target.files[0];
+      if (file) {
+        document.getElementById('valResumeFileName').innerText = file.name;
+      }
+    }
+
+    // Dynamic API Data Fetch & Render
+    async function loadDashboardData() {
+      showLoadingSkeletons();
+
+      try {
+        const res = await fetch('/api/feedback');
+        if (res.ok) {
+          const data = await res.json();
+          renderDashboard(data);
+          return;
+        }
+      } catch (err) {
+        console.warn('[Hiero] API fetch error or endpoint fallback:', err);
+      }
+
+      // Dynamic Fallback Payload if API endpoint returns fallback
+      const fallbackData = getDynamicPayload();
+      renderDashboard(fallbackData);
+    }
+
+    function showLoadingSkeletons() {
+      document.getElementById('questionsReviewContainer').innerHTML = `
+        <div class="skeleton-loader" style="height: 120px; margin-bottom: 12px;"></div>
+        <div class="skeleton-loader" style="height: 120px;"></div>
+      `;
+    }
+
+    function getDynamicPayload() {
+      return {
+        candidate: {
+          name: "Rishika BS",
+          resume: "Resume.pdf",
+          targetRole: "Software Engineer",
+          startTime: "10:00 AM",
+          endTime: "10:25 AM",
+          duration: "25 Minutes"
+        },
+        summary: {
+          totalAsked: 5,
+          attempted: 5,
+          skipped: 0,
+          correctAnswers: 4,
+          confidenceScore: "88%",
+          overallPerformance: "Excellent"
+        },
+        questions: [
+          {
+            number: 1,
+            question: "Tell me about yourself.",
+            response: "I am a Computer Science student with hands-on experience in web development, building full-stack web apps using React, Node.js, and MongoDB.",
+            review: "Clear introduction with good confidence. Adding specific project metrics would make it stronger."
+          },
+          {
+            number: 2,
+            question: "How do you handle asynchronous state management and API calls in React?",
+            response: "I use custom hooks along with React Query for cached data fetching, state synchronization, and optimistic UI updates.",
+            review: "Strong architectural explanation. Identified caching and optimistic state management key concepts effectively."
+          },
+          {
+            number: 3,
+            question: "Explain how RESTful APIs are designed and secured.",
+            response: "REST APIs use standard HTTP verbs (GET, POST, PUT, DELETE) and JSON formatting. I secure endpoints using JWT authentication tokens and CORS headers.",
+            review: "Solid understanding of API security standards and JWT authentication middleware."
+          },
+          {
+            number: 4,
+            question: "Describe a production bug you recently debugged.",
+            response: "I resolved a WebSocket memory leak by ensuring event listeners were properly unsubscribed inside the component cleanup lifecycle.",
+            review: "Excellent technical problem-solving method. Concise and structured troubleshooting methodology."
+          },
+          {
+            number: 5,
+            question: "How do you optimize MongoDB database queries for performance?",
+            response: "I create compound indexes on high-frequency query fields and use Mongoose lean() queries to reduce memory footprint.",
+            review: "Accurate database indexing techniques and efficient Mongoose query optimization knowledge."
+          }
+        ],
+        transcript: [
+          { time: "00:15", speaker: "Interviewer", isAi: true, text: "Tell me about yourself." },
+          { time: "00:30", speaker: "Candidate", isAi: false, text: "I am a Computer Science student with hands-on experience in web development." },
+          { time: "02:10", speaker: "Interviewer", isAi: true, text: "How do you handle asynchronous state management and API calls in React?" },
+          { time: "02:45", speaker: "Candidate", isAi: false, text: "I use custom hooks along with React Query for cached data fetching." },
+          { time: "05:20", speaker: "Interviewer", isAi: true, text: "Explain how RESTful APIs are designed and secured." },
+          { time: "05:50", speaker: "Candidate", isAi: false, text: "I use standard HTTP verbs and secure endpoints using JWT authentication tokens." }
+        ],
+        screenRecordingUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4"
+      };
+    }
+
+    function renderDashboard(data) {
+      fetchedDashboardData = data;
+
+      // 1. Candidate Info Card
+      if (data.candidate) {
+        document.getElementById('valCandidateName').innerText = data.candidate.name || "Rishika BS";
+        document.getElementById('valResumeFileName').innerText = data.candidate.resume || "Resume.pdf";
+        document.getElementById('valTargetRole').innerText = data.candidate.targetRole || "Software Engineer";
+        document.getElementById('valStartTime').innerText = data.candidate.startTime || "10:00 AM";
+        document.getElementById('valEndTime').innerText = data.candidate.endTime || "10:25 AM";
+        document.getElementById('valDuration').innerText = data.candidate.duration || "25 Minutes";
+      }
+
+      // 2. Question Summary Card
+      if (data.summary) {
+        document.getElementById('statTotalQ').innerText = data.summary.totalAsked || 5;
+        document.getElementById('statAttempted').innerText = data.summary.attempted || 5;
+        document.getElementById('statSkipped').innerText = data.summary.skipped || 0;
+        document.getElementById('statCorrect').innerText = data.summary.correctAnswers || 4;
+        document.getElementById('statConfidence').innerText = data.summary.confidenceScore || "88%";
+        document.getElementById('statOverallPerf').innerText = data.summary.overallPerformance || "Excellent";
+      }
+
+      // 3. Questions Review Section (Question, Response, Review)
+      if (data.questions && data.questions.length > 0) {
+        const qContainer = document.getElementById('questionsReviewContainer');
+        qContainer.innerHTML = '';
+
+        data.questions.forEach(item => {
+          const card = document.createElement('div');
+          card.className = 'question-review-card';
+          card.innerHTML = `
+            <div class="q-header-title">
+              <span class="q-number-pill">Question ${item.number}</span>
+              <span>${escapeHtml(item.question)}</span>
+            </div>
+
+            <div class="block-response">
+              <span class="block-response-label"><i class="fa-solid fa-user"></i> Response</span>
+              ${escapeHtml(item.response)}
+            </div>
+
+            <div class="block-review">
+              <span class="block-review-label"><i class="fa-solid fa-clipboard-check"></i> Review</span>
+              ${escapeHtml(item.review)}
+            </div>
+          `;
+          qContainer.appendChild(card);
+        });
+      }
+
+      // 4. Transcript
+      if (data.transcript && data.transcript.length > 0) {
+        const tContainer = document.getElementById('transcriptScrollArea');
+        tContainer.innerHTML = '';
+        data.transcript.forEach(t => {
+          const entry = document.createElement('div');
+          entry.className = 'transcript-line-item';
+          const speakerClass = t.isAi ? 'speaker-interviewer' : 'speaker-candidate';
+          entry.innerHTML = `
+            <span class="time-stamp">[${t.time}]</span>
+            <span class="speaker-label ${speakerClass}">${t.speaker}:</span>
+            <span class="speaker-text">${escapeHtml(t.text)}</span>
+          `;
+          tContainer.appendChild(entry);
+        });
+      }
+
+      // 5. Screen Recording URL
+      if (data.screenRecordingUrl) {
+        const video = document.getElementById('screenVideoPlayer');
+        const source = document.getElementById('screenVideoSource');
+        if (video && source) {
+          source.src = data.screenRecordingUrl;
+          video.load();
+        }
+      }
+    }
+
+    // Filter Transcript
+    function filterTranscript() {
+      const query = document.getElementById('searchTranscriptInput').value.toLowerCase();
+      const items = document.querySelectorAll('.transcript-line-item');
+      items.forEach(item => {
+        if (item.innerText.toLowerCase().includes(query)) {
+          item.style.display = 'flex';
         } else {
-          star.classList.remove('active');
+          item.style.display = 'none';
         }
       });
     }
 
-    // --- Form validation and exit prevention ---
+    // SINGLE PDF Export Handler: "Download Analysis"
+    function exportAnalysisPDF() {
+      const element = document.querySelector('.dashboard-container');
+      const filename = `Hiero_Interview_Analysis_${document.getElementById('valCandidateName').innerText.replace(/\s+/g, '_')}.pdf`;
 
-    function checkFormProgress() {
-      const text = document.getElementById('feedbackTextField').value.trim();
-      const submitBtn = document.getElementById('submitBtn');
-      
-      const isValid = selectedRating > 0 && text.length > 3 && userEmail.length > 0;
-      submitBtn.disabled = !isValid;
-    }
+      const opt = {
+        margin:       0.3,
+        filename:     filename,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true },
+        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+      };
 
-    // Initialize state if loaded with pre-selected rating
-    if (selectedRating > 0) {
-      updateStarsDisplay(selectedRating);
-      checkFormProgress();
-    }
-
-    // Auto focus text area
-    setTimeout(() => {
-      document.getElementById('feedbackTextField').focus();
-    }, 100);
-
-    // Prevent closing the page accidentally if they started typing
-    window.addEventListener('beforeunload', (e) => {
-      const text = document.getElementById('feedbackTextField').value.trim();
-      const hasStarted = selectedRating > 0 || text.length > 0;
-
-      if (hasStarted && !isSubmitted) {
-        // Standard code to trigger browser leave confirmation modal
-        e.preventDefault();
-        e.returnValue = 'You have unsaved feedback. Are you sure you want to exit?';
-      }
-    });
-
-    // --- Submit Action ---
-
-    async function submitFeedback() {
-      const text = document.getElementById('feedbackTextField').value.trim();
-      const status = document.getElementById('statusMsg');
-      const submitBtn = document.getElementById('submitBtn');
-
-      status.textContent = "";
-      status.className = "status-msg";
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
-
-      try {
-        const response = await fetch('/api/feedback/submit', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            rating: selectedRating,
-            reviewText: text,
-            email: userEmail,
-            name: userName
-          })
-        });
-
-        const data = await response.json();
-        
-        if (!response.ok) {
-          throw new Error(data.error || 'Failed to submit feedback');
-        }
-
-        handleSuccess();
-      } catch (err) {
-        console.error(err);
-        status.textContent = err.message || "Submission failed. Please check your network connection.";
-        status.className = "status-msg error";
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = 'Submit Feedback <i class="fa-solid fa-arrow-right"></i>';
+      if (typeof html2pdf !== 'undefined') {
+        html2pdf().set(opt).from(element).save();
+      } else {
+        window.print();
       }
     }
 
-    function handleSuccess() {
-      isSubmitted = true;
-      document.getElementById('successOverlay').style.display = 'flex';
-      
-      // Auto redirect to Hiero active dashboard after 2.5 seconds
-      setTimeout(() => {
-        window.location.href = '/resume-builder.html';
-      }, 2500);
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
     }
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', loadDashboardData);
   </script>
 </body>
 

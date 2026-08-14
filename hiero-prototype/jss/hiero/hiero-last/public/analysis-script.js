@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // Use the same server for analysis
+  // Use the current origin for analysis API
   const BACKEND_URL = "";
-  console.log("🔍 Using backend:", BACKEND_URL);
+  console.log("🔍 Using unified backend API");
   const form = document.getElementById("analyze-form");
   const loadingOverlay = document.getElementById("loading-overlay");
   const connectionStatus = document.getElementById("connection-status");
@@ -17,39 +17,56 @@ document.addEventListener("DOMContentLoaded", () => {
     radio.addEventListener('change', () => {
       const mode = document.querySelector('input[name="jd_mode"]:checked').value;
       if (mode === 'text') {
-        jdTextWrapper.style.display = 'block';
-        jdFileWrapper.style.display = 'none';
+        if (jdTextWrapper) jdTextWrapper.style.display = 'block';
+        if (jdFileWrapper) jdFileWrapper.style.display = 'none';
       } else {
-        jdTextWrapper.style.display = 'none';
-        jdFileWrapper.style.display = 'block';
+        if (jdTextWrapper) jdTextWrapper.style.display = 'none';
+        if (jdFileWrapper) jdFileWrapper.style.display = 'block';
       }
     });
   });
 
   if (!form) {
     console.error("Form not found. Check 'analysis.html' for <form id='analyze-form'>.");
-    alert("Form setup error. Please refresh or check the page.");
     return;
   }
 
   // Test backend connection on page load
   async function testBackendConnection() {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/analysis/health`);
+      const response = await fetch(`/api/analysis/health`);
       const data = await response.json();
       if (response.ok && data.status === 'ok') {
-        connectionStatus.style.display = "flex";
-        statusText.textContent = "";
-        analyzeBtn.disabled = false;
+        if (connectionStatus) {
+          connectionStatus.style.display = "flex";
+          connectionStatus.style.backgroundColor = "";
+          connectionStatus.style.color = "";
+        }
+        if (statusText) statusText.textContent = "AI Engine Online";
+        if (analyzeBtn) analyzeBtn.disabled = false;
       } else {
         throw new Error("Health check failed");
       }
     } catch (error) {
-      connectionStatus.style.display = "block";
-      connectionStatus.style.backgroundColor = "#f8d7da";
-      connectionStatus.style.color = "#721c24";
-      statusText.textContent = "❌ Backend connection failed. Please ensure the analysis server is running";
-      analyzeBtn.disabled = true;
+      console.warn("Primary health check warning:", error.message);
+      // Fallback check against API root
+      try {
+        const rootCheck = await fetch("/api/me");
+        if (rootCheck.ok || rootCheck.status === 401) {
+          if (connectionStatus) connectionStatus.style.display = "flex";
+          if (statusText) statusText.textContent = "AI Engine Online";
+          if (analyzeBtn) analyzeBtn.disabled = false;
+          return;
+        }
+      } catch (e) {}
+
+      if (connectionStatus) {
+        connectionStatus.style.display = "flex";
+        connectionStatus.style.backgroundColor = "#f8d7da";
+        connectionStatus.style.color = "#721c24";
+      }
+      if (statusText) statusText.textContent = "❌ Backend connection failed. Please ensure the server is running.";
+      if (analyzeBtn) analyzeBtn.disabled = false; // Allow user attempt
     }
   }
 
@@ -64,12 +81,12 @@ document.addEventListener("DOMContentLoaded", () => {
       // Reset validation box
       if (validationBox) { validationBox.style.display = 'none'; validationText.innerHTML = ''; }
 
-      const resume = document.getElementById('resume').files[0];
+      const resume = document.getElementById('resume')?.files?.[0];
       const jdFile = document.getElementById('jd')?.files?.[0];
       const jdTextEl = document.getElementById("jd-text");
       const jdMode = document.querySelector('input[name="jd_mode"]:checked')?.value || 'file';
 
-      console.log('📝 Form submitted');
+      console.log('📝 Analysis Form submitted');
 
       // Validation
       if (!resume) { alert("Please upload your resume PDF."); return; }
@@ -90,12 +107,12 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       
       formData.append('resume', resume);
-      if (jdMode === 'file') {
+      if (jdMode === 'file' && jdFile) {
         formData.append('jd', jdFile);
       }
 
       try {
-        const analyzeUrl = `${BACKEND_URL}/api/analysis/analyze`;
+        const analyzeUrl = `/api/analysis/analyze`;
         console.log('📤 Sending to backend:', analyzeUrl);
         const response = await fetch(analyzeUrl, { method: 'POST', body: formData, headers: { 'Accept': 'application/json' } });
         
@@ -180,10 +197,9 @@ document.addEventListener("DOMContentLoaded", () => {
   function startLoadingAnimation() {
     const overlay = document.getElementById('loading-overlay');
     const logo = document.getElementById('manifesting-logo');
-    const beam = document.getElementById('manifest-beam');
     const titleEl = document.getElementById('loader-title');
     
-    overlay.classList.add('visible');
+    if (overlay) overlay.classList.add('visible');
     
     let progress = 0;
     const stages = [
@@ -194,9 +210,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const interval = setInterval(() => {
       if (progress < 95) {
-        // To reach 95% in ~30s with 200ms interval:
-        // 30,000 / 200 = 150 increments.
-        // 95 / 150 = 0.63 average increment.
         progress += Math.random() * 0.8; 
         updateUI(progress);
       }
@@ -238,7 +251,6 @@ document.addEventListener("DOMContentLoaded", () => {
     state.stop();
     state.updateFinal(100);
     
-    // Mark all as completed
     ['stage-1', 'stage-2', 'stage-3-real'].forEach(id => {
       const el = document.getElementById(id);
       if (el) {
@@ -249,66 +261,30 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-    state.title.innerHTML = 'Analysis <span>Complete!</span>';
-    document.getElementById('loader-subtitle').textContent = `Match Score: ${score}% - Generating report...`;
-    
-    return new Promise(r => setTimeout(r, 1000));
+    const title = state.title;
+    if (title) {
+      title.innerHTML = `Match Score <span>${score}%</span>`;
+    }
   }
 
-  function showValidationErrors(err) {
+  function showValidationErrors(errJson) {
     if (!validationBox || !validationText) return;
-    const messages = [];
-    if (err && err.type === 'invalid_jd') {
-      messages.push('Job Description file appears invalid or incomplete. Upload a proper JD with sections like Roles, Responsibilities, Requirements.');
-    } else if (err && err.type === 'invalid_resume') {
-      messages.push('Resume appears invalid (too short or missing sections). Ensure it includes Education, Experience, Skills, Projects etc.');
-    } else if (err && err.message) {
-      messages.push(err.message);
-    } else {
-      messages.push('Unknown validation failure. Please re-check files.');
-    }
-    if (err && typeof err.detectedLength === 'number') {
-      messages.push(`Detected text length: ${err.detectedLength}`);
-    }
-    validationText.innerHTML = messages.map(m => `<div>• ${escapeHtml(m)}</div>`).join('');
+    const details = errJson.details || errJson.error || 'Validation failed.';
+    validationText.innerHTML = typeof details === 'string' ? details : JSON.stringify(details);
     validationBox.style.display = 'block';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  function escapeHtml(str) {
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
-  }
-
-  function generateProjectSuggestions(result) {
-    const projects = [];
-    if (result.projectSuggestions && Array.isArray(result.projectSuggestions)) {
-      result.projectSuggestions.forEach(p => {
-        if (typeof p === 'string' && p.trim()) projects.push(p);
-        else if (typeof p === 'object' && p.title) projects.push(p.title);
-        else if (typeof p === 'object' && p.name) projects.push(p.name);
-      });
+  function generateProjectSuggestions(raw) {
+    if (Array.isArray(raw.projectSuggestions) && raw.projectSuggestions.length > 0) {
+      return raw.projectSuggestions;
     }
-    if (projects.length === 0 && result.learningPlan && Array.isArray(result.learningPlan)) {
-      result.learningPlan.forEach(plan => {
-        if (plan.miniProjects && Array.isArray(plan.miniProjects)) {
-          plan.miniProjects.forEach(proj => {
-            if (typeof proj === 'string' && proj.trim()) projects.push(proj);
-          });
-        }
-      });
-    }
-    if (projects.length === 0) {
-      const domain = result.domain || 'it';
-      const suggestions = {
-        it: ['Build a REST API service', 'Create a Full-Stack Web App', 'Develop a Data Visualization Dashboard'],
-        hr: ['HR Analytics Dashboard', 'Recruitment Tracker System', 'Employee Engagement Portal'],
-        finance: ['Personal Expense Tracker', 'Investment Portfolio Manager', 'Budget Planning Tool'],
-        agriculture: ['Agri-Supply Chain Tracker', 'Crop Yield Prediction Model', 'Smart Farm Management System']
-      };
-      return (suggestions[domain] || suggestions.it).slice(0, 3);
-    }
-    return projects.slice(0, 6);
+    const missing = Array.isArray(raw.missingSkills) ? raw.missingSkills : [];
+    const skill1 = missing[0] || 'Full-Stack Web Dev';
+    const skill2 = missing[1] || 'REST APIs';
+    return [
+      `Build an end-to-end Application featuring ${skill1} with authentication and dashboard analytics.`,
+      `Develop a scalable Microservice leveraging ${skill2} and automated unit testing workflows.`,
+      `Create an Open-Source Tool or library integrating ${skill1} and ${skill2} for real-time data processing.`
+    ];
   }
 });

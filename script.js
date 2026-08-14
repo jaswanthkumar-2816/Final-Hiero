@@ -1,8 +1,8 @@
 // =============================
-// Base URLs
+// Base URLs (Unified Gateway)
 // =============================
-const API_BASE = 'http://localhost:5003';   // Resume creation server
-const ANALYSIS_BASE = 'http://localhost:5001'; // Analysis server
+const API_BASE = '';      // Native Gateway API
+const ANALYSIS_BASE = ''; // Native Gateway API
 
 // =============================
 // Resume Templates
