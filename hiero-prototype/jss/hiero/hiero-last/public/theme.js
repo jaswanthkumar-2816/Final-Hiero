@@ -141,5 +141,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+window.addEventListener('pageshow', initTheme);
 window.addEventListener('load', updateGlobalUserProfile);
 window.toggleTheme = toggleTheme;

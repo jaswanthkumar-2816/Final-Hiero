@@ -278,59 +278,104 @@ passport.deserializeUser((id, done) => {
     done(null, user);
 });
 
+const JWT_SECRET = process.env.JWT_SECRET || 'hiero_jwt_super_secret_key_2026';
+
 // JWT middleware
 const authenticateToken = (req, res, next) => {
-    const token = req.headers['authorization']?.split(' ')[1];
-    if (!token) return res.status(401).json({ error: 'Access denied' });
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.slice(7) : (authHeader || req.query.token);
+    if (!token) return res.status(401).json({ error: 'Access denied. Token missing.' });
 
-    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-        if (err) return res.status(403).json({ error: 'Invalid token' });
-        req.user = decoded; // Pass full payload (contains email, name, userId)
+    jwt.verify(token, JWT_SECRET, (err, decoded) => {
+        if (err) return res.status(403).json({ error: 'Invalid or expired token' });
+        req.user = decoded;
         next();
     });
 };
 
-// Signup Route
+// -----------------------------------------------------
+// SIGNUP ROUTE
+// -----------------------------------------------------
 router.post('/signup', async (req, res) => {
-    const { name, email, password } = req.body;
-    if (!name || !email || !password) return res.status(400).json({ error: 'All fields required' });
+    try {
+        const { name, username, email, password } = req.body;
+        const cleanName = (name || username || '').trim();
+        const cleanEmail = (email || '').trim().toLowerCase();
+        const cleanPassword = (password || '').trim();
 
-    const existingUser = users.find(u => u.email === email.trim().toLowerCase());
-    if (existingUser) return res.status(400).json({ error: 'User already exists' });
+        if (!cleanEmail || !cleanPassword) {
+            return res.status(400).json({ error: 'Email and password are required' });
+        }
 
-    const hashedPassword = await bcrypt.hash(password.trim(), 10);
-    const user = {
-        id: userIdCounter++,
-        name: name.trim(),
-        email: email.trim().toLowerCase(),
-        password: hashedPassword,
-        emailVerified: true, // Auto-verified for instant access
-        signupMethod: 'email',
-    };
-    users.push(user);
-    saveUsers();
+        const displayName = cleanName || cleanEmail.split('@')[0];
 
-    const token = jwt.sign({ email: user.email, userId: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    const link = `${PUBLIC_URL}/verify-email?token=${token}`;
+        // Check in-memory store
+        const existingInMemory = users.find(u => u.email && u.email.trim().toLowerCase() === cleanEmail);
+        if (existingInMemory) {
+            return res.status(400).json({ error: 'An account with this email already exists' });
+        }
 
-    // Send email non-blocking in background
-    if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-        transporter.sendMail({
-            from: process.env.EMAIL_USER,
-            to: user.email,
-            subject: `Welcome to Hiero!`,
-            html: `<p>Welcome to Hiero! Your account is active. <a href="${PUBLIC_URL}/login.html">Click here to log in</a>.</p>`
-        }).catch(err => console.warn('Email notification warning:', err.message));
+        // Check MongoDB if connected
+        const User = require('../models/User');
+        try {
+            const existingInDb = await User.findOne({ email: cleanEmail });
+            if (existingInDb) {
+                return res.status(400).json({ error: 'An account with this email already exists' });
+            }
+        } catch (e) {}
+
+        const hashedPassword = await bcrypt.hash(cleanPassword, 10);
+        const newUserId = String(userIdCounter++);
+
+        const newUser = {
+            id: newUserId,
+            name: displayName,
+            email: cleanEmail,
+            password: hashedPassword,
+            emailVerified: true,
+            signupMethod: 'email',
+            createdAt: new Date().toISOString()
+        };
+
+        users.push(newUser);
+        saveUsers();
+
+        // Save to MongoDB asynchronously
+        try {
+            await User.create({
+                username: displayName,
+                email: cleanEmail,
+                password: hashedPassword,
+                isPro: false
+            });
+        } catch (e) {}
+
+        const token = jwt.sign(
+            { userId: newUser.id, name: newUser.name, email: newUser.email },
+            JWT_SECRET,
+            { expiresIn: '7d' }
+        );
+
+        res.status(201).json({
+            success: true,
+            message: 'Account created successfully!',
+            token,
+            user: { id: newUser.id, name: newUser.name, email: newUser.email }
+        });
+
+    } catch (error) {
+        console.error('Signup error:', error);
+        res.status(500).json({ error: 'Failed to create account. Please try again.' });
     }
-
-    res.status(201).json({ message: 'Account created successfully! You can now log in.', user: { id: user.id, name: user.name, email: user.email } });
 });
 
-// Verify Email
+// -----------------------------------------------------
+// VERIFY EMAIL ROUTE
+// -----------------------------------------------------
 router.get('/verify-email', (req, res) => {
     const { token } = req.query;
     try {
-        const { email, userId } = jwt.verify(token, process.env.JWT_SECRET);
+        const { email, userId } = jwt.verify(token, JWT_SECRET);
         const user = users.find(u => u.id === userId && u.email === email);
         if (!user) return res.status(400).json({ error: 'Invalid token' });
         user.emailVerified = true;
@@ -341,24 +386,84 @@ router.get('/verify-email', (req, res) => {
     }
 });
 
-// Login
+// -----------------------------------------------------
+// LOGIN ROUTE
+// -----------------------------------------------------
 router.post('/login', async (req, res) => {
-    const { email, password } = req.body;
-    const user = users.find(u => u.email && u.email.trim().toLowerCase() === email.trim().toLowerCase());
-    if (!user || !user.password) return res.status(400).json({ error: 'Invalid credentials' });
+    try {
+        const { email, name, username, password } = req.body;
+        const identifier = (email || name || username || '').trim().toLowerCase();
+        const cleanPassword = (password || '').trim();
 
-    const match = await bcrypt.compare(password.trim(), user.password);
-    if (!match) return res.status(400).json({ error: 'Incorrect password' });
+        if (!identifier || !cleanPassword) {
+            return res.status(400).json({ error: 'Please enter your email/username and password' });
+        }
 
-    const token = jwt.sign({ userId: user.id, name: user.name, email: user.email }, process.env.JWT_SECRET, { expiresIn: '7d' });
-    res.json({ token, user: { id: user.id, name: user.name, email: user.email, picture: user.picture } });
+        // Search in-memory users array by email, username, or name
+        let user = users.find(u => {
+            const uEmail = (u.email || '').trim().toLowerCase();
+            const uName = (u.name || u.username || '').trim().toLowerCase();
+            return uEmail === identifier || uName === identifier;
+        });
+
+        // Fallback to MongoDB if not found in memory
+        if (!user) {
+            const User = require('../models/User');
+            try {
+                const dbUser = await User.findOne({
+                    $or: [
+                        { email: identifier },
+                        { username: identifier }
+                    ]
+                });
+
+                if (dbUser) {
+                    user = {
+                        id: dbUser._id.toString(),
+                        name: dbUser.username,
+                        email: dbUser.email,
+                        password: dbUser.password
+                    };
+                    // Cache in memory array
+                    if (!users.some(u => u.email === dbUser.email)) {
+                        users.push(user);
+                    }
+                }
+            } catch (e) {}
+        }
+
+        if (!user || !user.password) {
+            return res.status(400).json({ error: 'No account found with these credentials' });
+        }
+
+        const match = await bcrypt.compare(cleanPassword, user.password);
+        if (!match) {
+            return res.status(400).json({ error: 'Incorrect password. Please try again.' });
+        }
+
+        const token = jwt.sign(
+            { userId: user.id, name: user.name, email: user.email },
+            JWT_SECRET,
+            { expiresIn: '7d' }
+        );
+
+        res.json({
+            success: true,
+            token,
+            user: { id: user.id, name: user.name, email: user.email, picture: user.picture }
+        });
+
+    } catch (error) {
+        console.error('Login error:', error);
+        res.status(500).json({ error: 'Login failed due to a server error' });
+    }
 });
 
 // OAuth callbacks
 router.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'], prompt: 'select_account' }));
 router.get('/auth/google/callback', passport.authenticate('google', { session: false }), (req, res) => {
     const user = { id: req.user.id, name: req.user.name, email: req.user.email, picture: req.user.picture };
-    const token = jwt.sign({ userId: user.id, name: user.name, email: user.email }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ userId: user.id, name: user.name, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
     const userJson = encodeURIComponent(JSON.stringify(user));
     res.redirect(`/index.html?token=${token}&user=${userJson}`);
 });
@@ -366,7 +471,7 @@ router.get('/auth/google/callback', passport.authenticate('google', { session: f
 router.get('/auth/github', passport.authenticate('github', { scope: ['user:email'] }));
 router.get('/auth/github/callback', passport.authenticate('github', { session: false }), (req, res) => {
     const user = { id: req.user.id, name: req.user.name, email: req.user.email, picture: req.user.picture };
-    const token = jwt.sign({ userId: user.id, name: user.name, email: user.email }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ userId: user.id, name: user.name, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
     const userJson = encodeURIComponent(JSON.stringify(user));
     res.redirect(`/index.html?token=${token}&user=${userJson}`);
 });

@@ -1,7 +1,162 @@
 /* LIGHT MODE STYLES */
 body.light-mode {
-    background: linear-gradient(to right, #f0f4f8, #ffffff) !important;
-    color: #1a1a1a !important;
+    background: #f8fafc !important;
+    background-image: 
+        radial-gradient(circle at 0% 0%, rgba(4, 171, 7, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 100% 0%, rgba(4, 171, 7, 0.03) 0%, transparent 40%) !important;
+    color: #0f172a !important;
+}
+
+body.light-mode :root {
+    --bg-dark: #f8fafc;
+    --text-main: #0f172a;
+    --text-muted: #475569;
+    --glass: #ffffff;
+    --glass-border: rgba(0, 0, 0, 0.1);
+    --card-inner-bg: #f1f5f9;
+    --card-inner-border: rgba(0, 0, 0, 0.08);
+}
+
+/* Learn Page Light Mode Fixes */
+body.light-mode .nav-header {
+    background: rgba(255, 255, 255, 0.92) !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+    backdrop-filter: blur(16px) !important;
+}
+
+body.light-mode .nav-brand span,
+body.light-mode .app-brand span {
+    color: #0f172a !important;
+}
+
+body.light-mode .nav-btn {
+    color: #475569 !important;
+}
+
+body.light-mode .nav-btn.active,
+body.light-mode .nav-btn:hover {
+    color: #04ab07 !important;
+}
+
+body.light-mode .hero h1,
+body.light-mode .hero p,
+body.light-mode #sub-header {
+    color: #0f172a !important;
+}
+
+body.light-mode .hero h1 span {
+    color: #04ab07 !important;
+    -webkit-text-fill-color: #04ab07 !important;
+}
+
+body.light-mode .video-card {
+    background: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05) !important;
+}
+
+body.light-mode .video-card:hover {
+    border-color: #04ab07 !important;
+    box-shadow: 0 15px 35px rgba(4, 171, 7, 0.15) !important;
+}
+
+body.light-mode .video-info {
+    background: #ffffff !important;
+}
+
+body.light-mode .video-title {
+    color: #0f172a !important;
+}
+
+body.light-mode #mastery-active-panel {
+    background: #ffffff !important;
+    border: 1.5px solid rgba(4, 171, 7, 0.3) !important;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.06) !important;
+}
+
+body.light-mode #mastery-active-panel div {
+    color: #0f172a;
+}
+
+body.light-mode #mastery-active-panel [style*="var(--card-inner-bg)"],
+body.light-mode .video-section [style*="var(--card-inner-bg)"] {
+    background: #f1f5f9 !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+
+body.light-mode #mastery-active-panel [style*="var(--text-main)"] {
+    color: #0f172a !important;
+}
+
+body.light-mode #mastery-active-panel [style*="var(--text-muted)"] {
+    color: #475569 !important;
+}
+
+body.light-mode .tutor-card {
+    background: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06) !important;
+}
+
+body.light-mode .tutor-header {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+
+body.light-mode .tutor-header-text h3 {
+    color: #0f172a !important;
+}
+
+body.light-mode .chat-body {
+    background: #f8fafc !important;
+}
+
+body.light-mode .message.bot {
+    background: #f1f5f9 !important;
+    color: #0f172a !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+
+body.light-mode .message.user {
+    background: #04ab07 !important;
+    color: #ffffff !important;
+}
+
+body.light-mode .chat-input {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    border: 1px solid #cbd5e1 !important;
+}
+
+body.light-mode .chat-input::placeholder {
+    color: #94a3b8 !important;
+}
+
+body.light-mode .section-header h2 {
+    color: #0f172a !important;
+}
+
+body.light-mode .btn-back {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
+
+body.light-mode .btn-back:hover {
+    border-color: #04ab07 !important;
+    color: #04ab07 !important;
+}
+
+body.light-mode .video-modal {
+    background: rgba(248, 250, 252, 0.96) !important;
+}
+
+body.light-mode .modal-chat-side {
+    background: #ffffff !important;
+    border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+body.light-mode .close-modal {
+    color: #0f172a !important;
 }
 
 body.light-mode .dashboard-wrapper,

@@ -1409,6 +1409,30 @@
               dataset_schema: datasetSchema
             });
           }
+
+          // Evaluate with HIERO Mastery Engine API
+          const totalT = result.tests ? result.tests.length : 3;
+          const passedT = result.tests ? result.tests.filter(t => t.result && t.result.trim() === 'Passed').length : 3;
+          
+          fetch('/api/mastery/assess', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              domain: (currentSkill || 'DSA').toUpperCase().includes('PYTHON') ? 'Python' : 'DSA',
+              topicId: 'dsa_arrays',
+              score: Math.round((passedT / Math.max(1, totalT)) * 100),
+              passedTests: passedT,
+              totalTests: totalT
+            })
+          }).then(res => res.json()).then(mJson => {
+            if (mJson.success) {
+              const mBox = document.createElement('div');
+              mBox.style.cssText = `margin-top:14px; padding:14px 18px; border-radius:14px; font-size:13px; font-weight:800; background:${mJson.isMastered ? 'rgba(0,255,102,0.12)' : 'rgba(255,50,50,0.12)'}; border:1px solid ${mJson.isMastered ? '#00ff66' : '#ff3232'}; color:${mJson.isMastered ? '#00ff66' : '#ff5555'};`;
+              mBox.innerHTML = `${mJson.message}`;
+              terminalOut.appendChild(mBox);
+              terminalOut.scrollTop = terminalOut.scrollHeight;
+            }
+          }).catch(e => console.warn(e));
         } else {
           terminalOut.innerText = `> Execution Error:\n${result.error || "Unknown failure."}`;
           terminalOut.scrollTop = terminalOut.scrollHeight;

@@ -5,69 +5,161 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sign Up | Hiero</title>
-  <link rel="stylesheet" href="styles.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://kit.fontawesome.com/4e56cb0e6d.js" crossorigin="anonymous"></script>
   <style>
-    /* X-style OAuth Buttons matching login.html */
-    .btn.google-btn,
-    .btn.github-btn {
-      display: flex !important;
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #000000;
+      color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      overflow-x: hidden;
+    }
+
+    /* Splash Screen */
+    .splash-screen {
+      position: fixed;
+      inset: 0;
+      background-color: #000000;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo-animated {
+      width: 140px;
+      animation: glowPulse 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes glowPulse {
+      from {
+        filter: drop-shadow(0 0 10px rgba(0, 255, 0, 0.4));
+        transform: scale(1);
+      }
+      to {
+        filter: drop-shadow(0 0 25px rgba(0, 255, 0, 0.8));
+        transform: scale(1.05);
+      }
+    }
+
+    /* Login/Signup Card Container */
+    .login-wrapper {
+      display: flex;
+      width: 100%;
+      max-width: 960px;
+      min-height: 560px;
+      background: #0a0a0a;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0, 255, 0, 0.15), 0 0 40px rgba(0, 0, 0, 0.8);
+      margin: auto;
+    }
+
+    /* Left Panel: Glowing Logo */
+    .login-left {
+      flex: 1;
+      background: radial-gradient(circle at center, #051a05 0%, #000000 75%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      border-right: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .glow-logo {
+      width: 220px;
+      max-width: 80%;
+      height: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 0 25px rgba(0, 255, 0, 0.6));
+      animation: glowPulse 3s ease-in-out infinite alternate;
+    }
+
+    /* Right Panel: Form Area */
+    .login-right {
+      flex: 1;
+      background: #0e0e0e;
+      padding: 48px 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .login-box {
+      width: 100%;
+      max-width: 360px;
+    }
+
+    .login-box h2 {
+      text-align: center;
+      font-size: 28px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 6px;
+      letter-spacing: -0.5px;
+    }
+
+    /* OAuth Buttons */
+    .btn {
+      display: flex;
       align-items: center;
       justify-content: center;
       gap: 12px;
       width: 100%;
-      padding: 12px 24px;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      border-radius: 50px !important;
-      font-size: 15px;
-      font-weight: 500;
+      padding: 13px 20px;
+      border-radius: 50px;
+      font-size: 14.5px;
+      font-weight: 600;
       text-decoration: none;
+      cursor: pointer;
       transition: all 0.2s ease;
+      border: 1px solid transparent;
       margin-bottom: 12px;
     }
 
     .btn.google-btn {
       background: rgba(255, 255, 255, 0.95);
-      color: #333;
-      border-color: rgba(0, 0, 0, 0.1);
+      color: #1a1a1a;
+      border-color: rgba(255, 255, 255, 0.2);
     }
 
     .btn.google-btn:hover {
-      background: #fff;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      background: #ffffff;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(255, 255, 255, 0.15);
     }
 
     .btn.github-btn {
-      background: rgba(255, 255, 255, 0.1);
-      color: #fff;
-      border-color: rgba(255, 255, 255, 0.3);
+      background: rgba(255, 255, 255, 0.08);
+      color: #ffffff;
+      border-color: rgba(255, 255, 255, 0.2);
     }
 
     .btn.github-btn:hover {
-      background: rgba(255, 255, 255, 0.2);
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      background: rgba(255, 255, 255, 0.15);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
     }
 
-    /* Form improvements */
-    .email-btn {
-      border-radius: 50px !important;
-      background-color: #00ff00 !important;
-      color: #000 !important;
-    }
-
-    input {
-      border-radius: 50px !important;
-      padding: 12px 20px !important;
-    }
-
+    /* Divider */
     .divider {
-      margin: 20px 0;
+      margin: 18px 0;
       display: flex;
       align-items: center;
-      color: rgba(255, 255, 255, 0.3);
+      color: rgba(255, 255, 255, 0.4);
     }
 
     .divider::before,
@@ -75,12 +167,93 @@
       content: "";
       flex: 1;
       height: 1px;
-      background: rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.12);
     }
 
     .divider span {
-      padding: 0 10px;
+      padding: 0 14px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    /* Form Inputs */
+    #signup-form {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      width: 100%;
+    }
+
+    #signup-form input {
+      width: 100%;
+      padding: 13px 20px;
+      background: #161616;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 50px;
+      color: #ffffff;
       font-size: 14px;
+      font-family: inherit;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    #signup-form input:focus {
+      border-color: #00ff00;
+      box-shadow: 0 0 12px rgba(0, 255, 0, 0.3);
+      background: #1e1e1e;
+    }
+
+    #signup-form input::placeholder {
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    .email-btn {
+      background-color: #00ff00 !important;
+      color: #000000 !important;
+      font-weight: 700 !important;
+      border: none !important;
+      margin-top: 4px;
+    }
+
+    .email-btn:hover {
+      background-color: #00cc00 !important;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 255, 0, 0.3);
+    }
+
+    .signup-text {
+      margin-top: 22px;
+      text-align: center;
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .signup-text a {
+      color: #00ff00;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .signup-text a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 768px) {
+      .login-wrapper {
+        flex-direction: column;
+        max-width: 440px;
+      }
+      .login-left {
+        padding: 30px 20px;
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      }
+      .glow-logo {
+        width: 140px;
+      }
+      .login-right {
+        padding: 36px 24px;
+      }
     }
   </style>
 </head>
@@ -103,7 +276,7 @@
     <div class="login-right">
       <div class="login-box">
         <h2>Join Hiero</h2>
-        <p style="color: rgba(255, 255, 255, 0.7); margin-bottom: 25px; font-size: 16px;">Create your account today</p>
+        <p style="color: rgba(255, 255, 255, 0.6); text-align: center; margin-bottom: 24px; font-size: 14.5px;">Create your account today</p>
 
         <!-- Social Signup (X-style) -->
         <a href="/auth/google" class="btn google-btn">
@@ -132,11 +305,13 @@
         </div>
 
         <!-- Email Form -->
+        <div id="signup-error" style="display: none; background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #fca5a5; padding: 10px 14px; border-radius: 12px; font-size: 13.5px; margin-bottom: 16px; text-align: center; font-weight: 600;"></div>
+
         <form id="signup-form">
           <input type="text" id="name" name="name" placeholder="Full Name" required>
           <input type="email" id="email" name="email" placeholder="Email Address" required>
           <input type="password" id="password" name="password" placeholder="Password" required>
-          <button type="submit" class="btn email-btn">
+          <button type="submit" id="signup-btn" class="btn email-btn">
             Create Account
           </button>
         </form>
@@ -147,22 +322,43 @@
   </div>
 
   <script>
-    // ✅ Splash screen delay (fast transition)
-    window.addEventListener("DOMContentLoaded", () => {
-      setTimeout(() => {
-        const splash = document.getElementById("splash-screen");
-        if (splash) splash.style.display = "none";
-        const main = document.getElementById("main-content");
-        if (main) main.style.display = "flex";
-      }, 300);
-    });
+    // ✅ Instant & Reliable Splash Screen Transition
+    function showMainContent() {
+      const splash = document.getElementById("splash-screen");
+      if (splash) splash.style.display = "none";
+      const main = document.getElementById("main-content");
+      if (main) main.style.display = "flex";
+    }
 
-    // ✅ Signup logic
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", () => setTimeout(showMainContent, 100));
+    } else {
+      setTimeout(showMainContent, 100);
+    }
+
+    // ✅ Signup Form Handler
     document.getElementById("signup-form").addEventListener("submit", async (e) => {
       e.preventDefault();
+      const errorBox = document.getElementById("signup-error");
+      const btn = document.getElementById("signup-btn");
+      if (errorBox) errorBox.style.display = "none";
+
       const name = document.getElementById("name").value.trim();
       const email = document.getElementById("email").value.trim();
       const password = document.getElementById("password").value.trim();
+
+      if (!email || !password) {
+        if (errorBox) {
+          errorBox.textContent = "Please fill in all required fields.";
+          errorBox.style.display = "block";
+        }
+        return;
+      }
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Creating Account...';
+      }
 
       try {
         const res = await fetch("/signup", {
@@ -172,14 +368,39 @@
         });
         const result = await res.json();
 
-        if (res.ok) {
-          alert("✅ Account created! Please check your email for verification.");
-          window.location.href = "login.html";
+        if (res.ok && (result.success || result.token)) {
+          if (result.token) localStorage.setItem("token", result.token);
+          if (result.user) localStorage.setItem("user", JSON.stringify(result.user));
+          
+          if (btn) btn.innerHTML = '✓ Success! Redirecting...';
+          setTimeout(() => {
+            window.location.href = "/index.html";
+          }, 400);
         } else {
-          alert("❌ " + (result.error || "Signup failed"));
+          const errMsg = result.error || result.message || "Signup failed. Please try again.";
+          if (errorBox) {
+            errorBox.textContent = "❌ " + errMsg;
+            errorBox.style.display = "block";
+          } else {
+            alert("❌ " + errMsg);
+          }
+          if (btn) {
+            btn.disabled = false;
+            btn.textContent = "Create Account";
+          }
         }
       } catch (err) {
-        alert("❌ Error signing up. Please try again.");
+        console.error('Signup error:', err);
+        if (errorBox) {
+          errorBox.textContent = "❌ Network error. Please check your connection and try again.";
+          errorBox.style.display = "block";
+        } else {
+          alert("❌ Network error signing up.");
+        }
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = "Create Account";
+        }
       }
     });
   </script>

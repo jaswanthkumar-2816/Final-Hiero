@@ -89,7 +89,8 @@ app.use(passport.initialize());
 // ======================
 if (process.env.MONGODB_URI) {
     console.log('⏳ Connecting to MongoDB...');
-    mongoose.set('bufferCommands', false);
+    mongoose.set('bufferCommands', true);
+
     // Safe debug: Check first few chars and total length (don't log secrets)
     const uri = process.env.MONGODB_URI;
     console.log(`[DB Debug] URI starts with: "${uri.substring(0, 5)}...", Total length: ${uri.length}`);
@@ -178,6 +179,14 @@ app.use('/api/reel', reelRouter);
 const runRouter = require('./routes/run');
 app.use('/api/run', runRouter);
 
+// Mastery Engine API (Integrated)
+const masteryRouter = require('./routes/mastery');
+app.use('/api/mastery', masteryRouter);
+
+// Targeted Multilingual Micro-Curriculum Engine API (New!)
+const learningRouter = require('./routes/learning');
+app.use('/api/learning', learningRouter);
+
 // AI Photo Formalizer API (New!)
 const aiPhotoRouter = require('./routes/ai-photo');
 app.use('/api', aiPhotoRouter); // Handles /api/generate-executive-photo
@@ -225,6 +234,7 @@ app.get('/sitemap.xml', (req, res) => res.sendFile(path.join(landingDirPath, 'si
 app.get('/robots.txt', (req, res) => res.sendFile(path.join(landingDirPath, 'robots.txt')));
 
 app.get(['/learn', '/learn.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'learn.html')));
+app.get(['/quiz', '/quiz.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'quiz.html')));
 app.get(['/solve', '/solve.html'], (req, res) => res.sendFile(path.join(__dirname, 'solve.html')));
 app.get(['/resume-builder', '/resume-builder.html', '/dashboard/resume-builder'], (req, res) => {
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
@@ -271,6 +281,14 @@ app.use('/api', analysisRouter);
 // --- Interview Router Module ---
 const interviewRouter = require('./routes/interview');
 app.use('/api/interview', interviewRouter);
+
+// --- Problems Router Module ---
+const problemsRouter = require('./routes/problems');
+app.use('/api/problems', problemsRouter);
+
+// --- Adaptive Mastery Skill Graph Module ---
+const adaptiveRouter = require('./routes/adaptive-mastery');
+app.use('/api/adaptive', adaptiveRouter);
 
 // ======================
 // START SERVER

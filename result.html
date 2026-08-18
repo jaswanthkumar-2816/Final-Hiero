@@ -2812,7 +2812,7 @@
                 <a href="resume-builder.html" class="download-report-btn">
                   <i class="fa-solid fa-wand-magic-sparkles"></i> Optimize in Resume Builder
                 </a>
-                <a href="learn.html?skill=${encodeURIComponent(topMissing)}" class="btn-secondary">
+                <a href="quiz.html?skill=${encodeURIComponent(topMissing)}" class="btn-secondary">
                   <i class="fa-solid fa-graduation-cap"></i> Target ${sanitize(topMissing)}
                 </a>
               </div>
@@ -3283,8 +3283,8 @@
                         <div class="domain-group-title" style="color:var(--c-orange);"><i class="fa-solid fa-triangle-exclamation"></i> Target Gap (${missing.length})</div>
                         <div class="pill-grid">
                           ${missing.map(s => `
-                            <a href="learn.html?skill=${encodeURIComponent(s)}" class="skill-pill pill-missing" title="Launch interactive study track">
-                              <i class="fa-solid fa-plus"></i> ${sanitize(s)} <span class="pill-action-arrow">Learn &rarr;</span>
+                            <a href="quiz.html?skill=${encodeURIComponent(s)}" class="skill-pill pill-missing" title="Launch interactive study track">
+                              <i class="fa-solid fa-plus"></i> ${sanitize(s)} <span class="pill-action-arrow">Placement &rarr;</span>
                             </a>
                           `).join('')}
                         </div>
@@ -3364,8 +3364,8 @@
                       </div>
                       <div class="pill-grid">
                         ${items.map(s => `
-                          <a href="learn.html?skill=${encodeURIComponent(s)}" class="skill-pill pill-missing" title="Launch targeted study track">
-                            <i class="fa-solid fa-plus"></i> ${sanitize(s)} <span class="pill-action-arrow">Learn &rarr;</span>
+                          <a href="quiz.html?skill=${encodeURIComponent(s)}" class="skill-pill pill-missing" title="Launch targeted study track">
+                            <i class="fa-solid fa-plus"></i> ${sanitize(s)} <span class="pill-action-arrow">Placement &rarr;</span>
                           </a>
                         `).join('')}
                       </div>

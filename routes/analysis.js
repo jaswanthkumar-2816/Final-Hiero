@@ -394,68 +394,125 @@ function suggestFallbackProjects(missing) {
     return missing.slice(0, 2).map(s => `Build a project showcasing practical ${s}`);
 }
 
-// YouTube video fetcher
-async function fetchVideos(query) {
-    const skillFallbacks = {
-        "react": [
-            { title: "React JS Full Course 2024", videoId: "hQAHSlTtcmY", url: "https://www.youtube.com/embed/hQAHSlTtcmY", duration: "PT4H", thumbnail: "https://i.ytimg.com/vi/hQAHSlTtcmY/hqdefault.jpg" },
-            { title: "React Tutorial for Beginners", videoId: "SqcY0GlETPk", url: "https://www.youtube.com/embed/SqcY0GlETPk", duration: "PT20M", thumbnail: "https://i.ytimg.com/vi/SqcY0GlETPk/hqdefault.jpg" }
-        ],
-        "python": [
-            { title: "Python Tutorial for Beginners", videoId: "_uQrJ0TkZlc", url: "https://www.youtube.com/embed/_uQrJ0TkZlc", duration: "PT6H", thumbnail: "https://i.ytimg.com/vi/_uQrJ0TkZlc/hqdefault.jpg" },
-            { title: "Python Full Course for Beginners", videoId: "rfscVS0vtbw", url: "https://www.youtube.com/embed/rfscVS0vtbw", duration: "PT4H", thumbnail: "https://i.ytimg.com/vi/rfscVS0vtbw/hqdefault.jpg" }
-        ],
-        "javascript": [
-            { title: "JavaScript Tutorial for Beginners", videoId: "W6NZfCO5SIk", url: "https://www.youtube.com/embed/W6NZfCO5SIk", duration: "PT1H", thumbnail: "https://i.ytimg.com/vi/W6NZfCO5SIk/hqdefault.jpg" },
-            { title: "Modern JavaScript Course", videoId: "H3XIJYEPdus", url: "https://www.youtube.com/embed/H3XIJYEPdus", duration: "PT7H", thumbnail: "https://i.ytimg.com/vi/H3XIJYEPdus/hqdefault.jpg" }
-        ],
-        "machine learning": [
-            { title: "Machine Learning Course for Beginners", videoId: "i_LwzRVP7bg", url: "https://www.youtube.com/embed/i_LwzRVP7bg", duration: "PT2H", thumbnail: "https://i.ytimg.com/vi/i_LwzRVP7bg/hqdefault.jpg" },
-            { title: "Machine Learning with Python", videoId: "7eh4d6sabA0", url: "https://www.youtube.com/embed/7eh4d6sabA0", duration: "PT3H", thumbnail: "https://i.ytimg.com/vi/7eh4d6sabA0/hqdefault.jpg" }
-        ],
-        "data science": [
-            { title: "Data Science Full Course 2024", videoId: "0vT9FwzB2pg", url: "https://www.youtube.com/embed/0vT9FwzB2pg", duration: "PT10H", thumbnail: "https://i.ytimg.com/vi/0vT9FwzB2pg/hqdefault.jpg" },
-            { title: "Data Science Roadmap 2024", videoId: "7O4p7p6O-n0", url: "https://www.youtube.com/embed/7O4p7p6O-n0", duration: "PT15M", thumbnail: "https://i.ytimg.com/vi/7O4p7p6O-n0/hqdefault.jpg" }
-        ],
-        "sql": [
-            { title: "SQL Tutorial for Beginners", videoId: "HXV3zeQKqGY", url: "https://www.youtube.com/embed/HXV3zeQKqGY", duration: "PT4H", thumbnail: "https://i.ytimg.com/vi/HXV3zeQKqGY/hqdefault.jpg" }
-        ]
+// Score Tier Info Helper
+function getScoreTierInfo(score) {
+    const numScore = typeof score !== 'undefined' && score !== null ? Number(score) : 20;
+    if (numScore <= 40) {
+        return {
+            tier: 'beginner',
+            label: 'Beginner (Foundational)',
+            searchSuffix: 'complete beginner course tutorial step by step',
+            moduleTitles: [
+                'Module 1: Foundations & Core Concepts',
+                'Module 2: Essential Building Blocks',
+                'Module 3: Beginner Guided Practice'
+            ]
+        };
+    } else if (numScore <= 60) {
+        return {
+            tier: 'intermediate',
+            label: 'Intermediate (Core Focus)',
+            searchSuffix: 'intermediate tutorial core concepts practical guide',
+            moduleTitles: [
+                'Module 1: Core Functionality & Workflows',
+                'Module 2: Practical Data & State Patterns',
+                'Module 3: Hands-on Intermediate Problem Solving'
+            ]
+        };
+    } else if (numScore < 100) {
+        return {
+            tier: 'advanced',
+            label: 'Advanced (Project & Practice)',
+            searchSuffix: 'advanced concepts real world project production',
+            moduleTitles: [
+                'Module 1: Advanced Architecture & Deep Dive',
+                'Module 2: Production Real-World Application',
+                'Module 3: Performance & Optimization Mastery'
+            ]
+        };
+    } else {
+        return {
+            tier: 'expert',
+            label: 'Expert Masterclass (100% Score)',
+            searchSuffix: 'masterclass production system design architecture expert',
+            moduleTitles: [
+                'Module 1: Production System Architecture & Design',
+                'Module 2: High-Performance Enterprise Patterns',
+                'Module 3: Expert Masterclass Capstone'
+            ]
+        };
+    }
+}
+
+// Fallback Video Engine for 6 languages across 4 score tiers
+function get3FallbackVideos(skill, score, lang) {
+    const tierInfo = getScoreTierInfo(score);
+    const s = (skill || 'Python').trim();
+    const l = (lang || 'english').toLowerCase();
+
+    const videoIdPool = {
+        react: ['hQAHSlTtcmY', 'SqcY0GlETPk', 'w7ejDZ8SWv8', 'TNhaISOUy6Q', '35lXWvCuM8o', 'O6P86uwfdR0', '7kAW7Qx2yD0', 'd56mG7DezGs', 'cVw6-F648D4', 'ZCuYvjZfFA0', '00pxxT_4gLw', '4UZrsTqkcW4'],
+        python: ['_uQrJ0TkZlc', 'rfscVS0vtbw', 'kqtD5dpn9C8', 'JeznW_7DlB0', 'HGOBQPFzWKo', '8ext9G7xfeg', 'cKPlPJyQrtE', 'qUebd2NmbHU', '7k2v4kU_z9g', 'XGF3Qu4dUqk', '0vT9FwzB2pg', 'eWRfhZUzrAc'],
+        javascript: ['W6NZfCO5SIk', 'H3XIJYEPdus', 'pkDg23nL2vE', 'hdI2bqOjy3c', 'sbMstS2Q5uA', 'po5e6yC3t24', 'R9I85RhV7Cg', 'Bv_5Zv5c-Ts', '3PHXvlpOkfU', 'ZvbzSrg0afE', 'musPosdXqGg', 'nZ1DMMsyVyI'],
+        tensorflow: ['tPYj3fFJGjk', 'tpCFfeUEGs8', 'KNAWp2S3w94', 'Gv9_4yMHFhI', 'yWwOa7p4n8U', 'iaSUY6e788M', '6g4O5U6cYcE', 'R9OHn5ZFg8E', 'QPd2uu86M24', '7k2v4kU_z9g', '00pxxT_4gLw', 'eWRfhZUzrAc'],
+        machinelearning: ['i_LwzRVP7bg', '7eh4d6sabA0', 'Gv9_4yMHFhI', 'yN7ypxC7838', 'JcXaUv066zI', 'f_C5y5bO6j0', 'aircAruvnKk', 'qFJeN9V1zsI', 'GwIo3gVZCVg', 'bQhPllk77sU', 'R9OHn5ZFg8E', '0vT9FwzB2pg']
     };
 
-    const getFallbacks = (q) => {
-        const lowerQ = (q || "").toLowerCase();
-        const matchedKey = Object.keys(skillFallbacks).find(k => lowerQ.includes(k));
-        return skillFallbacks[matchedKey] || skillFallbacks["python"];
-    };
+    const cleanSkillKey = s.toLowerCase().replace(/[^a-z]/g, '');
+    const pool = videoIdPool[cleanSkillKey] || videoIdPool['python'];
+    const startIndex = tierInfo.tier === 'beginner' ? 0 : tierInfo.tier === 'intermediate' ? 3 : tierInfo.tier === 'advanced' ? 6 : 9;
+
+    const langLabel = l === 'telugu' ? 'Telugu (తెలుగు)' : l === 'hindi' ? 'Hindi (हिंदी)' : l === 'tamil' ? 'Tamil (தமிழ்)' : l === 'kannada' ? 'Kannada (ಕನ್ನಡ)' : l === 'malayalam' ? 'Malayalam (മലയാളം)' : 'English';
+
+    return [0, 1, 2].map(idx => {
+        const vId = pool[(startIndex + idx) % pool.length];
+        return {
+            title: `${s} ${tierInfo.tier.toUpperCase()} — ${tierInfo.moduleTitles[idx]} (${langLabel})`,
+            videoId: vId,
+            url: `https://www.youtube.com/embed/${vId}`,
+            duration: idx === 0 ? "PT45M" : idx === 1 ? "PT1H15M" : "PT2H",
+            thumbnail: `https://i.ytimg.com/vi/${vId}/hqdefault.jpg`,
+            moduleNumber: idx + 1,
+            moduleTitle: tierInfo.moduleTitles[idx],
+            level: tierInfo.label,
+            language: langLabel,
+            scoreTier: tierInfo.tier
+        };
+    });
+}
+
+// YouTube video fetcher supporting score tier and language
+async function fetchVideos(query, score = 20, lang = 'english') {
+    const tierInfo = getScoreTierInfo(score);
+    const languages = ["english", "hindi", "telugu", "tamil", "kannada", "malayalam"];
+    const results = {};
+    const queryClean = (query || "Python").replace(/ \(.+\)/g, '').trim();
 
     if (!YOUTUBE_API_KEY) {
-        console.warn('YOUTUBE_API_KEY missing. Returning placeholders.');
-        return { english: getFallbacks(query) };
+        console.warn('YOUTUBE_API_KEY missing. Using score-tiered fallback engine.');
+        languages.forEach(l => {
+            results[l] = get3FallbackVideos(queryClean, score, l);
+        });
+        return results;
     }
 
-    const languages = ["english", "hindi", "telugu", "tamil", "kannada"];
-    const results = {};
-    const queryClean = (query || "").replace(/ \(.+\)/g, '').trim();
-    const isAdvanced = (query || "").toLowerCase().includes('advanced');
+    const langCodes = { english: 'en', hindi: 'hi', telugu: 'te', tamil: 'ta', kannada: 'kn', malayalam: 'ml' };
 
-    for (const lang of languages) {
+    for (const l of languages) {
         try {
-            const langCode = langCodes[lang] || 'en';
-
-            // Relaxed queries for better match rates
-            let searchQuery = `${queryClean} ${isAdvanced ? 'advanced tutorial' : 'beginner tutorial'} in ${lang}`;
-
-            if (lang === 'english') {
-                searchQuery = `${queryClean} ${isAdvanced ? 'advanced expert tutorial' : 'complete course tutorial'}`;
+            const langCode = langCodes[l] || 'en';
+            let searchQuery = `${queryClean} ${tierInfo.searchSuffix} in ${l}`;
+            if (l === 'english') {
+                searchQuery = `${queryClean} ${tierInfo.searchSuffix}`;
             }
 
-            console.log(`[YT Search] Query for ${lang}: ${searchQuery}`);
+            console.log(`[YT Search] Query for ${l} (${tierInfo.label}): ${searchQuery}`);
 
             const ytRes = await axios.get(`https://www.googleapis.com/youtube/v3/search`, {
                 params: {
                     part: 'snippet',
                     type: 'video',
-                    maxResults: 6,
+                    maxResults: 5,
                     q: searchQuery,
                     key: YOUTUBE_API_KEY,
                     order: 'relevance',
@@ -466,14 +523,12 @@ async function fetchVideos(query) {
             });
 
             const items = ytRes.data.items || [];
-
-            if (items.length === 0 && lang !== 'english') {
-                console.log(`No results for ${lang}, skipping.`);
+            if (items.length === 0) {
+                results[l] = get3FallbackVideos(queryClean, score, l);
                 continue;
             }
 
             const videoIds = items.map(item => item.id.videoId).join(',');
-
             let durations = {};
             if (videoIds) {
                 const detailsRes = await axios.get(`https://www.googleapis.com/youtube/v3/videos`, {
@@ -485,30 +540,29 @@ async function fetchVideos(query) {
                 });
 
                 detailsRes.data.items?.forEach(item => {
-                    durations[item.id] = item.contentDetails.duration || "PT15M";
+                    durations[item.id] = item.contentDetails.duration || "PT25M";
                 });
             }
 
-            // Filter out short videos (< 1 min)
-            const filteredItems = items.filter(item => {
-                const dur = durations[item.id.videoId] || "PT0M";
-                return !dur.match(/PT[0]M/);
-            }).slice(0, 4);
+            const top3 = items.slice(0, 3);
+            const langLabel = l === 'telugu' ? 'Telugu (తెలుగు)' : l === 'hindi' ? 'Hindi (हिंदी)' : l === 'tamil' ? 'Tamil (தமிழ்)' : l === 'kannada' ? 'Kannada (ಕನ್ನಡ)' : l === 'malayalam' ? 'Malayalam (മലയാളം)' : 'English';
 
-            results[lang] = filteredItems.map(item => ({
-                title: item.snippet.title || "Untitled Tutorial",
+            results[l] = top3.map((item, index) => ({
+                title: item.snippet.title || `${queryClean} ${tierInfo.moduleTitles[index]}`,
                 videoId: item.id.videoId,
                 url: `https://www.youtube.com/embed/${item.id.videoId}`,
-                duration: durations[item.id.videoId] || "PT15M",
-                thumbnail: item.snippet.thumbnails?.high?.url || item.snippet.thumbnails?.medium?.url
+                duration: durations[item.id.videoId] || "PT30M",
+                thumbnail: item.snippet.thumbnails?.high?.url || item.snippet.thumbnails?.medium?.url,
+                moduleNumber: index + 1,
+                moduleTitle: tierInfo.moduleTitles[index] || `Module ${index + 1}`,
+                level: tierInfo.label,
+                language: langLabel,
+                scoreTier: tierInfo.tier
             }));
 
         } catch (error) {
-            console.error(`❌ Error fetching videos for ${lang}:`, error.message);
-            // Fallback if API fails (Quota etc)
-            if (lang === 'english' && !results['english']) {
-                results['english'] = getFallbacks(query);
-            }
+            console.error(`❌ Error fetching videos for ${l}:`, error.message);
+            results[l] = get3FallbackVideos(queryClean, score, l);
         }
     }
     return results;
@@ -672,6 +726,29 @@ router.post(['/analyze', '/analyze-full'], upload.fields([{ name: 'resume' }, { 
             try { allVideos[skill] = await fetchVideos(skill); } catch { allVideos[skill] = {}; }
             allProblems[skill] = problems[skill] || await generateAIProblems(skill);
         }
+
+        // 🎯 AUTO-BOOT MASTERY ENGINE: For every missing skill, create a StudentProgress
+        // record in NOT_STARTED state. This is what makes the analysis result automatically
+        // trigger the full Identify → Learn → Practice → Prove loop in learn.html.
+        try {
+            const userId = req.headers['x-user-id'] || req.body?.userId;
+            if (userId && missingUnion.length > 0) {
+                const StudentProgress = require('../models/StudentProgress');
+                await Promise.allSettled(
+                    missingUnion.slice(0, 8).map(skill =>
+                        StudentProgress.updateOne(
+                            { userId, skillName: skill.toLowerCase().trim() },
+                            { $setOnInsert: { state: 'NOT_STARTED', masteryPct: 0, createdAt: new Date(), updatedAt: new Date() } },
+                            { upsert: true }
+                        )
+                    )
+                );
+                console.log(`[Mastery] Auto-created progress records for ${missingUnion.slice(0,8).length} skills for user ${userId}`);
+            }
+        } catch (masteryErr) {
+            console.warn('[Mastery] Auto-boot silently failed:', masteryErr.message);
+        }
+
 
         // === Compute Advanced Analysis Metrics ===
         const ACTION_VERBS = [
@@ -934,12 +1011,12 @@ router.post(['/analyze', '/analyze-full'], upload.fields([{ name: 'resume' }, { 
 });
 
 router.post('/get-videos', async (req, res) => {
-    const { skill } = req.body;
+    const { skill, score, lang } = req.body;
     if (!skill) return res.status(400).json({ success: false, error: 'Missing skill parameter' });
 
     try {
-        console.log(`[Analysis] Fetching tutorials for: ${skill}`);
-        const videos = await fetchVideos(skill);
+        console.log(`[Analysis] Fetching score-tiered tutorials for: ${skill} (Score: ${score}%, Lang: ${lang || 'english'})`);
+        const videos = await fetchVideos(skill, score, lang || 'english');
 
         // Ensure problems exists and matches structure
         let skillProblems = problems[skill];

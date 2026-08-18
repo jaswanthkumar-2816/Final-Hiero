@@ -73,9 +73,10 @@
       transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    #loading-overlay.hidden {
-      opacity: 0;
-      pointer-events: none;
+    #loading-overlay.hidden, #loading-overlay[style*="display: none"] {
+      opacity: 0 !important;
+      pointer-events: none !important;
+      display: none !important;
     }
 
     .loading-logo {
@@ -1540,24 +1541,30 @@
 
     async function loadData() {
       const loader = document.getElementById('loading-overlay');
-      loader.classList.remove('hidden');
+      if (loader) loader.classList.remove('hidden');
 
       try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const scoreParam = urlParams.get('score') || localStorage.getItem('userScore') || 20;
+        const langParam = urlParams.get('lang') || localStorage.getItem('userLanguage') || 'english';
+
         const res = await fetch('/api/analysis/get-videos', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ skill: currentSkill })
+          body: JSON.stringify({ skill: currentSkill, score: scoreParam, lang: langParam })
         });
         const json = await res.json();
 
         if (json.success) {
-          renderVideos(json.data.videos[currentLang] || json.data.videos['english'] || []);
-          renderProblems(json.data.problems);
+          const videoData = json.data.videos || {};
+          const videoList = videoData[langParam] || videoData['english'] || (Array.isArray(videoData) ? videoData : Object.values(videoData)[0]) || [];
+          renderVideos(videoList);
+          if (json.data.problems) renderProblems(json.data.problems);
         }
       } catch (err) {
         console.error("Failed to load data", err);
       } finally {
-        setTimeout(() => loader.classList.add('hidden'), 800);
+        if (loader) setTimeout(() => loader.classList.add('hidden'), 800);
       }
     }
 

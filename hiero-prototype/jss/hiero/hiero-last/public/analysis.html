@@ -501,14 +501,103 @@
     #loading-overlay {
       position: fixed;
       inset: 0;
-      background: #020402;
+      background: var(--bg-main, #020402);
       backdrop-filter: blur(40px);
       z-index: 9999;
       display: none;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      color: white;
+      color: var(--text-main, white);
+    }
+
+    /* Bright / Light Mode Loading Overlay Overrides */
+    [data-theme="light"] #loading-overlay,
+    body.light-mode #loading-overlay,
+    .light-mode #loading-overlay,
+    .light-theme #loading-overlay {
+      background: #f8fafc !important;
+      color: #0f172a !important;
+    }
+
+    [data-theme="light"] #loader-title,
+    body.light-mode #loader-title,
+    .light-mode #loader-title,
+    .light-theme #loader-title {
+      color: #0f172a !important;
+    }
+
+    [data-theme="light"] #loader-subtitle,
+    body.light-mode #loader-subtitle,
+    .light-mode #loader-subtitle,
+    .light-theme #loader-subtitle {
+      color: #64748b !important;
+    }
+
+    [data-theme="light"] .hiero-core-shield,
+    body.light-mode .hiero-core-shield,
+    .light-mode .hiero-core-shield,
+    .light-theme .hiero-core-shield {
+      background: #ffffff !important;
+      border: 1.5px solid rgba(4, 171, 7, 0.4) !important;
+      box-shadow: 0 20px 60px rgba(4, 171, 7, 0.15) !important;
+    }
+
+    [data-theme="light"] .status-stage,
+    body.light-mode .status-stage,
+    .light-mode .status-stage,
+    .light-theme .status-stage {
+      background: #ffffff !important;
+      border: 1.5px solid #e2e8f0 !important;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04) !important;
+      opacity: 0.5;
+    }
+
+    [data-theme="light"] .status-stage.active,
+    body.light-mode .status-stage.active,
+    .light-mode .status-stage.active,
+    .light-theme .status-stage.active {
+      opacity: 1 !important;
+      background: rgba(4, 171, 7, 0.08) !important;
+      border-color: #04ab07 !important;
+      box-shadow: 0 8px 24px rgba(4, 171, 7, 0.15) !important;
+    }
+
+    [data-theme="light"] .stage-text h4,
+    body.light-mode .stage-text h4,
+    .light-mode .stage-text h4,
+    .light-theme .stage-text h4 {
+      color: #0f172a !important;
+    }
+
+    [data-theme="light"] .stage-text p,
+    body.light-mode .stage-text p,
+    .light-mode .stage-text p,
+    .light-theme .stage-text p {
+      color: #64748b !important;
+    }
+
+    [data-theme="light"] .stage-icon,
+    body.light-mode .stage-icon,
+    .light-mode .stage-icon,
+    .light-theme .stage-icon {
+      background: #f1f5f9 !important;
+      color: #475569 !important;
+    }
+
+    [data-theme="light"] .active .stage-icon,
+    body.light-mode .active .stage-icon,
+    .light-mode .active .stage-icon,
+    .light-theme .active .stage-icon {
+      background: rgba(4, 171, 7, 0.15) !important;
+      color: #04ab07 !important;
+    }
+
+    [data-theme="light"] .scanning-line,
+    body.light-mode .scanning-line,
+    .light-mode .scanning-line,
+    .light-theme .scanning-line {
+      background: linear-gradient(to bottom, transparent, rgba(4, 171, 7, 0.08), transparent) !important;
     }
 
     #loading-overlay.visible {

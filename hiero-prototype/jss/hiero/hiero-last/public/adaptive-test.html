@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Skill Graph & Adaptive Mastery Studio | Hiero</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="theme.css">
+  <script src="theme.js"></script>
+
+  <style>
+    :root {
+      --primary: #04ab07;
+      --primary-hover: #00e676;
+      --primary-glow: rgba(4, 171, 7, 0.35);
+      --bg-dark: #020402;
+      --bg-card: rgba(18, 22, 18, 0.7);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: rgba(4, 171, 7, 0.2);
+      --card-radius: 20px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(4, 171, 7, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(4, 171, 7, 0.05) 0%, transparent 40%);
+      color: var(--text-main);
+      min-height: 100vh;
+      padding: 30px;
+    }
+
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+
+    .header-box {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .header-box h1 {
+      font-size: 36px;
+      font-weight: 800;
+      letter-spacing: -1px;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #fff, var(--primary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .header-box p {
+      color: var(--text-muted);
+      font-size: 15px;
+    }
+
+    /* Skill Search Bar */
+    .skill-input-bar {
+      display: flex;
+      gap: 12px;
+      max-width: 600px;
+      margin: 0 auto 40px auto;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      padding: 8px;
+      border-radius: 16px;
+      backdrop-filter: blur(10px);
+    }
+
+    .skill-input-bar input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      padding: 12px 18px;
+      color: #fff;
+      font-size: 16px;
+      outline: none;
+    }
+
+    .skill-input-bar button {
+      background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+      color: #000;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .skill-input-bar button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 20px var(--primary-glow);
+    }
+
+    /* Layout Grid */
+    .studio-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+    }
+
+    @media (max-width: 1024px) {
+      .studio-grid { grid-template-columns: 1fr; }
+    }
+
+    .panel-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--card-radius);
+      padding: 28px;
+      backdrop-filter: blur(15px);
+    }
+
+    .panel-title {
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--text-main);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .panel-title i {
+      color: var(--primary);
+    }
+
+    /* Skill Graph Pipeline Nodes */
+    .graph-nodes {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .node-item {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 14px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: 0.3s;
+    }
+
+    .node-item:hover {
+      border-color: var(--primary);
+      background: rgba(4, 171, 7, 0.05);
+    }
+
+    .node-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .node-badge {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(4, 171, 7, 0.15);
+      border: 1.5px solid var(--primary);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 14px;
+    }
+
+    .node-info h4 {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+
+    .sub-tags {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .sub-tag {
+      font-size: 10.5px;
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-muted);
+      padding: 2px 8px;
+      border-radius: 100px;
+    }
+
+    .status-badge {
+      font-size: 11px;
+      font-weight: 800;
+      padding: 4px 12px;
+      border-radius: 100px;
+      text-transform: uppercase;
+    }
+
+    .status-badge.strong {
+      background: rgba(4, 171, 7, 0.15);
+      color: var(--primary);
+      border: 1px solid rgba(4, 171, 7, 0.3);
+    }
+
+    .status-badge.weak {
+      background: rgba(251, 65, 65, 0.15);
+      color: #fb7185;
+      border: 1px solid rgba(251, 65, 65, 0.3);
+    }
+
+    /* Diagnostic Quiz Questions */
+    .quiz-list {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .question-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      padding: 18px;
+      border-radius: 16px;
+    }
+
+    .q-text {
+      font-size: 14.5px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      line-height: 1.4;
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .opt-btn {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-main);
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      text-align: left;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .opt-btn:hover {
+      border-color: var(--primary);
+      background: rgba(4, 171, 7, 0.1);
+    }
+
+    .opt-btn.selected {
+      background: var(--primary);
+      color: #000;
+      font-weight: 700;
+      border-color: var(--primary);
+    }
+
+    .submit-btn {
+      width: 100%;
+      background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+      color: #000;
+      border: none;
+      padding: 16px;
+      border-radius: 14px;
+      font-weight: 800;
+      font-size: 15px;
+      cursor: pointer;
+      margin-top: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 0 25px var(--primary-glow);
+    }
+
+    /* Knowledge & Recommendations */
+    .knowledge-banner {
+      background: rgba(4, 171, 7, 0.1);
+      border: 1px solid rgba(4, 171, 7, 0.3);
+      padding: 20px;
+      border-radius: 16px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .rec-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+
+    .rec-header {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fb7185;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .res-pack {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .res-box {
+      background: rgba(0, 0, 0, 0.4);
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 12px;
+    }
+
+    .res-box i { color: var(--primary); margin-right: 6px; }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header-box">
+      <h1>Skill Graph & Adaptive Mastery Studio</h1>
+      <p>Demonstrating the full 6-Stage Pipeline: Skill Generator → Graph → Diagnostic → Student Knowledge → Weak Concepts → Recommendations</p>
+    </div>
+
+    <!-- Skill Search Input -->
+    <div class="skill-input-bar">
+      <input type="text" id="skill-input" value="Python" placeholder="Enter any skill (e.g. Python, Deep Learning, React, Kubernetes)...">
+      <button onclick="loadSkillGraph()"><i class="fa-solid fa-wand-magic-sparkles"></i> Generate Graph</button>
+    </div>
+
+    <div class="studio-grid">
+      <!-- LEFT PANE: SKILL GRAPH EXPLORER -->
+      <div class="panel-card">
+        <div class="panel-title">
+          <i class="fa-solid fa-diagram-project"></i>
+          1. Skill Graph Hierarchy
+        </div>
+        <div id="graph-container" class="graph-nodes">
+          <p style="color: var(--text-muted);">Click "Generate Graph" to build the 5-node hierarchy...</p>
+        </div>
+      </div>
+
+      <!-- RIGHT PANE: DIAGNOSTIC & KNOWLEDGE DASHBOARD -->
+      <div class="panel-card">
+        <div class="panel-title">
+          <i class="fa-solid fa-file-pen"></i>
+          2. Adaptive Diagnostic Engine
+        </div>
+        <div id="diagnostic-container">
+          <p style="color: var(--text-muted);">Load a Skill Graph to generate diagnostic questions...</p>
+        </div>
+      </div>
+
+      <!-- FULL WIDTH: STUDENT KNOWLEDGE & RECOMMENDATIONS -->
+      <div class="panel-card" style="grid-column: 1/-1;" id="knowledge-section" style="display:none;">
+        <div class="panel-title">
+          <i class="fa-solid fa-brain"></i>
+          3. Student Knowledge Profile & Weak Concepts Recommendation
+        </div>
+        <div id="knowledge-output"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentGraph = null;
+    let selectedAnswers = {};
+
+    async function loadSkillGraph() {
+      const skillName = document.getElementById('skill-input').value.trim();
+      if (!skillName) return;
+
+      const graphContainer = document.getElementById('graph-container');
+      const diagContainer = document.getElementById('diagnostic-container');
+      
+      graphContainer.innerHTML = '<p style="color:var(--text-muted);"><i class="fa-solid fa-spinner fa-spin"></i> Building Skill Graph via LLM/Cache...</p>';
+      diagContainer.innerHTML = '<p style="color:var(--text-muted);"><i class="fa-solid fa-spinner fa-spin"></i> Preparing Diagnostic Engine...</p>';
+
+      try {
+        const res = await fetch('/api/adaptive/skill-graph', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ skillName })
+        });
+        const json = await res.json();
+
+        if (json.success) {
+          currentGraph = json.skillGraph;
+          renderSkillGraph(currentGraph);
+          loadDiagnostic(skillName);
+        }
+      } catch (err) {
+        graphContainer.innerHTML = `<p style="color:#fb7185;">Error generating Skill Graph: ${err.message}</p>`;
+      }
+    }
+
+    function renderSkillGraph(graph) {
+      const container = document.getElementById('graph-container');
+      container.innerHTML = '';
+
+      graph.nodes.forEach((node, i) => {
+        const item = document.createElement('div');
+        item.className = 'node-item';
+        item.innerHTML = `
+          <div class="node-left">
+            <div class="node-badge">${i + 1}</div>
+            <div class="node-info">
+              <h4>${node.name}</h4>
+              <div class="sub-tags">
+                ${(node.subConcepts || []).map(c => `<span class="sub-tag">${c}</span>`).join('')}
+              </div>
+            </div>
+          </div>
+          <span class="status-badge strong">UNLOCKED</span>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    async function loadDiagnostic(skillName) {
+      const container = document.getElementById('diagnostic-container');
+      try {
+        const res = await fetch('/api/adaptive/generate-diagnostic', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ skillName, userId: 'studio-user' })
+        });
+        const json = await res.json();
+
+        if (json.success) {
+          renderDiagnosticQuestions(json.questions);
+        }
+      } catch (err) {
+        container.innerHTML = `<p style="color:#fb7185;">Failed to load diagnostic: ${err.message}</p>`;
+      }
+    }
+
+    function renderDiagnosticQuestions(questions) {
+      const container = document.getElementById('diagnostic-container');
+      selectedAnswers = {};
+
+      let html = '<div class="quiz-list">';
+      questions.forEach((q, idx) => {
+        html += `
+          <div class="question-card">
+            <div class="q-text">Q${idx + 1}. [${q.nodeName}] ${q.question}</div>
+            <div class="options-grid">
+              ${q.options.map((opt, oIdx) => `
+                <button class="opt-btn" id="opt-${idx}-${oIdx}" onclick="selectOption('${q.id}', ${idx}, ${oIdx})">
+                  ${String.fromCharCode(65 + oIdx)}. ${opt}
+                </button>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      });
+      html += '</div>';
+      html += `<button class="submit-btn" onclick="evaluateDiagnostic()"><i class="fa-solid fa-chart-pie"></i> Evaluate Diagnostic & Extract Knowledge Profile</button>`;
+
+      container.innerHTML = html;
+    }
+
+    function selectOption(qId, qIdx, oIdx) {
+      selectedAnswers[qIdx] = oIdx;
+      document.querySelectorAll(`[id^="opt-${qIdx}-"]`).forEach(b => b.classList.remove('selected'));
+      document.getElementById(`opt-${qIdx}-${oIdx}`).classList.add('selected');
+    }
+
+    async function evaluateDiagnostic() {
+      const skillName = currentGraph?.skillName || 'Python';
+      const answersArr = Object.keys(selectedAnswers).map(qIdx => ({
+        questionIndex: parseInt(qIdx),
+        selectedIndex: selectedAnswers[qIdx]
+      }));
+
+      const outSection = document.getElementById('knowledge-section');
+      const outDiv = document.getElementById('knowledge-output');
+      outSection.style.display = 'block';
+      outDiv.innerHTML = '<p style="color:var(--text-muted);"><i class="fa-solid fa-spinner fa-spin"></i> Processing Student Knowledge Profile...</p>';
+
+      try {
+        const res = await fetch('/api/adaptive/evaluate-diagnostic', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: 'studio-user', skillName, answers: answersArr })
+        });
+        const json = await res.json();
+
+        if (json.success) {
+          const k = json.studentKnowledge;
+          let html = `
+            <div class="knowledge-banner">
+              <div>
+                <h3 style="font-size: 22px; font-weight: 800; color: var(--primary);">Overall Mastery: ${k.overallMasteryPct}%</h3>
+                <p style="font-size: 13.5px; color: var(--text-main);">Tier Mode: <strong>${k.tierMode}</strong> · Weak Concepts Identified: <strong>${json.weakConcepts.length}</strong></p>
+              </div>
+              <button onclick="window.location.href='learn.html?skill=${encodeURIComponent(skillName)}'" style="background: linear-gradient(135deg, var(--primary), var(--primary-hover)); color: #000; border: none; padding: 12px 20px; border-radius: 12px; font-weight: 800; cursor: pointer;">
+                Go to learn.html Roadmap &rarr;
+              </button>
+            </div>
+          `;
+
+          html += '<h4 style="font-size: 15px; margin-bottom: 14px;">🎯 Targeted 3-Resource Packs for Weak Concepts:</h4>';
+
+          json.recommendations.forEach(rec => {
+            html += `
+              <div class="rec-card">
+                <div class="rec-header"><i class="fa-solid fa-circle-exclamation"></i> ${rec.reason}</div>
+                <div class="res-pack">
+                  <div class="res-box"><i class="fa-brands fa-youtube"></i> 1. Video: ${rec.resources?.videos?.[0]?.title || 'Targeted Deep Dive'}</div>
+                  <div class="res-box"><i class="fa-solid fa-book-open"></i> 2. Guide: ${rec.resources?.courses?.[0]?.title || 'Documentation Reference'}</div>
+                  <div class="res-box"><i class="fa-solid fa-code"></i> 3. Exercise: ${rec.resources?.exercises?.[0]?.title || 'Interactive Code Challenge'}</div>
+                </div>
+              </div>
+            `;
+          });
+
+          outDiv.innerHTML = html;
+        }
+      } catch (err) {
+        outDiv.innerHTML = `<p style="color:#fb7185;">Evaluation failed: ${err.message}</p>`;
+      }
+    }
+
+    // Auto-load Python on startup
+    window.onload = loadSkillGraph;
+  </script>
+</body>
+</html>
