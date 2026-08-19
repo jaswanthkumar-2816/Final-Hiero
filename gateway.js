@@ -9,6 +9,14 @@ const axios = require('axios');
 const multer = require('multer');
 const { createProxyMiddleware } = require('http-proxy-middleware');
 
+// Ensure DNS SRV resolution for MongoDB Atlas works seamlessly on local Windows environments
+const dns = require('dns');
+try {
+    dns.setServers(['8.8.8.8', '8.8.4.4', '1.1.1.1']);
+} catch (e) {
+    console.warn('DNS server override notice:', e.message);
+}
+
 // ✅ FIXED: Always load login-system/.env FIRST (it has JWT_SECRET, EMAIL_USER, etc.)
 // Then load root .env which has RAZORPAY and MONGODB_URI overrides
 dotenv.config({ path: path.join(__dirname, 'login-system', '.env') });
@@ -144,7 +152,9 @@ app.get('/dashboard', authObj.authenticateToken, (req, res, next) => {
 // Mount Import Service FIRST to handle /import requests effectively
 const importRouter = require('./routes/import-service');
 const resumeRouter = require('./routes/resume');
+app.use('/api/resume', importRouter);
 app.use('/api/resume', resumeRouter);
+app.use('/api', importRouter);
 
 // Support templates and preview folder sharing
 app.use('/templates/previews', express.static(path.join(__dirname, 'hiero-backend', 'templates', 'previews')));

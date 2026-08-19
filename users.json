@@ -183,5 +183,16 @@
     "emailVerified": true,
     "signupMethod": "email",
     "createdAt": "2026-08-18T13:06:37.382Z"
+  },
+  {
+    "id": 106,
+    "googleId": "105282060239483090034",
+    "email": "ajnamana@gmail.com",
+    "name": "Namana A.J",
+    "emailVerified": true,
+    "signupMethod": "google",
+    "picture": "https://lh3.googleusercontent.com/a/ACg8ocISkVeewJciujismomodMNzdbKKbCejran3RyK-3kU-CKMe4A=s96-c",
+    "loginCount": 9,
+    "lastLogin": "2026-08-19T12:31:56.678Z"
   }
 ]

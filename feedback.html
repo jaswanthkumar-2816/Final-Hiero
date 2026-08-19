@@ -1,61 +1,44 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hiero | Interview Review Dashboard</title>
-
-  <!-- Google Fonts -->
+  <title>Hiero | Mock Interview Feedback & Evaluation Report</title>
+  
+  <!-- Premium Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
-  <!-- FontAwesome Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome 6.4 Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-  <!-- html2pdf for Professional Client-Side PDF Report Generation -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-
+  
   <style>
     :root {
-      /* Theme Tokens - Modern Premium Dark Aesthetic */
-      --bg-body: #030503;
-      --bg-card: rgba(15, 23, 17, 0.78);
-      --bg-card-hover: rgba(22, 34, 25, 0.88);
-      --bg-input: #0a110c;
-      --border-color: rgba(42, 224, 35, 0.18);
-      --border-accent: rgba(7, 226, 25, 0.45);
-      --text-main: #ffffff;
-      --text-muted: #94a3b8;
-      --text-sub: #cbd5e1;
-      --primary: #07e219;
-      --primary-glow: rgba(7, 226, 25, 0.35);
-      --accent-cyan: #06b6d4;
-      --accent-yellow: #f59e0b;
-      --accent-rose: #f43f5e;
-      --accent-purple: #8b5cf6;
-      --card-shadow: 0 12px 32px 0 rgba(0, 0, 0, 0.55);
-      --glass-backdrop: blur(16px);
-      --radius-sm: 8px;
-      --radius-md: 14px;
-      --radius-lg: 22px;
-      --font-heading: 'Outfit', 'Plus Jakarta Sans', sans-serif;
-      --font-body: 'Plus Jakarta Sans', sans-serif;
-    }
-
-    [data-theme="light"] {
-      --bg-body: #f8fafc;
-      --bg-card: rgba(255, 255, 255, 0.95);
-      --bg-card-hover: #ffffff;
-      --bg-input: #f1f5f9;
-      --border-color: rgba(7, 226, 25, 0.25);
-      --border-accent: rgba(7, 226, 25, 0.55);
+      --primary: #07e219;          /* Hiero Exact Neon Green (#07e219) */
+      --primary-hover: #05c015;
+      --primary-light: rgba(7, 226, 25, 0.12);
+      --bg-dark: #f8fafc;           /* Light Slate Background */
+      --card-bg: #ffffff;
+      --card-inner: #f1f5f9;
       --text-main: #0f172a;
       --text-muted: #64748b;
-      --text-sub: #334155;
-      --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08);
-      --primary-glow: rgba(7, 226, 25, 0.2);
+      --border: #e2e8f0;
+      --dot-color: rgba(0, 0, 0, 0.05);
+      --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.02);
+      --shadow-md: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+    }
+
+    body.dark-mode {
+      --bg-dark: #000000;           /* Pitch Black Background */
+      --card-bg: rgba(13, 18, 28, 0.85);
+      --card-inner: rgba(20, 28, 44, 0.6);
+      --text-main: #ffffff;
+      --text-muted: #999999;
+      --border: rgba(255, 255, 255, 0.1);
+      --dot-color: rgba(7, 226, 25, 0.08);
+      --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.6);
     }
 
     * {
@@ -65,1015 +48,1224 @@
     }
 
     body {
-      font-family: var(--font-body);
-      background-color: var(--bg-body);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg-dark);
       color: var(--text-main);
       min-height: 100vh;
-      line-height: 1.5;
-      overflow-x: hidden;
+      padding: 24px 32px 60px 32px;
       transition: background-color 0.3s ease, color 0.3s ease;
       position: relative;
     }
 
-    /* Radial Dot Grid Background Overlay */
-    body::before {
-      content: "";
+    #antigravity-bg {
       position: fixed;
       inset: 0;
-      background-image: radial-gradient(rgba(7, 226, 25, 0.07) 1px, transparent 1px);
-      background-size: 30px 30px;
-      z-index: -1;
+      z-index: 0;
       pointer-events: none;
     }
 
-    /* Print Styles for PDF Generation */
-    @media print {
-      body {
-        background: #ffffff !important;
-        color: #000000 !important;
-      }
-      .no-print, header, button, input, .theme-toggle {
-        display: none !important;
-      }
-      .dashboard-container {
-        padding: 0 !important;
-        max-width: 100% !important;
-      }
-      .glass-card, .accordion-item {
-        background: #ffffff !important;
-        border: 1px solid #ccc !important;
-        box-shadow: none !important;
-        break-inside: avoid;
-        color: #000000 !important;
-      }
-      .accordion-body-content {
-        display: block !important;
-      }
+    .dot-overlay {
+      position: fixed;
+      inset: 0;
+      background-image: radial-gradient(var(--dot-color) 1px, transparent 1px);
+      background-size: 24px 24px;
+      z-index: 0;
+      pointer-events: none;
     }
 
-    /* Container */
-    .dashboard-container {
-      max-width: 1280px;
-      margin: 0 auto;
-      padding: 24px 28px 60px;
+    .container {
       position: relative;
       z-index: 2;
+      max-width: 1240px;
+      margin: 0 auto;
     }
 
-    /* Glassmorphism Card Utility */
-    .glass-card {
-      background: var(--bg-card);
-      backdrop-filter: var(--glass-backdrop);
-      -webkit-backdrop-filter: var(--glass-backdrop);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-lg);
-      box-shadow: var(--card-shadow);
-      padding: 28px;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      position: relative;
-    }
-
-    .glass-card:hover {
-      border-color: var(--border-accent);
-      box-shadow: 0 14px 35px var(--primary-glow);
-    }
-
-    /* Sticky Header Bar */
-    .header-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 20px;
-      padding: 16px 28px;
-      margin-bottom: 28px;
-      border-radius: var(--radius-md);
-      background: var(--bg-card);
-      backdrop-filter: var(--glass-backdrop);
-      border: 1px solid var(--border-color);
-      box-shadow: var(--card-shadow);
-      position: sticky;
-      top: 16px;
-      z-index: 100;
-    }
-
-    .logo-box {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      text-decoration: none;
-    }
-
-    .logo-icon {
-      width: 42px;
-      height: 42px;
-      background: linear-gradient(135deg, var(--primary), var(--accent-cyan));
-      border-radius: 12px;
+    .theme-toggle-btn {
+      position: fixed;
+      bottom: 24px;
+      left: 24px;
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      color: var(--text-main);
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #000000;
+      font-size: 18px;
+      cursor: pointer;
+      z-index: 1000;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+      transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .theme-toggle-btn:hover {
+      transform: scale(1.12) rotate(15deg);
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    /* Navbar Header */
+    .top-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+      padding-bottom: 16px;
+    }
+
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .brand-icon {
+      width: 38px;
+      height: 38px;
+      background: #0f172a;
+      color: var(--primary);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       font-size: 20px;
-      box-shadow: 0 0 20px var(--primary-glow);
     }
 
-    .brand-title {
-      font-family: var(--font-heading);
-      font-size: 22px;
+    .brand-logo span {
+      font-family: 'Outfit', sans-serif;
+      font-size: 24px;
       font-weight: 800;
-      color: var(--text-main);
       letter-spacing: -0.5px;
+      color: var(--text-main);
     }
 
-    .header-actions {
+    .nav-controls {
       display: flex;
       align-items: center;
       gap: 14px;
     }
 
-    /* Theme Toggle - Symbol Only */
-    .theme-toggle-icon-btn {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: var(--bg-input);
-      border: 1px solid var(--border-color);
+    .btn-dashboard {
+      background: linear-gradient(135deg, #07e219, #00b248);
+      color: #000000;
+      padding: 10px 22px;
+      border-radius: 30px;
+      font-size: 13.5px;
+      font-weight: 800;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      box-shadow: 0 0 16px rgba(7, 226, 25, 0.35);
+    }
+
+    .btn-dashboard:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 22px rgba(7, 226, 25, 0.55);
+    }
+
+    .user-pill {
+      background: var(--card-inner);
+      border: 1px solid var(--border);
+      padding: 6px 14px 6px 8px;
+      border-radius: 30px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13.5px;
+      font-weight: 700;
       color: var(--text-main);
+      cursor: pointer;
+    }
+
+    .user-avatar {
+      width: 28px;
+      height: 28px;
+      background: rgba(7, 226, 25, 0.15);
+      color: #07e219;
+      border: 1px solid rgba(7, 226, 25, 0.3);
+      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 16px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .theme-toggle-icon-btn:hover {
-      border-color: var(--primary);
-      color: var(--primary);
-      transform: scale(1.05);
-    }
-
-    /* Primary Action Button (Single Download Button) */
-    .btn-primary-download {
-      background: linear-gradient(135deg, var(--primary), #05a313);
-      color: #000000;
-      border: none;
-      border-radius: 99px;
-      padding: 10px 22px;
-      font-family: var(--font-heading);
+      font-size: 12px;
       font-weight: 800;
-      font-size: 14px;
+    }
+
+    .btn-download {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      padding: 10px 20px;
+      border-radius: 30px;
+      font-size: 13.5px;
+      font-weight: 700;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       transition: all 0.2s ease;
-      box-shadow: 0 4px 16px var(--primary-glow);
-      text-decoration: none;
+      box-shadow: var(--shadow-sm);
     }
 
-    .btn-primary-download:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 24px rgba(7, 226, 25, 0.5);
-    }
-
-    /* Section Header */
-    .card-section-title {
-      font-family: var(--font-heading);
-      font-size: 18px;
-      font-weight: 800;
-      color: var(--text-main);
-      margin-bottom: 20px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .card-section-title i {
+    .btn-download:hover {
+      background: var(--card-inner);
+      border-color: var(--primary);
       color: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: 0 0 16px rgba(7, 226, 25, 0.3);
     }
 
-    /* -------------------------------------------------------------
-       TWO-COLUMN TOP LAYOUT (Candidate Info + Question Summary)
-    ------------------------------------------------------------- */
-    .top-two-column-grid {
+    /* Grid Layout */
+    .dashboard-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1.15fr 0.85fr;
       gap: 24px;
-      margin-bottom: 28px;
+      align-items: start;
     }
 
-    @media (max-width: 900px) {
-      .top-two-column-grid {
+    @media (max-width: 1024px) {
+      .dashboard-grid {
         grid-template-columns: 1fr;
       }
     }
 
-    /* Left Card: Candidate Information */
-    .candidate-info-list {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
+    /* Section Cards */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 26px;
+      box-shadow: var(--shadow-md);
+      margin-bottom: 24px;
     }
 
-    .info-row-item {
-      background: var(--bg-input);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      padding: 14px 18px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      transition: border-color 0.2s ease;
-    }
-
-    .info-row-item:hover {
-      border-color: var(--border-accent);
-    }
-
-    .info-label-group {
+    .card-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--text-main);
       display: flex;
       align-items: center;
       gap: 10px;
-      font-size: 13px;
+      margin-bottom: 20px;
+    }
+
+    .card-title i {
+      color: var(--primary);
+      font-size: 18px;
+    }
+
+    /* Candidate Information List */
+    .info-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .info-row {
+      background: var(--card-inner);
+      border-radius: 12px;
+      padding: 14px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .info-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13.5px;
       font-weight: 700;
       color: var(--text-muted);
     }
 
-    .info-label-group i {
+    .info-label i {
       color: var(--primary);
-      font-size: 15px;
+      width: 16px;
+      text-align: center;
     }
 
-    .info-value-text {
-      font-family: var(--font-heading);
-      font-size: 14.5px;
+    .info-val {
+      font-size: 14px;
       font-weight: 800;
       color: var(--text-main);
     }
 
-    .resume-upload-box {
-      cursor: pointer;
-    }
-
-    .resume-upload-box:hover {
-      background: rgba(7, 226, 25, 0.05);
-      border-color: var(--primary);
-    }
-
-    /* Right Card: Question Summary Metric Cards */
-    .stats-summary-grid {
+    /* Question Summary Metric Boxes */
+    .summary-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
+      gap: 14px;
     }
 
-    @media (max-width: 600px) {
-      .stats-summary-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-
-    .stat-metric-card {
-      background: var(--bg-input);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      padding: 16px 14px;
+    .metric-box {
+      background: var(--card-inner);
+      border-radius: 14px;
+      padding: 18px 12px;
       text-align: center;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 6px;
-      transition: all 0.2s ease;
     }
 
-    .stat-metric-card:hover {
-      border-color: var(--border-accent);
-      transform: translateY(-2px);
-    }
-
-    .stat-metric-number {
-      font-family: var(--font-heading);
-      font-size: 24px;
-      font-weight: 900;
+    .metric-num {
+      font-family: 'Outfit', sans-serif;
+      font-size: 32px;
+      font-weight: 800;
       color: var(--text-main);
       line-height: 1;
+      margin-bottom: 6px;
     }
 
-    .stat-metric-label {
-      font-size: 11.5px;
-      font-weight: 700;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
+    .metric-num.emerald {
+      color: var(--primary);
     }
 
-    /* Performance Badge */
-    .perf-badge {
-      font-size: 13px;
+    .metric-label {
+      font-size: 11px;
       font-weight: 800;
-      padding: 4px 12px;
-      border-radius: 99px;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .metric-badge {
       background: rgba(7, 226, 25, 0.15);
       color: var(--primary);
-      border: 1px solid rgba(7, 226, 25, 0.35);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12.5px;
+      font-weight: 800;
+      margin-bottom: 6px;
     }
 
-    /* -------------------------------------------------------------
-       QUESTIONS REVIEW SECTION (Question, Response, Review)
-    ------------------------------------------------------------- */
-    .questions-review-section {
-      margin-bottom: 28px;
-    }
-
-    .question-review-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-lg);
-      padding: 24px;
-      margin-bottom: 18px;
+    /* Questions & Feedback Accordion List */
+    .questions-list {
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 12px;
+    }
+
+    .accordion-item {
+      background: var(--card-inner);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
       transition: all 0.2s ease;
     }
 
-    .question-review-card:hover {
-      border-color: var(--border-accent);
+    .accordion-item.active {
+      border-color: var(--primary);
+      background: var(--card-bg);
+      box-shadow: 0 4px 12px rgba(7, 226, 25, 0.1);
     }
 
-    .q-header-title {
-      font-family: var(--font-heading);
-      font-size: 16px;
-      font-weight: 800;
-      color: var(--text-main);
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-    }
-
-    .q-number-pill {
-      font-size: 12px;
-      font-weight: 900;
-      background: rgba(7, 226, 25, 0.15);
-      color: var(--primary);
-      padding: 3px 10px;
-      border-radius: 99px;
-      border: 1px solid rgba(7, 226, 25, 0.3);
-      white-space: nowrap;
-    }
-
-    .block-response {
-      background: var(--bg-input);
-      border-left: 3px solid var(--accent-cyan);
-      border-radius: var(--radius-sm);
-      padding: 14px 18px;
-      font-size: 14px;
-      color: var(--text-sub);
-    }
-
-    .block-response-label {
-      font-size: 11px;
-      font-weight: 800;
-      color: var(--accent-cyan);
-      text-transform: uppercase;
-      margin-bottom: 4px;
-      display: block;
-    }
-
-    .block-review {
-      background: rgba(7, 226, 25, 0.04);
-      border-left: 3px solid var(--primary);
-      border-radius: var(--radius-sm);
-      padding: 14px 18px;
-      font-size: 13.5px;
-      color: var(--text-main);
-    }
-
-    .block-review-label {
-      font-size: 11px;
-      font-weight: 800;
-      color: var(--primary);
-      text-transform: uppercase;
-      margin-bottom: 4px;
-      display: block;
-    }
-
-    /* -------------------------------------------------------------
-       COLLAPSIBLE ACCORDIONS (Transcript & Screen Recording)
-    ------------------------------------------------------------- */
-    .accordion-item {
-      background: var(--bg-card);
-      backdrop-filter: var(--glass-backdrop);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-lg);
-      box-shadow: var(--card-shadow);
-      margin-bottom: 20px;
-      overflow: hidden;
-      transition: border-color 0.3s ease;
-    }
-
-    .accordion-item:hover {
-      border-color: var(--border-accent);
-    }
-
-    .accordion-header-bar {
-      padding: 20px 28px;
-      font-family: var(--font-heading);
-      font-size: 17px;
-      font-weight: 800;
-      color: var(--text-main);
-      cursor: pointer;
+    .accordion-header {
+      padding: 16px 20px;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      cursor: pointer;
       user-select: none;
-      background: rgba(255, 255, 255, 0.015);
-      transition: background 0.2s ease;
     }
 
-    .accordion-header-bar:hover {
-      background: rgba(7, 226, 25, 0.05);
+    .q-badge {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-right: 12px;
+      white-space: nowrap;
     }
 
-    .accordion-header-left {
-      display: flex;
-      align-items: center;
-      gap: 12px;
+    .q-text {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-main);
+      flex: 1;
+      margin-right: 14px;
     }
 
-    .accordion-header-left i {
-      color: var(--primary);
-      font-size: 18px;
+    .accordion-chevron {
+      color: var(--text-muted);
+      transition: transform 0.25s ease;
     }
 
-    .chevron-icon {
-      color: var(--primary);
-      font-size: 16px;
-      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .accordion-item.open .chevron-icon {
+    .accordion-item.active .accordion-chevron {
       transform: rotate(180deg);
+      color: var(--primary);
     }
 
-    .accordion-body-content {
+    .accordion-body {
+      padding: 0 20px 20px 20px;
       display: none;
-      padding: 24px 28px;
-      background: var(--bg-input);
-      border-top: 1px solid var(--border-color);
     }
 
-    .accordion-item.open .accordion-body-content {
+    .accordion-item.active .accordion-body {
       display: block;
     }
 
-    /* Transcript Box */
-    .search-transcript-input {
-      background: var(--bg-body);
-      border: 1px solid var(--border-color);
-      border-radius: 99px;
-      padding: 10px 18px 10px 40px;
+    .answer-box {
+      background: var(--card-inner);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 10px;
+      font-size: 13.5px;
+      line-height: 1.65;
       color: var(--text-main);
-      font-size: 13.5px;
-      outline: none;
-      width: 100%;
-      margin-bottom: 16px;
-      transition: border-color 0.2s ease;
     }
 
-    .search-transcript-input:focus {
-      border-color: var(--primary);
-    }
-
-    .search-wrapper {
-      position: relative;
-      margin-bottom: 16px;
-    }
-
-    .search-wrapper i {
-      position: absolute;
-      left: 15px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--text-muted);
-      font-size: 13px;
-    }
-
-    .transcript-scroll-area {
-      max-height: 380px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      padding-right: 6px;
-    }
-
-    .transcript-line-item {
-      display: flex;
-      gap: 12px;
-      align-items: flex-start;
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      padding: 12px 16px;
-      border-radius: var(--radius-md);
-      font-size: 13.5px;
-    }
-
-    .time-stamp {
-      font-family: monospace;
-      font-size: 11.5px;
-      color: var(--text-muted);
-      background: var(--bg-body);
-      padding: 3px 8px;
-      border-radius: 6px;
-      border: 1px solid var(--border-color);
-      white-space: nowrap;
-    }
-
-    .speaker-label {
-      font-weight: 800;
-      white-space: nowrap;
-    }
-
-    .speaker-interviewer { color: var(--primary); }
-    .speaker-candidate { color: var(--accent-cyan); }
-
-    .speaker-text {
-      color: var(--text-sub);
-    }
-
-    /* Screen Recording Video Player */
-    .screen-rec-wrapper {
-      display: flex;
-      flex-direction: column;
+    .answer-tag {
+      display: inline-flex;
       align-items: center;
-      gap: 14px;
+      gap: 6px;
+      background: rgba(99, 102, 241, 0.15);
+      color: #818cf8;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 3px 10px;
+      border-radius: 6px;
+      margin-bottom: 8px;
+      letter-spacing: 0.5px;
     }
 
-    .video-viewport {
+    .feedback-box {
+      background: var(--card-inner);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 12px;
+      font-size: 13.5px;
+      line-height: 1.65;
+      color: var(--text-main);
+    }
+
+    .feedback-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(7, 226, 25, 0.15);
+      color: var(--primary);
+      font-size: 11px;
+      font-weight: 800;
+      padding: 3px 10px;
+      border-radius: 6px;
+      margin-bottom: 8px;
+      letter-spacing: 0.5px;
+    }
+
+    /* Video & Audio Cards */
+    .media-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: var(--shadow-md);
+      margin-bottom: 24px;
+    }
+
+    .video-preview-wrapper {
+      position: relative;
       width: 100%;
-      max-width: 860px;
-      aspect-ratio: 16 / 9;
-      background: #000000;
-      border-radius: var(--radius-md);
+      border-radius: 14px;
       overflow: hidden;
-      border: 1px solid var(--border-color);
-      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.7);
+      background: #0f172a;
+      aspect-ratio: 16/9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    .video-viewport video {
+    .video-preview-img {
       width: 100%;
       height: 100%;
       object-fit: cover;
     }
 
-    /* Skeletons */
-    .skeleton-loader {
-      background: linear-gradient(90deg, var(--bg-input) 25%, rgba(255,255,255,0.05) 50%, var(--bg-input) 75%);
-      background-size: 200% 100%;
-      animation: skeletonShimmer 1.5s infinite;
-      border-radius: 8px;
-      height: 20px;
-      width: 100%;
+    .video-play-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.35);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      color: #ffffff;
+      cursor: pointer;
     }
 
-    @keyframes skeletonShimmer {
-      0% { background-position: 200% 0; }
-      100% { background-position: -200% 0; }
+    .play-circle {
+      width: 48px;
+      height: 48px;
+      background: rgba(255, 255, 255, 0.9);
+      color: #0f172a;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      transition: transform 0.2s ease;
+    }
+
+    .video-play-overlay:hover .play-circle {
+      transform: scale(1.1);
+      background: var(--primary);
+      color: #ffffff;
+    }
+
+    .video-timestamp {
+      position: absolute;
+      bottom: 12px;
+      left: 14px;
+      background: rgba(0, 0, 0, 0.65);
+      color: #ffffff;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-family: monospace;
+    }
+
+    /* Audio Player Card */
+    .audio-player-wrapper {
+      background: var(--card-inner);
+      border-radius: 14px;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .audio-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .audio-pill {
+      background: #e2e8f0;
+      color: var(--text-main);
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .audio-controls-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .audio-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: #ffffff;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.15s ease;
+    }
+
+    .audio-btn:hover {
+      background: var(--primary-hover);
+      transform: scale(1.05);
+    }
+
+    .audio-slider-track {
+      flex: 1;
+      height: 6px;
+      background: #cbd5e1;
+      border-radius: 3px;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .audio-slider-progress {
+      height: 100%;
+      width: 0%;
+      background: var(--primary);
+      border-radius: 3px;
+    }
+
+    .audio-time {
+      font-size: 12px;
+      font-family: monospace;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    @media print {
+      body {
+        background: #ffffff !important;
+        color: #0f172a !important;
+        padding: 0 !important;
+      }
+      #antigravity-bg,
+      .dot-overlay,
+      .theme-toggle-btn,
+      .nav-controls {
+        display: none !important;
+      }
+      .top-header {
+        border-bottom: 2px solid #e2e8f0;
+        padding-bottom: 12px;
+        margin-bottom: 20px;
+      }
+      .card, .media-card {
+        box-shadow: none !important;
+        border: 1px solid #cbd5e1 !important;
+        background: #ffffff !important;
+        page-break-inside: avoid;
+      }
+      .info-row, .metric-box, .feedback-box, .accordion-item {
+        background: #f8fafc !important;
+        border-color: #e2e8f0 !important;
+        color: #0f172a !important;
+      }
+      .q-text, .info-val, .card-title, .metric-num {
+        color: #0f172a !important;
+      }
+      .accordion-body {
+        display: block !important;
+      }
+      .accordion-chevron {
+        display: none !important;
+      }
     }
   </style>
 </head>
 
 <body>
 
-  <div class="dashboard-container">
+  <!-- Background Effects -->
+  <canvas id="antigravity-bg"></canvas>
+  <div class="dot-overlay"></div>
 
-    <!-- Sticky Header Navigation -->
-    <header class="header-bar no-print">
-      <a href="/dashboard.html" class="logo-box">
-        <div class="logo-icon">
-          <i class="fa-solid fa-brain"></i>
-        </div>
-        <div class="brand-title">Hiero</div>
+  <!-- Floating Theme Toggle (Bottom-Left) -->
+  <button id="themeToggleBtn" class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Dark/Light Theme">
+    <i class="fa-solid fa-moon"></i>
+  </button>
+
+  <div class="container">
+    
+    <!-- Top Header Bar -->
+    <header class="top-header">
+      <a href="/index.html" class="brand-logo" style="display: flex; align-items: center; gap: 12px;">
+        <img src="/logo-hiero.png" alt="Hiero Logo" style="height: 44px; width: auto; object-fit: contain; border-radius: 8px; filter: drop-shadow(0 0 10px rgba(16, 185, 129, 0.4));">
+        <span style="font-family: 'Outfit', sans-serif; font-size: 24px; font-weight: 800; letter-spacing: -0.5px; color: var(--text-main);">HIERO</span>
       </a>
 
-      <div class="header-actions">
-        <!-- Theme Toggle Button (Symbol Only) -->
-        <button class="theme-toggle-icon-btn" onclick="toggleTheme()" id="themeBtn" title="Toggle Theme">
-          <i class="fa-solid fa-moon" id="themeIcon"></i>
-        </button>
-
-        <!-- SINGLE Download Button -->
-        <button class="btn-primary-download" onclick="exportAnalysisPDF()">
+      <div class="nav-controls">
+        <a href="/dashboard.html" class="btn-dashboard">
+          <i class="fa-solid fa-compass"></i> Dashboard
+        </a>
+        <div class="user-pill">
+          <div class="user-avatar" id="avatarInitial">N</div>
+          <span id="headerUserName">Namana A.J</span>
+          <i class="fa-solid fa-chevron-down" style="font-size: 11px; color: #64748b;"></i>
+        </div>
+        <button class="btn-download" onclick="downloadAnalysisReport()" title="Download / Export Analysis PDF">
           <i class="fa-solid fa-download"></i> Download Analysis
         </button>
       </div>
     </header>
 
-    <!-- CLEAN TWO-COLUMN TOP LAYOUT (Candidate Info Card + Question Summary Card) -->
-    <div class="top-two-column-grid">
-
-      <!-- LEFT CARD: Candidate Information Card -->
-      <div class="glass-card">
-        <div class="card-section-title">
-          <i class="fa-solid fa-user-check"></i> Candidate Information
-        </div>
-
-        <div class="candidate-info-list">
-          <div class="info-row-item">
-            <div class="info-label-group">
-              <i class="fa-solid fa-user"></i> Name
+    <!-- Main Dashboard Grid -->
+    <div class="dashboard-grid">
+      
+      <!-- LEFT COLUMN -->
+      <div class="col-left">
+        
+        <!-- Candidate Information Card -->
+        <div class="card">
+          <div class="card-title">
+            <i class="fa-solid fa-circle-user"></i> Candidate Information
+          </div>
+          
+          <div class="info-list">
+            <div class="info-row">
+              <div class="info-label"><i class="fa-solid fa-user"></i> Name</div>
+              <div class="info-val" id="candidateName">Namana A.J</div>
             </div>
-            <div class="info-value-text" id="valCandidateName">Rishika BS</div>
-          </div>
-
-          <!-- Resume Upload Row -->
-          <div class="info-row-item resume-upload-box" onclick="triggerResumeUpload()" title="Click to upload resume">
-            <input type="file" id="resumeFileInput" accept=".pdf,.docx" style="display: none;" onchange="handleResumeFileSelect(event)">
-            <div class="info-label-group">
-              <i class="fa-solid fa-file-pdf"></i> Resume
+            
+            <div class="info-row">
+              <div class="info-label"><i class="fa-solid fa-briefcase"></i> Target Role</div>
+              <div class="info-val" id="targetRole">Software Engineer</div>
             </div>
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <span class="info-value-text" id="valResumeFileName">Resume.pdf</span>
-              <i class="fa-solid fa-cloud-arrow-up" style="color: var(--primary); font-size: 14px;"></i>
+            
+            <div class="info-row">
+              <div class="info-label"><i class="fa-solid fa-clock"></i> Start Time</div>
+              <div class="info-val" id="startTime">10:00 AM</div>
+            </div>
+            
+            <div class="info-row">
+              <div class="info-label"><i class="fa-solid fa-hourglass-end"></i> End Time</div>
+              <div class="info-val" id="endTime">10:25 AM</div>
+            </div>
+            
+            <div class="info-row">
+              <div class="info-label"><i class="fa-solid fa-stopwatch"></i> Duration</div>
+              <div class="info-val" id="duration">25 Minutes</div>
             </div>
           </div>
+        </div>
 
-          <div class="info-row-item">
-            <div class="info-label-group">
-              <i class="fa-solid fa-briefcase"></i> Target Role
+        <!-- Questions & Feedback Section -->
+        <div class="card">
+          <div class="card-title">
+            <i class="fa-solid fa-comments"></i> Questions & Feedback
+          </div>
+          
+          <div class="questions-list" id="questionsContainer">
+            
+            <!-- Question 1 -->
+            <div class="accordion-item active">
+              <div class="accordion-header" onclick="toggleAccordion(this)">
+                <span class="q-badge">QUESTION 01</span>
+                <span class="q-text">Tell me about yourself.</span>
+                <i class="fa-solid fa-chevron-down accordion-chevron"></i>
+              </div>
+              <div class="accordion-body">
+                <div class="answer-box">
+                  <span class="answer-tag"><i class="fa-solid fa-microphone"></i> CANDIDATE ANSWER</span>
+                  <p>"I am a Full-Stack Software Engineer passionate about building scalable web applications and high-performance APIs. I recently completed my Computer Science degree where I specialized in modern web frameworks and database optimization. In my recent project, I designed a multi-tenant platform using React, Node.js, and MongoDB that served over 10,000 active users. I enjoy solving complex architecture problems and collaborating in fast-paced engineering teams."</p>
+                </div>
+
+                <div class="feedback-box">
+                  <span class="feedback-tag"><i class="fa-solid fa-wand-magic-sparkles"></i> AI EVALUATION & FEEDBACK</span>
+                  <p style="margin-bottom: 8px;"><strong>Strengths:</strong> Excellent self-introduction following the Present-Past-Future framework. Clear articulation of technical skills (React, Node.js, MongoDB) and quantified impact (10,000+ active users).</p>
+                  <p style="margin-bottom: 10px;"><strong>Key Suggestion:</strong> Briefly mention a soft skill or cross-functional collaboration experience to highlight well-rounded engineering leadership.</p>
+                  <div style="font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-circle-check"></i> Score: 9.0/10 (High Technical Clarity)
+                  </div>
+                </div>
+              </div>
             </div>
-            <div class="info-value-text" id="valTargetRole">Software Engineer</div>
-          </div>
 
-          <div class="info-row-item">
-            <div class="info-label-group">
-              <i class="fa-solid fa-clock"></i> Start Time
+            <!-- Question 2 -->
+            <div class="accordion-item">
+              <div class="accordion-header" onclick="toggleAccordion(this)">
+                <span class="q-badge">QUESTION 02</span>
+                <span class="q-text">How do you handle asynchronous state management and API calls in React?</span>
+                <i class="fa-solid fa-chevron-down accordion-chevron"></i>
+              </div>
+              <div class="accordion-body">
+                <div class="answer-box">
+                  <span class="answer-tag"><i class="fa-solid fa-microphone"></i> CANDIDATE ANSWER</span>
+                  <p>"For standard API requests, I use custom React hooks with <code>async/await</code> and <code>axios</code> inside <code>useEffect</code> or action handlers, managing loading, data, and error state variables cleanly. For application-wide server state, I use React Query or Redux Toolkit Query because they automate caching, background revalidation, retry logic, and optimistic UI updates without manual boilerplate."</p>
+                </div>
+
+                <div class="feedback-box">
+                  <span class="feedback-tag"><i class="fa-solid fa-wand-magic-sparkles"></i> AI EVALUATION & FEEDBACK</span>
+                  <p style="margin-bottom: 8px;"><strong>Strengths:</strong> Comprehensive response covering both component-level state and enterprise data-fetching tools (React Query/RTK Query). Highlighted error handling and optimistic UI updates.</p>
+                  <p style="margin-bottom: 10px;"><strong>Key Suggestion:</strong> Mention using <code>AbortController</code> cleanup functions inside <code>useEffect</code> to prevent memory leaks and unmounted component state updates.</p>
+                  <div style="font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-circle-check"></i> Score: 8.8/10 (Strong Technical Depth)
+                  </div>
+                </div>
+              </div>
             </div>
-            <div class="info-value-text" id="valStartTime">10:00 AM</div>
-          </div>
 
-          <div class="info-row-item">
-            <div class="info-label-group">
-              <i class="fa-solid fa-hourglass-end"></i> End Time
+            <!-- Question 3 -->
+            <div class="accordion-item">
+              <div class="accordion-header" onclick="toggleAccordion(this)">
+                <span class="q-badge">QUESTION 03</span>
+                <span class="q-text">Explain how RESTful APIs are designed and secured.</span>
+                <i class="fa-solid fa-chevron-down accordion-chevron"></i>
+              </div>
+              <div class="accordion-body">
+                <div class="answer-box">
+                  <span class="answer-tag"><i class="fa-solid fa-microphone"></i> CANDIDATE ANSWER</span>
+                  <p>"RESTful APIs should be resource-oriented using standard HTTP verbs (GET, POST, PUT, DELETE) and meaningful status codes (200, 201, 400, 401, 404, 500). To secure endpoints, I implement stateless JWT authentication passed in HTTP-only cookies or Authorization headers, configure strict CORS policies, enforce rate limiting using Redis, validate payload schemas using Joi/Zod, and require HTTPS encryption."</p>
+                </div>
+
+                <div class="feedback-box">
+                  <span class="feedback-tag"><i class="fa-solid fa-wand-magic-sparkles"></i> AI EVALUATION & FEEDBACK</span>
+                  <p style="margin-bottom: 8px;"><strong>Strengths:</strong> Outstanding structural understanding of REST principles and multi-layer API security (JWT, HTTP-only cookies, CORS, Rate limiting, input validation).</p>
+                  <p style="margin-bottom: 10px;"><strong>Key Suggestion:</strong> Add a brief point on API versioning strategies (e.g. <code>/api/v1/</code>) and token rotation/refresh token mechanisms.</p>
+                  <div style="font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-circle-check"></i> Score: 9.2/10 (Architectural Mastery)
+                  </div>
+                </div>
+              </div>
             </div>
-            <div class="info-value-text" id="valEndTime">10:25 AM</div>
-          </div>
 
-          <div class="info-row-item">
-            <div class="info-label-group">
-              <i class="fa-solid fa-stopwatch"></i> Duration
+            <!-- Question 4 -->
+            <div class="accordion-item">
+              <div class="accordion-header" onclick="toggleAccordion(this)">
+                <span class="q-badge">QUESTION 04</span>
+                <span class="q-text">Describe a production bug you recently debugged.</span>
+                <i class="fa-solid fa-chevron-down accordion-chevron"></i>
+              </div>
+              <div class="accordion-body">
+                <div class="answer-box">
+                  <span class="answer-tag"><i class="fa-solid fa-microphone"></i> CANDIDATE ANSWER</span>
+                  <p>"We encountered sudden memory spikes and request timeouts under peak traffic. I analyzed server APM logs and heap dumps, tracing the bug to unclosed database connections inside an unindexed event listener loop. I fixed the connection pooling lifecycle, added compound database indexes, and implemented automated load tests, which reduced p99 latency by 65% and resolved the memory leaks."</p>
+                </div>
+
+                <div class="feedback-box">
+                  <span class="feedback-tag"><i class="fa-solid fa-wand-magic-sparkles"></i> AI EVALUATION & FEEDBACK</span>
+                  <p style="margin-bottom: 8px;"><strong>Strengths:</strong> Impressive narrative utilizing the STAR technique (Situation, Task, Action, Result) with clear debugging methodologies (heap dumps, APM log inspection) and concrete quantitative outcome (65% latency reduction).</p>
+                  <p style="margin-bottom: 10px;"><strong>Key Suggestion:</strong> Mention how monitoring alerts (e.g. Datadog / Prometheus) originally notified the engineering team before user impact escalation.</p>
+                  <div style="font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-circle-check"></i> Score: 9.5/10 (Exceptional Problem Solving)
+                  </div>
+                </div>
+              </div>
             </div>
-            <div class="info-value-text" id="valDuration">25 Minutes</div>
+
+            <!-- Question 5 -->
+            <div class="accordion-item">
+              <div class="accordion-header" onclick="toggleAccordion(this)">
+                <span class="q-badge">QUESTION 05</span>
+                <span class="q-text">How do you optimize MongoDB database queries for performance?</span>
+                <i class="fa-solid fa-chevron-down accordion-chevron"></i>
+              </div>
+              <div class="accordion-body">
+                <div class="answer-box">
+                  <span class="answer-tag"><i class="fa-solid fa-microphone"></i> CANDIDATE ANSWER</span>
+                  <p>"I optimize MongoDB by designing single-field and compound indexes tailored to high-frequency query patterns. I inspect query execution plans using <code>.explain('executionStats')</code> to verify index scans (<code>IXSCAN</code>) over collection scans (<code>COLLSCAN</code>). Additionally, I project only required attributes with <code>.select()</code>, place <code>$match</code> early in aggregation pipelines, and use connection pooling."</p>
+                </div>
+
+                <div class="feedback-box">
+                  <span class="feedback-tag"><i class="fa-solid fa-wand-magic-sparkles"></i> AI EVALUATION & FEEDBACK</span>
+                  <p style="margin-bottom: 8px;"><strong>Strengths:</strong> Deep database optimization knowledge highlighting indexing internals (<code>IXSCAN</code> vs <code>COLLSCAN</code>), projection scoping, and early aggregation stage filtering.</p>
+                  <p style="margin-bottom: 10px;"><strong>Key Suggestion:</strong> Touch upon read preferences for scaling read-heavy workloads using secondary replica nodes.</p>
+                  <div style="font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-circle-check"></i> Score: 9.0/10 (Expert Database Tuning)
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
+
       </div>
 
-      <!-- RIGHT CARD: Question Summary Card -->
-      <div class="glass-card">
-        <div class="card-section-title">
-          <i class="fa-solid fa-chart-simple"></i> Question Summary
-        </div>
-
-        <div class="stats-summary-grid">
-          <div class="stat-metric-card">
-            <span class="stat-metric-number" id="statTotalQ">5</span>
-            <span class="stat-metric-label">Total Asked</span>
+      <!-- RIGHT COLUMN -->
+      <div class="col-right">
+        
+        <!-- Question Summary Card -->
+        <div class="card">
+          <div class="card-title">
+            <i class="fa-solid fa-chart-line"></i> Question Summary
           </div>
+          
+          <div class="summary-grid">
+            <div class="metric-box">
+              <div class="metric-num" id="totalAsked">5</div>
+              <div class="metric-label">TOTAL ASKED</div>
+            </div>
 
-          <div class="stat-metric-card">
-            <span class="stat-metric-number" style="color: var(--primary);" id="statAttempted">5</span>
-            <span class="stat-metric-label">Attempted</span>
-          </div>
+            <div class="metric-box">
+              <div class="metric-num" id="totalAttempted">5</div>
+              <div class="metric-label">ATTEMPTED</div>
+            </div>
 
-          <div class="stat-metric-card">
-            <span class="stat-metric-number" style="color: var(--accent-yellow);" id="statSkipped">0</span>
-            <span class="stat-metric-label">Skipped</span>
-          </div>
+            <div class="metric-box">
+              <div class="metric-num" id="totalSkipped">0</div>
+              <div class="metric-label">SKIPPED</div>
+            </div>
 
-          <div class="stat-metric-card">
-            <span class="stat-metric-number" style="color: var(--accent-cyan);" id="statCorrect">4</span>
-            <span class="stat-metric-label">Correct</span>
-          </div>
+            <div class="metric-box">
+              <div class="metric-num emerald" id="totalCorrect">4</div>
+              <div class="metric-label">CORRECT</div>
+            </div>
 
-          <div class="stat-metric-card">
-            <span class="stat-metric-number" style="color: var(--accent-purple);" id="statConfidence">88%</span>
-            <span class="stat-metric-label">Confidence</span>
-          </div>
+            <div class="metric-box">
+              <div class="metric-num emerald" id="confidenceVal">88%</div>
+              <div class="metric-label">CONFIDENCE</div>
+            </div>
 
-          <div class="stat-metric-card">
-            <span class="perf-badge" id="statOverallPerf">Excellent</span>
-            <span class="stat-metric-label" style="margin-top: 4px;">Overall</span>
-          </div>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- QUESTIONS REVIEW SECTION (Question, Response, Review) -->
-    <section class="questions-review-section">
-      <div class="card-section-title" style="margin-left: 4px;">
-        <i class="fa-solid fa-comments"></i> Questions & Review
-      </div>
-
-      <div id="questionsReviewContainer">
-        <!-- Dynamically Populated Cards -->
-      </div>
-    </section>
-
-    <!-- COLLAPSIBLE SECTION: TRANSCRIPT -->
-    <div class="accordion-item open" id="accTranscript">
-      <div class="accordion-header-bar" onclick="toggleAccordion('accTranscript')">
-        <div class="accordion-header-left">
-          <i class="fa-solid fa-quote-left"></i>
-          <span>Interview Transcript</span>
-        </div>
-        <i class="fa-solid fa-chevron-down chevron-icon"></i>
-      </div>
-      <div class="accordion-body-content">
-        <div class="search-wrapper">
-          <i class="fa-solid fa-magnifying-glass"></i>
-          <input type="text" class="search-transcript-input" id="searchTranscriptInput" placeholder="Search transcript..." onkeyup="filterTranscript()">
-        </div>
-
-        <div class="transcript-scroll-area" id="transcriptScrollArea">
-          <!-- Dynamically Populated Transcript -->
-        </div>
-      </div>
-    </div>
-
-    <!-- COLLAPSIBLE SECTION: SCREEN RECORDING -->
-    <div class="accordion-item" id="accScreenRecording">
-      <div class="accordion-header-bar" onclick="toggleAccordion('accScreenRecording')">
-        <div class="accordion-header-left">
-          <i class="fa-solid fa-video"></i>
-          <span>Screen Recording</span>
-        </div>
-        <i class="fa-solid fa-chevron-down chevron-icon"></i>
-      </div>
-      <div class="accordion-body-content">
-        <div class="screen-rec-wrapper">
-          <div class="video-viewport">
-            <video id="screenVideoPlayer" controls poster="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=1200&q=80">
-              <source id="screenVideoSource" src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" type="video/mp4">
-              Your browser does not support HTML5 video playback.
-            </video>
+            <div class="metric-box">
+              <div class="metric-badge" id="overallVerdict">Excellent</div>
+              <div class="metric-label">OVERALL</div>
+            </div>
           </div>
         </div>
+
+        <!-- Video Recording Card -->
+        <div class="media-card">
+          <div class="card-title">
+            <i class="fa-solid fa-video"></i> Video Recording
+          </div>
+
+          <div class="video-preview-wrapper">
+            <!-- Simulated video thumbnail -->
+            <img src="https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&w=800&q=80" alt="Video Recording" class="video-preview-img" id="videoThumbnail">
+            
+            <div class="video-play-overlay" onclick="toggleVideoPlay()">
+              <div class="play-circle" id="videoPlayIcon">
+                <i class="fa-solid fa-play"></i>
+              </div>
+              <span style="font-size: 13px; font-weight: 700;">Play Recording</span>
+            </div>
+
+            <div class="video-timestamp" id="videoTimer">0:00</div>
+            <video id="actualVideo" style="display: none; width: 100%; height: 100%; object-fit: cover;" controls></video>
+          </div>
+        </div>
+
+        <!-- Candidate Voice Audio Card -->
+        <div class="media-card">
+          <div class="card-title">
+            <i class="fa-solid fa-microphone"></i> Candidate Voice Audio
+          </div>
+
+          <div class="audio-player-wrapper">
+            <div class="audio-meta">
+              <span>Audio Track</span>
+              <span class="audio-pill">Session Audio</span>
+            </div>
+
+            <div class="audio-controls-row">
+              <button class="audio-btn" onclick="toggleAudioPlay()" id="audioPlayBtn">
+                <i class="fa-solid fa-play"></i>
+              </button>
+              
+              <div class="audio-slider-track" onclick="seekAudio(event)" id="audioTrack">
+                <div class="audio-slider-progress" id="audioProgress"></div>
+              </div>
+
+              <span class="audio-time" id="audioTimer">0:00 / 0:00</span>
+            </div>
+            
+            <audio id="actualAudio" style="display: none;"></audio>
+          </div>
+        </div>
+
       </div>
+
     </div>
 
   </div>
 
-  <!-- JAVASCRIPT LOGIC & DYNAMIC API INTEGRATION -->
   <script>
-    let fetchedDashboardData = null;
-
-    // Theme Toggle Handler (Symbol Only)
-    function toggleTheme() {
-      const html = document.documentElement;
-      const themeIcon = document.getElementById('themeIcon');
-      const currentTheme = html.getAttribute('data-theme');
-      const nextTheme = currentTheme === 'light' ? 'dark' : 'light';
+    // Accordion Toggle Logic
+    function toggleAccordion(headerEl) {
+      const item = headerEl.parentElement;
+      const isActive = item.classList.contains('active');
       
-      html.setAttribute('data-theme', nextTheme);
-      if (nextTheme === 'light') {
-        themeIcon.className = 'fa-solid fa-sun';
-      } else {
-        themeIcon.className = 'fa-solid fa-moon';
-      }
+      // Close other items optionally or toggle current
+      item.classList.toggle('active');
     }
 
-    // Accordion Toggle
-    function toggleAccordion(accordionId) {
-      const item = document.getElementById(accordionId);
-      if (item) {
-        item.classList.toggle('open');
-      }
-    }
-
-    // Resume Upload Click & Select Handlers
-    function triggerResumeUpload() {
-      document.getElementById('resumeFileInput').click();
-    }
-
-    function handleResumeFileSelect(event) {
-      const file = event.target.files[0];
-      if (file) {
-        document.getElementById('valResumeFileName').innerText = file.name;
-      }
-    }
-
-    // Dynamic API Data Fetch & Render
-    async function loadDashboardData() {
-      showLoadingSkeletons();
-
+    // Populate data from Session/LocalStorage if available
+    document.addEventListener('DOMContentLoaded', () => {
       try {
-        const res = await fetch('/api/feedback');
-        if (res.ok) {
-          const data = await res.json();
-          renderDashboard(data);
-          return;
+        const savedUser = JSON.parse(localStorage.getItem('user') || '{}');
+        const candidateName = savedUser.name || localStorage.getItem('hiero_user_name') || 'Namana A.J';
+        const role = localStorage.getItem('hiero_target_role') || 'Software Engineer';
+        
+        document.getElementById('candidateName').textContent = candidateName;
+        document.getElementById('headerUserName').textContent = candidateName;
+        document.getElementById('targetRole').textContent = role;
+        
+        if (candidateName && candidateName.length > 0) {
+          document.getElementById('avatarInitial').textContent = candidateName.charAt(0).toUpperCase();
         }
-      } catch (err) {
-        console.warn('[Hiero] API fetch error or endpoint fallback:', err);
-      }
 
-      // Dynamic Fallback Payload if API endpoint returns fallback
-      const fallbackData = getDynamicPayload();
-      renderDashboard(fallbackData);
-    }
-
-    function showLoadingSkeletons() {
-      document.getElementById('questionsReviewContainer').innerHTML = `
-        <div class="skeleton-loader" style="height: 120px; margin-bottom: 12px;"></div>
-        <div class="skeleton-loader" style="height: 120px;"></div>
-      `;
-    }
-
-    function getDynamicPayload() {
-      return {
-        candidate: {
-          name: "Rishika BS",
-          resume: "Resume.pdf",
-          targetRole: "Software Engineer",
-          startTime: "10:00 AM",
-          endTime: "10:25 AM",
-          duration: "25 Minutes"
-        },
-        summary: {
-          totalAsked: 5,
-          attempted: 5,
-          skipped: 0,
-          correctAnswers: 4,
-          confidenceScore: "88%",
-          overallPerformance: "Excellent"
-        },
-        questions: [
-          {
-            number: 1,
-            question: "Tell me about yourself.",
-            response: "I am a Computer Science student with hands-on experience in web development, building full-stack web apps using React, Node.js, and MongoDB.",
-            review: "Clear introduction with good confidence. Adding specific project metrics would make it stronger."
-          },
-          {
-            number: 2,
-            question: "How do you handle asynchronous state management and API calls in React?",
-            response: "I use custom hooks along with React Query for cached data fetching, state synchronization, and optimistic UI updates.",
-            review: "Strong architectural explanation. Identified caching and optimistic state management key concepts effectively."
-          },
-          {
-            number: 3,
-            question: "Explain how RESTful APIs are designed and secured.",
-            response: "REST APIs use standard HTTP verbs (GET, POST, PUT, DELETE) and JSON formatting. I secure endpoints using JWT authentication tokens and CORS headers.",
-            review: "Solid understanding of API security standards and JWT authentication middleware."
-          },
-          {
-            number: 4,
-            question: "Describe a production bug you recently debugged.",
-            response: "I resolved a WebSocket memory leak by ensuring event listeners were properly unsubscribed inside the component cleanup lifecycle.",
-            review: "Excellent technical problem-solving method. Concise and structured troubleshooting methodology."
-          },
-          {
-            number: 5,
-            question: "How do you optimize MongoDB database queries for performance?",
-            response: "I create compound indexes on high-frequency query fields and use Mongoose lean() queries to reduce memory footprint.",
-            review: "Accurate database indexing techniques and efficient Mongoose query optimization knowledge."
-          }
-        ],
-        transcript: [
-          { time: "00:15", speaker: "Interviewer", isAi: true, text: "Tell me about yourself." },
-          { time: "00:30", speaker: "Candidate", isAi: false, text: "I am a Computer Science student with hands-on experience in web development." },
-          { time: "02:10", speaker: "Interviewer", isAi: true, text: "How do you handle asynchronous state management and API calls in React?" },
-          { time: "02:45", speaker: "Candidate", isAi: false, text: "I use custom hooks along with React Query for cached data fetching." },
-          { time: "05:20", speaker: "Interviewer", isAi: true, text: "Explain how RESTful APIs are designed and secured." },
-          { time: "05:50", speaker: "Candidate", isAi: false, text: "I use standard HTTP verbs and secure endpoints using JWT authentication tokens." }
-        ],
-        screenRecordingUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4"
-      };
-    }
-
-    function renderDashboard(data) {
-      fetchedDashboardData = data;
-
-      // 1. Candidate Info Card
-      if (data.candidate) {
-        document.getElementById('valCandidateName').innerText = data.candidate.name || "Rishika BS";
-        document.getElementById('valResumeFileName').innerText = data.candidate.resume || "Resume.pdf";
-        document.getElementById('valTargetRole').innerText = data.candidate.targetRole || "Software Engineer";
-        document.getElementById('valStartTime').innerText = data.candidate.startTime || "10:00 AM";
-        document.getElementById('valEndTime').innerText = data.candidate.endTime || "10:25 AM";
-        document.getElementById('valDuration').innerText = data.candidate.duration || "25 Minutes";
-      }
-
-      // 2. Question Summary Card
-      if (data.summary) {
-        document.getElementById('statTotalQ').innerText = data.summary.totalAsked || 5;
-        document.getElementById('statAttempted').innerText = data.summary.attempted || 5;
-        document.getElementById('statSkipped').innerText = data.summary.skipped || 0;
-        document.getElementById('statCorrect').innerText = data.summary.correctAnswers || 4;
-        document.getElementById('statConfidence').innerText = data.summary.confidenceScore || "88%";
-        document.getElementById('statOverallPerf').innerText = data.summary.overallPerformance || "Excellent";
-      }
-
-      // 3. Questions Review Section (Question, Response, Review)
-      if (data.questions && data.questions.length > 0) {
-        const qContainer = document.getElementById('questionsReviewContainer');
-        qContainer.innerHTML = '';
-
-        data.questions.forEach(item => {
-          const card = document.createElement('div');
-          card.className = 'question-review-card';
-          card.innerHTML = `
-            <div class="q-header-title">
-              <span class="q-number-pill">Question ${item.number}</span>
-              <span>${escapeHtml(item.question)}</span>
-            </div>
-
-            <div class="block-response">
-              <span class="block-response-label"><i class="fa-solid fa-user"></i> Response</span>
-              ${escapeHtml(item.response)}
-            </div>
-
-            <div class="block-review">
-              <span class="block-review-label"><i class="fa-solid fa-clipboard-check"></i> Review</span>
-              ${escapeHtml(item.review)}
-            </div>
-          `;
-          qContainer.appendChild(card);
-        });
-      }
-
-      // 4. Transcript
-      if (data.transcript && data.transcript.length > 0) {
-        const tContainer = document.getElementById('transcriptScrollArea');
-        tContainer.innerHTML = '';
-        data.transcript.forEach(t => {
-          const entry = document.createElement('div');
-          entry.className = 'transcript-line-item';
-          const speakerClass = t.isAi ? 'speaker-interviewer' : 'speaker-candidate';
-          entry.innerHTML = `
-            <span class="time-stamp">[${t.time}]</span>
-            <span class="speaker-label ${speakerClass}">${t.speaker}:</span>
-            <span class="speaker-text">${escapeHtml(t.text)}</span>
-          `;
-          tContainer.appendChild(entry);
-        });
-      }
-
-      // 5. Screen Recording URL
-      if (data.screenRecordingUrl) {
-        const video = document.getElementById('screenVideoPlayer');
-        const source = document.getElementById('screenVideoSource');
-        if (video && source) {
-          source.src = data.screenRecordingUrl;
-          video.load();
+        // Check if real interview audio/video is saved
+        const recordedAudioUrl = localStorage.getItem('hiero_last_interview_audio');
+        if (recordedAudioUrl) {
+          const audioEl = document.getElementById('actualAudio');
+          audioEl.src = recordedAudioUrl;
         }
-      }
-    }
 
-    // Filter Transcript
-    function filterTranscript() {
-      const query = document.getElementById('searchTranscriptInput').value.toLowerCase();
-      const items = document.querySelectorAll('.transcript-line-item');
-      items.forEach(item => {
-        if (item.innerText.toLowerCase().includes(query)) {
-          item.style.display = 'flex';
-        } else {
-          item.style.display = 'none';
+        const recordedVideoUrl = localStorage.getItem('hiero_last_interview_video');
+        if (recordedVideoUrl) {
+          const videoEl = document.getElementById('actualVideo');
+          videoEl.src = recordedVideoUrl;
         }
-      });
-    }
+      } catch (e) {
+        console.warn('Session data read fallback to default preview data:', e);
+      }
+    });
 
-    // SINGLE PDF Export Handler: "Download Analysis"
-    function exportAnalysisPDF() {
-      const element = document.querySelector('.dashboard-container');
-      const filename = `Hiero_Interview_Analysis_${document.getElementById('valCandidateName').innerText.replace(/\s+/g, '_')}.pdf`;
-
-      const opt = {
-        margin:       0.3,
-        filename:     filename,
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true },
-        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
-      };
-
-      if (typeof html2pdf !== 'undefined') {
-        html2pdf().set(opt).from(element).save();
+    // Simulated Video Controls
+    let isVideoPlaying = false;
+    function toggleVideoPlay() {
+      const actualVideo = document.getElementById('actualVideo');
+      const overlay = document.querySelector('.video-play-overlay');
+      
+      if (actualVideo.src && actualVideo.src !== '') {
+        actualVideo.style.display = 'block';
+        overlay.style.display = 'none';
+        actualVideo.play();
       } else {
-        window.print();
+        // Toggle simulated state
+        isVideoPlaying = !isVideoPlaying;
+        const icon = document.getElementById('videoPlayIcon');
+        const timer = document.getElementById('videoTimer');
+        
+        if (isVideoPlaying) {
+          icon.innerHTML = '<i class="fa-solid fa-pause"></i>';
+          timer.textContent = '0:15 / 25:00';
+        } else {
+          icon.innerHTML = '<i class="fa-solid fa-play"></i>';
+          timer.textContent = '0:00';
+        }
       }
     }
 
-    function escapeHtml(str) {
-      if (!str) return '';
-      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    // Simulated Audio Controls
+    let isAudioPlaying = false;
+    let audioProgressVal = 0;
+    let audioInterval = null;
+
+    function toggleAudioPlay() {
+      const actualAudio = document.getElementById('actualAudio');
+      const btn = document.getElementById('audioPlayBtn');
+      const progress = document.getElementById('audioProgress');
+      const timer = document.getElementById('audioTimer');
+
+      if (actualAudio.src && actualAudio.src !== '') {
+        if (actualAudio.paused) {
+          actualAudio.play();
+          btn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+        } else {
+          actualAudio.pause();
+          btn.innerHTML = '<i class="fa-solid fa-play"></i>';
+        }
+      } else {
+        // Simulation
+        isAudioPlaying = !isAudioPlaying;
+        if (isAudioPlaying) {
+          btn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+          audioInterval = setInterval(() => {
+            audioProgressVal += 2;
+            if (audioProgressVal > 100) {
+              audioProgressVal = 0;
+              isAudioPlaying = false;
+              clearInterval(audioInterval);
+              btn.innerHTML = '<i class="fa-solid fa-play"></i>';
+            }
+            progress.style.width = audioProgressVal + '%';
+            const currentSecs = Math.floor((audioProgressVal / 100) * 150);
+            const mins = Math.floor(currentSecs / 60);
+            const secs = currentSecs % 60;
+            timer.textContent = `${mins}:${secs < 10 ? '0' : ''}${secs} / 2:30`;
+          }, 300);
+        } else {
+          btn.innerHTML = '<i class="fa-solid fa-play"></i>';
+          clearInterval(audioInterval);
+        }
+      }
     }
 
-    // Initialize on page load
-    document.addEventListener('DOMContentLoaded', loadDashboardData);
+    function seekAudio(event) {
+      const track = document.getElementById('audioTrack');
+      const progress = document.getElementById('audioProgress');
+      const rect = track.getBoundingClientRect();
+      const clickX = event.clientX - rect.left;
+      const width = rect.width;
+      audioProgressVal = Math.min(100, Math.max(0, (clickX / width) * 100));
+      progress.style.width = audioProgressVal + '%';
+    }
+
+    // --- Download / Print Analysis PDF Export ---
+    function downloadAnalysisReport() {
+      // Expand all question accordions so full report content is included in PDF output
+      const accordions = document.querySelectorAll('.accordion-item');
+      const previousStates = [];
+      accordions.forEach(item => {
+        previousStates.push(item.classList.contains('active'));
+        item.classList.add('active');
+      });
+
+      // Launch native print/PDF save dialog
+      window.print();
+
+      // Restore accordion states
+      setTimeout(() => {
+        accordions.forEach((item, idx) => {
+          if (!previousStates[idx]) {
+            item.classList.remove('active');
+          }
+        });
+      }, 1000);
+    }
+
+    // --- Theme Switching & Particle Canvas ---
+    function toggleTheme() {
+      document.body.classList.toggle('dark-mode');
+      const isDark = document.body.classList.contains('dark-mode');
+      localStorage.setItem('hiero_theme', isDark ? 'dark' : 'light');
+      updateThemeBtnIcon();
+    }
+
+    function updateThemeBtnIcon() {
+      const isDark = document.body.classList.contains('dark-mode');
+      const btn = document.getElementById('themeToggleBtn');
+      if (btn) {
+        btn.innerHTML = isDark ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>';
+      }
+    }
+
+    (function initTheme() {
+      const savedTheme = localStorage.getItem('hiero_theme');
+      if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+      }
+      updateThemeBtnIcon();
+    })();
+
+    // Background Particle Constellation Engine
+    (function () {
+      const canvas = document.getElementById('antigravity-bg');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      let particles = [];
+      let mouse = { x: null, y: null, radius: 170 };
+
+      window.addEventListener('mousemove', (e) => {
+        mouse.x = e.x;
+        mouse.y = e.y;
+      });
+
+      window.addEventListener('mouseout', () => {
+        mouse.x = null;
+        mouse.y = null;
+      });
+
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        initParticles();
+      }
+
+      class Particle {
+        constructor() {
+          this.init();
+        }
+
+        init() {
+          this.x = Math.random() * canvas.width;
+          this.y = Math.random() * canvas.height;
+          this.baseX = this.x;
+          this.baseY = this.y;
+          this.size = Math.random() * 2 + 1;
+          this.baseSize = this.size;
+          this.density = (Math.random() * 25) + 8;
+          this.opacity = Math.random() * 0.4 + 0.2;
+          this.velocity = (Math.random() - 0.5) * 0.4;
+        }
+
+        draw() {
+          const isDark = document.body.classList.contains('dark-mode');
+          ctx.fillStyle = isDark ? `rgba(7, 226, 25, ${this.opacity})` : `rgba(100, 116, 139, ${this.opacity * 0.5})`;
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        update() {
+          this.baseX += this.velocity;
+          this.baseY += this.velocity;
+
+          if (this.baseX > canvas.width) this.baseX = 0;
+          if (this.baseX < 0) this.baseX = canvas.width;
+          if (this.baseY > canvas.height) this.baseY = 0;
+          if (this.baseY < 0) this.baseY = canvas.height;
+
+          if (mouse.x !== null && mouse.y !== null) {
+            let dx = mouse.x - this.x;
+            let dy = mouse.y - this.y;
+            let distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < mouse.radius) {
+              let force = (mouse.radius - distance) / mouse.radius;
+              let dirX = dx / distance;
+              let dirY = dy / distance;
+
+              this.x -= dirX * force * this.density;
+              this.y -= dirY * force * this.density;
+              this.size = this.baseSize * (1 + force * 1.5);
+            } else {
+              this.x += (this.baseX - this.x) * 0.05;
+              this.y += (this.baseY - this.y) * 0.05;
+              this.size = this.baseSize;
+            }
+          } else {
+            this.x += (this.baseX - this.x) * 0.05;
+            this.y += (this.baseY - this.y) * 0.05;
+            this.size = this.baseSize;
+          }
+        }
+      }
+
+      function initParticles() {
+        particles = [];
+        let count = (canvas.width * canvas.height) / 9000;
+        for (let i = 0; i < count; i++) {
+          particles.push(new Particle());
+        }
+      }
+
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        for (let i = 0; i < particles.length; i++) {
+          particles[i].update();
+          particles[i].draw();
+        }
+
+        connect();
+        requestAnimationFrame(animate);
+      }
+
+      function connect() {
+        const isDark = document.body.classList.contains('dark-mode');
+        const linkBase = isDark ? 'rgba(7, 226, 25, ' : 'rgba(148, 163, 184, ';
+
+        for (let a = 0; a < particles.length; a++) {
+          for (let b = a + 1; b < particles.length; b++) {
+            let dx = particles[a].x - particles[b].x;
+            let dy = particles[a].y - particles[b].y;
+            let distSq = dx * dx + dy * dy;
+
+            if (distSq < 14000) {
+              let distance = Math.sqrt(distSq);
+              let opacity = 1 - (distance / 118);
+
+              ctx.beginPath();
+              ctx.strokeStyle = isDark 
+                ? `${linkBase}${opacity * 0.25})`
+                : `${linkBase}${opacity * 0.08})`;
+              ctx.lineWidth = 0.5;
+
+              ctx.moveTo(particles[a].x, particles[a].y);
+              ctx.lineTo(particles[b].x, particles[b].y);
+              ctx.stroke();
+            }
+          }
+        }
+      }
+
+      window.addEventListener('resize', resize);
+      resize();
+      animate();
+    })();
   </script>
 </body>
 
