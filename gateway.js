@@ -235,6 +235,7 @@ app.get('/get-started', (req, res) => {
 });
 
 app.get(['/mock-interview', '/mock-interview.html'], (req, res) => res.sendFile(path.join(__dirname, 'mock-interview.html')));
+app.get(['/session', '/session.html'], (req, res) => res.sendFile(path.join(__dirname, 'mock_interview', 'session.html')));
 app.get(['/result', '/result.html'], (req, res) => res.sendFile(path.join(__dirname, 'result.html')));
 app.get(['/companies', '/companies.html'], (req, res) => res.sendFile(path.join(__dirname, 'companies.html')));
 app.get(['/company', '/company.html'], (req, res) => res.sendFile(path.join(__dirname, 'company.html')));
