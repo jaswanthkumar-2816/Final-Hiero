@@ -268,6 +268,7 @@ app.get(['/ai-photo-formalizer', '/ai-photo-formalizer.html'], (req, res) => res
 // STATIC FILES
 // ======================
 app.use(express.static(__dirname, { index: false }));           // ← root SVGs (microsoft.svg, google.svg etc.)
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(express.static(landingDirPath, { index: false }));
 app.use(express.static(resumeBuilderPath, { index: false }));
 app.use('/public', express.static(resumeBuilderPath));

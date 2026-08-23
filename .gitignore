@@ -3,6 +3,7 @@ node_modules/
 .env
 *.log
 uploads/
+data/
 temp/
 .cache/
 .DS_Store

@@ -455,161 +455,6 @@ router.post('/chat', async (req, res) => {
 });
 
 // ─────────────────────────────────────────────
-// ROUTE: POST /voice-turn
-// True Voice-to-Voice AI Interview Turn
-// Ingests candidate's spoken audio directly, transcribes, analyzes & responds
-// ─────────────────────────────────────────────
-router.post('/voice-turn', videoUpload.fields([{ name: 'audio', maxCount: 1 }, { name: 'video', maxCount: 1 }]), async (req, res) => {
-    try {
-        const audioFile = req.files?.['audio']?.[0] || req.files?.['video']?.[0];
-        if (!audioFile || !audioFile.buffer) {
-            return res.status(400).json({ success: false, error: 'Voice audio file is required for voice-to-voice turn' });
-        }
-
-        const sessionId = (req.body.sessionId || 'session-' + Date.now()).replace(/[^a-zA-Z0-9_-]/g, '');
-        let context = {};
-        let messages = [];
-
-        try {
-            if (req.body.context) context = typeof req.body.context === 'string' ? JSON.parse(req.body.context) : req.body.context;
-        } catch(e) {}
-
-        try {
-            if (req.body.messages) messages = typeof req.body.messages === 'string' ? JSON.parse(req.body.messages) : req.body.messages;
-        } catch(e) {}
-
-        const questionIndex = req.body.questionIndex || req.body.questionNumber || 'Q' + (messages.filter(m => m.role === 'assistant').length || 1);
-        const duration = parseInt(req.body.duration || '0', 10);
-
-        // 1. Direct Neural Server-Side Whisper Audio Transcription
-        const formData = new FormData();
-        const filename = audioFile.originalname || 'candidate-voice.webm';
-        formData.append('file', audioFile.buffer, {
-            filename: filename,
-            contentType: audioFile.mimetype || 'audio/webm'
-        });
-        formData.append('model', 'whisper-large-v3-turbo');
-        formData.append('response_format', 'json');
-        formData.append('temperature', '0.0');
-
-        let lang = req.body.language || 'en';
-        if (lang && lang.includes('-')) lang = lang.split('-')[0];
-        formData.append('language', lang || 'en');
-
-        let candidateTranscript = '';
-        try {
-            const whisperRes = await axios.post(
-                'https://api.groq.com/openai/v1/audio/transcriptions',
-                formData,
-                {
-                    headers: {
-                        'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
-                        ...formData.getHeaders()
-                    },
-                    timeout: 20000
-                }
-            );
-            candidateTranscript = whisperRes.data?.text?.trim() || '';
-        } catch (sttErr) {
-            console.error('[Voice-Turn Whisper Error]:', sttErr?.response?.data || sttErr.message);
-            candidateTranscript = req.body.candidateTranscript || req.body.fallbackText || '';
-        }
-
-        if (!candidateTranscript || candidateTranscript.length < 2) {
-            return res.json({
-                success: false,
-                error: 'NO_SPEECH_DETECTED',
-                message: 'No clear voice audio was heard. Please speak your answer into the microphone.',
-                candidateTranscript: ''
-            });
-        }
-
-        // 2. Save Question Voice & Video Recording Permanently
-        let recordingUrl = '';
-        try {
-            const targetDir = path.join(__dirname, '..', 'uploads', 'recordings', sessionId);
-            if (!fs.existsSync(targetDir)) fs.mkdirSync(targetDir, { recursive: true });
-
-            const safeQNum = String(questionIndex).replace(/[^a-zA-Z0-9_-]/g, '_');
-            let ext = '.webm';
-            const mime = audioFile.mimetype || '';
-            if (mime.includes('mp4')) ext = '.mp4';
-            const recFilename = `${safeQNum}_${Date.now()}${ext}`;
-            const filePath = path.join(targetDir, recFilename);
-            fs.writeFileSync(filePath, audioFile.buffer);
-
-            recordingUrl = `/uploads/recordings/${sessionId}/${recFilename}`;
-
-            const manifestPath = path.join(targetDir, 'manifest.json');
-            let manifest = { sessionId, updatedAt: new Date().toISOString(), recordings: [] };
-            if (fs.existsSync(manifestPath)) {
-                try { manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8')); } catch(e){}
-            }
-            if (!manifest.recordings) manifest.recordings = [];
-            const lastAiMsg = messages.filter(m => m.role === 'assistant').pop()?.content || `Question ${safeQNum}`;
-            manifest.recordings.push({
-                questionNumber: safeQNum,
-                questionText: lastAiMsg,
-                candidateAnswer: candidateTranscript,
-                duration,
-                url: recordingUrl,
-                uploadedAt: new Date().toISOString()
-            });
-            manifest.updatedAt = new Date().toISOString();
-            fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
-        } catch(recSaveErr) {
-            console.warn('[Recording Save Notice]:', recSaveErr.message);
-        }
-
-        // 3. Append candidate's voice transcript to conversation history
-        messages.push({ role: 'user', content: candidateTranscript });
-
-        // 4. Determine Phase & Generate AI Interviewer Follow-up
-        const currentPhase = detectPhase(messages, req.body.phase);
-        let reply = '';
-        let isComplete = false;
-
-        if (currentPhase === 'feedback') {
-            const feedbackPrompt = buildFeedbackPrompt(context, messages);
-            const feedbackMessages = [
-                { role: 'system', content: feedbackPrompt },
-                { role: 'user', content: 'Generate the structured feedback report now.' }
-            ];
-            reply = await callGroq(feedbackMessages, 650);
-            isComplete = true;
-        } else {
-            const systemPrompt = buildSystemPrompt(context, currentPhase);
-            const allMessages = [
-                { role: 'system', content: systemPrompt },
-                ...messages
-            ];
-            reply = await callGroq(allMessages, 220);
-        }
-
-        // 5. Generate Speech Coaching Feedback
-        let coaching = {
-            clarityScore: Math.min(10, Math.max(7, Math.round(7 + (candidateTranscript.length / 40)))),
-            improvedPhrase: candidateTranscript.length > 20 ? `"${candidateTranscript.slice(0, 45)}..."` : "Good concise delivery.",
-            grammarTip: "Clear vocal articulation with active engineering terminology."
-        };
-
-        return res.json({
-            success: true,
-            candidateTranscript,
-            reply,
-            coaching,
-            recordingUrl,
-            phase: currentPhase,
-            isComplete,
-            sessionId
-        });
-    } catch (err) {
-        console.error('[Interview] /voice-turn error:', err);
-        return res.status(500).json({ success: false, error: 'Voice processing error', details: err.message });
-    }
-});
-
-// ─────────────────────────────────────────────
 // ROUTE: POST /feedback
 // Explicit endpoint to generate final feedback report
 // Call this when the frontend decides the interview is complete
@@ -667,7 +512,7 @@ router.post('/transcribe', multerUpload.single('audio'), async (req, res) => {
             filename: filename,
             contentType: req.file.mimetype || 'audio/webm'
         });
-        formData.append('model', 'whisper-large-v3-turbo');
+        formData.append('model', 'whisper-large-v3');
         formData.append('response_format', 'json');
         formData.append('temperature', '0.0');
 
@@ -683,7 +528,7 @@ router.post('/transcribe', multerUpload.single('audio'), async (req, res) => {
                     'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
                     ...formData.getHeaders()
                 },
-                timeout: 20000
+                timeout: 12000
             }
         );
 
@@ -845,13 +690,6 @@ router.get('/recordings/:sessionId/:questionNumber', (req, res) => {
     } catch (err) {
         return res.status(500).json({ success: false, error: err.message });
     }
-});
-
-// ─────────────────────────────────────────────
-// ROUTE: GET /health
-// ─────────────────────────────────────────────
-router.get('/health', (req, res) => {
-    res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
 module.exports = router;

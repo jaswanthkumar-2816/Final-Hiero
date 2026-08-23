@@ -1261,11 +1261,16 @@
 
 
         <div id="id-actions">
-          <p style="font-size: .72rem; color: var(--muted); letter-spacing: 2px; margin-bottom: 18px;">READY FOR SCAN
-          </p>
-          <button class="btn btn-primary" onclick="captureId()" style="width: 100%; max-width: 280px; padding: 16px;">
+          <div id="id-scan-status" style="font-size:0.8rem; font-weight:700; color:var(--muted); margin-bottom:18px; display:flex; align-items:center; justify-content:center; gap:8px; min-height:28px;">
+            <i class="fas fa-spinner fa-spin" style="color:var(--g)"></i> Initializing Face Detection AI...
+          </div>
+          <button id="btn-capture-id" class="btn btn-primary" onclick="captureId()" disabled style="width: 100%; max-width: 280px; padding: 16px; opacity:0.5; cursor:not-allowed;">
             <i class="fas fa-camera"></i> CAPTURE PHOTO
           </button>
+          <div id="id-capture-error" style="display:none; align-items:center; justify-content:center; gap:8px; background:rgba(239,68,68,0.12); border:1px solid rgba(239,68,68,0.3); border-radius:10px; padding:10px 16px; margin-top:14px; max-width:380px; margin-left:auto; margin-right:auto;">
+            <i class="fas fa-exclamation-triangle" style="color:#ef4444; font-size:0.85rem;"></i>
+            <span id="id-capture-error-text" style="font-size:0.75rem; color:#ef4444; font-weight:700;">Human face not detected. Please position your face clearly in the frame.</span>
+          </div>
         </div>
 
         <div id="id-confirm" style="display:none;flex-direction:column;align-items:center;gap:20px">
@@ -1939,7 +1944,7 @@
 
       <div style="text-align:center; margin-bottom:32px;">
         <h2 style="font-size:2rem;font-weight:800;letter-spacing:-1px;color:#fff;margin-bottom:8px;">Configure Your <span style="color:var(--g);text-shadow:0 0 20px var(--g25);">Interview Context</span></h2>
-        <p style="color:var(--muted);font-size:0.9rem;">Select a premium built-in job role or upload your custom resume and job description to lock in AI evaluation.</p>
+        <p style="color:var(--muted);font-size:0.9rem;">Upload your candidate resume <strong style="color:#ef4444;font-weight:700;">(Mandatory)</strong> and select your target job role to customize your AI interview evaluation.</p>
       </div>
 
       <div style="display:grid; grid-template-columns: 1fr 1.3fr; gap:36px; align-items:start;">
@@ -1960,7 +1965,12 @@
 
           <!-- Resume Upload Box -->
           <div>
-            <label style="font-size:0.75rem;font-weight:700;color:var(--muted);letter-spacing:1px;margin-bottom:8px;display:block;text-transform:uppercase;">Upload Resume (PDF)</label>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <label style="font-size:0.75rem;font-weight:700;color:var(--muted);letter-spacing:1px;display:block;text-transform:uppercase;margin:0;">
+                Upload Resume (PDF) <span style="color:#ef4444;font-size:0.9rem;">*</span>
+              </label>
+              <span style="font-size:0.65rem;color:#ef4444;font-weight:800;letter-spacing:0.5px;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.3);padding:2px 8px;border-radius:6px;text-transform:uppercase;">Mandatory</span>
+            </div>
             <div style="position:relative; width:100%;">
               <input type="file" id="ctx-resume-file" accept=".pdf"
                 style="position:absolute; width:100%; height:100%; opacity:0; cursor:pointer;"
@@ -1970,9 +1980,13 @@
                 <div style="width:58px;height:58px;border-radius:50%;background:linear-gradient(135deg, rgba(9, 192, 6, 0.15) 0%, rgba(9, 192, 6, 0.02) 100%);border:1.5px solid rgba(9, 192, 6, 0.35);display:inline-flex;align-items:center;justify-content:center;margin-bottom:14px;transition: all 0.3s ease;box-shadow:0 0 15px rgba(9, 192, 6, 0.08);" id="ctx-resume-icon-container">
                   <i id="ctx-resume-icon" class="fas fa-cloud-arrow-up" style="font-size:1.5rem; color:var(--g); transition: all 0.3s ease;"></i>
                 </div>
-                <p id="ctx-resume-label" style="font-size:0.88rem; color:#fff; margin:0 0 4px; font-weight:700; letter-spacing:0.2px;">Drag & Drop Resume PDF</p>
-                <p id="ctx-resume-sublabel" style="font-size:0.72rem; color:var(--muted); margin:0;">or click to browse local files</p>
+                <p id="ctx-resume-label" style="font-size:0.88rem; color:#fff; margin:0 0 4px; font-weight:700; letter-spacing:0.2px;">Drag & Drop Resume PDF <span style="color:#ef4444;">*</span></p>
+                <p id="ctx-resume-sublabel" style="font-size:0.72rem; color:var(--muted); margin:0;">Click to browse or drop local PDF file</p>
               </div>
+            </div>
+            <div id="ctx-resume-error" style="display:none;align-items:center;gap:8px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:8px 12px;margin-top:10px;">
+              <i class="fas fa-exclamation-triangle" style="color:#ef4444;font-size:0.85rem;"></i>
+              <span id="ctx-resume-error-text" style="font-size:0.75rem;color:#ef4444;font-weight:700;">Resume is required. Please upload your resume PDF to proceed.</span>
             </div>
             <div id="resume-parse-badge" style="display:none;align-items:center;gap:8px;background:rgba(9,192,6,0.08);border:1px solid var(--border-g);border-radius:8px;padding:8px 12px;margin-top:12px;">
               <i class="fas fa-check-circle" style="color:var(--g);font-size:0.85rem;"></i>
@@ -2166,13 +2180,19 @@
           <!-- Target Job Role TextArea -->
           <div>
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-              <label style="font-size:0.75rem;font-weight:700;color:var(--muted);letter-spacing:1px;display:block;text-transform:uppercase;">Target Job Role / Description</label>
-              <span id="role-desc-len" style="font-size:0.68rem;color:var(--muted);font-weight:600;">0 chars</span>
+              <label style="font-size:0.75rem;font-weight:700;color:var(--muted);letter-spacing:1px;display:block;text-transform:uppercase;margin:0;">
+                Target Job Role / Description <span style="color:#ef4444;font-size:0.9rem;">*</span>
+              </label>
+              <span id="role-desc-len" style="font-size:0.68rem;color:var(--muted);font-weight:600;">0 chars (min 35)</span>
             </div>
             <textarea id="ctx-role" rows="6"
               placeholder="e.g. Senior Frontend Engineer...&#10;Paste the full job requirements and description here to tailor your AI questions."
               style="width:100%;background:rgba(255,255,255,0.02);border:1px solid var(--border);color:#fff;padding:16px;border-radius:12px;font-family:inherit;font-size:0.9rem;outline:none;resize:vertical;transition:all 0.3s;box-shadow: inset 0 2px 8px rgba(0,0,0,0.2);"
-              oninput="document.getElementById('role-desc-len').textContent = this.value.length + ' chars'; selectCompanyRole('custom', true);"></textarea>
+              oninput="handleRoleInput(this)"></textarea>
+            <div id="ctx-role-error" style="display:none;align-items:center;gap:8px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:8px 12px;margin-top:10px;">
+              <i class="fas fa-exclamation-triangle" style="color:#ef4444;font-size:0.85rem;"></i>
+              <span id="ctx-role-error-text" style="font-size:0.75rem;color:#ef4444;font-weight:700;">Please enter a valid, detailed job description.</span>
+            </div>
           </div>
         </div>
 
@@ -2223,6 +2243,11 @@
       background: rgba(9, 192, 6, 0.06) !important;
       border-color: var(--g) !important;
       box-shadow: 0 0 20px rgba(9, 192, 6, 0.2) !important;
+    }
+    @keyframes shakeModal {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
     }
   </style>
 
@@ -2503,8 +2528,14 @@ Key Requirements:
       if (company === 'custom') {
         selectedRoleTitle = "Custom Role";
         if (!skipUpdateTextarea) {
-          document.getElementById('ctx-role').value = '';
-          document.getElementById('role-desc-len').textContent = '0 chars';
+          const roleEl = document.getElementById('ctx-role');
+          roleEl.value = '';
+          roleEl.style.borderColor = 'var(--border)';
+          roleEl.style.background = 'rgba(255,255,255,0.02)';
+          const lenEl = document.getElementById('role-desc-len');
+          if (lenEl) lenEl.innerHTML = `<span style="color:var(--muted);">0 chars (min 35)</span>`;
+          const errBox = document.getElementById('ctx-role-error');
+          if (errBox) errBox.style.display = 'none';
         }
         return;
       }
@@ -2513,10 +2544,72 @@ Key Requirements:
         selectedRoleTitle = companyRoles[company].title;
         if (!skipUpdateTextarea) {
           const desc = companyRoles[company].description;
-          document.getElementById('ctx-role').value = desc;
-          document.getElementById('role-desc-len').textContent = desc.length + ' chars';
+          const roleEl = document.getElementById('ctx-role');
+          roleEl.value = desc;
+          roleEl.style.borderColor = 'var(--border)';
+          roleEl.style.background = 'rgba(255,255,255,0.02)';
+          const lenEl = document.getElementById('role-desc-len');
+          if (lenEl) lenEl.innerHTML = `<span style="color:var(--g);font-weight:700;">${desc.length} chars ✓</span>`;
+          const errBox = document.getElementById('ctx-role-error');
+          if (errBox) errBox.style.display = 'none';
         }
       }
+    }
+
+    function handleRoleInput(el) {
+      const val = el.value || '';
+      const len = val.trim().length;
+      const lenEl = document.getElementById('role-desc-len');
+      const errBox = document.getElementById('ctx-role-error');
+
+      if (errBox) errBox.style.display = 'none';
+      el.style.borderColor = len >= 35 ? 'var(--g)' : 'var(--border)';
+      el.style.background = 'rgba(255,255,255,0.02)';
+
+      if (lenEl) {
+        if (len < 35) {
+          lenEl.innerHTML = `<span style="color:#ef4444;font-weight:700;">${len} chars (min 35)</span>`;
+        } else {
+          lenEl.innerHTML = `<span style="color:var(--g);font-weight:700;">${len} chars ✓</span>`;
+        }
+      }
+
+      selectCompanyRole('custom', true);
+    }
+
+    function validateJobDescription(text) {
+      if (!text || typeof text !== 'string') {
+        return { valid: false, message: 'Job description cannot be empty. Please select a role or paste a valid job description.' };
+      }
+      const clean = text.trim();
+      if (clean.length < 35) {
+        return { valid: false, message: 'Job description is too short (minimum 35 characters). Please provide detailed role requirements or select a company role above.' };
+      }
+
+      // Check for repeated spam characters (e.g. "aaaaa", "......", "11111")
+      if (/(.)\1{4,}/i.test(clean)) {
+        return { valid: false, message: 'Job description contains repetitive spam characters. Please provide realistic role requirements.' };
+      }
+
+      const words = clean.split(/\s+/).filter(w => w.length > 0);
+      if (words.length < 4) {
+        return { valid: false, message: 'Job description must contain at least 4 meaningful words describing the position.' };
+      }
+
+      // Check for repeated word spam (e.g. "abcd abcd abcd" or "test test test")
+      const uniqueWords = new Set(words.map(w => w.toLowerCase().replace(/[^a-z0-9]/g, '')));
+      uniqueWords.delete('');
+      if (uniqueWords.size < 3) {
+        return { valid: false, message: 'Job description contains repetitive words. Please provide actual job responsibilities or select a role above.' };
+      }
+
+      // Check for keyboard mashing / unpronounceable consonant runs (e.g. "asdfghjkl", "qwertyuiop")
+      const longConsonantRuns = words.filter(w => w.length >= 7 && !/[aeiouy]/i.test(w));
+      if (longConsonantRuns.length > 0) {
+        return { valid: false, message: 'Job description contains unreadable gibberish (' + longConsonantRuns[0] + '). Please enter genuine role requirements.' };
+      }
+
+      return { valid: true };
     }
 
     function extractNameFromResumeText(text, filename) {
@@ -2545,6 +2638,8 @@ Key Requirements:
       return '';
     }
 
+    let isResumeUploading = false;
+
     async function handleResumeSelect(input) {
       const box = document.getElementById('ctx-resume-box');
       const icon = document.getElementById('ctx-resume-icon');
@@ -2554,10 +2649,14 @@ Key Requirements:
       const badgeText = document.getElementById('resume-parse-badge-text');
       const nameInput = document.getElementById('ctx-candidate-name');
       const nameStatus = document.getElementById('ctx-name-status');
+      const errBox = document.getElementById('ctx-resume-error');
+
+      if (errBox) errBox.style.display = 'none';
 
       if (input.files && input.files[0]) {
         const file = input.files[0];
         
+        isResumeUploading = true;
         label.textContent = 'Uploading & Parsing...';
         sublabel.textContent = 'Analyzing resume structure with AI';
         box.style.borderColor = 'var(--g)';
@@ -2577,6 +2676,7 @@ Key Requirements:
           const data = await res.json();
           if (data.success && data.text) {
             uploadedResumeText = data.text;
+            isResumeUploading = false;
             
             const extractedName = extractNameFromResumeText(data.text, file.name);
             if (extractedName) {
@@ -2601,16 +2701,23 @@ Key Requirements:
           }
         } catch (e) {
           console.error("PDF Parsing failed:", e);
+          uploadedResumeText = "";
+          isResumeUploading = false;
           label.innerHTML = `<span style="color:var(--red)">✗ Parsing Failed</span>`;
           sublabel.textContent = 'Please try another PDF file';
           box.style.borderColor = 'var(--red)';
           box.style.background = 'rgba(239, 68, 68, 0.05)';
           icon.className = 'fas fa-triangle-exclamation';
           icon.style.color = 'var(--red)';
+          if (errBox) {
+            document.getElementById('ctx-resume-error-text').textContent = 'Failed to parse resume PDF. Please upload a valid, readable PDF.';
+            errBox.style.display = 'flex';
+          }
         }
       } else {
-        label.textContent = 'Drag & Drop Resume PDF';
-        sublabel.textContent = 'or click to browse local files';
+        isResumeUploading = false;
+        label.innerHTML = `Drag & Drop Resume PDF <span style="color:#ef4444;">*</span>`;
+        sublabel.textContent = 'Click to browse or drop local PDF file';
         box.style.borderColor = 'var(--border)';
         box.style.background = 'rgba(255,255,255,0.02)';
         icon.className = 'fas fa-cloud-arrow-up';
@@ -2623,10 +2730,51 @@ Key Requirements:
       const role = document.getElementById('ctx-role').value;
       const candidateNameInput = document.getElementById('ctx-candidate-name');
       const candidateName = candidateNameInput.value.trim() || 'Candidate';
+      const resumeErrBox = document.getElementById('ctx-resume-error');
+      const resumeBox = document.getElementById('ctx-resume-box');
+      const roleErrBox = document.getElementById('ctx-role-error');
+      const roleTextarea = document.getElementById('ctx-role');
 
-      if (!role) { alert('Please select a target job role or write one.'); return; }
+      // Check if resume is currently uploading
+      if (isResumeUploading) {
+        alert('Please wait for your resume to finish uploading and parsing.');
+        return;
+      }
 
-      let resumeText = uploadedResumeText || 'Not provided';
+      // Resume is strictly mandatory
+      if (!uploadedResumeText || uploadedResumeText.trim().length === 0) {
+        if (resumeErrBox) {
+          document.getElementById('ctx-resume-error-text').textContent = 'Resume upload is mandatory. Please upload your resume PDF to proceed.';
+          resumeErrBox.style.display = 'flex';
+        }
+        if (resumeBox) {
+          resumeBox.style.borderColor = 'var(--red)';
+          resumeBox.style.background = 'rgba(239, 68, 68, 0.08)';
+          resumeBox.style.animation = 'shakeModal 0.4s ease';
+          setTimeout(() => { if (resumeBox) resumeBox.style.animation = ''; }, 400);
+          resumeBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        return;
+      }
+
+      // Job Description validation (prevents "abcd" or spam/gibberish)
+      const jdValidation = validateJobDescription(role);
+      if (!jdValidation.valid) {
+        if (roleErrBox) {
+          document.getElementById('ctx-role-error-text').textContent = jdValidation.message;
+          roleErrBox.style.display = 'flex';
+        }
+        if (roleTextarea) {
+          roleTextarea.style.borderColor = 'var(--red)';
+          roleTextarea.style.background = 'rgba(239, 68, 68, 0.05)';
+          roleTextarea.style.animation = 'shakeModal 0.4s ease';
+          setTimeout(() => { if (roleTextarea) roleTextarea.style.animation = ''; }, 400);
+          roleTextarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        return;
+      }
+
+      let resumeText = uploadedResumeText;
 
       const btn = document.getElementById('ctx-submit-btn');
       const oldText = btn.innerHTML;
@@ -2813,30 +2961,254 @@ Key Requirements:
       if (n === 3) calibSensors();
     }
 
-    // ─── IDENTITY CAPTURE ────────────────────────────────────────────────────
-    async function startIdCam() {
+    // ─── IDENTITY CAPTURE (Real-Human Face AI Verification) ──────────────────
+    let idBlazeModel = null;
+    let idDetectionInterval = null;
+    let isHumanFaceDetected = false;
+    let lastFacePrediction = null;
+
+    function extractFaceDescriptor(prediction, videoEl) {
+      if (!prediction || !prediction.landmarks) return null;
+      const landmarks = prediction.landmarks;
+      const topLeft = prediction.topLeft;
+      const bottomRight = prediction.bottomRight;
+      
+      const x1 = topLeft[0], y1 = topLeft[1];
+      const x2 = bottomRight[0], y2 = bottomRight[1];
+      const w = Math.max(10, x2 - x1);
+      const h = Math.max(10, y2 - y1);
+      const cx = (x1 + x2) / 2;
+      const cy = (y1 + y2) / 2;
+      
+      const normLandmarks = [];
+      for (let i = 0; i < landmarks.length; i++) {
+        normLandmarks.push((landmarks[i][0] - cx) / w);
+        normLandmarks.push((landmarks[i][1] - cy) / h);
+      }
+      
+      const dist = (p1, p2) => Math.hypot(p1[0] - p2[0], p1[1] - p2[1]);
+      const rEye = landmarks[0], lEye = landmarks[1], nose = landmarks[2], mouth = landmarks[3];
+      const eyeMid = [(rEye[0] + lEye[0]) / 2, (rEye[1] + lEye[1]) / 2];
+      
+      const eyeDistRatio = dist(rEye, lEye) / w;
+      const noseEyeRatio = dist(nose, eyeMid) / h;
+      const noseMouthRatio = dist(nose, mouth) / h;
+      const eyeMouthRatio = dist(eyeMid, mouth) / h;
+      const aspectRatio = w / h;
+
+      const colorVec = new Float32Array(48);
       try {
-        stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-        document.getElementById('capture-feed').srcObject = stream;
-      } catch (e) { alert('Camera required to continue.'); goTo(1); }
+        const offCanvas = document.createElement('canvas');
+        offCanvas.width = 32; offCanvas.height = 32;
+        const offCtx = offCanvas.getContext('2d');
+        
+        const sx = Math.max(0, x1), sy = Math.max(0, y1);
+        const sw = Math.min(videoEl.videoWidth - sx, w);
+        const sh = Math.min(videoEl.videoHeight - sy, h);
+        
+        offCtx.drawImage(videoEl, sx, sy, sw, sh, 0, 0, 32, 32);
+        const imgData = offCtx.getImageData(0, 0, 32, 32).data;
+        
+        let idx = 0;
+        for (let row = 0; row < 4; row++) {
+          for (let col = 0; col < 4; col++) {
+            let rSum = 0, gSum = 0, bSum = 0, count = 0;
+            for (let y = row * 8; y < (row + 1) * 8; y++) {
+              for (let x = col * 8; x < (col + 1) * 8; x++) {
+                const pixelIdx = (y * 32 + x) * 4;
+                rSum += imgData[pixelIdx];
+                gSum += imgData[pixelIdx + 1];
+                bSum += imgData[pixelIdx + 2];
+                count++;
+              }
+            }
+            colorVec[idx++] = rSum / count;
+            colorVec[idx++] = gSum / count;
+            colorVec[idx++] = bSum / count;
+          }
+        }
+        let normSq = 0;
+        for (let i = 0; i < 48; i++) normSq += colorVec[i] * colorVec[i];
+        const norm = Math.sqrt(normSq) || 1;
+        for (let i = 0; i < 48; i++) colorVec[i] /= norm;
+      } catch (e) {
+        console.warn('Color fingerprint warning:', e);
+      }
+
+      return {
+        normLandmarks,
+        ratios: [eyeDistRatio, noseEyeRatio, noseMouthRatio, eyeMouthRatio, aspectRatio],
+        colorVec: Array.from(colorVec)
+      };
     }
-    function captureId() {
+
+    async function startIdCam() {
+      const statusEl = document.getElementById('id-scan-status');
+      const capBtn = document.getElementById('btn-capture-id');
+      const errBox = document.getElementById('id-capture-error');
+      if (errBox) errBox.style.display = 'none';
+
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 }, audio: true });
+        const v = document.getElementById('capture-feed');
+        v.srcObject = stream;
+        await new Promise((resolve) => { v.onloadedmetadata = () => resolve(); });
+        v.play();
+
+        if (statusEl) statusEl.innerHTML = '<i class="fas fa-spinner fa-spin" style="color:var(--g);"></i> Loading Face Detection AI...';
+
+        if (!idBlazeModel) {
+          idBlazeModel = await blazeface.load();
+        }
+
+        startIdFaceTracking();
+      } catch (e) {
+        console.error("Camera or BlazeFace error:", e);
+        alert('Camera required to continue.');
+        goTo(1);
+      }
+    }
+
+    function startIdFaceTracking() {
+      if (idDetectionInterval) clearInterval(idDetectionInterval);
       const v = document.getElementById('capture-feed');
+      const statusEl = document.getElementById('id-scan-status');
+      const capBtn = document.getElementById('btn-capture-id');
+      const camFrame = document.querySelector('.cam-frame');
+
+      idDetectionInterval = setInterval(async () => {
+        if (!idBlazeModel || v.readyState < 2 || v.paused || curStage !== 2) return;
+
+        try {
+          const preds = await idBlazeModel.estimateFaces(v, false);
+          if (!preds || preds.length === 0) {
+            isHumanFaceDetected = false;
+            lastFacePrediction = null;
+            if (statusEl) statusEl.innerHTML = '<span style="color:#ef4444;"><i class="fas fa-user-slash"></i> NO PERSON DETECTED — Position your face in frame</span>';
+            if (capBtn) {
+              capBtn.disabled = true;
+              capBtn.style.opacity = '0.5';
+              capBtn.style.cursor = 'not-allowed';
+              capBtn.style.background = 'rgba(255,255,255,0.05)';
+              capBtn.innerHTML = '<i class="fas fa-user-slash"></i> FACE REQUIRED TO CAPTURE';
+            }
+            if (camFrame) {
+              camFrame.style.borderColor = 'rgba(239, 68, 68, 0.4)';
+              camFrame.style.boxShadow = '0 0 15px rgba(239, 68, 68, 0.15)';
+            }
+          } else if (preds.length > 1) {
+            isHumanFaceDetected = false;
+            lastFacePrediction = null;
+            if (statusEl) statusEl.innerHTML = '<span style="color:#ef4444;"><i class="fas fa-users-slash"></i> MULTIPLE FACES DETECTED — Only candidate allowed</span>';
+            if (capBtn) {
+              capBtn.disabled = true;
+              capBtn.style.opacity = '0.5';
+              capBtn.style.cursor = 'not-allowed';
+              capBtn.style.background = 'rgba(255,255,255,0.05)';
+              capBtn.innerHTML = '<i class="fas fa-users-slash"></i> MULTIPLE FACES DETECTED';
+            }
+            if (camFrame) {
+              camFrame.style.borderColor = 'rgba(239, 68, 68, 0.6)';
+              camFrame.style.boxShadow = '0 0 20px rgba(239, 68, 68, 0.25)';
+            }
+          } else {
+            const pred = preds[0];
+            const start = pred.topLeft;
+            const end = pred.bottomRight;
+            const width = end[0] - start[0];
+            const height = end[1] - start[1];
+            const landmarks = pred.landmarks;
+
+            const isRealFace = width > 50 && height > 50 && landmarks && landmarks.length >= 4;
+
+            if (isRealFace) {
+              isHumanFaceDetected = true;
+              lastFacePrediction = pred;
+              if (statusEl) statusEl.innerHTML = '<span style="color:var(--g);font-weight:800;"><i class="fas fa-user-check"></i> REAL HUMAN FACE DETECTED & ALIGNED</span>';
+              if (capBtn) {
+                capBtn.disabled = false;
+                capBtn.style.opacity = '1';
+                capBtn.style.cursor = 'pointer';
+                capBtn.style.background = 'var(--g)';
+                capBtn.innerHTML = '<i class="fas fa-camera"></i> CAPTURE PHOTO';
+              }
+              if (camFrame) {
+                camFrame.style.borderColor = 'var(--g)';
+                camFrame.style.boxShadow = '0 0 30px rgba(9, 192, 6, 0.35)';
+              }
+              const errBox = document.getElementById('id-capture-error');
+              if (errBox) errBox.style.display = 'none';
+            } else {
+              isHumanFaceDetected = false;
+              if (statusEl) statusEl.innerHTML = '<span style="color:#eab308;"><i class="fas fa-arrows-to-eye"></i> PLEASE MOVE CLOSER TO THE CAMERA</span>';
+              if (capBtn) {
+                capBtn.disabled = true;
+                capBtn.style.opacity = '0.5';
+                capBtn.style.cursor = 'not-allowed';
+                capBtn.style.background = 'rgba(255,255,255,0.05)';
+                capBtn.innerHTML = '<i class="fas fa-expand"></i> MOVE CLOSER';
+              }
+            }
+          }
+        } catch (err) {
+          console.warn("Face tracking error:", err);
+        }
+      }, 220);
+    }
+
+    async function captureId() {
+      const v = document.getElementById('capture-feed');
+      const errBox = document.getElementById('id-capture-error');
+      const errText = document.getElementById('id-capture-error-text');
+
+      if (!isHumanFaceDetected || !lastFacePrediction) {
+        if (errBox) {
+          errText.textContent = "No valid human face detected. Please position your face inside the frame.";
+          errBox.style.display = 'flex';
+        }
+        return;
+      }
+
+      if (idDetectionInterval) {
+        clearInterval(idDetectionInterval);
+        idDetectionInterval = null;
+      }
+
       const c = document.createElement('canvas');
-      c.width = v.videoWidth; c.height = v.videoHeight;
-      c.getContext('2d').drawImage(v, 0, 0);
+      c.width = v.videoWidth || 640;
+      c.height = v.videoHeight || 480;
+      const ctx = c.getContext('2d');
+      ctx.drawImage(v, 0, 0, c.width, c.height);
       idPhoto = c.toDataURL('image/png');
+
+      // Extract and persist Biometric Face Descriptor
+      const baselineDescriptor = extractFaceDescriptor(lastFacePrediction, v);
+      sessionStorage.setItem('hiero_baseline_face', JSON.stringify(baselineDescriptor));
+      sessionStorage.setItem('hiero_id_photo', idPhoto);
+
+      if (window.userContext) {
+        window.userContext.idPhoto = idPhoto;
+        window.userContext.baselineFace = baselineDescriptor;
+        sessionStorage.setItem('mockContext', JSON.stringify(window.userContext));
+      }
+
       document.getElementById('static-id-photo').src = idPhoto;
       document.getElementById('static-id-photo').style.display = 'block';
       v.style.display = 'none';
       document.getElementById('id-actions').style.display = 'none';
       document.getElementById('id-confirm').style.display = 'flex';
     }
+
     function retakeId() {
+      sessionStorage.removeItem('hiero_baseline_face');
+      sessionStorage.removeItem('hiero_id_photo');
+      isHumanFaceDetected = false;
+      lastFacePrediction = null;
       document.getElementById('capture-feed').style.display = 'block';
       document.getElementById('static-id-photo').style.display = 'none';
       document.getElementById('id-actions').style.display = 'block';
       document.getElementById('id-confirm').style.display = 'none';
+      startIdFaceTracking();
     }
 
     // ─── VOICE CHECK (Identity Stage) ────────────────────────────────────────
