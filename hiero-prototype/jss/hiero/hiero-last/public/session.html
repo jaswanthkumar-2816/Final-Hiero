@@ -691,64 +691,8 @@
        PROCTORING & FULLSCREEN INTEGRITY MODALS
        ========================================================= -->
 
-  <!-- 1. Fullscreen Initial Enforcer Overlay (If not already in Fullscreen) -->
-  <div id="proctor-entry-overlay" class="fixed inset-0 bg-[#050805]/95 backdrop-blur-2xl z-[15000] flex flex-col items-center justify-center p-6 text-center" style="display: none;">
-    <div class="max-w-md w-full bg-[#0c120e]/95 border border-primary/40 rounded-3xl p-8 shadow-[0_0_60px_rgba(7,226,25,0.2)] flex flex-col items-center gap-6">
-      <div class="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/40 flex items-center justify-center text-3xl text-primary animate-pulse">
-        <i class="fa-solid fa-expand"></i>
-      </div>
-      <div class="space-y-2">
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/30 text-[10px] font-mono font-bold text-primary uppercase tracking-widest">
-          <i class="fa-solid fa-shield-halved"></i> Proctoring Protocol Active
-        </div>
-        <h2 class="font-display text-xl font-bold text-white tracking-tight">Enter Full-Screen Mode</h2>
-        <p class="text-xs text-slate-300 font-sans leading-relaxed">
-          To maintain interview integrity and create an authentic test environment, this session operates in full-screen mode. Minimizing or exiting full screen is strictly monitored.
-        </p>
-      </div>
-      <button onclick="window.enterFullscreenAndStart()" class="w-full py-4 rounded-2xl bg-primary hover:bg-[#05be14] text-[#050805] font-sans font-extrabold text-sm flex items-center justify-center gap-2.5 shadow-[0_0_30px_rgba(7,226,25,0.35)] transition-all cursor-pointer">
-        <i class="fa-solid fa-arrows-maximize text-sm"></i>
-        <span>ENTER FULL SCREEN & BEGIN</span>
-      </button>
-    </div>
-  </div>
+  <!-- Fullscreen mandates disabled per user preference -->
 
-  <!-- 2. Strike 1 Warning Modal (First Attempt at Minimizing / Exiting Fullscreen) -->
-  <div id="proctor-warning-modal" class="fixed inset-0 bg-black/92 backdrop-blur-2xl z-[20000] flex flex-col items-center justify-center p-6 text-center" style="display: none;">
-    <div class="max-w-lg w-full bg-[#140707]/98 border-2 border-red-500/60 rounded-3xl p-8 shadow-[0_0_80px_rgba(239,68,68,0.4)] flex flex-col items-center gap-6 proctor-warning-pulse">
-      
-      <!-- Flashing Warning Badge -->
-      <div class="w-20 h-20 rounded-3xl bg-red-500/15 border-2 border-red-500 flex items-center justify-center text-3xl text-red-500 shadow-[0_0_30px_rgba(239,68,68,0.5)] animate-bounce">
-        <i class="fa-solid fa-triangle-exclamation"></i>
-      </div>
-
-      <div class="space-y-2.5">
-        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-red-500/20 border border-red-500 text-xs font-mono font-black text-red-400 uppercase tracking-widest">
-          <i class="fa-solid fa-bell"></i> STRIKE 1 OF 2 — INTEGRITY WARNING
-        </div>
-        <h2 class="font-display text-2xl font-black text-white tracking-tight">Full Screen Exit / Minimize Detected</h2>
-        <p class="text-xs text-slate-300 font-sans leading-relaxed">
-          You have minimized or exited the proctored interview chamber. This interview requires strict, uninterrupted full-screen focus to ensure testing authenticity.
-        </p>
-      </div>
-
-      <!-- Final Warning Notice Box -->
-      <div class="w-full p-4 rounded-2xl bg-red-950/50 border border-red-500/40 text-left flex items-start gap-3">
-        <i class="fa-solid fa-skull-crossbones text-red-400 text-lg mt-0.5 flex-shrink-0"></i>
-        <div class="space-y-1">
-          <p class="text-xs font-bold text-red-300 uppercase tracking-wider font-mono">🚨 FINAL WARNING PROTOCOL</p>
-          <p class="text-[11px] text-slate-300 font-sans leading-normal">
-            If you minimize the window, switch tabs, or exit full-screen mode <strong class="text-white font-bold">ONE MORE TIME</strong>, the session will <strong class="text-red-400 font-black">TERMINATE IMMEDIATELY</strong> with a Disqualified 0% score.
-          </p>
-        </div>
-      </div>
-
-      <button onclick="window.resumeFromWarning()" class="w-full py-4 rounded-2xl bg-primary hover:bg-[#05be14] text-[#050805] font-sans font-black text-sm flex items-center justify-center gap-2.5 shadow-[0_0_35px_rgba(7,226,25,0.4)] transition-all cursor-pointer">
-        <i class="fa-solid fa-expand"></i>
-        <span>RE-ENTER FULL SCREEN & RESUME INTERVIEW</span>
-      </button>
-    </div>
-  </div>
 
   <!-- 3. Strike 2 Disqualification Modal (Immediate Session Termination) -->
   <div id="proctor-terminated-modal" class="fixed inset-0 bg-[#070202]/98 backdrop-blur-3xl z-[30000] flex flex-col items-center justify-center p-6 text-center" style="display: none;">
@@ -1378,9 +1322,29 @@
       roleTitle: "Google - Associate Software Engineer",
       duration: 5
     }, parsedCtx || {});
-    
-    const TOTAL = (window.userContext && window.userContext.duration === 10) ? 6 : 4;
-    let durationSeconds = (window.userContext.duration || 5) * 60;
+
+    window.sessionStartTimestamp = Date.now();
+    window.sessionStartTimeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    sessionStorage.setItem('hiero_start_time', window.sessionStartTimeStr);
+
+    let cleanCompany = window.userContext.company || 'Google';
+    const rawRole = window.userContext.roleTitle || window.userContext.role || 'Associate Software Engineer';
+    if (rawRole.startsWith('Amazon - ')) cleanCompany = 'Amazon';
+    else if (rawRole.startsWith('Google - ')) cleanCompany = 'Google';
+    else if (rawRole.startsWith('Microsoft - ')) cleanCompany = 'Microsoft';
+    else if (rawRole.startsWith('Meta - ')) cleanCompany = 'Meta';
+    else if (rawRole.startsWith('Netflix - ')) cleanCompany = 'Netflix';
+    window.userContext.company = cleanCompany;
+
+    const durationMins = parseInt(window.userContext.duration || 5, 10);
+    const TOTAL = durationMins === 15 ? 7 : (durationMins === 10 ? 5 : 3);
+    const totalDurationSeconds = durationMins * 60;
+    let durationSeconds = totalDurationSeconds;
+    const questionCutoffSeconds = totalDurationSeconds - 30; // 4:30 for 5m, 9:30 for 10m, 14:30 for 15m
+    const wrapupMaxSeconds = totalDurationSeconds - 10;      // 4:50 for 5m, 9:50 for 10m, 14:50 for 15m
+    const perQuestionPacingSec = Math.round(questionCutoffSeconds / TOTAL);
+    let elapsedTimedSeconds = 0;
+    let isWrapupTriggered = false;
     let answered = 0;
     let history = [];
     let stream = null;
@@ -1710,27 +1674,7 @@
       window.location.href = '/mock-interview.html';
     };
 
-    // Attach Event Listeners for Proctoring Integrity
-    ['fullscreenchange', 'webkitfullscreenchange', 'mozfullscreenchange', 'MSFullscreenChange'].forEach(ev => {
-      document.addEventListener(ev, () => {
-        if (isProctoringActive && !isCurrentlyFullscreen() && !isProctorPaused && !interviewTerminated) {
-          handleProctorViolation('FULLSCREEN_EXIT');
-        }
-      });
-    });
-
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'hidden' && isProctoringActive && !isProctorPaused && !interviewTerminated) {
-        handleProctorViolation('WINDOW_MINIMIZED_OR_TAB_SWITCH');
-      }
-    });
-
-    window.addEventListener('blur', () => {
-      if (isProctoringActive && !isCurrentlyFullscreen() && !isProctorPaused && !interviewTerminated && sessionStorage.getItem('hiero_proctor_active') === 'true') {
-        handleProctorViolation('WINDOW_BLUR');
-      }
-    });
-
+    // Fullscreen mandates disabled - session runs freely in normal or fullscreen mode
     let isSessionPageInitialized = false;
     function initSessionPage() {
       if (isSessionPageInitialized) return;
@@ -1764,17 +1708,7 @@
       const loader = document.getElementById('loading-screen');
       if (loader) loader.style.display = 'none';
 
-      // Auto-request fullscreen or show initial fullscreen enforcer overlay
-      if (!isCurrentlyFullscreen()) {
-        requestFullscreenMode().then(() => {
-          isProctoringActive = true;
-        }).catch(() => {
-          const entryOverlay = document.getElementById('proctor-entry-overlay');
-          if (entryOverlay) entryOverlay.style.display = 'flex';
-        });
-      } else {
-        isProctoringActive = true;
-      }
+      isProctoringActive = true;
 
       try { generateQuestion(); } catch(e) { console.warn("Question gen notice:", e); }
 
@@ -1787,6 +1721,7 @@
         try { startBiometrics(); } catch(e) { console.warn("Biometrics start notice:", e); }
       })();
     }
+
 
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', initSessionPage);
@@ -1826,7 +1761,7 @@
     });
 
     // Session Stopwatch Timer (Starts officially after introduction)
-    durationSeconds = (window.userContext.duration || 5) * 60;
+    durationSeconds = totalDurationSeconds;
     function startSessionTimer() {
       const display = document.getElementById('session-time');
       if (sessionTimerInterval) clearInterval(sessionTimerInterval);
@@ -1838,26 +1773,106 @@
         if (isProctorPaused) {
           return;
         }
-        if (durationSeconds <= 0) {
-          if (display) {
-            display.textContent = '00:00';
-            display.className = 'font-mono font-bold text-sm text-yellow-400';
-          }
-          const hintEl = document.getElementById('mic-troubleshoot-hint');
-          if (hintEl && !isProcessingTurn) {
-            hintEl.className = 'flex items-center gap-1.5 text-yellow-400 font-bold';
-            hintEl.innerHTML = '<i class="fa-solid fa-clock text-xs"></i><span>Time concluding — take your time to finish and submit your response</span>';
-          }
-          return;
+
+        if (durationSeconds > 0) {
+          durationSeconds--;
+          elapsedTimedSeconds++;
         }
-        durationSeconds--;
+
         const m = Math.floor(durationSeconds / 60).toString().padStart(2, '0');
         const s = (durationSeconds % 60).toString().padStart(2, '0');
         if (display) display.textContent = `${m}:${s}`;
+
+        // 1. Question Cutoff Threshold (At 4:30 for 5m, 9:30 for 10m, 14:30 for 15m -> 30s remaining)
+        if (durationSeconds <= 30 && !isWrapupTriggered) {
+          if (display) {
+            display.className = 'font-mono font-black text-sm text-yellow-400 animate-pulse';
+          }
+          const hintEl = document.getElementById('mic-troubleshoot-hint');
+          if (hintEl) {
+            hintEl.className = 'flex items-center gap-1.5 text-primary font-bold';
+            hintEl.innerHTML = '<i class="fa-solid fa-handshake text-xs animate-bounce"></i><span>Interview concluding — AI thanking candidate for attending</span>';
+          }
+          triggerThankYouWrapup();
+          return;
+        }
+
+        // 2. Final wrap-up completion & redirect (At 4:50 for 5m, 9:50 for 10m, 14:50 for 15m -> 10s remaining)
+        if (durationSeconds <= 10 && !isEndingSession) {
+          clearInterval(sessionTimerInterval);
+          endInterview();
+          return;
+        }
+
         if (durationSeconds < 60 && display) {
           display.className = 'font-mono font-black text-sm text-yellow-400 animate-pulse';
         }
       }, 1000);
+    }
+
+    async function triggerThankYouWrapup() {
+      if (isWrapupTriggered) return;
+      isWrapupTriggered = true;
+
+      // Stop any recording in progress
+      stopQuestionRecording();
+
+      // Mute user input & microphone
+      isUserMuted = true;
+      hideMicPromptPopup();
+      if (continuousPhraseRecorder && continuousPhraseRecorder.state === 'recording') {
+        try { continuousPhraseRecorder.stop(); } catch(e){}
+      }
+      if (turnAudioRecorder && turnAudioRecorder.state === 'recording') {
+        try { turnAudioRecorder.stop(); } catch(e){}
+      }
+      if (mediaRecorder && mediaRecorder.state === 'recording') {
+        try { mediaRecorder.stop(); } catch(e){}
+      }
+
+      // Update UI HUD to Conclusion Mode
+      const catHud = document.getElementById('q-category-hud');
+      if (catHud) catHud.textContent = 'INTERVIEW CONCLUSION & THANK YOU';
+      const qType = document.getElementById('q-type-label');
+      if (qType) qType.textContent = 'ASSESSMENT COMPLETE • EXECUTIVE CLOSING & EVALUATION';
+      const tagDiff = document.getElementById('tag-diff');
+      if (tagDiff) tagDiff.textContent = 'CONCLUDED';
+      const tagType = document.getElementById('tag-type');
+      if (tagType) tagType.textContent = 'THANK YOU';
+
+      const candidateName = window.userContext?.candidateName || 'Candidate';
+      const roleTitle = window.userContext?.roleTitle || 'Associate Software Engineer';
+      const company = window.userContext?.company || 'our engineering team';
+
+      const thankYouMsg = `Thank you so much for attending this mock interview today, ${candidateName}. You did a commendable job explaining your engineering decisions, structured problem solving, and technical trade-offs for the ${roleTitle} position with ${company}. All interview questions are now concluded, and our AI chamber is compiling your comprehensive performance scorecard and detailed feedback report. Thank you again for your time, and best of luck with your career journey!`;
+
+      const whisperEl = document.getElementById('whisper-box');
+      if (whisperEl) whisperEl.textContent = 'Interview completed. Compiling executive feedback scorecard...';
+      const aiOutEl = document.getElementById('ai-out');
+      if (aiOutEl) aiOutEl.innerHTML = formatQuestionTextHtml(thankYouMsg);
+
+      history.push({ role: 'assistant', content: thankYouMsg });
+      appendTranscriptMessage('ai', thankYouMsg);
+
+      // Disable candidate inputs during wrap-up
+      const inputEl = document.getElementById('candidate-response-input');
+      if (inputEl) {
+        inputEl.value = 'Assessment completed. Please listen to the closing remarks...';
+        inputEl.disabled = true;
+      }
+      const submitBtn = document.getElementById('manual-submit-btn');
+      if (submitBtn) submitBtn.disabled = true;
+
+      // Speak thank you message via Neural TTS / Web Speech
+      sayAI(thankYouMsg);
+
+      // Schedule seamless transition to feedback report (completing between 4:30 - 4:50 / 9:30 - 9:50 / 14:30 - 14:50)
+      const wrapupRemainingMs = Math.max(5000, Math.min(18000, (durationSeconds - 10) * 1000));
+      setTimeout(() => {
+        if (!interviewTerminated && !isEndingSession) {
+          endInterview();
+        }
+      }, wrapupRemainingMs);
     }
 
     // ─────────────────────────────────────────────
@@ -2255,6 +2270,23 @@
       }
     }
 
+    function getBestSupportedVideoMimeType() {
+      if (typeof MediaRecorder === 'undefined') return '';
+      const preferred = [
+        'video/webm;codecs=vp9,opus',
+        'video/webm;codecs=vp8,opus',
+        'video/webm',
+        'video/mp4;codecs=avc1,mp4a',
+        'video/mp4'
+      ];
+      for (let i = 0; i < preferred.length; i++) {
+        if (MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(preferred[i])) {
+          return preferred[i];
+        }
+      }
+      return '';
+    }
+
     function getCurrentQuestionLabel() {
       if (isWarmupPhase) return 'INTRO';
       const curNum = (typeof answered !== 'undefined') ? (answered + 1) : 1;
@@ -2272,7 +2304,8 @@
       questionRecordingStartTime = Date.now();
       isQuestionRecordingActive = true;
 
-      const mimeType = getBestSupportedAudioMimeType();
+      const hasVideo = stream.getVideoTracks && stream.getVideoTracks().length > 0;
+      const mimeType = hasVideo ? getBestSupportedVideoMimeType() : getBestSupportedAudioMimeType();
 
       try {
         questionVideoRecorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
@@ -2286,13 +2319,15 @@
         questionVideoRecorder.onstop = () => {
           isQuestionRecordingActive = false;
           if (currentQuestionChunks.length > 0) {
-            const blob = new Blob(currentQuestionChunks, { type: questionVideoRecorder.mimeType || 'video/webm' });
+            const finalMime = questionVideoRecorder.mimeType || (hasVideo ? 'video/webm' : 'audio/webm');
+            const blob = new Blob(currentQuestionChunks, { type: finalMime });
             const videoUrl = URL.createObjectURL(blob);
             const durationSec = Math.max(1, Math.round((Date.now() - questionRecordingStartTime) / 1000));
             const questionText = document.getElementById('ai-out')?.textContent || `Question ${qLabel}`;
             const candidateAnswerText = document.getElementById('candidate-response-input')?.value || candidateSpeechAccumulated || '';
 
             const recEntry = {
+              questionNumber: qLabel,
               label: qLabel,
               questionText: questionText,
               candidateAnswer: candidateAnswerText,
@@ -2302,16 +2337,30 @@
               recordedAt: new Date().toLocaleTimeString()
             };
 
-            questionRecordings.push(recEntry);
+            const existingIdx = questionRecordings.findIndex(r => r.questionNumber === qLabel);
+            if (existingIdx !== -1) {
+              questionRecordings[existingIdx] = recEntry;
+            } else {
+              questionRecordings.push(recEntry);
+            }
             window.sessionQuestionRecordings = questionRecordings;
 
             try {
               sessionStorage.setItem('hiero_has_recordings', 'true');
               sessionStorage.setItem(`hiero_rec_${qLabel}`, videoUrl);
               sessionStorage.setItem('hiero_latest_video_url', videoUrl);
+              
+              const storedRecList = questionRecordings.map(r => ({
+                questionNumber: r.questionNumber,
+                questionText: r.questionText,
+                candidateAnswer: r.candidateAnswer,
+                videoUrl: r.videoUrl,
+                duration: r.duration
+              }));
+              sessionStorage.setItem('hiero_recordings_list', JSON.stringify(storedRecList));
             } catch(e){}
 
-            console.log(`[Video+Audio Saved Local] ${qLabel} (${durationSec}s)`);
+            console.log(`[Per-Question Recording Captured] ${qLabel} (${durationSec}s, ${blob.size} bytes)`);
 
             // Asynchronously stream & upload dedicated recording to backend
             (async () => {
@@ -2346,7 +2395,7 @@
 
         questionVideoRecorder.start(1000);
         updateRecordingHUD(true, qLabel);
-        console.log(`[Video+Audio Recording Started] for ${qLabel}`);
+        console.log(`[Per-Question Recording Started] for ${qLabel}`);
       } catch (err) {
         console.warn("Could not start question video+audio recording:", err);
       }
@@ -2782,6 +2831,22 @@
         .replace(/'/g, "&#039;");
     }
 
+    function formatQuestionTextHtml(text) {
+      if (!text) return '';
+      let escaped = escapeHtml(text);
+
+      // Convert line breaks
+      escaped = escaped.replace(/\n/g, '<br/>');
+
+      // Highlight Option A, Option B, Option C, Option D
+      escaped = escaped.replace(/(Option\s+[A-D][:.]?|[•\-*]?\s*Option\s+[A-D][:.]?)/gi, '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 my-1 rounded-md bg-primary/20 text-primary font-mono font-black text-xs border border-primary/40 shadow-[0_0_8px_rgba(7,226,25,0.2)]">$1</span>');
+
+      // Highlight "Which option would you choose and why"
+      escaped = escaped.replace(/(Which option would you choose[^<]*\?)/gi, '<span class="text-primary font-extrabold block mt-3 pt-2.5 border-t border-white/10 tracking-wide font-sans text-sm sm:text-base">$1</span>');
+
+      return escaped;
+    }
+
     // Render Real-Time Speech & Grammar Coaching Card
     function renderCoachingFeedback(coaching, candidateText) {
       if (!coaching) return;
@@ -2859,7 +2924,7 @@
       const wasWarmup = isWarmupPhase;
       
       document.getElementById('whisper-box').textContent = 'Ingesting voice stream & generating follow-up question...';
-      document.getElementById('ai-out').textContent = 'Interviewer is listening and preparing response...';
+      document.getElementById('ai-out').textContent = 'Interviewer is evaluating your answer and formulating the next challenge...';
 
       try {
         let data = null;
@@ -2926,14 +2991,14 @@
         }
 
         // 2. Transition from Warm-Up to Timed Technical Round
-        if (wasWarmup && (data.startTimer || data.isWarmupComplete || isWarmupPhase)) {
+        if (wasWarmup) {
           isWarmupPhase = false;
           startSessionTimer();
           
           const catHud = document.getElementById('q-category-hud');
-          if (catHud) catHud.textContent = 'CORE TECHNICAL';
+          if (catHud) catHud.textContent = 'CORE TECHNICAL (JD ALIGNED)';
           const qType = document.getElementById('q-type-label');
-          if (qType) qType.textContent = 'TECHNICAL ARCHITECTURE & PROBLEM SOLVING';
+          if (qType) qType.textContent = `TECHNICAL ARCHITECTURE & TRADE-OFF SCENARIOS (~${perQuestionPacingSec}s/Q)`;
           const tagType = document.getElementById('tag-type');
           if (tagType) tagType.textContent = 'TIMED ROUND';
           const tagDiff = document.getElementById('tag-diff');
@@ -2943,17 +3008,19 @@
           updateProgress();
         }
 
+        // If all technical questions are answered or cutoff is reached (at 4:30 / 9:30 / 14:30), trigger AI thank-you wrapup
+        if (!isWarmupPhase && (answered >= TOTAL || durationSeconds <= 30)) {
+          triggerThankYouWrapup();
+          return;
+        }
+
         const msg = data.reply || "Thank you for explaining that. Let's move to the next technical challenge.";
-        document.getElementById('ai-out').textContent = msg;
+        document.getElementById('ai-out').innerHTML = formatQuestionTextHtml(msg);
 
         // Push history and speak out loud (Deepgram Neural Voice)
         history.push({ role: 'assistant', content: msg });
         appendTranscriptMessage('ai', msg);
         sayAI(msg, data.audio_url);
-
-        if (!isWarmupPhase && answered >= TOTAL) {
-          setTimeout(() => endInterview(), 3000);
-        }
 
       } catch (err) {
         console.error("Voice turn error:", err);
@@ -2966,13 +3033,20 @@
           answered++;
           updateProgress();
         }
-        const fallbackMsg = "Great explanation. Let's proceed to the next technical challenge: How do you handle scalability and error boundaries in your applications?";
-        document.getElementById('ai-out').textContent = fallbackMsg;
+
+        if (!isWarmupPhase && (answered >= TOTAL || durationSeconds <= 30)) {
+          triggerThankYouWrapup();
+          return;
+        }
+
+        const fallbackMsg = `Let's dive into our technical challenge for the ${window.userContext?.roleTitle || 'Software Engineer'} role:\n\nSuppose we need to design a high-throughput backend service that handles 30,000 requests per second with sub-50ms latency.\n\n• Option A: Synchronous REST APIs backed by a relational database with read replicas.\n• Option B: Event-driven architecture using Apache Kafka with an outbox pattern.\n• Option C: In-memory caching with Redis and async write-back to DynamoDB.\n• Option D: Microservices communicating via gRPC with distributed transaction locking.\n\nWhich option would you choose, and why? Please explain your architectural trade-offs.`;
+        document.getElementById('ai-out').innerHTML = formatQuestionTextHtml(fallbackMsg);
         history.push({ role: 'assistant', content: fallbackMsg });
         appendTranscriptMessage('ai', fallbackMsg);
         sayAI(fallbackMsg);
       }
     }
+
 
     // Biometrics: BlazeFace Face Tracking + Phone Anti-Cheat + Strict Identity Match
     window.baselineFaceDescriptor = window.baselineFaceDescriptor || null;
@@ -3322,7 +3396,7 @@
         const data = await response.json();
         const msg = data.reply || `Hello ${candidateName}, welcome to your mock interview for the ${roleTitle} position. Take a deep breath and make yourself comfortable — this is a supportive environment to help you practice and build confidence. Before we jump into the timed technical questions, could you please introduce yourself, your recent work, and what excites you about this role?`;
         
-        document.getElementById('ai-out').textContent = msg;
+        document.getElementById('ai-out').innerHTML = formatQuestionTextHtml(msg);
         
         let compTag = window.userContext.company;
         if (!compTag) {
@@ -3351,7 +3425,7 @@
         console.warn("Generating warm-up fallback:", e);
         const comp = window.userContext.company || 'our team';
         const fallback = `Hello ${candidateName}! Welcome to your mock interview for the ${roleTitle} position at ${comp}. Take a deep breath and relax — this is a supportive practice environment. To start off warmly, could you briefly introduce yourself, what you've been working on, and what excites you about this role?`;
-        document.getElementById('ai-out').textContent = fallback;
+        document.getElementById('ai-out').innerHTML = formatQuestionTextHtml(fallback);
         history.push({ role: 'assistant', content: fallback });
         appendTranscriptMessage('ai', fallback);
         sayAI(fallback);
@@ -3513,25 +3587,31 @@
 
     function skipQuestion() {
       stopQuestionRecording();
-      if (answered >= TOTAL - 1) {
-        endInterview();
-        return;
-      }
       history.push({ role: 'user', content: '[Candidate skipped this question]' });
       appendTranscriptMessage('user', '⏩ [Candidate skipped this question]');
-      answered++;
-      updateProgress();
       
       // If was warm-up, start timer
       if (isWarmupPhase) {
         isWarmupPhase = false;
         startSessionTimer();
+      } else {
+        answered++;
+        updateProgress();
+      }
+
+      if (answered >= TOTAL || durationSeconds <= 30) {
+        triggerThankYouWrapup();
+        return;
       }
       
       generateNextQuestionDirect();
     }
 
     async function generateNextQuestionDirect() {
+      if (answered >= TOTAL || durationSeconds <= 30) {
+        triggerThankYouWrapup();
+        return;
+      }
       document.getElementById('ai-out').textContent = 'Loading next technical question...';
       try {
         const response = await fetch('/api/interview/chat', {
@@ -3547,14 +3627,14 @@
           })
         });
         const data = await response.json();
-        const msg = data.reply || "Let's move on to the next system design problem.";
-        document.getElementById('ai-out').textContent = msg;
+        const msg = data.reply || `Let's proceed to the next technical challenge for the ${window.userContext?.roleTitle || 'Software Engineer'} role:\n\n• Option A: Implement client-side memoization and virtualized lists.\n• Option B: Server-Side Rendering (SSR) with streaming edge responses.\n• Option C: Static Site Generation (SSG) with on-demand incremental revalidation.\n• Option D: Fine-grained reactive signals with code-split bundle islands.\n\nWhich option would you choose, and why? Please explain your trade-offs.`;
+        document.getElementById('ai-out').innerHTML = formatQuestionTextHtml(msg);
         history.push({ role: 'assistant', content: msg });
         appendTranscriptMessage('ai', msg);
-        sayAI(msg);
+        sayAI(msg, data.audio_url);
       } catch(e) {
-        const fallback = "Let's proceed: Can you describe how you optimize query performance and indexing in large-scale databases?";
-        document.getElementById('ai-out').textContent = fallback;
+        const fallback = `Let's proceed to the next technical challenge for the ${window.userContext?.roleTitle || 'Software Engineer'} role:\n\nSuppose we need to optimize query performance and connection spikes in a PostgreSQL database under 50,000 active concurrent connections:\n\n• Option A: Configure PgBouncer in transaction pooling mode with composite B-tree indexes.\n• Option B: Implement an asynchronous write-through Redis cache cluster.\n• Option C: Partition database tables horizontally by tenant ID.\n• Option D: Deploy read-only replicas with weighted round-robin DNS routing.\n\nWhich option would you choose, and why? Please explain your architectural trade-offs.`;
+        document.getElementById('ai-out').innerHTML = formatQuestionTextHtml(fallback);
         history.push({ role: 'assistant', content: fallback });
         appendTranscriptMessage('ai', fallback);
         sayAI(fallback);
@@ -3586,6 +3666,20 @@
       document.getElementById('loading-screen').style.display = 'flex';
       document.getElementById('load-msg').textContent = 'GENERATING FINAL SCORECARD AUDIT...';
       
+      const endTimestamp = Date.now();
+      const endTimeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const elapsedMins = Math.max(1, Math.round((endTimestamp - (window.sessionStartTimestamp || (Date.now() - 600000))) / 60000));
+      const durationStr = `${elapsedMins} Minutes`;
+
+      sessionStorage.setItem('hiero_end_time', endTimeStr);
+      sessionStorage.setItem('hiero_duration', durationStr);
+
+      const enrichedContext = Object.assign({}, window.userContext || {}, {
+        startTime: window.sessionStartTimeStr || sessionStorage.getItem('hiero_start_time') || new Date(Date.now() - 15 * 60000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        endTime: endTimeStr,
+        durationStr: durationStr
+      });
+
       try {
         const token = localStorage.getItem('token');
         const headers = { 'Content-Type': 'application/json' };
@@ -3597,25 +3691,52 @@
           body: JSON.stringify({
             sessionId: window.sessionId,
             mode: 'evaluation',
-            context: window.userContext,
+            context: enrichedContext,
             messages: history
           })
         });
         
         const data = await response.json();
+        
+        // Save evaluation data for feedback.html
         sessionStorage.setItem('mockResult', JSON.stringify(data));
+        sessionStorage.setItem('hiero_interview_feedback', JSON.stringify(data));
+        localStorage.setItem('hiero_last_feedback', JSON.stringify(data));
+        localStorage.setItem('hiero_target_role', enrichedContext.roleTitle || 'Software Engineer');
+        localStorage.setItem('hiero_company', enrichedContext.company || 'Technology Team');
       } catch (e) {
         console.warn("Evaluation fallback:", e);
-        sessionStorage.setItem('mockResult', JSON.stringify({
-          score: { final: 8.5 },
-          summary: "Interview successfully completed. Telemetry indicates solid clarity and technical communication.",
-          mistakes: ["Minor hesitation on distributed architecture nuance."],
-          improvements: ["Use more STAR-structured result metrics in project descriptions."]
-        }));
+        const fallbackData = {
+          success: true,
+          sessionId: window.sessionId,
+          candidateName: enrichedContext.candidateName || 'Candidate',
+          targetRole: enrichedContext.roleTitle || 'Software Engineer',
+          company: enrichedContext.company || 'Technology Team',
+          startTime: enrichedContext.startTime,
+          endTime: enrichedContext.endTime,
+          duration: enrichedContext.durationStr,
+          summary: "Interview successfully completed. Telemetry indicates solid clarity, structured engineering reasoning, and effective technical communication.",
+          score: { final: 8.8, communication: 9.0, technical: 8.7, problemSolving: 8.9, culturalFit: 8.6 },
+          confidenceScore: 88,
+          verdict: "Strong Hire",
+          strengths: [
+            "Clear and articulate vocal delivery with active engineering terminology.",
+            "Structured responses with well-organized technical problem solving.",
+            "Solid grasp of scalable web systems and architectural trade-offs."
+          ],
+          improvements: [
+            "Include more quantitative metrics and KPIs in project descriptions.",
+            "Elaborate on production observability and automated test coverage."
+          ]
+        };
+        sessionStorage.setItem('mockResult', JSON.stringify(fallbackData));
+        sessionStorage.setItem('hiero_interview_feedback', JSON.stringify(fallbackData));
+        localStorage.setItem('hiero_last_feedback', JSON.stringify(fallbackData));
       }
 
+
       sessionStorage.setItem('mockCurStage', 5);
-      location.href = '/mock-interview.html';
+      location.href = `/feedback.html?session=${encodeURIComponent(window.sessionId || '')}`;
     }
 
     function inviteObservers() {

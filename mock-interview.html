@@ -1194,7 +1194,7 @@
           <div style="margin-bottom: 24px;">
             <p style="font-size:0.85rem;color:var(--muted);margin-bottom:12px;font-weight:600;letter-spacing:0.5px;">
               SELECT DURATION</p>
-            <div style="display:flex; gap: 12px;">
+            <div style="display:flex; gap: 12px; flex-wrap: wrap;">
               <button id="dur-5" class="btn"
                 style="background:rgba(9, 192, 6, 0.15); border:1px solid var(--g); padding: 12px 24px; border-radius: 12px; color:#fff; font-weight:700;"
                 onclick="setDuration(5)">
@@ -1204,6 +1204,11 @@
                 style="background:rgba(255,255,255,0.02); border:1px solid var(--border); padding: 12px 24px; border-radius: 12px; color:var(--muted); font-weight:600;"
                 onclick="setDuration(10)">
                 <i class="far fa-clock" style="margin-right:6px;"></i> 10 Minutes
+              </button>
+              <button id="dur-15" class="btn"
+                style="background:rgba(255,255,255,0.02); border:1px solid var(--border); padding: 12px 24px; border-radius: 12px; color:var(--muted); font-weight:600;"
+                onclick="setDuration(15)">
+                <i class="far fa-clock" style="margin-right:6px;"></i> 15 Minutes
               </button>
             </div>
           </div>
@@ -3181,7 +3186,7 @@ Key Requirements:
         duration: interviewDuration
       };
 
-      TOTAL = interviewDuration === 10 ? 6 : 4;
+      TOTAL = interviewDuration === 15 ? 7 : (interviewDuration === 10 ? 5 : 3);
 
       sessionStorage.setItem('mockContext', JSON.stringify(window.userContext));
 
@@ -3200,30 +3205,26 @@ Key Requirements:
 
       const btn5 = document.getElementById('dur-5');
       const btn10 = document.getElementById('dur-10');
+      const btn15 = document.getElementById('dur-15');
 
-      if (mins === 5) {
-        btn5.style.background = 'rgba(9, 192, 6, 0.15)';
-        btn5.style.borderColor = 'var(--g)';
-        btn5.style.color = '#fff';
-        btn5.style.fontWeight = '700';
+      [btn5, btn10, btn15].forEach(btn => {
+        if (!btn) return;
+        btn.style.background = 'rgba(255,255,255,0.02)';
+        btn.style.borderColor = 'var(--border)';
+        btn.style.color = 'var(--muted)';
+        btn.style.fontWeight = '600';
+      });
 
-        btn10.style.background = 'rgba(255,255,255,0.02)';
-        btn10.style.borderColor = 'var(--border)';
-        btn10.style.color = 'var(--muted)';
-        btn10.style.fontWeight = '600';
-      } else {
-        btn10.style.background = 'rgba(9, 192, 6, 0.15)';
-        btn10.style.borderColor = 'var(--g)';
-        btn10.style.color = '#fff';
-        btn10.style.fontWeight = '700';
-
-        btn5.style.background = 'rgba(255,255,255,0.02)';
-        btn5.style.borderColor = 'var(--border)';
-        btn5.style.color = 'var(--muted)';
-        btn5.style.fontWeight = '600';
+      const activeBtn = mins === 5 ? btn5 : (mins === 10 ? btn10 : btn15);
+      if (activeBtn) {
+        activeBtn.style.background = 'rgba(9, 192, 6, 0.15)';
+        activeBtn.style.borderColor = 'var(--g)';
+        activeBtn.style.color = '#fff';
+        activeBtn.style.fontWeight = '700';
       }
 
-      document.getElementById('badge-duration').textContent = mins + 'm';
+      const badgeDur = document.getElementById('badge-duration');
+      if (badgeDur) badgeDur.textContent = mins + 'm';
     }
 
     async function loadUserProfile() {

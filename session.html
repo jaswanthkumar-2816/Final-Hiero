@@ -1336,9 +1336,15 @@
     else if (rawRole.startsWith('Netflix - ')) cleanCompany = 'Netflix';
     window.userContext.company = cleanCompany;
 
-    const TOTAL = 5;
-
-    let durationSeconds = Math.max(10, (window.userContext.duration || 10)) * 60;
+    const durationMins = parseInt(window.userContext.duration || 5, 10);
+    const TOTAL = durationMins === 15 ? 7 : (durationMins === 10 ? 5 : 3);
+    const totalDurationSeconds = durationMins * 60;
+    let durationSeconds = totalDurationSeconds;
+    const questionCutoffSeconds = totalDurationSeconds - 30; // 4:30 for 5m, 9:30 for 10m, 14:30 for 15m
+    const wrapupMaxSeconds = totalDurationSeconds - 10;      // 4:50 for 5m, 9:50 for 10m, 14:50 for 15m
+    const perQuestionPacingSec = Math.round(questionCutoffSeconds / TOTAL);
+    let elapsedTimedSeconds = 0;
+    let isWrapupTriggered = false;
     let answered = 0;
     let history = [];
     let stream = null;
@@ -1755,7 +1761,7 @@
     });
 
     // Session Stopwatch Timer (Starts officially after introduction)
-    durationSeconds = (window.userContext.duration || 5) * 60;
+    durationSeconds = totalDurationSeconds;
     function startSessionTimer() {
       const display = document.getElementById('session-time');
       if (sessionTimerInterval) clearInterval(sessionTimerInterval);
@@ -1767,26 +1773,106 @@
         if (isProctorPaused) {
           return;
         }
-        if (durationSeconds <= 0) {
-          if (display) {
-            display.textContent = '00:00';
-            display.className = 'font-mono font-bold text-sm text-yellow-400';
-          }
-          const hintEl = document.getElementById('mic-troubleshoot-hint');
-          if (hintEl && !isProcessingTurn) {
-            hintEl.className = 'flex items-center gap-1.5 text-yellow-400 font-bold';
-            hintEl.innerHTML = '<i class="fa-solid fa-clock text-xs"></i><span>Time concluding — take your time to finish and submit your response</span>';
-          }
-          return;
+
+        if (durationSeconds > 0) {
+          durationSeconds--;
+          elapsedTimedSeconds++;
         }
-        durationSeconds--;
+
         const m = Math.floor(durationSeconds / 60).toString().padStart(2, '0');
         const s = (durationSeconds % 60).toString().padStart(2, '0');
         if (display) display.textContent = `${m}:${s}`;
+
+        // 1. Question Cutoff Threshold (At 4:30 for 5m, 9:30 for 10m, 14:30 for 15m -> 30s remaining)
+        if (durationSeconds <= 30 && !isWrapupTriggered) {
+          if (display) {
+            display.className = 'font-mono font-black text-sm text-yellow-400 animate-pulse';
+          }
+          const hintEl = document.getElementById('mic-troubleshoot-hint');
+          if (hintEl) {
+            hintEl.className = 'flex items-center gap-1.5 text-primary font-bold';
+            hintEl.innerHTML = '<i class="fa-solid fa-handshake text-xs animate-bounce"></i><span>Interview concluding — AI thanking candidate for attending</span>';
+          }
+          triggerThankYouWrapup();
+          return;
+        }
+
+        // 2. Final wrap-up completion & redirect (At 4:50 for 5m, 9:50 for 10m, 14:50 for 15m -> 10s remaining)
+        if (durationSeconds <= 10 && !isEndingSession) {
+          clearInterval(sessionTimerInterval);
+          endInterview();
+          return;
+        }
+
         if (durationSeconds < 60 && display) {
           display.className = 'font-mono font-black text-sm text-yellow-400 animate-pulse';
         }
       }, 1000);
+    }
+
+    async function triggerThankYouWrapup() {
+      if (isWrapupTriggered) return;
+      isWrapupTriggered = true;
+
+      // Stop any recording in progress
+      stopQuestionRecording();
+
+      // Mute user input & microphone
+      isUserMuted = true;
+      hideMicPromptPopup();
+      if (continuousPhraseRecorder && continuousPhraseRecorder.state === 'recording') {
+        try { continuousPhraseRecorder.stop(); } catch(e){}
+      }
+      if (turnAudioRecorder && turnAudioRecorder.state === 'recording') {
+        try { turnAudioRecorder.stop(); } catch(e){}
+      }
+      if (mediaRecorder && mediaRecorder.state === 'recording') {
+        try { mediaRecorder.stop(); } catch(e){}
+      }
+
+      // Update UI HUD to Conclusion Mode
+      const catHud = document.getElementById('q-category-hud');
+      if (catHud) catHud.textContent = 'INTERVIEW CONCLUSION & THANK YOU';
+      const qType = document.getElementById('q-type-label');
+      if (qType) qType.textContent = 'ASSESSMENT COMPLETE • EXECUTIVE CLOSING & EVALUATION';
+      const tagDiff = document.getElementById('tag-diff');
+      if (tagDiff) tagDiff.textContent = 'CONCLUDED';
+      const tagType = document.getElementById('tag-type');
+      if (tagType) tagType.textContent = 'THANK YOU';
+
+      const candidateName = window.userContext?.candidateName || 'Candidate';
+      const roleTitle = window.userContext?.roleTitle || 'Associate Software Engineer';
+      const company = window.userContext?.company || 'our engineering team';
+
+      const thankYouMsg = `Thank you so much for attending this mock interview today, ${candidateName}. You did a commendable job explaining your engineering decisions, structured problem solving, and technical trade-offs for the ${roleTitle} position with ${company}. All interview questions are now concluded, and our AI chamber is compiling your comprehensive performance scorecard and detailed feedback report. Thank you again for your time, and best of luck with your career journey!`;
+
+      const whisperEl = document.getElementById('whisper-box');
+      if (whisperEl) whisperEl.textContent = 'Interview completed. Compiling executive feedback scorecard...';
+      const aiOutEl = document.getElementById('ai-out');
+      if (aiOutEl) aiOutEl.innerHTML = formatQuestionTextHtml(thankYouMsg);
+
+      history.push({ role: 'assistant', content: thankYouMsg });
+      appendTranscriptMessage('ai', thankYouMsg);
+
+      // Disable candidate inputs during wrap-up
+      const inputEl = document.getElementById('candidate-response-input');
+      if (inputEl) {
+        inputEl.value = 'Assessment completed. Please listen to the closing remarks...';
+        inputEl.disabled = true;
+      }
+      const submitBtn = document.getElementById('manual-submit-btn');
+      if (submitBtn) submitBtn.disabled = true;
+
+      // Speak thank you message via Neural TTS / Web Speech
+      sayAI(thankYouMsg);
+
+      // Schedule seamless transition to feedback report (completing between 4:30 - 4:50 / 9:30 - 9:50 / 14:30 - 14:50)
+      const wrapupRemainingMs = Math.max(5000, Math.min(18000, (durationSeconds - 10) * 1000));
+      setTimeout(() => {
+        if (!interviewTerminated && !isEndingSession) {
+          endInterview();
+        }
+      }, wrapupRemainingMs);
     }
 
     // ─────────────────────────────────────────────
@@ -2912,7 +2998,7 @@
           const catHud = document.getElementById('q-category-hud');
           if (catHud) catHud.textContent = 'CORE TECHNICAL (JD ALIGNED)';
           const qType = document.getElementById('q-type-label');
-          if (qType) qType.textContent = 'TECHNICAL ARCHITECTURE & TRADE-OFF SCENARIOS';
+          if (qType) qType.textContent = `TECHNICAL ARCHITECTURE & TRADE-OFF SCENARIOS (~${perQuestionPacingSec}s/Q)`;
           const tagType = document.getElementById('tag-type');
           if (tagType) tagType.textContent = 'TIMED ROUND';
           const tagDiff = document.getElementById('tag-diff');
@@ -2922,6 +3008,12 @@
           updateProgress();
         }
 
+        // If all technical questions are answered or cutoff is reached (at 4:30 / 9:30 / 14:30), trigger AI thank-you wrapup
+        if (!isWarmupPhase && (answered >= TOTAL || durationSeconds <= 30)) {
+          triggerThankYouWrapup();
+          return;
+        }
+
         const msg = data.reply || "Thank you for explaining that. Let's move to the next technical challenge.";
         document.getElementById('ai-out').innerHTML = formatQuestionTextHtml(msg);
 
@@ -2929,11 +3021,6 @@
         history.push({ role: 'assistant', content: msg });
         appendTranscriptMessage('ai', msg);
         sayAI(msg, data.audio_url);
-
-        // Only conclude if all technical questions are answered
-        if (!isWarmupPhase && answered >= TOTAL) {
-          setTimeout(() => endInterview(), 3500);
-        }
 
       } catch (err) {
         console.error("Voice turn error:", err);
@@ -2946,6 +3033,12 @@
           answered++;
           updateProgress();
         }
+
+        if (!isWarmupPhase && (answered >= TOTAL || durationSeconds <= 30)) {
+          triggerThankYouWrapup();
+          return;
+        }
+
         const fallbackMsg = `Let's dive into our technical challenge for the ${window.userContext?.roleTitle || 'Software Engineer'} role:\n\nSuppose we need to design a high-throughput backend service that handles 30,000 requests per second with sub-50ms latency.\n\n• Option A: Synchronous REST APIs backed by a relational database with read replicas.\n• Option B: Event-driven architecture using Apache Kafka with an outbox pattern.\n• Option C: In-memory caching with Redis and async write-back to DynamoDB.\n• Option D: Microservices communicating via gRPC with distributed transaction locking.\n\nWhich option would you choose, and why? Please explain your architectural trade-offs.`;
         document.getElementById('ai-out').innerHTML = formatQuestionTextHtml(fallbackMsg);
         history.push({ role: 'assistant', content: fallbackMsg });
@@ -3494,25 +3587,31 @@
 
     function skipQuestion() {
       stopQuestionRecording();
-      if (answered >= TOTAL - 1) {
-        endInterview();
-        return;
-      }
       history.push({ role: 'user', content: '[Candidate skipped this question]' });
       appendTranscriptMessage('user', '⏩ [Candidate skipped this question]');
-      answered++;
-      updateProgress();
       
       // If was warm-up, start timer
       if (isWarmupPhase) {
         isWarmupPhase = false;
         startSessionTimer();
+      } else {
+        answered++;
+        updateProgress();
+      }
+
+      if (answered >= TOTAL || durationSeconds <= 30) {
+        triggerThankYouWrapup();
+        return;
       }
       
       generateNextQuestionDirect();
     }
 
     async function generateNextQuestionDirect() {
+      if (answered >= TOTAL || durationSeconds <= 30) {
+        triggerThankYouWrapup();
+        return;
+      }
       document.getElementById('ai-out').textContent = 'Loading next technical question...';
       try {
         const response = await fetch('/api/interview/chat', {
