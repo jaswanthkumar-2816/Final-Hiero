@@ -9,7 +9,7 @@ const multer = require('multer');
 const dotenv = require('dotenv');
 const path = require('path');
 const fs = require('fs');
-const puppeteer = require('puppeteer');
+// const puppeteer = require('puppeteer');
 
 const pdfParse = require('pdf-parse');
 const axios = require('axios');

@@ -4,10 +4,9 @@
   "description": "Unified Hiero server consolidating gateway, auth, and backend services",
   "main": "gateway.js",
   "scripts": {
-    "start": "node gateway.js",
+    "start": "PORT=2816 node gateway.js",
     "build": "echo 'Build complete'",
-    "postinstall": "npx puppeteer browsers install chrome",
-    "dev": "nodemon gateway.js"
+    "dev": "PORT=2816 nodemon gateway.js"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
