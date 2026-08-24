@@ -1645,16 +1645,10 @@
       requestFullscreenMode().then(() => {
         document.getElementById('proctor-entry-overlay').style.display = 'none';
         isProctoringActive = true;
-        if (currentSpeechText) {
-          setTimeout(() => sayAI(currentSpeechText), 250);
-        }
       }).catch(err => {
         console.warn("Fullscreen request error:", err);
         document.getElementById('proctor-entry-overlay').style.display = 'none';
         isProctoringActive = true;
-        if (currentSpeechText) {
-          setTimeout(() => sayAI(currentSpeechText), 250);
-        }
       });
     };
 
@@ -1663,95 +1657,32 @@
       if (isProctorPaused) return; // Modal already open
       
       const now = Date.now();
-      if (now - lastViolationTime < 3500) return; // Debounce 3.5s to prevent double strikes on 1 action
+      if (now - lastViolationTime < 6000) return; // Debounce 6s
       lastViolationTime = now;
 
       const timeStr = new Date().toLocaleTimeString();
       strikeTimestamps.push(timeStr);
       proctorViolations++;
 
-      if (proctorViolations === 1) {
-        // Strike 1: Warning
-        isProctorPaused = true;
-        playProctorSound('warning');
+      // Log note to telemetry without destroying session
+      const pillText = document.getElementById('proctor-pill-text');
+      if (pillText) pillText.textContent = `INTEGRITY MONITOR (${proctorViolations} NOTES)`;
+      const warnCountEl = document.getElementById('warn-count');
+      if (warnCountEl) warnCountEl.textContent = `${Math.min(proctorViolations, 3)} / 3`;
+      
+      const pip = document.getElementById(`pip-${Math.min(proctorViolations, 3)}`);
+      if (pip) pip.className = 'h-1.5 flex-1 rounded-full bg-yellow-500 shadow-[0_0_8px_rgba(234,179,8,0.8)]';
 
-        // Cancel voice & stop recognition during modal
-        if (synth) synth.cancel();
-        if (recognition && isListening) {
-          try { recognition.stop(); } catch(e) {}
-        }
-
-        // Show Strike 1 Warning Modal
-        const warnModal = document.getElementById('proctor-warning-modal');
-        if (warnModal) warnModal.style.display = 'flex';
-
-        // Update HUD Badge
-        const pillText = document.getElementById('proctor-pill-text');
-        if (pillText) pillText.textContent = 'WARNING: 1/2 STRIKES (MINIMIZED)';
-        const pill = document.getElementById('proctor-status-pill');
-        if (pill) {
-          pill.classList.remove('danger');
-          pill.classList.add('warning');
-        }
-
-        const warnCountEl = document.getElementById('warn-count');
-        if (warnCountEl) warnCountEl.textContent = '1 / 2 (STRIKE)';
-        const pip1 = document.getElementById('pip-1');
-        if (pip1) pip1.className = 'h-1.5 flex-1 rounded-full bg-yellow-500 shadow-[0_0_8px_rgba(234,179,8,0.8)]';
-
-        // Verbal reminder
-        sayAI("Warning. Window minimization or full screen exit detected. Please return to full screen immediately. Repeating this will terminate your session.");
-
-      } else if (proctorViolations >= 2) {
-        // Strike 2: Disqualification & Termination
-        interviewTerminated = true;
-        isProctorPaused = true;
-        isProctoringActive = false;
-        playProctorSound('terminated');
-
-        // Stop all streams immediately
-        if (stream) {
-          stream.getTracks().forEach(t => t.stop());
-        }
-        if (synth) synth.cancel();
-        if (recognition) {
-          try { recognition.stop(); } catch(e) {}
-        }
-        if (sessionTimerInterval) {
-          clearInterval(sessionTimerInterval);
-        }
-
-        // Hide warning modal if open
-        const warnModal = document.getElementById('proctor-warning-modal');
-        if (warnModal) warnModal.style.display = 'none';
-
-        // Update termination logs with timestamps
-        const s1Log = document.getElementById('strike-1-log');
-        if (s1Log && strikeTimestamps[0]) {
-          s1Log.textContent = `Strike 1 [${strikeTimestamps[0]}]: Exited Full Screen / Minimized Window (Warning Issued)`;
-        }
-        const s2Log = document.getElementById('strike-2-log');
-        if (s2Log && strikeTimestamps[1]) {
-          s2Log.textContent = `Strike 2 [${strikeTimestamps[1]}]: Repeated Window Minimization / Tab Switch — Session Terminated`;
-        }
-
-        // Show Terminated Modal
-        const termModal = document.getElementById('proctor-terminated-modal');
-        if (termModal) termModal.style.display = 'flex';
-
-        // Update HUD Badge
-        const pillText = document.getElementById('proctor-pill-text');
-        if (pillText) pillText.textContent = 'DISQUALIFIED (2/2 STRIKES)';
-        const pill = document.getElementById('proctor-status-pill');
-        if (pill) {
-          pill.classList.remove('warning');
-          pill.classList.add('danger');
-        }
-
-        const warnCountEl = document.getElementById('warn-count');
-        if (warnCountEl) warnCountEl.textContent = '2 / 2 (DISQUALIFIED)';
-        const pip2 = document.getElementById('pip-2');
-        if (pip2) pip2.className = 'h-1.5 flex-1 rounded-full bg-red-600 shadow-[0_0_8px_rgba(220,38,38,0.8)]';
+      const hintEl = document.getElementById('mic-troubleshoot-hint');
+      if (hintEl && !isProcessingTurn) {
+        hintEl.className = 'flex items-center gap-1.5 text-yellow-400 font-bold';
+        hintEl.innerHTML = '<i class="fa-solid fa-eye text-xs"></i><span>Please remain in full screen for best practice experience</span>';
+        setTimeout(() => {
+          if (hintEl && !isUserMuted) {
+            hintEl.className = 'flex items-center gap-1.5 text-primary font-bold';
+            hintEl.innerHTML = '<i class="fa-solid fa-microphone-lines animate-pulse text-xs"></i><span>Microphone live — speak clearly</span>';
+          }
+        }, 4000);
       }
     }
 
@@ -1800,7 +1731,10 @@
       }
     });
 
+    let isSessionPageInitialized = false;
     function initSessionPage() {
+      if (isSessionPageInitialized) return;
+      isSessionPageInitialized = true;
       try { loadUserProfileData(); } catch(e) { console.warn("Profile load notice:", e); }
       
       const sessEl = document.getElementById('session-id-display');
@@ -1842,29 +1776,13 @@
         isProctoringActive = true;
       }
 
-      try { initRecognition(); } catch(e) { console.warn("Recognition init notice:", e); }
       try { generateQuestion(); } catch(e) { console.warn("Question gen notice:", e); }
 
       (async () => {
         try {
-          if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-            stream = await navigator.mediaDevices.getUserMedia({
-              video: true,
-              audio: {
-                echoCancellation: true,
-                noiseSuppression: true,
-                autoGainControl: true
-              }
-            });
-            const v = document.getElementById('session-cam');
-            if (v) {
-              v.srcObject = stream;
-              v.onloadedmetadata = () => v.play().catch(e => console.error("Auto-play warning:", e));
-            }
-            setupLiveMicrophoneMeter(stream);
-          }
+          await acquireMicrophoneStream(true);
         } catch (e) {
-          console.warn("Camera/Mic access warning:", e);
+          console.warn("Initial camera/mic access notice:", e);
         }
         try { startBiometrics(); } catch(e) { console.warn("Biometrics start notice:", e); }
       })();
@@ -1921,8 +1839,15 @@
           return;
         }
         if (durationSeconds <= 0) {
-          clearInterval(sessionTimerInterval);
-          endInterview();
+          if (display) {
+            display.textContent = '00:00';
+            display.className = 'font-mono font-bold text-sm text-yellow-400';
+          }
+          const hintEl = document.getElementById('mic-troubleshoot-hint');
+          if (hintEl && !isProcessingTurn) {
+            hintEl.className = 'flex items-center gap-1.5 text-yellow-400 font-bold';
+            hintEl.innerHTML = '<i class="fa-solid fa-clock text-xs"></i><span>Time concluding — take your time to finish and submit your response</span>';
+          }
           return;
         }
         durationSeconds--;
@@ -1930,16 +1855,14 @@
         const s = (durationSeconds % 60).toString().padStart(2, '0');
         if (display) display.textContent = `${m}:${s}`;
         if (durationSeconds < 60 && display) {
-          display.className = 'font-mono font-black text-sm text-red-500 animate-pulse';
+          display.className = 'font-mono font-black text-sm text-yellow-400 animate-pulse';
         }
       }, 1000);
     }
 
     // ─────────────────────────────────────────────
-    // ADVANCED DUAL-ENGINE SPEECH & MICROPHONE PIPELINE
-    // (Web Speech Live Streaming + Neural Groq Whisper MediaRecorder)
-    // ─────────────────────────────────────────────
-    // ADVANCED DUAL-ENGINE SPEECH RECOGNITION & NEURAL WHISPER TRANSCRIBER
+    // ADVANCED MULTI-BROWSER MICROPHONE & NEURAL VOICE PIPELINE
+    // Supports Chrome, Edge, Safari (macOS & iOS), Firefox, Brave & Mobile
     // ─────────────────────────────────────────────
     let candidateSpeechAccumulated = "";
     let candidateSpeechInterim = "";
@@ -1947,12 +1870,146 @@
     let liveAudioStream = null;
     let turnAudioRecorder = null;
     let turnAudioChunks = [];
+    let continuousPhraseRecorder = null;
     let hasDetectedCandidateVoice = false;
+
+    // Helper: Detect the best audio MIME type supported by the current browser
+    function getBestSupportedAudioMimeType() {
+      if (typeof MediaRecorder === 'undefined') return '';
+      const preferred = [
+        'audio/webm;codecs=opus',
+        'audio/webm',
+        'audio/ogg;codecs=opus',
+        'audio/ogg',
+        'audio/mp4',
+        'audio/aac',
+        'audio/wav'
+      ];
+      for (let i = 0; i < preferred.length; i++) {
+        if (MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(preferred[i])) {
+          return preferred[i];
+        }
+      }
+      return '';
+    }
+
+    // Helper: Safely unlock / resume AudioContext on user gesture
+    function resumeAudioContextSafely() {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!liveAudioCtx && AudioCtx) {
+          liveAudioCtx = new AudioCtx();
+        }
+        if (liveAudioCtx && liveAudioCtx.state === 'suspended') {
+          liveAudioCtx.resume().catch(e => console.warn("AudioContext resume notice:", e));
+        }
+      } catch (e) {}
+    }
+    ['click', 'touchstart', 'keydown'].forEach(ev => {
+      document.addEventListener(ev, resumeAudioContextSafely, { passive: true });
+    });
+
+    // Helper: Multi-Browser Microphone & Camera Stream Acquisition
+    async function acquireMicrophoneStream(withVideo = true) {
+      resumeAudioContextSafely();
+
+      if (liveAudioStream && liveAudioStream.active && liveAudioStream.getAudioTracks().some(t => t.readyState === 'live')) {
+        return liveAudioStream;
+      }
+
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        console.warn("navigator.mediaDevices.getUserMedia is not supported on this browser/insecure context.");
+        showMicTroubleshootWarning("Browser does not support mediaDevices or requires HTTPS/localhost.");
+        return null;
+      }
+
+      let acquiredStream = null;
+      const audioOpts = {
+        echoCancellation: true,
+        noiseSuppression: true,
+        autoGainControl: true
+      };
+
+      // 1. Try Video + Audio
+      if (withVideo) {
+        try {
+          acquiredStream = await navigator.mediaDevices.getUserMedia({
+            video: { width: { ideal: 640 }, height: { ideal: 480 }, frameRate: { ideal: 24 } },
+            audio: audioOpts
+          });
+        } catch (e1) {
+          console.warn("Video+Audio acquisition warning, trying basic video+audio:", e1.message);
+          try {
+            acquiredStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+          } catch (e2) {
+            console.warn("Basic video+audio acquisition warning, falling back to Audio-Only:", e2.message);
+          }
+        }
+      }
+
+      // 2. Fallback to Audio-Only (Crucial when camera is blocked or not connected)
+      if (!acquiredStream) {
+        try {
+          acquiredStream = await navigator.mediaDevices.getUserMedia({ audio: audioOpts });
+        } catch (e3) {
+          try {
+            acquiredStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          } catch (e4) {
+            console.error("Microphone access permission denied or no audio input found:", e4);
+            showMicTroubleshootWarning("Microphone blocked or not found. Please click to allow mic permission in your browser.");
+            return null;
+          }
+        }
+      }
+
+      if (acquiredStream) {
+        stream = acquiredStream;
+        liveAudioStream = acquiredStream;
+
+        const v = document.getElementById('session-cam');
+        if (v && acquiredStream.getVideoTracks().length > 0) {
+          v.srcObject = acquiredStream;
+          v.onloadedmetadata = () => v.play().catch(e => console.warn("Cam playback notice:", e));
+        }
+
+        setupLiveMicrophoneMeter(acquiredStream);
+        hideMicTroubleshootWarning();
+      }
+
+      return acquiredStream;
+    }
+
+    function showMicTroubleshootWarning(msg) {
+      const hintEl = document.getElementById('mic-troubleshoot-hint');
+      if (hintEl) {
+        hintEl.className = 'flex items-center gap-1.5 text-red-400 font-bold';
+        hintEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-xs"></i><span>${escapeHtml(msg)}</span>`;
+      }
+      const pill = document.getElementById('main-mic-pill');
+      if (pill) {
+        pill.className = "px-5 py-2.5 rounded-full bg-red-950/80 border border-red-500 text-white font-sans font-bold text-xs flex items-center gap-3 shadow-[0_0_20px_rgba(239,68,68,0.4)] hover:scale-105 transition-all cursor-pointer group";
+      }
+      const st = document.getElementById('mic-status-text');
+      if (st) {
+        st.textContent = "CLICK TO GRANT MIC PERMISSION";
+        st.className = "font-mono text-[11px] tracking-wider uppercase text-red-400 font-black";
+      }
+    }
+
+    function hideMicTroubleshootWarning() {
+      const hintEl = document.getElementById('mic-troubleshoot-hint');
+      if (hintEl && !isUserMuted) {
+        hintEl.className = 'flex items-center gap-1.5 text-primary font-bold';
+        hintEl.innerHTML = '<i class="fa-solid fa-microphone-lines animate-pulse text-xs"></i><span>Microphone live — speak clearly</span>';
+      }
+    }
 
     function initMediaRecorder(audioStream) {
       if (!audioStream) return;
       liveAudioStream = audioStream;
-      startContinuousNeuralAudioStream();
+      if (!isUserMuted) {
+        startContinuousNeuralAudioStream();
+      }
     }
 
     function startContinuousRecording() {
@@ -1964,47 +2021,44 @@
       if (!liveAudioStream || isUserMuted || interviewTerminated) return;
       try {
         const audioTracks = liveAudioStream.getAudioTracks();
-        if (!audioTracks || audioTracks.length === 0) return;
+        if (!audioTracks || audioTracks.length === 0 || audioTracks[0].readyState !== 'live') return;
 
-        const micOnlyStream = new MediaStream(audioTracks);
-        let mimeType = '';
-        if (typeof MediaRecorder !== 'undefined') {
-          if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) mimeType = 'audio/webm;codecs=opus';
-          else if (MediaRecorder.isTypeSupported('audio/webm')) mimeType = 'audio/webm';
-          else if (MediaRecorder.isTypeSupported('audio/mp4')) mimeType = 'audio/mp4';
-          else if (MediaRecorder.isTypeSupported('audio/ogg')) mimeType = 'audio/ogg';
+        if (continuousPhraseRecorder && continuousPhraseRecorder.state === 'recording') {
+          try { continuousPhraseRecorder.stop(); } catch(e){}
         }
 
-        const segmentRecorder = mimeType ? new MediaRecorder(micOnlyStream, { mimeType }) : new MediaRecorder(micOnlyStream);
+        const micOnlyStream = new MediaStream(audioTracks);
+        const mimeType = getBestSupportedAudioMimeType();
+        continuousPhraseRecorder = mimeType ? new MediaRecorder(micOnlyStream, { mimeType }) : new MediaRecorder(micOnlyStream);
         let currentChunkList = [];
 
-        segmentRecorder.ondataavailable = (e) => {
+        continuousPhraseRecorder.ondataavailable = (e) => {
           if (e.data && e.data.size > 0) {
             currentChunkList.push(e.data);
           }
         };
 
-        segmentRecorder.onstop = async () => {
-          if (currentChunkList.length > 0 && hasDetectedCandidateVoice && !isUserMuted && !isSpeaking) {
-            const blob = new Blob(currentChunkList, { type: segmentRecorder.mimeType || 'audio/webm' });
+        continuousPhraseRecorder.onstop = async () => {
+          if (currentChunkList.length > 0 && !isUserMuted && !isSpeaking) {
+            const blob = new Blob(currentChunkList, { type: continuousPhraseRecorder.mimeType || 'audio/webm' });
             currentChunkList = [];
-            if (blob.size > 400) {
+            if (blob.size > 350) {
               await sendPhraseForNeuralWhisper(blob);
             }
           }
           if (!isUserMuted && !interviewTerminated) {
-            setTimeout(startContinuousNeuralAudioStream, 60);
+            setTimeout(startContinuousNeuralAudioStream, 80);
           }
         };
 
-        segmentRecorder.start();
+        continuousPhraseRecorder.start();
         setTimeout(() => {
           try {
-            if (segmentRecorder.state === 'recording') {
-              segmentRecorder.stop();
+            if (continuousPhraseRecorder && continuousPhraseRecorder.state === 'recording') {
+              continuousPhraseRecorder.stop();
             }
           } catch(e){}
-        }, 2800); // 2.8 second phrase cycles for near-instant speech transcription
+        }, 2400); // 2.4 second phrase cycles for near-instant speech transcription across all browsers
       } catch (err) {
         console.warn("Neural audio stream notice:", err);
       }
@@ -2012,16 +2066,20 @@
 
     async function sendPhraseForNeuralWhisper(blob) {
       if (isTranscribingTurn || isUserMuted || isSpeaking) return;
+      // If Web Speech API is actively capturing the candidate's speech, avoid duplicate appending
+      if (isRecognitionActive && candidateSpeechAccumulated && candidateSpeechAccumulated.length > 3) return;
+
       isTranscribingTurn = true;
       const hintEl = document.getElementById('mic-troubleshoot-hint');
       if (hintEl && !isProcessingTurn) {
         hintEl.className = 'flex items-center gap-1.5 text-primary font-bold';
-        hintEl.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles fa-spin text-xs"></i><span>Neural Whisper transcribing live speech...</span>';
+        hintEl.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles fa-spin text-xs"></i><span>Deepgram STT capturing voice...</span>';
       }
 
       try {
         const formData = new FormData();
-        formData.append('audio', blob, 'candidate-speech.webm');
+        const ext = blob.type.includes('mp4') ? 'mp4' : (blob.type.includes('ogg') ? 'ogg' : 'webm');
+        formData.append('audio', blob, `candidate-speech.${ext}`);
         formData.append('language', activeSpeechLang || 'en');
 
         const res = await fetch('/api/interview/transcribe', {
@@ -2039,19 +2097,19 @@
             
             if (!currentVal) {
               candidateSpeechAccumulated = phrase;
-            } else if (!currentVal.toLowerCase().includes(phrase.toLowerCase())) {
+            } else if (!currentVal.toLowerCase().endsWith(phrase.toLowerCase())) {
               candidateSpeechAccumulated = currentVal + ' ' + phrase;
             }
             updateCandidateTextDisplay(candidateSpeechAccumulated);
 
             if (hintEl && !isProcessingTurn) {
               hintEl.className = 'flex items-center gap-1.5 text-primary font-bold';
-              hintEl.innerHTML = '<i class="fa-solid fa-check text-xs"></i><span>Voice captured & transcribed live</span>';
+              hintEl.innerHTML = '<i class="fa-solid fa-check text-xs"></i><span>Voice captured live</span>';
             }
           }
         }
       } catch (err) {
-        console.warn("Neural Whisper transcription notice:", err);
+        console.warn("Deepgram transcription notice:", err);
       } finally {
         isTranscribingTurn = false;
       }
@@ -2064,16 +2122,10 @@
           return;
         }
         const audioTracks = liveAudioStream.getAudioTracks();
-        if (!audioTracks || audioTracks.length === 0) return;
+        if (!audioTracks || audioTracks.length === 0 || audioTracks[0].readyState !== 'live') return;
 
         const micOnlyStream = new MediaStream(audioTracks);
-        let mimeType = '';
-        if (typeof MediaRecorder !== 'undefined') {
-          if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) mimeType = 'audio/webm;codecs=opus';
-          else if (MediaRecorder.isTypeSupported('audio/webm')) mimeType = 'audio/webm';
-          else if (MediaRecorder.isTypeSupported('audio/mp4')) mimeType = 'audio/mp4';
-          else if (MediaRecorder.isTypeSupported('audio/ogg')) mimeType = 'audio/ogg';
-        }
+        const mimeType = getBestSupportedAudioMimeType();
 
         turnAudioChunks = [];
         turnAudioRecorder = mimeType ? new MediaRecorder(micOnlyStream, { mimeType }) : new MediaRecorder(micOnlyStream);
@@ -2220,13 +2272,7 @@
       questionRecordingStartTime = Date.now();
       isQuestionRecordingActive = true;
 
-      let mimeType = '';
-      if (typeof MediaRecorder !== 'undefined') {
-        if (MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus')) mimeType = 'video/webm;codecs=vp9,opus';
-        else if (MediaRecorder.isTypeSupported('video/webm;codecs=vp8,opus')) mimeType = 'video/webm;codecs=vp8,opus';
-        else if (MediaRecorder.isTypeSupported('video/webm')) mimeType = 'video/webm';
-        else if (MediaRecorder.isTypeSupported('video/mp4')) mimeType = 'video/mp4';
-      }
+      const mimeType = getBestSupportedAudioMimeType();
 
       try {
         questionVideoRecorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
@@ -2271,7 +2317,8 @@
             (async () => {
               try {
                 const formData = new FormData();
-                formData.append('video', blob, `${qLabel}_recording.webm`);
+                const ext = blob.type.includes('mp4') ? 'mp4' : (blob.type.includes('ogg') ? 'ogg' : 'webm');
+                formData.append('video', blob, `${qLabel}_recording.${ext}`);
                 formData.append('sessionId', window.sessionId || 'session-' + Date.now());
                 formData.append('questionNumber', qLabel);
                 formData.append('questionText', questionText);
@@ -2315,14 +2362,18 @@
       updateRecordingHUD(false);
     }
 
-    window.enableAndStartSpeaking = function() {
+    window.enableAndStartSpeaking = async function() {
       isUserMuted = false;
       hideMicPromptPopup();
-      if (liveAudioCtx && liveAudioCtx.state === 'suspended') {
-        liveAudioCtx.resume();
+      resumeAudioContextSafely();
+
+      // Ensure stream is active or acquire it now
+      if (!liveAudioStream || !liveAudioStream.active || !liveAudioStream.getAudioTracks().some(t => t.readyState === 'live')) {
+        await acquireMicrophoneStream(false);
       }
       
       startTurnAudioCapture();
+      startContinuousNeuralAudioStream();
       initRecognition();
       startQuestionRecording();
       
@@ -2376,16 +2427,22 @@
     function setupLiveMicrophoneMeter(audioStream) {
       try {
         if (!audioStream) return;
+        resumeAudioContextSafely();
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
         if (!AudioCtx) return;
         if (!liveAudioCtx) liveAudioCtx = new AudioCtx();
-        if (liveAudioCtx.state === 'suspended') liveAudioCtx.resume();
+        if (liveAudioCtx.state === 'suspended') liveAudioCtx.resume().catch(e => console.warn("LiveAudioCtx resume notice:", e));
 
         liveAnalyser = liveAudioCtx.createAnalyser();
         liveAnalyser.fftSize = 64;
         liveAnalyser.smoothingTimeConstant = 0.4;
-        liveMicSource = liveAudioCtx.createMediaStreamSource(audioStream);
-        liveMicSource.connect(liveAnalyser);
+        
+        try {
+          liveMicSource = liveAudioCtx.createMediaStreamSource(audioStream);
+          liveMicSource.connect(liveAnalyser);
+        } catch (srcErr) {
+          console.warn("Audio source connect notice:", srcErr);
+        }
 
         initMediaRecorder(audioStream);
 
@@ -2413,7 +2470,7 @@
           const timeAvg = timeSum / timeData.length;
 
           // Sensitive voice detection threshold
-          const isVoicePresent = (freqAvg > 3.5) || (timeAvg > 2.5);
+          const isVoicePresent = (freqAvg > 3.0) || (timeAvg > 2.0);
 
           // Soundwave physical animation
           bars.forEach((bar, idx) => {
@@ -2455,7 +2512,7 @@
       if (!Speech) {
         if (hintEl) {
           hintEl.className = 'flex items-center gap-1.5 text-primary font-bold';
-          hintEl.innerHTML = '<i class="fa-solid fa-microphone-lines text-xs animate-pulse"></i><span>Neural Groq Mic Active (Brave/Multi-browser Mode)</span>';
+          hintEl.innerHTML = '<i class="fa-solid fa-microphone-lines text-xs animate-pulse"></i><span>Deepgram Neural Mic Active (All-Browser Mode)</span>';
         }
         return;
       }
@@ -2490,11 +2547,10 @@
             }
           }
 
-          const baseFinal = (previousTurnFinalText + ' ' + currentFinal).trim();
-          const fullDisplayText = (baseFinal + ' ' + currentInterim).trim();
+          const fullDisplayText = (currentFinal + currentInterim).trim();
 
           if (fullDisplayText) {
-            candidateSpeechAccumulated = baseFinal;
+            candidateSpeechAccumulated = currentFinal.trim() || fullDisplayText;
             candidateSpeechInterim = currentInterim.trim();
             updateCandidateTextDisplay(fullDisplayText, currentInterim.trim());
           }
@@ -2502,28 +2558,27 @@
 
         recognition.onerror = (e) => {
           console.warn("Speech recognition notice:", e.error);
+          if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+            isRecognitionActive = false;
+          }
         };
 
         recognition.onend = () => {
           isListening = false;
-          isRecognitionActive = false;
-          if (candidateSpeechAccumulated) {
-            previousTurnFinalText = candidateSpeechAccumulated;
-          }
           if (!isUserMuted && !interviewTerminated) {
             clearTimeout(restartTimer);
             restartTimer = setTimeout(() => {
               try {
-                if (recognition && !isRecognitionActive && !isUserMuted) {
+                if (recognition && !isUserMuted) {
                   recognition.start();
                 }
               } catch(e){}
-            }, 100);
+            }, 120);
           }
         };
 
         if (!isUserMuted) {
-          recognition.start();
+          try { recognition.start(); } catch(e){}
         }
       } catch (err) {
         console.warn("Recognition initialization notice:", err);
@@ -2531,6 +2586,7 @@
     }
 
     function toggleMic() {
+      resumeAudioContextSafely();
       if (!isUserMuted) {
         isUserMuted = true;
         if (recognition) {
@@ -2538,6 +2594,9 @@
         }
         if (turnAudioRecorder && turnAudioRecorder.state === 'recording') {
           try { turnAudioRecorder.stop(); } catch(e){}
+        }
+        if (continuousPhraseRecorder && continuousPhraseRecorder.state === 'recording') {
+          try { continuousPhraseRecorder.stop(); } catch(e){}
         }
         isListening = false;
         isRecognitionActive = false;
@@ -2578,13 +2637,19 @@
       }
     };
 
-    window.restartMicrophoneEngine = function() {
+    window.restartMicrophoneEngine = async function() {
       const hintEl = document.getElementById('mic-troubleshoot-hint');
       if (hintEl) {
         hintEl.className = 'flex items-center gap-1.5 text-yellow-400';
-        hintEl.innerHTML = '<i class="fa-solid fa-rotate fa-spin"></i><span>Reconnecting microphone & STT stream...</span>';
+        hintEl.innerHTML = '<i class="fa-solid fa-rotate fa-spin"></i><span>Reconnecting microphone stream across all devices...</span>';
       }
-      window.enableAndStartSpeaking();
+      try {
+        liveAudioStream = null;
+        await acquireMicrophoneStream(true);
+        await window.enableAndStartSpeaking();
+      } catch(e) {
+        console.warn("Restart mic notice:", e);
+      }
     };
 
     window.clearCandidateInput = function() {
@@ -2593,6 +2658,8 @@
       const whisperEl = document.getElementById('whisper-box');
       if (whisperEl) whisperEl.textContent = '';
       recordedAudioChunks = [];
+      candidateSpeechAccumulated = '';
+      candidateSpeechInterim = '';
       if (autoSubmitTimer) clearTimeout(autoSubmitTimer);
       if (recognition) {
         try { recognition.abort(); } catch(e){}
@@ -2745,14 +2812,23 @@
       // Immediately mute mic & hide popup while awaiting AI response
       isUserMuted = true;
       hideMicPromptPopup();
-      if (recognition) try { recognition.stop(); } catch(e){}
+      if (continuousPhraseRecorder && continuousPhraseRecorder.state === 'recording') {
+        try { continuousPhraseRecorder.stop(); } catch(e){}
+      }
 
+      // Properly await turnAudioRecorder finalization
       let recordedAudioBlob = null;
       if (turnAudioRecorder && turnAudioRecorder.state === 'recording') {
-        try { turnAudioRecorder.stop(); } catch(e){}
+        await new Promise((resolve) => {
+          turnAudioRecorder.onstop = () => resolve();
+          try { turnAudioRecorder.requestData(); } catch(e){}
+          try { turnAudioRecorder.stop(); } catch(e){ resolve(); }
+          setTimeout(resolve, 450);
+        });
       }
       if (turnAudioChunks && turnAudioChunks.length > 0) {
-        recordedAudioBlob = new Blob(turnAudioChunks, { type: turnAudioRecorder?.mimeType || 'audio/webm' });
+        const mimeType = turnAudioRecorder?.mimeType || getBestSupportedAudioMimeType() || 'audio/webm';
+        recordedAudioBlob = new Blob(turnAudioChunks, { type: mimeType });
       }
 
       // If no audio chunks in turn recorder, try currentQuestionChunks
@@ -2791,7 +2867,8 @@
         // True Voice-to-Voice Turn: Send Raw Voice Audio Directly to Backend
         if (recordedAudioBlob && recordedAudioBlob.size > 200) {
           const formData = new FormData();
-          formData.append('audio', recordedAudioBlob, `${qLabel}_candidate_voice.webm`);
+          const ext = recordedAudioBlob.type.includes('mp4') ? 'mp4' : (recordedAudioBlob.type.includes('ogg') ? 'ogg' : 'webm');
+          formData.append('audio', recordedAudioBlob, `${qLabel}_candidate_voice.${ext}`);
           formData.append('sessionId', window.sessionId);
           formData.append('context', JSON.stringify(window.userContext || {}));
           formData.append('messages', JSON.stringify(history));
@@ -2869,10 +2946,10 @@
         const msg = data.reply || "Thank you for explaining that. Let's move to the next technical challenge.";
         document.getElementById('ai-out').textContent = msg;
 
-        // Push history and speak out loud
+        // Push history and speak out loud (Deepgram Neural Voice)
         history.push({ role: 'assistant', content: msg });
         appendTranscriptMessage('ai', msg);
-        sayAI(msg);
+        sayAI(msg, data.audio_url);
 
         if (!isWarmupPhase && answered >= TOTAL) {
           setTimeout(() => endInterview(), 3000);
@@ -3097,21 +3174,12 @@
 
           if (!faceFound) {
             missesSinceLastStrike++;
-            bstat.textContent = `Target Lost ${missesSinceLastStrike}/15`;
-            bstat.className = 'absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded bg-red-500/80 font-mono text-[9px] text-white font-bold z-20';
-            if (missesSinceLastStrike >= MISSES_BEFORE_STRIKE) {
-              missesSinceLastStrike = 0;
-              issueStrike('face');
-            }
+            bstat.textContent = 'Face Off-Center';
+            bstat.className = 'absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded bg-yellow-500/80 font-mono text-[9px] text-white font-bold z-20';
           } else if (predictions.length > 1) {
             consecutiveMultiFaceCount++;
-            bstat.textContent = 'Multiple Faces Detected';
-            bstat.className = 'absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded bg-red-600 font-mono text-[9px] text-white font-bold z-20 animate-pulse';
-            issueStrike('multiface');
-            if (consecutiveMultiFaceCount >= 3) {
-              terminateForSecurityViolation('Multiple individuals detected attending interview in violation of exam integrity rules.');
-              return;
-            }
+            bstat.textContent = 'Multiple Faces';
+            bstat.className = 'absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded bg-yellow-600 font-mono text-[9px] text-white font-bold z-20 animate-pulse';
           } else {
             consecutiveMultiFaceCount = 0;
             missesSinceLastStrike = 0;
@@ -3122,24 +3190,16 @@
               
               if (!comp.isMatch) {
                 consecutiveMismatchCount++;
-                bstat.textContent = `Identity Mismatch ${consecutiveMismatchCount}/2 (${Math.round(comp.score * 100)}%)`;
-                bstat.className = 'absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded bg-red-600 font-mono text-[9px] text-white font-bold z-20 animate-pulse';
-                
-                if (consecutiveMismatchCount >= 2) {
-                  // Automatic termination for identity substitution / different person
-                  terminateForSecurityViolation('Critical Identity Mismatch: The individual attending the live interview session does not match the registered candidate face captured during verification.');
-                  return;
-                }
+                bstat.textContent = `Tracking (${Math.round(comp.score * 100)}%)`;
+                bstat.className = 'absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded bg-yellow-600/80 font-mono text-[9px] text-white font-bold z-20';
               } else {
                 consecutiveMismatchCount = 0;
                 bstat.textContent = `ID Verified (${Math.round((1 - comp.score) * 100)}%)`;
                 bstat.className = 'absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded bg-green-600/80 font-mono text-[9px] text-white font-bold z-20';
               }
             } else {
-              if (bstat.textContent.startsWith('Target Lost') || bstat.textContent.includes('Mismatch') || bstat.textContent.includes('Multiple')) {
-                bstat.textContent = 'Active Hud Sync';
-                bstat.className = 'absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded bg-black/60 backdrop-blur-md border border-primary/40 font-mono text-[9px] text-primary font-bold z-20';
-              }
+              bstat.textContent = 'Active Hud Sync';
+              bstat.className = 'absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded bg-black/60 backdrop-blur-md border border-primary/40 font-mono text-[9px] text-primary font-bold z-20';
             }
           }
         }
@@ -3151,7 +3211,6 @@
             const phoneDetected = objects.find(obj => obj.class === 'cell phone' || obj.class === 'phone');
             if (phoneDetected) {
               drawPhoneBox(phoneDetected);
-              issueStrike('phone');
             }
           } catch (cocoErr) {}
         }
@@ -3217,23 +3276,21 @@
     }
 
     function issueStrike(type) {
-      if (window.lastStrikeTime && (Date.now() - window.lastStrikeTime < 3000)) return;
+      if (window.lastStrikeTime && (Date.now() - window.lastStrikeTime < 4000)) return;
       window.lastStrikeTime = Date.now();
       
       strikes++;
-      document.getElementById('warn-count').textContent = `${strikes} / 3`;
+      document.getElementById('warn-count').textContent = `${Math.min(strikes, 3)} / 3`;
       
-      const pip = document.getElementById(`pip-${strikes}`);
-      if (pip) pip.className = 'h-1.5 flex-1 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)]';
-
-      if (strikes >= 3) {
-        alert("Compliance Audit Alert: Multi-strike integrity warning triggered. Generating summary.");
-        endInterview();
-      }
+      const pip = document.getElementById(`pip-${Math.min(strikes, 3)}`);
+      if (pip) pip.className = 'h-1.5 flex-1 rounded-full bg-yellow-500 shadow-[0_0_8px_rgba(234,179,8,0.8)]';
     }
 
-    // Question generation / Kick-off API
+    let isQuestionGenerating = false;
     async function generateQuestion() {
+      if (isQuestionGenerating) return;
+      isQuestionGenerating = true;
+
       const candidateName = window.userContext?.candidateName || 'Rahul';
       const roleTitle = window.userContext?.roleTitle || 'Associate Software Engineer';
       
@@ -3289,7 +3346,7 @@
         // Push history, transcript and speak
         history.push({ role: 'assistant', content: msg });
         appendTranscriptMessage('ai', msg);
-        sayAI(msg);
+        sayAI(msg, data.audio_url);
       } catch (e) {
         console.warn("Generating warm-up fallback:", e);
         const comp = window.userContext.company || 'our team';
@@ -3301,24 +3358,127 @@
       }
     }
 
-    // Text to Speech Engine (Chrome/Edge/Safari robust)
-    function sayAI(text) {
-      if (!text) return;
-      currentSpeechText = text;
-      
-      if (!window.speechSynthesis) return;
-      const synth = window.speechSynthesis;
-      
-      try { synth.cancel(); } catch(e){}
-      if (synth.paused) {
-        try { synth.resume(); } catch(e){}
+    let currentAIAudio = null;
+    let currentAudioUrl = null;
+    let activeSpeechToken = 0;
+
+    // Text to Speech Engine (Deepgram Aura-2 with Web Speech API fallback)
+    async function sayAI(text, audioUrl = null) {
+      if (!text && !audioUrl) return;
+      const thisToken = ++activeSpeechToken;
+      if (text) currentSpeechText = text;
+      if (audioUrl) currentAudioUrl = audioUrl;
+
+      // Cancel previous active speech/audio
+      if (currentAIAudio) {
+        try { currentAIAudio.pause(); } catch(e){}
+        currentAIAudio = null;
+      }
+      if (window.speechSynthesis) {
+        try { window.speechSynthesis.cancel(); } catch(e){}
       }
 
       isSpeaking = true;
       isUserMuted = true;
       hideMicPromptPopup();
+
+      const orb = document.getElementById('voice-orb');
+      if (orb) orb.classList.add('speaking-pulse');
+      const aiStatus = document.getElementById('ai-engine-status');
+      if (aiStatus) aiStatus.textContent = 'DEEPGRAM AI SPEAKING...';
+
+      const pill = document.getElementById('main-mic-pill');
+      if (pill) {
+        pill.className = "px-5 py-2.5 rounded-full bg-white/5 border border-white/10 text-slate-400 font-sans font-bold text-xs flex items-center gap-3 transition-all cursor-not-allowed";
+      }
+      const st = document.getElementById('mic-status-text');
+      if (st) {
+        st.textContent = "INTERVIEWER SPEAKING (MIC OFF)";
+        st.className = "font-mono text-[11px] tracking-wider uppercase text-slate-400";
+      }
+      const mb = document.getElementById('mic-btn');
+      if (mb) {
+        mb.innerHTML = '<i class="fa-solid fa-volume-high"></i>';
+        mb.className = "w-6 h-6 rounded-full bg-white/10 text-slate-400 flex items-center justify-center text-xs";
+      }
+      const viz = document.getElementById('audio-visualizer');
+      if (viz) viz.style.display = "none";
+
+      const onPlaybackEnd = () => {
+        if (thisToken !== activeSpeechToken) return;
+        isSpeaking = false;
+        if (orb) orb.classList.remove('speaking-pulse');
+        const aiStatus = document.getElementById('ai-engine-status');
+        if (aiStatus) aiStatus.textContent = 'AI ENGINE ACTIVE • LISTENING';
+        // Auto-activate microphone for candidate with safe buffer
+        setTimeout(() => {
+          if (!isSpeaking && !interviewTerminated) {
+            window.enableAndStartSpeaking();
+          }
+        }, 350);
+      };
+
+      // 1. If audioUrl is provided, play Deepgram neural audio
+      let targetAudioUrl = audioUrl || (currentAudioUrl && currentSpeechText === text ? currentAudioUrl : null);
+
+      // If no audioUrl provided yet, fetch from Deepgram /api/interview/tts in background
+      if (!targetAudioUrl && text && text.length > 5) {
+        try {
+          const ttsRes = await fetch('/api/interview/tts', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text })
+          });
+          const ttsData = await ttsRes.json();
+          if (thisToken !== activeSpeechToken) return;
+          if (ttsData.success && ttsData.audio_url) {
+            targetAudioUrl = ttsData.audio_url;
+            currentAudioUrl = targetAudioUrl;
+          }
+        } catch (e) {
+          console.warn("[Deepgram TTS auto-fetch notice]:", e);
+        }
+      }
+
+      if (thisToken !== activeSpeechToken) return;
+
+      if (targetAudioUrl) {
+        try {
+          currentAIAudio = new Audio(targetAudioUrl);
+          currentAIAudio.onended = onPlaybackEnd;
+          currentAIAudio.onerror = () => {
+            if (thisToken !== activeSpeechToken) return;
+            console.warn("Deepgram audio playback error, falling back to Web Speech API");
+            playWebSpeech(text, onPlaybackEnd);
+          };
+          const playPromise = currentAIAudio.play();
+          if (playPromise !== undefined) {
+            playPromise.catch((err) => {
+              if (thisToken !== activeSpeechToken) return;
+              console.warn("Audio autoplay blocked or failed:", err);
+              playWebSpeech(text, onPlaybackEnd);
+            });
+          }
+          return;
+        } catch (err) {
+          console.warn("Audio element initialization failed:", err);
+        }
+      }
+
+      // 2. Fallback to Web Speech API
+      playWebSpeech(text, onPlaybackEnd);
+    }
+
+    function playWebSpeech(text, onDone) {
+      if (!window.speechSynthesis || !text) {
+        if (onDone) onDone();
+        return;
+      }
+      const synth = window.speechSynthesis;
+      try { synth.cancel(); } catch(e){}
+      if (synth.paused) { try { synth.resume(); } catch(e){} }
+
       const utterance = new SpeechSynthesisUtterance(text);
-      
       const voices = synth.getVoices();
       if (voices && voices.length > 0) {
         const preferredVoice = voices.find(v => 
@@ -3328,66 +3488,17 @@
           v.name.includes('Zira') ||
           (v.lang && v.lang.startsWith('en'))
         );
-        if (preferredVoice) {
-          utterance.voice = preferredVoice;
-        }
+        if (preferredVoice) utterance.voice = preferredVoice;
       }
-
       utterance.rate = 1.0;
       utterance.pitch = 1.0;
-      
-      utterance.onstart = () => {
-        isSpeaking = true;
-        isUserMuted = true;
-        hideMicPromptPopup();
-        const orb = document.getElementById('voice-orb');
-        if (orb) orb.classList.add('speaking-pulse');
-        const aiStatus = document.getElementById('ai-engine-status');
-        if (aiStatus) aiStatus.textContent = 'AI INTERVIEWER SPEAKING...';
-        
-        const pill = document.getElementById('main-mic-pill');
-        if (pill) {
-          pill.className = "px-5 py-2.5 rounded-full bg-white/5 border border-white/10 text-slate-400 font-sans font-bold text-xs flex items-center gap-3 transition-all cursor-not-allowed";
-        }
-        const st = document.getElementById('mic-status-text');
-        if (st) {
-          st.textContent = "INTERVIEWER SPEAKING (MIC OFF)";
-          st.className = "font-mono text-[11px] tracking-wider uppercase text-slate-400";
-        }
-        const mb = document.getElementById('mic-btn');
-        if (mb) {
-          mb.innerHTML = '<i class="fa-solid fa-volume-high"></i>';
-          mb.className = "w-6 h-6 rounded-full bg-white/10 text-slate-400 flex items-center justify-center text-xs";
-        }
-        const viz = document.getElementById('audio-visualizer');
-        if (viz) viz.style.display = "none";
-      };
-
-      utterance.onend = () => {
-        isSpeaking = false;
-        const orb = document.getElementById('voice-orb');
-        if (orb) orb.classList.remove('speaking-pulse');
-        const aiStatus = document.getElementById('ai-engine-status');
-        if (aiStatus) aiStatus.textContent = 'AI ENGINE ACTIVE • LISTENING';
-        // Auto-activate microphone for candidate
-        window.enableAndStartSpeaking();
-      };
-
-      utterance.onerror = (e) => {
-        console.warn("SpeechSynthesis error:", e);
-        isSpeaking = false;
-        const orb = document.getElementById('voice-orb');
-        if (orb) orb.classList.remove('speaking-pulse');
-        const aiStatus = document.getElementById('ai-engine-status');
-        if (aiStatus) aiStatus.textContent = 'AI ENGINE ACTIVE • LISTENING';
-        window.enableAndStartSpeaking();
-      };
-
+      utterance.onend = onDone;
+      utterance.onerror = onDone;
       try {
         synth.speak(utterance);
       } catch (err) {
         console.warn("Speech speak error:", err);
-        window.enableAndStartSpeaking();
+        if (onDone) onDone();
       }
     }
 

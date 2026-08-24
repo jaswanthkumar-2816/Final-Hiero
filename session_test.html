@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" class="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Hiero Live AI Interview — Test Chamber</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="/logo-hiero.png">
+
+  <!-- Premium Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            'bg-main': '#080a0f',
+            'stage-bg': '#0f131a',
+            'card-glass': 'rgba(18, 24, 38, 0.75)',
+            'primary': '#07e219',
+            'ai-purple': '#8b5cf6',
+            'ai-purple-dark': '#6d28d9',
+            'user-blue': '#38bdf8',
+            'danger': '#ef4444'
+          },
+          fontFamily: {
+            'sans': ['Plus Jakarta Sans', 'sans-serif'],
+            'display': ['Outfit', 'sans-serif'],
+            'mono': ['Geist Mono', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    :root {
+      --bg: #080a0f;
+      --stage-bg: #0f131a;
+      --ai-purple: #8b5cf6;
+      --g: #07e219;
+      --border: rgba(255, 255, 255, 0.08);
+    }
+
+    body {
+      background-color: var(--bg);
+      background-image: 
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(139, 92, 246, 0.15), transparent 70%),
+        radial-gradient(circle at 10% 90%, rgba(7, 226, 25, 0.06), transparent 50%),
+        radial-gradient(circle at 90% 90%, rgba(139, 92, 246, 0.08), transparent 50%);
+      color: #fff;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    /* Ambient pulse for AI Avatar */
+    .ai-speaking-wave {
+      animation: aiPulse 1.6s ease-in-out infinite alternate;
+    }
+
+    @keyframes aiPulse {
+      0% {
+        transform: scale(1);
+        box-shadow: 0 0 30px rgba(139, 92, 246, 0.4), inset 0 0 15px rgba(139, 92, 246, 0.3);
+      }
+      100% {
+        transform: scale(1.08);
+        box-shadow: 0 0 70px rgba(139, 92, 246, 0.85), inset 0 0 30px rgba(139, 92, 246, 0.6);
+      }
+    }
+
+    .ai-ripple-ring {
+      position: absolute;
+      inset: -16px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(139, 92, 246, 0.35);
+      animation: ringSpread 3s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+    }
+
+    .ai-ripple-ring:nth-child(2) {
+      inset: -32px;
+      animation-delay: 1s;
+    }
+
+    .ai-ripple-ring:nth-child(3) {
+      inset: -48px;
+      animation-delay: 2s;
+    }
+
+    @keyframes ringSpread {
+      0% { transform: scale(0.85); opacity: 0.9; }
+      100% { transform: scale(1.25); opacity: 0; }
+    }
+
+    /* Soundwave Equalizer Bars */
+    .eq-bar {
+      width: 3px;
+      border-radius: 4px;
+      background: linear-gradient(to top, #8b5cf6, #c084fc);
+      animation: eqBounce 1.2s ease-in-out infinite;
+      height: 6px;
+    }
+
+    @keyframes eqBounce {
+      0%, 100% { height: 6px; opacity: 0.4; }
+      50% { height: 22px; opacity: 1; filter: drop-shadow(0 0 6px #8b5cf6); }
+    }
+
+    /* Custom Scrollbar for Transcript */
+    ::-webkit-scrollbar {
+      width: 4px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 8px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #8b5cf6;
+    }
+  </style>
+</head>
+
+<body class="flex flex-col h-screen w-screen select-none">
+
+  <!-- =========================================================
+       TOP HEADER
+       ========================================================= -->
+  <header class="h-16 px-6 flex items-center justify-between border-b border-white/[0.06] bg-black/40 backdrop-blur-xl z-20 flex-shrink-0">
+    
+    <!-- Left: Brand + Role Title -->
+    <div class="flex items-center gap-4">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-lg bg-primary/15 border border-primary/40 flex items-center justify-center text-primary font-black text-sm tracking-tight shadow-[0_0_15px_rgba(7,226,25,0.3)]">
+          <i class="fa-solid fa-sparkles text-xs"></i>
+        </div>
+        <span class="font-display font-extrabold text-lg text-white tracking-wide">hiero</span>
+      </div>
+      <div class="h-4 w-[1px] bg-white/10 hidden sm:block"></div>
+      <span class="font-sans font-bold text-sm text-slate-200" id="header-role-title">Product Manager</span>
+    </div>
+
+    <!-- Right: Network Signal + Timer + User Avatar -->
+    <div class="flex items-center gap-4">
+      
+      <!-- Network Signal Bars -->
+      <div class="flex items-end gap-1 h-3.5" title="Network Connection: Excellent">
+        <span class="w-1 h-1.5 rounded-sm bg-primary"></span>
+        <span class="w-1 h-2 rounded-sm bg-primary"></span>
+        <span class="w-1 h-2.5 rounded-sm bg-primary"></span>
+        <span class="w-1 h-3.5 rounded-sm bg-primary animate-pulse"></span>
+      </div>
+
+      <!-- Live Clock / Timer Badge -->
+      <div class="px-3 py-1 rounded-full bg-black/60 border border-white/10 font-mono font-bold text-xs text-slate-200 tracking-wider flex items-center gap-2">
+        <span class="w-1.5 h-1.5 rounded-full bg-primary animate-ping"></span>
+        <span id="session-timer-display">00:15:00</span>
+      </div>
+
+      <!-- Candidate Avatar Badge -->
+      <div class="w-8 h-8 rounded-full bg-[#f59e0b] text-[#0f172a] font-black text-xs flex items-center justify-center shadow-[0_0_12px_rgba(245,158,11,0.4)]" id="candidate-avatar-initial" title="Candidate Profile">
+        RC
+      </div>
+
+    </div>
+  </header>
+
+  <!-- =========================================================
+       MAIN MEETING WORKSPACE
+       ========================================================= -->
+  <main class="flex-1 flex overflow-hidden p-3 sm:p-5 gap-4 relative">
+    
+    <!-- Large Meeting Canvas Frame -->
+    <div class="flex-1 flex flex-col items-center justify-between rounded-3xl bg-[#0d1117] border border-white/[0.08] relative overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.8)] transition-all">
+      
+      <!-- Ambient Studio Light Effect -->
+      <div class="absolute inset-0 pointer-events-none opacity-40 bg-[radial-gradient(circle_at_50%_40%,rgba(139,92,246,0.18),transparent_65%)]"></div>
+
+      <!-- Center AI Interviewer Neural Circle / Avatar (Exact match with Image 1 & 2) -->
+      <div class="relative flex flex-col items-center justify-center my-auto z-10">
+        <div class="ai-ripple-ring" id="ripple-1"></div>
+        <div class="ai-ripple-ring" id="ripple-2"></div>
+        <div class="ai-ripple-ring" id="ripple-3"></div>
+
+        <!-- Big Purple Initial Circle -->
+        <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-[#8b5cf6] flex items-center justify-center text-white font-display font-bold text-4xl shadow-[0_0_50px_rgba(139,92,246,0.6)] border-2 border-white/20 transition-all cursor-pointer select-none" id="ai-main-orb" onclick="toggleCandidateMic()">
+          I
+        </div>
+      </div>
+
+      <!-- Bottom Frame Overlay Elements (Exact match with Image 1 & 2) -->
+      <div class="w-full p-4 sm:p-6 flex items-end justify-between z-10">
+        
+        <!-- Left: Interviewer Badge + Soundwave Equalizer -->
+        <div class="flex items-center gap-2.5 bg-[#181c28]/90 backdrop-blur-md px-3.5 py-1.5 rounded-xl border border-white/10 shadow-lg">
+          <span class="font-mono text-[11px] font-bold text-purple-300 uppercase tracking-wider">
+            Interviewer
+          </span>
+          <!-- Soundwave Bars -->
+          <div class="flex items-center gap-1 h-4" id="ai-equalizer">
+            <span class="eq-bar" style="animation-delay: 0.1s"></span>
+            <span class="eq-bar" style="animation-delay: 0.3s"></span>
+            <span class="eq-bar" style="animation-delay: 0.5s"></span>
+            <span class="eq-bar" style="animation-delay: 0.2s"></span>
+            <span class="eq-bar" style="animation-delay: 0.4s"></span>
+            <span class="eq-bar" style="animation-delay: 0.6s"></span>
+            <span class="eq-bar" style="animation-delay: 0.15s"></span>
+          </div>
+        </div>
+
+        <!-- Right: Candidate Picture-in-Picture (PIP) Webcam Feed -->
+        <div class="relative w-44 sm:w-56 h-28 sm:h-36 rounded-2xl overflow-hidden bg-black border border-white/15 shadow-[0_10px_30px_rgba(0,0,0,0.8)] flex-shrink-0 group">
+          <video id="candidate-pip-video" autoplay playsinline muted class="w-full h-full object-cover"></video>
+          
+          <!-- Candidate PIP Label & Mic Status -->
+          <div class="absolute bottom-2 left-2 flex items-center gap-1.5 bg-black/80 backdrop-blur-md px-2 py-0.5 rounded-lg border border-white/10">
+            <span class="px-1.5 py-0.5 rounded bg-sky-500 text-white font-mono text-[9px] font-black uppercase">
+              You
+            </span>
+            <button onclick="toggleCandidateMic()" id="pip-mic-icon" class="text-primary text-[10px] cursor-pointer hover:scale-110 transition-transform">
+              <i class="fa-solid fa-microphone"></i>
+            </button>
+          </div>
+
+          <!-- Fallback when camera is disabled -->
+          <div id="pip-cam-fallback" class="absolute inset-0 bg-[#1e293b] flex flex-col items-center justify-center text-slate-400 gap-1.5" style="display: none;">
+            <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white font-bold text-xs">
+              RC
+            </div>
+            <span class="text-[10px] font-mono">Camera Offline</span>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- =========================================================
+         RIGHT TRANSCRIPT SIDEBAR DRAWER (Slide-Over Panel)
+         ========================================================= -->
+    <aside id="transcript-drawer" class="w-80 sm:w-96 flex flex-col rounded-3xl bg-[#0d1117] border border-white/[0.08] shadow-[0_20px_60px_rgba(0,0,0,0.8)] overflow-hidden transition-all duration-300 flex-shrink-0" style="display: flex;">
+      
+      <!-- Drawer Header -->
+      <div class="px-5 py-4 border-b border-white/[0.06] bg-black/40 flex items-center justify-between flex-shrink-0">
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-comment-dots text-yellow-400 text-sm"></i>
+          <span class="font-mono text-xs font-black uppercase tracking-wider text-slate-200">Transcript</span>
+        </div>
+        <button onclick="toggleTranscriptDrawer()" class="text-slate-400 hover:text-white transition-colors p-1 text-sm cursor-pointer" title="Close Transcript">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Messages Feed -->
+      <div class="flex-1 p-4 overflow-y-auto space-y-4 text-xs font-sans scroll-smooth" id="transcript-feed">
+        
+        <!-- Welcome intro bubble -->
+        <div class="flex items-start gap-2.5">
+          <div class="w-6 h-6 rounded-full bg-[#8b5cf6] text-white flex items-center justify-center font-bold text-[10px] flex-shrink-0 mt-0.5">
+            I
+          </div>
+          <div class="flex-1 bg-white/[0.04] p-3 rounded-2xl rounded-tl-sm border border-white/[0.06] text-slate-200 leading-relaxed space-y-2" id="first-ai-bubble">
+            <p>Connecting to AI Interview chamber...</p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Drawer Footer Info -->
+      <div class="p-3 border-t border-white/[0.06] bg-black/40 flex items-center justify-between text-[10px] font-mono text-slate-400">
+        <span class="flex items-center gap-1.5 text-primary">
+          <i class="fa-solid fa-circle-dot animate-pulse text-[8px]"></i> Neural sync live
+        </span>
+        <span id="turn-count-badge">Turn 1</span>
+      </div>
+
+    </aside>
+
+  </main>
+
+  <!-- =========================================================
+       BOTTOM FLOATING CONTROLS DOCK (Exact match with Image 1 & 2)
+       ========================================================= -->
+  <footer class="h-16 flex items-center justify-center gap-4 z-20 flex-shrink-0 pb-2">
+    
+    <div class="flex items-center gap-3 bg-[#131722]/90 backdrop-blur-xl px-3 py-2 rounded-full border border-white/10 shadow-[0_10px_40px_rgba(0,0,0,0.6)]">
+      
+      <!-- Button 1: Toggle Transcript Sidebar -->
+      <button id="btn-toggle-transcript" onclick="toggleTranscriptDrawer()" class="w-10 h-10 rounded-full bg-[#1e2533] hover:bg-[#2a3447] border border-white/10 text-slate-200 flex items-center justify-center text-sm transition-all hover:scale-105 cursor-pointer shadow-md" title="Toggle Live Transcript">
+        <i class="fa-solid fa-closed-captioning"></i>
+      </button>
+
+      <!-- Button 2: Red End Call Button -->
+      <button onclick="openEndInterviewModal()" class="h-10 px-5 rounded-full bg-[#ef4444] hover:bg-[#dc2626] text-white flex items-center justify-center text-sm transition-all hover:scale-105 cursor-pointer shadow-[0_0_20px_rgba(239,68,68,0.4)]" title="End Interview">
+        <i class="fa-solid fa-phone-slash"></i>
+      </button>
+
+    </div>
+
+  </footer>
+
+
+  <!-- =========================================================
+       END INTERVIEW CONFIRMATION MODAL (Matching Screenshot 3)
+       ========================================================= -->
+  <div id="end-interview-modal" style="display: none;" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+    <div class="w-full max-w-sm rounded-2xl bg-[#131722] border border-white/10 p-6 shadow-2xl relative text-center space-y-4 animate-in fade-in zoom-in-95">
+      
+      <!-- Close Button -->
+      <button onclick="closeEndInterviewModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white p-1">
+        <i class="fa-solid fa-xmark text-sm"></i>
+      </button>
+
+      <!-- Info Icon in Circle -->
+      <div class="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mx-auto text-slate-300 text-lg">
+        <i class="fa-solid fa-circle-info"></i>
+      </div>
+
+      <!-- Title -->
+      <h3 class="font-display font-bold text-lg text-white">End Interview</h3>
+
+      <!-- Description -->
+      <p class="text-xs text-slate-400 leading-relaxed">
+        Please confirm if you would like to conclude the interview session.
+      </p>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-3 pt-2">
+        <button onclick="closeEndInterviewModal()" class="flex-1 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-slate-300 transition-colors">
+          Cancel
+        </button>
+        <button onclick="confirmEndSession()" class="flex-1 py-2.5 rounded-xl bg-[#dc2626] hover:bg-[#b91c1c] text-xs font-bold text-white transition-colors shadow-lg shadow-red-600/30">
+          End Interview
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- =========================================================
+       CLIENT-SIDE JAVASCRIPT & AI AUDIO ENGINE
+       ========================================================= -->
+  <script>
+    // ─── STATE MANAGEMENT ────────────────────────────────────────────────────
+    let sessionUserContext = {
+      candidateName: "Rahul Chavan",
+      roleTitle: "Product Manager",
+      company: "Google",
+      duration: 15
+    };
+
+    // Load from sessionStorage if available
+    try {
+      const savedCtx = sessionStorage.getItem('mockContext') || localStorage.getItem('hiero_mock_context');
+      if (savedCtx) {
+        sessionUserContext = Object.assign(sessionUserContext, JSON.parse(savedCtx));
+      }
+    } catch(e){}
+
+    const candidateInitials = (sessionUserContext.candidateName || 'RC')
+      .split(' ')
+      .map(w => w[0])
+      .join('')
+      .substring(0, 2)
+      .toUpperCase();
+
+    document.getElementById('header-role-title').textContent = sessionUserContext.roleTitle;
+    document.getElementById('candidate-avatar-initial').textContent = candidateInitials || 'RC';
+
+    let conversationHistory = [];
+    let isUserMuted = false;
+    let isAISpeaking = false;
+    let currentTurn = 1;
+    const TOTAL_TURNS = 5;
+    let sessionDurationSec = (sessionUserContext.duration || 15) * 60;
+    let sessionTimerInterval = null;
+
+    let mediaStream = null;
+    let speechRecognition = null;
+    let candidateAccumulatedText = "";
+    let audioRecorder = null;
+    let audioChunks = [];
+    let currentAiAudio = null;
+
+    // ─── UI TOGGLES ─────────────────────────────────────────────────────────
+    function toggleTranscriptDrawer() {
+      const drawer = document.getElementById('transcript-drawer');
+      const btn = document.getElementById('btn-toggle-transcript');
+      if (drawer.style.display === 'none') {
+        drawer.style.display = 'flex';
+        btn.classList.add('bg-[#8b5cf6]/30', 'text-purple-300', 'border-[#8b5cf6]/50');
+      } else {
+        drawer.style.display = 'none';
+        btn.classList.remove('bg-[#8b5cf6]/30', 'text-purple-300', 'border-[#8b5cf6]/50');
+      }
+    }
+
+    function openEndInterviewModal() {
+      document.getElementById('end-interview-modal').style.display = 'flex';
+    }
+
+    function closeEndInterviewModal() {
+      document.getElementById('end-interview-modal').style.display = 'none';
+    }
+
+    function confirmEndSession() {
+      closeEndInterviewModal();
+      if (speechRecognition) { try { speechRecognition.stop(); } catch(e){} }
+      if (mediaStream) { mediaStream.getTracks().forEach(t => t.stop()); }
+      if (currentAiAudio) { try { currentAiAudio.pause(); } catch(e){} }
+      
+      document.getElementById('live-subtitle-text').textContent = "Interview session completed. Thank you!";
+      alert("Session completed! In this standalone test page, the session has concluded.");
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function formatCleanTranscript(text) {
+      if (!text) return '';
+      let clean = String(text);
+      
+      // Clean leading and trailing backticks
+      clean = clean.replace(/^```[a-z]*\n?/gi, '').replace(/\n?```$/g, '');
+      
+      // Clean markdown bold tags like **Scenario:** or **Option A:**
+      clean = clean.replace(/\*\*\s*Option\s*([A-D])\s*:\s*\*\*/gi, 'Option $1:');
+      clean = clean.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      clean = clean.replace(/\*(.*?)\*/g, '<em>$1</em>');
+      
+      // Clean redundant markdown dashes/bullets
+      clean = clean.replace(/^[•\-*]\s+/gm, '');
+      
+      // Convert line breaks
+      clean = clean.replace(/\n\n+/g, '<br/><br/>').replace(/\n/g, '<br/>');
+
+      // Style Option A, Option B, Option C, Option D or a), b), c), d)
+      clean = clean.replace(/(Option\s+[A-D][:.]?|\b[a-d]\)\s+)/gi, '<span class="inline-block px-2 py-0.5 my-0.5 rounded bg-[#8b5cf6]/20 text-purple-300 font-mono font-bold border border-[#8b5cf6]/35">$1</span> ');
+
+      // Highlight the concluding question prompt
+      clean = clean.replace(/(Which option would you choose[^<]*\?|Please choose one option[^<]*\?|Please explain your technical reasoning[^<]*\.?)/gi, '<span class="text-purple-200 font-bold block mt-2 pt-1 border-t border-white/10">$1</span>');
+
+      return clean;
+    }
+
+    function appendTranscriptMessage(role, text) {
+      const feed = document.getElementById('transcript-feed');
+      if (!feed) return;
+
+      const bubbleDiv = document.createElement('div');
+      bubbleDiv.className = 'flex items-start gap-2.5 animate-in fade-in duration-300';
+
+      if (role === 'assistant') {
+        bubbleDiv.innerHTML = `
+          <div class="w-6 h-6 rounded-full bg-[#8b5cf6] text-white flex items-center justify-center font-bold text-[10px] flex-shrink-0 mt-0.5">
+            I
+          </div>
+          <div class="flex-1 bg-white/[0.04] p-3 rounded-2xl rounded-tl-sm border border-white/[0.06] text-slate-200 leading-relaxed">
+            ${formatCleanTranscript(text)}
+          </div>
+        `;
+      } else {
+        bubbleDiv.innerHTML = `
+          <div class="w-6 h-6 rounded-full bg-[#0284c7] text-white flex items-center justify-center font-bold text-[10px] flex-shrink-0 mt-0.5">
+            ${candidateInitials || 'R'}
+          </div>
+          <div class="flex-1 bg-sky-500/10 p-3 rounded-2xl rounded-tl-sm border border-sky-500/20 text-sky-100 leading-relaxed font-medium">
+            "${escapeHtml(text)}"
+          </div>
+        `;
+      }
+
+      feed.appendChild(bubbleDiv);
+      feed.scrollTo({ top: feed.scrollHeight, behavior: 'smooth' });
+    }
+
+    // ─── CAMERA & MICROPHONE STREAM ──────────────────────────────────────────
+    async function initCameraAndMic() {
+      try {
+        mediaStream = await navigator.mediaDevices.getUserMedia({
+          video: { width: { ideal: 640 }, height: { ideal: 480 } },
+          audio: true
+        });
+
+        const pipVideo = document.getElementById('candidate-pip-video');
+        if (pipVideo) {
+          pipVideo.srcObject = mediaStream;
+        }
+
+        initSpeechRecognition();
+      } catch (err) {
+        console.warn("Camera/Mic initialization warning:", err);
+        const fallback = document.getElementById('pip-cam-fallback');
+        if (fallback) fallback.style.display = 'flex';
+      }
+    }
+
+    function toggleCandidateMic() {
+      if (isUserMuted) {
+        // Unmute
+        isUserMuted = false;
+        const pipIcon = document.getElementById('pip-mic-icon');
+        if (pipIcon) {
+          pipIcon.className = "text-primary text-[10px] cursor-pointer hover:scale-110 transition-transform";
+          pipIcon.innerHTML = '<i class="fa-solid fa-microphone"></i>';
+        }
+        try { speechRecognition?.start(); } catch(e){}
+      } else {
+        // Mute
+        isUserMuted = true;
+        const pipIcon = document.getElementById('pip-mic-icon');
+        if (pipIcon) {
+          pipIcon.className = "text-red-400 text-[10px] cursor-pointer hover:scale-110 transition-transform";
+          pipIcon.innerHTML = '<i class="fa-solid fa-microphone-slash"></i>';
+        }
+        try { speechRecognition?.stop(); } catch(e){}
+      }
+    }
+
+    // ─── SPEECH RECOGNITION & AUTO-TURN STREAM ────────────────────────────────
+    let autoSubmitSilenceTimer = null;
+
+    function initSpeechRecognition() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) return;
+
+      try {
+        speechRecognition = new SpeechRecognition();
+        speechRecognition.continuous = true;
+        speechRecognition.interimResults = true;
+        speechRecognition.lang = 'en-US';
+
+        speechRecognition.onresult = (event) => {
+          let interimText = '';
+          for (let i = event.resultIndex; i < event.results.length; i++) {
+            const transcript = event.results[i][0].transcript;
+            if (event.results[i].isFinal) {
+              candidateAccumulatedText += ' ' + transcript;
+            } else {
+              interimText += transcript;
+            }
+          }
+
+          if (autoSubmitSilenceTimer) clearTimeout(autoSubmitSilenceTimer);
+          const fullSpoken = (candidateAccumulatedText + ' ' + interimText).trim();
+
+          // If user spoken answer reaches a sentence and pauses for 1.8s, automatically submit turn
+          if (fullSpoken.length > 5 && !isAISpeaking && !isUserMuted) {
+            autoSubmitSilenceTimer = setTimeout(() => {
+              submitCandidateTurn(fullSpoken);
+            }, 1800);
+          }
+        };
+
+        speechRecognition.onend = () => {
+          if (!isUserMuted && !isAISpeaking) {
+            setTimeout(() => { try { speechRecognition.start(); } catch(e){} }, 200);
+          }
+        };
+
+        if (!isUserMuted) {
+          try { speechRecognition.start(); } catch(e){}
+        }
+      } catch (e) {
+        console.warn("Speech recognition notice:", e);
+      }
+    }
+
+    // ─── TEXT TO SPEECH (Deepgram Neural Voice) ──────────────────────────────
+    async function playAIVoice(text, audioUrl = null) {
+      isAISpeaking = true;
+      const orb = document.getElementById('ai-main-orb');
+      const eq = document.getElementById('ai-equalizer');
+
+      if (orb) orb.classList.add('ai-speaking-wave');
+      if (eq) eq.style.display = 'flex';
+
+      const onDone = () => {
+        isAISpeaking = false;
+        if (orb) orb.classList.remove('ai-speaking-wave');
+        if (!isUserMuted) {
+          try { speechRecognition?.start(); } catch(e){}
+        }
+      };
+
+      let targetAudioUrl = audioUrl;
+
+      if (!targetAudioUrl && text && text.length > 5) {
+        try {
+          const ttsRes = await fetch('/api/interview/tts', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text })
+          });
+          const ttsData = await ttsRes.json();
+          if (ttsData.success && ttsData.audio_url) {
+            targetAudioUrl = ttsData.audio_url;
+          }
+        } catch(e) {}
+      }
+
+      if (targetAudioUrl) {
+        try {
+          if (currentAiAudio) { try { currentAiAudio.pause(); } catch(e){} }
+          currentAiAudio = new Audio(targetAudioUrl);
+          currentAiAudio.onended = onDone;
+          currentAiAudio.onerror = () => fallbackWebSpeech(text, onDone);
+          currentAiAudio.play().catch(() => fallbackWebSpeech(text, onDone));
+          return;
+        } catch(e) {}
+      }
+
+      fallbackWebSpeech(text, onDone);
+    }
+
+    function fallbackWebSpeech(text, onDone) {
+      if (!window.speechSynthesis) { if (onDone) onDone(); return; }
+      window.speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.rate = 1.0;
+      utter.pitch = 1.0;
+      utter.onend = onDone;
+      utter.onerror = onDone;
+      window.speechSynthesis.speak(utter);
+    }
+
+    // ─── START INTERVIEW & LOAD QUESTION ─────────────────────────────────────
+    async function startInterviewFlow() {
+      startTimer();
+
+      try {
+        const res = await fetch('/api/interview/start', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            context: sessionUserContext,
+            sessionId: 'test-sess-' + Date.now()
+          })
+        });
+        const data = await res.json();
+        const greeting = data.reply || `Hello ${sessionUserContext.candidateName}, and welcome to your ${sessionUserContext.roleTitle} interview. To begin, could you introduce yourself?`;
+        
+        conversationHistory.push({ role: 'assistant', content: greeting });
+        document.getElementById('first-ai-bubble').innerHTML = formatCleanTranscript(greeting);
+        playAIVoice(greeting, data.audio_url);
+      } catch (err) {
+        const fallback = `Hello ${sessionUserContext.candidateName}, and welcome to your ${sessionUserContext.roleTitle} interview. To begin, please introduce yourself.`;
+        conversationHistory.push({ role: 'assistant', content: fallback });
+        document.getElementById('first-ai-bubble').innerHTML = formatCleanTranscript(fallback);
+        playAIVoice(fallback);
+      }
+    }
+
+    async function submitCandidateTurn(spokenText) {
+      const candidateAnswer = spokenText || candidateAccumulatedText.trim();
+      if (!candidateAnswer || isAISpeaking) return;
+
+      candidateAccumulatedText = "";
+      appendTranscriptMessage('user', candidateAnswer);
+      conversationHistory.push({ role: 'user', content: candidateAnswer });
+
+      currentTurn++;
+      const turnBadge = document.getElementById('turn-count-badge');
+      if (turnBadge) turnBadge.textContent = `Turn ${currentTurn}`;
+
+      try {
+        const response = await fetch('/api/interview/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sessionId: 'test-sess-direct',
+            context: sessionUserContext,
+            messages: conversationHistory
+          })
+        });
+        const data = await response.json();
+        const reply = data.reply || "Thank you for explaining your reasoning. Let's move to the next technical scenario.";
+
+        conversationHistory.push({ role: 'assistant', content: reply });
+        appendTranscriptMessage('assistant', reply);
+        playAIVoice(reply, data.audio_url);
+      } catch (err) {
+        console.error("Chat error:", err);
+        const fallback = "Great reasoning. Let's proceed to the next system architecture challenge.";
+        conversationHistory.push({ role: 'assistant', content: fallback });
+        appendTranscriptMessage('assistant', fallback);
+        playAIVoice(fallback);
+      }
+    }
+
+    // Allow pressing Enter key to submit candidate speech or manually type
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !isAISpeaking) {
+        const promptInput = prompt("Your answer:", candidateAccumulatedText || "I choose Option A.");
+        if (promptInput) submitCandidateTurn(promptInput);
+      }
+    });
+
+
+    function startTimer() {
+      if (sessionTimerInterval) clearInterval(sessionTimerInterval);
+      sessionTimerInterval = setInterval(() => {
+        if (sessionDurationSec <= 0) {
+          clearInterval(sessionTimerInterval);
+          return;
+        }
+        sessionDurationSec--;
+        const m = Math.floor(sessionDurationSec / 60).toString().padStart(2, '0');
+        const s = (sessionDurationSec % 60).toString().padStart(2, '0');
+        const display = document.getElementById('session-timer-display');
+        if (display) display.textContent = `00:${m}:${s}`;
+      }, 1000);
+    }
+
+    // ─── INITIALIZATION ──────────────────────────────────────────────────────
+    window.addEventListener('DOMContentLoaded', async () => {
+      await initCameraAndMic();
+      setTimeout(startInterviewFlow, 500);
+    });
+  </script>
+</body>
+
+</html>

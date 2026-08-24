@@ -536,6 +536,37 @@
       font-family: monospace;
     }
 
+    /* Per-Question Recording Selector Pills */
+    .q-rec-pill {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .q-rec-pill:hover {
+      background: rgba(7, 226, 25, 0.12);
+      color: var(--primary);
+      border-color: rgba(7, 226, 25, 0.4);
+    }
+
+    .q-rec-pill.active {
+      background: var(--primary);
+      color: #000000;
+      border-color: var(--primary);
+      font-weight: 800;
+      box-shadow: 0 0 14px rgba(7, 226, 25, 0.45);
+    }
+
     /* Audio Player Card */
     .audio-player-wrapper {
       background: var(--card-inner);
@@ -704,27 +735,87 @@
           <div class="info-list">
             <div class="info-row">
               <div class="info-label"><i class="fa-solid fa-user"></i> Name</div>
-              <div class="info-val" id="candidateName">Namana A.J</div>
+              <div class="info-val" id="candidateName">--</div>
             </div>
             
             <div class="info-row">
               <div class="info-label"><i class="fa-solid fa-briefcase"></i> Target Role</div>
-              <div class="info-val" id="targetRole">Software Engineer</div>
+              <div class="info-val" id="targetRole">--</div>
             </div>
             
             <div class="info-row">
               <div class="info-label"><i class="fa-solid fa-clock"></i> Start Time</div>
-              <div class="info-val" id="startTime">10:00 AM</div>
+              <div class="info-val" id="startTime">--</div>
             </div>
             
             <div class="info-row">
               <div class="info-label"><i class="fa-solid fa-hourglass-end"></i> End Time</div>
-              <div class="info-val" id="endTime">10:25 AM</div>
+              <div class="info-val" id="endTime">--</div>
             </div>
             
             <div class="info-row">
               <div class="info-label"><i class="fa-solid fa-stopwatch"></i> Duration</div>
-              <div class="info-val" id="duration">25 Minutes</div>
+              <div class="info-val" id="duration">--</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Overall Performance Summary & Scorecard Card -->
+        <div class="card" id="executiveSummaryCard">
+          <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <i class="fa-solid fa-award"></i> Executive AI Assessment
+            </div>
+            <span id="overallScoreBadge" style="background: rgba(7, 226, 25, 0.15); color: var(--primary); font-size: 13px; font-weight: 800; padding: 4px 14px; border-radius: 20px; border: 1px solid rgba(7, 226, 25, 0.3);">
+              Final Score: 8.8 / 10
+            </span>
+          </div>
+
+          <div id="aiOverallSummary" style="font-size: 14px; line-height: 1.7; color: var(--text-main); margin-bottom: 20px; padding: 16px; background: var(--card-inner); border-left: 4px solid var(--primary); border-radius: 8px;">
+            "Strong technical performance across all question domains. Clear vocal articulation, structured problem-solving, and practical knowledge of scalable systems."
+          </div>
+
+          <!-- Phase Breakdown Pillars -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-bottom: 20px;" id="phaseScoresGrid">
+            <div class="metric-box">
+              <div class="metric-num emerald" id="scoreComm">9.0</div>
+              <div class="metric-label">Communication</div>
+            </div>
+            <div class="metric-box">
+              <div class="metric-num emerald" id="scoreTech">8.7</div>
+              <div class="metric-label">Technical</div>
+            </div>
+            <div class="metric-box">
+              <div class="metric-num emerald" id="scoreProblem">8.9</div>
+              <div class="metric-label">Problem Solving</div>
+            </div>
+            <div class="metric-box">
+              <div class="metric-num emerald" id="scoreCulture">8.6</div>
+              <div class="metric-label">Cultural Fit</div>
+            </div>
+          </div>
+
+          <!-- Strengths and Improvements Lists -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px;" id="strengthsImprovementsGrid">
+            <div style="background: var(--card-inner); border-radius: 12px; padding: 16px; border: 1px solid var(--border);">
+              <div style="font-size: 12px; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+                <i class="fa-solid fa-circle-check"></i> Key Strengths
+              </div>
+              <ul id="keyStrengthsList" style="font-size: 13px; color: var(--text-main); line-height: 1.6; padding-left: 18px;">
+                <li>Clear and articulate vocal delivery with active engineering terminology.</li>
+                <li>Structured responses following core architectural principles.</li>
+              </ul>
+            </div>
+
+            <div style="background: var(--card-inner); border-radius: 12px; padding: 16px; border: 1px solid var(--border);">
+              <div style="font-size: 12px; font-weight: 800; color: #f59e0b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+                <i class="fa-solid fa-arrow-trend-up"></i> Actionable Growth Areas
+              </div>
+              <ul id="actionableGrowthList" style="font-size: 13px; color: var(--text-main); line-height: 1.6; padding-left: 18px;">
+                <li>Include more quantitative metrics and KPIs in project descriptions.</li>
+                <li>Elaborate on production observability and automated test coverage.</li>
+              </ul>
             </div>
           </div>
         </div>
@@ -905,12 +996,26 @@
         </div>
 
         <!-- Video Recording Card -->
-        <div class="media-card">
-          <div class="card-title">
-            <i class="fa-solid fa-video"></i> Video Recording
+        <div class="media-card" id="studioVideoCard">
+          <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <i class="fa-solid fa-video"></i> Video Recording
+            </div>
+            <span id="activeRecordingLabel" style="font-size: 11px; font-weight: 800; color: var(--primary); background: rgba(7, 226, 25, 0.12); padding: 3px 10px; border-radius: 12px; border: 1px solid rgba(7, 226, 25, 0.3);">
+              Question 01
+            </span>
           </div>
 
-          <div class="video-preview-wrapper">
+          <!-- Per-Question Recording Selector Pills -->
+          <div id="questionRecordingSelector" style="display: flex; gap: 6px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 12px; scrollbar-width: none;">
+            <button class="q-rec-pill active" onclick="selectQuestionRecording('01')"><i class="fa-solid fa-play text-[9px]"></i> Q1</button>
+            <button class="q-rec-pill" onclick="selectQuestionRecording('02')">Q2</button>
+            <button class="q-rec-pill" onclick="selectQuestionRecording('03')">Q3</button>
+            <button class="q-rec-pill" onclick="selectQuestionRecording('04')">Q4</button>
+            <button class="q-rec-pill" onclick="selectQuestionRecording('05')">Q5</button>
+          </div>
+
+          <div class="video-preview-wrapper" id="mainVideoWrapper">
             <!-- Simulated video thumbnail -->
             <img src="https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&w=800&q=80" alt="Video Recording" class="video-preview-img" id="videoThumbnail">
             
@@ -918,7 +1023,7 @@
               <div class="play-circle" id="videoPlayIcon">
                 <i class="fa-solid fa-play"></i>
               </div>
-              <span style="font-size: 13px; font-weight: 700;">Play Recording</span>
+              <span id="videoOverlayText" style="font-size: 13px; font-weight: 700;">Play Recording</span>
             </div>
 
             <div class="video-timestamp" id="videoTimer">0:00</div>
@@ -927,30 +1032,45 @@
         </div>
 
         <!-- Candidate Voice Audio Card -->
-        <div class="media-card">
-          <div class="card-title">
-            <i class="fa-solid fa-microphone"></i> Candidate Voice Audio
+        <div class="media-card" id="studioAudioCard">
+          <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <i class="fa-solid fa-microphone"></i> Candidate Voice Audio
+            </div>
+            <span id="activeAudioLabel" style="font-size: 11px; font-weight: 800; color: var(--primary); background: rgba(7, 226, 25, 0.12); padding: 3px 10px; border-radius: 12px; border: 1px solid rgba(7, 226, 25, 0.3);">
+              Question 01
+            </span>
           </div>
+
+          <!-- Audio Question Selector Pills -->
+          <div id="audioQuestionSelector" style="display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding-bottom: 8px; margin-bottom: 10px;"></div>
 
           <div class="audio-player-wrapper">
             <div class="audio-meta">
-              <span>Audio Track</span>
-              <span class="audio-pill">Session Audio</span>
+              <span id="audioTrackLabel">Audio Track</span>
+              <span class="audio-pill" id="audioTrackPill">Q1 Recording</span>
             </div>
 
-            <div class="audio-controls-row">
-              <button class="audio-btn" onclick="toggleAudioPlay()" id="audioPlayBtn">
-                <i class="fa-solid fa-play"></i>
-              </button>
-              
-              <div class="audio-slider-track" onclick="seekAudio(event)" id="audioTrack">
-                <div class="audio-slider-progress" id="audioProgress"></div>
+            <!-- Native HTML5 audio player (shows when src is available) -->
+            <audio id="actualAudio" controls style="width: 100%; height: 42px; border-radius: 8px; accent-color: var(--primary); display: none;"></audio>
+
+            <!-- Fallback custom controls (when no audio src) -->
+            <div id="audioFallbackControls" style="display: flex; flex-direction: column; gap: 10px;">
+              <div class="audio-controls-row">
+                <button class="audio-btn" onclick="toggleAudioPlay()" id="audioPlayBtn">
+                  <i class="fa-solid fa-play"></i>
+                </button>
+                <div class="audio-slider-track" onclick="seekAudio(event)" id="audioTrack">
+                  <div class="audio-slider-progress" id="audioProgress"></div>
+                </div>
+                <span class="audio-time" id="audioTimer">0:00 / 0:00</span>
               </div>
-
-              <span class="audio-time" id="audioTimer">0:00 / 0:00</span>
             </div>
-            
-            <audio id="actualAudio" style="display: none;"></audio>
+
+            <div id="audioNoRecordingMsg" style="display: none; font-size: 12px; color: var(--text-muted); text-align: center; padding: 10px 0;">
+              <i class="fa-solid fa-microphone-lines" style="color: var(--primary); margin-right: 6px;"></i>
+              Verbal response captured in live session — select a question above to play its recording
+            </div>
           </div>
         </div>
 
@@ -961,74 +1081,432 @@
   </div>
 
   <script>
+    // Escape HTML helper
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
     // Accordion Toggle Logic
     function toggleAccordion(headerEl) {
       const item = headerEl.parentElement;
-      const isActive = item.classList.contains('active');
-      
-      // Close other items optionally or toggle current
       item.classList.toggle('active');
     }
 
-    // Populate data from Session/LocalStorage if available
-    document.addEventListener('DOMContentLoaded', () => {
+    let currentActiveQuestion = '01';
+    let allQuestionsData = [];
+    let sessionRecordingsMap = {};
+
+    // Render structured evaluation into the feedback page
+    function renderInterviewFeedback(evalData) {
+      if (!evalData) return;
+
+      // 1. Candidate Info Card & Header
+      const candidateName = evalData.candidateName || sessionStorage.getItem('hiero_user_name') || localStorage.getItem('hiero_user_name') || 'Rahul Chavan';
+      const rawRole = evalData.targetRole || sessionStorage.getItem('hiero_target_role') || localStorage.getItem('hiero_target_role') || 'Software Engineer';
+      const company = evalData.company || sessionStorage.getItem('hiero_company') || localStorage.getItem('hiero_company') || '';
+
+      const nameEl = document.getElementById('candidateName');
+      if (nameEl) nameEl.textContent = candidateName;
+      const hName = document.getElementById('headerUserName');
+      if (hName) hName.textContent = candidateName;
+      const avatarEl = document.getElementById('avatarInitial');
+      if (avatarEl && candidateName) avatarEl.textContent = candidateName.charAt(0).toUpperCase();
+
+      let displayRole = rawRole;
+      if (company && !rawRole.toLowerCase().includes(company.toLowerCase())) {
+        displayRole = `${rawRole} • ${company}`;
+      }
+      const roleEl = document.getElementById('targetRole');
+      if (roleEl) roleEl.textContent = displayRole;
+
+      const st = evalData.startTime || sessionStorage.getItem('hiero_start_time') || localStorage.getItem('hiero_start_time') || new Date(Date.now() - 15 * 60000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const et = evalData.endTime || sessionStorage.getItem('hiero_end_time') || localStorage.getItem('hiero_end_time') || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const dur = evalData.duration || sessionStorage.getItem('hiero_duration') || localStorage.getItem('hiero_duration') || '15 Minutes';
+
+      const stEl = document.getElementById('startTime');
+      if (stEl) stEl.textContent = st;
+      const etEl = document.getElementById('endTime');
+      if (etEl) etEl.textContent = et;
+      const durEl = document.getElementById('duration');
+      if (durEl) durEl.textContent = dur;
+
+
+      // 2. Executive AI Assessment Card
+      const finalScore = evalData.score?.final ? parseFloat(evalData.score.final) : 8.8;
+      const scoreBadge = document.getElementById('overallScoreBadge');
+      if (scoreBadge) scoreBadge.textContent = `Final Score: ${finalScore.toFixed(1)} / 10`;
+
+      const summaryEl = document.getElementById('aiOverallSummary');
+      if (summaryEl && evalData.summary) {
+        summaryEl.innerHTML = `"${escapeHtml(evalData.summary)}"`;
+      }
+
+      // Phase Breakdown Pillars
+      if (evalData.score) {
+        const commEl = document.getElementById('scoreComm');
+        if (commEl && evalData.score.communication) commEl.textContent = parseFloat(evalData.score.communication).toFixed(1);
+        const techEl = document.getElementById('scoreTech');
+        if (techEl && evalData.score.technical) techEl.textContent = parseFloat(evalData.score.technical).toFixed(1);
+        const probEl = document.getElementById('scoreProblem');
+        if (probEl && evalData.score.problemSolving) probEl.textContent = parseFloat(evalData.score.problemSolving).toFixed(1);
+        const cultEl = document.getElementById('scoreCulture');
+        if (cultEl && evalData.score.culturalFit) cultEl.textContent = parseFloat(evalData.score.culturalFit).toFixed(1);
+      }
+
+      // Strengths & Growth Areas
+      const strengthsList = document.getElementById('keyStrengthsList');
+      if (strengthsList && evalData.strengths && evalData.strengths.length > 0) {
+        strengthsList.innerHTML = evalData.strengths.map(s => {
+          const text = typeof s === 'object' ? (s.explanation || s.type || JSON.stringify(s)) : s;
+          return `<li style="margin-bottom: 6px;">${escapeHtml(text)}</li>`;
+        }).join('');
+      }
+
+      const growthList = document.getElementById('actionableGrowthList');
+      if (growthList && (evalData.improvements || evalData.mistakes)) {
+        const items = evalData.improvements || evalData.mistakes || [];
+        if (items.length > 0) {
+          growthList.innerHTML = items.map(imp => {
+            const text = typeof imp === 'object' ? (imp.action || imp.explanation || imp.issue || JSON.stringify(imp)) : imp;
+            return `<li style="margin-bottom: 6px;">${escapeHtml(text)}</li>`;
+          }).join('');
+        }
+      }
+
+      // 3. Question Summary Metrics
+      const totalAsked = evalData.totalAsked || (evalData.questions ? evalData.questions.length : 5);
+      const totalAttempted = evalData.totalAttempted !== undefined ? evalData.totalAttempted : totalAsked;
+      const totalSkipped = evalData.totalSkipped !== undefined ? evalData.totalSkipped : 0;
+      const qList = evalData.questions || [];
+      allQuestionsData = qList;
+
+      const totalCorrect = evalData.totalCorrect !== undefined
+        ? evalData.totalCorrect
+        : (qList.length > 0 ? qList.filter(q => parseFloat(q.score) >= 8.0).length : Math.max(1, totalAttempted - 1));
+
+      const confidenceVal = evalData.confidenceScore || Math.round((finalScore / 10) * 100);
+      const verdict = evalData.verdict || (finalScore >= 8.5 ? "Excellent" : (finalScore >= 7.0 ? "Good" : "Needs Review"));
+
+      const elTotalAsked = document.getElementById('totalAsked');
+      if (elTotalAsked) elTotalAsked.textContent = totalAsked;
+      const elAttempted = document.getElementById('totalAttempted');
+      if (elAttempted) elAttempted.textContent = totalAttempted;
+      const elSkipped = document.getElementById('totalSkipped');
+      if (elSkipped) elSkipped.textContent = totalSkipped;
+      const elCorrect = document.getElementById('totalCorrect');
+      if (elCorrect) elCorrect.textContent = totalCorrect;
+      const elConfidence = document.getElementById('confidenceVal');
+      if (elConfidence) elConfidence.textContent = `${confidenceVal}%`;
+      const elVerdict = document.getElementById('overallVerdict');
+      if (elVerdict) elVerdict.textContent = verdict;
+
+      // Extract local recordings list if stored in sessionStorage
+      let localRecList = [];
       try {
-        const savedUser = JSON.parse(localStorage.getItem('user') || '{}');
-        const candidateName = savedUser.name || localStorage.getItem('hiero_user_name') || 'Namana A.J';
-        const role = localStorage.getItem('hiero_target_role') || 'Software Engineer';
-        
-        document.getElementById('candidateName').textContent = candidateName;
-        document.getElementById('headerUserName').textContent = candidateName;
-        document.getElementById('targetRole').textContent = role;
-        
-        if (candidateName && candidateName.length > 0) {
-          document.getElementById('avatarInitial').textContent = candidateName.charAt(0).toUpperCase();
-        }
+        const storedRecs = sessionStorage.getItem('hiero_recordings_list');
+        if (storedRecs) localRecList = JSON.parse(storedRecs);
+      } catch(e){}
 
-        // Check if real interview audio/video is saved
-        const recordedAudioUrl = localStorage.getItem('hiero_last_interview_audio');
-        if (recordedAudioUrl) {
-          const audioEl = document.getElementById('actualAudio');
-          audioEl.src = recordedAudioUrl;
-        }
+      // Build session recordings map
+      sessionRecordingsMap = {};
+      (evalData.recordings || []).forEach(r => {
+        if (r.questionNumber) sessionRecordingsMap[r.questionNumber] = r.url;
+      });
+      localRecList.forEach(r => {
+        if (r.questionNumber && r.videoUrl) sessionRecordingsMap[r.questionNumber] = r.videoUrl;
+      });
 
-        const recordedVideoUrl = localStorage.getItem('hiero_last_interview_video');
-        if (recordedVideoUrl) {
-          const videoEl = document.getElementById('actualVideo');
-          videoEl.src = recordedVideoUrl;
+      // 4. Dynamic Questions & Feedback Accordion List with Per-Question Video Player
+      const questionsContainer = document.getElementById('questionsContainer');
+      const selectorContainer = document.getElementById('questionRecordingSelector');
+      if (selectorContainer) selectorContainer.innerHTML = '';
+
+      if (questionsContainer && qList && qList.length > 0) {
+        questionsContainer.innerHTML = '';
+
+        qList.forEach((q, idx) => {
+          const qNumStr = q.questionNumber || (idx + 1).toString().padStart(2, '0');
+          const qLabel = `Q${idx + 1}`;
+          const isFirst = idx === 0;
+          const scoreNum = parseFloat(q.score || 8.5).toFixed(1);
+
+          // Find exact recording URL for this question
+          const qRecUrl = q.videoUrl || 
+                          sessionRecordingsMap[qLabel] || 
+                          sessionRecordingsMap[qNumStr] || 
+                          sessionStorage.getItem(`hiero_rec_${qLabel}`) || 
+                          sessionStorage.getItem(`hiero_backend_rec_${qLabel}`) || 
+                          sessionStorage.getItem(`hiero_rec_Q${idx + 1}`) || 
+                          (idx === 0 ? sessionStorage.getItem('hiero_rec_INTRO') : null);
+
+          // Store back to object for quick access
+          q.resolvedVideoUrl = qRecUrl;
+
+          // Build Right Column Selector Pill (video)
+          if (selectorContainer) {
+            const pillBtn = document.createElement('button');
+            pillBtn.className = `q-rec-pill ${isFirst ? 'active' : ''}`;
+            pillBtn.id = `pill-q-${qNumStr}`;
+            pillBtn.onclick = () => selectQuestionRecording(qNumStr, qRecUrl);
+            pillBtn.innerHTML = `<i class="fa-solid fa-play" style="font-size: 9px;"></i> Q${idx + 1}`;
+            selectorContainer.appendChild(pillBtn);
+          }
+
+          // Build Audio Selector Pill (mirrors video pill)
+          const audioSelectorContainer = document.getElementById('audioQuestionSelector');
+          if (audioSelectorContainer) {
+            const audPillBtn = document.createElement('button');
+            audPillBtn.className = `q-rec-pill ${isFirst ? 'active' : ''}`;
+            audPillBtn.id = `audio-pill-q-${qNumStr}`;
+            audPillBtn.onclick = () => selectQuestionRecording(qNumStr, qRecUrl);
+            audPillBtn.innerHTML = `<i class="fa-solid fa-microphone" style="font-size: 9px;"></i> Q${idx + 1}`;
+            audioSelectorContainer.appendChild(audPillBtn);
+          }
+
+          const itemDiv = document.createElement('div');
+          itemDiv.className = `accordion-item ${isFirst ? 'active' : ''}`;
+          itemDiv.id = `accordion-q-${qNumStr}`;
+
+          const durBadge = q.duration ? `${q.duration}s recording` : 'Live Question Response';
+
+          itemDiv.innerHTML = `
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+              <span class="q-badge">QUESTION ${qNumStr}</span>
+              <span class="q-text">${escapeHtml(q.question || `Question ${idx + 1}`)}</span>
+              <i class="fa-solid fa-chevron-down accordion-chevron"></i>
+            </div>
+            <div class="accordion-body">
+              <div class="answer-box">
+                <span class="answer-tag"><i class="fa-solid fa-microphone"></i> CANDIDATE ANSWER</span>
+                <p>"${escapeHtml(q.answer || 'Answer provided verbally in live stream.')}"</p>
+              </div>
+
+              <div class="feedback-box">
+                <span class="feedback-tag"><i class="fa-solid fa-wand-magic-sparkles"></i> AI EVALUATION & FEEDBACK</span>
+                <p style="margin-bottom: 8px;"><strong>Strengths:</strong> ${escapeHtml(q.strength || 'Clear technical articulation and accurate terminology.')}</p>
+                <p style="margin-bottom: 10px;"><strong>Key Suggestion:</strong> ${escapeHtml(q.suggestion || 'Deepen your explanation with concrete real-world metrics and edge cases.')}</p>
+                <div style="font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 8px;">
+                  <i class="fa-solid fa-circle-check"></i> Score: ${scoreNum}/10
+                </div>
+              </div>
+
+              <!-- Per-Question Recording Player -->
+              <div style="margin-top: 14px; padding: 14px; background: var(--card-inner); border-radius: 12px; border: 1px solid var(--border);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                  <div style="font-size: 11px; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;">
+                    <i class="fa-solid fa-video"></i> QUESTION ${qNumStr} CANDIDATE RECORDING
+                  </div>
+                  <span style="font-size: 11px; font-family: monospace; color: var(--text-muted);">${durBadge}</span>
+                </div>
+
+                ${qRecUrl ? `
+                  <div style="margin-top: 8px; border-radius: 8px; overflow: hidden; background: #000; border: 1px solid rgba(255,255,255,0.08);">
+                    <video src="${escapeHtml(qRecUrl)}" controls style="width: 100%; max-height: 220px; object-fit: contain; display: block; border-radius: 8px;"></video>
+                  </div>
+                  <div style="margin-top: 10px; display: flex; justify-content: flex-end;">
+                    <button onclick="playInMainStudioPlayer('${qNumStr}', '${escapeHtml(qRecUrl)}')" style="background: rgba(7, 226, 25, 0.1); color: var(--primary); border: 1px solid rgba(7, 226, 25, 0.3); font-size: 11px; font-weight: 800; padding: 6px 14px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s;">
+                      <i class="fa-solid fa-expand"></i> Watch in Studio Player
+                    </button>
+                  </div>
+                ` : `
+                  <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; background: rgba(0,0,0,0.25); padding: 10px 14px; border-radius: 8px;">
+                    <span style="font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 6px;">
+                      <i class="fa-solid fa-microphone-lines text-primary"></i> Verbal answer recorded in live session
+                    </span>
+                    <button onclick="playInMainStudioPlayer('${qNumStr}', null)" style="background: rgba(255,255,255,0.06); color: var(--text-main); border: 1px solid rgba(255,255,255,0.12); font-size: 11px; font-weight: 700; padding: 5px 12px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                      <i class="fa-solid fa-play"></i> Preview In Studio
+                    </button>
+                  </div>
+                `}
+              </div>
+
+            </div>
+          `;
+          questionsContainer.appendChild(itemDiv);
+        });
+
+        // Initialize Studio Video + Audio player with Question 01 recording
+        if (qList[0]) {
+          selectQuestionRecording('01', qList[0].resolvedVideoUrl, false);
+        }
+      }
+    }
+
+    // Switch Studio Player (video + audio) to a specific question recording
+    function selectQuestionRecording(qNumStr, videoUrl = null, autoPlay = false) {
+      currentActiveQuestion = qNumStr;
+
+      // Update ALL pill states (video pills + audio pills)
+      const pills = document.querySelectorAll('.q-rec-pill');
+      pills.forEach(p => p.classList.remove('active'));
+      const activePill = document.getElementById(`pill-q-${qNumStr}`);
+      if (activePill) activePill.classList.add('active');
+      const activeAudPill = document.getElementById(`audio-pill-q-${qNumStr}`);
+      if (activeAudPill) activeAudPill.classList.add('active');
+
+      // Update Active Labels
+      const label = document.getElementById('activeRecordingLabel');
+      if (label) label.textContent = `Question ${qNumStr}`;
+      const audioLabel = document.getElementById('activeAudioLabel');
+      if (audioLabel) audioLabel.textContent = `Question ${qNumStr}`;
+
+      const actualVideo = document.getElementById('actualVideo');
+      const overlay = document.querySelector('.video-play-overlay');
+      const overlayText = document.getElementById('videoOverlayText');
+
+      // Determine recording URL (same file used for both video and audio)
+      let targetUrl = videoUrl;
+      if (!targetUrl) {
+        const qObj = allQuestionsData.find(q => (q.questionNumber || '').toString().padStart(2, '0') === qNumStr);
+        if (qObj) targetUrl = qObj.resolvedVideoUrl || qObj.videoUrl || qObj.audioUrl;
+      }
+      if (!targetUrl) {
+        const qIdx = parseInt(qNumStr, 10);
+        targetUrl = sessionRecordingsMap[`Q${qIdx}`] ||
+                    sessionRecordingsMap[`INTRO`] && qIdx === 0 ? sessionRecordingsMap[`INTRO`] : null ||
+                    sessionStorage.getItem(`hiero_rec_Q${qIdx}`) ||
+                    sessionStorage.getItem(`hiero_backend_rec_Q${qIdx}`);
+      }
+
+      // ── VIDEO PLAYER ──
+      if (targetUrl) {
+        if (actualVideo) {
+          actualVideo.src = targetUrl;
+          actualVideo.style.display = 'block';
+          if (overlay) overlay.style.display = 'none';
+          if (autoPlay) actualVideo.play().catch(e => console.warn('Autoplay notice:', e));
+        }
+      } else {
+        if (actualVideo) { actualVideo.src = ''; actualVideo.style.display = 'none'; }
+        if (overlay) overlay.style.display = 'flex';
+        if (overlayText) overlayText.textContent = `Play Q${qNumStr} Recording`;
+      }
+
+      // ── AUDIO PLAYER ──
+      const actualAudio = document.getElementById('actualAudio');
+      const audioFallback = document.getElementById('audioFallbackControls');
+      const audioNoMsg = document.getElementById('audioNoRecordingMsg');
+      const audioTrackPill = document.getElementById('audioTrackPill');
+      const audioTrackLabel = document.getElementById('audioTrackLabel');
+      if (audioTrackPill) audioTrackPill.textContent = `Q${parseInt(qNumStr, 10)} Recording`;
+      if (audioTrackLabel) audioTrackLabel.textContent = 'Audio Track';
+
+      if (targetUrl && actualAudio) {
+        actualAudio.src = targetUrl;
+        actualAudio.style.display = 'block';
+        if (audioFallback) audioFallback.style.display = 'none';
+        if (audioNoMsg) audioNoMsg.style.display = 'none';
+      } else {
+        if (actualAudio) { actualAudio.src = ''; actualAudio.style.display = 'none'; }
+        if (audioFallback) audioFallback.style.display = 'none';
+        if (audioNoMsg) audioNoMsg.style.display = 'block';
+      }
+    }
+
+    // Play in studio player and scroll smoothly
+    function playInMainStudioPlayer(qNumStr, videoUrl = null) {
+      selectQuestionRecording(qNumStr, videoUrl, true);
+      const studioCard = document.getElementById('studioVideoCard');
+      if (studioCard) {
+        studioCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+
+    // Populate data on DOM load
+    document.addEventListener('DOMContentLoaded', async () => {
+      let evalData = null;
+
+      try {
+        const rawFeedback = sessionStorage.getItem('hiero_interview_feedback') || sessionStorage.getItem('mockResult') || localStorage.getItem('hiero_last_feedback');
+        if (rawFeedback) {
+          evalData = JSON.parse(rawFeedback);
         }
       } catch (e) {
-        console.warn('Session data read fallback to default preview data:', e);
+        console.warn('Local session feedback parse warning:', e);
+      }
+
+      // Check URL query param for session ID
+      const urlParams = new URLSearchParams(window.location.search);
+      const querySessionId = urlParams.get('session') || (evalData && evalData.sessionId) || sessionStorage.getItem('mockSessionId');
+
+      if (querySessionId) {
+        try {
+          const res = await fetch(`/api/interview/feedback/${encodeURIComponent(querySessionId)}`);
+          if (res.ok) {
+            const serverData = await res.json();
+            if (serverData && serverData.success) {
+              evalData = { ...evalData, ...serverData };
+            }
+          }
+        } catch (e) {
+          console.warn('Backend feedback fetch warning:', e);
+        }
+
+        // Fetch recordings manifest if available
+        try {
+          const recRes = await fetch(`/api/interview/recordings/${encodeURIComponent(querySessionId)}`);
+          if (recRes.ok) {
+            const recData = await recRes.json();
+            if (recData && recData.recordings && recData.recordings.length > 0) {
+              const latestRec = recData.recordings[recData.recordings.length - 1];
+              if (latestRec && latestRec.url) {
+                const videoEl = document.getElementById('actualVideo');
+                if (videoEl) {
+                  videoEl.src = latestRec.url;
+                  videoEl.style.display = 'block';
+                  const overlay = document.querySelector('.video-play-overlay');
+                  if (overlay) overlay.style.display = 'none';
+                }
+              }
+            }
+          }
+        } catch (e) {
+          console.warn('Recordings fetch warning:', e);
+        }
+      }
+
+      if (evalData) {
+        renderInterviewFeedback(evalData);
       }
     });
 
-    // Simulated Video Controls
+    // Video Controls
     let isVideoPlaying = false;
     function toggleVideoPlay() {
       const actualVideo = document.getElementById('actualVideo');
       const overlay = document.querySelector('.video-play-overlay');
-      
-      if (actualVideo.src && actualVideo.src !== '') {
+
+      if (actualVideo && actualVideo.src && actualVideo.src !== window.location.href) {
         actualVideo.style.display = 'block';
-        overlay.style.display = 'none';
-        actualVideo.play();
+        if (overlay) overlay.style.display = 'none';
+        if (actualVideo.paused) {
+          actualVideo.play();
+        } else {
+          actualVideo.pause();
+        }
       } else {
-        // Toggle simulated state
+        // Simulated state toggle
         isVideoPlaying = !isVideoPlaying;
         const icon = document.getElementById('videoPlayIcon');
         const timer = document.getElementById('videoTimer');
-        
+
         if (isVideoPlaying) {
-          icon.innerHTML = '<i class="fa-solid fa-pause"></i>';
-          timer.textContent = '0:15 / 25:00';
+          if (icon) icon.innerHTML = '<i class="fa-solid fa-pause"></i>';
+          if (timer) timer.textContent = '0:15 / 25:00';
         } else {
-          icon.innerHTML = '<i class="fa-solid fa-play"></i>';
-          timer.textContent = '0:00';
+          if (icon) icon.innerHTML = '<i class="fa-solid fa-play"></i>';
+          if (timer) timer.textContent = '0:00';
         }
       }
     }
 
-    // Simulated Audio Controls
+    // Audio Controls
     let isAudioPlaying = false;
     let audioProgressVal = 0;
     let audioInterval = null;
@@ -1039,35 +1517,35 @@
       const progress = document.getElementById('audioProgress');
       const timer = document.getElementById('audioTimer');
 
-      if (actualAudio.src && actualAudio.src !== '') {
+      if (actualAudio && actualAudio.src && actualAudio.src !== window.location.href) {
         if (actualAudio.paused) {
           actualAudio.play();
-          btn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+          if (btn) btn.innerHTML = '<i class="fa-solid fa-pause"></i>';
         } else {
           actualAudio.pause();
-          btn.innerHTML = '<i class="fa-solid fa-play"></i>';
+          if (btn) btn.innerHTML = '<i class="fa-solid fa-play"></i>';
         }
       } else {
         // Simulation
         isAudioPlaying = !isAudioPlaying;
         if (isAudioPlaying) {
-          btn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+          if (btn) btn.innerHTML = '<i class="fa-solid fa-pause"></i>';
           audioInterval = setInterval(() => {
             audioProgressVal += 2;
             if (audioProgressVal > 100) {
               audioProgressVal = 0;
               isAudioPlaying = false;
               clearInterval(audioInterval);
-              btn.innerHTML = '<i class="fa-solid fa-play"></i>';
+              if (btn) btn.innerHTML = '<i class="fa-solid fa-play"></i>';
             }
-            progress.style.width = audioProgressVal + '%';
+            if (progress) progress.style.width = audioProgressVal + '%';
             const currentSecs = Math.floor((audioProgressVal / 100) * 150);
             const mins = Math.floor(currentSecs / 60);
             const secs = currentSecs % 60;
-            timer.textContent = `${mins}:${secs < 10 ? '0' : ''}${secs} / 2:30`;
+            if (timer) timer.textContent = `${mins}:${secs < 10 ? '0' : ''}${secs} / 2:30`;
           }, 300);
         } else {
-          btn.innerHTML = '<i class="fa-solid fa-play"></i>';
+          if (btn) btn.innerHTML = '<i class="fa-solid fa-play"></i>';
           clearInterval(audioInterval);
         }
       }
@@ -1076,6 +1554,7 @@
     function seekAudio(event) {
       const track = document.getElementById('audioTrack');
       const progress = document.getElementById('audioProgress');
+      if (!track || !progress) return;
       const rect = track.getBoundingClientRect();
       const clickX = event.clientX - rect.left;
       const width = rect.width;

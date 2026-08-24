@@ -2344,7 +2344,8 @@
         try {
           const evalData = JSON.parse(sessionStorage.getItem('mockResult'));
           if (evalData) {
-            document.getElementById('final-score').textContent = evalData.score?.final || '7.5';
+            const finalScoreEl = document.getElementById('final-score');
+            if (finalScoreEl) finalScoreEl.textContent = evalData.score?.final || '7.5';
             
             // Format report HTML nicely
             let reportHTML = `<div style="font-size:1.1rem; color:#fff; font-style:italic; margin-bottom:32px; padding: 20px; background:rgba(9,192,6,0.05); border-left: 4px solid var(--g); border-radius: 4px;">"${evalData.summary || "Solid overall performance."}"</div>`;
@@ -2371,7 +2372,8 @@
             } else { reportHTML += `<li>Review standard practices and maintain your current level of depth.</li>`; }
             reportHTML += `</ul>`;
 
-            document.getElementById('audit-text').innerHTML = reportHTML;
+            const auditTextEl = document.getElementById('audit-text');
+            if (auditTextEl) auditTextEl.innerHTML = reportHTML;
           }
         } catch (e) {
           console.warn("Error rendering saved audit", e);

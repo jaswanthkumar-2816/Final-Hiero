@@ -221,6 +221,21 @@
       z-index: 1
     }
 
+    /* Identity & Sensors stages need wider container */
+    #s-identity.stage.active,
+    #s-sensors.stage.active {
+      max-width: 100%;
+      width: 100%;
+      padding: 0 24px;
+    }
+
+    @media (max-width: 960px) {
+      #s-identity .identity-3col,
+      #s-sensors .permissions-2col {
+        grid-template-columns: 1fr !important;
+      }
+    }
+
     /* STAGES */
     .stage {
       display: none;
@@ -417,6 +432,15 @@
       position: relative;
       box-shadow: 0 0 50px var(--g25);
       margin-bottom: 28px;
+    }
+
+    /* When inside HUD wrapper, cam-frame fills the wrapper */
+    #cam-hud-wrapper .cam-frame {
+      width: 100%;
+      height: 100%;
+      border-radius: 22px;
+      border: 2px solid rgba(9,192,6,0.7);
+      margin-bottom: 0;
     }
 
     #capture-feed,
@@ -1246,86 +1270,433 @@
     </section>
 
     <!-- ── S2: IDENTITY ── -->
-    <section id="s-identity" class="stage">
-      <div class="title">Identity Capture</div>
-      <p class="sub">Your face secures this session. Any mismatch triggers automatic termination.</p>
-      <p style="font-size:0.8rem;color:var(--g);font-weight:700;margin-top:-10px;margin-bottom:20px;text-align:center;">
-        Position your face directly inside the frame.</p>
-      <div class="card" style="padding: 40px 30px; text-align: center;">
-        <div class="cam-frame" style="margin: 0 auto 32px;">
-          <div class="scan-line"></div>
-          <video id="capture-feed" autoplay playsinline muted></video>
-          <img id="static-id-photo" style="display:none">
+    <section id="s-identity" class="stage" style="padding: 0; max-width: 100%; width: 100%; align-items: stretch;">
+
+      <!-- Secure Badge -->
+      <div style="display: flex; justify-content: center; margin-bottom: 28px; margin-top: 20px;">
+        <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(9,192,6,0.08); border: 1px solid rgba(9,192,6,0.3); border-radius: 50px; padding: 7px 20px;">
+          <i class="fas fa-shield-halved" style="color: var(--g); font-size: 0.8rem;"></i>
+          <span style="font-size: 0.72rem; font-weight: 800; color: var(--g); letter-spacing: 2px; font-family: 'IBM Plex Mono', monospace;">SECURE INTERVIEW SESSION</span>
+        </div>
+      </div>
+
+      <!-- Title -->
+      <div style="text-align: center; margin-bottom: 8px;">
+        <div class="title" style="margin-bottom: 10px;">Identity <span>Capture</span></div>
+        <p class="sub" style="margin-bottom: 0;">Your face secures this session. Any mismatch triggers automatic termination.</p>
+      </div>
+
+      <!-- 3-Column Layout -->
+      <div style="display: grid; grid-template-columns: 1fr 480px 1fr; gap: 32px; width: 100%; max-width: 1200px; margin: 36px auto 40px; align-items: start;">
+
+        <!-- LEFT COLUMN: Why we capture -->
+        <div style="background: linear-gradient(145deg, rgba(255,255,255,0.035), rgba(255,255,255,0.015)); border: 1px solid rgba(255,255,255,0.07); border-radius: 24px; padding: 28px 24px; backdrop-filter: blur(24px);">
+          <p style="font-size: 0.72rem; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--g); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+            <i class="fas fa-circle-info"></i> Why we capture?
+          </p>
+          <p style="font-size: 0.82rem; color: var(--muted); line-height: 1.6; margin-bottom: 24px;">
+            To ensure a fair, secure and trusted interview experience for everyone.
+          </p>
+
+          <!-- Feature bullets -->
+          <div style="display: flex; flex-direction: column; gap: 14px;">
+            <div style="display: flex; align-items: flex-start; gap: 14px; padding: 14px 16px; background: rgba(9,192,6,0.04); border: 1px solid rgba(9,192,6,0.15); border-radius: 14px;">
+              <div style="width: 34px; height: 34px; border-radius: 10px; background: rgba(9,192,6,0.1); border: 1px solid rgba(9,192,6,0.3); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px;">
+                <i class="fas fa-shield-check" style="color: var(--g); font-size: 0.85rem;"></i>
+              </div>
+              <div>
+                <p style="font-size: 0.82rem; font-weight: 700; color: #fff; margin: 0 0 3px;">Prevents Impersonation</p>
+                <p style="font-size: 0.73rem; color: var(--muted); margin: 0;">Verifies that it's really you.</p>
+              </div>
+            </div>
+
+            <div style="display: flex; align-items: flex-start; gap: 14px; padding: 14px 16px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.07); border-radius: 14px;">
+              <div style="width: 34px; height: 34px; border-radius: 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px;">
+                <i class="fas fa-eye" style="color: var(--g); font-size: 0.85rem;"></i>
+              </div>
+              <div>
+                <p style="font-size: 0.82rem; font-weight: 700; color: #fff; margin: 0 0 3px;">Monitors Session Integrity</p>
+                <p style="font-size: 0.73rem; color: var(--muted); margin: 0;">Detects anomalies in real-time.</p>
+              </div>
+            </div>
+
+            <div style="display: flex; align-items: flex-start; gap: 14px; padding: 14px 16px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.07); border-radius: 14px;">
+              <div style="width: 34px; height: 34px; border-radius: 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px;">
+                <i class="fas fa-lock" style="color: var(--g); font-size: 0.85rem;"></i>
+              </div>
+              <div>
+                <p style="font-size: 0.82rem; font-weight: 700; color: #fff; margin: 0 0 3px;">Keeps Your Data Safe</p>
+                <p style="font-size: 0.73rem; color: var(--muted); margin: 0;">Processed securely &amp; encrypted.</p>
+              </div>
+            </div>
+          </div>
         </div>
 
+        <!-- CENTER COLUMN: Camera Frame -->
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 16px;">
 
+          <!-- Face position guide pill -->
+          <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(9,192,6,0.1); border: 1px solid rgba(9,192,6,0.3); border-radius: 50px; padding: 7px 18px;">
+            <span style="width: 7px; height: 7px; border-radius: 50%; background: var(--g); box-shadow: 0 0 8px var(--g); display: inline-block;"></span>
+            <span style="font-size: 0.73rem; font-weight: 700; color: var(--g);">Position your face <strong style="color: #fff;">directly inside the frame</strong></span>
+          </div>
 
-        <div id="id-actions">
-          <div id="id-scan-status" style="font-size:0.8rem; font-weight:700; color:var(--muted); margin-bottom:18px; display:flex; align-items:center; justify-content:center; gap:8px; min-height:28px;">
+          <!-- Enhanced Camera Frame HUD -->
+          <div id="cam-hud-wrapper" style="position: relative; width: 300px; height: 380px;">
+            <!-- Corner bracket decorations (top-left, top-right, bottom-left, bottom-right) -->
+            <div style="position:absolute; top:0; left:0; width:36px; height:36px; border-top: 3px solid var(--g); border-left: 3px solid var(--g); border-radius: 8px 0 0 0; z-index:10; box-shadow: -3px -3px 12px rgba(9,192,6,0.4);"></div>
+            <div style="position:absolute; top:0; right:0; width:36px; height:36px; border-top: 3px solid var(--g); border-right: 3px solid var(--g); border-radius: 0 8px 0 0; z-index:10; box-shadow: 3px -3px 12px rgba(9,192,6,0.4);"></div>
+            <div style="position:absolute; bottom:0; left:0; width:36px; height:36px; border-bottom: 3px solid var(--g); border-left: 3px solid var(--g); border-radius: 0 0 0 8px; z-index:10; box-shadow: -3px 3px 12px rgba(9,192,6,0.4);"></div>
+            <div style="position:absolute; bottom:0; right:0; width:36px; height:36px; border-bottom: 3px solid var(--g); border-right: 3px solid var(--g); border-radius: 0 0 8px 0; z-index:10; box-shadow: 3px 3px 12px rgba(9,192,6,0.4);"></div>
+
+            <!-- Side tick marks (left & right centers) -->
+            <div style="position:absolute; left:-6px; top:50%; transform:translateY(-50%); display:flex; flex-direction:column; gap:6px; z-index:10;">
+              <div style="width:6px; height:3px; background: rgba(9,192,6,0.6); border-radius: 2px;"></div>
+              <div style="width:6px; height:3px; background: rgba(9,192,6,0.4); border-radius: 2px;"></div>
+              <div style="width:6px; height:3px; background: rgba(9,192,6,0.6); border-radius: 2px;"></div>
+              <div style="width:6px; height:3px; background: rgba(9,192,6,0.4); border-radius: 2px;"></div>
+              <div style="width:6px; height:3px; background: rgba(9,192,6,0.6); border-radius: 2px;"></div>
+            </div>
+            <div style="position:absolute; right:-6px; top:50%; transform:translateY(-50%); display:flex; flex-direction:column; gap:6px; z-index:10;">
+              <div style="width:6px; height:3px; background: rgba(9,192,6,0.6); border-radius: 2px;"></div>
+              <div style="width:6px; height:3px; background: rgba(9,192,6,0.4); border-radius: 2px;"></div>
+              <div style="width:6px; height:3px; background: rgba(9,192,6,0.6); border-radius: 2px;"></div>
+              <div style="width:6px; height:3px; background: rgba(9,192,6,0.4); border-radius: 2px;"></div>
+              <div style="width:6px; height:3px; background: rgba(9,192,6,0.6); border-radius: 2px;"></div>
+            </div>
+
+            <!-- Main cam frame with enhanced glow -->
+            <div class="cam-frame" style="width:100%; height:100%; border-radius: 22px; margin: 0; box-shadow: 0 0 60px rgba(9,192,6,0.3), 0 0 120px rgba(9,192,6,0.12), inset 0 0 30px rgba(9,192,6,0.08); border: 2px solid rgba(9,192,6,0.7);">
+              <div class="scan-line"></div>
+              <video id="capture-feed" autoplay playsinline muted style="border-radius: 20px;"></video>
+              <img id="static-id-photo" style="display:none; border-radius: 20px;">
+              <!-- Ambient glow overlay inside frame -->
+              <div style="position:absolute; inset:0; background: radial-gradient(ellipse at 50% 100%, rgba(9,192,6,0.08) 0%, transparent 60%); pointer-events:none; border-radius: 20px;"></div>
+            </div>
+
+            <!-- Bottom ambient glow platform -->
+            <div style="position:absolute; bottom:-20px; left:50%; transform:translateX(-50%); width:80%; height:1px; background: linear-gradient(90deg, transparent, rgba(9,192,6,0.6), transparent); box-shadow: 0 0 20px 6px rgba(9,192,6,0.2);"></div>
+          </div>
+
+          <!-- Status / Error bar -->
+          <div id="id-scan-status" style="font-size:0.78rem; font-weight:700; color:var(--muted); display:flex; align-items:center; justify-content:center; gap:8px; min-height:26px;">
             <i class="fas fa-spinner fa-spin" style="color:var(--g)"></i> Initializing Face Detection AI...
           </div>
-          <button id="btn-capture-id" class="btn btn-primary" onclick="captureId()" disabled style="width: 100%; max-width: 280px; padding: 16px; opacity:0.5; cursor:not-allowed;">
-            <i class="fas fa-camera"></i> CAPTURE PHOTO
-          </button>
-          <div id="id-capture-error" style="display:none; align-items:center; justify-content:center; gap:8px; background:rgba(239,68,68,0.12); border:1px solid rgba(239,68,68,0.3); border-radius:10px; padding:10px 16px; margin-top:14px; max-width:380px; margin-left:auto; margin-right:auto;">
-            <i class="fas fa-exclamation-triangle" style="color:#ef4444; font-size:0.85rem;"></i>
-            <span id="id-capture-error-text" style="font-size:0.75rem; color:#ef4444; font-weight:700;">Human face not detected. Please position your face clearly in the frame.</span>
+
+          <!-- Capture / No-face error -->
+          <div id="id-actions" style="width: 100%; display: flex; flex-direction: column; align-items: center; gap: 12px;">
+            <button id="btn-capture-id" class="btn btn-primary" onclick="captureId()" disabled
+              style="width: 100%; max-width: 300px; padding: 16px 24px; opacity:0.5; cursor:not-allowed; border-radius: 14px; font-size: 0.88rem; letter-spacing: 1.5px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 10px;">
+              <i class="fas fa-user-slash"></i> <span id="capture-btn-label">FACE REQUIRED TO CAPTURE</span>
+            </button>
+            <div id="id-capture-error" style="display:none; align-items:center; justify-content:center; gap:8px; background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.35); border-radius:10px; padding:10px 18px; max-width:340px; width:100%;">
+              <i class="fas fa-triangle-exclamation" style="color:#ef4444; font-size:0.85rem; flex-shrink:0;"></i>
+              <span id="id-capture-error-text" style="font-size:0.73rem; color:#ef4444; font-weight:700;">Human face not detected. Please position your face clearly in the frame.</span>
+            </div>
+          </div>
+
+          <!-- Confirm state (after capture) -->
+          <div id="id-confirm" style="display:none; flex-direction:column; align-items:center; gap:16px; width:100%; max-width:300px;">
+            <div style="background: rgba(9,192,6,0.1); border: 1px solid rgba(9,192,6,0.3); padding: 12px 24px; border-radius: 12px; display:flex; align-items:center; gap:10px; font-size:.85rem; font-weight:700; color:var(--g); width:100%; justify-content:center;">
+              <i class="fas fa-check-circle"></i> IDENTITY SECURED
+            </div>
+            <div style="display:flex; gap:12px; width:100%; justify-content:center;">
+              <button class="btn btn-ghost" onclick="retakeId()" style="flex:1;">Retake</button>
+              <button class="btn btn-primary" onclick="goTo(3)" style="flex:1;">Continue</button>
+            </div>
           </div>
         </div>
 
-        <div id="id-confirm" style="display:none;flex-direction:column;align-items:center;gap:20px">
-          <div
-            style="background: var(--g10); border: 1px solid var(--border-g); padding: 12px 24px; border-radius: 12px; display:flex;align-items:center;gap:10px;font-size:.85rem;font-weight:700;color:var(--g)">
-            <i class="fas fa-check-circle"></i> IDENTITY SECURED
-          </div>
-          <div style="display:flex;gap:12px; width: 100%; justify-content: center;">
-            <button class="btn btn-ghost" onclick="retakeId()">Retake</button>
-            <button class="btn btn-primary" onclick="goTo(3)">Continue</button>
+        <!-- RIGHT COLUMN: Capture Tips -->
+        <div style="background: linear-gradient(145deg, rgba(255,255,255,0.035), rgba(255,255,255,0.015)); border: 1px solid rgba(255,255,255,0.07); border-radius: 24px; padding: 28px 24px; backdrop-filter: blur(24px);">
+          <p style="font-size: 0.72rem; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--g); margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+            <i class="fas fa-chart-line"></i> Capture Tips
+          </p>
+
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <div style="display: flex; align-items: flex-start; gap: 14px; padding: 14px 16px; background: rgba(9,192,6,0.04); border: 1px solid rgba(9,192,6,0.15); border-radius: 14px;">
+              <div style="width: 34px; height: 34px; border-radius: 10px; background: rgba(9,192,6,0.1); border: 1px solid rgba(9,192,6,0.3); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <i class="fas fa-sun" style="color: var(--g); font-size: 0.85rem;"></i>
+              </div>
+              <div>
+                <p style="font-size: 0.82rem; font-weight: 700; color: #fff; margin: 0 0 3px;">Use good lighting</p>
+                <p style="font-size: 0.73rem; color: var(--muted); margin: 0;">Avoid dim light</p>
+              </div>
+            </div>
+
+            <div style="display: flex; align-items: flex-start; gap: 14px; padding: 14px 16px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.07); border-radius: 14px;">
+              <div style="width: 34px; height: 34px; border-radius: 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <i class="fas fa-id-badge" style="color: var(--g); font-size: 0.85rem;"></i>
+              </div>
+              <div>
+                <p style="font-size: 0.82rem; font-weight: 700; color: #fff; margin: 0 0 3px;">Keep your face centered</p>
+                <p style="font-size: 0.73rem; color: var(--muted); margin: 0;">Inside the frame</p>
+              </div>
+            </div>
+
+            <div style="display: flex; align-items: flex-start; gap: 14px; padding: 14px 16px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.07); border-radius: 14px;">
+              <div style="width: 34px; height: 34px; border-radius: 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <i class="fas fa-person" style="color: var(--g); font-size: 0.85rem;"></i>
+              </div>
+              <div>
+                <p style="font-size: 0.82rem; font-weight: 700; color: #fff; margin: 0 0 3px;">Look straight</p>
+                <p style="font-size: 0.73rem; color: var(--muted); margin: 0;">At the camera</p>
+              </div>
+            </div>
+
+            <div style="display: flex; align-items: flex-start; gap: 14px; padding: 14px 16px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.07); border-radius: 14px;">
+              <div style="width: 34px; height: 34px; border-radius: 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <i class="fas fa-ban" style="color: var(--g); font-size: 0.85rem;"></i>
+              </div>
+              <div>
+                <p style="font-size: 0.82rem; font-weight: 700; color: #fff; margin: 0 0 3px;">Remove hats / dark glasses</p>
+                <p style="font-size: 0.73rem; color: var(--muted); margin: 0;">For better recognition</p>
+              </div>
+            </div>
           </div>
         </div>
+
       </div>
     </section>
 
-    <!-- ── S3: SENSORS POP UP ── -->
-    <div id="s-sensors"
-      style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.85);backdrop-filter:blur(12px);z-index:20000;display:none;justify-content:center;align-items:center;padding:20px;">
-      <div class="card"
-        style="max-width:500px;background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:40px;box-shadow:0 40px 100px rgba(0,0,0,0.8);width:100%;text-align:center;">
-        <div class="title" style="font-size:1.8rem;margin-bottom:10px;">System <span
-            style="color:var(--g);">Check</span></div>
-        <p class="sub" style="margin-bottom:24px;font-size:0.85rem;">Preparing your hardware for the interview
-          simulation.</p>
+    <!-- ── S3: SYSTEM PERMISSIONS & VOICE VERIFICATION ── -->
+    <section id="s-sensors" class="stage" style="padding: 0; max-width: 100%; width: 100%; align-items: stretch;">
+      
+      <!-- Top Title Bar -->
+      <div style="width: 100%; max-width: 1200px; margin: 15px auto 24px; padding: 0 10px;">
+        <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(9,192,6,0.08); border: 1px solid rgba(9,192,6,0.3); border-radius: 50px; padding: 6px 18px; margin-bottom: 12px;">
+          <i class="fas fa-shield-halved" style="color: var(--g); font-size: 0.78rem;"></i>
+          <span style="font-size: 0.7rem; font-weight: 800; color: var(--g); letter-spacing: 2px; font-family: 'IBM Plex Mono', monospace;">STEP 3 OF 3 · PRE-ASSESSMENT INTEGRITY</span>
+        </div>
+        <h1 style="font-size: 2.1rem; font-weight: 800; color: #fff; margin: 0 0 6px; letter-spacing: -0.8px;">System Permissions Setup</h1>
+        <p style="font-size: 0.88rem; color: var(--muted); margin: 0;">Activates checks that maintain the integrity of your test</p>
+      </div>
 
-        <div class="sensor-row" style="background: rgba(255,255,255,0.02); min-height: 80px;">
-          <div style="display:flex;align-items:center;gap:18px">
-            <div class="perm-icon" style="width: 44px; height: 44px; border-radius: 12px; font-size: 1.1rem;"><i
-                class="fas fa-camera"></i></div>
-            <div style="text-align:left;">
-              <p style="font-size:.9rem;font-weight:700; color:#fff;margin:0;">Camera & Video</p>
-              <p style="font-size:.70rem;color:var(--muted);margin:0;">Used for identity verification</p>
+      <!-- Main 2-Column Grid (Left: Permissions, Right: Instructions + Live Video + Action) -->
+      <div class="permissions-2col" style="display: grid; grid-template-columns: 1.25fr 0.85fr; gap: 32px; width: 100%; max-width: 1200px; margin: 0 auto 50px; padding: 0 10px; align-items: start;">
+
+        <!-- LEFT COLUMN: Permissions List & Notice -->
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+
+          <!-- Camera Access Card -->
+          <div style="background: linear-gradient(145deg, rgba(255,255,255,0.035), rgba(255,255,255,0.015)); border: 1px solid rgba(9,192,6,0.35); border-radius: 20px; padding: 22px 24px; display: flex; align-items: center; justify-content: space-between; backdrop-filter: blur(24px); box-shadow: 0 8px 30px rgba(0,0,0,0.25);">
+            <div style="display: flex; align-items: center; gap: 16px;">
+              <div style="width: 44px; height: 44px; border-radius: 50%; background: rgba(9,192,6,0.15); border: 2px solid var(--g); display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 0 15px rgba(9,192,6,0.3);">
+                <i class="fas fa-check" style="color: var(--g); font-size: 1.1rem;"></i>
+              </div>
+              <div>
+                <h3 style="font-size: 1.05rem; font-weight: 700; color: #fff; margin: 0 0 4px;">Camera Access</h3>
+                <p style="font-size: 0.8rem; color: var(--muted); margin: 0;">Required for face verification and detection during the assessment.</p>
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 6px; background: rgba(9,192,6,0.12); border: 1px solid rgba(9,192,6,0.3); padding: 6px 14px; border-radius: 50px; font-size: 0.72rem; font-weight: 800; color: var(--g); font-family: 'IBM Plex Mono', monospace;">
+              <i class="fas fa-circle-check"></i> VERIFIED
             </div>
           </div>
-          <span id="chip-cam" class="sensor-chip chip-wait" style="padding: 6px 14px; font-size: 0.7rem;">READY</span>
+
+          <!-- Audio Check Card -->
+          <div id="perm-audio-card" style="background: linear-gradient(145deg, rgba(255,255,255,0.035), rgba(255,255,255,0.015)); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 22px 24px; backdrop-filter: blur(24px); transition: all 0.3s ease;">
+            
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px;">
+              <div style="display: flex; align-items: center; gap: 16px;">
+                <div id="audio-check-icon-box" style="width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.3s ease;">
+                  <i id="audio-check-icon" class="fas fa-microphone" style="color: var(--muted); font-size: 1rem;"></i>
+                </div>
+                <div>
+                  <h3 style="font-size: 1.05rem; font-weight: 700; color: #fff; margin: 0 0 4px;">Audio Check</h3>
+                  <p style="font-size: 0.8rem; color: var(--muted); margin: 0;">Required to ensure your microphone is working correctly and audio can be captured during the assessment.</p>
+                </div>
+              </div>
+              <div id="audio-status-pill" style="display: flex; align-items: center; gap: 6px; background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.3); padding: 6px 14px; border-radius: 50px; font-size: 0.72rem; font-weight: 800; color: #f59e0b; font-family: 'IBM Plex Mono', monospace;">
+                <i class="fas fa-clock"></i> PENDING
+              </div>
+            </div>
+
+            <!-- Audio Recording Test Sub-Card -->
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-left: 3px solid var(--g); border-radius: 14px; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+              <div style="display: flex; align-items: center; gap: 14px;">
+                <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(9,192,6,0.1); border: 1px solid rgba(9,192,6,0.25); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                  <i class="fas fa-microphone-lines" style="color: var(--g); font-size: 0.9rem;"></i>
+                </div>
+                <div>
+                  <h4 style="font-size: 0.88rem; font-weight: 700; color: #fff; margin: 0 0 2px;">Audio Recording Test</h4>
+                  <p style="font-size: 0.75rem; color: var(--muted); margin: 0;">Required to ensure audio can be recorded and monitored</p>
+                </div>
+              </div>
+              <button id="btn-open-audio-modal" onclick="openVoiceVerifyModal()" class="btn" style="background: var(--g); color: #050805; font-weight: 800; font-size: 0.78rem; letter-spacing: 1px; padding: 10px 20px; border-radius: 10px; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                <i class="fas fa-play"></i> <span id="audio-modal-btn-text">START AUDIO CHECK</span>
+              </button>
+            </div>
+
+          </div>
+
+          <!-- Please Note Box -->
+          <div style="background: linear-gradient(145deg, rgba(255,255,255,0.025), rgba(255,255,255,0.01)); border: 1px solid rgba(255,255,255,0.06); border-radius: 18px; padding: 22px 24px;">
+            <p style="font-size: 0.82rem; font-weight: 800; color: #fff; margin: 0 0 12px; letter-spacing: 0.5px;">Please note:</p>
+            <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px;">
+              <li style="display: flex; align-items: flex-start; gap: 10px; font-size: 0.78rem; color: var(--muted); line-height: 1.5;">
+                <span style="color: var(--g); font-size: 0.9rem; line-height: 1;">•</span>
+                <span>Hiero can access my camera feed for identity verification and monitoring purposes during the assessment.</span>
+              </li>
+              <li style="display: flex; align-items: flex-start; gap: 10px; font-size: 0.78rem; color: var(--muted); line-height: 1.5;">
+                <span style="color: var(--g); font-size: 0.9rem; line-height: 1;">•</span>
+                <span>I am the registered candidate and will take the assessment without any external help or impersonation.</span>
+              </li>
+              <li style="display: flex; align-items: flex-start; gap: 10px; font-size: 0.78rem; color: var(--muted); line-height: 1.5;">
+                <span style="color: var(--g); font-size: 0.9rem; line-height: 1;">•</span>
+                <span>My face should remain clearly visible throughout the assessment duration.</span>
+              </li>
+            </ul>
+            <a href="javascript:void(0)" onclick="alert('Full Integrity Agreement:\n\n1. Candidates must remain focused on the chamber.\n2. Audio and Video feeds are continuously analyzed by Hiero Neural Proctoring.\n3. Session terminations on multi-strike violation are irreversible.')" style="display: inline-block; font-size: 0.75rem; color: var(--g); font-weight: 700; margin-top: 10px; text-decoration: none;">Read More...</a>
+          </div>
+
         </div>
 
-        <div class="sensor-row" style="background: rgba(255,255,255,0.02); min-height: 80px;">
-          <div style="display:flex;align-items:center;gap:18px">
-            <div class="perm-icon" style="width: 44px; height: 44px; border-radius: 12px; font-size: 1.1rem;"><i
-                class="fas fa-microphone"></i></div>
-            <div style="text-align:left;">
-              <p style="font-size:.9rem;font-weight:700; color:#fff;margin:0;">Microphone & Audio</p>
-              <p style="font-size:.70rem;color:var(--muted);margin:0;">Used for voice responses</p>
+        <!-- RIGHT COLUMN: Important Instructions & Live Video & Proceed -->
+        <div style="display: flex; flex-direction: column; gap: 24px;">
+
+          <!-- Important Instructions Card -->
+          <div style="background: linear-gradient(145deg, rgba(255,255,255,0.035), rgba(255,255,255,0.015)); border: 1px solid rgba(255,255,255,0.07); border-radius: 20px; padding: 24px; backdrop-filter: blur(24px);">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
+              <i class="far fa-lightbulb" style="color: #facc15; font-size: 1.1rem;"></i>
+              <h3 style="font-size: 0.95rem; font-weight: 800; color: #fff; margin: 0; letter-spacing: 0.5px;">Important Instructions</h3>
+            </div>
+
+            <!-- Audio instructions -->
+            <div style="margin-bottom: 20px;">
+              <p style="font-size: 0.75rem; font-weight: 700; color: var(--text); margin-bottom: 8px;">For Audio access &amp; Audio verification:</p>
+              <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px;">
+                <li style="display: flex; align-items: flex-start; gap: 8px; font-size: 0.73rem; color: var(--muted); line-height: 1.45;">
+                  <span style="color: var(--muted); font-size: 0.8rem;">•</span>
+                  <span>If you are using bluetooth device for audio input, make sure that it is the primary device under microphone settings.</span>
+                </li>
+                <li style="display: flex; align-items: flex-start; gap: 8px; font-size: 0.73rem; color: var(--muted); line-height: 1.45;">
+                  <span style="color: var(--muted); font-size: 0.8rem;">•</span>
+                  <span>Use a working microphone (built-in or external) and plug in your mic before opening the browser.</span>
+                </li>
+                <li style="display: flex; align-items: flex-start; gap: 8px; font-size: 0.73rem; color: var(--muted); line-height: 1.45;">
+                  <span style="color: var(--muted); font-size: 0.8rem;">•</span>
+                  <span>When prompted, click Allow on the browser pop-up asking for Microphone access.</span>
+                </li>
+                <li style="display: flex; align-items: flex-start; gap: 8px; font-size: 0.73rem; color: var(--muted); line-height: 1.45;">
+                  <span style="color: var(--muted); font-size: 0.8rem;">•</span>
+                  <span><strong>If you denied Audio Access by mistake:</strong></span>
+                </li>
+                <li style="padding-left: 14px; font-size: 0.7rem; color: var(--muted); line-height: 1.4;">
+                  <strong>Chrome:</strong> In the address bar → Site Settings → Microphone Allow → Refresh.
+                </li>
+                <li style="padding-left: 14px; font-size: 0.7rem; color: var(--muted); line-height: 1.4;">
+                  <strong>Safari:</strong> Safari → Settings for Website → Microphone Allow → Refresh.
+                </li>
+              </ul>
+            </div>
+
+            <!-- Support section -->
+            <div style="border-top: 1px solid rgba(255,255,255,0.06); padding-top: 14px;">
+              <p style="font-size: 0.75rem; font-weight: 700; color: var(--text); margin-bottom: 6px;">Reach out to support if needed:</p>
+              <p style="font-size: 0.72rem; color: var(--muted); line-height: 1.45; margin: 0;">
+                If you face any issues, please email us at <a href="mailto:support@hiero.ai" style="color: var(--g); text-decoration: none;">support@hiero.ai</a> using your registered email ID.
+              </p>
             </div>
           </div>
-          <span id="chip-mic" class="sensor-chip chip-wait" style="padding: 6px 14px; font-size: 0.7rem;">READY</span>
+
+          <!-- Bottom Live Camera Box + "I understand, proceed" CTA -->
+          <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 16px;">
+            
+            <!-- Live camera thumbnail preview card -->
+            <div style="position: relative; width: 220px; height: 140px; border-radius: 16px; overflow: hidden; background: #000; border: 2px solid rgba(9,192,6,0.5); box-shadow: 0 8px 30px rgba(0,0,0,0.5), 0 0 20px rgba(9,192,6,0.2);">
+              <video id="perm-cam-preview" autoplay playsinline muted style="width: 100%; height: 100%; object-fit: cover;"></video>
+              <div style="position: absolute; top: 8px; left: 8px; display: flex; align-items: center; gap: 6px; background: rgba(0,0,0,0.65); backdrop-filter: blur(8px); padding: 3px 8px; border-radius: 20px; font-size: 0.65rem; font-weight: 800; color: var(--g); border: 1px solid rgba(9,192,6,0.3); font-family: 'IBM Plex Mono', monospace;">
+                <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--g); animation: pulse 1.5s infinite;"></span>
+                <span>LIVE FEED</span>
+              </div>
+            </div>
+
+            <!-- "I understand, proceed" Button -->
+            <button id="btn-understand-proceed" onclick="launchSession()" disabled
+              style="width: 100%; padding: 18px 28px; border-radius: 16px; border: none; font-size: 0.95rem; font-weight: 800; letter-spacing: 1px; display: flex; align-items: center; justify-content: center; gap: 12px; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); opacity: 0.45; cursor: not-allowed; background: rgba(255,255,255,0.08); color: var(--muted);">
+              <span>I understand, proceed</span>
+              <i class="fas fa-arrow-right"></i>
+            </button>
+          </div>
+
         </div>
 
-        <button class="btn btn-primary" id="launch-btn" disabled onclick="launchSession()"
-          style="margin-top:24px;width:100%; height: 56px; font-size: 0.9rem; letter-spacing: 2px;">
-          <i class="fas fa-play"></i> START INTERVIEW
+      </div>
+
+    </section>
+
+    <!-- ── VOICE VERIFICATION MODAL (SCREENSHOT 1) ── -->
+    <div id="voice-verify-modal" style="position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(16px); z-index: 30000; display: none; align-items: center; justify-content: center; padding: 20px;">
+      <div style="background: #0d120e; border: 1px solid rgba(9,192,6,0.3); border-radius: 24px; width: 100%; max-width: 580px; padding: 32px; box-shadow: 0 25px 80px rgba(0,0,0,0.9), 0 0 40px rgba(9,192,6,0.15); position: relative; animation: stageIn 0.3s ease-out;">
+        
+        <!-- Modal Header -->
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+          <h2 style="font-size: 1.25rem; font-weight: 800; color: #fff; margin: 0; letter-spacing: -0.3px;">Audio Check &amp; Voice Verification</h2>
+          <button onclick="closeVoiceVerifyModal()" style="background: transparent; border: none; color: var(--muted); font-size: 1.1rem; cursor: pointer; padding: 4px;">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <!-- Description -->
+        <p style="font-size: 0.8rem; color: var(--muted); line-height: 1.5; margin-bottom: 20px;">
+          Click on <strong>Start</strong> and read the sentence below to test your microphone and complete voice verification. This step ensures that your audio is working correctly and that your responses can be recorded clearly during the assessment.
+        </p>
+
+        <!-- Sentence Box -->
+        <div style="background: rgba(9,192,6,0.04); border: 1px solid rgba(9,192,6,0.25); border-radius: 14px; padding: 18px 20px; margin-bottom: 16px; position: relative;">
+          <p style="font-size: 0.88rem; font-weight: 700; color: #fff; line-height: 1.6; margin: 0;">
+            "Hi, I am here to complete this assessment. I understand that my voice is being recorded for verification purposes. I confirm that I am taking this test honestly and without any assistance."
+          </p>
+        </div>
+
+        <p style="font-size: 0.72rem; color: var(--muted); margin: 0 0 16px; font-weight: 600;">
+          <i class="fas fa-info-circle" style="color: var(--g); margin-right: 4px;"></i> Record your response for min 4 sec.
+        </p>
+
+        <!-- Microphone Selector Dropdown -->
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.09); border-radius: 12px; padding: 10px 14px; margin-bottom: 16px; display: flex; align-items: center; gap: 10px;">
+          <i class="fas fa-microphone" style="color: var(--g); font-size: 0.85rem;"></i>
+          <select id="modal-mic-select" style="background: transparent; border: none; color: #fff; font-size: 0.8rem; font-weight: 600; width: 100%; outline: none; cursor: pointer;">
+            <option value="default" style="background: #0d120e; color: #fff;">Microphone Array (Default Audio Device)</option>
+          </select>
+        </div>
+
+        <!-- Recording Control & Visualizer Bar -->
+        <div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 14px 18px; margin-bottom: 20px; display: flex; align-items: center; gap: 14px;">
+          
+          <!-- Start / Stop Button -->
+          <button id="modal-rec-btn" onclick="toggleModalAudioRecording()" style="background: #ef4444; color: #fff; border: none; border-radius: 50px; padding: 8px 18px; font-size: 0.78rem; font-weight: 800; display: flex; align-items: center; gap: 8px; cursor: pointer; transition: all 0.2s ease;">
+            <span id="modal-rec-dot" style="width: 8px; height: 8px; border-radius: 50%; background: #fff;"></span>
+            <span id="modal-rec-label">Start</span>
+          </button>
+
+          <!-- Progress Bar / Timeline -->
+          <div style="flex: 1; height: 8px; background: rgba(255,255,255,0.08); border-radius: 4px; overflow: hidden; position: relative;">
+            <div id="modal-rec-progress" style="width: 0%; height: 100%; background: linear-gradient(90deg, #09c006, #00ffcc); border-radius: 4px; transition: width 0.1s linear;"></div>
+          </div>
+
+          <!-- Time Display -->
+          <span id="modal-rec-timer" style="font-family: 'IBM Plex Mono', monospace; font-size: 0.82rem; font-weight: 700; color: #fff; min-width: 40px; text-align: right;">0:00</span>
+        </div>
+
+        <!-- Confirmation Checkbox -->
+        <div style="display: flex; align-items: flex-start; gap: 10px; margin-bottom: 24px;">
+          <input type="checkbox" id="modal-confirm-checkbox" onchange="validateModalNextButton()" style="margin-top: 3px; accent-color: var(--g); width: 16px; height: 16px; cursor: pointer;">
+          <label for="modal-confirm-checkbox" style="font-size: 0.75rem; color: var(--muted); line-height: 1.45; cursor: pointer;">
+            I confirm that my voice is clearly audible and my microphone is working properly. I understand that audio will be required during this assessment.
+          </label>
+        </div>
+
+        <!-- Action Next Button -->
+        <button id="modal-btn-next" onclick="completeVoiceVerification()" disabled
+          style="width: 100%; padding: 14px; border-radius: 12px; border: none; font-size: 0.88rem; font-weight: 800; letter-spacing: 1px; cursor: not-allowed; opacity: 0.5; background: rgba(255,255,255,0.08); color: var(--muted); transition: all 0.2s ease;">
+          Next
         </button>
+
       </div>
     </div>
+
 
     <!-- ── S4: SESSION ── -->
     <section id="s-session" class="stage">
@@ -2344,7 +2715,8 @@
         try {
           const evalData = JSON.parse(sessionStorage.getItem('mockResult'));
           if (evalData) {
-            document.getElementById('final-score').textContent = evalData.score?.final || '7.5';
+            const finalScoreEl = document.getElementById('final-score');
+            if (finalScoreEl) finalScoreEl.textContent = evalData.score?.final || '7.5';
             
             // Format report HTML nicely
             let reportHTML = `<div style="font-size:1.1rem; color:#fff; font-style:italic; margin-bottom:32px; padding: 20px; background:rgba(9,192,6,0.05); border-left: 4px solid var(--g); border-radius: 4px;">"${evalData.summary || "Solid overall performance."}"</div>`;
@@ -2371,7 +2743,19 @@
             } else { reportHTML += `<li>Review standard practices and maintain your current level of depth.</li>`; }
             reportHTML += `</ul>`;
 
-            document.getElementById('audit-text').innerHTML = reportHTML;
+            reportHTML += `
+            <div style="margin-top: 28px; display: flex; gap: 16px; flex-wrap: wrap;">
+              <a href="/feedback.html?session=${encodeURIComponent(sessionStorage.getItem('mockSessionId') || '')}" style="display: inline-flex; align-items: center; gap: 10px; background: var(--g); color: #000; font-weight: 800; font-size: 0.95rem; padding: 14px 28px; border-radius: 12px; text-decoration: none; box-shadow: 0 4px 18px rgba(7, 226, 25, 0.4); transition: transform 0.2s;">
+                <i class="fas fa-chart-pie"></i> View Comprehensive Feedback & Recordings
+              </a>
+              <button onclick="sessionStorage.clear(); location.reload();" style="display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.06); color: #fff; font-weight: 700; font-size: 0.9rem; padding: 14px 24px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.15); cursor: pointer;">
+                <i class="fas fa-rotate-left"></i> Start New Interview
+              </button>
+            </div>
+            `;
+
+            const auditTextEl = document.getElementById('audit-text');
+            if (auditTextEl) auditTextEl.innerHTML = reportHTML;
           }
         } catch (e) {
           console.warn("Error rendering saved audit", e);
@@ -2946,16 +3330,10 @@ Key Requirements:
     function goTo(n) {
       sessionStorage.setItem('mockCurStage', n);
       document.body.setAttribute('data-stage', n);
-      if (n === 3) {
-        // Pop Up Mode for System Checks
-        document.getElementById('s-sensors').style.display = 'flex';
-        curStage = 3;
-        calibSensors();
-        return;
-      }
 
       document.querySelectorAll('.stage.active').forEach(e => e.classList.remove('active'));
-      document.getElementById('s-' + stages[n - 1]).classList.add('active');
+      const targetStage = document.getElementById('s-' + stages[n - 1]);
+      if (targetStage) targetStage.classList.add('active');
       curStage = n;
       if (n === 2) startIdCam();
       if (n === 3) calibSensors();
@@ -3326,23 +3704,231 @@ Key Requirements:
       vc.start();
     }
 
-    // ─── SENSOR CALIBRATION ──────────────────────────────────────────────────
+    // ─── SENSOR CALIBRATION & SYSTEM PERMISSIONS SETUP ──────────────────────
+    let modalMediaRecorder = null;
+    let modalAudioChunks = [];
+    let modalRecordTimer = null;
+    let modalRecordSeconds = 0;
+    let modalIsRecording = false;
+    window.audioRecordedDuration = 0;
+    window.voiceVerified = false;
+
     async function calibSensors() {
       try {
         if (!stream) {
-          stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+          stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 }, audio: true });
         }
-        ['chip-cam', 'chip-mic'].forEach(id => {
-          const el = document.getElementById(id);
-          el.textContent = 'SYNCED';
-          el.className = 'sensor-chip chip-ok';
-        });
-        document.getElementById('launch-btn').disabled = false;
+
+        // Attach live stream to bottom right preview box
+        const prevVideo = document.getElementById('perm-cam-preview');
+        if (prevVideo && stream) {
+          prevVideo.srcObject = stream;
+          prevVideo.play().catch(e => console.warn('Preview video play warning:', e));
+        }
+
+        // Populate audio input devices into modal dropdown
+        populateAudioDevices();
+
+        // If not already verified, open modal automatically after smooth delay
+        if (!window.voiceVerified) {
+          setTimeout(() => {
+            openVoiceVerifyModal();
+          }, 350);
+        }
+
         loadResume();
       } catch (e) {
-        ['chip-cam', 'chip-mic'].forEach(id => {
-          document.getElementById(id).textContent = 'DENIED';
-        });
+        console.error('System permissions error:', e);
+        alert('Microphone and camera access are required to proceed.');
+      }
+    }
+
+    async function populateAudioDevices() {
+      try {
+        const select = document.getElementById('modal-mic-select');
+        if (!select || !navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) return;
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const audioInputs = devices.filter(d => d.kind === 'audioinput');
+        if (audioInputs.length > 0) {
+          select.innerHTML = audioInputs.map((d, i) => `
+            <option value="${d.deviceId || 'default'}" style="background: #0d120e; color: #fff;">
+              ${d.label || `Microphone ${i + 1} (${d.deviceId.slice(0, 8)}...)`}
+            </option>
+          `).join('');
+        }
+      } catch (err) {
+        console.warn('Audio device listing notice:', err);
+      }
+    }
+
+    function openVoiceVerifyModal() {
+      const m = document.getElementById('voice-verify-modal');
+      if (m) m.style.display = 'flex';
+      populateAudioDevices();
+    }
+
+    function closeVoiceVerifyModal() {
+      const m = document.getElementById('voice-verify-modal');
+      if (m) m.style.display = 'none';
+      if (modalIsRecording) {
+        stopModalAudioRecording();
+      }
+    }
+
+    async function toggleModalAudioRecording() {
+      if (modalIsRecording) {
+        stopModalAudioRecording();
+      } else {
+        startModalAudioRecording();
+      }
+    }
+
+    async function startModalAudioRecording() {
+      try {
+        const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        modalAudioChunks = [];
+        modalMediaRecorder = new MediaRecorder(audioStream);
+        modalMediaRecorder.ondataavailable = (e) => {
+          if (e.data.size > 0) modalAudioChunks.push(e.data);
+        };
+
+        modalMediaRecorder.onstop = () => {
+          window.audioRecordedDuration = modalRecordSeconds;
+          validateModalNextButton();
+        };
+
+        modalMediaRecorder.start();
+        modalIsRecording = true;
+        modalRecordSeconds = 0;
+
+        const recBtn = document.getElementById('modal-rec-btn');
+        const recLabel = document.getElementById('modal-rec-label');
+        const recDot = document.getElementById('modal-rec-dot');
+        const progressBar = document.getElementById('modal-rec-progress');
+        const timerText = document.getElementById('modal-rec-timer');
+
+        if (recBtn) recBtn.style.background = '#dc2626';
+        if (recLabel) recLabel.textContent = 'Stop';
+        if (recDot) recDot.style.animation = 'pulse 1s infinite';
+
+        if (modalRecordTimer) clearInterval(modalRecordTimer);
+        modalRecordTimer = setInterval(() => {
+          modalRecordSeconds++;
+          const mins = Math.floor(modalRecordSeconds / 60);
+          const secs = modalRecordSeconds % 60;
+          if (timerText) timerText.textContent = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+          
+          // Progress bar max at 4 seconds
+          const progressPercent = Math.min(100, (modalRecordSeconds / 4) * 100);
+          if (progressBar) progressBar.style.width = `${progressPercent}%`;
+
+          if (modalRecordSeconds >= 4) {
+            window.audioRecordedDuration = modalRecordSeconds;
+            validateModalNextButton();
+          }
+        }, 1000);
+
+      } catch (err) {
+        console.error('Recording start error:', err);
+        alert('Could not start microphone recording. Please allow microphone access.');
+      }
+    }
+
+    function stopModalAudioRecording() {
+      if (modalMediaRecorder && modalMediaRecorder.state !== 'inactive') {
+        modalMediaRecorder.stop();
+      }
+      modalIsRecording = false;
+      if (modalRecordTimer) {
+        clearInterval(modalRecordTimer);
+        modalRecordTimer = null;
+      }
+
+      const recBtn = document.getElementById('modal-rec-btn');
+      const recLabel = document.getElementById('modal-rec-label');
+      const recDot = document.getElementById('modal-rec-dot');
+
+      if (recBtn) {
+        recBtn.style.background = window.audioRecordedDuration >= 4 ? 'var(--g)' : '#ef4444';
+        recBtn.style.color = window.audioRecordedDuration >= 4 ? '#050805' : '#fff';
+      }
+      if (recLabel) recLabel.textContent = window.audioRecordedDuration >= 4 ? 'Recorded ✓' : 'Retest';
+      if (recDot) recDot.style.animation = 'none';
+
+      validateModalNextButton();
+    }
+
+    function validateModalNextButton() {
+      const checkbox = document.getElementById('modal-confirm-checkbox');
+      const nextBtn = document.getElementById('modal-btn-next');
+      const isDurationValid = window.audioRecordedDuration >= 4;
+      const isChecked = checkbox && checkbox.checked;
+
+      if (isDurationValid && isChecked) {
+        if (nextBtn) {
+          nextBtn.disabled = false;
+          nextBtn.style.opacity = '1';
+          nextBtn.style.cursor = 'pointer';
+          nextBtn.style.background = 'var(--g)';
+          nextBtn.style.color = '#050805';
+          nextBtn.style.boxShadow = '0 0 25px rgba(9, 192, 6, 0.45)';
+        }
+      } else {
+        if (nextBtn) {
+          nextBtn.disabled = true;
+          nextBtn.style.opacity = '0.5';
+          nextBtn.style.cursor = 'not-allowed';
+          nextBtn.style.background = 'rgba(255, 255, 255, 0.08)';
+          nextBtn.style.color = 'var(--muted)';
+          nextBtn.style.boxShadow = 'none';
+        }
+      }
+    }
+
+    function completeVoiceVerification() {
+      window.voiceVerified = true;
+      closeVoiceVerifyModal();
+
+      // Update Audio Check Card on Permissions page
+      const audioCard = document.getElementById('perm-audio-card');
+      const audioIconBox = document.getElementById('audio-check-icon-box');
+      const audioIcon = document.getElementById('audio-check-icon');
+      const audioStatusPill = document.getElementById('audio-status-pill');
+      const btnText = document.getElementById('audio-modal-btn-text');
+
+      if (audioCard) {
+        audioCard.style.borderColor = 'rgba(9, 192, 6, 0.35)';
+        audioCard.style.boxShadow = '0 8px 30px rgba(0, 0, 0, 0.25)';
+      }
+      if (audioIconBox) {
+        audioIconBox.style.background = 'rgba(9, 192, 6, 0.15)';
+        audioIconBox.style.border = '2px solid var(--g)';
+        audioIconBox.style.boxShadow = '0 0 15px rgba(9, 192, 6, 0.3)';
+      }
+      if (audioIcon) {
+        audioIcon.className = 'fas fa-check';
+        audioIcon.style.color = 'var(--g)';
+      }
+      if (audioStatusPill) {
+        audioStatusPill.className = 'flex items-center gap-1.5';
+        audioStatusPill.style.background = 'rgba(9, 192, 6, 0.12)';
+        audioStatusPill.style.border = '1px solid rgba(9, 192, 6, 0.3)';
+        audioStatusPill.style.color = 'var(--g)';
+        audioStatusPill.innerHTML = '<i class="fas fa-circle-check"></i> VERIFIED';
+      }
+      if (btnText) {
+        btnText.textContent = 'RETEST AUDIO';
+      }
+
+      // Enable the "I understand, proceed" button
+      const proceedBtn = document.getElementById('btn-understand-proceed');
+      if (proceedBtn) {
+        proceedBtn.disabled = false;
+        proceedBtn.style.opacity = '1';
+        proceedBtn.style.cursor = 'pointer';
+        proceedBtn.style.background = 'var(--g)';
+        proceedBtn.style.color = '#050805';
+        proceedBtn.style.boxShadow = '0 0 35px rgba(9, 192, 6, 0.45)';
       }
     }
 
@@ -3353,29 +3939,33 @@ Key Requirements:
         const d = await r.json();
         if (d.success) {
           resume = d.data;
-          document.getElementById('resume-status').textContent = 'Loaded';
-          document.getElementById('resume-status').style.color = 'var(--g)';
-        } else {
-          document.getElementById('resume-status').textContent = 'Unavailable';
+          const rStatus = document.getElementById('resume-status');
+          if (rStatus) {
+            rStatus.textContent = 'Loaded';
+            rStatus.style.color = 'var(--g)';
+          }
         }
       } catch (e) {
-        document.getElementById('resume-status').textContent = 'Unavailable';
+        console.warn('Resume load notice:', e);
       }
     }
 
     // ─── SESSION LAUNCH ──────────────────────────────────────────────────────
     async function launchSession() {
-      document.getElementById('s-sensors').style.display = 'none';
-      if (stream) {
-        stream.getTracks().forEach(t => t.stop());
-      }
+      const proceedBtn = document.getElementById('btn-understand-proceed');
+      if (proceedBtn) proceedBtn.disabled = true;
 
       const loader = document.getElementById('loading-screen');
-      loader.style.display = 'flex';
-      document.getElementById('load-msg').textContent = 'Launching secure telemetry node...';
-      await new Promise(r => setTimeout(r, 2000));
+      if (loader) {
+        loader.style.display = 'flex';
+        const msg = document.getElementById('load-msg');
+        if (msg) msg.textContent = 'LAUNCHING SECURE CHAMBER...';
+      }
+
+      await new Promise(r => setTimeout(r, 1200));
       location.href = '/session.html';
     }
+
 
     // ─── BIOMETRIC MONITORING (BlazeFace — TensorFlow.js) ───────────────────
     let strikes = 0;
