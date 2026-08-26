@@ -8,7 +8,7 @@ const groq = new Groq({ apiKey: GROQ_API_KEY });
 router.post('/generate', async (req, res) => {
     try {
         const { topic, audience, platform } = req.body;
-        
+
         if (!topic) {
             return res.status(400).json({ error: 'Topic is required' });
         }

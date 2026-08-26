@@ -17,7 +17,7 @@ const groq = new Groq({ apiKey: GROQ_API_KEY });
 async function callGroqWithFallback(params, res = null) {
     const PRIMARY_MODEL = AI_MODEL;
     const FALLBACK_MODEL = 'llama-3.1-8b-instant';
-    
+
     try {
         return await groq.chat.completions.create({
             ...params,
@@ -26,7 +26,7 @@ async function callGroqWithFallback(params, res = null) {
     } catch (error) {
         if (error.status === 429) {
             console.warn(`[Orbit AI] Rate limit (429) hit on ${PRIMARY_MODEL}. Falling back to ${FALLBACK_MODEL} silently.`);
-            
+
             return await groq.chat.completions.create({
                 ...params,
                 model: FALLBACK_MODEL
@@ -145,7 +145,7 @@ const ORBIT_TOOLS = [
 async function runOrbitTool(toolName, context, args = {}) {
     console.log(`[Orbit AI] Logic Engine: Executing ${toolName}`);
     const { safeLesson, safeExec, dataset_schema, user_code } = context;
-    
+
     // Use backend-constructed arguments for tool logic
     const code = args.user_code || user_code || "";
     const activeExec = args.execution_output || safeExec;
@@ -157,20 +157,20 @@ async function runOrbitTool(toolName, context, args = {}) {
         suggested_fix: "Check your recent code changes for potential syntax or logical errors.",
         next_step: "Review the problem description and execution output for clues."
     };
-    
+
 
     if (toolName === 'debug_code') {
         // Robust Pattern Detection for Tuple-based column selection
         // Supports whitespace variations and multi-line strings
         const tupleRegex = /(.*?)\b(\w+)\[\s*['"]([^'"]+)['"]\s*,\s*['"]([^'"]+)['"]\s*\]/m;
         const tupleMatch = code.match(tupleRegex);
-        
+
         if (tupleMatch) {
-            const prefix = tupleMatch[1].trim(); 
+            const prefix = tupleMatch[1].trim();
             const dfName = tupleMatch[2];
             const col1 = tupleMatch[3];
             const col2 = tupleMatch[4];
-            
+
             result.explanation = `The syntax is incorrect because pandas expects a list when selecting multiple columns. Using a comma inside single brackets (e.g., ${dfName}['${col1}', '${col2}']) creates a tuple, which is not a valid way to index multiple columns in a DataFrame.`;
             result.suggested_fix = `${prefix ? prefix + ' ' : ''}${dfName}[['${col1}', '${col2}']]`;
             result.next_step = "Update your code to use double brackets (a list) for column selection and re-run your model.";
@@ -231,19 +231,19 @@ function applySafetyFilter(text, tutorials, userMessage) {
 
     // Rule: greeting, tutorial_request -> NO CODE.
     const forbiddenCodeIntents = ['greeting', 'tutorial_request'];
-    
+
     if ((forbiddenCodeIntents.includes(intent) && hasCodeBlock) || hasBlacklisted) {
         console.log(`[Orbit] Safety filter triggered. Intent: ${intent}. Found: ${hasCodeBlock ? 'Code Block' : 'External Link'}`);
-        
+
         let tutorialList = [];
         if (Array.isArray(tutorials)) {
             tutorialList = tutorials;
         } else if (typeof tutorials === 'object' && Array.isArray(tutorials.tutorials)) {
             tutorialList = tutorials.tutorials;
         }
-        
+
         if (tutorialList.length === 0) tutorialList = ["Python in 4 hours", "Advanced data science Concepts"];
-        
+
         return `You should start with **${tutorialList[0]}** because it introduces the foundational concepts.\n\nThen continue with **${tutorialList[1] || tutorialList[0]}** to explore more advanced topics.\n\nWould you like a quick overview before watching?`;
     }
     return text;
@@ -278,9 +278,9 @@ Example: "For ${skillName} beginners, start with **${context.tutorials?.[0] || '
 
         // INTENT ROUTER: Intercept greetings before calling AI
         if (intent === 'greeting') {
-            return res.json({ 
-                success: true, 
-                answer: "Hello! I'm Orbit, your AI learning guide.\nHow can I help you today?" 
+            return res.json({
+                success: true,
+                answer: "Hello! I'm Orbit, your AI learning guide.\nHow can I help you today?"
             });
         }
 
@@ -307,7 +307,7 @@ Example: "For ${skillName} beginners, start with **${context.tutorials?.[0] || '
         if (intent === 'debug_code' || intent === 'explain_output' || intent === 'inspect_dataset') {
             const toolName = intent;
             reasoningLog = `> Detected ${toolName.replace('_', ' ')} request → running ${toolName} tool.\n\n`;
-            
+
             try {
                 let toolArguments = {};
                 if (toolName === 'debug_code') {
@@ -420,7 +420,7 @@ Example: "For ${skillName} beginners, start with **${context.tutorials?.[0] || '
     if (intent === 'debug_code' || intent === 'explain_output' || intent === 'inspect_dataset') {
         const toolName = intent;
         console.log(`[Orbit Router] Detected ${toolName} request → executing diagnostic tool.`);
-        
+
         try {
             let toolArguments = {};
             if (toolName === 'debug_code') {
@@ -445,7 +445,7 @@ Example: "For ${skillName} beginners, start with **${context.tutorials?.[0] || '
 
     try {
         console.log(`[Orbit AI] Deterministic inference for: "${message.substring(0, 50)}..."`);
-        
+
         const messages = [
             { role: 'system', content: ORBIT_SYSTEM_PROMPT + learningPrompt },
             ...safeHistory,

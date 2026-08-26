@@ -1275,16 +1275,19 @@
 
           const durBadge = q.duration ? `${q.duration}s recording` : 'Live Question Response';
 
+          const questionTitle = q.questionText || q.question || `Question ${idx + 1}`;
+          const answerContent = q.candidateAnswer || q.answer || q.transcript || q.answerTranscript || 'Answer provided verbally in live stream.';
+
           itemDiv.innerHTML = `
             <div class="accordion-header" onclick="toggleAccordion(this)">
               <span class="q-badge">QUESTION ${qNumStr}</span>
-              <span class="q-text">${escapeHtml(q.question || `Question ${idx + 1}`)}</span>
+              <span class="q-text">${escapeHtml(questionTitle)}</span>
               <i class="fa-solid fa-chevron-down accordion-chevron"></i>
             </div>
             <div class="accordion-body">
               <div class="answer-box">
                 <span class="answer-tag"><i class="fa-solid fa-microphone"></i> CANDIDATE ANSWER</span>
-                <p>"${escapeHtml(q.answer || 'Answer provided verbally in live stream.')}"</p>
+                <p>"${escapeHtml(answerContent)}"</p>
               </div>
 
               <div class="feedback-box">

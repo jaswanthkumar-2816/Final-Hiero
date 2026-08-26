@@ -194,5 +194,41 @@
     "picture": "https://lh3.googleusercontent.com/a/ACg8ocISkVeewJciujismomodMNzdbKKbCejran3RyK-3kU-CKMe4A=s96-c",
     "loginCount": 9,
     "lastLogin": "2026-08-19T12:31:56.678Z"
+  },
+  {
+    "id": "107",
+    "name": "Tarun Kumar",
+    "email": "tk230306@gmail.com",
+    "password": "$2a$10$/41Buj4ucKDMeZIkuFMtyuTj0gSc1iHtKhEELwb39lZxgrQ.TSRgu",
+    "emailVerified": true,
+    "signupMethod": "email",
+    "createdAt": "2026-08-24T14:40:31.682Z"
+  },
+  {
+    "id": 108,
+    "googleId": "demo-google-12345",
+    "email": "demo.user@hiero.ai",
+    "name": "Demo Student",
+    "emailVerified": true,
+    "signupMethod": "google",
+    "picture": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
+  },
+  {
+    "id": 109,
+    "githubId": "demo-github-12345",
+    "email": "demo.github@hiero.ai",
+    "name": "Demo Developer",
+    "emailVerified": true,
+    "signupMethod": "github",
+    "picture": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=80"
+  },
+  {
+    "id": 110,
+    "googleId": "110856914922903949067",
+    "email": "tk230306@gmail.com",
+    "name": "Tarun Kumar",
+    "emailVerified": true,
+    "signupMethod": "google",
+    "picture": "https://lh3.googleusercontent.com/a/ACg8ocIxubVhBAbZmWBQsMFVlvwvvhZDzxbAtQrzHd0Xf-lwH7WkTZUp=s96-c"
   }
 ]

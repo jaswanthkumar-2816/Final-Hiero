@@ -181,6 +181,10 @@ app.use('/api/scoring', scoringRouter); // Supports /user-stats, /project-comple
 const chatRouter = require('./routes/chat');
 app.use('/api/chat', chatRouter);
 
+// Interview API (Integrated)
+const interviewRouter = require('./routes/interview');
+app.use('/api/interview', interviewRouter);
+
 // Reel API (Integrated)
 const reelRouter = require('./routes/reel');
 app.use('/api/reel', reelRouter);
@@ -289,10 +293,6 @@ app.get('*', (req, res, next) => {
 
 // Final fallback for legacy /api/analyze if not caught by reviewRouter
 app.use('/api', analysisRouter);
-
-// --- Interview Router Module ---
-const interviewRouter = require('./routes/interview');
-app.use('/api/interview', interviewRouter);
 
 // --- Problems Router Module ---
 const problemsRouter = require('./routes/problems');

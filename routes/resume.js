@@ -121,8 +121,8 @@ router.post('/save-user-resume', async (req, res) => {
     }
 });
 
-// GET /api/resume/get-user-resume - Retrieve user's stored backend resume
-router.get('/get-user-resume', async (req, res) => {
+// GET /api/resume/get-user-resume & /api/resume/data - Retrieve user's stored backend resume
+router.get(['/get-user-resume', '/data'], async (req, res) => {
     try {
         let userId = req.query.userId || req.query.email;
 
@@ -639,4 +639,5 @@ router.get('/debug-render', async (req, res) => {
 });
 // ─────────────────────────────────────────────────────────────────────────────
 
+router.userResumesBackendStore = userResumesBackendStore;
 module.exports = router;

@@ -1334,10 +1334,17 @@
     else if (rawRole.startsWith('Microsoft - ')) cleanCompany = 'Microsoft';
     else if (rawRole.startsWith('Meta - ')) cleanCompany = 'Meta';
     else if (rawRole.startsWith('Netflix - ')) cleanCompany = 'Netflix';
+    else if (rawRole.startsWith('Apple - ')) cleanCompany = 'Apple';
+    else if (rawRole.startsWith('TCS - ')) cleanCompany = 'TCS';
+    else if (rawRole.startsWith('Infosys - ')) cleanCompany = 'Infosys';
+    else if (rawRole.startsWith('Wipro - ')) cleanCompany = 'Wipro';
+    else if (rawRole.startsWith('Zoho - ')) cleanCompany = 'Zoho';
+    else if (rawRole.startsWith('Flipkart - ')) cleanCompany = 'Flipkart';
+    else if (rawRole.startsWith('Paytm - ')) cleanCompany = 'Paytm';
     window.userContext.company = cleanCompany;
 
     const durationMins = parseInt(window.userContext.duration || 5, 10);
-    const TOTAL = durationMins === 15 ? 7 : (durationMins === 10 ? 5 : 3);
+    const TOTAL = durationMins === 15 ? 15 : (durationMins === 10 ? 10 : 5);
     const totalDurationSeconds = durationMins * 60;
     let durationSeconds = totalDurationSeconds;
     const questionCutoffSeconds = totalDurationSeconds - 30; // 4:30 for 5m, 9:30 for 10m, 14:30 for 15m

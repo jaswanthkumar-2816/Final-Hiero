@@ -322,7 +322,7 @@ router.post('/signup', async (req, res) => {
             if (existingInDb) {
                 return res.status(400).json({ error: 'An account with this email already exists' });
             }
-        } catch (e) {}
+        } catch (e) { }
 
         const hashedPassword = await bcrypt.hash(cleanPassword, 10);
         const newUserId = String(userIdCounter++);
@@ -348,7 +348,7 @@ router.post('/signup', async (req, res) => {
                 password: hashedPassword,
                 isPro: false
             });
-        } catch (e) {}
+        } catch (e) { }
 
         const token = jwt.sign(
             { userId: newUser.id, name: newUser.name, email: newUser.email },
@@ -429,7 +429,7 @@ router.post('/login', async (req, res) => {
                         users.push(user);
                     }
                 }
-            } catch (e) {}
+            } catch (e) { }
         }
 
         if (!user || !user.password) {

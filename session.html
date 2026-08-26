@@ -77,6 +77,20 @@
       --g-glow: rgba(5, 190, 20, 0.18);
     }
 
+    /* Anti-Cheating & Proctoring Protection: Prevent Text Copying */
+    body, html, main, aside, header, div, p, span, h1, h2, h3, h4, h5, h6 {
+      -webkit-user-select: none !important;
+      -moz-user-select: none !important;
+      -ms-user-select: none !important;
+      user-select: none !important;
+    }
+    textarea, input {
+      -webkit-user-select: text !important;
+      -moz-user-select: text !important;
+      -ms-user-select: text !important;
+      user-select: text !important;
+    }
+
     [data-theme="light"] h1:not(.bg-clip-text),
     [data-theme="light"] h2:not(.bg-clip-text),
     [data-theme="light"] h3:not(.bg-clip-text),
@@ -938,6 +952,30 @@
         </h2>
       </div>
 
+      <!-- Dedicated Answer Guide Card (Consider Mentioning / Reference Only) -->
+      <div id="answer-guide-card" class="w-full max-w-2xl matrix-glass-card p-3.5 sm:p-4 rounded-2xl border border-white/[0.08] text-left mb-4 transition-all duration-300 shadow-[0_0_20px_rgba(0,0,0,0.3)]">
+        <div class="flex items-center justify-between border-b border-white/[0.06] pb-2">
+          <div class="flex items-center gap-2">
+            <div class="w-5 h-5 rounded-lg bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 text-xs">
+              <i class="fa-solid fa-lightbulb"></i>
+            </div>
+            <span class="font-mono text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Answer Guide • Consider Mentioning</span>
+          </div>
+          <span class="font-mono text-[9px] font-semibold px-2 py-0.5 rounded bg-white/5 text-slate-400 border border-white/10">Reference Only</span>
+        </div>
+        <div id="answer-guide-items" class="flex flex-wrap gap-1.5 pt-2">
+          <span class="px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/[0.08] text-xs font-sans text-slate-300 flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Core background & recent experience
+          </span>
+          <span class="px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/[0.08] text-xs font-sans text-slate-300 flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Relevant project highlights
+          </span>
+          <span class="px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/[0.08] text-xs font-sans text-slate-300 flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Target role alignment
+          </span>
+        </div>
+      </div>
+
       <!-- Real-Time Speech, Grammar & Phrasing Coach Widget -->
       <div id="grammar-coach-card" class="w-full max-w-2xl matrix-glass-card p-4 rounded-2xl border border-primary/30 space-y-2.5 text-left mb-4 transition-all duration-300 shadow-[0_0_25px_rgba(7,226,25,0.08)]" style="display: none;">
         <div class="flex items-center justify-between border-b border-white/[0.08] pb-2">
@@ -997,6 +1035,47 @@
         </div>
       </div>
 
+      <!-- Acoustic Disturbance & Language Recognition Telemetry Banner -->
+      <div id="acoustic-telemetry-hud" class="w-full max-w-2xl matrix-glass-card px-4 py-2.5 rounded-xl border border-white/[0.08] mb-3 flex flex-wrap items-center justify-between gap-2 text-left transition-all duration-300">
+        <!-- Environment / Disturbance Indicator -->
+        <div class="flex items-center gap-2">
+          <div id="noise-indicator-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)]"></div>
+          <div class="flex flex-col">
+            <span id="noise-status-badge" class="font-mono text-[10px] font-bold text-emerald-400 tracking-wider uppercase flex items-center gap-1">
+              <i class="fa-solid fa-shield-halved"></i> <span>Acoustic Space: Clean</span>
+            </span>
+            <span id="noise-subtext" class="text-[9px] text-slate-400 font-sans">Optimal silent space for accurate voice recognition</span>
+          </div>
+        </div>
+
+        <!-- Language & Dialect Telemetry -->
+        <div class="flex items-center gap-1.5 bg-black/40 px-2.5 py-1 rounded-lg border border-white/[0.06]">
+          <i class="fa-solid fa-globe text-primary text-[10px]"></i>
+          <span class="font-mono text-[9px] text-slate-300 font-semibold" id="hud-detected-lang">Detected: English (India / en-IN)</span>
+        </div>
+      </div>
+
+      <!-- Prominent Disturbance Alert Banner (Appears when high outside noise is detected) -->
+      <div id="disturbance-alert-banner" class="w-full max-w-2xl bg-gradient-to-r from-red-950/90 via-amber-950/90 to-red-950/90 border-2 border-red-500/80 rounded-2xl p-3.5 mb-3 flex items-center justify-between gap-3 shadow-[0_0_30px_rgba(239,68,68,0.35)] transition-all animate-pulse" style="display: none;">
+        <div class="flex items-center gap-3 text-left">
+          <div class="w-9 h-9 rounded-xl bg-red-500/20 border border-red-500/40 text-red-400 flex items-center justify-center text-sm shrink-0">
+            <i class="fa-solid fa-volume-xmark"></i>
+          </div>
+          <div>
+            <div class="text-xs font-bold text-red-300 font-sans flex items-center gap-1.5">
+              <span>OUTSIDE NOISE / DISTURBANCE DETECTED</span>
+              <span class="px-1.5 py-0.2 rounded bg-red-500/30 text-red-200 text-[8px] font-mono font-bold">WARNING</span>
+            </div>
+            <p class="text-[11px] text-slate-200 font-sans mt-0.5">
+              High background disturbance detected. Please <strong>move to a silent space</strong> so outside noise is not captured as your answer.
+            </p>
+          </div>
+        </div>
+        <button onclick="window.dismissDisturbanceBanner()" class="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-slate-300 text-xs font-mono transition-all shrink-0 cursor-pointer">
+          Dismiss
+        </button>
+      </div>
+
       <!-- Prominent Question Action Alert: Turn On Mic Popup -->
       <div id="mic-prompt-popup" class="w-full max-w-2xl bg-gradient-to-r from-[#0d2a14]/95 via-[#06180b]/95 to-[#0d2a14]/95 border-2 border-primary rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-[0_0_35px_rgba(7,226,25,0.35)] transition-all animate-bounce-subtle" style="display: none;">
         <div class="flex items-center gap-3.5 text-left w-full sm:w-auto">
@@ -1051,7 +1130,7 @@
           <div id="whisper-box" style="display: none;"></div>
         </div>
 
-        <!-- Action Bar: Live Voice Status & Send Button -->
+        <!-- Action Bar: Live Voice Status, Skip/Unsure & Send Button -->
         <div class="flex flex-col sm:flex-row items-center justify-between gap-2.5 pt-1">
           <div class="flex items-center gap-2 font-mono text-[10px] text-slate-400">
             <span id="mic-troubleshoot-hint" class="flex items-center gap-1.5 text-primary font-bold">
@@ -1067,12 +1146,18 @@
           </div>
 
           <div class="flex items-center gap-2 w-full sm:w-auto">
+            <!-- I Don't Know / Skip Button -->
+            <button type="button" id="skip-unsure-btn" onclick="window.skipOrUnsureQuestion()" class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-300 hover:text-amber-200 font-sans font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-[0_0_15px_rgba(245,158,11,0.15)] hover:scale-105 cursor-pointer" title="If you don't know the answer or want to skip, the AI will console you and move to the next question.">
+              <i class="fa-solid fa-forward-step text-amber-400"></i>
+              <span>I DON'T KNOW / SKIP</span>
+            </button>
+
             <span class="hidden sm:inline font-mono text-[10px] text-slate-500 mr-1">
               <kbd class="px-1.5 py-0.5 rounded bg-white/10 text-slate-300 font-bold">↵ Enter</kbd> to Send
             </span>
             <button id="submit-response-btn" onclick="window.handleManualResponseSubmit()" class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-primary hover:bg-[#05be14] text-[#050805] font-sans font-black text-xs flex items-center justify-center gap-2 shadow-[0_0_25px_rgba(7,226,25,0.4)] hover:scale-105 transition-all cursor-pointer">
               <i class="fa-solid fa-paper-plane"></i>
-              <span>SUBMIT VOICE ANSWER</span>
+              <span>SUBMIT ANSWER</span>
             </button>
           </div>
         </div>
@@ -1334,10 +1419,17 @@
     else if (rawRole.startsWith('Microsoft - ')) cleanCompany = 'Microsoft';
     else if (rawRole.startsWith('Meta - ')) cleanCompany = 'Meta';
     else if (rawRole.startsWith('Netflix - ')) cleanCompany = 'Netflix';
+    else if (rawRole.startsWith('Apple - ')) cleanCompany = 'Apple';
+    else if (rawRole.startsWith('TCS - ')) cleanCompany = 'TCS';
+    else if (rawRole.startsWith('Infosys - ')) cleanCompany = 'Infosys';
+    else if (rawRole.startsWith('Wipro - ')) cleanCompany = 'Wipro';
+    else if (rawRole.startsWith('Zoho - ')) cleanCompany = 'Zoho';
+    else if (rawRole.startsWith('Flipkart - ')) cleanCompany = 'Flipkart';
+    else if (rawRole.startsWith('Paytm - ')) cleanCompany = 'Paytm';
     window.userContext.company = cleanCompany;
 
     const durationMins = parseInt(window.userContext.duration || 5, 10);
-    const TOTAL = durationMins === 15 ? 7 : (durationMins === 10 ? 5 : 3);
+    const TOTAL = durationMins === 15 ? 15 : (durationMins === 10 ? 10 : 5);
     const totalDurationSeconds = durationMins * 60;
     let durationSeconds = totalDurationSeconds;
     const questionCutoffSeconds = totalDurationSeconds - 30; // 4:30 for 5m, 9:30 for 10m, 14:30 for 15m
@@ -2472,7 +2564,54 @@
       isProcessingTurn = false;
     }
 
-    // Web Audio API Hardware Audio Level Meter + Dual VAD (Time + Frequency Domain)
+    // ─────────────────────────────────────────────
+    // ACOUSTIC DISTURBANCE & NOISE TELEMETRY SYSTEM
+    // ─────────────────────────────────────────────
+    let consecutiveNoiseDisturbanceCount = 0;
+    let consecutiveCleanAudioCount = 0;
+    let isDisturbanceAlertVisible = false;
+
+    window.dismissDisturbanceBanner = function() {
+      const banner = document.getElementById('disturbance-alert-banner');
+      if (banner) banner.style.display = 'none';
+      isDisturbanceAlertVisible = false;
+    };
+
+    function updateAcousticEnvironmentHUD(status, isDisturbance = false) {
+      const dot = document.getElementById('noise-indicator-dot');
+      const badge = document.getElementById('noise-status-badge');
+      const subtext = document.getElementById('noise-subtext');
+      const banner = document.getElementById('disturbance-alert-banner');
+
+      if (isDisturbance) {
+        if (dot) dot.className = 'w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_12px_rgba(239,68,68,0.9)] animate-ping';
+        if (badge) {
+          badge.className = 'font-mono text-[10px] font-bold text-red-400 tracking-wider uppercase flex items-center gap-1';
+          badge.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-red-400"></i> <span>DISTURBANCE DETECTED • MOVE TO SILENT SPACE</span>';
+        }
+        if (subtext) subtext.textContent = 'High background / outside noise detected. Move to a quiet space.';
+        if (banner && !isDisturbanceAlertVisible) {
+          banner.style.display = 'flex';
+          isDisturbanceAlertVisible = true;
+        }
+      } else if (status === 'moderate') {
+        if (dot) dot.className = 'w-2.5 h-2.5 rounded-full bg-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.8)]';
+        if (badge) {
+          badge.className = 'font-mono text-[10px] font-bold text-amber-400 tracking-wider uppercase flex items-center gap-1';
+          badge.innerHTML = '<i class="fa-solid fa-circle-exclamation text-amber-400"></i> <span>MODERATE AMBIENT NOISE</span>';
+        }
+        if (subtext) subtext.textContent = 'Minor background ambient sound detected.';
+      } else {
+        if (dot) dot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)]';
+        if (badge) {
+          badge.className = 'font-mono text-[10px] font-bold text-emerald-400 tracking-wider uppercase flex items-center gap-1';
+          badge.innerHTML = '<i class="fa-solid fa-shield-halved text-emerald-400"></i> <span>ACOUSTIC SPACE: CLEAN</span>';
+        }
+        if (subtext) subtext.textContent = 'Optimal silent space for accurate voice recognition';
+      }
+    }
+
+    // Web Audio API Hardware Audio Level Meter + Dual VAD (Time + Frequency Domain) + Noise Disturbance Detection
     function setupLiveMicrophoneMeter(audioStream) {
       try {
         if (!audioStream) return;
@@ -2509,7 +2648,16 @@
           liveAnalyser.getByteTimeDomainData(timeData);
 
           let freqSum = 0;
-          for (let i = 0; i < freqData.length; i++) freqSum += freqData[i];
+          let lowFreqEnergy = 0;
+          let midFreqEnergy = 0;
+          let highFreqEnergy = 0;
+
+          for (let i = 0; i < freqData.length; i++) {
+            freqSum += freqData[i];
+            if (i < 6) lowFreqEnergy += freqData[i];
+            else if (i < 24) midFreqEnergy += freqData[i];
+            else highFreqEnergy += freqData[i];
+          }
           const freqAvg = freqSum / freqData.length;
 
           let timeSum = 0;
@@ -2518,8 +2666,31 @@
           }
           const timeAvg = timeSum / timeData.length;
 
-          // Sensitive voice detection threshold
-          const isVoicePresent = (freqAvg > 3.0) || (timeAvg > 2.0);
+          // Harmonic voice detection vs background noise
+          const isVoicePresent = (freqAvg > 3.5) || (timeAvg > 2.2);
+
+          // Background Disturbance Detector: Continuous high ambient floor or broadband unvoiced noise
+          const isBroadbandNoise = (lowFreqEnergy > 160 || highFreqEnergy > 140) && midFreqEnergy < (lowFreqEnergy + highFreqEnergy) * 0.45;
+          const isHighAmbientDisturbance = (freqAvg > 22 && !hasDetectedCandidateVoice);
+
+          if (isBroadbandNoise || isHighAmbientDisturbance) {
+            consecutiveNoiseDisturbanceCount++;
+            consecutiveCleanAudioCount = 0;
+          } else if (!isVoicePresent && freqAvg < 12) {
+            consecutiveCleanAudioCount++;
+            if (consecutiveCleanAudioCount > 40) {
+              consecutiveNoiseDisturbanceCount = 0;
+            }
+          }
+
+          // Trigger disturbance indicator if disturbance persists for > 45 animation frames (~0.75s)
+          if (consecutiveNoiseDisturbanceCount > 45) {
+            updateAcousticEnvironmentHUD('disturbance', true);
+          } else if (freqAvg > 14 && !isVoicePresent) {
+            updateAcousticEnvironmentHUD('moderate', false);
+          } else if (consecutiveCleanAudioCount > 30) {
+            updateAcousticEnvironmentHUD('clean', false);
+          }
 
           // Soundwave physical animation
           bars.forEach((bar, idx) => {
@@ -2529,6 +2700,9 @@
             if (isVoicePresent) {
               bar.style.backgroundColor = '#07e219';
               bar.style.boxShadow = '0 0 8px rgba(7, 226, 25, 0.8)';
+            } else if (consecutiveNoiseDisturbanceCount > 45) {
+              bar.style.backgroundColor = '#ef4444';
+              bar.style.boxShadow = '0 0 8px rgba(239, 68, 68, 0.8)';
             } else {
               bar.style.backgroundColor = 'rgba(7, 226, 25, 0.35)';
               bar.style.boxShadow = 'none';
@@ -2553,7 +2727,7 @@
       }
     }
 
-    // Speech Recognition Engine with multi-language & continuous live transcription
+    // Speech Recognition Engine with multi-language & continuous verbatim live transcription
     function initRecognition() {
       const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
       const hintEl = document.getElementById('mic-troubleshoot-hint');
@@ -2561,7 +2735,7 @@
       if (!Speech) {
         if (hintEl) {
           hintEl.className = 'flex items-center gap-1.5 text-primary font-bold';
-          hintEl.innerHTML = '<i class="fa-solid fa-microphone-lines text-xs animate-pulse"></i><span>Deepgram Neural Mic Active (All-Browser Mode)</span>';
+          hintEl.innerHTML = '<i class="fa-solid fa-microphone-lines text-xs animate-pulse"></i><span>Deepgram Neural Voice Active (All-Browser Mode)</span>';
         }
         return;
       }
@@ -2584,24 +2758,33 @@
 
         recognition.onresult = (event) => {
           if (isUserMuted || isSpeaking) return;
-          let currentFinal = '';
-          let currentInterim = '';
+          let turnFinalText = '';
+          let turnInterimText = '';
 
           for (let i = 0; i < event.results.length; ++i) {
             const res = event.results[i];
             if (res.isFinal) {
-              currentFinal += res[0].transcript + ' ';
+              turnFinalText += res[0].transcript + ' ';
             } else {
-              currentInterim += res[0].transcript;
+              turnInterimText += res[0].transcript;
             }
           }
 
-          const fullDisplayText = (currentFinal + currentInterim).trim();
+          const cleanFinal = turnFinalText.trim();
+          const cleanInterim = turnInterimText.trim();
 
-          if (fullDisplayText) {
-            candidateSpeechAccumulated = currentFinal.trim() || fullDisplayText;
-            candidateSpeechInterim = currentInterim.trim();
-            updateCandidateTextDisplay(fullDisplayText, currentInterim.trim());
+          // Verbatim text assembly: exact words spoken by candidate
+          if (cleanFinal) {
+            candidateSpeechAccumulated = cleanFinal;
+          }
+          candidateSpeechInterim = cleanInterim;
+
+          const exactVerbatimText = cleanInterim 
+            ? (candidateSpeechAccumulated ? candidateSpeechAccumulated + ' ' + cleanInterim : cleanInterim)
+            : candidateSpeechAccumulated;
+
+          if (exactVerbatimText) {
+            updateCandidateTextDisplay(exactVerbatimText, cleanInterim);
           }
         };
 
@@ -2614,19 +2797,19 @@
 
         recognition.onend = () => {
           isListening = false;
-          if (!isUserMuted && !interviewTerminated) {
+          if (!isUserMuted && !interviewTerminated && !isSpeaking) {
             clearTimeout(restartTimer);
             restartTimer = setTimeout(() => {
               try {
-                if (recognition && !isUserMuted) {
+                if (recognition && !isUserMuted && !isSpeaking) {
                   recognition.start();
                 }
               } catch(e){}
-            }, 120);
+            }, 100);
           }
         };
 
-        if (!isUserMuted) {
+        if (!isUserMuted && !isSpeaking) {
           try { recognition.start(); } catch(e){}
         }
       } catch (err) {
@@ -2678,6 +2861,15 @@
     window.changeSpeechLanguage = function(newLang) {
       activeSpeechLang = newLang;
       localStorage.setItem('hiero_speech_lang', newLang);
+      
+      const langMap = {
+        'en-IN': 'Detected: English (India / en-IN)',
+        'en-US': 'Detected: English (US / en-US)',
+        'en-GB': 'Detected: English (UK / en-GB)'
+      };
+      const hudLang = document.getElementById('hud-detected-lang');
+      if (hudLang) hudLang.textContent = langMap[newLang] || `Detected: ${newLang}`;
+
       if (recognition) {
         try { recognition.abort(); } catch(e){}
         if (!isUserMuted) {
@@ -2712,8 +2904,17 @@
       if (autoSubmitTimer) clearTimeout(autoSubmitTimer);
       if (recognition) {
         try { recognition.abort(); } catch(e){}
-        setTimeout(() => initRecognition(), 200);
+        setTimeout(() => initRecognition(), 150);
       }
+    };
+
+    window.skipOrUnsureQuestion = function() {
+      if (autoSubmitTimer) clearTimeout(autoSubmitTimer);
+      const unsurePhrase = "I am not sure about this specific topic, could we please move to the next question?";
+      const inputEl = document.getElementById('candidate-response-input');
+      if (inputEl) inputEl.value = unsurePhrase;
+      submitCandidateResponse(unsurePhrase);
+      if (inputEl) inputEl.value = '';
     };
 
     window.handleManualResponseSubmit = async function() {
@@ -2736,7 +2937,7 @@
       }
 
       if (!text) {
-        alert('Please speak or type your answer before submitting.');
+        alert('Please speak or type your answer into the microphone before submitting.');
         return;
       }
       submitCandidateResponse(text);
@@ -2756,7 +2957,7 @@
 
     // Clean, Professional Transcript Engine
     let transcriptCount = 0;
-    function appendTranscriptMessage(sender, text, coachTip = null) {
+    function appendTranscriptMessage(sender, text, coachTip = null, qTag = null) {
       if (!text || !text.trim()) return;
       const list = document.getElementById('transcript-chat-list');
       if (!list) return;
@@ -2768,13 +2969,16 @@
       transcriptCount++;
       const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       const item = document.createElement('div');
-      item.className = 'w-full text-left space-y-1.5 py-2 border-b border-white/[0.06] last:border-0';
+      item.className = 'w-full text-left space-y-1.5 py-2.5 border-b border-white/[0.06] last:border-0';
+
+      const tagLabel = qTag || (isWarmupPhase ? 'Warm-up Intro' : `Question ${answered + 1}`);
 
       if (sender === 'ai') {
         item.innerHTML = `
           <div class="flex items-center justify-between text-[11px]">
             <span class="font-semibold text-primary flex items-center gap-1.5">
-              <span class="w-1.5 h-1.5 rounded-full bg-primary"></span> Interviewer
+              <span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span> Interviewer
+              <span class="ml-1 px-1.5 py-0.2 rounded bg-primary/20 text-primary font-mono text-[9px] font-bold uppercase">${escapeHtml(tagLabel)}</span>
             </span>
             <span class="text-[10px] text-slate-500 font-mono">${timeStr}</span>
           </div>
@@ -2783,13 +2987,13 @@
           </p>
         `;
       } else {
-        const isSkip = text.includes('skipped');
+        const isSkip = text.includes('skipped') || text.includes('not sure') || text.includes("don't know");
         let coachBadgeHtml = '';
         if (coachTip) {
           coachBadgeHtml = `
             <div class="mt-1.5 p-2 rounded-lg bg-primary/10 border border-primary/25 text-[10px] font-sans text-slate-300">
               <div class="text-primary font-bold flex items-center gap-1 mb-0.5 font-mono text-[9px] uppercase tracking-wider">
-                <i class="fa-solid fa-wand-magic-sparkles text-[9px]"></i> AI Coach Feedback
+                <i class="fa-solid fa-wand-magic-sparkles text-[9px]"></i> AI Feedback & Delivery Note
               </div>
               <p class="text-white font-medium italic text-[11px]">"${escapeHtml(coachTip.improvedPhrase || '')}"</p>
               <p class="text-slate-400 text-[9px] mt-0.5">${escapeHtml(coachTip.grammarTip || '')}</p>
@@ -2801,10 +3005,11 @@
           <div class="flex items-center justify-between text-[11px]">
             <span class="font-semibold text-slate-300 flex items-center gap-1.5">
               <span class="w-1.5 h-1.5 rounded-full bg-white/50"></span> You
+              <span class="ml-1 px-1.5 py-0.2 rounded bg-white/10 text-slate-300 font-mono text-[9px] font-bold uppercase">Answer ${escapeHtml(tagLabel)}</span>
             </span>
             <span class="text-[10px] text-slate-500 font-mono">${timeStr}</span>
           </div>
-          <p class="text-xs ${isSkip ? 'text-slate-400 italic' : 'text-slate-100'} leading-relaxed break-words font-normal pl-3 border-l-2 border-white/30">
+          <p class="text-xs ${isSkip ? 'text-amber-300/90 italic' : 'text-slate-100'} leading-relaxed break-words font-normal pl-3 border-l-2 ${isSkip ? 'border-amber-400/50' : 'border-white/30'}">
             ${escapeHtml(text)}
           </p>
           ${coachBadgeHtml}
@@ -2865,71 +3070,199 @@
       }
     }
 
+    // =========================================================
+    // AUTHORITATIVE INTERVIEW STATE MACHINE & SINGLE SOURCE OF TRUTH
+    // =========================================================
+    const InterviewState = {
+      INITIALIZING: 'INITIALIZING',
+      ASKING: 'ASKING',
+      SPEAKING: 'SPEAKING',
+      WAITING_FOR_USER: 'WAITING_FOR_USER',
+      LISTENING: 'LISTENING',
+      PROCESSING_ANSWER: 'PROCESSING_ANSWER',
+      GENERATING_NEXT_QUESTION: 'GENERATING_NEXT_QUESTION',
+      PREPARING_TTS: 'PREPARING_TTS',
+      COMPLETED: 'COMPLETED',
+      ERROR: 'ERROR'
+    };
+    let currentInterviewState = InterviewState.INITIALIZING;
+
+    // Single Authoritative Current Question Object (Source of Truth)
+    let currentQuestion = {
+      sessionId: window.sessionId,
+      questionNumber: 1,
+      questionText: "Please introduce yourself and briefly describe your experience relevant to this position.",
+      category: "introduction",
+      skill: "Communication & Background",
+      difficulty: "warm-up",
+      source: "standard_warmup",
+      questionType: "INTRO",
+      answerGuide: [
+        "Your educational background and core technical focus",
+        "Recent projects or key technologies you've worked with",
+        "What excites you about this role"
+      ],
+      candidateAnswer: ""
+    };
+
     let isWarmupPhase = true;
     let isTimerRunning = false;
+    let answerSubmitted = false;
+    let isGeneratingNextQuestion = false;
+
+    // Render Current Question, Category, Difficulty, Tags & Answer Guide
+    function renderCurrentQuestion(qObj = currentQuestion) {
+      if (!qObj) return;
+
+      const aiOut = document.getElementById('ai-out');
+      if (aiOut) {
+        aiOut.innerHTML = formatQuestionTextHtml(qObj.questionText);
+      }
+
+      const qTypeLabel = document.getElementById('q-type-label');
+      if (qTypeLabel) {
+        if (isWarmupPhase) {
+          qTypeLabel.textContent = 'WARM-UP & BACKGROUND INTRODUCTION (UNTIMED)';
+        } else {
+          const qNum = qObj.questionNumber || (answered + 1);
+          qTypeLabel.textContent = `QUESTION ${qNum} • ${qObj.skill ? qObj.skill.toUpperCase() : 'TECHNICAL ARCHITECTURE'}`;
+        }
+      }
+
+      const tagComp = document.getElementById('tag-comp');
+      if (tagComp) {
+        tagComp.textContent = (window.userContext?.company || 'GOOGLE').toUpperCase();
+      }
+
+      const tagDiff = document.getElementById('tag-diff');
+      if (tagDiff) {
+        tagDiff.textContent = (qObj.difficulty || (isWarmupPhase ? 'WARM-UP' : 'MEDIUM')).toUpperCase();
+      }
+
+      const tagType = document.getElementById('tag-type');
+      if (tagType) {
+        tagType.textContent = (qObj.category || (isWarmupPhase ? 'INTRO' : 'TECHNICAL')).toUpperCase();
+      }
+
+      const catHud = document.getElementById('q-category-hud');
+      if (catHud) {
+        catHud.textContent = isWarmupPhase ? 'WELCOME & INTRO' : (qObj.skill || 'CORE TECHNICAL').toUpperCase();
+      }
+
+      // Render Answer Guide (Areas to consider mentioning - strictly for reference)
+      const guideCard = document.getElementById('answer-guide-card');
+      const guideContainer = document.getElementById('answer-guide-items');
+      if (guideContainer && Array.isArray(qObj.answerGuide) && qObj.answerGuide.length > 0) {
+        guideContainer.innerHTML = qObj.answerGuide.map(item => `
+          <span class="px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/[0.08] text-xs font-sans text-slate-300 flex items-center gap-1.5 shadow-sm">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0"></span>
+            <span>${escapeHtml(item)}</span>
+          </span>
+        `).join('');
+        if (guideCard) guideCard.style.display = 'block';
+      } else if (guideCard) {
+        guideCard.style.display = 'none';
+      }
+
+      // Clear input area for the new question turn
+      const inputEl = document.getElementById('candidate-response-input');
+      if (inputEl) {
+        inputEl.value = '';
+        inputEl.placeholder = "🎙️ Listening to your voice — speak your answer clearly...";
+      }
+      const whisperEl = document.getElementById('whisper-box');
+      if (whisperEl) whisperEl.textContent = '';
+      candidateSpeechAccumulated = '';
+      candidateSpeechInterim = '';
+    }
 
     async function submitCandidateResponse(fallbackText = '') {
-      const qLabel = getCurrentQuestionLabel();
-      
-      // Stop question video & audio recording
-      stopQuestionRecording();
+      // 1. Guard against Double Submissions and invalid states
+      if (answerSubmitted || isGeneratingNextQuestion) {
+        console.warn("[INTERVIEW] Duplicate answer submission blocked by guard.");
+        return;
+      }
+      if (isSpeaking) {
+        console.warn("[INTERVIEW] Cannot submit answer while interviewer is speaking.");
+        return;
+      }
 
-      // Immediately mute mic & hide popup while awaiting AI response
+      const inputEl = document.getElementById('candidate-response-input');
+      const textFromInput = inputEl ? inputEl.value.trim() : '';
+      const finalFallbackText = (fallbackText || textFromInput || candidateSpeechAccumulated || '').trim();
+
+      // 2. NO ANSWER = NO ANSWER: If user does not speak, DO NOT invent an answer or advance!
+      if (!finalFallbackText) {
+        const hintEl = document.getElementById('mic-troubleshoot-hint');
+        if (hintEl) {
+          hintEl.className = 'flex items-center gap-1.5 text-amber-400 font-bold';
+          hintEl.innerHTML = '<i class="fa-solid fa-microphone-slash text-xs"></i><span>I didn\'t catch your response. Take a moment and speak into the mic.</span>';
+        }
+        currentInterviewState = InterviewState.WAITING_FOR_USER;
+        window.enableAndStartSpeaking();
+        return;
+      }
+
+      // 3. Set authoritative guard flags
+      answerSubmitted = true;
+      isGeneratingNextQuestion = true;
+      currentInterviewState = InterviewState.PROCESSING_ANSWER;
+      
+      const qLabel = getCurrentQuestionLabel();
+      currentQuestion.candidateAnswer = finalFallbackText;
+
+      // Stop recording and mute microphone during evaluation
+      stopQuestionRecording();
       isUserMuted = true;
       hideMicPromptPopup();
+      if (recognition) {
+        try { recognition.stop(); } catch(e){}
+      }
       if (continuousPhraseRecorder && continuousPhraseRecorder.state === 'recording') {
         try { continuousPhraseRecorder.stop(); } catch(e){}
       }
 
-      // Properly await turnAudioRecorder finalization
+      // Finalize audio blob if voice-turn recording is active
       let recordedAudioBlob = null;
       if (turnAudioRecorder && turnAudioRecorder.state === 'recording') {
         await new Promise((resolve) => {
           turnAudioRecorder.onstop = () => resolve();
           try { turnAudioRecorder.requestData(); } catch(e){}
           try { turnAudioRecorder.stop(); } catch(e){ resolve(); }
-          setTimeout(resolve, 450);
+          setTimeout(resolve, 400);
         });
       }
       if (turnAudioChunks && turnAudioChunks.length > 0) {
         const mimeType = turnAudioRecorder?.mimeType || getBestSupportedAudioMimeType() || 'audio/webm';
         recordedAudioBlob = new Blob(turnAudioChunks, { type: mimeType });
       }
-
-      // If no audio chunks in turn recorder, try currentQuestionChunks
       if (!recordedAudioBlob && currentQuestionChunks && currentQuestionChunks.length > 0) {
         recordedAudioBlob = new Blob(currentQuestionChunks, { type: 'video/webm' });
       }
-
-      const inputEl = document.getElementById('candidate-response-input');
-      const textFromInput = inputEl ? inputEl.value.trim() : '';
-      const finalFallbackText = fallbackText || textFromInput || candidateSpeechAccumulated || '';
 
       previousTurnFinalText = "";
       candidateSpeechAccumulated = "";
       candidateSpeechInterim = "";
       hasDetectedCandidateVoice = false;
       turnAudioChunks = [];
-      if (inputEl) inputEl.value = '';
 
       const pill = document.getElementById('main-mic-pill');
       if (pill) {
-        pill.className = "px-5 py-2.5 rounded-full bg-white/5 border border-white/10 text-slate-400 font-sans font-bold text-xs flex items-center gap-3 transition-all";
+        pill.className = "px-5 py-2.5 rounded-full bg-white/5 border border-white/10 text-slate-400 font-sans font-bold text-xs flex items-center gap-3 transition-all cursor-not-allowed";
       }
       const st = document.getElementById('mic-status-text');
-      if (st) st.textContent = "AI ANALYZING YOUR VOICE RESPONSE...";
+      if (st) st.textContent = "AI EVALUATING YOUR SPOKEN ANSWER...";
       const viz = document.getElementById('audio-visualizer');
       if (viz) viz.style.display = "none";
       
       const wasWarmup = isWarmupPhase;
-      
-      document.getElementById('whisper-box').textContent = 'Ingesting voice stream & generating follow-up question...';
-      document.getElementById('ai-out').textContent = 'Interviewer is evaluating your answer and formulating the next challenge...';
+      document.getElementById('whisper-box').textContent = 'Analyzing voice answer & retrieving next challenge...';
+      document.getElementById('ai-out').textContent = 'Interviewer is evaluating your response...';
 
       try {
         let data = null;
 
-        // True Voice-to-Voice Turn: Send Raw Voice Audio Directly to Backend
+        // Post answer to server
         if (recordedAudioBlob && recordedAudioBlob.size > 200) {
           const formData = new FormData();
           const ext = recordedAudioBlob.type.includes('mp4') ? 'mp4' : (recordedAudioBlob.type.includes('ogg') ? 'ogg' : 'webm');
@@ -2952,37 +3285,44 @@
 
           data = await response.json();
         } else {
-          // Fallback if audio recorder was empty
-          if (!finalFallbackText) {
-            alert('Please speak your answer into the microphone before submitting.');
-            return;
-          }
-          history.push({ role: 'user', content: finalFallbackText });
           const token = localStorage.getItem('token');
           const headers = { 'Content-Type': 'application/json' };
           if (token) headers['Authorization'] = `Bearer ${token}`;
 
-          const response = await fetch('/api/interview/chat', {
+          const response = await fetch('/api/interview/answer', {
             method: 'POST',
             headers,
             body: JSON.stringify({
               sessionId: window.sessionId,
-              context: window.userContext,
-              messages: history
+              answerText: finalFallbackText,
+              questionIndex: wasWarmup ? 1 : (answered + 1)
             })
           });
           data = await response.json();
-          data.candidateTranscript = finalFallbackText;
         }
 
-        const candidateSpokenText = data.candidateTranscript || finalFallbackText || '[Candidate spoken response]';
+        // Handle server retry request (e.g. empty audio)
+        if (data.answerStatus === 'NO_RESPONSE' || data.isRetry) {
+          answerSubmitted = false;
+          isGeneratingNextQuestion = false;
+          currentInterviewState = InterviewState.WAITING_FOR_USER;
+          const hintEl = document.getElementById('mic-troubleshoot-hint');
+          if (hintEl) {
+            hintEl.className = 'flex items-center gap-1.5 text-amber-400 font-bold';
+            hintEl.innerHTML = '<i class="fa-solid fa-microphone-slash text-xs"></i><span>' + (data.reply || "I didn't catch your response. Take a moment and try again.") + '</span>';
+          }
+          window.enableAndStartSpeaking();
+          return;
+        }
+
+        const candidateSpokenText = data.candidateTranscript || finalFallbackText;
         
-        // Push user message if not already added
+        // Push user message to history
         if (!history.find(h => h.role === 'user' && h.content === candidateSpokenText)) {
           history.push({ role: 'user', content: candidateSpokenText });
         }
 
-        // 1. Render Live Grammar & Speech Coach
+        // Render Live Grammar & Speech Coaching in left transcript
         if (data.coaching) {
           renderCoachingFeedback(data.coaching, candidateSpokenText);
           appendTranscriptMessage('user', candidateSpokenText, data.coaching);
@@ -2990,63 +3330,63 @@
           appendTranscriptMessage('user', candidateSpokenText);
         }
 
-        // 2. Transition from Warm-Up to Timed Technical Round
+        // Transition from Untimed Warm-Up to Official Timed Technical Round
         if (wasWarmup) {
           isWarmupPhase = false;
           startSessionTimer();
-          
-          const catHud = document.getElementById('q-category-hud');
-          if (catHud) catHud.textContent = 'CORE TECHNICAL (JD ALIGNED)';
-          const qType = document.getElementById('q-type-label');
-          if (qType) qType.textContent = `TECHNICAL ARCHITECTURE & TRADE-OFF SCENARIOS (~${perQuestionPacingSec}s/Q)`;
-          const tagType = document.getElementById('tag-type');
-          if (tagType) tagType.textContent = 'TIMED ROUND';
-          const tagDiff = document.getElementById('tag-diff');
-          if (tagDiff) tagDiff.textContent = 'MEDIUM';
         } else {
           answered++;
           updateProgress();
         }
 
-        // If all technical questions are answered or cutoff is reached (at 4:30 / 9:30 / 14:30), trigger AI thank-you wrapup
-        if (!isWarmupPhase && (answered >= TOTAL || durationSeconds <= 30)) {
+        // Check if interview completed
+        if (data.isComplete || data.isCompleted || (!isWarmupPhase && (answered >= TOTAL || durationSeconds <= 30))) {
+          currentInterviewState = InterviewState.COMPLETED;
           triggerThankYouWrapup();
           return;
         }
 
-        const msg = data.reply || "Thank you for explaining that. Let's move to the next technical challenge.";
-        document.getElementById('ai-out').innerHTML = formatQuestionTextHtml(msg);
+        // Next Question Received: Update Single Source of Truth
+        currentInterviewState = InterviewState.GENERATING_NEXT_QUESTION;
+        const nextQ = data.question || data.nextQuestion || {};
+        const qNum = nextQ.questionNumber || nextQ.index || (answered + 1);
 
-        // Push history and speak out loud (Deepgram Neural Voice)
-        history.push({ role: 'assistant', content: msg });
-        appendTranscriptMessage('ai', msg);
-        sayAI(msg, data.audio_url);
+        currentQuestion = {
+          sessionId: window.sessionId,
+          questionNumber: qNum,
+          questionText: nextQ.questionText || data.reply || "Let's proceed to the next technical topic.",
+          category: nextQ.category || 'technical',
+          skill: nextQ.skill || 'Technical Skills',
+          difficulty: nextQ.difficulty || 'medium',
+          source: nextQ.source || 'company_question_bank',
+          questionType: isWarmupPhase ? 'INTRO' : 'TECHNICAL',
+          answerGuide: nextQ.answerGuide || (nextQ.expectedTopics ? nextQ.expectedTopics.map(t => `Key consideration: ${t}`) : ["Core mechanism", "Trade-offs", "Production practices"]),
+          candidateAnswer: ""
+        };
+
+        // Render next question to UI
+        renderCurrentQuestion(currentQuestion);
+
+        // Push history and append to left transcript
+        history.push({ role: 'assistant', content: currentQuestion.questionText });
+        appendTranscriptMessage('ai', currentQuestion.questionText);
+
+        // Reset guards for the next question turn
+        answerSubmitted = false;
+        isGeneratingNextQuestion = false;
+
+        // Speak the new question aloud (TTS)
+        currentInterviewState = InterviewState.PREPARING_TTS;
+        sayAI(currentQuestion.questionText, data.audio_url);
 
       } catch (err) {
-        console.error("Voice turn error:", err);
-        const fallbackTextUsed = finalFallbackText || "My professional experience involves building scalable systems with clean architecture.";
-        appendTranscriptMessage('user', fallbackTextUsed);
-        if (wasWarmup) {
-          isWarmupPhase = false;
-          startSessionTimer();
-        } else {
-          answered++;
-          updateProgress();
-        }
-
-        if (!isWarmupPhase && (answered >= TOTAL || durationSeconds <= 30)) {
-          triggerThankYouWrapup();
-          return;
-        }
-
-        const fallbackMsg = `Let's dive into our technical challenge for the ${window.userContext?.roleTitle || 'Software Engineer'} role:\n\nSuppose we need to design a high-throughput backend service that handles 30,000 requests per second with sub-50ms latency.\n\n• Option A: Synchronous REST APIs backed by a relational database with read replicas.\n• Option B: Event-driven architecture using Apache Kafka with an outbox pattern.\n• Option C: In-memory caching with Redis and async write-back to DynamoDB.\n• Option D: Microservices communicating via gRPC with distributed transaction locking.\n\nWhich option would you choose, and why? Please explain your architectural trade-offs.`;
-        document.getElementById('ai-out').innerHTML = formatQuestionTextHtml(fallbackMsg);
-        history.push({ role: 'assistant', content: fallbackMsg });
-        appendTranscriptMessage('ai', fallbackMsg);
-        sayAI(fallbackMsg);
+        console.error("Answer submission error:", err);
+        answerSubmitted = false;
+        isGeneratingNextQuestion = false;
+        currentInterviewState = InterviewState.WAITING_FOR_USER;
+        window.enableAndStartSpeaking();
       }
     }
-
 
     // Biometrics: BlazeFace Face Tracking + Phone Anti-Cheat + Strict Identity Match
     window.baselineFaceDescriptor = window.baselineFaceDescriptor || null;
@@ -3171,7 +3511,6 @@
       interviewTerminated = true;
       if (biometricsInterval) clearInterval(biometricsInterval);
       if (sessionTimerInterval) clearInterval(sessionTimerInterval);
-      if (micTimerInterval) clearInterval(micTimerInterval);
       if (stream) stream.getTracks().forEach(t => t.stop());
       if (synth) synth.cancel();
       if (recognition) try { recognition.stop(); } catch(e){}
@@ -3365,19 +3704,13 @@
       if (isQuestionGenerating) return;
       isQuestionGenerating = true;
 
-      const candidateName = window.userContext?.candidateName || 'Rahul';
+      currentInterviewState = InterviewState.INITIALIZING;
+      const candidateName = window.userContext?.candidateName || 'Candidate';
       const roleTitle = window.userContext?.roleTitle || 'Associate Software Engineer';
-      
+      const companyName = window.userContext?.company || 'Google';
+
       // Warm-Up Opening
       document.getElementById('ai-out').textContent = 'Connecting with interviewer & preparing warm-up welcome...';
-      const catHud = document.getElementById('q-category-hud');
-      if (catHud) catHud.textContent = 'WELCOME & INTRO';
-      const qType = document.getElementById('q-type-label');
-      if (qType) qType.textContent = 'WARM-UP & BACKGROUND INTRODUCTION (UNTIMED)';
-      const tagDiff = document.getElementById('tag-diff');
-      if (tagDiff) tagDiff.textContent = 'WARM-UP';
-      const tagType = document.getElementById('tag-type');
-      if (tagType) tagType.textContent = 'INTRO';
       
       try {
         const token = localStorage.getItem('token');
@@ -3394,41 +3727,65 @@
         });
 
         const data = await response.json();
-        const msg = data.reply || `Hello ${candidateName}, welcome to your mock interview for the ${roleTitle} position. Take a deep breath and make yourself comfortable — this is a supportive environment to help you practice and build confidence. Before we jump into the timed technical questions, could you please introduce yourself, your recent work, and what excites you about this role?`;
-        
-        document.getElementById('ai-out').innerHTML = formatQuestionTextHtml(msg);
-        
-        let compTag = window.userContext.company;
-        if (!compTag) {
-          const title = (window.userContext.roleTitle || "").toLowerCase();
-          if (title.includes('meta')) compTag = 'Meta';
-          else if (title.includes('netflix')) compTag = 'Netflix';
-          else if (title.includes('amazon')) compTag = 'Amazon';
-          else if (title.includes('microsoft')) compTag = 'Microsoft';
-          else if (title.includes('apple')) compTag = 'Apple';
-          else if (title.includes('tcs')) compTag = 'TCS';
-          else if (title.includes('infosys')) compTag = 'Infosys';
-          else if (title.includes('wipro')) compTag = 'Wipro';
-          else if (title.includes('zoho')) compTag = 'Zoho';
-          else if (title.includes('flipkart')) compTag = 'Flipkart';
-          else if (title.includes('paytm')) compTag = 'Paytm';
-          else compTag = 'Google';
-        }
+        const serverQ = data.question || {};
 
-        document.getElementById('tag-comp').textContent = compTag;
+        currentQuestion = {
+          sessionId: window.sessionId,
+          questionNumber: 1,
+          questionText: serverQ.questionText || `Please introduce yourself and briefly describe your experience relevant to this position.`,
+          category: serverQ.category || "introduction",
+          skill: serverQ.skill || "Communication & Background",
+          difficulty: serverQ.difficulty || "warm-up",
+          source: serverQ.source || "standard_warmup",
+          questionType: "INTRO",
+          answerGuide: serverQ.answerGuide || [
+            "Your educational background and core technical focus",
+            "Recent projects or key technologies you've worked with",
+            `What excites you about the ${roleTitle} role at ${companyName}`
+          ],
+          candidateAnswer: ""
+        };
 
-        // Push history, transcript and speak
-        history.push({ role: 'assistant', content: msg });
-        appendTranscriptMessage('ai', msg);
-        sayAI(msg, data.audio_url);
+        renderCurrentQuestion(currentQuestion);
+
+        const welcomeSpokenText = data.reply || `Hello ${candidateName}, welcome to your mock interview for the ${roleTitle} position at ${companyName}. Take a deep breath and make yourself comfortable. ${currentQuestion.questionText}`;
+
+        history.push({ role: 'assistant', content: welcomeSpokenText });
+        appendTranscriptMessage('ai', welcomeSpokenText);
+
+        currentInterviewState = InterviewState.PREPARING_TTS;
+        sayAI(welcomeSpokenText, data.audio_url);
+
       } catch (e) {
         console.warn("Generating warm-up fallback:", e);
-        const comp = window.userContext.company || 'our team';
-        const fallback = `Hello ${candidateName}! Welcome to your mock interview for the ${roleTitle} position at ${comp}. Take a deep breath and relax — this is a supportive practice environment. To start off warmly, could you briefly introduce yourself, what you've been working on, and what excites you about this role?`;
-        document.getElementById('ai-out').innerHTML = formatQuestionTextHtml(fallback);
+        const comp = window.userContext.company || 'Google';
+        currentQuestion = {
+          sessionId: window.sessionId,
+          questionNumber: 1,
+          questionText: `Please introduce yourself, what you've been working on, and what excites you about this ${roleTitle} role.`,
+          category: "introduction",
+          skill: "Communication & Background",
+          difficulty: "warm-up",
+          source: "standard_warmup",
+          questionType: "INTRO",
+          answerGuide: [
+            "Your core skills and recent technical projects",
+            "Key architectural decisions or tools you've used",
+            `Why you are excited about ${comp}`
+          ],
+          candidateAnswer: ""
+        };
+
+        renderCurrentQuestion(currentQuestion);
+
+        const fallback = `Hello ${candidateName}! Welcome to your mock interview for the ${roleTitle} position at ${comp}. Take a deep breath and relax. ${currentQuestion.questionText}`;
         history.push({ role: 'assistant', content: fallback });
         appendTranscriptMessage('ai', fallback);
+
+        currentInterviewState = InterviewState.PREPARING_TTS;
         sayAI(fallback);
+      } finally {
+        isQuestionGenerating = false;
       }
     }
 
@@ -3440,6 +3797,7 @@
     async function sayAI(text, audioUrl = null) {
       if (!text && !audioUrl) return;
       const thisToken = ++activeSpeechToken;
+      currentInterviewState = isWarmupPhase ? InterviewState.ASKING : InterviewState.SPEAKING;
       if (text) currentSpeechText = text;
       if (audioUrl) currentAudioUrl = audioUrl;
 
@@ -3452,14 +3810,18 @@
         try { window.speechSynthesis.cancel(); } catch(e){}
       }
 
+      // STRICT SYNCHRONIZATION: During AI TTS, STT is completely OFF/Muted
       isSpeaking = true;
       isUserMuted = true;
       hideMicPromptPopup();
+      if (recognition) {
+        try { recognition.stop(); } catch(e){}
+      }
 
       const orb = document.getElementById('voice-orb');
       if (orb) orb.classList.add('speaking-pulse');
       const aiStatus = document.getElementById('ai-engine-status');
-      if (aiStatus) aiStatus.textContent = 'DEEPGRAM AI SPEAKING...';
+      if (aiStatus) aiStatus.textContent = 'INTERVIEWER SPEAKING...';
 
       const pill = document.getElementById('main-mic-pill');
       if (pill) {
@@ -3467,7 +3829,7 @@
       }
       const st = document.getElementById('mic-status-text');
       if (st) {
-        st.textContent = "INTERVIEWER SPEAKING (MIC OFF)";
+        st.textContent = "INTERVIEWER SPEAKING (MIC MUTED)";
         st.className = "font-mono text-[11px] tracking-wider uppercase text-slate-400";
       }
       const mb = document.getElementById('mic-btn');
@@ -3481,10 +3843,12 @@
       const onPlaybackEnd = () => {
         if (thisToken !== activeSpeechToken) return;
         isSpeaking = false;
+        currentInterviewState = InterviewState.WAITING_FOR_USER;
         if (orb) orb.classList.remove('speaking-pulse');
         const aiStatus = document.getElementById('ai-engine-status');
-        if (aiStatus) aiStatus.textContent = 'AI ENGINE ACTIVE • LISTENING';
-        // Auto-activate microphone for candidate with safe buffer
+        if (aiStatus) aiStatus.textContent = 'AI LISTENING • YOUR TURN TO SPEAK';
+        
+        // 350ms acoustic grace buffer to avoid capturing audio echoes
         setTimeout(() => {
           if (!isSpeaking && !interviewTerminated) {
             window.enableAndStartSpeaking();
@@ -3495,7 +3859,6 @@
       // 1. If audioUrl is provided, play Deepgram neural audio
       let targetAudioUrl = audioUrl || (currentAudioUrl && currentSpeechText === text ? currentAudioUrl : null);
 
-      // If no audioUrl provided yet, fetch from Deepgram /api/interview/tts in background
       if (!targetAudioUrl && text && text.length > 5) {
         try {
           const ttsRes = await fetch('/api/interview/tts', {
@@ -3586,59 +3949,7 @@
     };
 
     function skipQuestion() {
-      stopQuestionRecording();
-      history.push({ role: 'user', content: '[Candidate skipped this question]' });
-      appendTranscriptMessage('user', '⏩ [Candidate skipped this question]');
-      
-      // If was warm-up, start timer
-      if (isWarmupPhase) {
-        isWarmupPhase = false;
-        startSessionTimer();
-      } else {
-        answered++;
-        updateProgress();
-      }
-
-      if (answered >= TOTAL || durationSeconds <= 30) {
-        triggerThankYouWrapup();
-        return;
-      }
-      
-      generateNextQuestionDirect();
-    }
-
-    async function generateNextQuestionDirect() {
-      if (answered >= TOTAL || durationSeconds <= 30) {
-        triggerThankYouWrapup();
-        return;
-      }
-      document.getElementById('ai-out').textContent = 'Loading next technical question...';
-      try {
-        const response = await fetch('/api/interview/chat', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          },
-          body: JSON.stringify({
-            sessionId: window.sessionId,
-            context: window.userContext,
-            messages: history
-          })
-        });
-        const data = await response.json();
-        const msg = data.reply || `Let's proceed to the next technical challenge for the ${window.userContext?.roleTitle || 'Software Engineer'} role:\n\n• Option A: Implement client-side memoization and virtualized lists.\n• Option B: Server-Side Rendering (SSR) with streaming edge responses.\n• Option C: Static Site Generation (SSG) with on-demand incremental revalidation.\n• Option D: Fine-grained reactive signals with code-split bundle islands.\n\nWhich option would you choose, and why? Please explain your trade-offs.`;
-        document.getElementById('ai-out').innerHTML = formatQuestionTextHtml(msg);
-        history.push({ role: 'assistant', content: msg });
-        appendTranscriptMessage('ai', msg);
-        sayAI(msg, data.audio_url);
-      } catch(e) {
-        const fallback = `Let's proceed to the next technical challenge for the ${window.userContext?.roleTitle || 'Software Engineer'} role:\n\nSuppose we need to optimize query performance and connection spikes in a PostgreSQL database under 50,000 active concurrent connections:\n\n• Option A: Configure PgBouncer in transaction pooling mode with composite B-tree indexes.\n• Option B: Implement an asynchronous write-through Redis cache cluster.\n• Option C: Partition database tables horizontally by tenant ID.\n• Option D: Deploy read-only replicas with weighted round-robin DNS routing.\n\nWhich option would you choose, and why? Please explain your architectural trade-offs.`;
-        document.getElementById('ai-out').innerHTML = formatQuestionTextHtml(fallback);
-        history.push({ role: 'assistant', content: fallback });
-        appendTranscriptMessage('ai', fallback);
-        sayAI(fallback);
-      }
+      window.skipOrUnsureQuestion();
     }
 
     function updateProgress() {
@@ -3653,6 +3964,7 @@
       if (isEndingSession) return;
       isEndingSession = true;
       interviewTerminated = true;
+      currentInterviewState = InterviewState.COMPLETED;
 
       stopQuestionRecording();
 
@@ -3698,7 +4010,6 @@
         
         const data = await response.json();
         
-        // Save evaluation data for feedback.html
         sessionStorage.setItem('mockResult', JSON.stringify(data));
         sessionStorage.setItem('hiero_interview_feedback', JSON.stringify(data));
         localStorage.setItem('hiero_last_feedback', JSON.stringify(data));
@@ -3706,34 +4017,7 @@
         localStorage.setItem('hiero_company', enrichedContext.company || 'Technology Team');
       } catch (e) {
         console.warn("Evaluation fallback:", e);
-        const fallbackData = {
-          success: true,
-          sessionId: window.sessionId,
-          candidateName: enrichedContext.candidateName || 'Candidate',
-          targetRole: enrichedContext.roleTitle || 'Software Engineer',
-          company: enrichedContext.company || 'Technology Team',
-          startTime: enrichedContext.startTime,
-          endTime: enrichedContext.endTime,
-          duration: enrichedContext.durationStr,
-          summary: "Interview successfully completed. Telemetry indicates solid clarity, structured engineering reasoning, and effective technical communication.",
-          score: { final: 8.8, communication: 9.0, technical: 8.7, problemSolving: 8.9, culturalFit: 8.6 },
-          confidenceScore: 88,
-          verdict: "Strong Hire",
-          strengths: [
-            "Clear and articulate vocal delivery with active engineering terminology.",
-            "Structured responses with well-organized technical problem solving.",
-            "Solid grasp of scalable web systems and architectural trade-offs."
-          ],
-          improvements: [
-            "Include more quantitative metrics and KPIs in project descriptions.",
-            "Elaborate on production observability and automated test coverage."
-          ]
-        };
-        sessionStorage.setItem('mockResult', JSON.stringify(fallbackData));
-        sessionStorage.setItem('hiero_interview_feedback', JSON.stringify(fallbackData));
-        localStorage.setItem('hiero_last_feedback', JSON.stringify(fallbackData));
       }
-
 
       sessionStorage.setItem('mockCurStage', 5);
       location.href = `/feedback.html?session=${encodeURIComponent(window.sessionId || '')}`;
@@ -3773,7 +4057,136 @@
         if (stressBar) stressBar.style.width = "30%";
       }
     }, 4000);
+
+    // ─────────────────────────────────────────────
+    // PROCTORING & ANTI-CHEATING SECURITY ENGINE
+    // Prevents Tab Switching, Copy, Cut, Paste, and DevTools
+    // ─────────────────────────────────────────────
+    let tabSwitchViolations = 0;
+    let isTabWarningModalOpen = false;
+
+    function showProctorSecurityWarning(message) {
+      const toast = document.getElementById('anti-copy-toast');
+      const msgEl = document.getElementById('anti-copy-toast-msg');
+      if (toast && msgEl) {
+        msgEl.textContent = message || 'Action prohibited during live interview.';
+        toast.style.opacity = '1';
+        toast.style.transform = 'translate(-50%, 0)';
+        setTimeout(() => {
+          toast.style.opacity = '0';
+          toast.style.transform = 'translate(-50%, -20px)';
+        }, 2800);
+      }
+    }
+
+    function triggerTabSwitchViolation() {
+      if (interviewTerminated || isEndingSession) return;
+      tabSwitchViolations++;
+      
+      const countEl = document.getElementById('tab-violation-count-text');
+      if (countEl) countEl.textContent = `Violation #${tabSwitchViolations}`;
+
+      const modal = document.getElementById('tab-switch-warning-modal');
+      if (modal) {
+        modal.style.display = 'flex';
+        isTabWarningModalOpen = true;
+      }
+      showProctorSecurityWarning(`Tab switch detected! (Violation #${tabSwitchViolations})`);
+    }
+
+    window.dismissTabWarning = function() {
+      const modal = document.getElementById('tab-switch-warning-modal');
+      if (modal) modal.style.display = 'none';
+      isTabWarningModalOpen = false;
+      resumeAudioContextSafely();
+    };
+
+    // Tab Switching Detection (Visibility API + Window Blur)
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        triggerTabSwitchViolation();
+      }
+    });
+
+    window.addEventListener('blur', () => {
+      triggerTabSwitchViolation();
+    });
+
+    // Disable Copy, Cut, Paste, and Context Menu
+    document.addEventListener('copy', (e) => {
+      e.preventDefault();
+      showProctorSecurityWarning('Copying text is strictly disabled during assessment.');
+      return false;
+    });
+
+    document.addEventListener('cut', (e) => {
+      e.preventDefault();
+      showProctorSecurityWarning('Cutting text is strictly disabled.');
+      return false;
+    });
+
+    document.addEventListener('paste', (e) => {
+      e.preventDefault();
+      showProctorSecurityWarning('Pasting content is disabled to ensure authentic spoken assessment.');
+      return false;
+    });
+
+    document.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      showProctorSecurityWarning('Right-click context menu is disabled.');
+      return false;
+    });
+
+    // Block keyboard shortcuts (Ctrl+C, Ctrl+V, Ctrl+U, Ctrl+P, Ctrl+S, F12, DevTools)
+    document.addEventListener('keydown', (e) => {
+      const key = e.key.toLowerCase();
+      const isCtrlOrCmd = e.ctrlKey || e.metaKey;
+
+      if (isCtrlOrCmd && ['c', 'v', 'u', 'p', 's', 'x'].includes(key)) {
+        e.preventDefault();
+        showProctorSecurityWarning(`Shortcut (${isCtrlOrCmd ? 'Ctrl' : 'Cmd'}+${key.toUpperCase()}) is disabled.`);
+        return false;
+      }
+
+      if (e.key === 'F12' || (isCtrlOrCmd && e.shiftKey && ['i', 'j', 'c'].includes(key))) {
+        e.preventDefault();
+        showProctorSecurityWarning('Developer inspection tools are disabled.');
+        return false;
+      }
+    });
   </script>
+
+  <!-- Proctoring Security: Full Screen Tab-Switching Warning Modal -->
+  <div id="tab-switch-warning-modal" class="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-xl flex items-center justify-center p-4 transition-all duration-300" style="display: none;">
+    <div class="max-w-md w-full matrix-glass-card border-2 border-red-500/80 p-6 rounded-3xl text-center space-y-4 shadow-[0_0_50px_rgba(239,68,68,0.5)] animate-bounce-subtle">
+      <div class="w-16 h-16 rounded-full bg-red-500/20 border-2 border-red-500 text-red-400 flex items-center justify-center text-2xl mx-auto shadow-[0_0_20px_rgba(239,68,68,0.4)] animate-pulse">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+      </div>
+      <div class="space-y-1.5">
+        <div class="font-mono text-xs font-bold text-red-400 uppercase tracking-widest flex items-center justify-center gap-1.5">
+          <i class="fa-solid fa-shield-halved"></i> <span>Proctoring Security Alert</span>
+        </div>
+        <h3 class="font-display font-black text-xl text-white">TAB SWITCHING DETECTED</h3>
+        <p class="text-xs text-slate-300 font-sans leading-relaxed">
+          You navigated away from the active interview window (<span id="tab-violation-count-text" class="text-red-400 font-bold">Violation #1</span>). Tab switching, window minimization, and external assistance are strictly prohibited.
+        </p>
+      </div>
+      <div class="p-3 rounded-xl bg-red-950/40 border border-red-500/30 text-left text-[11px] text-red-200 font-mono space-y-1">
+        <div class="flex items-center gap-2 font-bold"><i class="fa-solid fa-circle-info"></i> Security Policy:</div>
+        <div>• Keep this window focused in fullscreen throughout the assessment.</div>
+        <div>• Violations are logged on your scorecard.</div>
+      </div>
+      <button onclick="dismissTabWarning()" class="w-full py-3 rounded-xl bg-red-600 hover:bg-red-500 text-white font-sans font-bold text-sm shadow-[0_0_20px_rgba(239,68,68,0.4)] transition-all cursor-pointer">
+        I UNDERSTAND &amp; RETURN TO INTERVIEW
+      </button>
+    </div>
+  </div>
+
+  <!-- Anti-Copy Warning Floating Toast -->
+  <div id="anti-copy-toast" class="fixed top-5 left-1/2 -translate-x-1/2 z-[9999] bg-[#120505] border border-red-500 text-red-300 px-5 py-2.5 rounded-full shadow-[0_0_25px_rgba(239,68,68,0.6)] font-mono text-xs font-bold flex items-center gap-2 transition-all duration-300 pointer-events-none opacity-0 translate-y-[-20px]">
+    <i class="fa-solid fa-ban text-red-400"></i>
+    <span id="anti-copy-toast-msg">Copying and external shortcuts are disabled.</span>
+  </div>
 </body>
 
 </html>
