@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hiero | What each screen means</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="theme.css">
+  <script src="theme.js"></script>
+  <style>
+    :root {
+      --bg: #0A0A0F;
+      --card: #111111;
+      --line: #222;
+      --text: #f8fafc;
+      --muted: #a1a1aa;
+      --green: #00ff00;
+      --head: #161616;
+    }
+    html[data-theme="light"] {
+      --bg: #F8FAFC;
+      --card: #ffffff;
+      --line: #E2E8F0;
+      --text: #0F172A;
+      --muted: #475569;
+      --green: #0F6E56;
+      --head: #F1F5F9;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Inter, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+      min-height: 100vh;
+    }
+    .wrap { max-width: 1080px; margin: 0 auto; padding: 36px 20px 80px; }
+    a.back { color: var(--muted); text-decoration: none; font-size: 13px; font-weight: 600; }
+    a.back:hover { color: var(--green); }
+    h1 { font-size: 2rem; font-weight: 800; margin: 18px 0 8px; letter-spacing: -0.03em; }
+    h1 span { color: var(--green); }
+    .lead { color: var(--muted); max-width: 640px; margin-bottom: 28px; }
+    h2 { font-size: 1.05rem; font-weight: 800; margin: 32px 0 12px; }
+    .table-wrap {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      overflow: hidden;
+      background: var(--card);
+    }
+    table { width: 100%; border-collapse: collapse; }
+    th, td {
+      padding: 13px 16px;
+      text-align: left;
+      vertical-align: top;
+      font-size: 14px;
+      border-bottom: 1px solid var(--line);
+    }
+    th {
+      background: var(--head);
+      font-size: 12px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      font-weight: 800;
+    }
+    th.tech { width: 46%; color: var(--green); }
+    th.plain { width: 54%; color: var(--muted); }
+    tr:last-child td { border-bottom: none; }
+    td.tech { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; color: var(--text); }
+    td.plain { color: var(--muted); font-weight: 500; }
+    code { color: var(--green); font-size: 12.5px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a class="back" href="result.html"><i class="fa-solid fa-arrow-left"></i> Back to results</a>
+    <h1>Hiero in two languages: <span>technical</span> and plain English</h1>
+    <p class="lead">Left column is the product language. Right column is what a student should understand, with no jargon.</p>
+
+    <h2>1. The student path</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th class="tech">Technical</th>
+            <th class="plain">Plain English</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="tech"><code>analysis.html</code> → <code>POST /api/analysis/analyze</code> → <code>localStorage.analysisResult</code> → <code>result.html</code></td>
+            <td class="plain">Upload your resume and the job file. Hiero compares them and opens a results page.</td>
+          </tr>
+          <tr>
+            <td class="tech"><code>result.html</code> Start Skill Module → <code>quiz.html</code> (skill pick, then Beginner / Intermediate)</td>
+            <td class="plain">Choose what you want to learn. Then say if you are new or already know some of it.</td>
+          </tr>
+          <tr>
+            <td class="tech">Beginner → <code>learn.html?skill=…&amp;track=beginner</code> (no diagnostic)</td>
+            <td class="plain">If you are new, skip the test. Watch videos and practice in order.</td>
+          </tr>
+          <tr>
+            <td class="tech">Intermediate → 10-question diagnostic → <code>learn.html?…&amp;track=intermediate</code></td>
+            <td class="plain">If you already know some of it, take a short test. Then study only the parts you missed.</td>
+          </tr>
+          <tr>
+            <td class="tech">Suggested project → <code>project.html?name=…</code></td>
+            <td class="plain">Click a project idea to open the project workspace for that idea.</td>
+          </tr>
+          <tr>
+            <td class="tech">Start Mock Interview → <code>mock-interview.html</code> (role prefilled from analysis)</td>
+            <td class="plain">Practice speaking for this job. The questions follow the job you uploaded.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>2. What the results numbers mean</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th class="tech">Technical</th>
+            <th class="plain">Plain English</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="tech"><code>score</code> (0–100), mostly JD requirement coverage. Extra coding skills do not inflate the score.</td>
+            <td class="plain">How close your resume is to this job. Extra skills that the job does not ask for do not raise this number.</td>
+          </tr>
+          <tr>
+            <td class="tech"><code>jobTitle</code> parsed from the JD, ignoring campus placement noise</td>
+            <td class="plain">The real job name, not the college registration or eligibility text.</td>
+          </tr>
+          <tr>
+            <td class="tech"><code>domain</code> e.g. <code>tech</code>, <code>sales-core</code>, <code>non-tech</code></td>
+            <td class="plain">What kind of job this is: software, sales, or something else.</td>
+          </tr>
+          <tr>
+            <td class="tech"><code>matchedSkills</code></td>
+            <td class="plain">Things this job needs that already appear on your resume.</td>
+          </tr>
+          <tr>
+            <td class="tech"><code>missingSkills</code></td>
+            <td class="plain">Things this job needs that are not on your resume. Learn these first.</td>
+          </tr>
+          <tr>
+            <td class="tech"><code>extraSkills</code></td>
+            <td class="plain">Skills you have that this job does not need. They are listed, but they do not raise the match score.</td>
+          </tr>
+          <tr>
+            <td class="tech"><code>jdSkills</code> / required skills</td>
+            <td class="plain">The skill list Hiero used as the job’s real requirements.</td>
+          </tr>
+          <tr>
+            <td class="tech"><code>skillToLearnFirst</code></td>
+            <td class="plain">The single most important gap. Start here.</td>
+          </tr>
+          <tr>
+            <td class="tech"><code>projectSuggestions[].title</code> + <code>reason</code></td>
+            <td class="plain">A project you can build so a recruiter can see the missing skill, and why it helps this job.</td>
+          </tr>
+          <tr>
+            <td class="tech"><code>atsScore</code></td>
+            <td class="plain">How easy it is for a computer to read your resume (headings, verbs, length). This is not the job-match score.</td>
+          </tr>
+          <tr>
+            <td class="tech"><code>interviewChance</code></td>
+            <td class="plain">A rough guess of interview odds from the match score. A weak match stays low on purpose.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>3. Buttons on the results page</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th class="tech">Technical</th>
+            <th class="plain">Plain English</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="tech">Start Skill Module → <code>quiz.html</code></td>
+            <td class="plain">Pick a skill, then Beginner or Intermediate.</td>
+          </tr>
+          <tr>
+            <td class="tech">Missing-skill row → <code>quiz.html?skill=…</code></td>
+            <td class="plain">You already chose that skill. Next choose Beginner or Intermediate.</td>
+          </tr>
+          <tr>
+            <td class="tech">Suggested project card → <code>project.html?name=…</code></td>
+            <td class="plain">Open that project’s page (videos, GitHub, notes).</td>
+          </tr>
+          <tr>
+            <td class="tech">Start Mock Interview → <code>mock-interview.html</code></td>
+            <td class="plain">Start a practice interview for this job.</td>
+          </tr>
+          <tr>
+            <td class="tech">Re-Analyze → <code>analysis.html</code></td>
+            <td class="plain">Upload again with a new resume or a new job file.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>4. Learning levels</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th class="tech">Technical</th>
+            <th class="plain">Plain English</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="tech"><code>track=beginner</code> — sequential modules, curated videos, resources, problems. No 10Q quiz.</td>
+            <td class="plain">You are starting from scratch. Follow the path in order. No test first.</td>
+          </tr>
+          <tr>
+            <td class="tech"><code>track=intermediate</code> — diagnostic 10Q, topic-gap clips on <code>learn.html</code></td>
+            <td class="plain">You already know some of it. Take 10 questions. Then watch only the parts you got wrong.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+</html>

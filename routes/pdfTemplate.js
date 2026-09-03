@@ -1,4 +1,4 @@
-const puppeteer = require('puppeteer');
+// const puppeteer = require('puppeteer'); // Moved to lazy require inside getSharedBrowser
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
@@ -8,6 +8,7 @@ const { renderResumeWithPagination } = require('./renderResume');
 let sharedBrowserPromise = null;
 
 async function getSharedBrowser() {
+    const puppeteer = require('puppeteer');
     if (sharedBrowserPromise) {
         try {
             const browser = await sharedBrowserPromise;
@@ -103,6 +104,7 @@ async function getSharedBrowser() {
 
 // Helper to launch a fresh, dedicated one-off browser instance for robust crash recovery
 async function launchFreshBrowser() {
+    const puppeteer = require('puppeteer');
     const launchOptions = {
         headless: 'new',
         args: [

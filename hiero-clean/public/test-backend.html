@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Backend Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #000;
+      color: #00ff00;
+    }
+    .test-section {
+      margin: 20px 0;
+      padding: 15px;
+      border: 1px solid #00ff00;
+      border-radius: 8px;
+    }
+    button {
+      background: #00ff00;
+      color: #000;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    .result {
+      margin-top: 10px;
+      padding: 10px;
+      background: #111;
+      border-radius: 5px;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <h1>Backend API Test</h1>
+  
+  <div class="test-section">
+    <h3>Test Videos API</h3>
+    <button onclick="testVideos()">Test /api/skills/videos</button>
+    <div id="videos-result" class="result"></div>
+  </div>
+
+  <div class="test-section">
+    <h3>Test Problems API</h3>
+    <button onclick="testProblems()">Test /api/skills/problems</button>
+    <div id="problems-result" class="result"></div>
+  </div>
+
+  <div class="test-section">
+    <h3>Test Quizzes API</h3>
+    <button onclick="testQuizzes()">Test /api/skills/quizzes</button>
+    <div id="quizzes-result" class="result"></div>
+  </div>
+
+  <div class="test-section">
+    <h3>Test Lessons API</h3>
+    <button onclick="testLessons()">Test /api/skills/lessons</button>
+    <div id="lessons-result" class="result"></div>
+  </div>
+
+  <div class="test-section">
+    <h3>Test Chatbot API</h3>
+    <button onclick="testChatbot()">Test /api/ask</button>
+    <div id="chatbot-result" class="result"></div>
+  </div>
+
+  <script>
+    const API_BASE_URL = 'http://localhost:5005/api';
+
+    async function testVideos() {
+      const resultDiv = document.getElementById('videos-result');
+      resultDiv.textContent = 'Testing...';
+      
+      try {
+        const response = await fetch(`${API_BASE_URL}/skills/videos`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ skills: ['React'] })
+        });
+        
+        const data = await response.json();
+        resultDiv.textContent = `Status: ${response.status}\nResponse: ${JSON.stringify(data, null, 2)}`;
+      } catch (error) {
+        resultDiv.textContent = `Error: ${error.message}`;
+      }
+    }
+
+    async function testProblems() {
+      const resultDiv = document.getElementById('problems-result');
+      resultDiv.textContent = 'Testing...';
+      
+      try {
+        const response = await fetch(`${API_BASE_URL}/skills/problems`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ skill: 'React', day: 1 })
+        });
+        
+        const data = await response.json();
+        resultDiv.textContent = `Status: ${response.status}\nResponse: ${JSON.stringify(data, null, 2)}`;
+      } catch (error) {
+        resultDiv.textContent = `Error: ${error.message}`;
+      }
+    }
+
+    async function testQuizzes() {
+      const resultDiv = document.getElementById('quizzes-result');
+      resultDiv.textContent = 'Testing...';
+      
+      try {
+        const response = await fetch(`${API_BASE_URL}/skills/quizzes`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ skill: 'React', day: 1 })
+        });
+        
+        const data = await response.json();
+        resultDiv.textContent = `Status: ${response.status}\nResponse: ${JSON.stringify(data, null, 2)}`;
+      } catch (error) {
+        resultDiv.textContent = `Error: ${error.message}`;
+      }
+    }
+
+    async function testLessons() {
+      const resultDiv = document.getElementById('lessons-result');
+      resultDiv.textContent = 'Testing...';
+      
+      try {
+        const response = await fetch(`${API_BASE_URL}/skills/lessons`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ skill: 'React', days: 2 })
+        });
+        
+        const data = await response.json();
+        resultDiv.textContent = `Status: ${response.status}\nResponse: ${JSON.stringify(data, null, 2)}`;
+      } catch (error) {
+        resultDiv.textContent = `Error: ${error.message}`;
+      }
+    }
+
+    async function testChatbot() {
+      const resultDiv = document.getElementById('chatbot-result');
+      resultDiv.textContent = 'Testing...';
+      
+      try {
+        const response = await fetch(`${API_BASE_URL}/ask`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            question: 'What is React?', 
+            skill: 'React' 
+          })
+        });
+        
+        const data = await response.json();
+        resultDiv.textContent = `Status: ${response.status}\nResponse: ${JSON.stringify(data, null, 2)}`;
+      } catch (error) {
+        resultDiv.textContent = `Error: ${error.message}`;
+      }
+    }
+  </script>
+</body>
+</html> 

@@ -60,17 +60,18 @@
       z-index: 10;
     }
 
-    /* Loading Overlay */
+    /* Loading Overlay — same logo fill as resume builder */
     #loading-overlay {
       position: fixed;
       inset: 0;
-      background: var(--bg-dark);
       z-index: 9999;
+      background: linear-gradient(135deg, #000000 0%, #0c4a16 100%);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+      color: #fff;
+      transition: opacity 0.45s ease;
     }
 
     #loading-overlay.hidden, #loading-overlay[style*="display: none"] {
@@ -79,56 +80,83 @@
       display: none !important;
     }
 
-    .loading-logo {
-      width: 100px;
-      height: 100px;
-      margin-bottom: 24px;
-      animation: logoPulse 2s ease-in-out infinite;
-      filter: drop-shadow(0 0 20px var(--primary-glow));
+    .hiero-gen-logo-box {
+      width: 220px;
+      height: 220px;
+      margin: 0 auto 28px;
+      background: rgba(0, 0, 0, 0.7);
+      border-radius: 20px;
+      padding: 28px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    @keyframes logoPulse {
+    .hiero-gen-logo-box::before {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 0%;
+      background: linear-gradient(180deg, transparent 0%, rgba(42, 224, 35, 0.28) 100%);
+      animation: hieroFillLogo 3s ease-in-out infinite;
+      z-index: 1;
+      border-radius: 20px;
+    }
 
-      0%,
-      100% {
-        transform: scale(1);
-        filter: drop-shadow(0 0 20px var(--primary-glow));
-      }
+    .hiero-gen-logo-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      filter: drop-shadow(0 4px 20px rgba(42, 224, 35, 0.5));
+      position: relative;
+      z-index: 2;
+    }
 
-      50% {
-        transform: scale(1.1);
-        filter: drop-shadow(0 0 40px var(--primary-glow));
-      }
+    @keyframes hieroFillLogo {
+      0% { height: 0%; }
+      50% { height: 100%; }
+      100% { height: 0%; }
+    }
+
+    .loading-status {
+      font-size: 18px;
+      color: #2ae023;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+
+    .loading-sub {
+      font-size: 14px;
+      opacity: 0.8;
+      margin-bottom: 24px;
     }
 
     .loading-bar-bg {
-      width: 180px;
-      height: 2px;
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 10px;
+      width: 280px;
+      height: 10px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 12px;
       overflow: hidden;
-      position: relative;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
     }
 
     .loading-bar {
-      position: absolute;
-      top: 0;
-      left: 0;
       height: 100%;
       width: 40%;
-      background: var(--primary);
-      box-shadow: 0 0 10px var(--primary);
+      background: linear-gradient(90deg, #2ae023, #1a8b17);
+      box-shadow: 0 0 20px rgba(42, 224, 35, 0.6);
       animation: loadingAnim 2s infinite ease-in-out;
     }
 
     @keyframes loadingAnim {
-      0% {
-        left: -40%;
-      }
-
-      100% {
-        left: 100%;
-      }
+      0% { transform: translateX(-100%); width: 40%; }
+      100% { transform: translateX(350%); width: 40%; }
     }
 
     /* Anti-gravity Background */
@@ -300,6 +328,29 @@
     .lang-tab:hover:not(.active) {
       color: var(--text-main);
       background: rgba(255, 255, 255, 0.05);
+    }
+
+    html[data-theme="light"] .lang-tabs,
+    body.light-mode .lang-tabs {
+      background: #e2e8f0;
+      border: 1px solid rgba(15, 23, 42, 0.16);
+    }
+
+    html[data-theme="light"] .lang-tab,
+    body.light-mode .lang-tab {
+      color: #0f172a;
+    }
+
+    html[data-theme="light"] .lang-tab.active,
+    body.light-mode .lang-tab.active {
+      background: var(--primary);
+      color: #041204;
+    }
+
+    html[data-theme="light"] .count-badge,
+    body.light-mode .count-badge {
+      background: #e2e8f0;
+      color: #0f172a;
     }
 
     /* Grid */
@@ -600,6 +651,12 @@
       font-size: 18px;
       font-weight: 700;
       margin-bottom: 8px;
+    }
+
+    .resource-pack-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
     }
 
     .prob-badges {
@@ -1131,6 +1188,10 @@
         gap: 32px;
       }
 
+      .resource-pack-grid {
+        grid-template-columns: 1fr;
+      }
+
       .tutor-card {
         height: 600px;
       }
@@ -1138,7 +1199,7 @@
   </style>
 </head>
 
-<body>
+<body class="learn-page">
   <canvas id="antigravity-bg"></canvas>
 
   <!-- Mobile Warning Overlay -->
@@ -1158,7 +1219,11 @@
   </div>
 
   <div id="loading-overlay">
-    <img src="logo-hiero.png" alt="Hiero" class="loading-logo">
+    <div class="hiero-gen-logo-box">
+      <img src="logohiero.png" alt="Hiero">
+    </div>
+    <div class="loading-status">Generating your path</div>
+    <div class="loading-sub">Finding videos and problems for this skill</div>
     <div class="loading-bar-bg">
       <div class="loading-bar"></div>
     </div>
@@ -1192,7 +1257,7 @@
     <div class="hero">
       <p id="sub-header">Specialized Roadmap for</p>
       <h1 id="skill-display">Mastering <span>%SKILL%</span></h1>
-      <p>Hand-picked lessons, interactive challenges, and an expert AI mentor to accelerate your growth.</p>
+      <p id="hero-blurb">Hand-picked lessons, interactive challenges, and an expert AI mentor to accelerate your growth.</p>
 
       <div class="lang-tabs" id="language-switcher">
         <!-- Injected by JS -->
@@ -1388,20 +1453,16 @@
 
       const params = new URLSearchParams(window.location.search);
       const urlSkill = params.get('skill');
-      currentLang = (params.get('language') || params.get('lang') || 'english').toLowerCase();
+      const track = params.get('track');
+      currentLang = (params.get('language') || params.get('lang') || localStorage.getItem('userLanguage') || 'english').toLowerCase();
+      const langNameMap = { en: 'english', hi: 'hindi', te: 'telugu', ta: 'tamil', kn: 'kannada', ml: 'malayalam' };
+      currentLang = langNameMap[currentLang] || currentLang;
 
-      if (!urlSkill) {
-        const stored = localStorage.getItem('analysisResult');
-        if (stored) {
-          try {
-            const data = JSON.parse(stored).data || JSON.parse(stored);
-            const missing = data.missingSkills || [];
-            if (missing.length > 0) {
-              showSelector(missing);
-              return;
-            }
-          } catch (e) {}
-        }
+      if (track !== 'beginner' && track !== 'intermediate') {
+        const q = new URLSearchParams();
+        if (urlSkill) q.set('skill', urlSkill.split(',')[0].trim());
+        window.location.replace(q.toString() ? `quiz.html?${q}` : 'quiz.html');
+        return;
       }
 
       currentSkill = (urlSkill || 'React').split(',')[0].trim();
@@ -1523,9 +1584,7 @@
       panel.classList.add('active');
       
       document.getElementById('confirm-learn-btn').onclick = () => {
-        document.getElementById('selector-overlay').classList.remove('active');
-        currentSkill = skill;
-        startLearning();
+        window.location.href = `quiz.html?skill=${encodeURIComponent(skill)}`;
       };
     }
 
@@ -1543,6 +1602,35 @@
     let activeTopic = null;
     const userId = localStorage.getItem('userId') || localStorage.getItem('user_id') || 'guest-' + Date.now();
 
+    function getLearningTrack() {
+      const fromApi = masteryPathData?.track;
+      const fromUrl = new URLSearchParams(window.location.search).get('track');
+      const track = fromApi || fromUrl;
+      if (track === 'beginner' || track === 'intermediate') return track;
+      if ((masteryPathData?.weakSubConcepts || []).length) return 'intermediate';
+      if (masteryPathData?.currentState === 'LEARNING' && (masteryPathData?.overallMastery || 0) === 0) return 'beginner';
+      return null;
+    }
+
+    function isBeginnerTrack() {
+      return getLearningTrack() === 'beginner';
+    }
+
+    function applyTrackHero() {
+      const beginner = isBeginnerTrack();
+      const blurb = document.getElementById('hero-blurb');
+      const sub = document.getElementById('sub-header');
+      if (beginner) {
+        if (sub) sub.innerText = 'Clear path — follow this';
+        if (blurb) blurb.innerText = `Follow this path in order. Watch the curated video, use the resources, then solve the problems for each module to learn ${currentSkill}.`;
+        document.getElementById('skill-display').innerHTML = `Learn <span>${currentSkill}</span> from scratch`;
+      } else if (getLearningTrack() === 'intermediate') {
+        if (sub) sub.innerText = 'Your topic gaps';
+        if (blurb) blurb.innerText = `Based on your quiz, focus on the exact topics you missed — not the whole skill. Watch the targeted clips, then practice those subtopics.`;
+        document.getElementById('skill-display').innerHTML = `Close your <span>${currentSkill}</span> gaps`;
+      }
+    }
+
     async function loadMasteryPath() {
       const loader = document.getElementById('loading-overlay');
       loader.classList.remove('hidden');
@@ -1551,21 +1639,28 @@
         const json = await res.json();
         if (json.success) {
           masteryPathData = json;
+          applyTrackHero();
           renderPathMap(json.topics);
           const active = json.topics.find(t => t.id === json.currentTopicId) || json.topics[0];
           activeTopic = active;
           renderActiveModulePanel(active, json.currentState);
-          document.getElementById('video-count').innerText = `${json.topics.length} Modules · ${json.overallMastery}% Mastered`;
-          // Also load video resources and problems
+          const trackLabel = isBeginnerTrack() ? 'Beginner path' : getLearningTrack() === 'intermediate' ? 'Intermediate gaps' : 'Modules';
+          document.getElementById('video-count').innerText = `${json.topics.length} ${trackLabel} · ${json.overallMastery}% Mastered`;
+          if (isBeginnerTrack()) {
+            renderBeginnerPathResources(json.topics);
+          }
           loadData();
         }
       } catch (err) {
         console.error('Mastery path load failed', err);
-        // Fallback: load as before
         loadData();
       } finally {
         setTimeout(() => loader.classList.add('hidden'), 800);
       }
+    }
+
+    function isLightTheme() {
+      return document.documentElement.getAttribute('data-theme') === 'light' || document.body.classList.contains('light-mode');
     }
 
     function renderPathMap(topics) {
@@ -1576,6 +1671,7 @@
       const mapDiv = document.createElement('div');
       mapDiv.id = 'mastery-path-map';
       mapDiv.style.cssText = 'grid-column: 1/-1; display: flex; align-items: center; gap: 0; overflow-x: auto; padding: 20px 4px; margin-bottom: 12px; scrollbar-width: thin;';
+      const light = isLightTheme();
 
       topics.forEach((topic, i) => {
         const isLocked = topic.locked || topic.state === 'LOCKED';
@@ -1584,28 +1680,36 @@
         const pct = isMastered ? 100 : (isActive ? (topic.masteryPct || 0) : 0);
 
         const node = document.createElement('div');
-        node.style.cssText = `display:flex; flex-direction:column; align-items:center; min-width:130px; cursor:${isLocked ? 'not-allowed' : 'pointer'}; opacity:${isLocked ? '0.4' : '1'}; position:relative;`;
+        node.style.cssText = `display:flex; flex-direction:column; align-items:center; min-width:130px; cursor:${isLocked ? 'not-allowed' : 'pointer'}; opacity:${isLocked ? (light ? '0.72' : '0.4') : '1'}; position:relative;`;
 
+        const idleBg = light ? '#f1f5f9' : 'rgba(255,255,255,0.04)';
+        const idleBorder = light ? '#64748b' : 'rgba(255,255,255,0.1)';
+        const idleNum = light ? '#0f172a' : 'var(--text-muted)';
         const circle = document.createElement('div');
         circle.style.cssText = `
           width:54px; height:54px; border-radius:50%;
           display:flex; align-items:center; justify-content:center;
           font-size:18px; font-weight:800; position:relative;
-          background:${isMastered ? 'var(--primary)' : isActive ? 'rgba(4,171,7,0.15)' : 'rgba(255,255,255,0.04)'};
-          border:2px solid ${isMastered ? 'var(--primary)' : isActive ? 'var(--primary)' : 'rgba(255,255,255,0.1)'};
-          color:${isMastered ? '#000' : isActive ? 'var(--primary)' : 'var(--text-muted)'};
+          background:${isMastered ? 'var(--primary)' : isActive ? 'rgba(4,171,7,0.15)' : idleBg};
+          border:2px solid ${isMastered ? 'var(--primary)' : isActive ? 'var(--primary)' : idleBorder};
+          color:${isMastered ? '#000' : isActive ? 'var(--primary)' : idleNum};
           box-shadow:${isActive ? '0 0 24px var(--primary-glow)' : 'none'};
           ${isActive ? 'animation: pathPulse 2s ease-in-out infinite;' : ''}
         `;
         circle.innerText = isMastered ? '✓' : isLocked ? '🔒' : (i + 1);
 
         const label = document.createElement('div');
-        label.style.cssText = `font-size:12px; font-weight:700; color:${isActive ? 'var(--primary)' : 'var(--text-main)'}; text-align:center; margin-top:8px; max-width:115px; line-height:1.3;`;
+        label.style.cssText = `font-size:12px; font-weight:700; color:${isActive ? 'var(--primary)' : (light ? '#0f172a' : 'var(--text-main)')}; text-align:center; margin-top:8px; max-width:115px; line-height:1.3;`;
         label.innerText = topic.name;
 
         const badgeLabel = document.createElement('div');
-        badgeLabel.style.cssText = `font-size:10px; font-weight:800; text-transform:uppercase; margin-top:4px; padding:2px 8px; border-radius:100px; ${isMastered ? 'background:rgba(4,171,7,0.15); color:var(--primary);' : isActive ? 'background:rgba(251,191,36,0.15); color:#fbbf24;' : 'color:var(--text-muted);'}`;
-        badgeLabel.innerText = isMastered ? 'Strong Area' : isActive ? 'Focus Area' : '';
+        const idleBadge = light ? 'color:#334155;' : 'color:var(--text-muted);';
+        badgeLabel.style.cssText = `font-size:10px; font-weight:800; text-transform:uppercase; margin-top:4px; padding:2px 8px; border-radius:100px; ${isMastered ? 'background:rgba(4,171,7,0.15); color:var(--primary);' : isActive ? 'background:rgba(251,191,36,0.15); color:#d97706;' : idleBadge}`;
+        if (isBeginnerTrack()) {
+          badgeLabel.innerText = isMastered ? 'Done' : isActive ? 'You are here' : (!isLocked ? 'Up next' : '');
+        } else {
+          badgeLabel.innerText = isMastered ? 'Strong' : isActive ? 'Your gap' : '';
+        }
 
         node.appendChild(circle);
         node.appendChild(label);
@@ -1615,7 +1719,7 @@
 
         if (i < topics.length - 1) {
           const arrow = document.createElement('div');
-          arrow.style.cssText = `width:32px; min-width:32px; height:2px; background:${isMastered ? 'var(--primary)' : 'rgba(255,255,255,0.08)'}; margin-bottom:24px; flex-shrink:0;`;
+          arrow.style.cssText = `width:32px; min-width:32px; height:2px; background:${isMastered ? 'var(--primary)' : (light ? '#94a3b8' : 'rgba(255,255,255,0.08)')}; margin-bottom:24px; flex-shrink:0;`;
           mapDiv.appendChild(arrow);
         }
       });
@@ -1653,38 +1757,48 @@
         animation: fadeInUp 0.4s ease-out;
       `;
 
-      const overallScore = masteryPathData?.overallMastery || 60;
+      const overallScore = masteryPathData?.overallMastery || 0;
       const weakConcepts = masteryPathData?.weakSubConcepts || [];
-      
-      let bannerTitle = 'FAST-TRACK ACTIVATED';
-      let bannerMsg = `Based on your diagnostic score (${overallScore}%), HIERO skipped your strong areas. Focus on the identified sub-topics below to increase your job match score!`;
-      let bannerIcon = '<i class="fa-solid fa-bolt" style="color: var(--primary);"></i>';
-      let bannerBg = 'rgba(4, 171, 7, 0.1)';
-      let bannerBorder = 'rgba(4, 171, 7, 0.3)';
+      const beginner = isBeginnerTrack();
+      const video = topic?.resources?.primary;
+      const videoId = extractYouTubeId(video?.url);
+      const embedUrl = videoId ? `https://www.youtube.com/embed/${videoId}` : '';
 
-      if (overallScore < 50) {
-        bannerTitle = 'FOUNDATION PATHWAY';
-        bannerMsg = `Starting from Module 1 to build step-by-step mastery across all core concepts of ${currentSkill}.`;
-        bannerIcon = '<i class="fa-solid fa-seedling" style="color: var(--primary);"></i>';
-      } else if (overallScore >= 80) {
-        bannerTitle = 'ADVANCED PLACEMENT';
-        bannerMsg = `Foundational modules passed! You have been placed directly into advanced architecture and production scenarios.`;
-        bannerIcon = '<i class="fa-solid fa-trophy" style="color: var(--primary);"></i>';
+      let bannerTitle, bannerMsg, bannerIcon, bannerBg, bannerBorder;
+      if (beginner) {
+        bannerTitle = 'FOLLOW THIS PATH';
+        bannerMsg = `Learn ${currentSkill} in order. For this module: watch the video, use the resources, then solve the problems. Do not skip ahead.`;
+        bannerIcon = '<i class="fa-solid fa-route" style="color: var(--primary);"></i>';
+        bannerBg = 'rgba(4, 171, 7, 0.1)';
+        bannerBorder = 'rgba(4, 171, 7, 0.3)';
+      } else {
+        bannerTitle = 'YOUR TOPIC GAPS';
+        bannerMsg = weakConcepts.length
+          ? `The quiz showed you specifically need work on: ${weakConcepts.join(', ')}. Watch the exact clips for those subtopics, then practice them.`
+          : `Based on your diagnostic (${overallScore}%), focus on this module’s weak spots — not the whole skill from scratch.`;
+        bannerIcon = '<i class="fa-solid fa-bullseye" style="color: var(--primary);"></i>';
+        bannerBg = 'rgba(251, 191, 36, 0.08)';
+        bannerBorder = 'rgba(251, 191, 36, 0.3)';
+        if (overallScore >= 80) {
+          bannerTitle = 'ADVANCED GAPS ONLY';
+          bannerMsg = `Foundations look solid. Drill the remaining topic gaps below.`;
+        }
       }
 
       const stateMeta = {
-        NOT_STARTED: { icon: '<i class="fa-solid fa-play"></i>', label: 'NOT STARTED', color: 'var(--text-muted)', ctaText: 'Start Placement Quiz', ctaIcon: '<i class="fa-solid fa-bullseye"></i>' },
-        LEARNING:    { icon: '<i class="fa-solid fa-book"></i>', label: 'LEARNING',     color: '#60a5fa',           ctaText: 'Watch Module Video',  ctaIcon: '<i class="fa-solid fa-play"></i>' },
-        PRACTICING:  { icon: '<i class="fa-solid fa-bolt"></i>', label: 'FOCUS AREA',   color: '#fbbf24',           ctaText: 'Solve Practice Challenge', ctaIcon: '<i class="fa-solid fa-code"></i>' },
-        ASSESSING:   { icon: '<i class="fa-solid fa-file-pen"></i>', label: 'ASSESSMENT READY', color: '#a78bfa',      ctaText: 'Take Assessment (5 Qs)', ctaIcon: '<i class="fa-solid fa-file-lines"></i>' },
-        MASTERED:    { icon: '<i class="fa-solid fa-check"></i>',  label: 'STRONG AREA',  color: 'var(--primary)',    ctaText: 'Move to Next Module', ctaIcon: '<i class="fa-solid fa-arrow-right"></i>' },
-        LOCKED:      { icon: '<i class="fa-solid fa-lock"></i>', label: 'LOCKED',       color: 'var(--text-muted)', ctaText: 'Complete previous module first', ctaIcon: '<i class="fa-solid fa-lock"></i>' }
+        NOT_STARTED: beginner
+          ? { icon: '<i class="fa-solid fa-play"></i>', label: 'START HERE', color: 'var(--primary)', ctaText: 'Start Module 1', ctaIcon: '<i class="fa-solid fa-play"></i>' }
+          : { icon: '<i class="fa-solid fa-play"></i>', label: 'NOT STARTED', color: 'var(--text-muted)', ctaText: 'Take Diagnostic Quiz', ctaIcon: '<i class="fa-solid fa-bullseye"></i>' },
+        LEARNING:    { icon: '<i class="fa-solid fa-book"></i>', label: beginner ? 'FOLLOW THIS MODULE' : 'LEARN THIS GAP', color: '#60a5fa', ctaText: beginner ? 'Watch this video' : 'Watch gap clip', ctaIcon: '<i class="fa-solid fa-play"></i>' },
+        PRACTICING:  { icon: '<i class="fa-solid fa-bolt"></i>', label: beginner ? 'PRACTICE THIS MODULE' : 'PRACTICE THIS TOPIC', color: '#fbbf24', ctaText: 'Solve practice problems', ctaIcon: '<i class="fa-solid fa-code"></i>' },
+        ASSESSING:   { icon: '<i class="fa-solid fa-file-pen"></i>', label: 'ASSESSMENT READY', color: '#a78bfa', ctaText: 'Take Assessment (5 Qs)', ctaIcon: '<i class="fa-solid fa-file-lines"></i>' },
+        MASTERED:    { icon: '<i class="fa-solid fa-check"></i>',  label: beginner ? 'MODULE COMPLETE' : 'STRONG ON THIS TOPIC', color: 'var(--primary)', ctaText: 'Move to Next Module', ctaIcon: '<i class="fa-solid fa-arrow-right"></i>' },
+        LOCKED:      { icon: '<i class="fa-solid fa-lock"></i>', label: 'LOCKED', color: 'var(--text-muted)', ctaText: 'Complete previous module first', ctaIcon: '<i class="fa-solid fa-lock"></i>' }
       };
       const meta = stateMeta[state] || stateMeta['NOT_STARTED'];
       const pct = topic.masteryPct || 0;
 
       panel.innerHTML = `
-        <!-- High-Signal Explanation Banner: WHAT -> WHY -> WHAT NEXT -->
         <div style="background: ${bannerBg}; border: 1px solid ${bannerBorder}; padding: 16px 20px; border-radius: 16px; margin-bottom: 24px; display: flex; align-items: center; gap: 14px;">
           <div style="font-size: 24px; color: var(--primary);">${bannerIcon}</div>
           <div>
@@ -1708,10 +1822,10 @@
               <div style="height:100%; width:${pct}%; background:${pct >= 75 ? 'var(--primary)' : pct >= 40 ? '#fbbf24' : 'rgba(255,255,255,0.2)'}; border-radius:100px; transition:width 0.6s ease;"></div>
             </div>
 
-            ${weakConcepts.length > 0 ? `
+            ${!beginner && weakConcepts.length > 0 ? `
               <div style="background:rgba(251,65,65,0.08); border:1px solid rgba(251,65,65,0.25); border-radius:12px; padding:12px 16px;">
                 <div style="font-size:12px; font-weight:800; color:#fb7185; margin-bottom:6px; display:flex; align-items:center; gap:6px;">
-                  <i class="fa-solid fa-circle-exclamation"></i> Identified Gaps Needing Practice:
+                  <i class="fa-solid fa-circle-exclamation"></i> Exact topics to learn for this skill:
                 </div>
                 <div style="display:flex; flex-wrap:wrap; gap:6px;">
                   ${weakConcepts.map(c => `<span style="background:rgba(251,65,65,0.15); color:#fb7185; font-size:11.5px; font-weight:700; padding:4px 12px; border-radius:100px;">${c}</span>`).join('')}
@@ -1736,55 +1850,100 @@
           ` : `<div style="color:var(--text-muted);font-size:13px;">Complete previous module first</div>`}
         </div>
 
-        <!-- 3 Surgical Learning Resources Container -->
-        <div style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 20px; margin-top: 16px;">
-          <div style="font-size: 13px; font-weight: 800; color: var(--text-main); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px; display: flex; align-items: center; gap: 8px;">
-            <i class="fa-solid fa-layer-group" style="color: var(--primary);"></i> Targeted 3-Resource Pack for ${topic.name}
+        ${beginner && embedUrl ? `
+        <div style="margin-bottom:8px;border-radius:16px;overflow:hidden;border:1px solid rgba(4,171,7,0.25);">
+          <div style="padding:10px 14px;font-size:12px;font-weight:800;color:var(--primary);background:rgba(4,171,7,0.08);">
+            <i class="fa-solid fa-circle-play"></i> Step 1 — Watch this: ${video?.title || topic.name}
+            ${video?.duration ? ` · ${video.duration}` : ''}
           </div>
-          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
-            <div style="background: var(--card-inner-bg); border: 1px solid var(--card-inner-border); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; justify-content: space-between; gap: 12px;">
-              <div>
-                <div style="font-size: 11px; font-weight: 800; color: #ef4444; text-transform: uppercase; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;"><i class="fa-brands fa-youtube"></i> 1. Video Tutorial</div>
-                <div style="font-size: 14px; font-weight: 700; color: var(--text-main); margin-bottom: 4px;">Mastering ${topic.name}</div>
-                <div style="font-size: 12px; color: var(--text-muted);">45 min targeted deep dive</div>
-              </div>
-              <button onclick="handleMasteryCTA('LEARNING', '${topic.id}')" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #ef4444; padding: 8px 14px; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
-                <i class="fa-solid fa-play"></i> Watch Video
-              </button>
-            </div>
-
-            <div style="background: var(--card-inner-bg); border: 1px solid var(--card-inner-border); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; justify-content: space-between; gap: 12px;">
-              <div>
-                <div style="font-size: 11px; font-weight: 800; color: #60a5fa; text-transform: uppercase; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;"><i class="fa-solid fa-book-open"></i> 2. Deep Dive Guide</div>
-                <div style="font-size: 14px; font-weight: 700; color: var(--text-main); margin-bottom: 4px;">${topic.name} Documentation</div>
-                <div style="font-size: 12px; color: var(--text-muted);">Surgical concept reference</div>
-              </div>
-              <a href="https://google.com/search?q=${encodeURIComponent(currentSkill + ' ' + topic.name + ' documentation')}" target="_blank" style="background: rgba(96, 165, 250, 0.15); border: 1px solid rgba(96, 165, 250, 0.4); color: #60a5fa; padding: 8px 14px; border-radius: 10px; font-size: 12px; font-weight: 700; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 6px;">
-                <i class="fa-solid fa-book-open"></i> Read Documentation
-              </a>
-            </div>
-
-            <div style="background: var(--card-inner-bg); border: 1px solid var(--card-inner-border); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; justify-content: space-between; gap: 12px;">
-              <div>
-                <div style="font-size: 11px; font-weight: 800; color: var(--primary); text-transform: uppercase; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;"><i class="fa-solid fa-code"></i> 3. Hands-on Problem</div>
-                <div style="font-size: 14px; font-weight: 700; color: var(--text-main); margin-bottom: 4px;">Interactive Coding Challenge</div>
-                <div style="font-size: 12px; color: var(--text-muted);">Test cases on solve.html</div>
-              </div>
-              <button onclick="handleMasteryCTA('PRACTICING', '${topic.id}')" style="background: rgba(4, 171, 7, 0.15); border: 1px solid var(--primary); color: var(--primary); padding: 8px 14px; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
-                <i class="fa-solid fa-code"></i> Solve Challenge
-              </button>
-            </div>
-          </div>
+          <iframe src="${embedUrl}" style="width:100%;aspect-ratio:16/9;border:0;display:block;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
         </div>
+        ` : ''}
+        <div id="exact-learn-clips" style="margin-top:18px;"></div>
       `;
 
       const container = document.getElementById('video-container');
       container.parentElement.insertBefore(panel, container);
+      if (!beginner) loadExactLearnClips(currentSkill, weakConcepts);
+    }
+
+    function renderBeginnerPathResources(topics) {
+      const problemContainer = document.getElementById('problem-container');
+      if (problemContainer) problemContainer.innerHTML = '';
+
+      const videoHeader = document.querySelector('.video-section .section-header h2');
+      const problemHeader = document.querySelector('.problems-section .section-header h2');
+      if (videoHeader) videoHeader.innerText = 'Videos in your language';
+      if (problemHeader) problemHeader.innerText = 'Problems to learn this skill';
+
+      (topics || []).forEach((topic, i) => {
+        (topic.problemIds || []).forEach((pid, pi) => {
+          if (!problemContainer) return;
+          const row = document.createElement('div');
+          row.className = 'problem-item';
+          row.innerHTML = `
+            <div class="prob-main">
+              <div class="prob-badges"><span class="diff-badge easy">MODULE ${i + 1}</span></div>
+              <h4>Problem ${pi + 1} — ${topic.name}</h4>
+              <p style="font-size:13px;color:var(--text-muted)">Solve this to learn ${topic.name}. Follow the video first, then practice.</p>
+            </div>
+            <a href="solve.html?skill=${encodeURIComponent(currentSkill)}&problem=${pid}&topicId=${topic.id}&userId=${userId}" class="solve-btn" style="text-decoration:none;color:inherit;">Solve</a>
+          `;
+          problemContainer.appendChild(row);
+        });
+      });
+    }
+
+    async function loadExactLearnClips(skillName, weakConcepts) {
+      const host = document.getElementById('exact-learn-clips');
+      if (!host || !weakConcepts || !weakConcepts.length) return;
+      host.innerHTML = `<div style="font-size:13px;font-weight:800;margin-bottom:10px;color:var(--text-main);"><i class="fa-solid fa-scissors" style="color:var(--primary);"></i> Exact timestamp clips (from timed captions, not whole videos)</div>`;
+      const unique = [...new Set(weakConcepts.map(c => String(c)))].slice(0, 3);
+      for (const sub of unique) {
+        const box = document.createElement('div');
+        box.style.cssText = 'margin-bottom:14px;border:1px solid rgba(4,171,7,0.3);border-radius:14px;overflow:hidden;background:rgba(4,171,7,0.05);';
+        box.innerHTML = `<div style="padding:10px 14px;font-size:12px;color:var(--text-muted);"><i class="fa-solid fa-spinner fa-spin"></i> Finding the ${sub} segment…</div>`;
+        host.appendChild(box);
+        try {
+          const res = await fetch('/api/adaptive/match-segment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ skillName, subtopic: sub, questionText: sub })
+          });
+          const m = await res.json();
+          if (!m.success) {
+            box.innerHTML = `<div style="padding:10px 14px;font-size:12px;color:#fb7185;">No caption match for ${sub}</div>`;
+            continue;
+          }
+          box.innerHTML = `
+            <div style="padding:10px 14px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;">
+              <strong style="color:var(--primary);font-size:13px;">${sub}: ${m.startLabel} – ${m.endLabel}</strong>
+              <span style="font-size:11px;color:var(--text-muted);">${m.method}${m.warning ? ' · captions missing, start of video' : ''}</span>
+            </div>
+            <iframe src="${m.embedUrl}" style="width:100%;aspect-ratio:16/9;border:0;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            <div style="padding:8px 14px;"><a href="${m.watchUrl}" target="_blank" rel="noopener" style="color:var(--primary);font-size:12px;font-weight:800;">Open YouTube at ${m.startLabel} →</a></div>
+          `;
+        } catch (e) {
+          box.innerHTML = `<div style="padding:10px 14px;font-size:12px;color:#fb7185;">${e.message}</div>`;
+        }
+      }
     }
 
     async function handleMasteryCTA(state, topicId) {
       if (state === 'NOT_STARTED') {
+        if (isBeginnerTrack()) {
+          try {
+            await fetch('/api/mastery/set-beginner-level', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ userId, skillName: currentSkill })
+            });
+          } catch (e) {}
+          await handleMasteryCTA('LEARNING', topicId);
+          return;
+        }
         showDiagnosticModal();
+        return;
       } else if (state === 'LEARNING') {
         const topic = masteryPathData?.topics?.find(t => t.id === topicId);
         const res = topic?.resources?.primary;
@@ -2016,41 +2175,43 @@
         loader.classList.add('hidden');
         loader.style.display = 'none';
       }
+      const videoBox = document.getElementById('video-container');
+      if (videoBox) {
+        videoBox.innerHTML = `<p style="grid-column:1/-1;color:var(--text-muted);padding:24px 8px;"><i class="fa-solid fa-spinner fa-spin"></i> Loading videos…</p>`;
+      }
 
       try {
         const urlParams = new URLSearchParams(window.location.search);
         const scoreParam = urlParams.get('score') || localStorage.getItem('userScore') || 20;
-        const langParam = urlParams.get('lang') || localStorage.getItem('userLanguage') || 'en';
-        const langCode = langParam.length === 2 ? langParam : (langParam === 'telugu' ? 'te' : langParam === 'hindi' ? 'hi' : langParam === 'tamil' ? 'ta' : langParam === 'kannada' ? 'kn' : langParam === 'malayalam' ? 'ml' : 'en');
+        const rawLang = currentLang || urlParams.get('language') || urlParams.get('lang') || localStorage.getItem('userLanguage') || 'english';
+        const langNameMap = { en: 'english', hi: 'hindi', te: 'telugu', ta: 'tamil', kn: 'kannada', ml: 'malayalam' };
+        const langParam = langNameMap[String(rawLang).toLowerCase()] || String(rawLang).toLowerCase();
+        const searchSkill = skillForVideoSearch(currentSkill);
 
-        // Query Targeted Multilingual Micro-Curriculum Dashboard API
-        const dashRes = await fetch(`/api/learning/dashboard?lang=${langCode}&userId=${encodeURIComponent(userId)}`);
-        const dashJson = await dashRes.json();
+        const videoHeader = document.querySelector('.video-section .section-header h2');
+        if (videoHeader) videoHeader.innerText = `Videos in ${langParam}`;
 
-        if (dashJson && dashJson.skill_tracks && dashJson.skill_tracks.length > 0) {
-          const currentTrack = dashJson.skill_tracks.find(t => t.skill_id.toLowerCase() === currentSkill.toLowerCase().replace(/[^a-z0-9]/g,'')) || dashJson.skill_tracks[0];
-          
-          if (currentTrack && currentTrack.video_modules) {
-            renderTrackModules(currentTrack, dashJson.user_profile);
-            return;
-          }
-        }
-
-        // Fallback API call
         const res = await fetch('/api/analysis/get-videos', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ skill: currentSkill, score: scoreParam, lang: langParam })
+          body: JSON.stringify({ skill: searchSkill, score: scoreParam, lang: langParam })
         });
         const json = await res.json();
         if (json.success) {
           const videoData = json.data.videos || {};
           const videoList = videoData[langParam] || videoData['english'] || (Array.isArray(videoData) ? videoData : Object.values(videoData)[0]) || [];
-          renderVideos(videoList);
-          if (json.data.problems) renderProblems(json.data.problems);
+          renderVideos(Array.isArray(videoList) ? videoList : []);
+          try {
+            if (json.data.problems) renderProblems(json.data.problems);
+          } catch (probErr) {
+            console.error('Failed to render problems', probErr);
+          }
+        } else {
+          renderVideos([]);
         }
       } catch (err) {
         console.error('Failed to load videos/problems', err);
+        renderVideos([]);
       } finally {
         if (loader) {
           loader.classList.add('hidden');
@@ -2225,18 +2386,34 @@
 
     let currentModuleList = [];
 
+    function skillForVideoSearch(name) {
+      const raw = String(name || '').trim();
+      const known = ['html', 'css', 'javascript', 'python', 'sql', 'react', 'java', 'node', 'mongodb', 'django', 'flask', 'typescript', 'kotlin', 'swift', 'docker', 'aws', 'excel'];
+      const lower = raw.toLowerCase();
+      const hit = known.find(k => lower === k || lower.startsWith(k + ' ') || lower.includes(' ' + k + ' ') || lower.includes(k));
+      return hit || raw.split(/[,&]/)[0].trim() || raw;
+    }
+
     function renderVideos(videos) {
       const container = document.getElementById('video-container');
+      if (!container) return;
       container.innerHTML = '';
-      currentModuleList = videos;
-      const displayVideos = (videos || []).slice(0, 3);
-      document.getElementById('video-count').innerText = `${displayVideos.length} Specialized Video Tutorials`;
+      currentModuleList = videos || [];
+      const displayVideos = currentModuleList.filter(v => v && (v.videoId || v.url)).slice(0, 3);
+      const langLabel = (displayVideos[0] && displayVideos[0].language) || currentLang || 'English';
+      const countEl = document.getElementById('video-count');
+      if (countEl) countEl.innerText = `${displayVideos.length} videos · ${langLabel}`;
+
+      if (!displayVideos.length) {
+        container.innerHTML = `<p style="grid-column:1/-1;color:var(--text-muted);padding:24px 8px;">No videos found yet. Try another language tab, or refresh.</p>`;
+        return;
+      }
 
       displayVideos.forEach((v, i) => {
         const card = document.createElement('div');
         card.className = 'video-card';
         card.style.animation = `fadeInUp 0.6s ease-out forwards ${i * 0.1}s`;
-        const duration = (v.duration || 'PT30M').replace('PT','').replace('H','h ').replace('M','m ').replace('S','s');
+        const duration = String(v.duration || 'PT30M').replace('PT','').replace('H','h ').replace('M','m ').replace('S','s');
         const modNum = i + 1;
         const defaultModTitles = [
           'Module 1: Foundations & Core Concepts',
@@ -2246,19 +2423,21 @@
         const modTitle = v.moduleTitle || defaultModTitles[i] || `Module ${modNum}`;
         const level = v.level || (i===0 ? 'Beginner' : i===1 ? 'Intermediate' : 'Advanced');
         const solveId = v.solveId || (i + 1);
-        const langLabel = v.language || 'English';
+        const cardLang = v.language || langLabel;
+        const safeTitle = String(v.title || 'Tutorial').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+        const videoId = v.videoId || String(v.url || '').match(/embed\/([^?&]+)/)?.[1] || '';
 
         card.innerHTML = `
-          <div class="video-thumb" onclick="openVideo('${v.videoId}','${(v.title||'').replace(/'/g,"\\'")}',${i})">
+          <div class="video-thumb" onclick="openVideo('${videoId}','${safeTitle}',${i})">
             <img src="${v.thumbnail || 'https://via.placeholder.com/640x360?text=Tutorial'}" alt="Thumbnail" loading="lazy">
             <div class="play-overlay"><div class="play-icon"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div></div>
             <span class="duration">${duration}</span>
             <div style="position:absolute;top:12px;left:12px;background:rgba(4,171,7,0.9);color:#000;font-weight:800;font-size:11px;padding:4px 10px;border-radius:100px;text-transform:uppercase;">Module ${modNum}</div>
-            <div style="position:absolute;top:12px;right:12px;background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);color:#fff;font-weight:700;font-size:11px;padding:4px 10px;border-radius:100px;">${langLabel}</div>
+            <div style="position:absolute;top:12px;right:12px;background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);color:#fff;font-weight:700;font-size:11px;padding:4px 10px;border-radius:100px;">${cardLang}</div>
           </div>
           <div class="video-info" style="display:flex;flex-direction:column;gap:10px;">
             <div style="font-size:12px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:0.5px;">${modTitle}</div>
-            <div class="video-title" style="cursor:pointer;" onclick="openVideo('${v.videoId}','${(v.title||'').replace(/'/g,"\\'")}',${i})">${v.title}</div>
+            <div class="video-title" style="cursor:pointer;" onclick="openVideo('${videoId}','${safeTitle}',${i})">${v.title || 'Tutorial'}</div>
             <div class="tags" style="display:flex;align-items:center;justify-content:space-between;margin-top:4px;">
               <span class="tag" style="background:rgba(4,171,7,0.15);color:var(--primary);border:1px solid rgba(4,171,7,0.3);">${level}</span>
               <button onclick="window.location.href='solve.html?skill=${encodeURIComponent(currentSkill)}&problem=${solveId}&userId=${userId}'" style="background:linear-gradient(135deg,var(--primary),#00e676);color:#000;border:none;padding:6px 14px;border-radius:100px;font-weight:800;font-size:11.5px;cursor:pointer;display:flex;align-items:center;gap:6px;box-shadow:0 0 12px var(--primary-glow);">
@@ -2267,12 +2446,6 @@
             </div>
           </div>
         `;
-        container.appendChild(card);
-      });
-    }
-              </button>
-            </div>
-          </div>`;
         container.appendChild(card);
       });
     }
@@ -2355,8 +2528,9 @@
 
 
     function setupLanguages() {
-      const langs = ['English', 'Hindi', 'Telugu', 'Tamil', 'Kannada'];
+      const langs = ['English', 'Hindi', 'Telugu', 'Tamil', 'Kannada', 'Malayalam'];
       const container = document.getElementById('language-switcher');
+      if (!container) return;
       container.innerHTML = '';
       langs.forEach(lang => {
         const btn = document.createElement('button');
@@ -2366,7 +2540,14 @@
         btn.onclick = () => {
           if (currentLang === lKey) return;
           currentLang = lKey;
-          window.history.pushState({}, '', `?skill=${currentSkill}&language=${currentLang}`);
+          localStorage.setItem('userLanguage', currentLang);
+          const track = getLearningTrack() || '';
+          const params = new URLSearchParams(window.location.search);
+          params.set('skill', currentSkill);
+          params.set('language', currentLang);
+          params.set('lang', currentLang);
+          if (track) params.set('track', track);
+          window.history.pushState({}, '', `?${params.toString()}`);
           setupLanguages();
           loadData();
         };
@@ -2427,16 +2608,15 @@
           body: JSON.stringify({ 
             message: text,
             context: learning_context,
-            // Keep existing fields for backward compatibility if needed, 
-            // but the prompt builder will prioritize context
+            skill: currentSkill,
             conversationHistory: conversationHistory,
             tutor_state: tutorState
           })
         });
-        const json = await res.json();
+        const json = await res.json().catch(() => ({}));
 
         loadingMsg.innerText = '';
-        const answer = json.answer || json.token || "I'm sorry, I couldn't process that. Try asking something else!";
+        const answer = json.answer || json.token || (res.ok ? "I'm sorry, I couldn't process that. Try asking something else!" : 'Orbit is waking up — refresh once, then ask again.');
         
         // Simple state update logic
         if (text.toLowerCase().includes('pizza')) tutorState.challenge = "Predicting Pizza Prices";
@@ -2717,6 +2897,14 @@
       resize();
       animate();
     })();
+
+    const originalToggleTheme = window.toggleTheme;
+    window.toggleTheme = function () {
+      if (typeof originalToggleTheme === 'function') originalToggleTheme();
+      if (masteryPathData && Array.isArray(masteryPathData.topics)) {
+        renderPathMap(masteryPathData.topics);
+      }
+    };
 
     document.addEventListener('DOMContentLoaded', init);
   </script>

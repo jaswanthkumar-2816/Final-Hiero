@@ -1,0 +1,1959 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Skill Assessment & Placement | Hiero</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="theme.css">
+  <script src="theme.js"></script>
+  <style>
+    :root {
+      --primary: #04ab07;
+      --primary-hover: #00e676;
+      --primary-glow: rgba(4, 171, 7, 0.4);
+      --bg-dark: #020402;
+      --bg-card: rgba(13, 17, 24, 0.85);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: rgba(4, 171, 7, 0.2);
+      --card-radius: 28px;
+      --glass: rgba(18, 20, 18, 0.5);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --font-sans: 'Inter', sans-serif;
+      --font-display: 'Outfit', sans-serif;
+      --nav-active-bg: #04ab07;
+      --nav-active-text: #000000;
+      --card-inner-bg: rgba(255, 255, 255, 0.02);
+      --card-inner-border: rgba(255, 255, 255, 0.07);
+      --cta-btn-bg: rgba(4, 171, 7, 0.12);
+      --cta-btn-text: #00e676;
+      --cta-btn-border: rgba(4, 171, 7, 0.35);
+    }
+
+    /* Light Theme (Vibrant Hiero Green) */
+    [data-theme="light"], body.light-mode {
+      --primary: #04ab07;
+      --primary-hover: #00b306;
+      --primary-glow: rgba(4, 171, 7, 0.25);
+      --bg-dark: #f8fafc;
+      --bg-card: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --border: rgba(4, 171, 7, 0.25);
+      --glass-border: rgba(0, 0, 0, 0.08);
+      --nav-active-bg: #04ab07;
+      --nav-active-text: #ffffff;
+      --card-inner-bg: #ffffff;
+      --card-inner-border: rgba(4, 171, 7, 0.2);
+      --cta-btn-bg: #ffffff;
+      --cta-btn-text: #04ab07;
+      --cta-btn-border: rgba(4, 171, 7, 0.4);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg-dark);
+      background-image:
+        radial-gradient(circle at 0% 0%, rgba(4, 171, 7, 0.12) 0%, transparent 45%),
+        radial-gradient(circle at 100% 100%, rgba(0, 230, 118, 0.1) 0%, transparent 50%);
+      background-attachment: fixed;
+      color: var(--text-main);
+      min-height: 100vh;
+      overflow-x: hidden;
+      line-height: 1.6;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    /* Ambient noise texture */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+      opacity: 0.02;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    /* Anti-gravity Particle Background */
+    #antigravity-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* Top Header Navbar */
+    .nav-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 72px;
+      background: var(--bg-dark);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--glass-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+      z-index: 1000;
+      transition: background-color 0.3s ease;
+    }
+
+    [data-theme="light"] .nav-header, body.light-mode .nav-header {
+      background: rgba(255, 255, 255, 0.95);
+    }
+
+    .app-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text-main);
+      font-weight: 800;
+      font-size: 20px;
+      font-family: var(--font-display);
+      letter-spacing: 0.5px;
+    }
+
+    .app-logo-box {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      box-shadow: none;
+    }
+
+    .app-logo-box img {
+      width: 32px;
+      height: 32px;
+      object-fit: contain;
+    }
+
+    .nav-menu {
+      display: flex;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 6px;
+      border-radius: 100px;
+      border: 1px solid var(--glass-border);
+    }
+
+    [data-theme="light"] .nav-menu, body.light-mode .nav-menu {
+      background: rgba(0, 0, 0, 0.04);
+    }
+
+    .nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 100px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .nav-btn:hover {
+      color: var(--text-main);
+      background: rgba(4, 171, 7, 0.12);
+    }
+
+    .nav-btn.active {
+      background: var(--nav-active-bg);
+      color: var(--nav-active-text);
+      font-weight: 700;
+      box-shadow: 0 0 15px var(--primary-glow);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .theme-toggle-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--glass-border);
+      color: var(--text-main);
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    [data-theme="light"] .theme-toggle-btn, body.light-mode .theme-toggle-btn {
+      background: rgba(0, 0, 0, 0.05);
+    }
+
+    .theme-toggle-btn:hover {
+      background: rgba(4, 171, 7, 0.2);
+      color: var(--primary);
+    }
+
+    .user-avatar-small {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), #00e676);
+      color: #000;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      box-shadow: 0 0 12px var(--primary-glow);
+    }
+
+    /* Main Container */
+    .app-container {
+      width: 100%;
+      max-width: 900px;
+      margin-top: 105px;
+      padding: 0 24px 60px 24px;
+      animation: fadeInUp 0.5s ease-out;
+    }
+
+    .btn-back {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 8px 18px;
+      border-radius: 100px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 24px;
+      transition: all 0.3s ease;
+      text-decoration: none;
+    }
+
+    [data-theme="light"] .btn-back, body.light-mode .btn-back {
+      background: #ffffff;
+    }
+
+    .btn-back:hover {
+      color: var(--text-main);
+      background: rgba(4, 171, 7, 0.15);
+      border-color: var(--primary);
+    }
+
+    /* Hero Section */
+    .hero-section {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+
+    .target-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(4, 171, 7, 0.15);
+      border: 1.5px solid rgba(4, 171, 7, 0.4);
+      color: var(--primary);
+      padding: 6px 18px;
+      border-radius: 100px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      margin-bottom: 14px;
+      text-transform: uppercase;
+      box-shadow: 0 0 20px var(--primary-glow);
+    }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: 42px;
+      font-weight: 800;
+      letter-spacing: -0.8px;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      color: var(--text-main);
+    }
+
+    .hero-title span {
+      background: linear-gradient(135deg, #04ab07, #00e676);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 20px rgba(4, 171, 7, 0.35));
+    }
+
+    .hero-subtitle {
+      color: var(--text-muted);
+      font-size: 15.5px;
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* Placement Glass Card */
+    .placement-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(24px);
+      border: 1px solid var(--border);
+      border-radius: var(--card-radius);
+      padding: 44px 40px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.08);
+      position: relative;
+      overflow: hidden;
+      transition: background-color 0.3s ease;
+    }
+
+    .placement-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--primary), transparent);
+    }
+
+    .step-indicator {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 1.8px;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .question-title {
+      font-size: 26px;
+      font-weight: 800;
+      font-family: var(--font-display);
+      color: var(--text-main);
+      margin-bottom: 32px;
+      line-height: 1.35;
+      letter-spacing: -0.4px;
+    }
+
+    .skill-highlight {
+      background: linear-gradient(135deg, #04ab07, #00e676);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: 800;
+    }
+
+    /* Level Selection Grid */
+    .level-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    @media (max-width: 720px) {
+      .level-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .level-card {
+      background: var(--card-inner-bg);
+      border: 1.5px solid var(--card-inner-border);
+      border-radius: 24px;
+      padding: 32px 28px;
+      cursor: pointer;
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 24px;
+      position: relative;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+    }
+
+    .level-card:hover {
+      background: rgba(4, 171, 7, 0.08);
+      border-color: var(--primary);
+      transform: translateY(-5px);
+      box-shadow: 0 20px 40px rgba(4, 171, 7, 0.15), 0 0 25px var(--primary-glow);
+    }
+
+    .level-card.selected {
+      background: rgba(4, 171, 7, 0.15) !important;
+      border-color: var(--primary) !important;
+      box-shadow: 0 0 35px var(--primary-glow) !important;
+    }
+
+    .card-info h3 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      line-height: 1.35;
+      word-break: break-word;
+    }
+
+    .card-info p {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.55;
+    }
+
+    .card-cta-btn {
+      width: 100%;
+      background: var(--cta-btn-bg);
+      border: 1.5px solid var(--cta-btn-border);
+      color: var(--cta-btn-text);
+      padding: 14px;
+      border-radius: 14px;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .level-card:hover .card-cta-btn {
+      background: linear-gradient(135deg, var(--primary), #00e676) !important;
+      color: #000000 !important;
+      border: none !important;
+      box-shadow: 0 0 20px var(--primary-glow) !important;
+    }
+
+    /* STEP 2: HIGHLY INTERESTING & DYNAMIC QUESTION UI */
+    .quiz-top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--glass-border);
+    }
+
+    .quiz-timer-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 800;
+      font-size: 14px;
+      color: var(--primary);
+      background: rgba(4, 171, 7, 0.12);
+      padding: 6px 18px;
+      border-radius: 100px;
+      border: 1px solid rgba(4, 171, 7, 0.3);
+      box-shadow: 0 0 15px var(--primary-glow);
+    }
+
+    .progress-bar-wrap {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 10%;
+      background: linear-gradient(90deg, var(--primary), #00e676);
+      box-shadow: 0 0 12px var(--primary);
+      transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .quiz-progress-dots {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 24px;
+      justify-content: center;
+    }
+
+    .dot-item {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid var(--glass-border);
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .dot-item.active {
+      background: var(--primary);
+      box-shadow: 0 0 12px var(--primary);
+      transform: scale(1.3);
+    }
+
+    .dot-item.answered {
+      background: rgba(4, 171, 7, 0.5);
+    }
+
+    .subtopic-badge {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--primary);
+      background: rgba(4, 171, 7, 0.15);
+      border: 1px solid rgba(4, 171, 7, 0.3);
+      padding: 6px 14px;
+      border-radius: 100px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+
+    .question-card-inner {
+      animation: slideInCard 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes slideInCard {
+      from {
+        opacity: 0;
+        transform: translateY(12px) scale(0.99);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .question-text {
+      font-size: 21px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 28px;
+      line-height: 1.55;
+    }
+
+    .options-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-bottom: 32px;
+    }
+
+    .choice-card {
+      background: var(--card-inner-bg);
+      border: 1.5px solid var(--card-inner-border);
+      border-radius: 18px;
+      padding: 16px 20px;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      user-select: none;
+      position: relative;
+    }
+
+    .choice-card:hover {
+      background: rgba(4, 171, 7, 0.08);
+      border-color: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(4, 171, 7, 0.12);
+    }
+
+    .choice-card.selected {
+      background: linear-gradient(135deg, rgba(4, 171, 7, 0.18), rgba(0, 230, 118, 0.08)) !important;
+      border-color: var(--primary) !important;
+      box-shadow: 0 0 25px var(--primary-glow) !important;
+    }
+
+    .letter-badge {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--glass-border);
+      color: var(--text-muted);
+      font-weight: 800;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.25s ease;
+      flex-shrink: 0;
+    }
+
+    .choice-card:hover .letter-badge {
+      background: rgba(4, 171, 7, 0.2);
+      color: var(--primary-hover);
+      border-color: var(--primary);
+    }
+
+    .choice-card.selected .letter-badge {
+      background: var(--primary) !important;
+      color: #000000 !important;
+      border: none !important;
+      box-shadow: 0 0 12px var(--primary);
+    }
+
+    .choice-text {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-main);
+      line-height: 1.45;
+      flex-grow: 1;
+    }
+
+    .choice-check-icon {
+      color: var(--primary);
+      font-size: 16px;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    .choice-card.selected .choice-check-icon {
+      opacity: 1;
+    }
+
+    .quiz-nav-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 10px;
+    }
+
+    .btn-quiz-nav {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1.5px solid var(--glass-border);
+      color: var(--text-main);
+      padding: 12px 24px;
+      border-radius: 14px;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+    }
+
+    [data-theme="light"] .btn-quiz-nav, body.light-mode .btn-quiz-nav {
+      background: #ffffff;
+      border-color: rgba(4, 171, 7, 0.25);
+    }
+
+    .btn-quiz-nav:hover:not(:disabled) {
+      background: rgba(4, 171, 7, 0.15);
+      border-color: var(--primary);
+      color: var(--primary-hover);
+    }
+
+    .btn-quiz-nav:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .btn-submit-quiz {
+      background: linear-gradient(135deg, var(--primary), #00e676);
+      color: #000000;
+      border: none;
+      padding: 14px 28px;
+      border-radius: 14px;
+      font-weight: 800;
+      font-size: 15px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 0 20px var(--primary-glow);
+      transition: all 0.3s ease;
+    }
+
+    .btn-submit-quiz:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 30px var(--primary-glow);
+    }
+
+    /* ULTRA-PREMIUM RESULT VIEW STYLES */
+    .result-hero-card {
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.04), rgba(4, 171, 7, 0.06));
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      padding: 32px 28px;
+      margin-bottom: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      gap: 28px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    [data-theme="light"] .result-hero-card, body.light-mode .result-hero-card {
+      background: linear-gradient(145deg, #ffffff, rgba(4, 171, 7, 0.05));
+      border-color: rgba(4, 171, 7, 0.2);
+      box-shadow: 0 10px 30px rgba(4, 171, 7, 0.08);
+    }
+
+    .gauge-wrapper {
+      position: relative;
+      width: 140px;
+      height: 140px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .gauge-svg {
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg);
+    }
+
+    .gauge-bg {
+      fill: none;
+      stroke: rgba(255, 255, 255, 0.08);
+      stroke-width: 10;
+    }
+
+    [data-theme="light"] .gauge-bg, body.light-mode .gauge-bg {
+      stroke: rgba(0, 0, 0, 0.06);
+    }
+
+    .gauge-fill {
+      fill: none;
+      stroke-width: 10;
+      stroke-linecap: round;
+      stroke-dasharray: 339.29;
+      stroke-dashoffset: 339.29;
+      transition: stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.4s ease;
+    }
+
+    .gauge-center-content {
+      position: absolute;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .gauge-score-val {
+      font-size: 38px;
+      font-weight: 800;
+      font-family: var(--font-display);
+      line-height: 1;
+      letter-spacing: -1px;
+      color: var(--text-main);
+    }
+
+    .gauge-score-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-top: 4px;
+      color: var(--text-muted);
+    }
+
+    .result-metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 16px;
+      flex-grow: 1;
+    }
+
+    .metric-pill-card {
+      background: var(--card-inner-bg);
+      border: 1px solid var(--card-inner-border);
+      border-radius: 16px;
+      padding: 16px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .metric-pill-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(4, 171, 7, 0.3);
+    }
+
+    .metric-pill-label {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .metric-pill-val {
+      font-size: 22px;
+      font-weight: 800;
+      font-family: var(--font-display);
+      color: var(--text-main);
+    }
+
+    /* SUB-TOPIC BREAKDOWN MODERN LIST */
+    .subtopic-cards-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .subtopic-card-item {
+      background: var(--card-inner-bg);
+      border: 1px solid var(--card-inner-border);
+      border-radius: 16px;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      transition: all 0.25s ease;
+    }
+
+    .subtopic-card-item:hover {
+      border-color: rgba(4, 171, 7, 0.3);
+      transform: translateX(4px);
+    }
+
+    .subtopic-title-box {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 200px;
+    }
+
+    .subtopic-icon-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: rgba(4, 171, 7, 0.12);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      flex-shrink: 0;
+    }
+
+    .subtopic-name-text {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .subtopic-bar-wrap {
+      flex-grow: 1;
+      max-width: 220px;
+      min-width: 120px;
+    }
+
+    .subtopic-bar-bg {
+      height: 8px;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 100px;
+      overflow: hidden;
+    }
+
+    [data-theme="light"] .subtopic-bar-bg, body.light-mode .subtopic-bar-bg {
+      background: rgba(0, 0, 0, 0.08);
+    }
+
+    .subtopic-bar-fill {
+      height: 100%;
+      border-radius: 100px;
+      transition: width 0.8s ease;
+    }
+
+    .subtopic-score-fraction {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text-muted);
+      min-width: 90px;
+      text-align: right;
+    }
+
+    /* STATUS BADGES */
+    .status-badge {
+      font-size: 12px;
+      font-weight: 800;
+      padding: 6px 14px;
+      border-radius: 100px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      letter-spacing: 0.3px;
+    }
+
+    .status-badge.strong {
+      background: rgba(4, 171, 7, 0.14);
+      color: #04ab07;
+      border: 1px solid rgba(4, 171, 7, 0.3);
+    }
+
+    .status-badge.weak {
+      background: rgba(239, 68, 68, 0.14);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    /* AI RECOMMENDATION BANNER */
+    .ai-summary-banner {
+      background: linear-gradient(135deg, rgba(4, 171, 7, 0.08), rgba(0, 230, 118, 0.04));
+      border: 1.5px solid rgba(4, 171, 7, 0.28);
+      border-radius: 18px;
+      padding: 20px 24px;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 32px;
+      position: relative;
+    }
+
+    .ai-summary-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: var(--primary);
+      color: #000000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+      box-shadow: 0 0 15px var(--primary-glow);
+    }
+
+    .ai-summary-body {
+      font-size: 14.5px;
+      font-weight: 600;
+      color: var(--text-main);
+      line-height: 1.5;
+    }
+
+    /* LANGUAGE SELECTION MODAL STYLES */
+    .lang-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.78);
+      backdrop-filter: blur(14px);
+      z-index: 2000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      animation: fadeInModal 0.3s ease forwards;
+    }
+
+    @keyframes fadeInModal {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .lang-modal-card {
+      background: var(--bg-card);
+      border: 1.5px solid var(--border);
+      border-radius: 28px;
+      max-width: 580px;
+      width: 100%;
+      padding: 32px 36px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), 0 0 30px var(--primary-glow);
+    }
+
+    [data-theme="light"] .lang-modal-card, body.light-mode .lang-modal-card {
+      background: #ffffff;
+      border-color: rgba(4, 171, 7, 0.3);
+      box-shadow: 0 20px 50px rgba(4, 171, 7, 0.12);
+    }
+
+    .lang-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 14px;
+    }
+
+    .lang-card {
+      background: var(--card-inner-bg);
+      border: 1.5px solid var(--card-inner-border);
+      border-radius: 18px;
+      padding: 16px 14px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .lang-card:hover {
+      border-color: rgba(4, 171, 7, 0.4);
+      transform: translateY(-3px);
+      background: rgba(4, 171, 7, 0.05);
+    }
+
+    .lang-card.selected {
+      border-color: var(--primary);
+      background: rgba(4, 171, 7, 0.12);
+      box-shadow: 0 0 18px var(--primary-glow);
+    }
+
+    .lang-flag {
+      font-size: 26px;
+      line-height: 1;
+      margin-bottom: 2px;
+    }
+
+    .lang-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .lang-native {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .keyboard-hint {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-align: center;
+      margin-top: 16px;
+      font-weight: 600;
+    }
+
+    .keyboard-hint kbd {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--glass-border);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: var(--primary);
+      font-family: monospace;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Anti-gravity Particle Canvas -->
+  <canvas id="antigravity-bg"></canvas>
+
+  <!-- Top Navigation Header -->
+  <header class="nav-header">
+    <a href="/" class="app-brand">
+      <div class="app-logo-box">
+        <img src="logo-hiero.png" alt="Hiero Logo" onerror="this.onerror=null; this.src='logo-hiero.png';">
+      </div>
+      <span>HIERO</span>
+    </a>
+    <nav class="nav-menu">
+      <a href="resume-builder.html" class="nav-btn"><i class="fa-regular fa-file-lines"></i><span>Resume Builder</span></a>
+      <a href="result.html" class="nav-btn"><i class="fa-solid fa-magnifying-glass"></i><span>Analyse Resume</span></a>
+      <a href="companies.html" class="nav-btn"><i class="fa-solid fa-building"></i><span>Target Companies</span></a>
+      <a href="mock-interview.html" class="nav-btn"><i class="fa-solid fa-microphone"></i><span>Mock Interview</span></a>
+      <a href="learn.html" class="nav-btn active"><i class="fa-solid fa-book-open"></i><span>Learn Skills</span></a>
+    </nav>
+    <div class="nav-actions">
+      <button class="theme-toggle-btn" id="theme-switch" onclick="window.toggleTheme()" title="Switch Theme"><i class="fa-solid fa-moon"></i></button>
+      <div class="user-profile-nav user-profile">
+        <div class="user-avatar-small user-avatar">J</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="app-container">
+
+    <a href="learn.html" class="btn-back" id="back-btn-link"><i class="fa-solid fa-arrow-left"></i> BACK TO SKILLS</a>
+
+    <!-- STEP 1 VIEW: LEVEL SELECTOR -->
+    <div id="step-1-wrapper">
+      <div class="hero-section">
+        <div class="target-badge" id="skill-badge">
+          <i class="fa-solid fa-bullseye"></i> Skill Placement: <span id="target-skill-name">React</span>
+        </div>
+        <h1 class="hero-title">Let’s find the right <span>starting point</span></h1>
+        <p class="hero-subtitle">Tell us what you already know so HIERO can create the right learning path for you.</p>
+      </div>
+
+      <div class="placement-card">
+        <span class="step-indicator">STEP 1 OF 2</span>
+        <h2 class="question-title">How familiar are you with <span id="question-skill-name" style="color: var(--primary-hover);">React</span>?</h2>
+
+        <div class="level-grid">
+
+          <!-- Card 1: Beginner -->
+          <div class="level-card" id="card-beginner" onclick="selectLevel('beginner')">
+            <div class="card-info">
+              <h3>🌱 I’m a beginner</h3>
+              <p>I’m starting from scratch and want to learn <span class="skill-name-inline" style="font-weight: 700; color: var(--text-main);">React</span> step by step.</p>
+            </div>
+            <button class="card-cta-btn">
+              Start from the beginning →
+            </button>
+          </div>
+
+          <!-- Card 2: Have Prior Knowledge -->
+          <div class="level-card" id="card-intermediate" onclick="selectLevel('intermediate')">
+            <div class="card-info">
+              <h3>⚡ Have prior knowledge</h3>
+              <p>I already know some <span class="skill-name-inline" style="font-weight: 700; color: var(--text-main);">React</span> and want HIERO to identify my strengths and weak areas.</p>
+            </div>
+            <button class="card-cta-btn">
+              Take the 10-question diagnostic →
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2 VIEW: DYNAMIC & INTERESTING 10-QUESTION QUIZ INTERFACE -->
+    <div id="step-2-wrapper" style="display: none;">
+      <div class="hero-section" style="margin-bottom: 20px;">
+        <div class="target-badge">
+          <i class="fa-solid fa-bolt"></i> Diagnostic: <span id="quiz-skill-title">React</span>
+        </div>
+      </div>
+
+      <div class="placement-card">
+        <div class="quiz-top-bar">
+          <div>
+            <span class="step-indicator" id="q-counter">QUESTION 1 OF 10</span>
+            <span style="font-size: 12.5px; color: var(--text-muted); font-weight: 600;">10 Questions · 5 min recommended</span>
+          </div>
+          <div class="quiz-timer-box">
+            <i class="fa-regular fa-clock"></i> <span id="timer-display">05:00</span>
+          </div>
+        </div>
+
+        <!-- Animated Fill Bar & Dots Tracker -->
+        <div class="progress-bar-wrap">
+          <div class="progress-bar-fill" id="progress-bar-fill"></div>
+        </div>
+        <div class="quiz-progress-dots" id="dots-container"></div>
+
+        <div class="question-card-inner" id="question-card-inner">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px; flex-wrap: wrap;">
+            <div class="subtopic-badge" id="subtopic-tag">
+              <i class="fa-solid fa-layer-group"></i> <span id="subtopic-text">HOOKS &amp; STATE</span>
+            </div>
+            <div id="difficulty-tag" style="font-size: 11.5px; font-weight: 800; padding: 4px 12px; border-radius: 100px;">
+              🟢 Easy
+            </div>
+          </div>
+          <h2 class="question-text" id="question-body">Loading diagnostic question...</h2>
+
+          <!-- Interactive Choice Cards with Letter Badges (A, B, C, D) -->
+          <div class="options-list" id="options-container"></div>
+        </div>
+
+        <div class="quiz-nav-row">
+          <button class="btn-quiz-nav" id="btn-prev-q" onclick="prevQuestion()" disabled>
+            <i class="fa-solid fa-arrow-left"></i> Previous
+          </button>
+          <button class="btn-quiz-nav" id="btn-next-q" onclick="nextQuestion()">
+            Next <i class="fa-solid fa-arrow-right"></i>
+          </button>
+          <button class="btn-submit-quiz" id="btn-submit-q" onclick="submitDiagnosticQuiz()" style="display: none;">
+            Submit Diagnostic 🎯
+          </button>
+        </div>
+
+        <div class="keyboard-hint">
+          💡 Press <kbd>1</kbd>-<kbd>4</kbd> or <kbd>A</kbd>-<kbd>D</kbd> to select option • <kbd>Enter</kbd> or <kbd>→</kbd> for Next
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 4 VIEW: TOPIC-WISE DIAGNOSTIC RESULTS -->
+    <div id="step-result-wrapper" style="display: none;">
+      <div class="hero-section">
+        <div class="target-badge"><i class="fa-solid fa-chart-line"></i> Diagnostic Outcome</div>
+        <h1 class="hero-title">Your <span id="result-skill-name">React</span> Diagnostic</h1>
+        <p class="hero-subtitle">HIERO has analyzed your answers across all subtopics to construct your personalized starting point.</p>
+      </div>
+
+      <div class="placement-card">
+        <!-- ULTRA-PREMIUM RESULT HERO CONTAINER -->
+        <div class="result-hero-card">
+          <div class="gauge-wrapper">
+            <svg class="gauge-svg" viewBox="0 0 120 120">
+              <circle class="gauge-bg" cx="60" cy="60" r="54"></circle>
+              <circle class="gauge-fill" id="score-gauge-fill" cx="60" cy="60" r="54" stroke="#04ab07"></circle>
+            </svg>
+            <div class="gauge-center-content">
+              <div class="gauge-score-val" id="overall-score-pct">0%</div>
+              <div class="gauge-score-label" id="overall-score-tag">Accuracy</div>
+            </div>
+          </div>
+
+          <div class="result-metrics-grid">
+            <div class="metric-pill-card">
+              <div class="metric-pill-label"><i class="fa-solid fa-bullseye" style="color: var(--primary);"></i> Accuracy</div>
+              <div class="metric-pill-val" id="metric-accuracy-val">0%</div>
+            </div>
+            <div class="metric-pill-card">
+              <div class="metric-pill-label"><i class="fa-solid fa-circle-check" style="color: #10b981;"></i> Correct</div>
+              <div class="metric-pill-val" id="metric-correct-val" style="color: #10b981;">0 / 10</div>
+            </div>
+            <div class="metric-pill-card">
+              <div class="metric-pill-label"><i class="fa-solid fa-circle-xmark" style="color: #ef4444;"></i> Focus Areas</div>
+              <div class="metric-pill-val" id="metric-focus-val" style="color: #ef4444;">0</div>
+            </div>
+          </div>
+        </div>
+
+        <h3 style="font-size: 18px; font-weight: 800; font-family: var(--font-display); color: var(--text-main); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+          <i class="fa-solid fa-list-check" style="color: var(--primary);"></i> Sub-Topic Breakdown
+        </h3>
+
+        <div class="subtopic-cards-list" id="topic-scores-container"></div>
+
+        <div class="ai-summary-banner">
+          <div class="ai-summary-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+          <div class="ai-summary-body" id="result-summary-msg">
+            HIERO found areas for improvement and built your custom fast-track roadmap!
+          </div>
+        </div>
+
+        <!-- TARGET SKILLS TO LEARN SELECTION CARD -->
+        <div class="skills-to-learn-container" style="background: var(--bg-card); border: 1.5px solid var(--border); border-radius: 20px; padding: 24px; margin-top: 24px; margin-bottom: 28px; box-shadow: 0 10px 30px rgba(0,0,0,0.15);">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+            <h3 style="font-size: 18px; font-weight: 800; font-family: var(--font-display); color: var(--text-main); margin: 0; display: flex; align-items: center; gap: 8px;">
+              <i class="fa-solid fa-graduation-cap" style="color: var(--primary);"></i> Skills You Need to Learn & Focus On
+            </h3>
+            <span style="font-size: 12px; font-weight: 700; color: var(--primary); background: rgba(4,171,7,0.1); padding: 4px 12px; border-radius: 100px;">
+              AI Recommended Roadmap
+            </span>
+          </div>
+          <p style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 18px; line-height: 1.5;">
+            HIERO identified these focus areas based on your test. Select the skills you want to master in your micro-curriculum:
+          </p>
+
+          <!-- Interactive Skill Chips Grid -->
+          <div id="skills-to-learn-grid" style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px;"></div>
+
+          <!-- Add Custom Skill Input -->
+          <div style="display: flex; gap: 10px; align-items: center; margin-top: 14px;">
+            <input type="text" id="custom-skill-input" placeholder="+ Add custom skill or topic to learn..." style="flex: 1; padding: 10px 16px; border-radius: 100px; background: var(--card-inner-bg); border: 1px solid var(--card-inner-border); color: var(--text-main); font-size: 13px;">
+            <button onclick="addCustomSkillToLearn()" style="background: var(--card-inner-bg); border: 1px solid var(--primary); color: var(--primary); padding: 10px 18px; border-radius: 100px; font-weight: 700; font-size: 13px; cursor: pointer;">
+              + Add Skill
+            </button>
+          </div>
+        </div>
+
+        <!-- Detailed Question Review & Explanations ("Why You Got This Score") -->
+        <div style="margin-bottom: 32px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 20px;">
+            <h3 style="font-size: 18px; font-weight: 800; font-family: var(--font-display); color: var(--text-main); display: flex; align-items: center; gap: 8px; margin: 0;">
+              <i class="fa-solid fa-magnifying-glass-chart" style="color: var(--primary);"></i> Diagnostic Breakdown — Score Analysis
+            </h3>
+            
+            <!-- Filter Tabs -->
+            <div style="display: flex; gap: 6px; background: rgba(255, 255, 255, 0.04); padding: 4px; border-radius: 100px; border: 1px solid var(--glass-border);" id="review-filter-tabs">
+              <button class="nav-btn active" onclick="filterReviewCards('all', this)" style="padding: 6px 14px; font-size: 12px;">All (10)</button>
+              <button class="nav-btn" onclick="filterReviewCards('correct', this)" style="padding: 6px 14px; font-size: 12px;">✅ Correct (<span id="cnt-correct-tab">0</span>)</button>
+              <button class="nav-btn" onclick="filterReviewCards('missed', this)" style="padding: 6px 14px; font-size: 12px;">❌ Missed (<span id="cnt-missed-tab">0</span>)</button>
+            </div>
+          </div>
+
+          <div id="detailed-review-list" style="display: flex; flex-direction: column; gap: 16px;"></div>
+        </div>
+
+        <button class="btn-submit-quiz" style="width: 100%; justify-content: center; padding: 18px 32px; font-size: 16px; border-radius: 16px;" onclick="goToPersonalizedPath()">
+          Proceed to Personalized Learning Path →
+        </button>
+      </div>
+    </div>
+
+    <!-- LANGUAGE SELECTION MODAL -->
+    <div id="language-modal" class="lang-modal-backdrop" style="display: none;">
+      <div class="lang-modal-card">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+          <div style="font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--primary); display: flex; align-items: center; gap: 8px;">
+            <i class="fa-solid fa-globe"></i> Learning Language Preference
+          </div>
+          <button onclick="closeLanguageModal()" style="background: none; border: none; color: var(--text-muted); font-size: 20px; cursor: pointer;">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <h2 style="font-size: 24px; font-weight: 800; font-family: var(--font-display); color: var(--text-main); margin-bottom: 8px;">
+          Select Your Learning Language 🌐
+        </h2>
+        <p style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 22px; line-height: 1.5;">
+          HIERO will generate <strong style="color: var(--primary);">3 customized video tutorials</strong> matching your score tier in your preferred language.
+        </p>
+
+        <div class="lang-grid">
+          <div class="lang-card selected" onclick="selectLang('english', this)">
+            <div class="lang-flag">🇬🇧</div>
+            <div class="lang-title">English</div>
+            <div class="lang-native">Global Standard</div>
+          </div>
+          <div class="lang-card" onclick="selectLang('telugu', this)">
+            <div class="lang-flag">🇮🇳</div>
+            <div class="lang-title">Telugu</div>
+            <div class="lang-native">తెలుగు</div>
+          </div>
+          <div class="lang-card" onclick="selectLang('hindi', this)">
+            <div class="lang-flag">🇮🇳</div>
+            <div class="lang-title">Hindi</div>
+            <div class="lang-native">हिंदी</div>
+          </div>
+          <div class="lang-card" onclick="selectLang('tamil', this)">
+            <div class="lang-flag">🇮🇳</div>
+            <div class="lang-title">Tamil</div>
+            <div class="lang-native">தமிழ்</div>
+          </div>
+          <div class="lang-card" onclick="selectLang('kannada', this)">
+            <div class="lang-flag">🇮🇳</div>
+            <div class="lang-title">Kannada</div>
+            <div class="lang-native">ಕನ್ನಡ</div>
+          </div>
+          <div class="lang-card" onclick="selectLang('malayalam', this)">
+            <div class="lang-flag">🇮🇳</div>
+            <div class="lang-title">Malayalam</div>
+            <div class="lang-native">മലയാളം</div>
+          </div>
+        </div>
+
+        <button class="btn-submit-quiz" id="btn-confirm-lang" style="width: 100%; justify-content: center; padding: 16px 28px; font-size: 15.5px; margin-top: 24px; border-radius: 16px;" onclick="confirmLanguageAndProceed()">
+          Start Learning in English →
+        </button>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const selectedSkill = (urlParams.get('skill') || 'React').trim();
+    const userId = localStorage.getItem('userId') || localStorage.getItem('user_id') || 'guest-' + Date.now();
+
+    // Skill Name Displays
+    document.getElementById('target-skill-name').textContent = selectedSkill;
+    document.getElementById('question-skill-name').textContent = selectedSkill;
+    document.querySelectorAll('.skill-name-inline').forEach(el => el.textContent = selectedSkill);
+    document.getElementById('quiz-skill-title').textContent = selectedSkill;
+    document.getElementById('result-skill-name').textContent = selectedSkill;
+
+    // Subtopic Icons Mapping
+    const subtopicIcons = {
+      'components': 'fa-brands fa-react',
+      'jsx': 'fa-solid fa-code',
+      'hooks': 'fa-solid fa-link',
+      'state': 'fa-solid fa-database',
+      'performance': 'fa-solid fa-bolt',
+      'architecture': 'fa-solid fa-sitemap',
+      'testing': 'fa-solid fa-vial',
+      'core': 'fa-solid fa-cube'
+    };
+
+    // Quiz State Variables
+    let quizQuestions = [];
+    let currentQIdx = 0;
+    let userAnswers = [];
+    let quizTimerInterval = null;
+    let secondsElapsed = 0;
+    const TARGET_SECONDS = 300; // 5 min recommended target
+    const MAX_SECONDS = 420;   // 7 min hard timeout
+    let isSubmitting = false;
+
+    async function selectLevel(level) {
+      if (level === 'beginner') {
+        document.getElementById('card-beginner').classList.add('selected');
+        try {
+          const res = await fetch('/api/mastery/set-beginner-level', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId, skillName: selectedSkill })
+          });
+          const data = await res.json();
+          if (data.success) {
+            window.location.href = `learn.html?skill=${encodeURIComponent(selectedSkill)}`;
+          }
+        } catch (e) {
+          window.location.href = `learn.html?skill=${encodeURIComponent(selectedSkill)}`;
+        }
+      } else {
+        document.getElementById('card-intermediate').classList.add('selected');
+        start10QuestionQuiz();
+      }
+    }
+
+    async function start10QuestionQuiz() {
+      document.getElementById('step-1-wrapper').style.display = 'none';
+      document.getElementById('step-2-wrapper').style.display = 'block';
+
+      try {
+        const res = await fetch('/api/mastery/diagnostic-10q', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId, skillName: selectedSkill })
+        });
+        const data = await res.json();
+        quizQuestions = data.questions || [];
+        userAnswers = new Array(quizQuestions.length).fill(-1);
+
+        renderProgressDots();
+        renderCurrentQuestion();
+        startQuizTimer();
+      } catch (e) {
+        console.error('Failed to load 10-question diagnostic', e);
+      }
+    }
+
+    function renderProgressDots() {
+      const container = document.getElementById('dots-container');
+      container.innerHTML = '';
+      quizQuestions.forEach((_, i) => {
+        const dot = document.createElement('div');
+        dot.className = `dot-item ${i === currentQIdx ? 'active' : userAnswers[i] !== -1 ? 'answered' : ''}`;
+        dot.onclick = () => {
+          currentQIdx = i;
+          renderCurrentQuestion();
+        };
+        container.appendChild(dot);
+      });
+
+      // Update fill bar
+      const pct = Math.round(((currentQIdx + 1) / Math.max(quizQuestions.length, 1)) * 100);
+      document.getElementById('progress-bar-fill').style.width = `${pct}%`;
+    }
+
+    function renderCurrentQuestion() {
+      if (!quizQuestions.length) return;
+      const q = quizQuestions[currentQIdx];
+
+      // Re-trigger slide-in animation
+      const cardInner = document.getElementById('question-card-inner');
+      cardInner.style.animation = 'none';
+      cardInner.offsetHeight; // trigger reflow
+      cardInner.style.animation = 'slideInCard 0.35s cubic-bezier(0.16, 1, 0.3, 1)';
+
+      document.getElementById('q-counter').textContent = `QUESTION ${currentQIdx + 1} OF ${quizQuestions.length}`;
+
+      // Set Subtopic Tag & Difficulty Tag
+      const subtopicStr = q.subTopic || 'CORE';
+      document.getElementById('subtopic-text').textContent = subtopicStr.toUpperCase();
+
+      let subIconClass = 'fa-solid fa-layer-group';
+      const lowSub = subtopicStr.toLowerCase();
+      for (let key in subtopicIcons) {
+        if (lowSub.includes(key)) subIconClass = subtopicIcons[key];
+      }
+      document.getElementById('subtopic-tag').querySelector('i').className = subIconClass;
+
+      const diff = q.difficulty || (currentQIdx < 3 ? 'Easy' : (currentQIdx < 7 ? 'Medium' : 'Hard'));
+      const diffTag = document.getElementById('difficulty-tag');
+      if (diffTag) {
+        if (diff.toLowerCase() === 'easy') {
+          diffTag.innerHTML = '<i class="fa-solid fa-signal" style="color: #10b981;"></i> 🟢 Easy';
+          diffTag.style.background = 'rgba(16, 185, 129, 0.12)';
+          diffTag.style.color = '#10b981';
+          diffTag.style.border = '1px solid rgba(16, 185, 129, 0.3)';
+        } else if (diff.toLowerCase() === 'medium') {
+          diffTag.innerHTML = '<i class="fa-solid fa-signal" style="color: #f59e0b;"></i> 🟡 Medium';
+          diffTag.style.background = 'rgba(245, 158, 11, 0.12)';
+          diffTag.style.color = '#f59e0b';
+          diffTag.style.border = '1px solid rgba(245, 158, 11, 0.3)';
+        } else {
+          diffTag.innerHTML = '<i class="fa-solid fa-signal" style="color: #ef4444;"></i> 🔴 Hard';
+          diffTag.style.background = 'rgba(239, 68, 68, 0.12)';
+          diffTag.style.color = '#ef4444';
+          diffTag.style.border = '1px solid rgba(239, 68, 68, 0.3)';
+        }
+      }
+
+      document.getElementById('question-body').textContent = q.question;
+
+      const optsContainer = document.getElementById('options-container');
+      optsContainer.innerHTML = '';
+
+      const letters = ['A', 'B', 'C', 'D'];
+      q.options.forEach((optText, i) => {
+        const isSelected = userAnswers[currentQIdx] === i;
+        const card = document.createElement('div');
+        card.className = `choice-card ${isSelected ? 'selected' : ''}`;
+        card.innerHTML = `
+          <div class="letter-badge">${isSelected ? '<i class="fa-solid fa-check"></i>' : letters[i]}</div>
+          <div class="choice-text">${optText}</div>
+          <i class="fa-solid fa-circle-check choice-check-icon"></i>
+        `;
+        card.onclick = () => selectOption(i);
+        optsContainer.appendChild(card);
+      });
+
+      document.getElementById('btn-prev-q').disabled = currentQIdx === 0;
+
+      if (currentQIdx === quizQuestions.length - 1) {
+        document.getElementById('btn-next-q').style.display = 'none';
+        document.getElementById('btn-submit-q').style.display = 'inline-flex';
+      } else {
+        document.getElementById('btn-next-q').style.display = 'inline-flex';
+        document.getElementById('btn-submit-q').style.display = 'none';
+      }
+
+      renderProgressDots();
+    }
+
+    function selectOption(idx) {
+      userAnswers[currentQIdx] = idx;
+      renderCurrentQuestion();
+    }
+
+    function prevQuestion() {
+      if (currentQIdx > 0) {
+        currentQIdx--;
+        renderCurrentQuestion();
+      }
+    }
+
+    function nextQuestion() {
+      if (currentQIdx < quizQuestions.length - 1) {
+        currentQIdx++;
+        renderCurrentQuestion();
+      }
+    }
+
+    // Keyboard Shortcuts Support (1-4, A-D, Enter, Arrow Right)
+    document.addEventListener('keydown', (e) => {
+      if (document.getElementById('step-2-wrapper').style.display === 'none') return;
+
+      const key = e.key.toUpperCase();
+      if (['1', 'A'].includes(key) && quizQuestions[currentQIdx]?.options[0]) selectOption(0);
+      else if (['2', 'B'].includes(key) && quizQuestions[currentQIdx]?.options[1]) selectOption(1);
+      else if (['3', 'C'].includes(key) && quizQuestions[currentQIdx]?.options[2]) selectOption(2);
+      else if (['4', 'D'].includes(key) && quizQuestions[currentQIdx]?.options[3]) selectOption(3);
+      else if (['ENTER', 'ARROWRIGHT'].includes(key)) {
+        if (currentQIdx === quizQuestions.length - 1) submitDiagnosticQuiz();
+        else nextQuestion();
+      } else if (key === 'ARROWLEFT') {
+        prevQuestion();
+      }
+    });
+
+    function startQuizTimer() {
+      secondsElapsed = 0;
+      clearInterval(quizTimerInterval);
+      quizTimerInterval = setInterval(() => {
+        secondsElapsed++;
+        const remaining = Math.max(0, TARGET_SECONDS - secondsElapsed);
+        const mins = Math.floor(remaining / 60);
+        const secs = remaining % 60;
+        document.getElementById('timer-display').textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+
+        // Hard timeout at 7 minutes (420s)
+        if (secondsElapsed >= MAX_SECONDS) {
+          clearInterval(quizTimerInterval);
+          alert('Hard timeout reached (7 min max). Submitting your diagnostic answers now.');
+          submitDiagnosticQuiz();
+        }
+      }, 1000);
+    }
+
+    async function submitDiagnosticQuiz() {
+      if (isSubmitting) return;
+      isSubmitting = true;
+      clearInterval(quizTimerInterval);
+
+      try {
+        const res = await fetch('/api/mastery/grade-diagnostic-10q', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId,
+            skillName: selectedSkill,
+            userAnswers,
+            questions: quizQuestions
+          })
+        });
+        const result = await res.json();
+        if (result.success) {
+          displayDiagnosticResults(result);
+        }
+      } catch (e) {
+        console.error('Failed to submit diagnostic quiz', e);
+      }
+    }
+
+    function displayDiagnosticResults(data) {
+      document.getElementById('step-2-wrapper').style.display = 'none';
+      document.getElementById('step-result-wrapper').style.display = 'block';
+
+      const overallScore = typeof data.overallScore === 'number' ? data.overallScore : 0;
+      currentScoreVal = overallScore;
+      document.getElementById('overall-score-pct').textContent = `${overallScore}%`;
+
+      // Gauge ring animation calculation: circumference = 2 * PI * 54 = ~339.29
+      const circumference = 339.29;
+      const strokeOffset = circumference - (overallScore / 100) * circumference;
+      const gaugeFillEl = document.getElementById('score-gauge-fill');
+      
+      let gaugeColor = '#04ab07';
+      let scoreTagText = 'Needs Focus';
+      if (overallScore >= 80) {
+        gaugeColor = '#04ab07';
+        scoreTagText = 'Mastered';
+      } else if (overallScore >= 50) {
+        gaugeColor = '#f59e0b';
+        scoreTagText = 'Proficient';
+      } else {
+        gaugeColor = '#ef4444';
+        scoreTagText = 'Needs Focus';
+      }
+
+      if (gaugeFillEl) {
+        gaugeFillEl.style.stroke = gaugeColor;
+        setTimeout(() => {
+          gaugeFillEl.style.strokeDashoffset = strokeOffset;
+        }, 100);
+      }
+
+      const scoreTagEl = document.getElementById('overall-score-tag');
+      if (scoreTagEl) {
+        scoreTagEl.textContent = scoreTagText;
+        scoreTagEl.style.color = gaugeColor;
+      }
+
+      const scores = data.topicScores || {};
+      const container = document.getElementById('topic-scores-container');
+      if (container) {
+        container.innerHTML = '';
+        Object.keys(scores).forEach(topic => {
+          const info = scores[topic];
+          const isStrong = info.status === 'STRONG';
+          const card = document.createElement('div');
+          card.className = 'subtopic-card-item';
+          
+          const barColor = isStrong ? '#04ab07' : '#ef4444';
+
+          card.innerHTML = `
+            <div class="subtopic-title-box">
+              <div class="subtopic-icon-avatar" style="background: ${isStrong ? 'rgba(4,171,7,0.12)' : 'rgba(239,68,68,0.12)'}; color: ${barColor};">
+                <i class="${isStrong ? 'fa-solid fa-check' : 'fa-solid fa-triangle-exclamation'}"></i>
+              </div>
+              <div class="subtopic-name-text">${topic}</div>
+            </div>
+            
+            <div class="subtopic-bar-wrap">
+              <div class="subtopic-bar-bg">
+                <div class="subtopic-bar-fill" style="width: ${info.scorePct}%; background: ${barColor};"></div>
+              </div>
+            </div>
+
+            <div class="subtopic-score-fraction">${info.correct} / ${info.total} (${info.scorePct}%)</div>
+
+            <div>
+              <span class="status-badge ${isStrong ? 'strong' : 'weak'}">
+                ${isStrong ? '✅ Strong' : '🔴 Needs improvement'}
+              </span>
+            </div>
+          `;
+          container.appendChild(card);
+        });
+      }
+
+      const weakCount = (data.weakTopics || []).length;
+      const strongTopics = data.strongTopics || [];
+
+      let summaryHtml = `HIERO AI analyzed your results: <strong>${weakCount} area(s)</strong> need focused learning.`;
+      if (strongTopics.length > 0) {
+        summaryHtml += `<br><span style="color: var(--primary);">✨ Mastered subtopics skipped: <strong>${strongTopics.join(', ')}</strong></span>`;
+      }
+      document.getElementById('result-summary-msg').innerHTML = summaryHtml;
+
+      // Populate Skills You Need to Learn
+      const weakList = data.weakTopics || [];
+      const allSubtopics = Object.keys(data.topicScores || {});
+      const skillsToLearn = weakList.length > 0 ? weakList : allSubtopics.filter(t => (data.topicScores[t]?.scorePct || 0) < 80);
+      
+      if (skillsToLearn.length === 0) {
+        skillsToLearn.push(...allSubtopics.slice(0, 3));
+      }
+
+      window.selectedSkillsToLearn = [...skillsToLearn];
+      renderSkillsToLearnGrid();
+
+      // Populate Detailed Question Explanations ("Why You Got This Score")
+      const reviewContainer = document.getElementById('detailed-review-list');
+      reviewContainer.innerHTML = '';
+
+      const reviews = data.detailedReview || [];
+      let correctCount = 0;
+      let missedCount = 0;
+
+      reviews.forEach((item, idx) => {
+        if (item.isCorrect) correctCount++;
+        else missedCount++;
+
+        const diff = item.difficulty || (idx < 3 ? 'Easy' : (idx < 7 ? 'Medium' : 'Hard'));
+        let diffBadgeHtml = '<span style="font-size: 11px; font-weight: 800; color: #10b981; background: rgba(16, 185, 129, 0.12); padding: 3px 10px; border-radius: 100px; border: 1px solid rgba(16, 185, 129, 0.3);">🟢 Easy</span>';
+        if (diff.toLowerCase() === 'medium') {
+          diffBadgeHtml = '<span style="font-size: 11px; font-weight: 800; color: #f59e0b; background: rgba(245, 158, 11, 0.12); padding: 3px 10px; border-radius: 100px; border: 1px solid rgba(245, 158, 11, 0.3);">🟡 Medium</span>';
+        } else if (diff.toLowerCase() === 'hard') {
+          diffBadgeHtml = '<span style="font-size: 11px; font-weight: 800; color: #ef4444; background: rgba(239, 68, 68, 0.12); padding: 3px 10px; border-radius: 100px; border: 1px solid rgba(239, 68, 68, 0.3);">🔴 Hard</span>';
+        }
+
+        const card = document.createElement('div');
+        card.className = `review-item-card ${item.isCorrect ? 'is-correct-card' : 'is-missed-card'}`;
+        card.style.background = item.isCorrect ? 'rgba(4, 171, 7, 0.05)' : 'rgba(239, 68, 68, 0.05)';
+        card.style.border = `1.5px solid ${item.isCorrect ? 'rgba(4, 171, 7, 0.22)' : 'rgba(239, 68, 68, 0.22)'}`;
+        card.style.borderRadius = '18px';
+        card.style.padding = '20px 22px';
+        card.style.transition = 'all 0.2s ease';
+
+        card.innerHTML = `
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 11.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: ${item.isCorrect ? 'var(--primary)' : '#ef4444'}; background: ${item.isCorrect ? 'rgba(4, 171, 7, 0.12)' : 'rgba(239, 68, 68, 0.12)'}; padding: 4px 12px; border-radius: 100px;">
+                Q${item.questionNum} • ${item.subTopic}
+              </span>
+              ${diffBadgeHtml}
+            </div>
+            <span class="status-badge ${item.isCorrect ? 'strong' : 'weak'}" style="font-size: 11px; padding: 3px 12px;">
+              ${item.isCorrect ? '✅ Correct' : '❌ Missed'}
+            </span>
+          </div>
+
+          <div style="font-size: 15.5px; font-weight: 700; color: var(--text-main); margin-bottom: 14px; line-height: 1.45;">
+            ${item.question}
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 8px; font-size: 14px; margin-bottom: 14px;">
+            <div style="color: ${item.isCorrect ? 'var(--primary)' : '#ef4444'}; font-weight: 600; background: ${item.isCorrect ? 'rgba(4, 171, 7, 0.08)' : 'rgba(239, 68, 68, 0.08)'}; padding: 10px 14px; border-radius: 12px; border: 1px solid ${item.isCorrect ? 'rgba(4, 171, 7, 0.2)' : 'rgba(239, 68, 68, 0.2)'};">
+              <i class="${item.isCorrect ? 'fa-solid fa-circle-check' : 'fa-solid fa-circle-xmark'}"></i> Your Choice: <strong>${item.userAnswerText}</strong>
+            </div>
+            ${!item.isCorrect ? `
+              <div style="color: #10b981; font-weight: 600; background: rgba(16, 185, 129, 0.08); padding: 10px 14px; border-radius: 12px; border: 1px solid rgba(16, 185, 129, 0.2);">
+                <i class="fa-solid fa-circle-check"></i> Correct Answer: <strong>${item.correctAnswerText}</strong>
+              </div>
+            ` : ''}
+          </div>
+
+          <div style="font-size: 13.5px; color: var(--text-muted); background: var(--card-inner-bg); border: 1px solid var(--card-inner-border); border-left: 4px solid ${item.isCorrect ? 'var(--primary)' : '#ef4444'}; padding: 12px 16px; border-radius: 12px; line-height: 1.55;">
+            💡 <strong>Why:</strong> ${item.explanation}
+          </div>
+        `;
+        reviewContainer.appendChild(card);
+      });
+
+      // Update metric pill cards
+      document.getElementById('metric-accuracy-val').textContent = `${overallScore}%`;
+      document.getElementById('metric-correct-val').textContent = `${correctCount} / ${reviews.length || 10}`;
+      document.getElementById('metric-focus-val').textContent = `${weakCount}`;
+
+      document.getElementById('cnt-correct-tab').textContent = correctCount;
+      document.getElementById('cnt-missed-tab').textContent = missedCount;
+      // Filter logic
+      window.allReviewsList = reviews;
+      filterReviewCards('all', document.querySelector('#review-filter-tabs .nav-btn'));
+    }
+
+    function renderSkillsToLearnGrid() {
+      const grid = document.getElementById('skills-to-learn-grid');
+      if (!grid) return;
+      grid.innerHTML = '';
+
+      (window.selectedSkillsToLearn || []).forEach(skill => {
+        const chip = document.createElement('div');
+        chip.className = 'skill-learn-chip selected';
+        chip.style.cssText = `
+          display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 100px;
+          background: rgba(4,171,7,0.12); border: 1.5px solid var(--primary); color: var(--text-main);
+          font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s ease;
+        `;
+        chip.innerHTML = `<i class="fa-solid fa-circle-check" style="color: var(--primary);"></i> ${skill}`;
+        chip.onclick = () => {
+          const idx = window.selectedSkillsToLearn.indexOf(skill);
+          if (idx > -1) {
+            window.selectedSkillsToLearn.splice(idx, 1);
+            chip.style.background = 'var(--card-inner-bg)';
+            chip.style.borderColor = 'var(--card-inner-border)';
+            chip.querySelector('i').className = 'fa-regular fa-circle';
+            chip.querySelector('i').style.color = 'var(--text-muted)';
+          } else {
+            window.selectedSkillsToLearn.push(skill);
+            chip.style.background = 'rgba(4,171,7,0.12)';
+            chip.style.borderColor = 'var(--primary)';
+            chip.querySelector('i').className = 'fa-solid fa-circle-check';
+            chip.querySelector('i').style.color = 'var(--primary)';
+          }
+        };
+        grid.appendChild(chip);
+      });
+    }
+
+    function addCustomSkillToLearn() {
+      const input = document.getElementById('custom-skill-input');
+      const val = input ? input.value.trim() : '';
+      if (val && !window.selectedSkillsToLearn.includes(val)) {
+        window.selectedSkillsToLearn.push(val);
+        input.value = '';
+        renderSkillsToLearnGrid();
+      }
+    }
+
+    function filterReviewCards(type, btnEl) {
+      document.querySelectorAll('#review-filter-tabs .nav-btn').forEach(b => b.classList.remove('active'));
+      if (btnEl) btnEl.classList.add('active');
+
+      const cards = document.querySelectorAll('.review-item-card');
+      cards.forEach(card => {
+        if (type === 'all') {
+          card.style.display = 'block';
+        } else if (type === 'correct') {
+          card.style.display = card.classList.contains('is-correct-card') ? 'block' : 'none';
+        } else if (type === 'missed') {
+          card.style.display = card.classList.contains('is-missed-card') ? 'block' : 'none';
+        }
+      });
+    }
+
+    let currentSelectedLang = 'english';
+    let currentScoreVal = 20;
+
+    function goToPersonalizedPath() {
+      openLanguageModal();
+    }
+
+    function openLanguageModal() {
+      document.getElementById('language-modal').style.display = 'flex';
+    }
+
+    function closeLanguageModal() {
+      document.getElementById('language-modal').style.display = 'none';
+    }
+
+    function selectLang(langKey, cardEl) {
+      currentSelectedLang = langKey;
+      document.querySelectorAll('.lang-card').forEach(c => c.classList.remove('selected'));
+      if (cardEl) cardEl.classList.add('selected');
+
+      const labels = {
+        english: 'English',
+        telugu: 'Telugu (తెలుగు)',
+        hindi: 'Hindi (हिंदी)',
+        tamil: 'Tamil (தமிழ்)',
+        kannada: 'Kannada (ಕನ್ನಡ)',
+        malayalam: 'Malayalam (മലയാളം)'
+      };
+
+      const btn = document.getElementById('btn-confirm-lang');
+      if (btn) {
+        btn.textContent = `Start Learning in ${labels[langKey] || 'English'} →`;
+      }
+    }
+
+    function confirmLanguageAndProceed() {
+      localStorage.setItem('userLanguage', currentSelectedLang);
+      localStorage.setItem('userScore', currentScoreVal);
+      if (window.selectedSkillsToLearn && window.selectedSkillsToLearn.length > 0) {
+        localStorage.setItem('userSelectedSkills', JSON.stringify(window.selectedSkillsToLearn));
+      }
+
+      const skillsQuery = window.selectedSkillsToLearn && window.selectedSkillsToLearn.length > 0 
+        ? encodeURIComponent(window.selectedSkillsToLearn.join(','))
+        : encodeURIComponent(selectedSkill);
+
+      window.location.href = `learn.html?skill=${skillsQuery}&score=${currentScoreVal}&lang=${currentSelectedLang}`;
+    }
+
+    // Minimal Particle Background Canvas
+    (function () {
+      const canvas = document.getElementById('antigravity-bg');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      let particles = [];
+
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+      window.addEventListener('resize', resize);
+      resize();
+
+      for (let i = 0; i < 40; i++) {
+        particles.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          radius: Math.random() * 1.8 + 0.6,
+          speedY: - (Math.random() * 0.35 + 0.1),
+          opacity: Math.random() * 0.35 + 0.15
+        });
+      }
+
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => {
+          p.y += p.speedY;
+          if (p.y < 0) {
+            p.y = canvas.height;
+            p.x = Math.random() * canvas.width;
+          }
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(4, 171, 7, ${p.opacity})`;
+          ctx.shadowBlur = 10;
+          ctx.shadowColor = '#04ab07';
+          ctx.fill();
+        });
+        requestAnimationFrame(animate);
+      }
+      animate();
+    })();
+  </script>
+
+</body>
+
+</html>

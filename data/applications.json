@@ -1,0 +1,186 @@
+[
+  {
+    "id": "app-1788194917829",
+    "opportunityId": "j-1",
+    "companyName": "Tesla AI Vision",
+    "studentId": "cand-1",
+    "studentName": "Jaswanth Kumar",
+    "email": "jaswanthkumarmuthoju@gmail.com",
+    "status": "applied",
+    "matchScore": 92,
+    "appliedAt": "2026-08-31T16:48:37.829Z",
+    "resumeUrl": "/resumes/Jaswanth_Kumar_Resume_2026.pdf",
+    "skillsMatch": {
+      "matched": [
+        "Python",
+        "React",
+        "TypeScript",
+        "SQL"
+      ],
+      "missing": [
+        "Docker"
+      ]
+    }
+  },
+  {
+    "id": "app-1787855635069",
+    "opportunityId": "j-1",
+    "companyName": "Tesla AI Vision",
+    "studentId": "cand-1",
+    "studentName": "Jaswanth Kumar",
+    "email": "jaswanthkumarmuthoju@gmail.com",
+    "status": "applied",
+    "matchScore": 92,
+    "appliedAt": "2026-08-27T18:33:55.069Z",
+    "resumeUrl": "/resumes/Jaswanth_Kumar_Resume_2026.pdf",
+    "skillsMatch": {
+      "matched": [
+        "Python",
+        "React",
+        "TypeScript",
+        "SQL"
+      ],
+      "missing": [
+        "Docker"
+      ]
+    }
+  },
+  {
+    "id": "app-1787643234076",
+    "opportunityId": "opp-demo-1",
+    "companyName": "Acme AI Systems",
+    "studentId": "cand-1",
+    "studentName": "Jaswanth Kumar",
+    "email": "jaswanthkumarmuthoju@gmail.com",
+    "status": "applied",
+    "matchScore": 92,
+    "appliedAt": "2026-08-25T07:33:54.077Z",
+    "resumeUrl": "/resumes/Jaswanth_Kumar_Resume_Master_1.pdf",
+    "skillsMatch": {
+      "matched": [
+        "Python",
+        "React",
+        "TypeScript",
+        "SQL"
+      ],
+      "missing": [
+        "Docker"
+      ]
+    }
+  },
+  {
+    "id": "app-1787609374820",
+    "opportunityId": "j-1787609032641",
+    "companyName": "Tech Hiero",
+    "studentId": "cand-1",
+    "studentName": "Jaswanth Kumar",
+    "email": "jaswanthkumarmuthoju@gmail.com",
+    "status": "applied",
+    "matchScore": 92,
+    "appliedAt": "2026-08-24T22:09:34.820Z",
+    "resumeUrl": "/resumes/Jaswanth_Kumar_Resume_2026.pdf",
+    "skillsMatch": {
+      "matched": [
+        "Python",
+        "React",
+        "TypeScript",
+        "SQL"
+      ],
+      "missing": [
+        "Docker"
+      ]
+    }
+  },
+  {
+    "id": "app-1787608952757",
+    "opportunityId": "j-1787608538593",
+    "companyName": "Tech Hiero",
+    "studentId": "cand-1",
+    "studentName": "Jaswanth Kumar",
+    "email": "jaswanthkumarmuthoju@gmail.com",
+    "status": "applied",
+    "matchScore": 92,
+    "appliedAt": "2026-08-24T22:02:32.757Z",
+    "resumeUrl": "/resumes/Jaswanth_Kumar_Resume_Master.pdf",
+    "skillsMatch": {
+      "matched": [
+        "Python",
+        "React",
+        "TypeScript",
+        "SQL"
+      ],
+      "missing": [
+        "Docker"
+      ]
+    }
+  },
+  {
+    "id": "app-1787608619985",
+    "opportunityId": "j-1787608538593",
+    "companyName": "Tech Hiero",
+    "studentId": "cand-1",
+    "studentName": "Jaswanth Kumar",
+    "email": "jaswanthkumarmuthoju@gmail.com",
+    "status": "applied",
+    "matchScore": 92,
+    "appliedAt": "2026-08-24T21:56:59.985Z",
+    "resumeUrl": "/resumes/jaswanth_resume.pdf",
+    "skillsMatch": {
+      "matched": [
+        "Python",
+        "React",
+        "TypeScript",
+        "SQL"
+      ],
+      "missing": [
+        "Docker"
+      ]
+    }
+  },
+  {
+    "id": "app-1787608557973",
+    "opportunityId": "j-1787608538593",
+    "companyName": "Tech Hiero",
+    "studentId": "cand-1",
+    "studentName": "Jaswanth Kumar",
+    "email": "jaswanthkumarmuthoju@gmail.com",
+    "status": "applied",
+    "matchScore": 92,
+    "appliedAt": "2026-08-24T21:55:57.973Z",
+    "resumeUrl": "/resumes/jaswanth_resume.pdf",
+    "skillsMatch": {
+      "matched": [
+        "Python",
+        "React",
+        "TypeScript",
+        "SQL"
+      ],
+      "missing": [
+        "Docker"
+      ]
+    }
+  },
+  {
+    "id": "app-1787608331635",
+    "opportunityId": "j-1787608001591",
+    "companyName": "Verified HR Partner",
+    "studentId": "cand-1",
+    "studentName": "Jaswanth Kumar",
+    "email": "jaswanthkumarmuthoju@gmail.com",
+    "status": "applied",
+    "matchScore": 92,
+    "appliedAt": "2026-08-24T21:52:11.635Z",
+    "resumeUrl": "/resumes/jaswanth_resume.pdf",
+    "skillsMatch": {
+      "matched": [
+        "Python",
+        "React",
+        "TypeScript",
+        "SQL"
+      ],
+      "missing": [
+        "Docker"
+      ]
+    }
+  }
+]

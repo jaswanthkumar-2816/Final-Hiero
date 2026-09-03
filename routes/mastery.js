@@ -6,7 +6,7 @@ const StudentProgress = require('../models/StudentProgress');
 const DiagnosticResult = require('../models/DiagnosticResult');
 
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
-const AI_MODEL = process.env.AI_MODEL || 'llama-3.3-70b-versatile';
+const AI_MODEL = process.env.AI_MODEL || 'openai/gpt-oss-20b';
 const MASTERY_THRESHOLD = 75;
 
 // ─────────────────────────────────────────────────────
@@ -472,6 +472,7 @@ router.post('/set-beginner-level', async (req, res) => {
                     startingTopicId: firstTopicId,
                     state: 'LEARNING',
                     masteryPct: 0,
+                    track: 'beginner',
                     weakSubConcepts: [],
                     updatedAt: new Date()
                 }
@@ -844,6 +845,7 @@ router.post('/grade-diagnostic-10q', async (req, res) => {
                     startingTopicId,
                     state: startingState,
                     masteryPct: Math.round(overallScore * 0.4),
+                    track: 'intermediate',
                     weakSubConcepts: weakTopics,
                     updatedAt: new Date()
                 }
@@ -941,7 +943,7 @@ router.post('/placement', async (req, res) => {
         try {
             await StudentProgress.findOneAndUpdate(
                 { userId, skillName: normalizedSkill },
-                { $set: { topicId: startingTopicId, startingTopicId, state: startingState, updatedAt: new Date() } },
+                { $set: { topicId: startingTopicId, startingTopicId, state: startingState, track: 'intermediate', updatedAt: new Date() } },
                 { upsert: true }
             );
         } catch(e) {}
@@ -984,9 +986,11 @@ router.get('/path/:userId/:skillName', async (req, res) => {
             success: true,
             skillName: normalizedSkill,
             source: tree.source,
+            track: progress?.track || null,
             currentTopicId: progress?.topicId || tree.topics[0]?.id,
             currentState: progress?.state || 'NOT_STARTED',
             overallMastery: progress?.masteryPct || 0,
+            weakSubConcepts: progress?.weakSubConcepts || [],
             topics: topicsWithState
         });
     } catch (e) {

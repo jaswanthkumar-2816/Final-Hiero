@@ -24,7 +24,7 @@ async function ensureAuthenticated() {
   const token = getAuthToken();
   if (!token) {
     try {
-      const response = await fetch('http://localhost:5003/api/auth/demo', {
+      const response = await fetch(`${window.location.origin}/api/auth/demo`, {
         method: 'POST'
       });
       const result = await response.json();
@@ -71,7 +71,7 @@ async function submitStep(step) {
     const token = getAuthToken();
     if (token) headers['Authorization'] = `Bearer ${token}`;
     
-    const response = await fetch(`http://localhost:5003/api/resume/${step}`, {
+    const response = await fetch(`${window.location.origin}/api/resume/${step}`, {
       method: 'POST',
       headers,
       body: JSON.stringify(data)
@@ -112,7 +112,7 @@ async function uploadPhoto(formData) {
     const headers = {};
     if (token) headers['Authorization'] = `Bearer ${token}`;
     
-    const response = await fetch('http://localhost:5003/api/resume/photo', {
+    const response = await fetch(`${window.location.origin}/api/resume/photo`, {
       method: 'POST',
       headers,
       body: formData
@@ -152,7 +152,7 @@ async function sendChatMessage() {
     };
     if (token) headers['Authorization'] = `Bearer ${token}`;
     
-    const response = await fetch('http://localhost:5003/api/resume/chat', {
+    const response = await fetch(`${window.location.origin}/api/resume/chat`, {
       method: 'POST',
       headers,
       body: JSON.stringify({ message })
@@ -179,7 +179,7 @@ async function previewResume() {
     };
     if (token) headers['Authorization'] = `Bearer ${token}`;
     
-    const response = await fetch('http://localhost:5003/api/resume/preview', {
+    const response = await fetch(`${window.location.origin}/api/resume/preview`, {
       method: 'POST',
       headers,
       body: JSON.stringify({})
@@ -188,7 +188,7 @@ async function previewResume() {
     const result = await response.json();
     if (response.ok) {
       showStatus('Preview ready', 'success');
-      window.open('http://localhost:5003/api/resume/preview-view', '_blank');
+      window.open(`${window.location.origin}/api/resume/preview-view`, '_blank');
     } else {
       showStatus(result.error || 'Failed to generate preview', 'error');
       console.error("Preview Error:", result);
@@ -211,7 +211,7 @@ async function downloadResume() {
     };
     if (token) headers['Authorization'] = `Bearer ${token}`;
     
-    const response = await fetch('http://localhost:5003/api/resume/generate', {
+    const response = await fetch('${window.location.origin}/api/resume/generate', {
       method: 'POST',
       headers,
       body: JSON.stringify({})
@@ -221,7 +221,7 @@ async function downloadResume() {
     if (response.ok) {
       showStatus('Resume generated', 'success');
       const a = document.createElement('a');
-      a.href = `http://localhost:5003/api/resume/download?file=${result.file}`;
+      a.href = `${window.location.origin}/api/resume/download?file=${result.file}`;
       a.download = result.file;
       a.click();
     } else {

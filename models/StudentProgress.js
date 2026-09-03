@@ -27,6 +27,7 @@ const studentProgressSchema = new mongoose.Schema({
         default: 'NOT_STARTED'
     },
     masteryPct: { type: Number, default: 0, min: 0, max: 100 },
+    track: { type: String, default: null }, // 'beginner' | 'intermediate'
     lastAssessedAt: Date,
     weakSubConcepts: [String],
     startingTopicId: String,                            // set by placement quiz

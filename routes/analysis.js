@@ -5,7 +5,7 @@ const pdfParse = require('pdf-parse');
 const fs = require('fs');
 const path = require('path');
 const dotenv = require('dotenv');
-const { Groq } = require('groq-sdk');
+// const { Groq } = require('groq-sdk'); // Lazy loaded on demand
 const authObj = require('./auth'); // For personalization
 const { normalizeResponse } = require('../utils/normalizeResponse');
 
@@ -16,10 +16,17 @@ const router = express.Router();
 // Env vars
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
-const AI_MODEL = process.env.AI_MODEL || 'llama-3.3-70b-versatile';
+const AI_MODEL = process.env.AI_MODEL || 'openai/gpt-oss-20b';
 
-// Initialize Groq
-const groq = new Groq({ apiKey: GROQ_API_KEY });
+// Initialize Groq lazily
+let groqInstance = null;
+function getGroq() {
+    if (!groqInstance) {
+        const { Groq } = require('groq-sdk');
+        groqInstance = new Groq({ apiKey: GROQ_API_KEY });
+    }
+    return groqInstance;
+}
 
 // Load Curriculum
 let CURRICULUM = {};
@@ -252,21 +259,22 @@ function normalizeCodeBlock(data) {
 }
 
 // Skill extraction utils
-const TECH_SKILL_SET = new Set(['python', 'java', 'javascript', 'js', 'node', 'nodejs', 'react', 'angular', 'vue', 'html', 'css', 'docker', 'kubernetes', 'k8s', 'aws', 'gcp', 'azure', 'git', 'github', 'graphql', 'rest', 'api', 'mongodb', 'mysql', 'postgres', 'sql', 'redis', 'kafka', 'spark', 'pandas', 'numpy', 'tensorflow', 'keras', 'pytorch', 'machine learning', 'deep learning', 'nlp', 'flask', 'django', 'fastapi', 'express', 'typescript', 'c++', 'cpp', 'go', 'golang', 'rust', 'php', 'laravel', 'swift', 'kotlin', 'android', 'ios', 'flutter', 'selenium', 'jest', 'mocha', 'cypress', 'devops', 'microservices', 'oauth', 'jwt', 'security', 'etl', 'tableau', 'powerbi', 'salesforce', 'sap', 'oracle', 'c#', 'dotnet', 'asp.net', 'unity', 'unreal', 'figma', 'adobe', 'photoshop', 'illustrator', 'linux', 'bash', 'shell', 'terraform', 'ansible', 'jenkins', 'circleci', 'travis', 'graphql', 'apollo', 'redux', 'mobx', 'tailwind', 'bootstrap']);
+const TECH_SKILL_SET = new Set(['python', 'java', 'javascript', 'js', 'node', 'nodejs', 'react', 'angular', 'vue', 'html', 'css', 'docker', 'kubernetes', 'k8s', 'aws', 'gcp', 'azure', 'git', 'github', 'graphql', 'rest', 'api', 'mongodb', 'mysql', 'postgres', 'sql', 'redis', 'kafka', 'spark', 'pandas', 'numpy', 'tensorflow', 'keras', 'pytorch', 'machine learning', 'deep learning', 'nlp', 'flask', 'django', 'fastapi', 'express', 'typescript', 'c++', 'cpp', 'go', 'golang', 'rust', 'php', 'laravel', 'swift', 'kotlin', 'android', 'ios', 'flutter', 'selenium', 'jest', 'mocha', 'cypress', 'devops', 'microservices', 'oauth', 'jwt', 'security', 'etl', 'tableau', 'powerbi', 'salesforce', 'sap', 'oracle', 'c#', 'dotnet', 'asp.net', 'unity', 'unreal', 'figma', 'adobe', 'photoshop', 'illustrator', 'linux', 'bash', 'shell', 'terraform', 'ansible', 'jenkins', 'circleci', 'travis', 'graphql', 'apollo', 'redux', 'mobx', 'tailwind', 'bootstrap', 'sensors', 'mechatronics', 'plc', 'cad']);
 const SOFT_SKILL_SET = new Set(['communication', 'leadership', 'teamwork', 'management', 'strategic', 'planning', 'negotiation', 'presentation', 'stakeholder', 'coordination', 'problem solving', 'critical thinking', 'adaptability', 'collaboration', 'time management', 'organization', 'customer service', 'sales', 'marketing', 'budgeting', 'reporting', 'finance', 'recruitment', 'training', 'mentoring', 'analysis', 'operations', 'project management', 'agile', 'scrum', 'public speaking', 'emotional intelligence', 'conflict resolution', 'decision making', 'creativity', 'innovation', 'customer experience', 'cx', 'user experience', 'ux']);
-const MULTI_WORD = ['machine learning', 'deep learning', 'data science', 'problem solving', 'critical thinking', 'time management', 'project management', 'artificial intelligence', 'software engineering', 'full stack', 'front end', 'back end', 'cloud computing'];
+const MULTI_WORD = ['machine learning', 'deep learning', 'data science', 'problem solving', 'critical thinking', 'time management', 'project management', 'artificial intelligence', 'software engineering', 'full stack', 'front end', 'back end', 'cloud computing', 'factory automation', 'machine vision', 'product demonstration', 'consulting sales'];
+const CAMPUS_NOISE = new Set(['recruitment', 'registration', 'shortlisting', 'eligibility', 'backlog', 'placement', 'campus', 'statistics', 'participation', 'hiring', 'workflow', 'planning']);
 
 function normalizeSkill(s) { return s.toLowerCase().trim(); }
 function extractSkillsDeterministic(text = '') {
     if (!text) return [];
     const lower = text.toLowerCase();
     const found = new Set();
-
+    
     // Check multi-word phrases first
     for (const phrase of MULTI_WORD) {
         if (lower.includes(phrase)) found.add(phrase);
     }
-
+    
     // Check individual tokens
     const tokens = lower.split(/[^a-z0-9+#.]+/).filter(t => t.length > 1);
     for (let t of tokens) {
@@ -275,11 +283,55 @@ function extractSkillsDeterministic(text = '') {
         if (t === 'dl') t = 'deep learning';
         if (TECH_SKILL_SET.has(t) || SOFT_SKILL_SET.has(t)) found.add(t);
     }
-    return Array.from(found).sort();
+    return Array.from(found).filter(s => !isCampusNoise(s)).sort();
 }
-function classifyDomain(resumeSkills, jdSkills) {
-    const techCount = (resumeSkills || []).filter(s => TECH_SKILL_SET.has(s)).length + (jdSkills || []).filter(s => TECH_SKILL_SET.has(s)).length;
-    const softCount = (resumeSkills || []).filter(s => SOFT_SKILL_SET.has(s)).length + (jdSkills || []).filter(s => SOFT_SKILL_SET.has(s)).length;
+function skillKey(s) {
+    return String(s || '').toLowerCase().replace(/[^a-z0-9+#]+/g, ' ').trim();
+}
+
+function skillsOverlap(a, b) {
+    const ka = skillKey(a);
+    const kb = skillKey(b);
+    if (!ka || !kb) return false;
+    if (ka === kb) return true;
+    if (ka.length >= 5 && kb.length >= 5 && (ka.includes(kb) || kb.includes(ka))) return true;
+    return false;
+}
+
+function isCampusNoise(skill) {
+    const s = skillKey(skill);
+    if (!s) return true;
+    if (CAMPUS_NOISE.has(s)) return true;
+    if (s.length > 90) return true;
+    return /registration|shortlist|backlog|eligible candidate|pre placement|open for course|hiring workflow/.test(s);
+}
+
+function resumeHasSkill(resumeText, resumeSkills, skill) {
+    if ((resumeSkills || []).some(s => skillsOverlap(s, skill))) return true;
+    const k = skillKey(skill);
+    if (k.length > 4 && (resumeText || '').toLowerCase().includes(k)) return true;
+    return false;
+}
+
+function cleanSkillList(list) {
+    const out = [];
+    const seen = new Set();
+    for (const raw of list || []) {
+        const s = String(raw || '').trim();
+        if (!s || isCampusNoise(s)) continue;
+        const key = skillKey(s);
+        if (!key || seen.has(key)) continue;
+        seen.add(key);
+        out.push(s);
+    }
+    return out;
+}
+
+function classifyDomain(resumeSkills, jdSkills, jdText = '') {
+    const blob = `${(jdSkills || []).join(' ')} ${(jdText || '')}`.toLowerCase();
+    if (/sales engineer|consulting sales|factory automation|territory|product demonstration/.test(blob)) return 'sales-core';
+    const techCount = (resumeSkills || []).filter(s => TECH_SKILL_SET.has(skillKey(s))).length + (jdSkills || []).filter(s => TECH_SKILL_SET.has(skillKey(s))).length;
+    const softCount = (resumeSkills || []).filter(s => SOFT_SKILL_SET.has(skillKey(s))).length + (jdSkills || []).filter(s => SOFT_SKILL_SET.has(skillKey(s))).length;
     return techCount >= softCount ? 'tech' : 'non-tech';
 }
 
@@ -326,6 +378,24 @@ async function safeExtractPdf(buffer, fileName = 'unknown') {
     if (bestLength > 0) return bestResult;
     console.error(`❌ PDF extraction failed for ${fileName}`);
     return '';
+}
+
+function isPlainTextUpload(file) {
+    const extension = path.extname(file?.originalname || '').toLowerCase();
+    return extension === '.txt' || file?.mimetype === 'text/plain';
+}
+
+async function extractUploadedText(file) {
+    if (!file) return '';
+
+    const buffer = fs.readFileSync(file.path);
+    if (isPlainTextUpload(file)) {
+        // Remove the UTF-8 byte-order mark when present so the analysis starts
+        // with the actual resume/JD content instead of an invisible character.
+        return buffer.toString('utf8').replace(/^\uFEFF/, '').trim();
+    }
+
+    return safeExtractPdf(buffer, file.originalname);
 }
 
 // AI Problem fallback generator
@@ -389,9 +459,60 @@ function genericProblemSet(skill) {
     };
 }
 
-function suggestFallbackProjects(missing) {
-    if (!missing.length) return ['Refactor an existing project adding measurable outcomes', 'Create documentation & tests for a past project'];
-    return missing.slice(0, 2).map(s => `Build a project showcasing practical ${s}`);
+function suggestFallbackProjects(missing, domain) {
+    const gaps = (missing || []).filter(Boolean);
+    if (domain === 'sales-core') {
+        return [
+            { title: 'Factory Automation Product Demo Deck', tags: ['Sales', 'Presentation', 'Sensors'], reason: 'This role needs live product demonstrations for factory customers', skillGap: gaps[0] || 'Product Demonstration', impact: 'High Impact' },
+            { title: 'Territory CRM Visit Tracker', tags: ['CRM', 'Excel', 'Sales'], reason: 'Consulting sales needs a weekly territory and follow-up system', skillGap: gaps.find(s => /sales|crm/i.test(s)) || 'Sales', impact: 'Recommended' },
+            { title: 'Customer ROI Case Study', tags: ['Analysis', 'Communication'], reason: 'Show how factory products save cost and downtime for a plant', skillGap: gaps[1] || 'Communication', impact: 'Recommended' }
+        ];
+    }
+    if (!gaps.length) {
+        return [
+            { title: 'Refactor an existing project with measurable outcomes', tags: ['Portfolio'], reason: 'Quantify impact on your current work', skillGap: 'Portfolio', impact: 'Recommended' },
+            { title: 'Add tests and a public write-up for a past project', tags: ['Documentation'], reason: 'Recruiters need proof, not just skill names', skillGap: 'Documentation', impact: 'Recommended' }
+        ];
+    }
+    return gaps.slice(0, 3).map((s, i) => ({
+        title: `Build a project that proves ${s}`,
+        tags: [s],
+        reason: `The job requires ${s} and it is missing from the resume`,
+        skillGap: s,
+        impact: i === 0 ? 'High Impact' : 'Recommended'
+    }));
+}
+
+function isSalesLikeRole(jdText, jdSkills) {
+    const blob = `${jdText || ''} ${(jdSkills || []).join(' ')}`.toLowerCase();
+    return /sales engineer|consulting sales|factory automation|territory|product demonstration|field sales|b2b sales/.test(blob);
+}
+
+function normalizeProjectSuggestions(raw, missing, domain) {
+    const out = [];
+    const seen = new Set();
+    const push = (p) => {
+        if (!p || !p.title) return;
+        const key = p.title.toLowerCase().trim();
+        if (seen.has(key) || out.length >= 3) return;
+        seen.add(key);
+        out.push(p);
+    };
+    for (const item of raw || []) {
+        if (typeof item === 'string' && item.trim()) {
+            push({ title: item.trim(), tags: [missing[0]].filter(Boolean), reason: 'Closes a skill gap for this job', skillGap: missing[0] || '', impact: 'High Impact' });
+        } else if (item && item.title) {
+            push({
+                title: String(item.title).trim(),
+                tags: Array.isArray(item.tags) ? item.tags : [],
+                reason: item.reason || (item.skillGap ? `Closes gap: ${item.skillGap}` : 'Closes a skill gap for this job'),
+                skillGap: item.skillGap || missing[0] || '',
+                impact: item.impact || (out.length === 0 ? 'High Impact' : 'Recommended')
+            });
+        }
+    }
+    for (const fallback of suggestFallbackProjects(missing, domain)) push(fallback);
+    return out;
 }
 
 // Score Tier Info Helper
@@ -451,6 +572,9 @@ function get3FallbackVideos(skill, score, lang) {
     const l = (lang || 'english').toLowerCase();
 
     const videoIdPool = {
+        html: ['UB1O30fR-EE', 'pQN-pnXPaVg', 'mU6anWqZJcc', 'kMT54MPz9oE', 'HD13ktigpvA', 'qxRwTwQVzEA', 'qz0aGYrrlhU', 'PlxWf493en4', 'salY_Sm6h7U', 'v4oN4LuAENV', 'XqFR2lqBYPk', 'DPnqb74Smug'],
+        css: ['1PnNi_t2n3g', 'yfoY53QXEnI', '1Rs2ND1ryYc', 'OXGznpKZ_sA', 'wRNinF7TQqE', 'JJSoEo8JSnc', 'n4gLB-8Z9F8', '1PnNi_t2n3g', '1Rs2ND1ryYc', 'yfoY53QXEnI', 'OXGznpKZ_sA', 'wRNinF7TQqE'],
+        sql: ['HXV3zeQKqGY', '7S_tz1z_5bA', '9Pzj7Dj25oA', 'zsjvFFKOm3k', 'p3qvA1p0E5c', '5bQ7Q0QdY8k', 'HXV3zeQKqGY', '7S_tz1z_5bA', '9Pzj7Dj25oA', 'zsjvFFKOm3k', 'p3qvA1p0E5c', '5bQ7Q0QdY8k'],
         react: ['hQAHSlTtcmY', 'SqcY0GlETPk', 'w7ejDZ8SWv8', 'TNhaISOUy6Q', '35lXWvCuM8o', 'O6P86uwfdR0', '7kAW7Qx2yD0', 'd56mG7DezGs', 'cVw6-F648D4', 'ZCuYvjZfFA0', '00pxxT_4gLw', '4UZrsTqkcW4'],
         python: ['_uQrJ0TkZlc', 'rfscVS0vtbw', 'kqtD5dpn9C8', 'JeznW_7DlB0', 'HGOBQPFzWKo', '8ext9G7xfeg', 'cKPlPJyQrtE', 'qUebd2NmbHU', '7k2v4kU_z9g', 'XGF3Qu4dUqk', '0vT9FwzB2pg', 'eWRfhZUzrAc'],
         javascript: ['W6NZfCO5SIk', 'H3XIJYEPdus', 'pkDg23nL2vE', 'hdI2bqOjy3c', 'sbMstS2Q5uA', 'po5e6yC3t24', 'R9I85RhV7Cg', 'Bv_5Zv5c-Ts', '3PHXvlpOkfU', 'ZvbzSrg0afE', 'musPosdXqGg', 'nZ1DMMsyVyI'],
@@ -481,34 +605,69 @@ function get3FallbackVideos(skill, score, lang) {
     });
 }
 
-// YouTube video fetcher supporting score tier and language
-async function fetchVideos(query, score = 20, lang = 'english') {
-    const tierInfo = getScoreTierInfo(score);
-    const languages = ["english", "hindi", "telugu", "tamil", "kannada", "malayalam"];
-    const results = {};
-    const queryClean = (query || "Python").replace(/ \(.+\)/g, '').trim();
+// YouTube video fetcher for the selected language
+const YT_LANG_CODES = { english: 'en', hindi: 'hi', telugu: 'te', tamil: 'ta', kannada: 'kn', malayalam: 'ml' };
+const YT_LANG_SCRIPTS = { hindi: 'हिंदी', telugu: 'తెలుగు', tamil: 'தமிழ்', kannada: 'ಕನ್ನಡ', malayalam: 'മലയാളം' };
 
-    if (!YOUTUBE_API_KEY) {
-        console.warn('YOUTUBE_API_KEY missing. Using score-tiered fallback engine.');
-        languages.forEach(l => {
-            results[l] = get3FallbackVideos(queryClean, score, l);
-        });
-        return results;
+function languageSearchQuery(skill, lang) {
+    const l = (lang || 'english').toLowerCase();
+    if (l === 'english') return `${skill} tutorial for beginners`;
+    const native = YT_LANG_SCRIPTS[l] || '';
+    return `${skill} tutorial ${l} ${native}`.trim();
+}
+
+function languageLabel(lang) {
+    const l = (lang || 'english').toLowerCase();
+    if (l === 'telugu') return 'Telugu (తెలుగు)';
+    if (l === 'hindi') return 'Hindi (हिंदी)';
+    if (l === 'tamil') return 'Tamil (தமிழ்)';
+    if (l === 'kannada') return 'Kannada (ಕನ್ನಡ)';
+    if (l === 'malayalam') return 'Malayalam (മലയാളം)';
+    return 'English';
+}
+
+async function searchYouTubeKeyless(query, limit = 5) {
+    const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
+    const ytRes = await axios.get(url, {
+        timeout: 12000,
+        headers: {
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+            'Accept-Language': 'en-US,en;q=0.9'
+        }
+    });
+    const html = typeof ytRes.data === 'string' ? ytRes.data : '';
+    const match = html.match(/var\s+ytInitialData\s*=\s*({[\s\S]+?});/);
+    if (!match) return [];
+    const parsed = JSON.parse(match[1]);
+    const contents = parsed.contents?.twoColumnSearchResultsRenderer?.primaryContents?.sectionListRenderer?.contents || [];
+    const videos = [];
+    for (const section of contents) {
+        const items = section.itemSectionRenderer?.contents || [];
+        for (const item of items) {
+            const v = item.videoRenderer;
+            if (!v?.videoId) continue;
+            videos.push({
+                title: v.title?.runs?.[0]?.text || v.title?.simpleText || query,
+                videoId: v.videoId,
+                url: `https://www.youtube.com/embed/${v.videoId}`,
+                duration: v.lengthText?.simpleText || 'PT30M',
+                thumbnail: `https://i.ytimg.com/vi/${v.videoId}/hqdefault.jpg`
+            });
+            if (videos.length >= limit) return videos;
+        }
     }
+    return videos;
+}
 
-    const langCodes = { english: 'en', hindi: 'hi', telugu: 'te', tamil: 'ta', kannada: 'kn', malayalam: 'ml' };
+async function searchVideosForLanguage(skill, score, lang) {
+    const l = (lang || 'english').toLowerCase();
+    const langLabel = languageLabel(l);
+    const searchQuery = languageSearchQuery(skill, l);
+    const langCode = YT_LANG_CODES[l] || 'en';
 
-    for (const l of languages) {
+    if (YOUTUBE_API_KEY) {
         try {
-            const langCode = langCodes[l] || 'en';
-            let searchQuery = `${queryClean} ${tierInfo.searchSuffix} in ${l}`;
-            if (l === 'english') {
-                searchQuery = `${queryClean} ${tierInfo.searchSuffix}`;
-            }
-
-            console.log(`[YT Search] Query for ${l} (${tierInfo.label}): ${searchQuery}`);
-
-            const ytRes = await axios.get(`https://www.googleapis.com/youtube/v3/search`, {
+            const ytRes = await axios.get('https://www.googleapis.com/youtube/v3/search', {
                 params: {
                     part: 'snippet',
                     type: 'video',
@@ -516,56 +675,61 @@ async function fetchVideos(query, score = 20, lang = 'english') {
                     q: searchQuery,
                     key: YOUTUBE_API_KEY,
                     order: 'relevance',
-                    videoDefinition: 'high',
                     relevanceLanguage: langCode,
                     safeSearch: 'moderate'
-                }
+                },
+                timeout: 12000
             });
-
             const items = ytRes.data.items || [];
-            if (items.length === 0) {
-                results[l] = get3FallbackVideos(queryClean, score, l);
-                continue;
+            if (items.length) {
+                return items.slice(0, 3).map((item, idx) => ({
+                    title: item.snippet.title,
+                    videoId: item.id.videoId,
+                    url: `https://www.youtube.com/embed/${item.id.videoId}`,
+                    duration: 'PT30M',
+                    thumbnail: item.snippet.thumbnails?.high?.url || `https://i.ytimg.com/vi/${item.id.videoId}/hqdefault.jpg`,
+                    moduleNumber: idx + 1,
+                    language: langLabel
+                }));
             }
-
-            const videoIds = items.map(item => item.id.videoId).join(',');
-            let durations = {};
-            if (videoIds) {
-                const detailsRes = await axios.get(`https://www.googleapis.com/youtube/v3/videos`, {
-                    params: {
-                        part: 'contentDetails',
-                        id: videoIds,
-                        key: YOUTUBE_API_KEY
-                    }
-                });
-
-                detailsRes.data.items?.forEach(item => {
-                    durations[item.id] = item.contentDetails.duration || "PT25M";
-                });
-            }
-
-            const top3 = items.slice(0, 3);
-            const langLabel = l === 'telugu' ? 'Telugu (తెలుగు)' : l === 'hindi' ? 'Hindi (हिंदी)' : l === 'tamil' ? 'Tamil (தமிழ்)' : l === 'kannada' ? 'Kannada (ಕನ್ನಡ)' : l === 'malayalam' ? 'Malayalam (മലയാളം)' : 'English';
-
-            results[l] = top3.map((item, index) => ({
-                title: item.snippet.title || `${queryClean} ${tierInfo.moduleTitles[index]}`,
-                videoId: item.id.videoId,
-                url: `https://www.youtube.com/embed/${item.id.videoId}`,
-                duration: durations[item.id.videoId] || "PT30M",
-                thumbnail: item.snippet.thumbnails?.high?.url || item.snippet.thumbnails?.medium?.url,
-                moduleNumber: index + 1,
-                moduleTitle: tierInfo.moduleTitles[index] || `Module ${index + 1}`,
-                level: tierInfo.label,
-                language: langLabel,
-                scoreTier: tierInfo.tier
-            }));
-
-        } catch (error) {
-            console.error(`❌ Error fetching videos for ${l}:`, error.message);
-            results[l] = get3FallbackVideos(queryClean, score, l);
+        } catch (e) {
+            console.warn('[YT API]', l, e.message);
         }
     }
-    return results;
+
+    try {
+        const scraped = await searchYouTubeKeyless(searchQuery, 5);
+        if (scraped.length) {
+            return scraped.slice(0, 3).map((v, idx) => ({
+                ...v,
+                moduleNumber: idx + 1,
+                language: langLabel
+            }));
+        }
+    } catch (e) {
+        console.warn('[YT scrape]', l, e.message);
+    }
+
+    return get3FallbackVideos(skill, score, 'english').map(v => ({
+        ...v,
+        language: 'English',
+        isFallback: true
+    }));
+}
+
+function skillForVideoSearch(query) {
+    const raw = String(query || 'Python').replace(/ \(.+\)/g, '').trim();
+    const known = ['html', 'css', 'javascript', 'python', 'sql', 'react', 'java', 'node', 'mongodb', 'django', 'flask', 'typescript'];
+    const lower = raw.toLowerCase();
+    const hit = known.find(k => lower === k || lower.startsWith(k + ' ') || lower.includes(k));
+    return hit || raw.split(/[,&]/)[0].trim() || raw;
+}
+
+async function fetchVideos(query, score = 20, lang = 'english') {
+    const queryClean = skillForVideoSearch(query);
+    const requested = (lang || 'english').toLowerCase();
+    const videos = await searchVideosForLanguage(queryClean, score, requested);
+    return { [requested]: videos };
 }
 
 // Multer setup
@@ -593,7 +757,7 @@ router.post(['/analyze', '/analyze-full'], upload.fields([{ name: 'resume' }, { 
     console.log('[ANALYSIS] Request received');
     console.log('[ANALYSIS] Files:', Object.keys(req.files || {}));
     console.log('[ANALYSIS] Body keys:', Object.keys(req.body || {}));
-
+    
     let resumeFilePath, jdFilePath;
     try {
         const resumeFile = req.files?.resume?.[0];
@@ -615,19 +779,25 @@ router.post(['/analyze', '/analyze-full'], upload.fields([{ name: 'resume' }, { 
         resumeFilePath = resumeFile.path;
         if (jdFile) jdFilePath = jdFile.path;
 
-        const resumeBuffer = fs.readFileSync(resumeFilePath);
-        const resumeText = await safeExtractPdf(resumeBuffer, resumeFile.originalname);
+        const resumeText = await extractUploadedText(resumeFile);
 
         if (!resumeText || resumeText.length < 10) {
-            return res.status(400).json({ success: false, error: 'Unable to extract text from resume PDF.' });
+            return res.status(400).json({
+                success: false,
+                error: 'Unable to extract usable text from the resume.',
+                details: 'Use a text-based PDF or a TXT file with at least a few lines of resume content.'
+            });
         }
 
         let jdText = '';
         if (jdFile) {
-            const jdBuffer = fs.readFileSync(jdFilePath);
-            jdText = await safeExtractPdf(jdBuffer, jdFile.originalname);
+            jdText = await extractUploadedText(jdFile);
             if (!jdText || jdText.length < 10) {
-                return res.status(400).json({ success: false, error: 'Unable to extract text from JD PDF.' });
+                return res.status(400).json({
+                    success: false,
+                    error: 'Unable to extract usable text from the job description.',
+                    details: 'Use a text-based PDF or a TXT file with at least a few lines of job-description content.'
+                });
             }
         } else if (jdTextField) {
             jdText = jdTextField;
@@ -648,36 +818,40 @@ router.post(['/analyze', '/analyze-full'], upload.fields([{ name: 'resume' }, { 
 
         const jdSet = new Set(jdSkills);
         const resumeSet = new Set(resumeSkills);
-        const matchedSkills = Array.from(jdSet).filter(s => resumeSet.has(s));
-        const missingSkillsPre = Array.from(jdSet).filter(s => !resumeSet.has(s));
+        let matchedSkills = Array.from(jdSet).filter(s => resumeHasSkill(resumeText, resumeSkills, s));
+        const missingSkillsPre = Array.from(jdSet).filter(s => !resumeHasSkill(resumeText, resumeSkills, s));
         const baseScore = jdSet.size ? Math.round((matchedSkills.length / jdSet.size) * 100) : 0;
-        const domain = classifyDomain(resumeSkills, jdSkills);
+        const domain = classifyDomain(resumeSkills, jdSkills, jdText);
+        const salesLike = domain === 'sales-core' || isSalesLikeRole(jdText, jdSkills);
 
-        console.log(`[ANALYSIS] Base Score: ${baseScore}, Missing (Pre): ${missingSkillsPre.length}`);
+        console.log(`[ANALYSIS] Base Score: ${baseScore}, Missing (Pre): ${missingSkillsPre.length}, Domain: ${domain}`);
 
         // AI Extraction
         const ctxLimit = parseInt(process.env.ANALYSIS_TEXT_LIMIT || '4000', 10);
-        const prompt = `Task: Professional Resume vs Job Description Comparison.
-        
-        Resume Content:
-        ${resumeText.slice(0, ctxLimit)}
-        
-        Job Description Content:
-        ${jdText.slice(0, ctxLimit)}
-        
-        Instructions:
-        1. Identify missing skills (tech and soft).
-        2. Calculate a match score (0-100) based on requirements.
-        3. Identify the most critical skill to learn first.
-        4. Suggest 3 concrete projects to bridge the gap.
-        
-        Return ONLY a strict JSON object with these keys:
-        {
-          "missingSkills": ["skill1", "skill2"],
-          "score": 85,
-          "skillToLearnFirst": "Primary Missing Skill",
-          "projectSuggestions": ["Project 1 Description", "Project 2 Description", "Project 3 Description"]
-        }`;
+        const prompt = `Compare this campus student's resume to the actual JOB they applied for.
+
+Resume:
+${resumeText.slice(0, ctxLimit)}
+
+Job description (often a campus placement PDF with eligibility, registration, course lists — IGNORE those):
+${jdText.slice(0, ctxLimit)}
+
+Rules:
+- requiredSkills = what the person must DO in the job (sales, sensors, demos, coding, etc.). Never include recruitment, registration, shortlisting, eligibility, backlogs, placement process, or degree course names.
+- If the job is sales/consulting/core-engineering and the resume is data science/web, that is a WEAK match. Score 10-30 unless the resume actually has those job skills.
+- score = round(100 * matchedRequired / requiredSkills). Do NOT add points for extra coding skills the job does not ask for.
+- project titles must train the MISSING job skills, not generic Portfolio Website / CRUD / Data Dashboard unless the job is software.
+
+Return ONLY JSON:
+{
+  "jobTitle": "exact role name",
+  "requiredSkills": ["skill1", "skill2"],
+  "matchedSkills": ["skill on both resume and job"],
+  "missingSkills": ["job skill not on resume"],
+  "score": 18,
+  "skillToLearnFirst": "most important missing skill",
+  "projectSuggestions": [{"title": "short project title", "reason": "why this job needs it"}]
+}`;
 
         let aiResult, aiRaw;
 
@@ -705,19 +879,42 @@ router.post(['/analyze', '/analyze-full'], upload.fields([{ name: 'resume' }, { 
             aiResult = { score: baseScore, missingSkills: missingSkillsPre, skillToLearnFirst: missingSkillsPre[0] || '', projectSuggestions: suggestFallbackProjects(missingSkillsPre) };
         }
 
-        // Clean & Merge
+        // Clean & Merge against the real job, not campus-process tokens
         aiResult.missingSkills = Array.isArray(aiResult.missingSkills) ? aiResult.missingSkills.map(s => s.toString().trim()).filter(Boolean) : missingSkillsPre;
+        aiResult.requiredSkills = Array.isArray(aiResult.requiredSkills) ? aiResult.requiredSkills.map(s => s.toString().trim()).filter(Boolean) : [];
+        aiResult.matchedSkills = Array.isArray(aiResult.matchedSkills) ? aiResult.matchedSkills.map(s => s.toString().trim()).filter(Boolean) : [];
         if (aiResult.score == null || isNaN(aiResult.score)) aiResult.score = baseScore;
-        aiResult.skillToLearnFirst = aiResult.skillToLearnFirst || aiResult.missingSkills[0] || '';
-        aiResult.projectSuggestions = Array.isArray(aiResult.projectSuggestions) && aiResult.projectSuggestions.length ? aiResult.projectSuggestions : suggestFallbackProjects(aiResult.missingSkills);
+        const jobTitle = String(aiResult.jobTitle || '').trim();
+
+        let requiredSkills = cleanSkillList(aiResult.requiredSkills.length ? aiResult.requiredSkills : jdSkills);
+        if (requiredSkills.length < 3) {
+            requiredSkills = cleanSkillList([...requiredSkills, ...jdSkills, ...aiResult.requiredSkills]);
+        }
+        if (strategy === 'ai' && aiResult.requiredSkills.length) {
+            requiredSkills = cleanSkillList(aiResult.requiredSkills);
+        }
+
+        matchedSkills = requiredSkills.filter(s => resumeHasSkill(resumeText, resumeSkills, s));
+        let missingUnion = requiredSkills.filter(s => !resumeHasSkill(resumeText, resumeSkills, s));
+        for (const s of aiResult.missingSkills) {
+            if (isCampusNoise(s) || resumeHasSkill(resumeText, resumeSkills, s)) continue;
+            if (!missingUnion.some(m => skillsOverlap(m, s))) missingUnion.push(s);
+            if (!requiredSkills.some(r => skillsOverlap(r, s))) requiredSkills.push(s);
+        }
 
         const filterSoft = (process.env.FILTER_SOFT_SKILLS || '1') === '1';
-        const filterFn = s => !filterSoft || !SOFT_SKILL_SET.has(s.toLowerCase());
-
-        let missingUnion = [...new Set([...missingSkillsPre, ...aiResult.missingSkills])].filter(filterFn);
-        if (strategy === 'ai') {
-            missingUnion = Array.from(new Set(aiResult.missingSkills)).filter(filterFn);
+        if (filterSoft && !salesLike && domain === 'tech') {
+            missingUnion = missingUnion.filter(s => !SOFT_SKILL_SET.has(skillKey(s)));
         }
+        missingUnion = cleanSkillList(missingUnion);
+
+        jdSkills.length = 0;
+        jdSkills.push(...requiredSkills);
+
+        aiResult.skillToLearnFirst = aiResult.skillToLearnFirst || missingUnion[0] || '';
+        aiResult.projectSuggestions = Array.isArray(aiResult.projectSuggestions) && aiResult.projectSuggestions.length
+            ? aiResult.projectSuggestions
+            : suggestFallbackProjects(missingUnion, domain);
 
         // Enrichment
         const allVideos = {};
@@ -743,7 +940,7 @@ router.post(['/analyze', '/analyze-full'], upload.fields([{ name: 'resume' }, { 
                         )
                     )
                 );
-                console.log(`[Mastery] Auto-created progress records for ${missingUnion.slice(0, 8).length} skills for user ${userId}`);
+                console.log(`[Mastery] Auto-created progress records for ${missingUnion.slice(0,8).length} skills for user ${userId}`);
             }
         } catch (masteryErr) {
             console.warn('[Mastery] Auto-boot silently failed:', masteryErr.message);
@@ -752,10 +949,10 @@ router.post(['/analyze', '/analyze-full'], upload.fields([{ name: 'resume' }, { 
 
         // === Compute Advanced Analysis Metrics ===
         const ACTION_VERBS = [
-            'built', 'developed', 'designed', 'implemented', 'deployed', 'optimized', 'improved',
-            'created', 'led', 'managed', 'architected', 'reduced', 'increased', 'automated',
-            'engineered', 'launched', 'delivered', 'integrated', 'maintained', 'collaborated',
-            'analyzed', 'achieved', 'established', 'streamlined', 'accelerated'
+            'built','developed','designed','implemented','deployed','optimized','improved',
+            'created','led','managed','architected','reduced','increased','automated',
+            'engineered','launched','delivered','integrated','maintained','collaborated',
+            'analyzed','achieved','established','streamlined','accelerated'
         ];
 
         const METRIC_PATTERNS = [
@@ -768,58 +965,64 @@ router.post(['/analyze', '/analyze-full'], upload.fields([{ name: 'resume' }, { 
 
         // 1. Compute ATS Score
         const tResume = resumeText.toLowerCase();
-        const requiredSections = ['experience', 'education', 'skills', 'projects', 'summary', 'objective', 'achievements'];
-        const foundSections = requiredSections.filter(s => tResume.includes(s));
-        const structureScore = Math.round((foundSections.length / requiredSections.length) * 100);
+        const requiredSections = ['experience','education','skills','projects','summary','objective','achievements'];
+        const foundSections    = requiredSections.filter(s => tResume.includes(s));
+        const structureScore   = Math.round((foundSections.length / requiredSections.length) * 100);
 
-        const verbsFound = ACTION_VERBS.filter(v => new RegExp(`\\b${v}\\w*\\b`, 'i').test(resumeText));
+        const verbsFound       = ACTION_VERBS.filter(v => new RegExp(`\\b${v}\\w*\\b`, 'i').test(resumeText));
         const actionVerbsScore = Math.min(100, Math.round((verbsFound.length / 10) * 100));
 
-        const metricMatches = METRIC_PATTERNS.reduce((c, p) => c + (resumeText.match(p) || []).length, 0);
+        const metricMatches    = METRIC_PATTERNS.reduce((c, p) => c + (resumeText.match(p) || []).length, 0);
         const achievementsScore = Math.min(100, metricMatches * 15);
 
-        const wordCount = resumeText.split(/\s+/).filter(Boolean).length;
-        const formattingScore = wordCount < 150 ? 50 : wordCount < 300 ? 70 : wordCount < 800 ? 95 : 85;
+        const wordCount        = resumeText.split(/\s+/).filter(Boolean).length;
+        const formattingScore  = wordCount < 150 ? 50 : wordCount < 300 ? 70 : wordCount < 800 ? 95 : 85;
 
-        const avgWordsPerLine = wordCount / Math.max(resumeText.split('\n').length, 1);
+        const avgWordsPerLine  = wordCount / Math.max(resumeText.split('\n').length, 1);
         const readabilityScore = avgWordsPerLine > 20 ? 75 : avgWordsPerLine > 8 ? 92 : 80;
 
-        const keywordsScore = Math.min(100, Math.round(structureScore * 0.5 + actionVerbsScore * 0.3 + Math.min(achievementsScore, 30)));
+        const keywordsScore    = Math.min(100, Math.round(structureScore * 0.5 + actionVerbsScore * 0.3 + Math.min(achievementsScore, 30)));
 
         const finalATS = Math.round(
-            keywordsScore * 0.30 +
-            formattingScore * 0.20 +
+            keywordsScore    * 0.30 +
+            formattingScore  * 0.20 +
             readabilityScore * 0.20 +
-            structureScore * 0.20 +
+            structureScore   * 0.20 +
             actionVerbsScore * 0.10
         );
 
-        const atsScore = Math.max(50, Math.min(100, finalATS));
+        const atsScore = Math.max(20, Math.min(100, finalATS));
 
-        // 2. Extra Skills (Bonus Skills)
-        const jdSetLower = new Set(jdSkills.map(s => s.toLowerCase().trim()));
-        const extraSkills = resumeSkills.filter(s => s && !jdSetLower.has(s.toLowerCase().trim()));
+        // 2. Extra Skills — listed, but they do not inflate the match score
+        const extraSkills = resumeSkills.filter(s => s && !requiredSkills.some(r => skillsOverlap(r, s)) && !matchedSkills.some(m => skillsOverlap(m, s)));
 
-        // 3. Score Breakdown & Weighted Final Score
-        const matchPct = (matchedSkills.length / Math.max(jdSkills.length, 1)) * 100;
-        const skillsPts = Math.round((matchPct / 100) * 40);
+        // 3. Score is mostly JD requirement coverage. Extra coding skills do not add points.
+        const matchPct = (matchedSkills.length / Math.max(requiredSkills.length, 1)) * 100;
+        const skillsPts = Math.round((matchPct / 100) * 70);
 
         const hasProjects = /project|built|developed|created|implemented|github|deployed/i.test(resumeText);
-        const projectKeywords = jdSkills.filter(s => resumeText.toLowerCase().includes(s.toLowerCase()));
-        const projPts = hasProjects
-            ? Math.min(25, Math.round(15 + (projectKeywords.length / Math.max(jdSkills.length, 1)) * 10))
-            : 8;
+        const projectKeywords = requiredSkills.filter(s => resumeHasSkill(resumeText, resumeSkills, s));
+        const projPts = hasProjects && matchedSkills.length
+            ? Math.min(12, 4 + Math.round((projectKeywords.length / Math.max(requiredSkills.length, 1)) * 8))
+            : 0;
 
-        const hasExp = /experience|internship|worked at|employed|company|organization|role|position|junior|senior/i.test(resumeText);
+        const hasExp = /experience|internship|worked at|employed|intern/i.test(resumeText);
         const yearsMatch = resumeText.match(/(\d+)\s*\+?\s*years?\s+(of\s+)?experience/i);
         const years = yearsMatch ? parseInt(yearsMatch[1]) : 0;
-        const expPts = hasExp ? Math.min(15, 9 + Math.min(years * 2, 6)) : 5;
+        const expPts = hasExp ? Math.min(10, 5 + Math.min(years, 5)) : 2;
 
         const hasEdu = /education|university|college|degree|bachelor|master|b\.tech|m\.tech|b\.e|m\.e|bsc|msc|phd/i.test(resumeText);
-        const eduPts = hasEdu ? 9 : 5;
-        const bonusPts = Math.min(10, Math.round(extraSkills.length * 1.5));
+        const eduPts = hasEdu ? 8 : 2;
+        const bonusPts = 0;
 
-        const finalScore = Math.min(100, skillsPts + projPts + expPts + eduPts + bonusPts);
+        let finalScore = Math.min(100, skillsPts + projPts + expPts + eduPts + bonusPts);
+        const aiScore = Math.max(0, Math.min(100, Number(aiResult.score) || finalScore));
+        if (Math.abs(aiScore - finalScore) <= 25) {
+            finalScore = Math.round((finalScore * 0.7) + (aiScore * 0.3));
+        } else {
+            finalScore = Math.round(Math.min(finalScore, aiScore + 8));
+        }
+        finalScore = Math.max(0, Math.min(100, finalScore));
 
         // 4. Job Description Skills with Importance Tiers
         const tJD = jdText.toLowerCase();
@@ -827,92 +1030,80 @@ router.post(['/analyze', '/analyze-full'], upload.fields([{ name: 'resume' }, { 
             const escaped = skill.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
             const regex = new RegExp(escaped, 'gi');
             const freq = (tJD.match(regex) || []).length;
-            const pos = tJD.indexOf(skill.toLowerCase());
+            const pos  = tJD.indexOf(skill.toLowerCase());
             const posScore = pos === -1 ? 0 : Math.max(0, 100 - Math.round((pos / tJD.length) * 100));
             return { skill, score: freq * 10 + posScore };
         }).sort((a, b) => b.score - a.score);
 
         const nSkills = scoredJdSkills.length;
         const critBound = Math.max(1, Math.round(nSkills * 0.35));
-        const impBound = Math.max(critBound + 1, Math.round(nSkills * 0.70));
+        const impBound  = Math.max(critBound + 1, Math.round(nSkills * 0.70));
 
         const jdSkillsWithImportance = scoredJdSkills.map((item, idx) => ({
-            skill: item.skill,
+            skill:      item.skill,
             importance: idx < critBound ? 'Critical' : idx < impBound ? 'Important' : 'Optional'
         }));
 
         // 5. Recruiter Insights
         const strengths = [];
-        const concerns = [];
-        if (matchedSkills.length >= 5) strengths.push('Strong technical skill alignment with JD');
-        if (/internship|intern/i.test(resumeText)) strengths.push('Relevant internship experience');
-        if (/project|github|portfolio/i.test(resumeText)) strengths.push('Has project portfolio / GitHub');
-        if (extraSkills.length >= 3) strengths.push(`Brings ${extraSkills.length} extra bonus skills beyond requirements`);
-        if (/machine learning|ai|deep learning|llm|nlp/i.test(resumeText)) strengths.push('Strong AI/ML background');
-        if (/full.?stack|backend.*frontend|frontend.*backend/i.test(resumeText)) strengths.push('Full stack development capabilities');
-        if (strengths.length === 0) strengths.push('Good educational background');
+        const concerns  = [];
+        if (matchedSkills.length >= 3) strengths.push('Some skills overlap with this job');
+        if (/internship|intern/i.test(resumeText)) strengths.push('Has internship experience');
+        if (/project|github|portfolio/i.test(resumeText)) strengths.push('Has project work to discuss');
+        if (salesLike && extraSkills.length) strengths.push('Bring extra skills, but they are not the core of this job');
+        if (strengths.length === 0) strengths.push('Clear education section on the resume');
 
-        if (metricMatches < 2) concerns.push('Projects lack measurable metrics — add numbers (e.g. 500+ users, 40% faster)');
-        const sqlMissing = missingUnion.find(s => /sql|database|db/i.test(s));
-        if (sqlMissing) concerns.push(`No ${sqlMissing} mentioned in resume`);
-        const cloudMissing = missingUnion.find(s => /cloud|aws|azure|gcp/i.test(s));
-        if (cloudMissing) concerns.push('No cloud deployment experience mentioned');
-        if (!/agile|scrum/i.test(resumeText)) concerns.push('No Agile/Scrum methodology mentioned');
+        if (matchPct < 40) concerns.push(`Only ${matchedSkills.length} of ${requiredSkills.length} job requirements appear on the resume`);
+        if (missingUnion.length) concerns.push(`Missing for this role: ${missingUnion.slice(0, 3).join(', ')}`);
+        if (metricMatches < 2) concerns.push('Add numbers to achievements (customers met, conversion %, cost saved)');
+        if (salesLike && /python|javascript|data science/i.test(resumeText) && matchPct < 40) {
+            concerns.push('This is not a software role — extra coding skills do not raise the match score');
+        }
         if (concerns.length === 0 && missingUnion.length > 0) concerns.push(`Missing ${missingUnion.slice(0, 2).join(' and ')}`);
 
         const proTip = missingUnion.length > 0
-            ? `Add ${missingUnion.slice(0, 3).join(', ')} to your skills and quantify project results to reach the top 10% of candidates.`
-            : 'Excellent profile! Add measurable numbers to your bullet points to stand out even more.';
+            ? `Learn ${missingUnion.slice(0, 3).join(', ')} and add one project that proves those job skills.`
+            : 'Strong coverage. Add measurable results to stand out more.';
 
-        // 6. Project Suggestions (Personalized with Reason and Tags)
         const PROJECT_MAP = {
-            'AWS': { title: 'Deploy ML Model on AWS', tags: ['AWS', 'EC2', 'S3', 'SageMaker'], reason: 'missing Cloud Computing (AWS)' },
-            'Cloud Computing': { title: 'Cloud-Based Web App on AWS/GCP', tags: ['AWS', 'Firebase', 'Serverless'], reason: 'missing Cloud Computing' },
-            'Docker': { title: 'Containerized App with Docker Compose', tags: ['Docker', 'Docker Compose', 'CI/CD'], reason: 'missing Docker' },
-            'Kubernetes': { title: 'Kubernetes Cluster Deployment', tags: ['K8s', 'Helm', 'Docker', 'GKE'], reason: 'missing Kubernetes' },
-            'Machine Learning': { title: 'End-to-End ML Pipeline', tags: ['Scikit-learn', 'Pandas', 'MLflow'], reason: 'missing Machine Learning' },
-            'SQL': { title: 'Analytics Dashboard with SQL + Python', tags: ['MySQL', 'PostgreSQL', 'Pandas'], reason: 'missing SQL' },
-            'React': { title: 'React SPA with REST API Integration', tags: ['React', 'Redux', 'Axios', 'Tailwind'], reason: 'missing React.js' },
-            'React.js': { title: 'React SPA with REST API Integration', tags: ['React', 'Redux', 'Axios', 'Tailwind'], reason: 'missing React.js' },
-            'Node.js': { title: 'Node.js REST API with Auth & Tests', tags: ['Node.js', 'Express', 'JWT', 'MongoDB'], reason: 'missing Node.js' },
-            'Agile': { title: 'Agile Sprint Board App', tags: ['Scrum', 'Jira', 'Kanban'], reason: 'missing Agile/Scrum' },
-            'Agile / Scrum': { title: 'Agile Sprint Board App', tags: ['Scrum', 'Jira', 'Kanban'], reason: 'missing Agile/Scrum' },
-            'TypeScript': { title: 'TypeScript Full-Stack App', tags: ['TypeScript', 'Next.js', 'Prisma'], reason: 'missing TypeScript' },
-            'GraphQL': { title: 'GraphQL API with Apollo', tags: ['GraphQL', 'Apollo', 'React'], reason: 'missing GraphQL' },
-            'Python': { title: 'Python Automation & Data Pipeline', tags: ['Python', 'Pandas', 'FastAPI'], reason: 'missing Python' },
-            'Pandas': { title: 'Data Analysis Project with Pandas', tags: ['Pandas', 'NumPy', 'Matplotlib'], reason: 'missing Pandas' },
-            'TensorFlow': { title: 'Image Classifier with TensorFlow', tags: ['TensorFlow', 'Keras', 'CNN'], reason: 'missing TensorFlow' }
+            'AWS':              { title: 'Deploy ML Model on AWS',                tags: ['AWS', 'EC2', 'S3', 'SageMaker'],     reason: 'missing Cloud Computing (AWS)' },
+            'Cloud Computing':  { title: 'Cloud-Based Web App on AWS/GCP',        tags: ['AWS', 'Firebase', 'Serverless'],     reason: 'missing Cloud Computing' },
+            'Docker':           { title: 'Containerized App with Docker Compose',  tags: ['Docker', 'Docker Compose', 'CI/CD'], reason: 'missing Docker' },
+            'Kubernetes':       { title: 'Kubernetes Cluster Deployment',          tags: ['K8s', 'Helm', 'Docker', 'GKE'],     reason: 'missing Kubernetes' },
+            'Machine Learning': { title: 'End-to-End ML Pipeline',                tags: ['Scikit-learn', 'Pandas', 'MLflow'],  reason: 'missing Machine Learning' },
+            'SQL':              { title: 'Analytics Dashboard with SQL + Python',  tags: ['MySQL', 'PostgreSQL', 'Pandas'],     reason: 'missing SQL' },
+            'React':            { title: 'React SPA with REST API Integration',   tags: ['React', 'Redux', 'Axios', 'Tailwind'], reason: 'missing React.js' },
+            'React.js':         { title: 'React SPA with REST API Integration',   tags: ['React', 'Redux', 'Axios', 'Tailwind'], reason: 'missing React.js' },
+            'Node.js':          { title: 'Node.js REST API with Auth & Tests',    tags: ['Node.js', 'Express', 'JWT', 'MongoDB'], reason: 'missing Node.js' },
+            'TypeScript':       { title: 'TypeScript Full-Stack App',             tags: ['TypeScript', 'Next.js', 'Prisma'],   reason: 'missing TypeScript' },
+            'Python':           { title: 'Python Automation & Data Pipeline',     tags: ['Python', 'Pandas', 'FastAPI'],       reason: 'missing Python' },
+            'sales':            { title: 'Territory CRM Visit Tracker',           tags: ['Sales', 'CRM', 'Excel'],             reason: 'this job needs a sales process you can show' },
+            'marketing':        { title: 'Product Pitch One-Pager Pack',          tags: ['Marketing', 'Presentation'],         reason: 'consulting sales needs a clear product story' },
+            'presentation':     { title: 'Factory Automation Product Demo Deck',  tags: ['Presentation', 'Sensors'],           reason: 'this job includes live product demonstrations' },
+            'sensors':          { title: 'Sensor Application Case Study',         tags: ['Sensors', 'Factory Automation'],     reason: 'the role sells factory sensors and vision systems' },
+            'communication':    { title: 'Customer Discovery Interview Notes',    tags: ['Communication', 'Sales'],            reason: 'field sales needs structured customer conversations' }
         };
 
-        const projectSuggestions = [];
+        const mappedProjects = [];
         const seenProj = new Set();
         for (const skill of missingUnion) {
-            if (projectSuggestions.length >= 3) break;
-            const proj = PROJECT_MAP[skill];
+            if (mappedProjects.length >= 3) break;
+            const proj = PROJECT_MAP[skill] || PROJECT_MAP[skillKey(skill)];
             if (proj && !seenProj.has(proj.title)) {
                 seenProj.add(proj.title);
-                projectSuggestions.push({ ...proj, skillGap: skill, impact: projectSuggestions.length === 0 ? 'High Impact' : 'Recommended' });
+                mappedProjects.push({ ...proj, skillGap: skill, impact: mappedProjects.length === 0 ? 'High Impact' : 'Recommended' });
             }
         }
-        const defaultProjects = domain === 'tech'
-            ? [
-                { title: 'Personal Portfolio Website', tags: ['React', 'CSS', 'GitHub Pages'], reason: 'showcase your projects', skillGap: 'Portfolio', impact: 'Recommended' },
-                { title: 'Full-Stack CRUD App with Auth', tags: ['Node.js', 'React', 'MongoDB'], reason: 'demonstrate full-stack skills', skillGap: 'Full Stack', impact: 'Recommended' },
-                { title: 'Data Dashboard with Charts', tags: ['Python', 'Pandas', 'Streamlit'], reason: 'show data analysis skills', skillGap: 'Data', impact: 'Medium Impact' }
-            ]
-            : [
-                { title: 'Excel KPI Tracking Dashboard', tags: ['Excel', 'Pivot Tables'], reason: 'demonstrate data skills', skillGap: 'Data', impact: 'Recommended' },
-                { title: 'Process Improvement Case Study', tags: ['Flowchart', 'Analysis'], reason: 'show analytical thinking', skillGap: 'Operations', impact: 'Recommended' }
-            ];
-        for (const d of defaultProjects) {
-            if (projectSuggestions.length >= 3) break;
-            if (!seenProj.has(d.title)) { seenProj.add(d.title); projectSuggestions.push(d); }
-        }
+        const projectSuggestions = normalizeProjectSuggestions(
+            [...(aiResult.projectSuggestions || []), ...mappedProjects],
+            missingUnion,
+            domain
+        );
 
         // 7. Learning Track
         const learningTrack = [
             ...matchedSkills.slice(0, 2).map(skill => {
-                const escaped = skill.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                const escaped  = skill.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
                 const mentions = (tResume.match(new RegExp(escaped, 'gi')) || []).length;
                 return { skill, progress: Math.min(95, 50 + mentions * 15), priority: 'High', status: 'In Progress' };
             }),
@@ -922,15 +1113,17 @@ router.post(['/analyze', '/analyze-full'], upload.fields([{ name: 'resume' }, { 
         ];
 
         // 8. Career Readiness Metrics
-        const missingCriticalCount = jdSkillsWithImportance.filter(j => j.importance === 'Critical' && missingUnion.includes(j.skill)).length;
-        const interviewChance = Math.min(98, Math.max(30, Math.round(finalScore * 0.5 + atsScore * 0.3 + 20 - missingCriticalCount * 5)));
+        const missingCriticalCount = jdSkillsWithImportance.filter(j => j.importance === 'Critical' && missingUnion.some(m => skillsOverlap(m, j.skill))).length;
+        const interviewChance = Math.min(90, Math.max(5, Math.round(finalScore * 0.9 - missingCriticalCount * 4)));
         const ppoReadiness = Math.round(interviewChance * 0.97);
-        const profileStrength = Math.round((finalScore + atsScore) / 2);
+        const profileStrength = Math.round((finalScore * 0.7) + (atsScore * 0.3));
+        const skillToLearnFirst = aiResult.skillToLearnFirst || missingUnion[0] || matchedSkills[0] || 'Communication';
 
         const payload = {
             success: true,
             score: finalScore,
             domain,
+            jobTitle,
             jdSkills,
             resumeSkills,
             matchedSkills,
@@ -938,31 +1131,34 @@ router.post(['/analyze', '/analyze-full'], upload.fields([{ name: 'resume' }, { 
             extraSkills,
             jdSkillsWithImportance,
             atsScore,
-            atsKeywords: Math.max(50, Math.min(100, keywordsScore)),
-            atsFormatting: Math.max(60, Math.min(100, formattingScore)),
-            atsReadability: Math.max(55, Math.min(100, readabilityScore)),
-            atsStructure: Math.max(50, Math.min(100, structureScore)),
-            atsActionVerbs: Math.max(40, Math.min(100, actionVerbsScore)),
+            atsKeywords: Math.max(20, Math.min(100, keywordsScore)),
+            atsFormatting: Math.max(20, Math.min(100, formattingScore)),
+            atsReadability: Math.max(20, Math.min(100, readabilityScore)),
+            atsStructure: Math.max(20, Math.min(100, structureScore)),
+            atsActionVerbs: Math.max(20, Math.min(100, actionVerbsScore)),
             scoreBreakdown: {
-                skillsMatch: { pts: skillsPts, max: 40, pct: Math.round((skillsPts / 40) * 100) },
-                projectRelevance: { pts: projPts, max: 25, pct: Math.round((projPts / 25) * 100) },
-                experience: { pts: expPts, max: 15, pct: Math.round((expPts / 15) * 100) },
-                education: { pts: eduPts, max: 10, pct: Math.round((eduPts / 10) * 100) },
-                bonusSkills: { pts: bonusPts, max: 10, pct: Math.round((bonusPts / 10) * 100) }
+                skillsMatch:      { pts: skillsPts, max: 70, pct: Math.round((skillsPts / 70) * 100) },
+                projectRelevance: { pts: projPts,   max: 12, pct: Math.round((projPts / 12) * 100) },
+                experience:       { pts: expPts,    max: 10, pct: Math.round((expPts / 10) * 100) },
+                education:        { pts: eduPts,    max: 8,  pct: Math.round((eduPts / 8) * 100) },
+                bonusSkills:      { pts: bonusPts,  max: 10, pct: 0 }
             },
             recruiterInsights: { strengths: strengths.slice(0, 5), concerns: concerns.slice(0, 4), proTip },
             learningTrack,
             projectSuggestions,
-            skillToLearnFirst: aiResult.skillToLearnFirst || missingUnion[0] || 'JavaScript',
+            skillToLearnFirst,
             interviewChance,
             ppoReadiness,
             profileStrength,
             videos: allVideos,
             problems: allProblems,
             warnings: [],
+            resumeText: String(resumeText || '').slice(0, 8000),
+            jdText: String(jdText || '').slice(0, 8000),
             data: {
                 score: finalScore,
                 domain,
+                jobTitle,
                 jdSkills,
                 resumeSkills,
                 matchedSkills,
@@ -970,28 +1166,30 @@ router.post(['/analyze', '/analyze-full'], upload.fields([{ name: 'resume' }, { 
                 extraSkills,
                 jdSkillsWithImportance,
                 atsScore,
-                atsKeywords: Math.max(50, Math.min(100, keywordsScore)),
-                atsFormatting: Math.max(60, Math.min(100, formattingScore)),
-                atsReadability: Math.max(55, Math.min(100, readabilityScore)),
-                atsStructure: Math.max(50, Math.min(100, structureScore)),
-                atsActionVerbs: Math.max(40, Math.min(100, actionVerbsScore)),
+                atsKeywords: Math.max(20, Math.min(100, keywordsScore)),
+                atsFormatting: Math.max(20, Math.min(100, formattingScore)),
+                atsReadability: Math.max(20, Math.min(100, readabilityScore)),
+                atsStructure: Math.max(20, Math.min(100, structureScore)),
+                atsActionVerbs: Math.max(20, Math.min(100, actionVerbsScore)),
                 scoreBreakdown: {
-                    skillsMatch: { pts: skillsPts, max: 40, pct: Math.round((skillsPts / 40) * 100) },
-                    projectRelevance: { pts: projPts, max: 25, pct: Math.round((projPts / 25) * 100) },
-                    experience: { pts: expPts, max: 15, pct: Math.round((expPts / 15) * 100) },
-                    education: { pts: eduPts, max: 10, pct: Math.round((eduPts / 10) * 100) },
-                    bonusSkills: { pts: bonusPts, max: 10, pct: Math.round((bonusPts / 10) * 100) }
+                    skillsMatch:      { pts: skillsPts, max: 70, pct: Math.round((skillsPts / 70) * 100) },
+                    projectRelevance: { pts: projPts,   max: 12, pct: Math.round((projPts / 12) * 100) },
+                    experience:       { pts: expPts,    max: 10, pct: Math.round((expPts / 10) * 100) },
+                    education:        { pts: eduPts,    max: 8,  pct: Math.round((eduPts / 8) * 100) },
+                    bonusSkills:      { pts: bonusPts,  max: 10, pct: 0 }
                 },
                 recruiterInsights: { strengths: strengths.slice(0, 5), concerns: concerns.slice(0, 4), proTip },
                 learningTrack,
                 projectSuggestions,
-                skillToLearnFirst: aiResult.skillToLearnFirst || missingUnion[0] || 'JavaScript',
+                skillToLearnFirst,
                 interviewChance,
                 ppoReadiness,
                 profileStrength,
                 videos: allVideos,
                 problems: allProblems,
-                warnings: []
+                warnings: [],
+                resumeText: String(resumeText || '').slice(0, 8000),
+                jdText: String(jdText || '').slice(0, 8000)
             }
         };
 
@@ -1195,7 +1393,7 @@ Pedagogical Behavior & Rules:
         // --- unified Logic with Tool Support ---
         const safeCode = (typeof code === 'string' ? code : JSON.stringify(code || 'None')).replace(/\[object Object\]/g, '// (Neural Leak Filtered)');
 
-        const completion = await groq.chat.completions.create({
+        const completion = await getGroq().chat.completions.create({
             model: AI_MODEL,
             messages: [
                 { role: "system", content: systemPrompt },
@@ -1236,7 +1434,7 @@ Pedagogical Behavior & Rules:
                 toolResults.push({ role: "tool", tool_call_id: toolCall.id, content: safeContent });
             }
 
-            const secondCompletion = await groq.chat.completions.create({
+            const secondCompletion = await getGroq().chat.completions.create({
                 model: AI_MODEL,
                 messages: [
                     { role: "system", content: systemPrompt },

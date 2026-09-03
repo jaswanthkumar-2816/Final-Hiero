@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HIERO – No Internet Connection</title>
+  <style>
+    body {
+      background: #07090e;
+      color: #f8fafc;
+      font-family: 'Outfit', -apple-system, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      text-align: center;
+      padding: 2rem;
+    }
+    .logo {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, #07e219, #0284c7);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: #000;
+      margin: 0 auto 2rem;
+      box-shadow: 0 0 40px rgba(7,226,25,0.3);
+    }
+    h1 { font-size: 1.8rem; font-weight: 800; margin-bottom: 0.75rem; }
+    p { color: #94a3b8; font-size: 1rem; max-width: 320px; margin-bottom: 2rem; line-height: 1.6; }
+    button {
+      background: #07e219;
+      color: #000;
+      border: none;
+      padding: 0.9rem 2rem;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="logo">H</div>
+  <h1>You're Offline</h1>
+  <p>HIERO needs an internet connection to load the latest jobs and career opportunities.</p>
+  <button onclick="location.reload()">Retry Connection</button>
+</body>
+</html>

@@ -5,18 +5,6 @@ const dotenv = require('dotenv');
 const path = require('path');
 const mongoose = require('mongoose');
 const compression = require('compression');
-const axios = require('axios');
-const multer = require('multer');
-const { createProxyMiddleware } = require('http-proxy-middleware');
-
-// Ensure DNS SRV resolution for MongoDB Atlas works seamlessly on local Windows environments
-const dns = require('dns');
-try {
-    dns.setServers(['8.8.8.8', '8.8.4.4', '1.1.1.1']);
-} catch (e) {
-    console.warn('DNS server override notice:', e.message);
-}
-
 // ✅ FIXED: Always load login-system/.env FIRST (it has JWT_SECRET, EMAIL_USER, etc.)
 // Then load root .env which has RAZORPAY and MONGODB_URI overrides
 dotenv.config({ path: path.join(__dirname, 'login-system', '.env') });
@@ -65,9 +53,13 @@ const allowedOrigins = [
     'http://localhost:8080',
     'http://localhost:8082',
     'http://localhost:8085',
+    'http://localhost:2004',
+    'http://localhost:2005',
     'http://localhost:5001',
     'http://localhost:5003',
     'http://localhost:2816',
+    'http://127.0.0.1:2004',
+    'http://127.0.0.1:2005',
     'http://127.0.0.1:8080',
     'http://127.0.0.1:8082',
     'http://127.0.0.1:8085',
@@ -77,6 +69,7 @@ const allowedOrigins = [
     'http://127.0.0.1:2816',
     'http://localhost:5504',
     'https://85692af7a6b1.ngrok-free.app',
+    'https://connect-portal-swart.vercel.app',
     originOf(PUBLIC_URL),
     ...(process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',').map(s => s.trim()) : [])
 ].filter(Boolean);
@@ -148,66 +141,36 @@ app.get('/dashboard', authObj.authenticateToken, (req, res, next) => {
 });
 
 
-// 📄 Resume API (Integrated!)
-// Mount Import Service FIRST to handle /import requests effectively
-const importRouter = require('./routes/import-service');
-const resumeRouter = require('./routes/resume');
-app.use('/api/resume', importRouter);
-app.use('/api/resume', resumeRouter);
-app.use('/api', importRouter);
+// Load heavy API modules on first request so the site can open immediately
+function lazyRouter(modPath) {
+    let router = null;
+    return function lazyMounted(req, res, next) {
+        if (!router) {
+            console.log('⏳ Loading', modPath);
+            router = require(modPath);
+        }
+        return router(req, res, next);
+    };
+}
+
+app.use('/api/resume', lazyRouter('./routes/resume'));
 
 // Support templates and preview folder sharing
 app.use('/templates/previews', express.static(path.join(__dirname, 'hiero-backend', 'templates', 'previews')));
 app.use('/dashboard/previews', express.static(path.join(__dirname, 'hiero-backend', 'templates', 'previews')));
 
-
-// Reviews & Admin API (Integrated - No Proxy!)
-const reviewRouter = require('./routes/review');
-app.use('/api', reviewRouter); // Handles /api/review, /api/login-track, /api/admin/*
-
-// Analysis API (Integrated)
-const analysisRouter = require('./routes/analysis');
-app.use('/api/analysis', analysisRouter); // Supports /api/analysis/analyze
-
-// Projects API (Integrated)
-const projectsRouter = require('./routes/projects');
-app.use('/api/projects', projectsRouter); // Supports /youtube, /github, /docs, /chat
-
-// Scoring API (Integrated)
-const scoringRouter = require('./routes/scoring');
-app.use('/api/scoring', scoringRouter); // Supports /user-stats, /project-complete
-
-// Chat API (Integrated)
-const chatRouter = require('./routes/chat');
-app.use('/api/chat', chatRouter);
-
-// Interview API (Integrated)
-const interviewRouter = require('./routes/interview');
-app.use('/api/interview', interviewRouter);
-
-// Reel API (Integrated)
-const reelRouter = require('./routes/reel');
-app.use('/api/reel', reelRouter);
-
-// Run API (Integrated)
-const runRouter = require('./routes/run');
-app.use('/api/run', runRouter);
-
-// Mastery Engine API (Integrated)
-const masteryRouter = require('./routes/mastery');
-app.use('/api/mastery', masteryRouter);
-
-// Targeted Multilingual Micro-Curriculum Engine API (New!)
-const learningRouter = require('./routes/learning');
-app.use('/api/learning', learningRouter);
-
-// AI Photo Formalizer API (New!)
-const aiPhotoRouter = require('./routes/ai-photo');
-app.use('/api', aiPhotoRouter); // Handles /api/generate-executive-photo
-
-// Payment API (Integrated)
-const paymentRouter = require('./routes/payment');
-app.use('/api/payment', paymentRouter);
+app.use('/api', lazyRouter('./routes/review'));
+app.use('/api/analysis', lazyRouter('./routes/analysis'));
+app.use('/api/projects', lazyRouter('./routes/projects'));
+app.use('/api/scoring', lazyRouter('./routes/scoring'));
+app.use('/api/chat', lazyRouter('./routes/chat'));
+app.use('/api/interview', lazyRouter('./routes/interview'));
+app.use('/api/reel', lazyRouter('./routes/reel'));
+app.use('/api/run', lazyRouter('./routes/run'));
+app.use('/api/mastery', lazyRouter('./routes/mastery'));
+app.use('/api/learning', lazyRouter('./routes/learning'));
+app.use('/api', lazyRouter('./routes/ai-photo'));
+app.use('/api/payment', lazyRouter('./routes/payment'));
 
 // Support legacy shortened paths
 app.use('/auth/signup', (req, res) => res.redirect(307, '/signup'));
@@ -240,7 +203,6 @@ app.get('/get-started', (req, res) => {
 
 app.get(['/mock-interview', '/mock-interview.html'], (req, res) => res.sendFile(path.join(__dirname, 'mock-interview.html')));
 app.get(['/session', '/session.html'], (req, res) => res.sendFile(path.join(__dirname, 'mock_interview', 'session.html')));
-app.get(['/result', '/result.html'], (req, res) => res.sendFile(path.join(__dirname, 'result.html')));
 app.get(['/companies', '/companies.html'], (req, res) => res.sendFile(path.join(__dirname, 'companies.html')));
 app.get(['/company', '/company.html'], (req, res) => res.sendFile(path.join(__dirname, 'company.html')));
 app.get(['/job_success', '/job_success.html'], (req, res) => res.sendFile(path.join(__dirname, 'job_success.html')));
@@ -248,8 +210,58 @@ app.get(['/success', '/success.html'], (req, res) => res.sendFile(path.join(resu
 app.get('/sitemap.xml', (req, res) => res.sendFile(path.join(landingDirPath, 'sitemap.xml')));
 app.get('/robots.txt', (req, res) => res.sendFile(path.join(landingDirPath, 'robots.txt')));
 
+// =============================================
+// 📱 PWA & Android TWA Routes (Play Store)
+// =============================================
+app.get('/manifest.json', (req, res) => {
+    res.setHeader('Content-Type', 'application/manifest+json');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.sendFile(path.join(__dirname, 'manifest.json'));
+});
+app.get('/sw.js', (req, res) => {
+    res.setHeader('Content-Type', 'text/javascript');
+    res.setHeader('Service-Worker-Allowed', '/');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.sendFile(path.join(__dirname, 'sw.js'));
+});
+app.get('/offline.html', (req, res) => res.sendFile(path.join(__dirname, 'offline.html')));
+app.get('/.well-known/assetlinks.json', (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    const assetLinksPath = path.join(__dirname, '.well-known', 'assetlinks.json');
+    if (fs.existsSync(assetLinksPath)) {
+        res.sendFile(assetLinksPath);
+    } else {
+        // Placeholder until keystore is generated
+        res.json([{
+            "relation": ["delegate_permission/common.handle_all_urls"],
+            "target": {
+                "namespace": "android_app",
+                "package_name": "in.hiero.app",
+                "sha256_cert_fingerprints": ["REPLACE_WITH_YOUR_KEYSTORE_SHA256_FINGERPRINT"]
+            }
+        }]);
+    }
+});
+
+
 app.get(['/learn', '/learn.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'learn.html')));
 app.get(['/quiz', '/quiz.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'quiz.html')));
+app.get(['/hiero-explained', '/hiero-explained.html'], (req, res) => {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.sendFile(path.join(resumeBuilderPath, 'hiero-explained.html'));
+});
+app.get('/analysis-script.js', (req, res) => {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.sendFile(path.join(resumeBuilderPath, 'analysis-script.js'));
+});
+app.get(['/result', '/result.html'], (req, res) => {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.sendFile(path.join(resumeBuilderPath, 'result.html'));
+});
+app.get(['/adaptive-test', '/adaptive-test.html'], (req, res) => {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.sendFile(path.join(resumeBuilderPath, 'adaptive-test.html'));
+});
 app.get(['/solve', '/solve.html'], (req, res) => res.sendFile(path.join(__dirname, 'solve.html')));
 app.get(['/resume-builder', '/resume-builder.html', '/dashboard/resume-builder'], (req, res) => {
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
@@ -265,7 +277,6 @@ app.get(['/feedback', '/feedback.html'], (req, res) => res.sendFile(path.join(__
 app.get(['/design-tester', '/design-tester.html'], (req, res) => res.sendFile(path.join(__dirname, 'design-tester.html')));
 app.get(['/project', '/project.html'], (req, res) => res.sendFile(path.join(__dirname, 'project.html')));
 app.get(['/analysis', '/analysis.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'analysis.html')));
-app.get(['/companies', '/companies.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'companies.html')));
 app.get(['/ai-photo-formalizer', '/ai-photo-formalizer.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'ai-photo-formalizer.html')));
 
 // ======================
@@ -292,15 +303,11 @@ app.get('*', (req, res, next) => {
 });
 
 // Final fallback for legacy /api/analyze if not caught by reviewRouter
-app.use('/api', analysisRouter);
+app.use('/api', lazyRouter('./routes/analysis'));
 
-// --- Problems Router Module ---
-const problemsRouter = require('./routes/problems');
-app.use('/api/problems', problemsRouter);
-
-// --- Adaptive Mastery Skill Graph Module ---
-const adaptiveRouter = require('./routes/adaptive-mastery');
-app.use('/api/adaptive', adaptiveRouter);
+app.use('/api/problems', lazyRouter('./routes/problems'));
+app.use('/api/opportunities', lazyRouter('./routes/opportunities'));
+app.use('/api/adaptive', lazyRouter('./routes/adaptive-mastery'));
 
 // ======================
 // START SERVER

@@ -147,6 +147,33 @@
       color: var(--text-muted);
     }
 
+    .theme-toggle,
+    .user-menu-toggle,
+    .logout-trigger {
+      font: inherit;
+    }
+
+    .user-profile-link,
+    .user-dropdown-item {
+      text-decoration: none;
+    }
+
+    .user-profile-link {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      min-width: 0;
+    }
+
+    .user-menu-toggle {
+      appearance: none;
+      border: 0;
+      background: transparent;
+      padding: 6px;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+
     /* --- MAIN AREA --- */
     .content-stage {
       position: relative;
@@ -436,19 +463,33 @@
     }
 
     @media (max-width: 600px) {
-      .cards-grid { grid-template-columns: 1fr; }
-      .hero-title { font-size: 32px; }
-      .nav-header { padding: 20px; }
-      .dashboard-container { padding: 0 20px; }
-      .stats-row { flex-direction: column; gap: 15px; }
+      .top-nav {
+        padding: 14px 16px;
+        gap: 10px;
+      }
+
+      .brand-group { gap: 8px; min-width: 0; }
+      .brand-name { font-size: 20px; }
+      .nav-actions { gap: 8px !important; flex-shrink: 0; }
+      .dashboard-nav-btn { padding: 8px 10px !important; }
+      .dashboard-nav-label,
+      .user-name-label { display: none; }
+      .user-access-pill { padding: 4px; gap: 2px; }
+      .user-profile-link { gap: 0; }
+      .user-avatar-initial { width: 32px; height: 32px; }
+      .user-menu-toggle { padding: 6px; }
+      .theme-toggle { top: auto; right: auto; bottom: 16px; left: 16px; }
+      .content-stage { margin: 48px auto; padding: 0 20px; }
+      .hero-h1 { font-size: 40px; letter-spacing: -2px; }
+      .pills-track { margin-bottom: 36px; }
     }
   </style>
 </head>
 
 <body>
-  <div class="theme-toggle" onclick="toggleTheme()" title="Toggle Light/Dark Mode">
+  <button type="button" class="theme-toggle" onclick="toggleTheme()" title="Toggle Light/Dark Mode" aria-label="Toggle light and dark mode">
     <i class="fas fa-sun"></i>
-  </div>
+  </button>
   <div class="dot-overlay"></div>
   <canvas id="antigravity-bg"></canvas>
 
@@ -459,28 +500,32 @@
         <span class="brand-name">HIERO</span>
       </div>
 
-      <div style="display: flex; align-items: center; gap: 15px;">
+      <div class="nav-actions" style="display: flex; align-items: center; gap: 15px;">
         <a href="/Admin/dashboard.html" id="adminLink" style="display: none; color: #ff3b30; font-weight: 700; text-decoration: none; font-size: 13px; border: 1px solid #ff3b30; padding: 8px 16px; border-radius: 20px; transition: all 0.2s; background: rgba(255, 59, 48, 0.1);" onmouseover="this.style.background='rgba(255, 59, 48, 0.2)'" onmouseout="this.style.background='rgba(255, 59, 48, 0.1)'">Admin Dashboard</a>
 
-        <a href="dashboard.html" class="dashboard-nav-btn" style="display: flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #07e219, #00b248); color: #000; font-weight: 800; font-size: 13.5px; text-decoration: none; padding: 9px 20px; border-radius: 100px; box-shadow: 0 0 16px rgba(7, 226, 25, 0.35); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">
-          <i class="fa-solid fa-gauge-high"></i> Dashboard
+        <a href="dashboard.html" class="dashboard-nav-btn" aria-label="Open dashboard" style="display: flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #07e219, #00b248); color: #000; font-weight: 800; font-size: 13.5px; text-decoration: none; padding: 9px 20px; border-radius: 100px; box-shadow: 0 0 16px rgba(7, 226, 25, 0.35); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">
+          <i class="fa-solid fa-gauge-high"></i><span class="dashboard-nav-label">Dashboard</span>
         </a>
         
         <div class="user-access-pill" id="userPill">
-          <div class="user-avatar-initial" id="userAvatarContainer" onclick="window.location.href='dashboard.html'" style="cursor: pointer;" title="Go to Dashboard">U</div>
-          <span class="user-name-label" id="userNameLabel" onclick="window.location.href='dashboard.html'" style="cursor: pointer;" title="Go to Dashboard">User Profile</span>
-          <i class="fa-solid fa-chevron-down" onclick="toggleUserDropdown()" style="font-size: 12px; color: var(--text-muted); margin-left: 6px; cursor: pointer;"></i>
+          <a class="user-profile-link" href="dashboard.html" title="Go to Dashboard">
+            <span class="user-avatar-initial" id="userAvatarContainer">U</span>
+            <span class="user-name-label" id="userNameLabel">User Profile</span>
+          </a>
+          <button type="button" id="userMenuToggle" class="user-menu-toggle" onclick="toggleUserDropdown()" aria-label="Open account menu" aria-controls="userDropdown" aria-expanded="false">
+            <i class="fa-solid fa-chevron-down"></i>
+          </button>
           
-          <div class="logout-box" id="userDropdown" style="background: #0d121c; border: 1px solid rgba(7, 226, 25, 0.35); border-radius: 14px; padding: 8px; width: 220px; box-shadow: 0 12px 36px rgba(0,0,0,0.7); position: absolute; top: 110%; right: 0; z-index: 1000; display: none;">
-            <div onclick="window.location.href='dashboard.html'" style="display: flex; align-items: center; gap: 10px; padding: 12px 14px; color: #07e219; font-weight: 800; font-size: 13.5px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.08); border-radius: 8px; transition: 0.2s;" onmouseover="this.style.background='rgba(7,226,25,0.12)'" onmouseout="this.style.background='transparent'">
+          <div class="logout-box" id="userDropdown" role="menu" style="background: #0d121c; border: 1px solid rgba(7, 226, 25, 0.35); border-radius: 14px; padding: 8px; width: 220px; box-shadow: 0 12px 36px rgba(0,0,0,0.7); position: absolute; top: 110%; right: 0; z-index: 1000; display: none;">
+            <a href="dashboard.html" class="user-dropdown-item" role="menuitem" style="display: flex; align-items: center; gap: 10px; padding: 12px 14px; color: #07e219; font-weight: 800; font-size: 13.5px; border-bottom: 1px solid rgba(255,255,255,0.08); border-radius: 8px; transition: 0.2s;" onmouseover="this.style.background='rgba(7,226,25,0.12)'" onmouseout="this.style.background='transparent'">
               <i class="fa-solid fa-house"></i> Go to Dashboard
-            </div>
-            <div onclick="window.location.href='companies.html'" style="display: flex; align-items: center; gap: 10px; padding: 12px 14px; color: #ffffff; font-weight: 700; font-size: 13.5px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.08); border-radius: 8px; transition: 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='transparent'">
+            </a>
+            <a href="companies.html" class="user-dropdown-item" role="menuitem" style="display: flex; align-items: center; gap: 10px; padding: 12px 14px; color: #ffffff; font-weight: 700; font-size: 13.5px; border-bottom: 1px solid rgba(255,255,255,0.08); border-radius: 8px; transition: 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='transparent'">
               <i class="fa-solid fa-building"></i> Target Companies
-            </div>
-            <div class="logout-trigger" onclick="handleLogout()" style="display: flex; align-items: center; gap: 10px; padding: 12px 14px; color: #ff4d4d; font-weight: 700; font-size: 13.5px; cursor: pointer; border-radius: 8px; transition: 0.2s;" onmouseover="this.style.background='rgba(255,77,77,0.12)'" onmouseout="this.style.background='transparent'">
+            </a>
+            <button type="button" class="logout-trigger" role="menuitem" onclick="handleLogout()" style="display: flex; align-items: center; gap: 10px; width: 100%; border: 0; background: transparent; padding: 12px 14px; color: #ff4d4d; font-weight: 700; font-size: 13.5px; cursor: pointer; border-radius: 8px; transition: 0.2s;" onmouseover="this.style.background='rgba(255,77,77,0.12)'" onmouseout="this.style.background='transparent'">
               <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
-            </div>
+            </button>
           </div>
         </div>
       </div>

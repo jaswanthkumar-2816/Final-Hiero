@@ -1,5 +1,5 @@
-/* LIGHT MODE STYLES */
-body.light-mode {
+/* LIGHT MODE STYLES — skip the analysis result page, it has its own palette */
+body.light-mode:not(.result-page) {
     background: #f8fafc !important;
     background-image: 
         radial-gradient(circle at 0% 0%, rgba(4, 171, 7, 0.05) 0%, transparent 40%),
@@ -7,34 +7,24 @@ body.light-mode {
     color: #0f172a !important;
 }
 
-body.light-mode :root {
-    --bg-dark: #f8fafc;
-    --text-main: #0f172a;
-    --text-muted: #475569;
-    --glass: #ffffff;
-    --glass-border: rgba(0, 0, 0, 0.1);
-    --card-inner-bg: #f1f5f9;
-    --card-inner-border: rgba(0, 0, 0, 0.08);
-}
-
 /* Learn Page Light Mode Fixes */
-body.light-mode .nav-header {
+body.learn-page.light-mode .nav-header {
     background: rgba(255, 255, 255, 0.92) !important;
     border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
     backdrop-filter: blur(16px) !important;
 }
 
-body.light-mode .nav-brand span,
-body.light-mode .app-brand span {
+body.learn-page.light-mode .nav-brand span,
+body.learn-page.light-mode .app-brand span {
     color: #0f172a !important;
 }
 
-body.light-mode .nav-btn {
+body.learn-page.light-mode .nav-btn {
     color: #475569 !important;
 }
 
-body.light-mode .nav-btn.active,
-body.light-mode .nav-btn:hover {
+body.learn-page.light-mode .nav-btn.active,
+body.learn-page.light-mode .nav-btn:hover {
     color: #04ab07 !important;
 }
 
@@ -582,8 +572,9 @@ body.light-mode .page-subtitle, body.light-mode .subtext, body.light-mode .sub-d
     color: #475569 !important;
 }
 
-[data-theme="light"] .company-card, [data-theme="light"] .kpi-benchmark-deck, [data-theme="light"] .card, [data-theme="light"] .container-card,
-body.light-mode .company-card, body.light-mode .kpi-benchmark-deck, body.light-mode .card, body.light-mode .container-card {
+[data-theme="light"] .company-card, [data-theme="light"] .kpi-benchmark-deck, [data-theme="light"] .container-card,
+body.light-mode:not(.result-page) .company-card, body.light-mode:not(.result-page) .kpi-benchmark-deck, body.light-mode:not(.result-page) .card, body.light-mode:not(.result-page) .container-card,
+[data-theme="light"]:not(.result-page) .card {
     background: #ffffff !important;
     border-color: #e2e8f0 !important;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05) !important;
@@ -636,4 +627,41 @@ body.light-mode .breadcrumb-row, body.light-mode .breadcrumb-row span {
 [data-theme="light"] .breadcrumb-row span.current, body.light-mode .breadcrumb-row span.current {
     color: #0f172a !important;
     font-weight: 600;
+}
+
+/* Analysis summary keeps its own palette (do not inherit learn-page light CSS) */
+body.result-page {
+    background: var(--bg-color) !important;
+    background-image: none !important;
+    color: var(--text-main) !important;
+}
+body.result-page .nav-header {
+    background: var(--nav-bg) !important;
+    border-bottom: 1px solid var(--border-color) !important;
+}
+body.result-page .nav-btn {
+    color: var(--text-muted) !important;
+}
+body.result-page .nav-btn.active {
+    background: var(--nav-active-text) !important;
+    color: #000 !important;
+}
+body.result-page .card {
+    background: var(--card-bg) !important;
+    border-color: var(--border-color) !important;
+    box-shadow: none !important;
+    color: var(--text-main) !important;
+}
+body.result-page .page-title,
+body.result-page h1 {
+    color: var(--text-main) !important;
+    -webkit-text-fill-color: var(--text-main) !important;
+}
+body.result-page .page-title span {
+    color: var(--primary-accent) !important;
+    -webkit-text-fill-color: var(--primary-accent) !important;
+}
+body.result-page .stat-num {
+    color: var(--text-main) !important;
+    -webkit-text-fill-color: var(--text-main) !important;
 }

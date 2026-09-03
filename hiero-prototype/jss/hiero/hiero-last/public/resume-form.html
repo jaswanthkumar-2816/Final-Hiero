@@ -675,18 +675,108 @@
       display: none;
     }
 
-    .section-title {
-      font-size: 1.8rem;
-      color: #04ab07ee;
-      margin-bottom: 20px;
-      padding-bottom: 12px;
-      border-bottom: 4px solid #0d8705;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      font-weight: 700;
-      position: relative;
-      flex-wrap: wrap;
+    /* --- DARK MODE (Default Theme) --- */
+    body:not(.light-mode) .section-title {
+      color: #00ff00 !important;
+    }
+
+    body:not(.light-mode) .form-group label {
+      color: #f8fafc !important;
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    body:not(.light-mode) input:not([type="checkbox"]),
+    body:not(.light-mode) textarea,
+    body:not(.light-mode) select {
+      color: #f8fafc !important;
+      background: rgba(255, 255, 255, 0.07) !important;
+      border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    }
+
+    body:not(.light-mode) input::placeholder,
+    body:not(.light-mode) textarea::placeholder {
+      color: #94a3b8 !important;
+      opacity: 0.85;
+    }
+
+    body:not(.light-mode) .experience-item,
+    body:not(.light-mode) .education-item,
+    body:not(.light-mode) .project-item,
+    body:not(.light-mode) .internship-item,
+    body:not(.light-mode) .reference-item,
+    body:not(.light-mode) .custom-detail-item {
+      background: rgba(15, 23, 42, 0.7) !important;
+      border: 1px solid rgba(42, 224, 35, 0.3) !important;
+    }
+
+    /* --- BRIGHT MODE (Light Theme) --- */
+    body.light-mode {
+      background: #f8fafc !important;
+      color: #0f172a !important;
+    }
+
+    body.light-mode .main-layout {
+      background: transparent !important;
+    }
+
+    body.light-mode .section-title {
+      color: #04ab07 !important;
+      border-bottom-color: #04ab07 !important;
+    }
+
+    body.light-mode .section-title::before {
+      background: #04ab07 !important;
+    }
+
+    body.light-mode .form-group label {
+      color: #0f172a !important;
+      font-weight: 700 !important;
+      font-size: 14px;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    body.light-mode input:not([type="checkbox"]),
+    body.light-mode textarea,
+    body.light-mode select {
+      color: #0f172a !important;
+      background: #ffffff !important;
+      border: 1.5px solid #cbd5e1 !important;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+    }
+
+    body.light-mode input:focus,
+    body.light-mode textarea:focus,
+    body.light-mode select:focus {
+      border-color: #04ab07 !important;
+      box-shadow: 0 0 0 3px rgba(4, 171, 7, 0.2) !important;
+    }
+
+    body.light-mode input::placeholder,
+    body.light-mode textarea::placeholder {
+      color: #64748b !important;
+      opacity: 0.9;
+    }
+
+    body.light-mode .experience-item,
+    body.light-mode .education-item,
+    body.light-mode .project-item,
+    body.light-mode .internship-item,
+    body.light-mode .reference-item,
+    body.light-mode .custom-detail-item {
+      background: #ffffff !important;
+      border: 1px solid #e2e8f0 !important;
+      border-left: 5px solid #04ab07 !important;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05) !important;
+    }
+
+    body.light-mode .section-icon {
+      color: #04ab07 !important;
+      background: rgba(4, 171, 7, 0.1) !important;
+      border-color: rgba(4, 171, 7, 0.3) !important;
     }
 
     .section-title::before {
@@ -4862,24 +4952,98 @@
           endDateInput.disabled = true;
           endDateInput.value = '';
           endDateInput.placeholder = 'Present';
-        } else {
-          endDateInput.style.opacity = '1';
-          endDateInput.style.pointerEvents = 'auto';
-          endDateInput.disabled = false;
-          endDateInput.placeholder = '';
-        }
-      }
+         // Custom Modal Popup when Max 4 Items Limit is Reached
+    function showMaxLimitModal(sectionName) {
+      const existing = document.getElementById('maxLimitModal');
+      if (existing) existing.remove();
+
+      const modal = document.createElement('div');
+      modal.id = 'maxLimitModal';
+      modal.style.cssText = `
+        position: fixed;
+        top: 0; left: 0; width: 100vw; height: 100vh;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(8px);
+        z-index: 99999;
+        display: flex; align-items: center; justify-content: center;
+        padding: 20px;
+      `;
+
+      modal.innerHTML = `
+        <div style="
+          background: #0f172a;
+          border: 1px solid rgba(239, 68, 68, 0.5);
+          border-radius: 24px;
+          padding: 32px 28px;
+          max-width: 440px;
+          width: 100%;
+          text-align: center;
+          box-shadow: 0 25px 60px rgba(0,0,0,0.7), 0 0 35px rgba(239,68,68,0.25);
+        ">
+          <div style="
+            width: 64px; height: 64px;
+            background: rgba(239, 68, 68, 0.15);
+            border: 2px solid rgba(239, 68, 68, 0.4);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 16px;
+            font-size: 28px; color: #ef4444;
+          ">
+            ⚠️
+          </div>
+          <h3 style="margin: 0 0 10px; font-size: 20px; font-weight: 800; color: #f8fafc;">
+            Maximum Limit Reached (4 Items)
+          </h3>
+          <p style="margin: 0 0 16px; font-size: 14px; line-height: 1.5; color: #cbd5e1;">
+            You have reached the maximum limit of <strong>4 entries</strong> for <strong>${sectionName}</strong>.
+          </p>
+          <div style="
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px dashed rgba(239, 68, 68, 0.35);
+            border-radius: 14px;
+            padding: 14px 16px;
+            font-size: 13px; font-weight: 600; color: #fca5a5;
+            margin-bottom: 24px;
+            line-height: 1.4;
+          ">
+            ❗ To add a new ${sectionName.toLowerCase()} item, removing one of your existing entries is mandatory.
+          </div>
+          <button onclick="document.getElementById('maxLimitModal').remove()" style="
+            width: 100%;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: #ffffff;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 12px;
+            font-size: 14px; font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(239,68,68,0.4);
+          ">
+            Understood, I'll Remove One First
+          </button>
+        </div>
+      `;
+
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.remove();
+      });
+
+      document.body.appendChild(modal);
     }
 
-    // Add Experience / Education
+    // Add Experience / Education (Capped at Max 4 entries)
     let expCount = 1, eduCount = 1;
     function addExperience() {
-      expCount++;
       const container = document.getElementById('experienceContainer');
+      if (container && container.querySelectorAll('.experience-item').length >= 4) {
+        showMaxLimitModal('Work Experience');
+        return;
+      }
+      expCount++;
       const div = document.createElement('div');
       div.className = 'experience-item';
       div.innerHTML = `
-        <button type="button" class="remove-btn" aria-label="Remove entry" onclick="this.parentElement.remove()">Remove</button>
+        <button type="button" class="remove-btn" aria-label="Remove entry" onclick="this.parentElement.remove(); if(window.calculateATS) window.calculateATS();">Remove</button>
         <div class="form-row">
           <div class="form-group"><label>Job Title</label><input type="text" name="jobTitle[]" placeholder="Software Engineer"></div>
           <div class="form-group"><label>Company</label><input type="text" name="company[]" placeholder="Company Name"></div>
@@ -4896,16 +5060,21 @@
         <div class="form-group"><label>Description</label><textarea name="jobDescription[]" rows="4" placeholder="Key achievements..."></textarea></div>
       `;
       container.appendChild(div);
+      if (window.calculateATS) window.calculateATS();
     }
 
 
     function addEducation() {
-      eduCount++;
       const container = document.getElementById('educationContainer');
+      if (container && container.querySelectorAll('.education-item').length >= 4) {
+        showMaxLimitModal('Education');
+        return;
+      }
+      eduCount++;
       const div = document.createElement('div');
       div.className = 'education-item';
       div.innerHTML = `
-        <button type="button" class="remove-btn" aria-label="Remove entry" onclick="this.parentElement.remove()">Remove</button>
+        <button type="button" class="remove-btn" aria-label="Remove entry" onclick="this.parentElement.remove(); if(window.calculateATS) window.calculateATS();">Remove</button>
         <div class="form-row">
           <div class="form-group"><label>Degree</label><input type="text" name="degree[]" placeholder="Bachelor of Science"></div>
           <div class="form-group"><label>School</label><input type="text" name="school[]" placeholder="University Name"></div>
@@ -4916,14 +5085,19 @@
         </div>
       `;
       container.appendChild(div);
+      if (window.calculateATS) window.calculateATS();
     }
 
     function addInternship() {
       const container = document.getElementById('internshipsContainer');
+      if (container && container.querySelectorAll('.internship-item').length >= 4) {
+        showMaxLimitModal('Internships');
+        return;
+      }
       const div = document.createElement('div');
       div.className = 'internship-item';
       div.innerHTML = `
-        <button type="button" class="remove-btn" aria-label="Remove entry" onclick="this.parentElement.remove()">Remove</button>
+        <button type="button" class="remove-btn" aria-label="Remove entry" onclick="this.parentElement.remove(); if(window.calculateATS) window.calculateATS();">Remove</button>
         <div class="form-row">
           <div class="form-group"><label>Intern Role</label><input type="text" name="internRole[]" placeholder="Software Intern"></div>
           <div class="form-group"><label>Organization</label><input type="text" name="internOrg[]" placeholder="Tech Solutions"></div>
@@ -4935,40 +5109,50 @@
         <div class="form-group"><label>Description</label><textarea name="internDesc[]" rows="4" placeholder="Key contributions..."></textarea></div>
       `;
       container.appendChild(div);
+      if (window.calculateATS) window.calculateATS();
     }
 
 
     // Add Reference
     let refCount = 1;
     function addReference() {
-      refCount++;
       const container = document.getElementById('referencesContainer');
+      if (container && container.querySelectorAll('.reference-item').length >= 4) {
+        showMaxLimitModal('References');
+        return;
+      }
+      refCount++;
       const div = document.createElement('div');
       div.className = 'reference-item';
       div.innerHTML = `
-        <button type="button" class="remove-btn" aria-label="Remove entry" onclick="this.parentElement.remove()">Remove</button>
+        <button type="button" class="remove-btn" aria-label="Remove entry" onclick="this.parentElement.remove(); if(window.calculateATS) window.calculateATS();">Remove</button>
         <div class="form-row">
           <div class="form-group"><label>Reference Name</label><input type="text" name="refName[]" placeholder="John Smith"></div>
           <div class="form-group"><label>Title/Position</label><input type="text" name="refTitle[]" placeholder="Senior Manager"></div>
         </div>
         <div class="form-row">
           <div class="form-group"><label>Company</label><input type="text" name="refCompany[]" placeholder="Company Name"></div>
-          <div class="form-group"><label>Phone</label><input type="tel" name="refPhone[]" placeholder="(555) 123-4567" pattern="[\+]?[\d\s\-\(\)\.]+" title="Please enter a valid phone number"></div>
+          <div class="form-group"><label>Phone</label><input type="tel" name="refPhone[]" placeholder="(555) 123-4567" pattern="[\\+]?[\\d\\s\\-\\(\\)\\.]+" title="Please enter a valid phone number"></div>
         </div>
         <div class="form-group"><label>Email</label><input type="email" name="refEmail[]" placeholder="reference@company.com" title="Please enter a valid email address"></div>
       `;
       container.appendChild(div);
+      if (window.calculateATS) window.calculateATS();
     }
 
     // Add Project
     let projectCount = 1;
     function addProject() {
-      projectCount++;
       const container = document.getElementById('projectsContainer');
+      if (container && container.querySelectorAll('.project-item').length >= 4) {
+        showMaxLimitModal('Projects');
+        return;
+      }
+      projectCount++;
       const div = document.createElement('div');
       div.className = 'project-item';
       div.innerHTML = `
-        <button type="button" class="remove-btn" aria-label="Remove entry" onclick="this.parentElement.remove()">Remove</button>
+        <button type="button" class="remove-btn" aria-label="Remove entry" onclick="this.parentElement.remove(); if(window.calculateATS) window.calculateATS();">Remove</button>
         <div class="form-group">
           <label>Project Name <span class="required">*</span></label>
           <input type="text" name="projectName[]" placeholder="E-commerce Platform" required>
@@ -4999,21 +5183,27 @@
         </div>
       `;
       container.appendChild(div);
+      if (window.calculateATS) window.calculateATS();
     }
 
     // Add Custom Detail
     let customCount = 1;
     function addCustomDetail() {
-      customCount++;
       const container = document.getElementById('customDetailsContainer');
+      if (container && container.querySelectorAll('.custom-detail-item').length >= 4) {
+        showMaxLimitModal('Custom Details');
+        return;
+      }
+      customCount++;
       const div = document.createElement('div');
       div.className = 'custom-detail-item';
       div.innerHTML = `
-        <button type="button" class="remove-btn" aria-label="Remove custom entry" onclick="this.parentElement.remove()">Remove</button>
+        <button type="button" class="remove-btn" aria-label="Remove custom entry" onclick="this.parentElement.remove(); if(window.calculateATS) window.calculateATS();">Remove</button>
         <div class="form-group"><label>Item Heading</label><input type="text" name="customHeading[]" placeholder="e.g., Research Paper A"></div>
         <div class="form-group"><label>Content</label><textarea name="customContent[]" rows="4" placeholder="Describe the details..."></textarea></div>
       `;
       container.appendChild(div);
+      if (window.calculateATS) window.calculateATS();
     }
 
     // Fill Sample Data - Comprehensive function to populate all form fields

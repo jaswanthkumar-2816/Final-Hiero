@@ -1,0 +1,50 @@
+[
+  {
+    "id": "c-jas-hiero-in",
+    "name": "Hiero Corp",
+    "logoUrl": "",
+    "location": "Bangalore, India",
+    "description": "Verified partner company connecting directly with HIERO AI talent network.",
+    "website": ""
+  },
+  {
+    "id": "c-jaswanthkumarmuthoju-gmail-com",
+    "name": "TechNova Inc.",
+    "logoUrl": "",
+    "location": "Bangalore, India",
+    "description": "Verified partner company connecting directly with HIERO AI talent network.",
+    "website": ""
+  },
+  {
+    "id": "comp-starlight-ai-corp",
+    "name": "Starlight AI Corp",
+    "logoUrl": "",
+    "location": "Bangalore, India",
+    "description": "Verified partner company connecting directly with HIERO AI talent network.",
+    "website": ""
+  },
+  {
+    "id": "c-1787602602161",
+    "name": "Verified HR Partner",
+    "logoUrl": "",
+    "location": "Pune ",
+    "description": "Verified partner company connecting directly with HIERO AI talent network.",
+    "website": ""
+  },
+  {
+    "id": "comp-nexus-ai-labs",
+    "name": "Nexus AI Labs",
+    "logoUrl": "",
+    "location": "Hyderabad, India",
+    "description": "Verified partner company connecting directly with HIERO AI talent network.",
+    "website": ""
+  },
+  {
+    "id": "comp-acme-tech",
+    "name": "Acme AI Systems",
+    "logoUrl": "",
+    "location": "Bangalore, India",
+    "description": "Pioneering next-gen AI automation and intelligence engines.",
+    "website": "https://acme.ai"
+  }
+]

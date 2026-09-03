@@ -6,7 +6,7 @@ const StudentProgress = require('../models/StudentProgress');
 const DiagnosticResult = require('../models/DiagnosticResult');
 
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
-const AI_MODEL = process.env.AI_MODEL || 'llama-3.3-70b-versatile';
+const AI_MODEL = process.env.AI_MODEL || 'openai/gpt-oss-20b';
 const MASTERY_THRESHOLD = 70;
 
 // =========================================================
@@ -173,6 +173,69 @@ const CURATED_SKILL_GRAPHS = {
         }
       }
     ]
+  },
+
+  'sql': {
+    skillName: 'SQL',
+    nodes: [
+      {
+        id: 'sql-select',
+        name: 'SELECT, WHERE & Filtering',
+        order: 1,
+        subConcepts: ['select', 'where', 'order-by', 'distinct'],
+        questions: [
+          { id: 'sql-q1', question: 'Which clause filters rows after they are grouped?', options: ['WHERE', 'HAVING', 'ORDER BY', 'FROM'], correctIndex: 1, subConcept: 'having' },
+          { id: 'sql-q2', question: 'SELECT DISTINCT is used to?', options: ['Sort rows', 'Remove duplicate rows', 'Join tables', 'Create indexes'], correctIndex: 1, subConcept: 'distinct' }
+        ],
+        resources: {
+          videos: [
+            { title: 'SQL Full Course – Bro Code', url: 'https://www.youtube.com/watch?v=HXV3zeQKqGY', duration: '4h' },
+            { title: 'SQL – freeCodeCamp', url: 'https://www.youtube.com/watch?v=7S_tz1z_5bA', duration: '4h' }
+          ],
+          courses: [{ title: 'SQLBolt Interactive Lessons', url: 'https://sqlbolt.com/' }],
+          exercises: [{ title: 'Filter & Distinct Lab', problemId: 'sql-1' }]
+        }
+      },
+      {
+        id: 'sql-joins',
+        name: 'JOINs (Inner, Left, Outer)',
+        order: 2,
+        subConcepts: ['inner-join', 'left-join', 'outer-join', 'on-condition'],
+        questions: [
+          { id: 'sql-q3', question: 'INNER JOIN returns rows that…', options: ['Exist only in the left table', 'Match in both tables on the join key', 'Exist in either table', 'Are always NULL on the right'], correctIndex: 1, subConcept: 'inner-join' },
+          { id: 'sql-q4', question: 'LEFT JOIN keeps every row from…', options: ['The right table only', 'The left table, with NULLs when the right has no match', 'Only matching keys', 'A cartesian product'], correctIndex: 1, subConcept: 'left-join' }
+        ],
+        resources: {
+          videos: [
+            { title: 'SQL Joins Explained Simply', url: 'https://www.youtube.com/watch?v=2EewKq7iYpk', duration: '20m' },
+            { title: 'SQL Inner vs Outer Join', url: 'https://www.youtube.com/watch?v=qwAFLRTKnLo', duration: '15m' },
+            { title: 'SQL Joins Tutorial', url: 'https://www.youtube.com/watch?v=9Pzj7Aj25lw', duration: '25m' },
+            { title: 'SQL Full Course – Bro Code', url: 'https://www.youtube.com/watch?v=HXV3zeQKqGY', duration: '4h' },
+            { title: 'SQL – freeCodeCamp', url: 'https://www.youtube.com/watch?v=7S_tz1z_5bA', duration: '4h' }
+          ],
+          courses: [{ title: 'Mode SQL Joins Tutorial', url: 'https://mode.com/sql-tutorial/sql-joins/' }],
+          exercises: [{ title: 'Inner Join Matching Lab', problemId: 'sql-2' }]
+        }
+      },
+      {
+        id: 'sql-agg',
+        name: 'GROUP BY & Aggregates',
+        order: 3,
+        subConcepts: ['group-by', 'count', 'sum', 'having'],
+        questions: [
+          { id: 'sql-q5', question: 'COUNT(*) vs COUNT(column) differs because COUNT(column)…', options: ['Counts duplicate rows twice', 'Ignores NULL values in that column', 'Requires an index', 'Only works with integers'], correctIndex: 1, subConcept: 'count' },
+          { id: 'sql-q6', question: 'Every non-aggregated SELECT column must appear in…', options: ['ORDER BY', 'GROUP BY', 'HAVING', 'LIMIT'], correctIndex: 1, subConcept: 'group-by' }
+        ],
+        resources: {
+          videos: [
+            { title: 'SQL Full Course – Bro Code', url: 'https://www.youtube.com/watch?v=HXV3zeQKqGY', duration: '4h' },
+            { title: 'SQL – freeCodeCamp', url: 'https://www.youtube.com/watch?v=7S_tz1z_5bA', duration: '4h' }
+          ],
+          courses: [{ title: 'SQL GROUP BY Guide', url: 'https://mode.com/sql-tutorial/sql-group-by/' }],
+          exercises: [{ title: 'Aggregation Challenge', problemId: 'sql-3' }]
+        }
+      }
+    ]
   }
 };
 
@@ -180,7 +243,35 @@ const CURATED_SKILL_GRAPHS = {
 async function getOrGenerateSkillGraph(skillName) {
   const normalizedKey = skillName.toLowerCase().trim();
 
-  // STEP 1: Check MongoDB Cache First (Cache-Miss Only Strategy)
+  // STEP 1: Curated blueprints win (keeps SQL joins / subtopic tags current)
+  if (CURATED_SKILL_GRAPHS[normalizedKey]) {
+    console.log(`[Skill Graph Curated HIT] Serving '${skillName}' from static blueprint.`);
+    const graph = CURATED_SKILL_GRAPHS[normalizedKey];
+    try {
+      await SkillTree.findOneAndUpdate(
+        { skillName: normalizedKey },
+        {
+          skillName: normalizedKey,
+          source: 'hardcoded',
+          topics: graph.nodes.map((n) => ({
+            id: n.id,
+            name: n.name,
+            order: n.order,
+            subConcepts: n.subConcepts,
+            diagnosticQuestions: n.questions,
+            resources: {
+              primary: n.resources.videos[0] ? { type: 'video', url: n.resources.videos[0].url, title: n.resources.videos[0].title } : null,
+              alternates: (n.resources.courses || []).map(c => ({ type: 'article', url: c.url, title: c.title }))
+            }
+          }))
+        },
+        { upsert: true }
+      );
+    } catch (e) {}
+    return graph;
+  }
+
+  // STEP 2: Check MongoDB Cache
   try {
     const cachedTree = await SkillTree.findOne({ skillName: normalizedKey });
     if (cachedTree && cachedTree.topics && cachedTree.topics.length > 0) {
@@ -210,30 +301,6 @@ async function getOrGenerateSkillGraph(skillName) {
     }
   } catch (dbErr) {
     console.warn('[Skill Graph Cache Read Warning]:', dbErr.message);
-  }
-
-  // STEP 2: Check Curated Static Dict Fallback
-  if (CURATED_SKILL_GRAPHS[normalizedKey]) {
-    console.log(`[Skill Graph Curated HIT] Serving '${skillName}' from static blueprint.`);
-    const graph = CURATED_SKILL_GRAPHS[normalizedKey];
-    // Cache curated tree in MongoDB for consistency
-    try {
-      await SkillTree.create({
-        skillName: normalizedKey,
-        source: 'hardcoded',
-        topics: graph.nodes.map((n, i) => ({
-          id: n.id,
-          name: n.name,
-          order: n.order,
-          diagnosticQuestions: n.questions,
-          resources: {
-            primary: n.resources.videos[0] ? { type: 'video', url: n.resources.videos[0].url, title: n.resources.videos[0].title } : null,
-            alternates: (n.resources.courses || []).map(c => ({ type: 'article', url: c.url, title: c.title }))
-          }
-        }))
-      });
-    } catch(e) {}
-    return graph;
   }
 
   // STEP 3: Cache MISS -> Trigger Groq LLM Generation ONCE per skill
@@ -457,8 +524,8 @@ router.post('/evaluate-diagnostic', async (req, res) => {
       await StudentProgress.findOneAndUpdate(
         { userId, skillName: graph.skillName.toLowerCase() },
         {
-          overallMastery: overallMasteryPct,
-          currentState: studentKnowledge.tierMode === 'FAST_TRACK' ? 'LEARNING' : 'NOT_STARTED',
+          masteryPct: overallMasteryPct,
+          state: studentKnowledge.tierMode === 'FAST_TRACK' ? 'LEARNING' : 'NOT_STARTED',
           weakSubConcepts: weakConcepts.map(w => w.nodeName),
           updatedAt: new Date()
         },
@@ -468,12 +535,23 @@ router.post('/evaluate-diagnostic', async (req, res) => {
       console.warn('MongoDB StudentProgress save skipped:', dbErr.message);
     }
 
+    const wrongSubtopics = detailedReview
+      .filter(r => !r.isCorrect && r.subConcept)
+      .map(r => ({
+        subtopic: r.subConcept,
+        nodeId: r.nodeId,
+        nodeName: r.nodeName,
+        question: r.question,
+        path: `${graph.skillName} > ${r.nodeName} > ${r.subConcept}`
+      }));
+
     res.json({
       success: true,
       studentKnowledge,
       weakConcepts,
       recommendations,
-      detailedReview
+      detailedReview,
+      wrongSubtopics
     });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -524,17 +602,74 @@ router.post('/update-knowledge', async (req, res) => {
     const graph = await getOrGenerateSkillGraph(skillName);
     const nodeIndex = graph.nodes.findIndex(n => n.id === nodeId);
     const nextNode = graph.nodes[nodeIndex + 1];
+    const isPassed = scorePct >= MASTERY_THRESHOLD;
+    const nextTopicId = isPassed && nextNode ? nextNode.id : nodeId;
+    const nextState = isPassed ? (nextNode ? 'LEARNING' : 'MASTERED') : 'PRACTICING';
+
+    // Persist mastery state to StudentProgress
+    try {
+      await StudentProgress.findOneAndUpdate(
+        { userId, skillName: graph.skillName.toLowerCase() },
+        {
+          $set: {
+            topicId: nextTopicId,
+            state: nextState,
+            masteryPct: Math.max(scorePct, 0),
+            updatedAt: new Date()
+          }
+        },
+        { upsert: true }
+      );
+    } catch (dbErr) {
+      console.warn('[Adaptive] update-knowledge DB save failed:', dbErr.message);
+    }
 
     res.json({
       success: true,
       skillName: graph.skillName,
       updatedNodeId: nodeId,
       nodeMasteryPct: scorePct,
-      nodeState: scorePct >= MASTERY_THRESHOLD ? 'MASTERED' : 'LEARNING',
+      nodeState: nextState,
       nextUnlockedNode: nextNode ? { id: nextNode.id, name: nextNode.name } : null,
       message: nextNode ? `Node mastered! Next node '${nextNode.name}' unlocked.` : `All Skill Graph nodes mastered!`
     });
   } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// =========================================================
+// LEARN STEP: transcript-timestamp matching (not whole-video pick)
+// =========================================================
+router.post('/match-segment', async (req, res) => {
+  const { subtopic, description, questionText, skillName, nodeId, candidateVideos } = req.body || {};
+  if (!subtopic && !questionText) {
+    return res.status(400).json({ success: false, message: 'subtopic or questionText required.' });
+  }
+
+  try {
+    const { matchLearnSegment } = require('../services/transcriptMatcher');
+    let videos = Array.isArray(candidateVideos) ? candidateVideos : [];
+    if (!videos.length && skillName) {
+      const graph = await getOrGenerateSkillGraph(skillName);
+      const node = nodeId
+        ? graph.nodes.find(n => n.id === nodeId)
+        : graph.nodes.find(n =>
+            (n.subConcepts || []).some(s => String(s).toLowerCase() === String(subtopic).toLowerCase())
+          ) || graph.nodes[0];
+      videos = node?.resources?.videos || [];
+    }
+
+    const match = await matchLearnSegment({
+      subtopic: subtopic || questionText,
+      description,
+      questionText,
+      candidateVideos: videos
+    });
+
+    res.json(match);
+  } catch (err) {
+    console.error('[Adaptive] match-segment error:', err.message);
     res.status(500).json({ success: false, message: err.message });
   }
 });

@@ -465,7 +465,7 @@ async function loadTemplates() {
       id: t.id,
       name: t.name,
       description: t.description,
-      preview: t.preview.startsWith('/') ? `http://localhost:5003${t.preview}` : t.preview,
+      preview: t.preview.startsWith('/') ? `${window.location.origin}${t.preview}` : t.preview,
       recommended: t.recommended || [],
       category: t.category
     }));

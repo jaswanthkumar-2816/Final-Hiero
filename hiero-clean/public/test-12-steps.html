@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resume Builder - 12 Steps Test</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+  <div class="max-w-6xl mx-auto p-8">
+    <h1 class="text-3xl font-bold mb-8 text-center">Resume Builder - 12 Steps Validation</h1>
+    
+    <!-- Status Display -->
+    <div id="status" class="mb-4 text-center font-semibold"></div>
+    
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+      <div class="bg-white p-6 rounded-lg text-center">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+        <p class="mt-2">Processing...</p>
+      </div>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="mb-8">
+      <div id="progressBar" class="w-full bg-gray-200 rounded-full h-3 mb-2">
+        <div id="progressFill" class="bg-blue-600 h-3 rounded-full transition-all duration-300" style="width: 0%"></div>
+      </div>
+      <p id="progressText" class="text-center text-sm text-gray-600">Step 1 of 12: Basic Information</p>
+    </div>
+
+    <!-- Step 1: Basic Information -->
+    <div id="basicForm" class="bg-white p-6 rounded-lg shadow-md mb-4">
+      <h2 class="text-xl font-semibold mb-4">1. Basic Information</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <input type="text" id="basicName" class="w-full p-2 border rounded" placeholder="Full Name" value="John Doe">
+        <input type="email" id="basicEmail" class="w-full p-2 border rounded" placeholder="Email" value="john@example.com">
+        <input type="tel" id="basicPhone" class="w-full p-2 border rounded" placeholder="Phone" value="123-456-7890">
+        <input type="url" id="basicWebstite" class="w-full p-2 border rounded" placeholder="Website" value="https://johndoe.com">
+        <div class="md:col-span-2">
+          <textarea id="basicCareerObjective" class="w-full p-2 border rounded" rows="3" placeholder="Career Objective">Experienced software developer seeking challenging opportunities</textarea>
+        </div>
+      </div>
+      <div class="mt-4 flex gap-2">
+        <button onclick="submitStep('basic')" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Save & Continue</button>
+        <button onclick="skipStep('basic')" class="px-4 py-2 bg-gray-400 text-white rounded hover:bg-gray-500">Skip</button>
+      </div>
+    </div>
+
+    <!-- Step 2: Education -->
+    <div id="educationForm" class="bg-white p-6 rounded-lg shadow-md mb-4" style="display: none;">
+      <h2 class="text-xl font-semibold mb-4">2. Education</h2>
+      <div class="grid grid-cols-2 gap-4 mb-4">
+        <input type="text" id="eduInstitution" class="w-full p-2 border rounded" placeholder="Institution" value="MIT">
+        <input type="text" id="eduDegree" class="w-full p-2 border rounded" placeholder="Degree" value="Computer Science">
+        <input type="text" id="eduYear" class="w-full p-2 border rounded" placeholder="Year" value="2020">
+        <input type="text" id="eduGpa" class="w-full p-2 border rounded" placeholder="GPA" value="3.8">
+      </div>
+      <button onclick="addEducationEntry()" class="px-4 py-2 bg-green-600 text-white rounded mb-4">Add Education</button>
+      <ul id="educationList" class="mb-4 list-disc pl-6"></ul>
+      <div class="flex gap-2">
+        <button onclick="goBackStep('education')" class="px-4 py-2 bg-gray-400 text-white rounded">Back</button>
+        <button onclick="submitStep('education')" class="px-4 py-2 bg-blue-600 text-white rounded">Save & Continue</button>
+      </div>
+    </div>
+
+    <!-- Step 3: Projects -->
+    <div id="projectsForm" class="bg-white p-6 rounded-lg shadow-md mb-4" style="display: none;">
+      <h2 class="text-xl font-semibold mb-4">3. Projects</h2>
+      <div class="grid grid-cols-2 gap-4 mb-4">
+        <input type="text" id="projectName" class="w-full p-2 border rounded" placeholder="Project Name" value="E-commerce Website">
+        <input type="text" id="projectDesc" class="w-full p-2 border rounded" placeholder="Description" value="Full-stack web application">
+        <input type="text" id="projectDuration" class="w-full p-2 border rounded" placeholder="Duration" value="6 months">
+        <input type="text" id="projectYear" class="w-full p-2 border rounded" placeholder="Year" value="2023">
+      </div>
+      <button onclick="addProjectEntry()" class="px-4 py-2 bg-green-600 text-white rounded mb-4">Add Project</button>
+      <ul id="projectsList" class="mb-4 list-disc pl-6"></ul>
+      <div class="flex gap-2">
+        <button onclick="goBackStep('projects')" class="px-4 py-2 bg-gray-400 text-white rounded">Back</button>
+        <button onclick="submitStep('projects')" class="px-4 py-2 bg-blue-600 text-white rounded">Save & Continue</button>
+      </div>
+    </div>
+
+    <!-- Step 4: Skills -->
+    <div id="skillsForm" class="bg-white p-6 rounded-lg shadow-md mb-4" style="display: none;">
+      <h2 class="text-xl font-semibold mb-4">4. Skills</h2>
+      <div class="space-y-4">
+        <input type="text" id="skillsTechnical" class="w-full p-2 border rounded" placeholder="Technical Skills (comma-separated)" value="JavaScript, Python, React, Node.js">
+        <input type="text" id="skillsManagement" class="w-full p-2 border rounded" placeholder="Management Skills" value="Team Leadership, Project Management">
+      </div>
+      <div class="mt-4 flex gap-2">
+        <button onclick="goBackStep('skills')" class="px-4 py-2 bg-gray-400 text-white rounded">Back</button>
+        <button onclick="submitStep('skills')" class="px-4 py-2 bg-blue-600 text-white rounded">Save & Continue</button>
+      </div>
+    </div>
+
+    <!-- Step 5: Certifications -->
+    <div id="certificationsForm" class="bg-white p-6 rounded-lg shadow-md mb-4" style="display: none;">
+      <h2 class="text-xl font-semibold mb-4">5. Certifications</h2>
+      <div class="grid grid-cols-3 gap-4 mb-4">
+        <input type="text" id="certName" class="w-full p-2 border rounded" placeholder="Certification Name" value="AWS Solutions Architect">
+        <input type="text" id="certIssuer" class="w-full p-2 border rounded" placeholder="Issuer" value="Amazon">
+        <input type="text" id="certYear" class="w-full p-2 border rounded" placeholder="Year" value="2023">
+      </div>
+      <button onclick="addCertificationEntry()" class="px-4 py-2 bg-green-600 text-white rounded mb-4">Add Certification</button>
+      <ul id="certificationsList" class="mb-4 list-disc pl-6"></ul>
+      <div class="flex gap-2">
+        <button onclick="goBackStep('certifications')" class="px-4 py-2 bg-gray-400 text-white rounded">Back</button>
+        <button onclick="submitStep('certifications')" class="px-4 py-2 bg-blue-600 text-white rounded">Save & Continue</button>
+      </div>
+    </div>
+
+    <!-- Step 6: Achievements -->
+    <div id="achievementsForm" class="bg-white p-6 rounded-lg shadow-md mb-4" style="display: none;">
+      <h2 class="text-xl font-semibold mb-4">6. Achievements</h2>
+      <div class="grid grid-cols-3 gap-4 mb-4">
+        <input type="text" id="achTitle" class="w-full p-2 border rounded" placeholder="Achievement Title" value="Employee of the Year">
+        <input type="text" id="achDesc" class="w-full p-2 border rounded" placeholder="Description" value="Recognition for outstanding performance">
+        <input type="text" id="achYear" class="w-full p-2 border rounded" placeholder="Year" value="2023">
+      </div>
+      <button onclick="addAchievementEntry()" class="px-4 py-2 bg-green-600 text-white rounded mb-4">Add Achievement</button>
+      <ul id="achievementsList" class="mb-4 list-disc pl-6"></ul>
+      <div class="flex gap-2">
+        <button onclick="goBackStep('achievements')" class="px-4 py-2 bg-gray-400 text-white rounded">Back</button>
+        <button onclick="submitStep('achievements')" class="px-4 py-2 bg-blue-600 text-white rounded">Save & Continue</button>
+      </div>
+    </div>
+
+    <!-- Step 7: Hobbies -->
+    <div id="hobbiesForm" class="bg-white p-6 rounded-lg shadow-md mb-4" style="display: none;">
+      <h2 class="text-xl font-semibold mb-4">7. Hobbies</h2>
+      <input type="text" id="hobbies" class="w-full p-2 border rounded" placeholder="Hobbies (comma-separated)" value="Reading, Photography, Hiking">
+      <div class="mt-4 flex gap-2">
+        <button onclick="goBackStep('hobbies')" class="px-4 py-2 bg-gray-400 text-white rounded">Back</button>
+        <button onclick="submitStep('hobbies')" class="px-4 py-2 bg-blue-600 text-white rounded">Save & Continue</button>
+      </div>
+    </div>
+
+    <!-- Step 8: Personal Details -->
+    <div id="personal_detailsForm" class="bg-white p-6 rounded-lg shadow-md mb-4" style="display: none;">
+      <h2 class="text-xl font-semibold mb-4">8. Personal Details</h2>
+      <div class="space-y-4">
+        <input type="text" id="personalDob" class="w-full p-2 border rounded" placeholder="Date of Birth" value="1990-01-01">
+        <input type="text" id="personalGender" class="w-full p-2 border rounded" placeholder="Gender" value="Male">
+        <input type="text" id="personalAddress" class="w-full p-2 border rounded" placeholder="Address" value="123 Main St, City, State">
+      </div>
+      <div class="mt-4 flex gap-2">
+        <button onclick="goBackStep('personal_details')" class="px-4 py-2 bg-gray-400 text-white rounded">Back</button>
+        <button onclick="submitStep('personal_details')" class="px-4 py-2 bg-blue-600 text-white rounded">Save & Continue</button>
+      </div>
+    </div>
+
+    <!-- Step 9: References -->
+    <div id="referencesForm" class="bg-white p-6 rounded-lg shadow-md mb-4" style="display: none;">
+      <h2 class="text-xl font-semibold mb-4">9. References</h2>
+      <div class="grid grid-cols-3 gap-4 mb-4">
+        <input type="text" id="refName" class="w-full p-2 border rounded" placeholder="Reference Name" value="Jane Smith">
+        <input type="text" id="refContact" class="w-full p-2 border rounded" placeholder="Contact" value="jane@company.com">
+        <input type="text" id="refRelationship" class="w-full p-2 border rounded" placeholder="Relationship" value="Former Manager">
+      </div>
+      <button onclick="addReferenceEntry()" class="px-4 py-2 bg-green-600 text-white rounded mb-4">Add Reference</button>
+      <ul id="referencesList" class="mb-4 list-disc pl-6"></ul>
+      <div class="flex gap-2">
+        <button onclick="goBackStep('references')" class="px-4 py-2 bg-gray-400 text-white rounded">Back</button>
+        <button onclick="submitStep('references')" class="px-4 py-2 bg-blue-600 text-white rounded">Save & Continue</button>
+      </div>
+    </div>
+
+    <!-- Step 10: Photo -->
+    <div id="photoForm" class="bg-white p-6 rounded-lg shadow-md mb-4" style="display: none;">
+      <h2 class="text-xl font-semibold mb-4">10. Photo Upload</h2>
+      <input type="file" id="photo" accept="image/*" class="w-full p-2 border rounded">
+      <div class="mt-4 flex gap-2">
+        <button onclick="goBackStep('photo')" class="px-4 py-2 bg-gray-400 text-white rounded">Back</button>
+        <button onclick="submitStep('photo')" class="px-4 py-2 bg-blue-600 text-white rounded">Save & Continue</button>
+        <button onclick="skipStep('photo')" class="px-4 py-2 bg-gray-400 text-white rounded">Skip Photo</button>
+      </div>
+    </div>
+
+    <!-- Step 11: Template -->
+    <div id="templateForm" class="bg-white p-6 rounded-lg shadow-md mb-4" style="display: none;">
+      <h2 class="text-xl font-semibold mb-4">11. Template Selection</h2>
+      <select id="template" class="w-full p-2 border rounded">
+        <option value="altacv">AltaCV</option>
+        <option value="modernsimple">Modern Simple</option>
+        <option value="awesomecv">AwesomeCV</option>
+        <option value="deedycv">Deedy CV</option>
+        <option value="elegant">Elegant</option>
+        <option value="professionalcv">Professional CV</option>
+      </select>
+      <div class="mt-4 flex gap-2">
+        <button onclick="goBackStep('template')" class="px-4 py-2 bg-gray-400 text-white rounded">Back</button>
+        <button onclick="submitStep('template')" class="px-4 py-2 bg-blue-600 text-white rounded">Save & Continue</button>
+      </div>
+    </div>
+
+    <!-- Step 12: Preview -->
+    <div id="previewForm" class="bg-white p-6 rounded-lg shadow-md mb-4" style="display: none;">
+      <h2 class="text-xl font-semibold mb-4">12. Resume Preview & Download</h2>
+      <p class="mb-4">Your resume has been generated successfully!</p>
+      <div class="flex gap-2">
+        <button onclick="previewResume()" class="px-4 py-2 bg-green-600 text-white rounded">Preview Resume</button>
+        <button onclick="downloadResume()" class="px-4 py-2 bg-blue-600 text-white rounded">Download PDF</button>
+        <button onclick="goBackStep('preview')" class="px-4 py-2 bg-gray-400 text-white rounded">Back</button>
+      </div>
+    </div>
+
+    <!-- Test Results -->
+    <div class="bg-white p-6 rounded-lg shadow-md">
+      <h2 class="text-xl font-semibold mb-4">Test Results</h2>
+      <div id="testResults" class="space-y-2">
+        <p class="text-gray-600">Start by filling out Step 1 and clicking "Save & Continue" to test all 12 steps.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Include the updated build.js script -->
+  <script src="build.js"></script>
+  
+  <script>
+    // Override showStatus to also log to test results
+    const originalShowStatus = showStatus;
+    function showStatus(message, type = 'info') {
+      originalShowStatus(message, type);
+      const testResults = document.getElementById('testResults');
+      const className = type === 'success' ? 'text-green-600' : type === 'error' ? 'text-red-600' : 'text-blue-600';
+      testResults.innerHTML += `<p class="${className}">• ${message}</p>`;
+    }
+    
+    // Log when steps are completed
+    const originalSwitchStep = switchStep;
+    function switchStep(step) {
+      originalSwitchStep(step);
+      showStatus(`Switched to step: ${step}`, 'info');
+    }
+  </script>
+</body>
+</html>

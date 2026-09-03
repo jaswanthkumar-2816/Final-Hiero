@@ -675,18 +675,108 @@
       display: none;
     }
 
-    .section-title {
-      font-size: 1.8rem;
-      color: #04ab07ee;
-      margin-bottom: 20px;
-      padding-bottom: 12px;
-      border-bottom: 4px solid #0d8705;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      font-weight: 700;
-      position: relative;
-      flex-wrap: wrap;
+    /* --- DARK MODE (Default Theme) --- */
+    body:not(.light-mode) .section-title {
+      color: #00ff00 !important;
+    }
+
+    body:not(.light-mode) .form-group label {
+      color: #f8fafc !important;
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    body:not(.light-mode) input:not([type="checkbox"]),
+    body:not(.light-mode) textarea,
+    body:not(.light-mode) select {
+      color: #f8fafc !important;
+      background: rgba(255, 255, 255, 0.07) !important;
+      border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    }
+
+    body:not(.light-mode) input::placeholder,
+    body:not(.light-mode) textarea::placeholder {
+      color: #94a3b8 !important;
+      opacity: 0.85;
+    }
+
+    body:not(.light-mode) .experience-item,
+    body:not(.light-mode) .education-item,
+    body:not(.light-mode) .project-item,
+    body:not(.light-mode) .internship-item,
+    body:not(.light-mode) .reference-item,
+    body:not(.light-mode) .custom-detail-item {
+      background: rgba(15, 23, 42, 0.7) !important;
+      border: 1px solid rgba(42, 224, 35, 0.3) !important;
+    }
+
+    /* --- BRIGHT MODE (Light Theme) --- */
+    body.light-mode {
+      background: #f8fafc !important;
+      color: #0f172a !important;
+    }
+
+    body.light-mode .main-layout {
+      background: transparent !important;
+    }
+
+    body.light-mode .section-title {
+      color: #04ab07 !important;
+      border-bottom-color: #04ab07 !important;
+    }
+
+    body.light-mode .section-title::before {
+      background: #04ab07 !important;
+    }
+
+    body.light-mode .form-group label {
+      color: #0f172a !important;
+      font-weight: 700 !important;
+      font-size: 14px;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    body.light-mode input:not([type="checkbox"]),
+    body.light-mode textarea,
+    body.light-mode select {
+      color: #0f172a !important;
+      background: #ffffff !important;
+      border: 1.5px solid #cbd5e1 !important;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+    }
+
+    body.light-mode input:focus,
+    body.light-mode textarea:focus,
+    body.light-mode select:focus {
+      border-color: #04ab07 !important;
+      box-shadow: 0 0 0 3px rgba(4, 171, 7, 0.2) !important;
+    }
+
+    body.light-mode input::placeholder,
+    body.light-mode textarea::placeholder {
+      color: #64748b !important;
+      opacity: 0.9;
+    }
+
+    body.light-mode .experience-item,
+    body.light-mode .education-item,
+    body.light-mode .project-item,
+    body.light-mode .internship-item,
+    body.light-mode .reference-item,
+    body.light-mode .custom-detail-item {
+      background: #ffffff !important;
+      border: 1px solid #e2e8f0 !important;
+      border-left: 5px solid #04ab07 !important;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05) !important;
+    }
+
+    body.light-mode .section-icon {
+      color: #04ab07 !important;
+      background: rgba(4, 171, 7, 0.1) !important;
+      border-color: rgba(4, 171, 7, 0.3) !important;
     }
 
     .section-title::before {
@@ -2854,6 +2944,7 @@
       document.getElementById('formStepIndicator').style.display = 'none';
       document.querySelector('.main-layout').style.display = 'none';
       document.querySelector('.bottom-actions').style.display = 'none';
+      if (window.hideLivePreviewToggle) window.hideLivePreviewToggle();
 
       // Remove the back button if it exists
       const existingBackBtn = document.getElementById('backToTemplatesBtn');
@@ -4306,7 +4397,7 @@
           formStepIndicator.style.display = 'block';
           // console.log('âœ… Form step indicator shown');
         } else {
-    // console.error('âŒ formStepIndicator element not found');
+    // console.error('â Œ formStepIndicator element not found');
         }
 
         const mainLayout = document.querySelector('.main-layout');
@@ -4314,8 +4405,10 @@
           mainLayout.style.display = 'grid';
           // console.log('âœ… Main layout shown');
         } else {
-    // console.error('âŒ main-layout element not found');
+    // console.error('â Œ main-layout element not found');
         }
+        
+        if (window.showLivePreviewToggle) window.showLivePreviewToggle();
 
         const bottomActions = document.querySelector('.bottom-actions');
         if (bottomActions) {
@@ -4660,6 +4753,7 @@
         if (formStepIndicator) formStepIndicator.style.display = 'block';
         if (mainLayout) mainLayout.style.display = 'grid';
         if (bottomActions) bottomActions.style.display = 'flex';
+        if (window.showLivePreviewToggle) window.showLivePreviewToggle();
 
         history.pushState({ step: 2, template: localStorage.getItem('selectedTemplate') }, '', '');
         localStorage.setItem('resumeData', JSON.stringify(data));
@@ -4911,15 +5005,98 @@
       }
     }
 
-    // Add Experience / Education
+    // Custom Modal Popup when Max 4 Items Limit is Reached
+    function showMaxLimitModal(sectionName) {
+      const existing = document.getElementById('maxLimitModal');
+      if (existing) existing.remove();
+
+      const modal = document.createElement('div');
+      modal.id = 'maxLimitModal';
+      modal.style.cssText = `
+        position: fixed;
+        top: 0; left: 0; width: 100vw; height: 100vh;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(8px);
+        z-index: 99999;
+        display: flex; align-items: center; justify-content: center;
+        padding: 20px;
+      `;
+
+      modal.innerHTML = `
+        <div style="
+          background: #0f172a;
+          border: 1px solid rgba(239, 68, 68, 0.5);
+          border-radius: 24px;
+          padding: 32px 28px;
+          max-width: 440px;
+          width: 100%;
+          text-align: center;
+          box-shadow: 0 25px 60px rgba(0,0,0,0.7), 0 0 35px rgba(239,68,68,0.25);
+        ">
+          <div style="
+            width: 64px; height: 64px;
+            background: rgba(239, 68, 68, 0.15);
+            border: 2px solid rgba(239, 68, 68, 0.4);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 16px;
+            font-size: 28px; color: #ef4444;
+          ">
+            ⚠️
+          </div>
+          <h3 style="margin: 0 0 10px; font-size: 20px; font-weight: 800; color: #f8fafc;">
+            Maximum Limit Reached (4 Items)
+          </h3>
+          <p style="margin: 0 0 16px; font-size: 14px; line-height: 1.5; color: #cbd5e1;">
+            You have reached the maximum limit of <strong>4 entries</strong> for <strong>${sectionName}</strong>.
+          </p>
+          <div style="
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px dashed rgba(239, 68, 68, 0.35);
+            border-radius: 14px;
+            padding: 14px 16px;
+            font-size: 13px; font-weight: 600; color: #fca5a5;
+            margin-bottom: 24px;
+            line-height: 1.4;
+          ">
+            ❗ To add a new ${sectionName.toLowerCase()} item, removing one of your existing entries is mandatory.
+          </div>
+          <button onclick="document.getElementById('maxLimitModal').remove()" style="
+            width: 100%;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: #ffffff;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 12px;
+            font-size: 14px; font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(239,68,68,0.4);
+          ">
+            Understood, I'll Remove One First
+          </button>
+        </div>
+      `;
+
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.remove();
+      });
+
+      document.body.appendChild(modal);
+    }
+
+    // Add Experience / Education (Capped at Max 4 entries)
     let expCount = 1, eduCount = 1;
     function addExperience() {
-      expCount++;
       const container = document.getElementById('experienceContainer');
+      if (container && container.querySelectorAll('.experience-item').length >= 4) {
+        showMaxLimitModal('Work Experience');
+        return;
+      }
+      expCount++;
       const div = document.createElement('div');
       div.className = 'experience-item';
       div.innerHTML = `
-        <button type="button" class="remove-btn" aria-label="Remove entry" onclick="this.parentElement.remove()">Remove</button>
+        <button type="button" class="remove-btn" aria-label="Remove entry" onclick="this.parentElement.remove(); if(window.calculateATS) window.calculateATS();">Remove</button>
         <div class="form-row">
           <div class="form-group"><label>Job Title</label><input type="text" name="jobTitle[]" placeholder="Software Engineer"></div>
           <div class="form-group"><label>Company</label><input type="text" name="company[]" placeholder="Company Name"></div>
@@ -4936,16 +5113,21 @@
         <div class="form-group"><label>Description</label><textarea name="jobDescription[]" rows="4" placeholder="Key achievements..."></textarea></div>
       `;
       container.appendChild(div);
+      if (window.calculateATS) window.calculateATS();
     }
 
 
     function addEducation() {
-      eduCount++;
       const container = document.getElementById('educationContainer');
+      if (container && container.querySelectorAll('.education-item').length >= 4) {
+        showMaxLimitModal('Education');
+        return;
+      }
+      eduCount++;
       const div = document.createElement('div');
       div.className = 'education-item';
       div.innerHTML = `
-        <button type="button" class="remove-btn" aria-label="Remove entry" onclick="this.parentElement.remove()">Remove</button>
+        <button type="button" class="remove-btn" aria-label="Remove entry" onclick="this.parentElement.remove(); if(window.calculateATS) window.calculateATS();">Remove</button>
         <div class="form-row">
           <div class="form-group"><label>Degree</label><input type="text" name="degree[]" placeholder="Bachelor of Science"></div>
           <div class="form-group"><label>School</label><input type="text" name="school[]" placeholder="University Name"></div>
@@ -4956,14 +5138,19 @@
         </div>
       `;
       container.appendChild(div);
+      if (window.calculateATS) window.calculateATS();
     }
 
     function addInternship() {
       const container = document.getElementById('internshipsContainer');
+      if (container && container.querySelectorAll('.internship-item').length >= 4) {
+        showMaxLimitModal('Internships');
+        return;
+      }
       const div = document.createElement('div');
       div.className = 'internship-item';
       div.innerHTML = `
-        <button type="button" class="remove-btn" aria-label="Remove entry" onclick="this.parentElement.remove()">Remove</button>
+        <button type="button" class="remove-btn" aria-label="Remove entry" onclick="this.parentElement.remove(); if(window.calculateATS) window.calculateATS();">Remove</button>
         <div class="form-row">
           <div class="form-group"><label>Intern Role</label><input type="text" name="internRole[]" placeholder="Software Intern"></div>
           <div class="form-group"><label>Organization</label><input type="text" name="internOrg[]" placeholder="Tech Solutions"></div>
@@ -4975,40 +5162,50 @@
         <div class="form-group"><label>Description</label><textarea name="internDesc[]" rows="4" placeholder="Key contributions..."></textarea></div>
       `;
       container.appendChild(div);
+      if (window.calculateATS) window.calculateATS();
     }
 
 
     // Add Reference
     let refCount = 1;
     function addReference() {
-      refCount++;
       const container = document.getElementById('referencesContainer');
+      if (container && container.querySelectorAll('.reference-item').length >= 4) {
+        showMaxLimitModal('References');
+        return;
+      }
+      refCount++;
       const div = document.createElement('div');
       div.className = 'reference-item';
       div.innerHTML = `
-        <button type="button" class="remove-btn" aria-label="Remove entry" onclick="this.parentElement.remove()">Remove</button>
+        <button type="button" class="remove-btn" aria-label="Remove entry" onclick="this.parentElement.remove(); if(window.calculateATS) window.calculateATS();">Remove</button>
         <div class="form-row">
           <div class="form-group"><label>Reference Name</label><input type="text" name="refName[]" placeholder="John Smith"></div>
           <div class="form-group"><label>Title/Position</label><input type="text" name="refTitle[]" placeholder="Senior Manager"></div>
         </div>
         <div class="form-row">
           <div class="form-group"><label>Company</label><input type="text" name="refCompany[]" placeholder="Company Name"></div>
-          <div class="form-group"><label>Phone</label><input type="tel" name="refPhone[]" placeholder="(555) 123-4567" pattern="[\+]?[\d\s\-\(\)\.]+" title="Please enter a valid phone number"></div>
+          <div class="form-group"><label>Phone</label><input type="tel" name="refPhone[]" placeholder="(555) 123-4567" pattern="[\\+]?[\\d\\s\\-\\(\\)\\.]+" title="Please enter a valid phone number"></div>
         </div>
         <div class="form-group"><label>Email</label><input type="email" name="refEmail[]" placeholder="reference@company.com" title="Please enter a valid email address"></div>
       `;
       container.appendChild(div);
+      if (window.calculateATS) window.calculateATS();
     }
 
     // Add Project
     let projectCount = 1;
     function addProject() {
-      projectCount++;
       const container = document.getElementById('projectsContainer');
+      if (container && container.querySelectorAll('.project-item').length >= 4) {
+        showMaxLimitModal('Projects');
+        return;
+      }
+      projectCount++;
       const div = document.createElement('div');
       div.className = 'project-item';
       div.innerHTML = `
-        <button type="button" class="remove-btn" aria-label="Remove entry" onclick="this.parentElement.remove()">Remove</button>
+        <button type="button" class="remove-btn" aria-label="Remove entry" onclick="this.parentElement.remove(); if(window.calculateATS) window.calculateATS();">Remove</button>
         <div class="form-group">
           <label>Project Name <span class="required">*</span></label>
           <input type="text" name="projectName[]" placeholder="E-commerce Platform" required>
@@ -5039,21 +5236,27 @@
         </div>
       `;
       container.appendChild(div);
+      if (window.calculateATS) window.calculateATS();
     }
 
     // Add Custom Detail
     let customCount = 1;
     function addCustomDetail() {
-      customCount++;
       const container = document.getElementById('customDetailsContainer');
+      if (container && container.querySelectorAll('.custom-detail-item').length >= 4) {
+        showMaxLimitModal('Custom Details');
+        return;
+      }
+      customCount++;
       const div = document.createElement('div');
       div.className = 'custom-detail-item';
       div.innerHTML = `
-        <button type="button" class="remove-btn" aria-label="Remove custom entry" onclick="this.parentElement.remove()">Remove</button>
+        <button type="button" class="remove-btn" aria-label="Remove custom entry" onclick="this.parentElement.remove(); if(window.calculateATS) window.calculateATS();">Remove</button>
         <div class="form-group"><label>Item Heading</label><input type="text" name="customHeading[]" placeholder="e.g., Research Paper A"></div>
         <div class="form-group"><label>Content</label><textarea name="customContent[]" rows="4" placeholder="Describe the details..."></textarea></div>
       `;
       container.appendChild(div);
+      if (window.calculateATS) window.calculateATS();
     }
 
     // Fill Sample Data - Comprehensive function to populate all form fields
@@ -7173,3 +7376,375 @@
 
 </body>
 </html>
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!-- HIERO ENHANCEMENTS: Auto-Save, Live Preview, ATS Score, AI  -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<script>
+(function() {
+  'use strict';
+
+  // ─── 1. AUTO-SAVE / LOAD (localStorage persistence) ──────────
+  const SAVE_KEY = 'hiero_resume_autosave';
+  let autoSaveTimer = null;
+
+  function autoSave() {
+    try {
+      const data = collectFormData();
+      data._savedAt = new Date().toISOString();
+      data._template = currentSelectedTemplate || 'classic';
+      localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+      showSaveIndicator();
+    } catch(e) { /* silent */ }
+  }
+
+  function loadSavedData() {
+    try {
+      const raw = localStorage.getItem(SAVE_KEY);
+      if (!raw) return false;
+      const data = JSON.parse(raw);
+      if (!data.personalInfo?.fullName && !data.personalInfo?.email) return false;
+      fillFormWithData(data);
+      return true;
+    } catch(e) { return false; }
+  }
+
+  function fillFormWithData(data) {
+    if (!data) return;
+    const pi = data.personalInfo || {};
+    const setVal = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
+    setVal('fullName', pi.fullName);
+    setVal('email', pi.email);
+    setVal('phone', pi.phone);
+    setVal('address', pi.address);
+    setVal('linkedin', pi.linkedin);
+    setVal('github', pi.github);
+    setVal('website', pi.website);
+    setVal('professionalTitle', pi.professionalTitle);
+    setVal('summary', data.summary);
+    setVal('technicalSkills', data.skills || data.technicalSkills);
+    setVal('softSkills', data.softSkills);
+    setVal('certifications', data.certifications);
+    setVal('languages', data.languages);
+    setVal('achievements', data.achievements);
+  }
+
+  function showSaveIndicator() {
+    let ind = document.getElementById('autosave-indicator');
+    if (!ind) {
+      ind = document.createElement('div');
+      ind.id = 'autosave-indicator';
+      ind.style.cssText = 'position:fixed;top:80px;right:20px;z-index:9999;background:rgba(4,171,7,0.9);color:#000;padding:6px 14px;border-radius:20px;font-size:11px;font-weight:700;opacity:0;transition:opacity 0.3s;pointer-events:none;';
+      ind.textContent = '✓ Auto-saved';
+      document.body.appendChild(ind);
+    }
+    ind.style.opacity = '1';
+    setTimeout(() => { ind.style.opacity = '0'; }, 2000);
+  }
+
+  // Hook into form changes
+  function startAutoSave() {
+    document.addEventListener('input', (e) => {
+      if (e.target.matches('input, textarea, select')) {
+        clearTimeout(autoSaveTimer);
+        autoSaveTimer = setTimeout(autoSave, 1500);
+      }
+    });
+    document.addEventListener('change', (e) => {
+      if (e.target.matches('input, textarea, select, input[type=checkbox]')) {
+        clearTimeout(autoSaveTimer);
+        autoSaveTimer = setTimeout(autoSave, 500);
+      }
+    });
+  }
+
+  // ─── 2. ATS SCORE CALCULATOR ─────────────────────────────────
+  function createATSScoreWidget() {
+    // ATS Score widget removed as requested
+  }
+
+  function calculateATS() {
+    let score = 0;
+    const tips = [];
+    const data = collectFormData();
+
+    // Contact info (20 pts)
+    if (data.personalInfo?.fullName) score += 5;
+    else tips.push('Add your full name');
+    if (data.personalInfo?.email) score += 5;
+    else tips.push('Add email address');
+    if (data.personalInfo?.phone) score += 5;
+    else tips.push('Add phone number');
+    if (data.personalInfo?.professionalTitle) score += 5;
+    else tips.push('Add job title');
+
+    // Summary (15 pts)
+    const summary = data.summary || '';
+    if (summary.length > 100) score += 15;
+    else if (summary.length > 40) score += 10;
+    else if (summary.length > 0) score += 5;
+    else tips.push('Add a professional summary');
+
+    // Experience (25 pts)
+    const exp = Array.isArray(data.experience) ? data.experience : [];
+    if (exp.length >= 1) score += 8;
+    else tips.push('Add work experience (up to 4)');
+    if (exp.length >= 2) score += 8;
+    if (exp.length >= 3) score += 4;
+    if (exp.some(e => e.description && e.description.length > 30)) score += 5;
+    else if (exp.length > 0) tips.push('Add bullet descriptions to experience');
+
+    // Education (15 pts)
+    const edu = Array.isArray(data.education) ? data.education : [];
+    if (edu.length >= 1) score += 10;
+    else tips.push('Add education details');
+    if (edu.some(e => e.degree)) score += 5;
+
+    // Skills (15 pts)
+    const skillsStr = (data.skills || data.technicalSkills || '') + ', ' + (data.softSkills || '');
+    const skills = skillsStr.split(/[,|\n]/).map(s => s.trim()).filter(Boolean);
+    if (skills.length >= 8) score += 15;
+    else if (skills.length >= 4) score += 10;
+    else if (skills.length >= 1) score += 5;
+    else tips.push('Add key technical & soft skills');
+
+    // Projects (10 pts)
+    const projects = Array.isArray(data.projects) ? data.projects : [];
+    if (projects.length >= 1) score += 5;
+    if (projects.length >= 2) score += 5;
+    if (projects.length === 0 && exp.length < 2) tips.push('Add projects or portfolio items');
+
+    score = Math.min(100, Math.max(0, score));
+
+    // Update widget
+    const circle = document.getElementById('ats-circle');
+    const valueEl = document.getElementById('ats-value');
+    const labelEl = document.getElementById('ats-label');
+    const tipsEl = document.getElementById('ats-tips');
+
+    if (circle) {
+      const color = score >= 80 ? '#04ab07' : score >= 50 ? '#f59e0b' : '#ef4444';
+      circle.style.background = `conic-gradient(${color} ${score * 3.6}deg, rgba(255,255,255,0.1) ${score * 3.6}deg)`;
+    }
+    if (valueEl) valueEl.textContent = score;
+    if (labelEl) {
+      const label = score >= 80 ? 'ATS Optimized ✅' : score >= 50 ? 'Needs Improvement ⚠️' : 'Weak Resume ❌';
+      labelEl.textContent = label;
+      labelEl.style.color = score >= 80 ? '#04ab07' : score >= 50 ? '#f59e0b' : '#ef4444';
+    }
+    if (tipsEl) tipsEl.textContent = tips.length > 0 ? tips[0] : 'Looking great!';
+
+    // Update floating badge if present
+    const badges = document.querySelectorAll('.ats-score-value, #ats-score-display');
+    badges.forEach(b => b.textContent = score + '%');
+
+    return score;
+  }
+
+  // Export globally
+  window.calculateATS = calculateATS;
+
+  function startATSCalculation() {
+    document.addEventListener('input', () => {
+      clearTimeout(window._atsTimer);
+      window._atsTimer = setTimeout(calculateATS, 400);
+    });
+    document.addEventListener('change', () => {
+      clearTimeout(window._atsTimer);
+      window._atsTimer = setTimeout(calculateATS, 200);
+    });
+    setTimeout(calculateATS, 800);
+  }
+
+  // ─── 3. AI SKILL SUGGESTIONS ─────────────────────────────────
+  function addAISkillButton() {
+    const skillsSection = document.getElementById('section-skills');
+    if (!skillsSection) return;
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> AI Suggest Skills';
+    btn.style.cssText = 'background:linear-gradient(135deg,#04ab07,#00e676);color:#000;border:none;padding:8px 16px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;margin-top:8px;display:flex;align-items:center;gap:6px;';
+    btn.onclick = async () => {
+      const title = document.getElementById('professionalTitle')?.value || '';
+      const skillsInput = document.getElementById('technicalSkills');
+      if (!title) { alert('Please enter your job title first'); return; }
+
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating...';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch('/api/problems/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ skill: title, subTopic: 'skills', difficulty: 'suggestion' })
+        });
+        // For now, use a local skill database
+        const skillDB = {
+          'software engineer': ['JavaScript', 'Python', 'React', 'Node.js', 'Git', 'Docker', 'AWS', 'SQL', 'REST APIs', 'Agile'],
+          'data scientist': ['Python', 'R', 'SQL', 'TensorFlow', 'PyTorch', 'Pandas', 'NumPy', 'Scikit-learn', 'Tableau', 'Machine Learning'],
+          'web developer': ['HTML5', 'CSS3', 'JavaScript', 'React', 'Vue.js', 'Node.js', 'PHP', 'MySQL', 'WordPress', 'Figma'],
+          'full stack developer': ['React', 'Node.js', 'TypeScript', 'PostgreSQL', 'MongoDB', 'Docker', 'AWS', 'Git', 'REST APIs', 'GraphQL'],
+          'devops engineer': ['Docker', 'Kubernetes', 'AWS', 'Jenkins', 'Terraform', 'Ansible', 'Linux', 'Python', 'CI/CD', 'Monitoring'],
+          'mobile developer': ['React Native', 'Flutter', 'Swift', 'Kotlin', 'Firebase', 'REST APIs', 'UI/UX', 'Git', 'Testing', 'App Store'],
+          'default': ['Communication', 'Problem Solving', 'Team Leadership', 'Project Management', 'Critical Thinking', 'Time Management', 'Adaptability', 'SQL', 'Microsoft Office', 'Data Analysis'],
+        };
+        const titleLower = title.toLowerCase();
+        const matched = Object.keys(skillDB).find(k => titleLower.includes(k));
+        const suggested = skillDB[matched] || skillDB['default'];
+
+        const currentSkills = skillsInput?.value || '';
+        const newSkills = suggested.filter(s => !currentSkills.toLowerCase().includes(s.toLowerCase()));
+        if (newSkills.length > 0) {
+          const separator = currentSkills.trim() ? ', ' : '';
+          skillsInput.value = currentSkills + separator + newSkills.slice(0, 8).join(', ');
+          skillsInput.style.borderColor = '#04ab07';
+          setTimeout(() => { skillsInput.style.borderColor = ''; }, 2000);
+        }
+      } catch(e) { console.error('AI skills error:', e); }
+
+      btn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> AI Suggest Skills';
+      btn.disabled = false;
+    };
+
+    const skillsGroup = document.getElementById('group-skills') || skillsSection;
+    skillsGroup.appendChild(btn);
+  }
+
+  // ─── 4. AI EXPERIENCE WRITER ─────────────────────────────────
+  function addAIWriterButtons() {
+    document.querySelectorAll('textarea[name="jobDescription[]"]').forEach(textarea => {
+      const wrapper = document.createElement('div');
+      wrapper.style.cssText = 'display:flex;gap:6px;margin-top:6px;';
+
+      const aiBtn = document.createElement('button');
+      aiBtn.type = 'button';
+      aiBtn.innerHTML = '<i class="fa-solid fa-robot"></i> AI Write';
+      aiBtn.style.cssText = 'background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:4px;';
+      aiBtn.onclick = async () => {
+        const jobTitle = textarea.closest('.experience-item')?.querySelector('input[name="jobTitle[]"]')?.value || 'Software Engineer';
+        const company = textarea.closest('.experience-item')?.querySelector('input[name="company[]"]')?.value || '';
+
+        aiBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+        aiBtn.disabled = true;
+
+        try {
+          const bullets = [
+            `• Led the development of ${company || 'key'} ${jobTitle} projects, delivering features that improved user engagement by 25%`,
+            `• Collaborated with cross-functional teams of 8+ members to design and implement scalable solutions`,
+            `• Optimized application performance, reducing load times by 40% through code refactoring and caching strategies`,
+            `• Implemented automated testing pipelines, increasing code coverage from 60% to 90%`,
+          ];
+          textarea.value = bullets.join('\n');
+          textarea.style.borderColor = '#6366f1';
+          setTimeout(() => { textarea.style.borderColor = ''; }, 2000);
+        } catch(e) { console.error('AI writer error:', e); }
+
+        aiBtn.innerHTML = '<i class="fa-solid fa-robot"></i> AI Write';
+        aiBtn.disabled = false;
+      };
+
+      wrapper.appendChild(aiBtn);
+      textarea.parentNode.insertBefore(wrapper, textarea.nextSibling);
+    });
+  }
+
+  // ─── 5. LIVE PREVIEW PANEL ───────────────────────────────────
+  let livePreviewPanel = null;
+
+  function createLivePreviewPanel() {
+    livePreviewPanel = document.createElement('div');
+    livePreviewPanel.id = 'live-preview-panel';
+    livePreviewPanel.style.cssText = 'position:fixed;top:72px;right:0;width:380px;height:calc(100vh - 72px);background:rgba(13,17,24,0.98);border-left:1px solid rgba(4,171,7,0.2);z-index:999;transform:translateX(100%);transition:transform 0.3s ease;display:flex;flex-direction:column;backdrop-filter:blur(16px);';
+
+    livePreviewPanel.innerHTML = `
+      <div style="padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:space-between;">
+        <span style="font-size:12px;font-weight:700;color:#f8fafc;">📄 Live Preview</span>
+        <button id="close-live-preview" style="background:none;border:none;color:#94a3b8;cursor:pointer;font-size:16px;">✕</button>
+      </div>
+      <div id="live-preview-content" style="flex:1;overflow:auto;padding:12px;display:flex;justify-content:center;">
+        <div style="color:#94a3b8;font-size:12px;text-align:center;padding-top:40px;">Start typing to see<br>live preview</div>
+      </div>
+      <div style="padding:12px;border-top:1px solid rgba(255,255,255,0.08);display:flex;gap:8px;">
+        <button onclick="previewResume()" style="flex:1;background:rgba(4,171,7,0.12);border:1px solid rgba(4,171,7,0.3);color:#04ab07;padding:8px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;">Preview PDF</button>
+        <button onclick="downloadResume()" style="flex:1;background:#04ab07;border:none;color:#000;padding:8px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;">Download</button>
+      </div>
+    `;
+    document.body.appendChild(livePreviewPanel);
+
+    document.getElementById('close-live-preview').onclick = () => {
+      livePreviewPanel.style.transform = 'translateX(100%)';
+    };
+  }
+
+  function toggleLivePreview() {
+    if (!livePreviewPanel) createLivePreviewPanel();
+    const isOpen = livePreviewPanel.style.transform === 'translateX(0)';
+    livePreviewPanel.style.transform = isOpen ? 'translateX(100%)' : 'translateX(0)';
+  }
+
+  function addPreviewToggle() {
+    if (document.getElementById('live-preview-toggle-btn')) return;
+    const toggle = document.createElement('button');
+    toggle.id = 'live-preview-toggle-btn';
+    toggle.innerHTML = '<i class="fa-solid fa-eye"></i>';
+    toggle.title = 'Toggle Live Preview';
+    toggle.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:9998;width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#04ab07,#00e676);color:#000;border:none;font-size:18px;cursor:pointer;box-shadow:0 4px 20px rgba(4,171,7,0.4);display:none;align-items:center;justify-content:center;';
+    toggle.onclick = toggleLivePreview;
+    document.body.appendChild(toggle);
+  }
+
+  function showLivePreviewToggle() {
+    const toggle = document.getElementById('live-preview-toggle-btn');
+    if (toggle) toggle.style.display = 'flex';
+  }
+
+  function hideLivePreviewToggle() {
+    const toggle = document.getElementById('live-preview-toggle-btn');
+    if (toggle) toggle.style.display = 'none';
+    if (livePreviewPanel) {
+      livePreviewPanel.style.transform = 'translateX(100%)';
+    }
+  }
+
+  window.showLivePreviewToggle = showLivePreviewToggle;
+  window.hideLivePreviewToggle = hideLivePreviewToggle;
+
+  // ─── INIT ────────────────────────────────────────────────────
+  function init() {
+    // Auto-save
+    startAutoSave();
+
+    // Load saved data
+    setTimeout(() => { loadSavedData(); }, 500);
+
+    // ATS Score widget (removed)
+    // createATSScoreWidget();
+    startATSCalculation();
+    setTimeout(calculateATS, 1000);
+
+    // AI buttons (after form loads)
+    setTimeout(() => {
+      addAISkillButton();
+      addAIWriterButtons();
+    }, 2000);
+
+    // Live preview toggle
+    addPreviewToggle();
+    createLivePreviewPanel();
+
+    // Initial check: show only if main-layout (form filling) is visible
+    const formVisible = document.querySelector('.main-layout') && document.querySelector('.main-layout').style.display !== 'none';
+    if (formVisible) {
+      showLivePreviewToggle();
+    } else {
+      hideLivePreviewToggle();
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>

@@ -1,0 +1,543 @@
+[
+  {
+    "id": "j-1788424184096",
+    "companyId": "c-jas-hiero-in",
+    "companyName": "Hiero Corp",
+    "logoUrl": "",
+    "type": "internship",
+    "title": "Software Development Engineer Intern",
+    "department": "Core Engineering",
+    "description": "We are seeking a high-caliber Software Development Engineer Intern to join our core engineering team. In this role, you will build scalable web applications and REST APIs using modern technologies.\n\nKey Responsibilities:\n- Design and develop clean, maintainable code in Python, React, and TypeScript.\n- Build and consume REST APIs using Node.js and Express.\n- Collaborate with senior engineers to implement relational database models using PostgreSQL and MySQL.\n- Use Git and GitHub for version control and workflow collaboration.\n- Write unit tests and participate in technical design reviews.\n\nRequirements & Skills:\n- Strong proficiency in JavaScript, TypeScript, React, and Python.\n- Hands-on experience with Node.js, REST APIs, and SQL databases.\n- Familiarity with Git, Linux command line, and Docker containers.\n- Strong problem-solving skills and algorithmic thinking.",
+    "requiredSkills": [
+      {
+        "name": "Python",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "JavaScript",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "React",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "TypeScript",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "SQL",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "Docker",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "Machine Learning",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "Git",
+        "importance": "high",
+        "category": "required"
+      }
+    ],
+    "preferredSkills": [
+      {
+        "name": "Node.js",
+        "importance": "high",
+        "category": "preferred"
+      },
+      {
+        "name": "Java",
+        "importance": "high",
+        "category": "preferred"
+      },
+      {
+        "name": "Linux",
+        "importance": "high",
+        "category": "preferred"
+      },
+      {
+        "name": "REST APIs",
+        "importance": "high",
+        "category": "preferred"
+      }
+    ],
+    "eligibility": "B.Tech / BE in CS / IT (2025/2026 Batch)",
+    "location": "Bangalore, India",
+    "workMode": "hybrid",
+    "employmentType": "Internship",
+    "salary": "₹35,000/month",
+    "deadline": "2026-10-30",
+    "status": "active",
+    "applicantsCount": 0,
+    "shortlistedCount": 0,
+    "createdAt": "2026-09-03"
+  },
+  {
+    "id": "j-1788194789391",
+    "companyId": "c-jaswanthkumarmuthoju-gmail-com",
+    "companyName": "TechNova Inc.",
+    "logoUrl": "",
+    "type": "full-time",
+    "title": "AI / Machine Learning Engineer",
+    "department": "Artificial Intelligence & Data",
+    "description": "We are hiring an AI / Machine Learning Engineer to design and deploy state-of-the-art machine learning models and LLM solutions.\n\nKey Responsibilities:\n- Build, train, and evaluate machine learning models using PyTorch, TensorFlow, and scikit-learn.\n- Optimize deep learning inference pipelines for production deployment.\n- Integrate LLM APIs, RAG (Retrieval-Augmented Generation), and vector databases.\n- Perform data preprocessing, feature engineering, and SQL analytics.\n- Collaborate with cloud platform engineers to deploy ML pipelines on AWS and Docker containers.\n\nRequirements & Skills:\n- Deep expertise in Python, PyTorch, TensorFlow, and Computer Vision / NLP algorithms.\n- Solid understanding of SQL, REST APIs, Docker, and AWS cloud infrastructure.\n- Strong mathematical background in Linear Algebra, Calculus, and Probability.",
+    "requiredSkills": [
+      {
+        "name": "Python",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "TypeScript",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "SQL",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "AWS",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "Docker",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "Machine Learning",
+        "importance": "high",
+        "category": "required"
+      }
+    ],
+    "preferredSkills": [
+      {
+        "name": "TensorFlow",
+        "importance": "high",
+        "category": "preferred"
+      },
+      {
+        "name": "PyTorch",
+        "importance": "high",
+        "category": "preferred"
+      },
+      {
+        "name": "REST APIs",
+        "importance": "high",
+        "category": "preferred"
+      }
+    ],
+    "eligibility": "B.Tech / M.Tech in CS / AI / Data Science",
+    "location": "Hyderabad, India",
+    "workMode": "hybrid",
+    "employmentType": "Full-time",
+    "salary": "₹14 - 18 LPA",
+    "deadline": "2026-11-15",
+    "status": "active",
+    "applicantsCount": 0,
+    "shortlistedCount": 0,
+    "createdAt": "2026-08-31"
+  },
+  {
+    "id": "j-1787643546646",
+    "companyId": "c-jaswanthkumarmuthoju-gmail-com",
+    "companyName": "TechNova Inc.",
+    "logoUrl": "",
+    "type": "internship",
+    "title": "Software Development Engineer Intern",
+    "department": "Core Engineering",
+    "description": "We are seeking a high-caliber Software Development Engineer Intern to join our core engineering team. In this role, you will build scalable web applications and REST APIs using modern technologies.\n\nKey Responsibilities:\n- Design and develop clean, maintainable code in Python, React, and TypeScript.\n- Build and consume REST APIs using Node.js and Express.\n- Collaborate with senior engineers to implement relational database models using PostgreSQL and MySQL.\n- Use Git and GitHub for version control and workflow collaboration.\n- Write unit tests and participate in technical design reviews.\n\nRequirements & Skills:\n- Strong proficiency in JavaScript, TypeScript, React, and Python.\n- Hands-on experience with Node.js, REST APIs, and SQL databases.\n- Familiarity with Git, Linux command line, and Docker containers.\n- Strong problem-solving skills and algorithmic thinking.",
+    "requiredSkills": [
+      {
+        "name": "Python",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "JavaScript",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "React",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "TypeScript",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "SQL",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "Docker",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "Machine Learning",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "Git",
+        "importance": "high",
+        "category": "required"
+      }
+    ],
+    "preferredSkills": [
+      {
+        "name": "Node.js",
+        "importance": "high",
+        "category": "preferred"
+      },
+      {
+        "name": "Java",
+        "importance": "high",
+        "category": "preferred"
+      },
+      {
+        "name": "Linux",
+        "importance": "high",
+        "category": "preferred"
+      },
+      {
+        "name": "REST APIs",
+        "importance": "high",
+        "category": "preferred"
+      }
+    ],
+    "eligibility": "B.Tech / BE in CS / IT (2025/2026 Batch)",
+    "location": "Bangalore, India",
+    "workMode": "hybrid",
+    "employmentType": "Internship",
+    "salary": "₹35,000/month",
+    "deadline": "2026-10-30",
+    "status": "active",
+    "applicantsCount": 0,
+    "shortlistedCount": 0,
+    "createdAt": "2026-08-25"
+  },
+  {
+    "id": "j-1787609032641",
+    "companyId": "c-1787602602161",
+    "companyName": "Tech Hiero",
+    "type": "full-time",
+    "title": "DevOps & Cloud Infrastructure Engineer",
+    "department": "Platform Engineering",
+    "description": "Architect and manage robust cloud infrastructure and automated CI/CD pipelines for our global microservices architecture.\n\nKey Responsibilities:\n- Provision and maintain scalable AWS cloud environments using Infrastructure as Code (Terraform).\n- Manage Docker containers and Kubernetes clusters across staging and production.\n- Build resilient CI/CD pipelines using GitHub Actions and Jenkins.\n- Monitor system reliability, uptime, and security metrics using Prometheus and Grafana.\n\nRequirements & Skills:\n- Advanced skills in AWS, Docker, Kubernetes, Linux, and Terraform.\n- Scripting knowledge in Python, Bash, and Shell.",
+    "requiredSkills": [
+      {
+        "name": "Python",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "TypeScript",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "AWS",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "Docker",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "Kubernetes",
+        "importance": "high",
+        "category": "required"
+      }
+    ],
+    "preferredSkills": [
+      {
+        "name": "Machine Learning",
+        "importance": "high",
+        "category": "preferred"
+      },
+      {
+        "name": "Git",
+        "importance": "high",
+        "category": "preferred"
+      },
+      {
+        "name": "Linux",
+        "importance": "high",
+        "category": "preferred"
+      }
+    ],
+    "eligibility": "B.Tech in CS/IT (1-4 years exp)",
+    "location": "Remote, India",
+    "workMode": "remote",
+    "employmentType": "Full-time",
+    "salary": "₹15 - 22 LPA",
+    "deadline": "2026-12-01",
+    "status": "active",
+    "applicantsCount": 1,
+    "shortlistedCount": 0,
+    "createdAt": "2026-08-24"
+  },
+  {
+    "id": "j-1787608538593",
+    "companyId": "c-1787602602161",
+    "companyName": "Tech Hiero",
+    "type": "internship",
+    "title": "Software Development Engineer Intern",
+    "department": "Core Engineering",
+    "description": "We are seeking a high-caliber Software Development Engineer Intern to join our core engineering team. In this role, you will build scalable web applications and REST APIs using modern technologies.\n\nKey Responsibilities:\n- Design and develop clean, maintainable code in Python, React, and TypeScript.\n- Build and consume REST APIs using Node.js and Express.\n- Collaborate with senior engineers to implement relational database models using PostgreSQL and MySQL.\n- Use Git and GitHub for version control and workflow collaboration.\n- Write unit tests and participate in technical design reviews.\n\nRequirements & Skills:\n- Strong proficiency in JavaScript, TypeScript, React, and Python.\n- Hands-on experience with Node.js, REST APIs, and SQL databases.\n- Familiarity with Git, Linux command line, and Docker containers.\n- Strong problem-solving skills and algorithmic thinking.",
+    "requiredSkills": [
+      {
+        "name": "Python",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "JavaScript",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "React",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "TypeScript",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "SQL",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "Docker",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "Machine Learning",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "Git",
+        "importance": "high",
+        "category": "required"
+      }
+    ],
+    "preferredSkills": [
+      {
+        "name": "Node.js",
+        "importance": "high",
+        "category": "preferred"
+      },
+      {
+        "name": "Java",
+        "importance": "high",
+        "category": "preferred"
+      },
+      {
+        "name": "Linux",
+        "importance": "high",
+        "category": "preferred"
+      },
+      {
+        "name": "REST APIs",
+        "importance": "high",
+        "category": "preferred"
+      }
+    ],
+    "eligibility": "B.Tech / BE in CS / IT (2025/2026 Batch)",
+    "location": "Bangalore, India",
+    "workMode": "hybrid",
+    "employmentType": "Internship",
+    "salary": "₹35,000/month",
+    "deadline": "2026-10-30",
+    "status": "active",
+    "applicantsCount": 3,
+    "shortlistedCount": 0,
+    "createdAt": "2026-08-24"
+  },
+  {
+    "id": "opp-1787608384008",
+    "companyId": "comp-starlight-ai-corp",
+    "companyName": "Starlight AI Corp",
+    "type": "job",
+    "title": "Staff Robotics Engineer",
+    "department": "Engineering",
+    "description": "Building autonomous AI flight controllers.",
+    "requiredSkills": [],
+    "preferredSkills": [],
+    "eligibility": "B.Tech/BE/MCA",
+    "location": "Bangalore, India",
+    "workMode": "hybrid",
+    "employmentType": "Full-time",
+    "salary": "₹45,00,000 / yr",
+    "deadline": "2026-12-31",
+    "status": "active",
+    "applicantsCount": 0,
+    "shortlistedCount": 0,
+    "createdAt": "2026-08-24"
+  },
+  {
+    "id": "j-1787608001591",
+    "companyId": "c-1787602602161",
+    "companyName": "Verified HR Partner",
+    "type": "internship",
+    "title": "Data Engineer ",
+    "department": "Social",
+    "description": "We are hiring an AI / Machine Learning Engineer to design and deploy state-of-the-art machine learning models and LLM solutions.\n\nKey Responsibilities:\n- Build, train, and evaluate machine learning models using PyTorch, TensorFlow, and scikit-learn.\n- Optimize deep learning inference pipelines for production deployment.\n- Integrate LLM APIs, RAG (Retrieval-Augmented Generation), and vector databases.\n- Perform data preprocessing, feature engineering, and SQL analytics.\n- Collaborate with cloud platform engineers to deploy ML pipelines on AWS and Docker containers.\n\nRequirements & Skills:\n- Deep expertise in Python, PyTorch, TensorFlow, and Computer Vision / NLP algorithms.\n- Solid understanding of SQL, REST APIs, Docker, and AWS cloud infrastructure.\n- Strong mathematical background in Linear Algebra, Calculus, and Probability.\n",
+    "requiredSkills": [
+      {
+        "name": "Python",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "TypeScript",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "SQL",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "AWS",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "Docker",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "Machine Learning",
+        "importance": "high",
+        "category": "required"
+      }
+    ],
+    "preferredSkills": [
+      {
+        "name": "TensorFlow",
+        "importance": "high",
+        "category": "preferred"
+      },
+      {
+        "name": "PyTorch",
+        "importance": "high",
+        "category": "preferred"
+      },
+      {
+        "name": "REST APIs",
+        "importance": "high",
+        "category": "preferred"
+      }
+    ],
+    "eligibility": "B.tech",
+    "location": "Pune ",
+    "workMode": "hybrid",
+    "employmentType": "Internship",
+    "salary": "25-30 LPA",
+    "deadline": "2026-10-30",
+    "status": "active",
+    "applicantsCount": 1,
+    "shortlistedCount": 0,
+    "createdAt": "2026-08-24"
+  },
+  {
+    "id": "opp-1787607696187",
+    "companyId": "comp-nexus-ai-labs",
+    "companyName": "Nexus AI Labs",
+    "type": "job",
+    "title": "Lead AI Frontend Engineer",
+    "department": "Engineering",
+    "description": "Building high-performance reactive AI interfaces.",
+    "requiredSkills": [],
+    "preferredSkills": [],
+    "eligibility": "B.Tech/BE/MCA",
+    "location": "Hyderabad, India",
+    "workMode": "remote",
+    "employmentType": "Full-time",
+    "salary": "₹18,00,000 / yr",
+    "deadline": "2026-12-31",
+    "status": "active",
+    "applicantsCount": 0,
+    "shortlistedCount": 0,
+    "createdAt": "2026-08-24"
+  },
+  {
+    "id": "opp-demo-1",
+    "companyId": "comp-acme-tech",
+    "companyName": "Acme AI Systems",
+    "type": "internship",
+    "title": "Full Stack & AI Engineer Intern",
+    "department": "AI & Engineering",
+    "description": "Join Acme AI Systems to build scalable generative AI tools and full-stack web applications for enterprise clients.",
+    "requiredSkills": [
+      {
+        "id": "sk-1",
+        "name": "Python",
+        "category": "required"
+      },
+      {
+        "id": "sk-2",
+        "name": "React",
+        "category": "required"
+      },
+      {
+        "id": "sk-3",
+        "name": "TypeScript",
+        "category": "required"
+      }
+    ],
+    "preferredSkills": [
+      {
+        "id": "sk-4",
+        "name": "PyTorch",
+        "category": "preferred"
+      },
+      {
+        "id": "sk-5",
+        "name": "Docker",
+        "category": "preferred"
+      }
+    ],
+    "eligibility": "B.Tech / B.E / M.Tech in CS or related fields",
+    "location": "Bangalore, India (Hybrid)",
+    "workMode": "hybrid",
+    "employmentType": "Internship",
+    "salary": "₹35,000 / month",
+    "deadline": "2026-11-30",
+    "status": "active",
+    "applicantsCount": 15,
+    "shortlistedCount": 3,
+    "createdAt": "2026-08-24"
+  }
+]

@@ -2546,8 +2546,8 @@
                   </svg>
                 </div>
                 <div style="text-align:left;overflow:hidden;">
-                  <p style="font-size:0.8rem;font-weight:700;margin:0;color:#fff;">Custom</p>
-                  <p style="font-size:0.65rem;color:var(--muted);margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Write your own role</p>
+                  <p id="analyzed-job-card-title" style="font-size:0.8rem;font-weight:700;margin:0;color:#fff;">Your analyzed job</p>
+                  <p id="analyzed-job-card-sub" style="font-size:0.65rem;color:var(--muted);margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Same resume + JD from analysis</p>
                 </div>
               </div>
             </div>
@@ -2710,6 +2710,16 @@
 
       // Initialize premium cards
       selectCompanyRole('custom', true);
+      applyAnalyzedJobContext();
+
+      const params = new URLSearchParams(window.location.search);
+      const fromApply = params.get('from') === 'apply' || params.get('autostart') === '1';
+      if (fromApply) {
+        showContextOverlay();
+        if (params.get('autostart') === '1' && (uploadedResumeText || document.getElementById('ctx-role')?.value.trim())) {
+          setTimeout(() => submitContext(), 250);
+        }
+      }
 
       // Restore stage location directly so reload doesn't reset to phase 1
       let savedStage = parseInt(sessionStorage.getItem('mockCurStage')) || 1;
@@ -2783,13 +2793,127 @@
     let interviewDuration = 5;
     window.sessionId = sessionStorage.getItem('mockSessionId') || ("hiero-sess-" + Date.now());
     sessionStorage.setItem('mockSessionId', window.sessionId);
-    window.userContext = { level: 'Mid' };
+    window.userContext = Object.assign({ level: 'Mid' }, window.userContext || {});
 
     function showContextOverlay() {
       document.getElementById('context-overlay').style.display = 'flex';
+      const ta = document.getElementById('ctx-role');
+      if (!ta || !ta.value.trim()) {
+        selectCompanyRole('custom', true);
+        applyAnalyzedJobContext();
+      }
     }
 
     let uploadedResumeText = "";
+    let analyzedCompanyName = "";
+
+    function readAnalysisPayload() {
+      try {
+        const stored = JSON.parse(localStorage.getItem('analysisResult') || '{}');
+        const data = stored.data || stored || {};
+        let extra = {};
+        try { extra = JSON.parse(localStorage.getItem('hieroInterviewContext') || '{}'); } catch (e) {}
+        return { data, extra, stored };
+      } catch (e) {
+        return { data: {}, extra: {}, stored: {} };
+      }
+    }
+
+    function buildJdText(data, extra, company) {
+      if (extra.jdText && extra.jdText.trim().length > 30) return extra.jdText.trim();
+      if (data.jdText && data.jdText.trim().length > 30) return data.jdText.trim();
+      const title = extra.jobTitle || data.jobTitle || '';
+      const required = (data.jdSkills || []).join(', ');
+      const matched = (data.matchedSkills || []).join(', ');
+      const missing = (data.missingSkills || []).join(', ');
+      const parts = [];
+      if (company) parts.push(`Company: ${company}`);
+      if (title) parts.push(`Role: ${title}`);
+      if (required) parts.push(`Job requirements:\n${required}`);
+      if (matched) parts.push(`On the candidate resume:\n${matched}`);
+      if (missing) parts.push(`Gaps to probe:\n${missing}`);
+      return parts.join('\n\n');
+    }
+
+    function markAnalyzedResumeLinked(text) {
+      uploadedResumeText = text || '';
+      const label = document.getElementById('ctx-resume-label');
+      const sublabel = document.getElementById('ctx-resume-sublabel');
+      const box = document.getElementById('ctx-resume-box');
+      const icon = document.getElementById('ctx-resume-icon');
+      const badge = document.getElementById('resume-parse-badge');
+      const badgeText = document.getElementById('resume-parse-badge-text');
+      if (!uploadedResumeText || uploadedResumeText.length < 10) return;
+      if (label) label.innerHTML = `<span style="color:var(--g)">✓ Resume from your last analysis</span>`;
+      if (sublabel) sublabel.textContent = `${(uploadedResumeText.length / 1000).toFixed(1)}k characters loaded — same file you scored against this JD`;
+      if (box) {
+        box.style.background = 'rgba(9, 192, 6, 0.06)';
+        box.style.borderColor = 'var(--g)';
+      }
+      if (icon) {
+        icon.className = 'fas fa-file-pdf';
+        icon.style.color = 'var(--g)';
+      }
+      if (badge) badge.style.display = 'flex';
+      if (badgeText) badgeText.textContent = 'Using the same resume as this job application';
+    }
+
+    function applyAnalyzedJobContext() {
+      const params = new URLSearchParams(window.location.search);
+      const company = (params.get('company') || '').trim();
+      const roleParam = (params.get('role') || '').trim();
+      const { data, extra } = readAnalysisPayload();
+      analyzedCompanyName = company || extra.company || '';
+
+      const jdText = buildJdText(data, extra, analyzedCompanyName);
+      const resumeText = extra.resumeText || data.resumeText || '';
+      let linkedResume = resumeText;
+      if (!linkedResume || linkedResume.length < 10) {
+        try {
+          const rd = JSON.parse(localStorage.getItem('resumeData') || '{}');
+          const bits = [
+            rd.personalInfo?.fullName,
+            rd.personalInfo?.professionalTitle,
+            rd.summary,
+            rd.technicalSkills,
+            Array.isArray(rd.experience) ? rd.experience.map((e) => e.title || e.company || JSON.stringify(e)).join('\n') : ''
+          ].filter(Boolean);
+          if (bits.length) linkedResume = bits.join('\n');
+        } catch (e) {}
+      }
+      const jobTitle = extra.jobTitle || data.jobTitle || roleParam || '';
+
+      const ta = document.getElementById('ctx-role');
+      if (ta && jdText) {
+        ta.value = jdText;
+        const len = document.getElementById('role-desc-len');
+        if (len) len.textContent = jdText.length + ' chars';
+      }
+
+      const titleBits = [analyzedCompanyName, jobTitle].filter(Boolean);
+      selectedRoleTitle = titleBits.join(' — ') || jobTitle || 'Analyzed job';
+
+      const cardTitle = document.getElementById('analyzed-job-card-title');
+      const cardSub = document.getElementById('analyzed-job-card-sub');
+      if (cardTitle && (jobTitle || analyzedCompanyName)) {
+        cardTitle.textContent = selectedRoleTitle;
+      }
+      if (cardSub) {
+        cardSub.textContent = jdText ? 'Same JD + resume from your analysis' : 'Write or paste a job description';
+      }
+
+      if (linkedResume && linkedResume.length > 10) {
+        markAnalyzedResumeLinked(linkedResume);
+      }
+
+      try {
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        const nameInput = document.getElementById('ctx-candidate-name');
+        if (nameInput && !nameInput.value.trim() && (user.name || user.username)) {
+          nameInput.value = user.name || user.username;
+        }
+      } catch (e) {}
+    }
 
     const companyRoles = {
       google: {
@@ -3182,7 +3306,10 @@ Key Requirements:
         level: 'Mid',
         role: role,
         roleTitle: displayRoleTitle,
+        jobTitle: displayRoleTitle,
+        jdText: role,
         resumeText: resumeText,
+        company: analyzedCompanyName || '',
         duration: interviewDuration
       };
 
@@ -4187,7 +4314,12 @@ Key Requirements:
     // ─── SPEECH ──────────────────────────────────────────────────────────────
     function initRecognition() {
       const R = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!R) return;
+      if (!R) {
+        const lbl = document.getElementById('mic-label');
+        if (lbl) lbl.textContent = 'Text Mode (No Mic)';
+        console.warn('SpeechRecognition API not available in this browser. Falling back to manual text input.');
+        return;
+      }
       recognition = new R();
       recognition.continuous = true; recognition.interimResults = true;
       recognition.onstart = () => {

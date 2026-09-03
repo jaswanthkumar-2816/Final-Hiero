@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hiero Command Center</title>
+    <title>Hiero Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="theme.css">
@@ -97,7 +97,22 @@
         .welcome-text p { color: var(--text-muted); margin: 0; font-size: 16px; font-family: 'Inter'; }
         
         /* Quick Tools Grid */
-        .tools-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .tools-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+        .empty-state { text-align: center; padding: 28px 12px; color: var(--text-muted); }
+        .empty-state i { font-size: 28px; color: var(--primary); opacity: 0.5; margin-bottom: 10px; display: block; }
+        .empty-state p { margin: 0 0 14px 0; font-size: 14px; line-height: 1.5; }
+        .empty-state a, .ghost-link {
+            color: var(--primary); font-weight: 700; text-decoration: none; font-size: 14px;
+        }
+        .skill-chip.gap {
+            background: rgba(255, 184, 77, 0.12);
+            border-color: rgba(255, 184, 77, 0.35);
+        }
+        .skill-chip.gap i { color: var(--warning); }
+        .next-gap {
+            margin-top: 12px; font-size: 13px; color: var(--text-muted);
+        }
+        .next-gap strong { color: var(--text-main); }
         .tool-card {
             background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 25px;
             text-align: center; text-decoration: none; color: #fff; transition: 0.3s; display: block;
@@ -297,12 +312,13 @@
         }
         .score-card-actions {
             display: flex;
-            gap: 15px;
+            gap: 12px;
+            flex-wrap: wrap;
             border-top: 1px solid rgba(255, 255, 255, 0.08);
             padding-top: 20px;
         }
         .apply-companies-btn {
-            flex: 2;
+            flex: 1 1 180px;
             background: linear-gradient(135deg, var(--primary), #00b248);
             color: #000;
             border: none;
@@ -488,7 +504,7 @@
         }
     </style>
 </head>
-<body>
+<body class="dashboard-page">
 
     <div class="ambient-glow glow-1"></div>
     <div class="ambient-glow glow-2"></div>
@@ -500,10 +516,10 @@
         </a>
         <div class="nav-links">
             <a href="dashboard.html" class="active">Dashboard</a>
+            <a href="analysis.html">Analysis</a>
             <a href="resume-builder.html">Resume Builder</a>
             <a href="mock-interview.html">Interview Prep</a>
-            <a href="solve.html">Solve</a>
-            <a href="learn.html">Learn</a>
+            <a href="quiz.html">Learn</a>
         </div>
         <div class="user-profile">
             <button class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Theme" style="background: rgba(255,255,255,0.08); border: 1px solid var(--card-border); color: #fff; padding: 8px 12px; border-radius: 8px; cursor: pointer; transition: 0.3s; margin-right: 8px;">
@@ -524,7 +540,7 @@
             <div class="card welcome-banner">
                 <div class="welcome-text">
                     <h1>Welcome back, <span id="welcome-name" style="color: var(--primary);">User</span>!</h1>
-                    <p>Your premium command center. Track your progress and advance your career.</p>
+                    <p id="welcome-sub">Match the job you applied for, close the skill gaps, then practice interviews.</p>
                 </div>
                 <div style="font-size: 60px; color: var(--primary); opacity: 0.2;"><i class="fas fa-rocket"></i></div>
             </div>
@@ -532,10 +548,10 @@
             <!-- Applied Companies Section -->
             <div class="card applied-jobs-card" id="applied-jobs-section" style="background: linear-gradient(135deg, rgba(7, 226, 25, 0.08), rgba(13, 18, 28, 0.9)); border: 1px solid rgba(7, 226, 25, 0.35); border-radius: 24px; padding: 24px 30px;">
                 <div class="card-header" style="border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
-                    <div class="card-title" style="font-size: 20px; font-weight: 800; color: #fff;">
-                        <i class="fas fa-check-circle" style="color: var(--primary);"></i> Successfully Applied Companies & Hiring Drives
+                    <div class="card-title" style="font-size: 20px; font-weight: 800; color: var(--text-main);">
+                        <i class="fas fa-briefcase" style="color: var(--primary);"></i> Your applications
                     </div>
-                    <a href="companies.html" style="color: var(--primary); font-weight: 700; text-decoration: none; font-size: 14px; background: rgba(7,226,25,0.12); padding: 6px 14px; border-radius: 100px; border: 1px solid rgba(7,226,25,0.3);">Apply for More Companies →</a>
+                    <a href="companies.html" style="color: var(--primary); font-weight: 700; text-decoration: none; font-size: 14px; background: rgba(7,226,25,0.12); padding: 6px 14px; border-radius: 100px; border: 1px solid rgba(7,226,25,0.3);">Browse companies →</a>
                 </div>
                 <div id="applied-companies-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;">
                     <!-- Populated dynamically by JS -->
@@ -548,7 +564,7 @@
                     <div class="card-title">
                         <i class="fas fa-chart-line"></i> Candidate Match & Skill Score
                     </div>
-                    <span id="score-badge" class="score-badge-pill">High Compatibility</span>
+                    <span id="score-badge" class="score-badge-pill">Awaiting analysis</span>
                 </div>
                 
                 <div class="score-card-body">
@@ -565,8 +581,8 @@
                         </div>
                         
                         <div class="score-breakdown-details">
-                            <h3 id="candidate-role-target">Software Developer / Skill Alignment</h3>
-                            <p id="candidate-score-sub">Based on your latest resume evaluation & verified technical skills</p>
+                            <h3 id="candidate-role-target">No job analyzed yet</h3>
+                            <p id="candidate-score-sub">Upload your resume and the job description to see an honest match score for that role.</p>
 
                             <div class="mini-metrics">
                                 <div class="metric-box">
@@ -590,11 +606,14 @@
                     </div>
 
                     <div class="score-card-actions">
-                        <button class="apply-companies-btn" onclick="handleApplyToCompanies(this)">
-                            <i class="fas fa-paper-plane"></i> Apply to Companies with Match Score
-                        </button>
+                        <a href="quiz.html" class="apply-companies-btn" id="primary-flow-btn" style="text-decoration:none;">
+                            <i class="fas fa-graduation-cap"></i> Start Skill Module
+                        </a>
+                        <a href="result.html" class="reanalyze-btn" id="view-result-btn">
+                            <i class="fas fa-chart-pie"></i> Full analysis
+                        </a>
                         <a href="analysis.html" class="reanalyze-btn">
-                            <i class="fas fa-sync-alt"></i> Re-Analyze Resume
+                            <i class="fas fa-sync-alt"></i> Analyze
                         </a>
                     </div>
                 </div>
@@ -602,20 +621,25 @@
 
             <!-- Quick Tools -->
             <div class="tools-grid">
-                <a href="resume-builder.html" class="tool-card">
-                    <i class="fas fa-file-invoice"></i>
-                    <h3>Resume Builder</h3>
-                    <p>Create & download premium ATS resumes</p>
+                <a href="analysis.html" class="tool-card">
+                    <i class="fas fa-chart-pie"></i>
+                    <h3>Job Analysis</h3>
+                    <p>Score your resume against a real JD</p>
+                </a>
+                <a href="quiz.html" class="tool-card">
+                    <i class="fas fa-graduation-cap"></i>
+                    <h3>Learn Skills</h3>
+                    <p>Beginner videos or a 10-question diagnostic</p>
                 </a>
                 <a href="mock-interview.html" class="tool-card">
                     <i class="fas fa-microphone-alt"></i>
                     <h3>Mock Interview</h3>
-                    <p>Practice with real-time AI feedback</p>
+                    <p>Practice the role from your last analysis</p>
                 </a>
-                <a href="solve.html" class="tool-card">
-                    <i class="fas fa-code"></i>
-                    <h3>Problem Solving</h3>
-                    <p>Master coding challenges</p>
+                <a href="resume-builder.html" class="tool-card">
+                    <i class="fas fa-file-invoice"></i>
+                    <h3>Resume Builder</h3>
+                    <p>Build an ATS resume for campus drives</p>
                 </a>
             </div>
 
@@ -638,37 +662,9 @@
                 <div class="card">
                     <div class="card-header">
                         <div class="card-title"><i class="fas fa-graduation-cap"></i> Learning Progress</div>
-                        <a href="learn.html" style="color: var(--primary); text-decoration: none; font-size: 14px;">Browse Library <i class="fas fa-arrow-right"></i></a>
+                        <a href="quiz.html" style="color: var(--primary); text-decoration: none; font-size: 14px;">Start module <i class="fas fa-arrow-right"></i></a>
                     </div>
-                    <div style="display: flex; flex-direction: column; gap: 20px;">
-                        <div>
-                            <div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px;">
-                                <span>Advanced Data Structures</span>
-                                <span style="color: var(--primary);">65%</span>
-                            </div>
-                            <div style="width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
-                                <div style="width: 65%; height: 100%; background: var(--primary); box-shadow: 0 0 10px var(--primary-glow);"></div>
-                            </div>
-                        </div>
-                        <div>
-                            <div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px;">
-                                <span>System Design Basics</span>
-                                <span style="color: var(--primary);">30%</span>
-                            </div>
-                            <div style="width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
-                                <div style="width: 30%; height: 100%; background: var(--primary); box-shadow: 0 0 10px var(--primary-glow);"></div>
-                            </div>
-                        </div>
-                        
-                        <div style="background: rgba(42, 224, 35, 0.05); border: 1px solid rgba(42, 224, 35, 0.2); padding: 15px; border-radius: 12px; display: flex; gap: 15px; align-items: center; margin-top: 10px;">
-                            <div style="width: 50px; height: 50px; background: rgba(0,0,0,0.5); border-radius: 8px; display: flex; align-items: center; justify-content: center; position: relative;">
-                                <i class="fas fa-play" style="color: var(--primary); z-index: 2;"></i>
-                            </div>
-                            <div>
-                                <h4 style="margin: 0 0 5px 0; font-size: 15px;">Continue Watching</h4>
-                                <p style="margin: 0; font-size: 13px; color: var(--text-muted);">Dynamic Programming Intro • 12m left</p>
-                            </div>
-                        </div>
+                    <div id="learning-progress-body" style="display: flex; flex-direction: column; gap: 20px;">
                     </div>
                 </div>
             </div>
@@ -694,23 +690,9 @@
             <div class="card">
                 <div class="card-header">
                     <div class="card-title"><i class="fas fa-laptop-code"></i> Solve Portal</div>
-                    <span style="font-size: 12px; background: rgba(255,255,255,0.1); padding: 3px 8px; border-radius: 10px;">Weekly Rank: 42</span>
                 </div>
-                <div style="display: flex; justify-content: space-around; margin-bottom: 20px; text-align: center;">
-                    <div>
-                        <div style="font-size: 24px; font-weight: 700; color: var(--primary);">24</div>
-                        <div style="font-size: 12px; color: var(--text-muted);">Easy</div>
-                    </div>
-                    <div>
-                        <div style="font-size: 24px; font-weight: 700; color: var(--warning);">12</div>
-                        <div style="font-size: 12px; color: var(--text-muted);">Medium</div>
-                    </div>
-                    <div>
-                        <div style="font-size: 24px; font-weight: 700; color: var(--danger);">3</div>
-                        <div style="font-size: 12px; color: var(--text-muted);">Hard</div>
-                    </div>
-                </div>
-                <a href="solve.html" style="display: block; width: 100%; padding: 12px; text-align: center; background: rgba(255,255,255,0.05); color: #fff; text-decoration: none; border-radius: 8px; font-size: 14px; transition: 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">Solve Daily Challenge</a>
+                <p style="color: var(--text-muted); font-size: 14px; margin: 0 0 16px 0; line-height: 1.5;">Practice coding when the job needs it. Your counts stay empty until you solve problems here.</p>
+                <a href="solve.html" style="display: block; width: 100%; padding: 12px; text-align: center; background: rgba(255,255,255,0.05); color: var(--text-main); text-decoration: none; border-radius: 8px; font-size: 14px; transition: 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">Open problem set</a>
             </div>
 
             <!-- Recent Activity -->
@@ -718,29 +700,7 @@
                 <div class="card-header">
                     <div class="card-title"><i class="fas fa-history"></i> Recent Activity</div>
                 </div>
-                <div class="activity-feed">
-                    <div class="activity-item">
-                        <div class="activity-dot"></div>
-                        <div class="activity-text">
-                            <p>Logged into Command Center</p>
-                            <span>Just now</span>
-                        </div>
-                    </div>
-                    <div class="activity-item">
-                        <div class="activity-dot" style="background: var(--warning); box-shadow: 0 0 10px var(--warning);"></div>
-                        <div class="activity-text">
-                            <p>Completed "Two Sum" challenge</p>
-                            <span>2 days ago</span>
-                        </div>
-                    </div>
-                    <div class="activity-item">
-                        <div class="activity-dot" style="background: #0088ff; box-shadow: 0 0 10px #0088ff;"></div>
-                        <div class="activity-text">
-                            <p>Downloaded PDF Resume</p>
-                            <span>3 days ago</span>
-                        </div>
-                    </div>
-                </div>
+                <div class="activity-feed" id="activity-feed"></div>
             </div>
 
         </div>
@@ -755,7 +715,7 @@
                 <button class="modal-close-btn" onclick="closeApplyModal()">&times;</button>
             </div>
             <div class="modal-body">
-                <p class="modal-subtitle">Companies accepting applications based on your verified <strong><span id="modal-user-score" style="color: var(--primary);">--%</span> Match Score</strong>:</p>
+                <p class="modal-subtitle">These listings are campus partners. Your match % is from the <strong>last job you analyzed</strong>, not a made-up fit for each company.</p>
                 
                 <div class="company-list">
                     <div class="company-card">
@@ -767,7 +727,7 @@
                             </div>
                         </div>
                         <div class="comp-match">
-                            <span class="match-pct" id="comp-match-amazon">88% Fit</span>
+                            <span class="match-pct" id="comp-match-amazon">—</span>
                             <button class="comp-apply-btn" onclick="applyToCompany('Amazon', this)"><i class="fas fa-paper-plane"></i> Apply</button>
                         </div>
                     </div>
@@ -781,7 +741,7 @@
                             </div>
                         </div>
                         <div class="comp-match">
-                            <span class="match-pct" id="comp-match-tcs">94% Fit</span>
+                            <span class="match-pct" id="comp-match-tcs">—</span>
                             <button class="comp-apply-btn" onclick="applyToCompany('TCS', this)"><i class="fas fa-paper-plane"></i> Apply</button>
                         </div>
                     </div>
@@ -795,7 +755,7 @@
                             </div>
                         </div>
                         <div class="comp-match">
-                            <span class="match-pct" id="comp-match-infosys">91% Fit</span>
+                            <span class="match-pct" id="comp-match-infosys">—</span>
                             <button class="comp-apply-btn" onclick="applyToCompany('Infosys', this)"><i class="fas fa-paper-plane"></i> Apply</button>
                         </div>
                     </div>
@@ -809,7 +769,7 @@
                             </div>
                         </div>
                         <div class="comp-match">
-                            <span class="match-pct" id="comp-match-wipro">86% Fit</span>
+                            <span class="match-pct" id="comp-match-wipro">—</span>
                             <button class="comp-apply-btn" onclick="applyToCompany('Wipro', this)"><i class="fas fa-paper-plane"></i> Apply</button>
                         </div>
                     </div>
@@ -823,7 +783,7 @@
                             </div>
                         </div>
                         <div class="comp-match">
-                            <span class="match-pct" id="comp-match-paytm">82% Fit</span>
+                            <span class="match-pct" id="comp-match-paytm">—</span>
                             <button class="comp-apply-btn" onclick="applyToCompany('Paytm', this)"><i class="fas fa-paper-plane"></i> Apply</button>
                         </div>
                     </div>
@@ -837,6 +797,48 @@
             initializeDashboard();
         });
 
+        function escapeHtml(s) {
+            return String(s == null ? '' : s)
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        function readAnalysis() {
+            try {
+                const raw = localStorage.getItem('analysisResult') || localStorage.getItem('hieroAnalysisResult');
+                if (!raw) return null;
+                const parsed = JSON.parse(raw);
+                const data = parsed.data || parsed;
+                if (!data || typeof data !== 'object') return null;
+                const score = parseInt(data.score, 10);
+                return {
+                    score: Number.isFinite(score) ? Math.min(100, Math.max(0, score)) : null,
+                    jobTitle: data.jobTitle || '',
+                    domain: data.domain || '',
+                    matchedSkills: Array.isArray(data.matchedSkills) ? data.matchedSkills : [],
+                    missingSkills: Array.isArray(data.missingSkills) ? data.missingSkills : [],
+                    skillToLearnFirst: data.skillToLearnFirst || '',
+                    atsScore: data.atsScore != null ? parseInt(data.atsScore, 10) : null,
+                    timestamp: parsed.timestamp || null
+                };
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function formatRelativeTime(iso) {
+            if (!iso) return '';
+            const t = new Date(iso).getTime();
+            if (!Number.isFinite(t)) return '';
+            const mins = Math.round((Date.now() - t) / 60000);
+            if (mins < 1) return 'Just now';
+            if (mins < 60) return mins + ' min ago';
+            const hrs = Math.round(mins / 60);
+            if (hrs < 24) return hrs + ' hr ago';
+            const days = Math.round(hrs / 24);
+            return days + ' day' + (days === 1 ? '' : 's') + ' ago';
+        }
+
         function renderAppliedCompaniesSection() {
             const container = document.getElementById('applied-companies-list');
             if (!container) return;
@@ -845,25 +847,48 @@
             try {
                 const stored = localStorage.getItem('hieroAppliedCompanies');
                 if (stored) applied = JSON.parse(stored);
-            } catch(e) {}
+            } catch (e) {}
 
-            if (!applied || applied.length === 0) {
-                applied = ['Meta', 'Amazon', 'Microsoft'];
+            if (!Array.isArray(applied)) applied = [];
+            const analysis = readAnalysis();
+            const honestScore = analysis && analysis.score != null ? analysis.score : null;
+
+            const items = applied.map((entry) => {
+                if (typeof entry === 'string') {
+                    return { name: entry, role: analysis && analysis.jobTitle ? analysis.jobTitle : '', score: honestScore };
+                }
+                return {
+                    name: entry.name || entry.company || 'Company',
+                    role: entry.role || entry.jobTitle || (analysis && analysis.jobTitle) || '',
+                    score: entry.score != null ? parseInt(entry.score, 10) : honestScore
+                };
+            }).filter((row) => row.name);
+
+            if (!items.length) {
+                container.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1 / -1;">
+                        <i class="fas fa-inbox"></i>
+                        <p>No applications yet. When you apply from Companies, they show up here with the match score from your last analysis — not a made-up 88%.</p>
+                        <a href="companies.html">Browse campus companies →</a>
+                    </div>`;
+                return;
             }
 
-            container.innerHTML = applied.map(comp => `
-                <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(7, 226, 25, 0.25); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 10px; transition: 0.3s;" onmouseover="this.style.borderColor='#07e219'" onmouseout="this.style.borderColor='rgba(7, 226, 25, 0.25)'">
-                    <div style="display: flex; align-items: center; justify-content: space-between;">
-                        <h4 style="margin: 0; font-size: 16px; font-weight: 800; color: #fff;">${comp}</h4>
-                        <span style="background: rgba(7, 226, 25, 0.15); border: 1px solid rgba(7, 226, 25, 0.4); color: #07e219; padding: 3px 10px; border-radius: 100px; font-size: 11px; font-weight: 700;">✓ Applied & Confirmed</span>
+            container.innerHTML = items.map((comp) => {
+                const scoreLabel = Number.isFinite(comp.score) ? `Match: ${comp.score}%` : 'Match: not analyzed';
+                const roleLabel = comp.role ? escapeHtml(comp.role) : 'Role not saved';
+                const receiptRole = encodeURIComponent(comp.role || 'Campus applicant');
+                const receiptScore = encodeURIComponent((Number.isFinite(comp.score) ? comp.score : '') + '%');
+                return `
+                <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(7, 226, 25, 0.25); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 10px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                        <h4 style="margin: 0; font-size: 16px; font-weight: 800; color: var(--text-main);">${escapeHtml(comp.name)}</h4>
+                        <span style="background: rgba(7, 226, 25, 0.15); border: 1px solid rgba(7, 226, 25, 0.4); color: var(--primary); padding: 3px 10px; border-radius: 100px; font-size: 11px; font-weight: 700;">Applied</span>
                     </div>
-                    <p style="margin: 0; font-size: 13px; color: var(--text-muted);">Target Role: Senior Development Engineer • Hiero Match: 88%</p>
-                    <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 4px;">
-                        <span style="font-size: 11px; color: #64748b;">Ref #HIO-2026-CONFIRMED</span>
-                        <a href="job_success.html?company=${encodeURIComponent(comp)}&role=Senior%20Development%20Engineer&score=88%25" style="color: #07e219; font-size: 12px; font-weight: 700; text-decoration: none;">View Receipt →</a>
-                    </div>
-                </div>
-            `).join('');
+                    <p style="margin: 0; font-size: 13px; color: var(--text-muted);">${roleLabel} • ${escapeHtml(scoreLabel)}</p>
+                    <a href="job_success.html?company=${encodeURIComponent(comp.name)}&role=${receiptRole}&score=${receiptScore}" style="color: var(--primary); font-size: 12px; font-weight: 700; text-decoration: none;">View receipt →</a>
+                </div>`;
+            }).join('');
         }
 
         function formatTemplateName(id) {
@@ -934,6 +959,8 @@
 
             // 2. Candidate Score & Skill Evaluation
             loadCandidateMatchScore(user);
+            renderLearningProgress();
+            renderActivityFeed();
 
             // 3. Subscription Status
             const subContainer = document.getElementById('sub-status-container');
@@ -1003,71 +1030,42 @@
         }
 
         function loadCandidateMatchScore(user) {
-            let analysisData = null;
-            try {
-                const rawResult = localStorage.getItem('analysisResult') || localStorage.getItem('hieroAnalysisResult');
-                if (rawResult) {
-                    const parsed = JSON.parse(rawResult);
-                    analysisData = parsed.data || parsed;
-                }
-            } catch (e) {
-                console.warn('Error reading analysis data from storage:', e);
-            }
-
+            const analysis = readAnalysis();
             let resumeData = null;
             try {
                 const rawResume = localStorage.getItem('resumeData');
                 if (rawResume) resumeData = JSON.parse(rawResume);
             } catch (e) {}
 
-            let score = 0;
-            let atsScore = 82;
+            let score = null;
+            let atsScore = null;
             let matchedSkills = [];
             let missingSkills = [];
-            let targetRole = 'Software Developer / Skill Alignment';
+            let targetRole = 'No job analyzed yet';
+            let subtitle = 'Upload your resume and the job description to see an honest match score for that role.';
 
-            if (analysisData && (typeof analysisData.score === 'number' || typeof analysisData.score === 'string')) {
-                score = parseInt(analysisData.score) || 0;
-                atsScore = parseInt(analysisData.atsScore) || Math.min(100, score + 6);
-                matchedSkills = Array.isArray(analysisData.matchedSkills) ? analysisData.matchedSkills : (analysisData.resumeSkills || []);
-                missingSkills = Array.isArray(analysisData.missingSkills) ? analysisData.missingSkills : [];
-                if (analysisData.domain) {
-                    targetRole = `${analysisData.domain.toUpperCase()} Specialist / Skill Alignment`;
-                }
+            if (analysis && analysis.score != null) {
+                score = analysis.score;
+                atsScore = Number.isFinite(analysis.atsScore) ? analysis.atsScore : null;
+                matchedSkills = analysis.matchedSkills;
+                missingSkills = analysis.missingSkills;
+                targetRole = analysis.jobTitle || 'Last analyzed job';
+                subtitle = missingSkills.length
+                    ? `This score is for that job only. ${missingSkills.length} skill gap${missingSkills.length === 1 ? '' : 's'} to close before you look like a fit.`
+                    : 'Your resume covers the skills this job asked for.';
             } else if (resumeData) {
-                let base = 50;
-                if (resumeData.personalInfo?.fullName) base += 10;
-                if (resumeData.personalInfo?.email) base += 5;
-                if (resumeData.experience?.length) base += 15;
-                if (resumeData.education?.length) base += 10;
-                if (resumeData.technicalSkills) base += 10;
-                score = Math.min(100, base);
-                atsScore = Math.min(100, base + 5);
-
-                if (resumeData.technicalSkills) {
-                    matchedSkills = resumeData.technicalSkills.split(/,|\n/).map(s => s.trim()).filter(Boolean);
-                }
-                if (resumeData.personalInfo?.professionalTitle) {
-                    targetRole = `${resumeData.personalInfo.professionalTitle} / Verified Profile`;
-                }
-            } else {
-                score = 78;
-                atsScore = 85;
-                matchedSkills = ['JavaScript', 'Python', 'React', 'HTML/CSS', 'Git'];
-                missingSkills = ['Docker', 'AWS'];
+                targetRole = resumeData.personalInfo?.professionalTitle || 'Resume on file — no job compared yet';
+                subtitle = 'Run Analysis with a job description. A resume alone is not a match score.';
             }
 
-            score = Math.min(Math.max(score, 0), 100);
-
-            // Update DOM Elements
             const scoreValEl = document.getElementById('candidate-score-val');
-            if (scoreValEl) scoreValEl.innerText = `${score}%`;
+            if (scoreValEl) scoreValEl.innerText = score == null ? '--%' : `${score}%`;
 
             const modalScoreEl = document.getElementById('modal-user-score');
-            if (modalScoreEl) modalScoreEl.innerText = `${score}%`;
+            if (modalScoreEl) modalScoreEl.innerText = score == null ? '--%' : `${score}%`;
 
             const atsValEl = document.getElementById('ats-score-val');
-            if (atsValEl) atsValEl.innerText = `${atsScore}/100`;
+            if (atsValEl) atsValEl.innerText = atsScore == null ? '—' : `${atsScore}/100`;
 
             const matchedCountEl = document.getElementById('matched-count-val');
             if (matchedCountEl) matchedCountEl.innerText = matchedSkills.length;
@@ -1078,60 +1076,147 @@
             const roleTargetEl = document.getElementById('candidate-role-target');
             if (roleTargetEl) roleTargetEl.innerText = targetRole;
 
-            // Update SVG Ring Progress (stroke-dasharray = 264)
-            const svgBar = document.getElementById('score-svg-bar');
-            if (svgBar) {
-                const offset = 264 - (score / 100) * 264;
-                setTimeout(() => {
-                    svgBar.style.strokeDashoffset = offset;
-                }, 150);
+            const subEl = document.getElementById('candidate-score-sub');
+            if (subEl) subEl.innerText = subtitle;
+
+            const welcomeSub = document.getElementById('welcome-sub');
+            if (welcomeSub && analysis && analysis.jobTitle) {
+                welcomeSub.textContent = `Last job analyzed: ${analysis.jobTitle}. Close the gaps, then interview.`;
             }
 
-            // Update Badge
+            const svgBar = document.getElementById('score-svg-bar');
+            if (svgBar) {
+                const ring = score == null ? 0 : score;
+                const offset = 264 - (ring / 100) * 264;
+                svgBar.style.stroke = (score != null && score < 50) ? '#ffb84d' : 'var(--primary)';
+                setTimeout(() => { svgBar.style.strokeDashoffset = offset; }, 150);
+            }
+
             const badgeEl = document.getElementById('score-badge');
             if (badgeEl) {
-                if (score >= 80) {
-                    badgeEl.innerText = 'High Compatibility';
+                if (score == null) {
+                    badgeEl.innerText = 'Awaiting analysis';
+                    badgeEl.style.color = 'var(--text-muted)';
+                    badgeEl.style.borderColor = 'rgba(255,255,255,0.2)';
+                    badgeEl.style.background = 'rgba(255,255,255,0.06)';
+                } else if (score >= 80) {
+                    badgeEl.innerText = 'Strong fit';
                     badgeEl.style.color = 'var(--primary)';
                     badgeEl.style.borderColor = 'var(--primary)';
                     badgeEl.style.background = 'rgba(7, 226, 25, 0.15)';
-                } else if (score >= 60) {
-                    badgeEl.innerText = 'Moderate Fit';
+                } else if (score >= 50) {
+                    badgeEl.innerText = 'Partial fit';
                     badgeEl.style.color = 'var(--warning)';
                     badgeEl.style.borderColor = 'var(--warning)';
                     badgeEl.style.background = 'rgba(255, 184, 77, 0.15)';
                 } else {
-                    badgeEl.innerText = 'Needs Upskilling';
+                    badgeEl.innerText = 'Needs upskilling';
                     badgeEl.style.color = 'var(--danger)';
                     badgeEl.style.borderColor = 'var(--danger)';
                     badgeEl.style.background = 'rgba(255, 68, 68, 0.15)';
                 }
             }
 
-            // Update Company Match Percentages
-            const amazonMatch = Math.min(100, Math.max(60, score + 4));
-            const tcsMatch = Math.min(100, Math.max(65, score + 10));
-            const infosysMatch = Math.min(100, Math.max(65, score + 7));
-            const wiproMatch = Math.min(100, Math.max(60, score + 2));
-            const paytmMatch = Math.min(100, Math.max(60, score - 2));
+            ['comp-match-amazon','comp-match-tcs','comp-match-infosys','comp-match-wipro','comp-match-paytm'].forEach((id) => {
+                const el = document.getElementById(id);
+                if (el) el.innerText = score == null ? 'Analyze first' : `${score}% (this JD)`;
+            });
 
-            if (document.getElementById('comp-match-amazon')) document.getElementById('comp-match-amazon').innerText = `${amazonMatch}% Fit`;
-            if (document.getElementById('comp-match-tcs')) document.getElementById('comp-match-tcs').innerText = `${tcsMatch}% Fit`;
-            if (document.getElementById('comp-match-infosys')) document.getElementById('comp-match-infosys').innerText = `${infosysMatch}% Fit`;
-            if (document.getElementById('comp-match-wipro')) document.getElementById('comp-match-wipro').innerText = `${wiproMatch}% Fit`;
-            if (document.getElementById('comp-match-paytm')) document.getElementById('comp-match-paytm').innerText = `${paytmMatch}% Fit`;
-
-            // Skill Chips
             const chipsContainer = document.getElementById('matched-skills-container');
             if (chipsContainer) {
-                if (matchedSkills.length > 0) {
-                    chipsContainer.innerHTML = matchedSkills.slice(0, 6).map(skill => 
-                        `<span class="skill-chip"><i class="fas fa-check-circle"></i> ${skill}</span>`
-                    ).join('');
+                const matchedChips = matchedSkills.slice(0, 4).map((skill) =>
+                    `<span class="skill-chip"><i class="fas fa-check-circle"></i> ${escapeHtml(skill)}</span>`
+                );
+                const gapChips = missingSkills.slice(0, 4).map((skill) =>
+                    `<span class="skill-chip gap"><i class="fas fa-minus-circle"></i> ${escapeHtml(skill)}</span>`
+                );
+                if (matchedChips.length || gapChips.length) {
+                    const firstGap = analysis && (analysis.skillToLearnFirst || missingSkills[0]);
+                    chipsContainer.innerHTML = matchedChips.join('') + gapChips.join('') +
+                        (firstGap ? `<p class="next-gap">Learn first: <strong>${escapeHtml(firstGap)}</strong></p>` : '');
                 } else {
-                    chipsContainer.innerHTML = `<span style="color: var(--text-muted); font-size: 13px;">Upload resume in Resume Builder or run Analysis to view verified skill tags.</span>`;
+                    chipsContainer.innerHTML = `<span style="color: var(--text-muted); font-size: 13px;">Run Analysis to see which skills this job actually asked for.</span>`;
                 }
             }
+
+            const primaryBtn = document.getElementById('primary-flow-btn');
+            const viewResultBtn = document.getElementById('view-result-btn');
+            if (analysis && analysis.score != null) {
+                const skill = analysis.skillToLearnFirst || missingSkills[0] || '';
+                if (primaryBtn) {
+                    primaryBtn.href = skill ? `quiz.html?skill=${encodeURIComponent(skill)}` : 'quiz.html';
+                    primaryBtn.innerHTML = `<i class="fas fa-graduation-cap"></i> Start Skill Module`;
+                }
+                if (viewResultBtn) viewResultBtn.style.display = '';
+            } else {
+                if (primaryBtn) {
+                    primaryBtn.href = 'analysis.html';
+                    primaryBtn.innerHTML = `<i class="fas fa-chart-pie"></i> Analyze a job`;
+                }
+                if (viewResultBtn) viewResultBtn.style.display = 'none';
+            }
+        }
+
+        function renderLearningProgress() {
+            const box = document.getElementById('learning-progress-body');
+            if (!box) return;
+            const analysis = readAnalysis();
+            const gaps = analysis ? (analysis.missingSkills || []).slice(0, 3) : [];
+            if (!gaps.length) {
+                box.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-graduation-cap"></i>
+                        <p>Skill modules appear after you analyze a job. Beginner path is videos; Intermediate is a 10-question diagnostic.</p>
+                        <a href="quiz.html">Open skill modules →</a>
+                    </div>`;
+                return;
+            }
+            box.innerHTML = gaps.map((skill) => `
+                <div>
+                    <div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px; gap: 8px;">
+                        <span>${escapeHtml(skill)}</span>
+                        <span style="color: var(--warning);">Not started</span>
+                    </div>
+                    <div style="width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
+                        <div style="width: 4%; height: 100%; background: var(--warning);"></div>
+                    </div>
+                </div>
+            `).join('') + `
+                <a href="quiz.html?skill=${encodeURIComponent(gaps[0])}" style="background: rgba(42, 224, 35, 0.05); border: 1px solid rgba(42, 224, 35, 0.2); padding: 15px; border-radius: 12px; display: flex; gap: 15px; align-items: center; text-decoration: none; color: inherit;">
+                    <div style="width: 50px; height: 50px; background: rgba(0,0,0,0.5); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-play" style="color: var(--primary);"></i>
+                    </div>
+                    <div>
+                        <h4 style="margin: 0 0 5px 0; font-size: 15px;">Start with this gap</h4>
+                        <p style="margin: 0; font-size: 13px; color: var(--text-muted);">${escapeHtml(gaps[0])}</p>
+                    </div>
+                </a>`;
+        }
+
+        function renderActivityFeed() {
+            const feed = document.getElementById('activity-feed');
+            if (!feed) return;
+            const analysis = readAnalysis();
+            const items = [{ title: 'Opened dashboard', when: 'Just now', color: 'var(--primary)' }];
+            if (analysis && analysis.jobTitle) {
+                items.push({
+                    title: `Analyzed ${analysis.jobTitle} (${analysis.score}%)`,
+                    when: formatRelativeTime(analysis.timestamp) || 'Recently',
+                    color: 'var(--warning)'
+                });
+            }
+            if (localStorage.getItem('resumeData')) {
+                items.push({ title: 'Resume saved in builder', when: 'On this device', color: '#0088ff' });
+            }
+            feed.innerHTML = items.map((item) => `
+                <div class="activity-item">
+                    <div class="activity-dot" style="background: ${item.color}; box-shadow: 0 0 10px ${item.color};"></div>
+                    <div class="activity-text">
+                        <p>${escapeHtml(item.title)}</p>
+                        <span>${escapeHtml(item.when)}</span>
+                    </div>
+                </div>
+            `).join('');
         }
 
         function openApplyModal() {
@@ -1144,72 +1229,34 @@
             if (modal) modal.classList.remove('active');
         }
 
-        async function handleApplyToCompanies(btn) {
-            if (btn) {
-                btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Saving Resume to Backend...`;
-                btn.disabled = true;
-            }
-
-            try {
-                const userStr = localStorage.getItem('user');
-                const user = userStr ? JSON.parse(userStr) : {};
-                
-                let analysisData = null;
-                try {
-                    const rawResult = localStorage.getItem('analysisResult') || localStorage.getItem('hieroAnalysisResult');
-                    if (rawResult) analysisData = JSON.parse(rawResult).data || JSON.parse(rawResult);
-                } catch(e) {}
-
-                let resumeData = null;
-                try {
-                    const rawResume = localStorage.getItem('resumeData');
-                    if (rawResume) resumeData = JSON.parse(rawResume);
-                } catch(e) {}
-
-                const currentScoreVal = document.getElementById('candidate-score-val')?.innerText?.replace('%','') || '78';
-                const currentAtsVal = document.getElementById('ats-score-val')?.innerText?.split('/')[0] || '85';
-                const currentTargetDomain = document.getElementById('candidate-role-target')?.innerText || 'TECH Specialist';
-
-                let matchedSkills = [];
-                if (analysisData?.matchedSkills?.length) matchedSkills = analysisData.matchedSkills;
-                else if (resumeData?.technicalSkills) matchedSkills = String(resumeData.technicalSkills).split(/,|\n/).map(s => s.trim()).filter(Boolean);
-                else matchedSkills = ['Python', 'JavaScript', 'React', 'HTML/CSS', 'Git', 'Data Science'];
-
-                const payload = {
-                    userId: user.id || user.userId || user.email || 'user_' + Date.now(),
-                    fullName: user.name || user.username || resumeData?.personalInfo?.fullName || 'Jaswanth Kumar',
-                    email: user.email || resumeData?.personalInfo?.email || 'jaswanth@hiero.ai',
-                    phone: resumeData?.personalInfo?.phone || '',
-                    targetDomain: currentTargetDomain,
-                    score: parseInt(currentScoreVal) || 78,
-                    atsScore: parseInt(currentAtsVal) || 85,
-                    matchedSkills: matchedSkills,
-                    resumeData: resumeData || {}
-                };
-
-                const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
-                await fetch('/api/resume/save-user-resume', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-                    },
-                    body: JSON.stringify(payload)
-                });
-            } catch(err) {
-                console.warn('Backend sync warning (proceeding to companies page):', err);
-            }
-
+        async function handleApplyToCompanies() {
             window.location.href = 'companies.html';
         }
 
         function applyToCompany(companyName, btn) {
-            btn.innerHTML = `<i class="fas fa-check-circle"></i> Applied!`;
-            btn.classList.add('applied');
-            btn.disabled = true;
+            const analysis = readAnalysis();
+            let applied = [];
+            try {
+                applied = JSON.parse(localStorage.getItem('hieroAppliedCompanies') || '[]');
+            } catch (e) { applied = []; }
+            if (!Array.isArray(applied)) applied = [];
+            const record = {
+                name: companyName,
+                role: analysis && analysis.jobTitle ? analysis.jobTitle : 'Campus applicant',
+                score: analysis && analysis.score != null ? analysis.score : null,
+                at: new Date().toISOString()
+            };
+            applied = applied.filter((row) => (typeof row === 'string' ? row : row.name) !== companyName);
+            applied.unshift(record);
+            localStorage.setItem('hieroAppliedCompanies', JSON.stringify(applied.slice(0, 20)));
+            if (btn) {
+                btn.innerHTML = `<i class="fas fa-check-circle"></i> Applied`;
+                btn.disabled = true;
+            }
+            const scoreQ = record.score != null ? `${record.score}%` : '';
             setTimeout(() => {
-                window.location.href = `job_success.html?company=${encodeURIComponent(companyName)}&role=${encodeURIComponent('Senior Software Engineer')}&score=85%25`;
-            }, 450);
+                window.location.href = `job_success.html?company=${encodeURIComponent(companyName)}&role=${encodeURIComponent(record.role)}&score=${encodeURIComponent(scoreQ)}`;
+            }, 400);
         }
 
         function logout() {
@@ -1221,10 +1268,5 @@
             }
         }
     </script>
-
-    <!-- Theme Toggle Floating Button -->
-    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Theme">
-        <i class="fas fa-sun"></i>
-    </button>
 </body>
 </html>

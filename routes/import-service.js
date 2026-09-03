@@ -2,10 +2,17 @@ const express = require('express');
 const axios = require('axios');
 const multer = require('multer');
 const fs = require('fs');
-const pdfParse = require('pdf-parse');
-const mammoth = require('mammoth');
-const Tesseract = require('tesseract.js');
 const path = require('path');
+
+function getPdfParse() {
+    return require('pdf-parse');
+}
+function getMammoth() {
+    return require('mammoth');
+}
+function getTesseract() {
+    return require('tesseract.js');
+}
 
 const router = express.Router();
 
@@ -27,10 +34,10 @@ function normalizeText(text) {
 async function extractTextFromPdf(filePath) {
     try {
         const dataBuffer = fs.readFileSync(filePath);
-        const data = await pdfParse(dataBuffer);
+        const data = await getPdfParse()(dataBuffer);
         let text = data.text || '';
         if (text.trim().length < 50) {
-            const { data: { text: ocrText } } = await Tesseract.recognize(filePath, 'eng');
+            const { data: { text: ocrText } } = await getTesseract().recognize(filePath, 'eng');
             text = ocrText;
         }
         return text;
@@ -39,7 +46,7 @@ async function extractTextFromPdf(filePath) {
 
 async function extractFromDocx(filePath) {
     try {
-        const result = await mammoth.extractRawText({ path: filePath });
+        const result = await getMammoth().extractRawText({ path: filePath });
         return result.value || '';
     } catch (error) { throw new Error('Failed to extract DOCX text.'); }
 }

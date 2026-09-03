@@ -336,7 +336,7 @@ router.post('/start', async (req, res) => {
         }
 
         // Resolve Company
-        let normalizedCompanyId = (companyId || context?.company || 'google').toLowerCase().replace(/[^a-z0-9]/g, '');
+        let normalizedCompanyId = (companyId || context?.company || 'general').toLowerCase().replace(/[^a-z0-9]/g, '');
         if (!COMPANY_BLUEPRINTS[normalizedCompanyId]) {
             const foundKey = Object.keys(COMPANY_BLUEPRINTS).find(k => normalizedCompanyId.includes(k));
             normalizedCompanyId = foundKey || 'general';
@@ -344,11 +344,11 @@ router.post('/start', async (req, res) => {
         const blueprint = COMPANY_BLUEPRINTS[normalizedCompanyId] || COMPANY_BLUEPRINTS.general;
         const companyName = context?.company || blueprint.name;
 
-        // Resolve Role & Job Description
-        const jobRole = context?.roleTitle || context?.role || BUILTIN_JD[jobId]?.title || 'Associate Software Engineer';
-        let jdFullText = context?.role || BUILTIN_JD[jobId]?.description || '';
+        // Resolve Role & Job Description — prefer the JD the student actually analyzed
+        const jobRole = context?.roleTitle || context?.jobTitle || context?.role || BUILTIN_JD[jobId]?.title || 'Campus applicant';
+        let jdFullText = context?.jdText || context?.role || BUILTIN_JD[jobId]?.description || '';
         if (!jdFullText || jdFullText.length < 20) {
-            jdFullText = `Software Engineer role at ${companyName}. Focus on scalable systems, REST APIs, database performance, and clean code.`;
+            jdFullText = `Role: ${jobRole} at ${companyName}. Interview against the candidate's uploaded resume and this job.`;
         }
 
         const jdSnapshot = {
@@ -370,7 +370,11 @@ router.post('/start', async (req, res) => {
             summary: ''
         };
 
-        if (userResume) {
+        if (context?.resumeText && String(context.resumeText).length > 20) {
+            resumeSnapshot.summary = String(context.resumeText).substring(0, 4000);
+            resumeSnapshot.matchedSkills = extractSkillTokens(context.resumeText);
+            if (context.candidateName) resumeSnapshot.fullName = context.candidateName;
+        } else if (userResume) {
             resumeSnapshot.fullName = userResume.fullName || userResume.name || user.name;
             resumeSnapshot.professionalTitle = userResume.professionalTitle || jobRole;
             resumeSnapshot.matchedSkills = userResume.matchedSkills || (userResume.skills ? Object.values(userResume.skills).flat() : []);
@@ -378,9 +382,6 @@ router.post('/start', async (req, res) => {
             resumeSnapshot.experience = userResume.experience || [];
             resumeSnapshot.education = userResume.education || [];
             resumeSnapshot.summary = userResume.summary || '';
-        } else if (context?.resumeText) {
-            resumeSnapshot.summary = context.resumeText.substring(0, 1500);
-            resumeSnapshot.matchedSkills = extractSkillTokens(context.resumeText);
         }
 
         const sessionId = clientSessionId || ('hiero-sess-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7));
@@ -1559,6 +1560,15 @@ router.get('/recordings/:sessionId', (req, res) => {
 // ─────────────────────────────────────────────────────────────────────────────
 router.get('/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// Legacy session event logging used by mock-interview.html
+router.post('/telemetry', (req, res) => {
+    const { sessionId, event, data } = req.body || {};
+    if (sessionId && event) {
+        console.log(`[Interview Telemetry] session=${sessionId} event=${event}`, data ? JSON.stringify(data) : '');
+    }
+    res.json({ success: true });
 });
 
 module.exports = router;

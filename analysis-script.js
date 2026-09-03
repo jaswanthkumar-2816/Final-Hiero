@@ -4,8 +4,6 @@ document.addEventListener("DOMContentLoaded", () => {
   console.log("🔍 Using unified backend API");
   const form = document.getElementById("analyze-form");
   const loadingOverlay = document.getElementById("loading-overlay");
-  const connectionStatus = document.getElementById("connection-status");
-  const statusText = document.getElementById("status-text");
   const analyzeBtn = document.getElementById("analyze-btn");
   const validationBox = document.getElementById('validation-errors');
   const validationText = document.getElementById('validation-errors-text');
@@ -31,168 +29,118 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
-  // Test backend connection on page load
-  async function testBackendConnection() {
-    try {
-      const response = await fetch(`/api/analysis/health`);
-      const data = await response.json();
-      if (response.ok && data.status === 'ok') {
-        if (connectionStatus) {
-          connectionStatus.style.display = "flex";
-          connectionStatus.style.backgroundColor = "";
-          connectionStatus.style.color = "";
-        }
-        if (statusText) statusText.textContent = "AI Engine Online";
-        if (analyzeBtn) analyzeBtn.disabled = false;
-      } else {
-        throw new Error("Health check failed");
-      }
-    } catch (error) {
-      console.warn("Primary health check warning:", error.message);
-      // Fallback check against API root
-      try {
-        const rootCheck = await fetch("/api/me");
-        if (rootCheck.ok || rootCheck.status === 401) {
-          if (connectionStatus) connectionStatus.style.display = "flex";
-          if (statusText) statusText.textContent = "AI Engine Online";
-          if (analyzeBtn) analyzeBtn.disabled = false;
-          return;
-        }
-      } catch (e) {}
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-      if (connectionStatus) {
-        connectionStatus.style.display = "flex";
-        connectionStatus.style.backgroundColor = "#f8d7da";
-        connectionStatus.style.color = "#721c24";
-      }
-      if (statusText) statusText.textContent = "❌ Backend connection failed. Please ensure the server is running.";
-      if (analyzeBtn) analyzeBtn.disabled = false; // Allow user attempt
+    const resume = document.getElementById('resume')?.files?.[0];
+    const jdFile = document.getElementById('jd')?.files?.[0];
+    const jdTextEl = document.getElementById('jd-text');
+    const jdMode = document.querySelector('input[name="jd_mode"]:checked')?.value || 'file';
+    const errors = [];
+
+    if (!resume) errors.push('Upload your resume as a PDF or TXT file.');
+    if (jdMode === 'file' && !jdFile) errors.push('Upload a job-description file or switch to pasted text.');
+    if (jdMode === 'text' && !jdTextEl?.value.trim()) errors.push('Paste the job description before analysing.');
+
+    if (errors.length) {
+      showValidationErrors({ details: errors });
+      return;
     }
-  }
 
-  // Test connection when page loads
-  testBackendConnection();
+    if (!loadingOverlay) {
+      showValidationErrors({ details: 'The analysis screen could not start. Refresh the page and try again.' });
+      return;
+    }
 
-  // Enhanced Analysis Form Handler with Detailed Logging
-  const analyzeForm = document.getElementById('analyze-form');
-  if (analyzeForm) {
-    analyzeForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      // Reset validation box
-      if (validationBox) { validationBox.style.display = 'none'; validationText.innerHTML = ''; }
+    const formData = new FormData();
+    formData.append('resume', resume);
+    if (jdMode === 'file') {
+      formData.append('jd', jdFile);
+    } else {
+      formData.append('jd_text', jdTextEl.value.trim());
+    }
 
-      const resume = document.getElementById('resume')?.files?.[0];
-      const jdFile = document.getElementById('jd')?.files?.[0];
-      const jdTextEl = document.getElementById("jd-text");
-      const jdMode = document.querySelector('input[name="jd_mode"]:checked')?.value || 'file';
+    const animationState = startLoadingAnimation();
+    if (analyzeBtn) analyzeBtn.disabled = true;
 
-      console.log('📝 Analysis Form submitted');
+    try {
+      const response = await fetch('/api/analysis/analyze', {
+        method: 'POST',
+        body: formData,
+        headers: { Accept: 'application/json' }
+      });
+      const result = await response.json().catch(() => ({}));
 
-      // Validation
-      if (!resume) { alert("Please upload your resume PDF."); return; }
-      if (jdMode === 'file' && !jdFile) { alert("Please upload the job description file or switch to text mode."); return; }
-      if (jdMode === 'text' && (!jdTextEl || !jdTextEl.value.trim())) { alert("Please paste the job description text."); return; }
-
-      if (!loadingOverlay) { console.error("Loading overlay not found."); return; }
-      
-      // Start dynamic animation
-      const animationState = startLoadingAnimation();
-
-      const formData = new FormData();
-      if (jdMode === 'text') {
-        const text = jdTextEl.value.trim();
-        formData.append('jd_text', text);
-        formData.append('jd', text); 
-        formData.append('description', text); 
-      }
-      
-      formData.append('resume', resume);
-      if (jdMode === 'file' && jdFile) {
-        formData.append('jd', jdFile);
+      if (!response.ok || result.success === false) {
+        throw new Error(result.details || result.error || `Analysis failed (${response.status}).`);
       }
 
-      try {
-        const analyzeUrl = `/api/analysis/analyze`;
-        console.log('📤 Sending to backend:', analyzeUrl);
-        const response = await fetch(analyzeUrl, { method: 'POST', body: formData, headers: { 'Accept': 'application/json' } });
-        
-        if (response.status === 422) {
-          const errJson = await response.json().catch(() => ({}));
-          showValidationErrors(errJson);
-          loadingOverlay.classList.remove('visible');
-          animationState.stop();
-          return;
-        }
+      const raw = result.data || result;
+      await finishLoadingAnimation(animationState, raw.score || 0);
 
-        if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(`HTTP ${response.status}: ${errorText}`);
-        }
+      const rawMatched = Array.isArray(raw.matchedSkills) ? raw.matchedSkills : [];
+      const rawMissing = Array.isArray(raw.missingSkills) ? raw.missingSkills : [];
+      const rawResume = Array.isArray(raw.resumeSkills) ? raw.resumeSkills : [];
+      const rawJD = Array.isArray(raw.jdSkills) ? raw.jdSkills : [];
+      const jdSet = new Set(rawJD.map((skill) => skill.toLowerCase().trim()));
+      const matchedSet = new Set(rawMatched.map((skill) => skill.toLowerCase().trim()));
+      const computedExtra = rawResume.filter((skill) => skill && !jdSet.has(skill.toLowerCase().trim()) && !matchedSet.has(skill.toLowerCase().trim()));
 
-        const result = await response.json();
-        // Unwrap backend's { success: true, data: {...} } wrapper if present
-        const raw = (result && result.data) ? result.data : result;
+      const transformedData = {
+        score: Math.min(Math.max(parseInt(raw.score, 10) || 0, 0), 100),
+        domain: raw.domain || 'it',
+        jobTitle: raw.jobTitle || '',
+        jdSkills: rawJD,
+        resumeSkills: rawResume,
+        matchedSkills: rawMatched,
+        missingSkills: rawMissing,
+        extraSkills: Array.isArray(raw.extraSkills) && raw.extraSkills.length ? raw.extraSkills : computedExtra,
+        skillToLearnFirst: raw.skillToLearnFirst || rawMissing[0] || '',
+        projectSuggestions: generateProjectSuggestions(raw),
+        learningTrack: Array.isArray(raw.learningTrack) ? raw.learningTrack : [],
+        recruiterInsights: raw.recruiterInsights || null,
+        interviewChance: raw.interviewChance || null,
+        scoreBreakdown: raw.scoreBreakdown || null,
+        atsScore: raw.atsScore || null,
+        atsKeywords: raw.atsKeywords || null,
+        atsFormatting: raw.atsFormatting || null,
+        atsReadability: raw.atsReadability || null,
+        atsStructure: raw.atsStructure || null,
+        atsActionVerbs: raw.atsActionVerbs || null,
+        experience: raw.experience || [],
+        education: raw.education || [],
+        summary: raw.summary || null,
+        resumeText: raw.resumeText || '',
+        jdText: raw.jdText || '',
+      };
 
-        // Finish animation before redirect
-        await finishLoadingAnimation(animationState, raw.score || result.score || 0);
+      const storageData = {
+        success: true,
+        data: transformedData,
+        rawData: raw,
+        learningPlan: raw.learningPlan || [],
+        timestamp: new Date().toISOString()
+      };
+      localStorage.setItem('analysisResult', JSON.stringify(storageData));
+      localStorage.setItem('hieroLearningPlan', JSON.stringify(raw.learningPlan || []));
+      localStorage.setItem('hieroInterviewContext', JSON.stringify({
+        jobTitle: transformedData.jobTitle || '',
+        company: '',
+        jdText: transformedData.jdText || '',
+        resumeText: transformedData.resumeText || '',
+        score: transformedData.score,
+        timestamp: storageData.timestamp
+      }));
 
-        const rawMatched = Array.isArray(raw.matchedSkills)  ? raw.matchedSkills
-                         : Array.isArray(raw.matched)        ? raw.matched
-                         : Array.isArray(raw.presentSkills)  ? raw.presentSkills
-                         : [];
-
-        const rawMissing = Array.isArray(raw.missingSkills) ? raw.missingSkills
-                         : Array.isArray(raw.missing)        ? raw.missing
-                         : [];
-
-        const rawResume  = Array.isArray(raw.resumeSkills) ? raw.resumeSkills : [];
-        const rawJD      = Array.isArray(raw.jdSkills)     ? raw.jdSkills     : [];
-
-        // Extra skills = skills in resume NOT found in JD (bonus skills)
-        const matchedSet = new Set(rawMatched.map(s => s.toLowerCase().trim()));
-        const jdSet      = new Set(rawJD.map(s => s.toLowerCase().trim()));
-        const computedExtra = rawResume.filter(s =>
-          s && !jdSet.has(s.toLowerCase().trim()) && !matchedSet.has(s.toLowerCase().trim())
-        );
-        const rawExtra = Array.isArray(raw.extraSkills) && raw.extraSkills.length > 0
-          ? raw.extraSkills : computedExtra;
-
-        const transformedData = {
-          score:              Math.min(Math.max(parseInt(raw.score) || 0, 0), 100),
-          domain:             raw.domain || 'it',
-          jdSkills:           rawJD,
-          resumeSkills:       rawResume,
-          matchedSkills:      rawMatched,
-          missingSkills:      rawMissing,
-          extraSkills:        rawExtra,
-          skillToLearnFirst:  raw.skillToLearnFirst || rawMissing[0] || 'JavaScript',
-          projectSuggestions: generateProjectSuggestions(raw),
-          atsScore:           raw.atsScore        || null,
-          atsKeywords:        raw.atsKeywords     || null,
-          atsFormatting:      raw.atsFormatting   || null,
-          atsReadability:     raw.atsReadability  || null,
-          atsStructure:       raw.atsStructure    || null,
-          atsActionVerbs:     raw.atsActionVerbs  || null,
-          experience:         raw.experience      || [],
-          education:          raw.education       || [],
-          summary:            raw.summary         || null,
-        };
-
-        const storageData = { success: true, data: transformedData, rawData: raw, learningPlan: raw.learningPlan || [], timestamp: new Date().toISOString() };
-        localStorage.setItem('analysisResult', JSON.stringify(storageData));
-        localStorage.setItem('hieroLearningPlan', JSON.stringify(raw.learningPlan || []));
-
-        setTimeout(() => { window.location.href = 'result.html'; }, 800);
-      } catch (error) {
-        console.error('❌ Error during analysis:', error.message);
-        animationState.stop();
-        if (loadingOverlay) loadingOverlay.classList.remove('visible');
-        alert('Analysis failed: ' + error.message);
-      }
-    });
-  } else {
-    console.warn('⚠️ analyze-form not found on this page');
-  }
+      setTimeout(() => { window.location.href = 'result.html'; }, 800);
+    } catch (error) {
+      console.error('Analysis error:', error);
+      animationState.stop();
+      loadingOverlay.classList.remove('visible');
+      showValidationErrors({ details: error.message || 'Analysis failed. Please try again.' });
+      if (analyzeBtn) analyzeBtn.disabled = false;
+    }
+  });
 
   function startLoadingAnimation() {
     const overlay = document.getElementById('loading-overlay');
@@ -270,7 +218,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function showValidationErrors(errJson) {
     if (!validationBox || !validationText) return;
     const details = errJson.details || errJson.error || 'Validation failed.';
-    validationText.innerHTML = typeof details === 'string' ? details : JSON.stringify(details);
+    validationText.textContent = Array.isArray(details) ? details.join(' ') : String(details);
     validationBox.style.display = 'block';
   }
 

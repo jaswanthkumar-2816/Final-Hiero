@@ -2059,6 +2059,62 @@
         </div>
       </div>
 
+      <!-- Candidate Resume Selection & Application Confirmation Modal -->
+      <div class="modal-overlay" id="apply-resume-modal">
+        <div class="custom-modal-content" style="width: 540px; padding: 26px;">
+          <div class="modal-header" style="margin-bottom: 12px; padding-bottom: 12px;">
+            <h3><i class="fa-solid fa-file-invoice" style="color: var(--primary-accent); margin-right: 8px;"></i> Confirm Application Resume</h3>
+            <button class="drawer-close-btn" onclick="closeApplyResumeModal()" style="width: 30px; height: 30px;">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+
+          <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px; line-height: 1.4;">
+            Applying to <strong id="apply-modal-comp-name" style="color: var(--text-main);">Company</strong> for <span id="apply-modal-job-title" style="color: var(--primary-accent); font-weight: 700;">Role</span>.
+          </div>
+
+          <div class="modal-body" style="padding: 0; display: flex; flex-direction: column; gap: 12px;">
+            <!-- Option 1: Existing Active Resume -->
+            <div class="resume-option-card active" id="opt-card-saved" onclick="selectResumeOption('saved')" style="border: 1.5px solid var(--primary-accent); background: rgba(7, 226, 25, 0.08); border-radius: 16px; padding: 14px 16px; display: flex; gap: 12px; align-items: flex-start; cursor: pointer;">
+              <input type="radio" name="resumeChoiceOption" id="radio-resume-saved" value="saved" checked style="accent-color: var(--primary-accent); margin-top: 3px;">
+              <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(7, 226, 25, 0.15); border: 1px solid rgba(7, 226, 25, 0.3); color: var(--primary-accent); display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0;">
+                <i class="fa-solid fa-file-pdf"></i>
+              </div>
+              <div style="flex: 1; min-width: 0;">
+                <div style="font-size: 13px; font-weight: 700; color: var(--text-main);">Continue with Active Saved Resume</div>
+                <div style="font-size: 12px; font-weight: 600; color: var(--primary-accent); margin-top: 2px;" id="modal-saved-resume-name">Jaswanth_Kumar_Resume_AI_Engineer.pdf</div>
+                <div style="font-size: 11px; color: var(--text-muted); margin-top: 3px;">
+                  <span style="color: var(--primary-accent); font-weight: 700;">✓ Skill-Parsed</span> · Active HIERO Profile Resume
+                </div>
+              </div>
+            </div>
+
+            <!-- Option 2: Upload New Resume -->
+            <div class="resume-option-card" id="opt-card-new" onclick="selectResumeOption('new')" style="border: 1.5px solid var(--border-color); background: var(--surface-1); border-radius: 16px; padding: 14px 16px; display: flex; gap: 12px; align-items: flex-start; cursor: pointer;">
+              <input type="radio" name="resumeChoiceOption" id="radio-resume-new" value="new" style="accent-color: var(--primary-accent); margin-top: 3px;">
+              <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(168, 85, 247, 0.12); border: 1px solid rgba(168, 85, 247, 0.3); color: #a855f7; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0;">
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+              </div>
+              <div style="flex: 1; min-width: 0;">
+                <div style="font-size: 13px; font-weight: 700; color: var(--text-main);">Upload & Apply with a New Resume</div>
+                <div style="margin-top: 6px; border: 1.5px dashed rgba(168, 85, 247, 0.4); background: var(--surface-2); border-radius: 10px; padding: 10px; text-align: center; cursor: pointer;" id="new-resume-dropzone-box" onclick="document.getElementById('modal-new-resume-file-input').click()">
+                  <i class="fa-solid fa-arrow-up-from-bracket" style="color: #a855f7; font-size: 14px; margin-bottom: 2px;"></i>
+                  <div id="new-resume-file-label" style="font-size: 11px; font-weight: 700; color: var(--text-main);">Click to Select PDF / DOCX File</div>
+                </div>
+                <input type="file" id="modal-new-resume-file-input" accept=".pdf,.doc,.docx" style="display: none;" onchange="handleModalNewResumeChange(event)">
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-footer" style="margin-top: 18px; padding-top: 14px; display: flex; justify-content: flex-end; gap: 10px;">
+            <button class="card-secondary-btn" onclick="closeApplyResumeModal()">Cancel</button>
+            <button class="primary-action-btn" id="confirm-submit-apply-btn" onclick="confirmApplicationSubmission()">
+              <i class="fa-solid fa-paper-plane" style="margin-right: 6px;"></i> Confirm & Submit Application
+            </button>
+          </div>
+        </div>
+      </div>
+
       <!-- JavaScript Intelligence & Engine -->
       <script>
         // ==========================================
@@ -2849,23 +2905,137 @@
         // Helper to render company logo avatar with image and fallback
         function getCompanyLogoHtml(company, size = '48px') {
           const logo = company.logoUrl || '';
+          if (logo) {
+            return `
+          <div class="company-logo-avatar" style="width: ${size}; height: ${size}; min-width: ${size}; border-radius: 14px; overflow: hidden; display: flex; align-items: center; justify-content: center; background: rgba(7, 226, 25, 0.08); border: 1px solid rgba(7, 226, 25, 0.25);">
+            <img src="${logo}" alt="${company.name}" class="company-brand-logo-img" style="width: 100%; height: 100%; object-fit: cover; display: block;" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';">
+            <span class="avatar-fallback-text" style="display: none; font-weight: 800; color: #07e219;">${company.avatarText || company.name.slice(0, 2).toUpperCase()}</span>
+          </div>
+        `;
+          }
           return `
-        <div class="company-logo-avatar" style="width: ${size}; height: ${size};">
-          ${logo ? `<img src="${logo}" alt="${company.name}" class="company-brand-logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` : ''}
-          <span class="avatar-fallback-text" style="${logo ? 'display: none;' : ''}">${company.avatarText || company.name.slice(0, 2).toUpperCase()}</span>
-        </div>
-      `;
+          <div class="company-logo-avatar" style="width: ${size}; height: ${size}; min-width: ${size}; border-radius: 14px; overflow: hidden; display: flex; align-items: center; justify-content: center; background: rgba(7, 226, 25, 0.08); border: 1px solid rgba(7, 226, 25, 0.25);">
+            <span class="avatar-fallback-text" style="font-weight: 800; color: #07e219;">${company.avatarText || company.name.slice(0, 2).toUpperCase()}</span>
+          </div>
+        `;
+        }
+
+        let liveBackendOpps = [];
+        let liveBackendComps = [];
+
+        async function fetchLiveBackendOpportunities() {
+          try {
+            let res;
+            try {
+              res = await fetch('http://localhost:5050/api/opportunities');
+            } catch(e) {
+              res = await fetch('/api/opportunities');
+            }
+            if (res && res.ok) {
+              const data = await res.json();
+              if (data.success) {
+                liveBackendOpps = data.opportunities || [];
+                liveBackendComps = data.companies || [];
+                renderCompaniesGrid();
+                renderRoleMatrix();
+              }
+            }
+          } catch(e) {
+            console.warn('Backend API opportunity sync fallback to localStorage:', e);
+          }
+        }
+
+        // Helper to load custom HR opportunities created in Connect-Portal
+        function loadCustomHRCompanies() {
+          try {
+            const localOpps = JSON.parse(localStorage.getItem('hc_custom_opportunities') || '[]');
+            const localCompanies = JSON.parse(localStorage.getItem('hc_custom_companies') || '[]');
+
+            let userLogo = '';
+            try {
+              const uStr = localStorage.getItem('hc_user');
+              if (uStr) {
+                const uObj = JSON.parse(uStr);
+                userLogo = uObj.logoUrl || uObj.companyLogo || '';
+              }
+            } catch(e) {}
+
+            // Merge live backend opportunities + local storage opportunities
+            const oppMap = new Map();
+            [...liveBackendOpps, ...localOpps].forEach(o => {
+              if (o && o.id && !oppMap.has(o.id)) {
+                oppMap.set(o.id, o);
+              }
+            });
+            const customOpps = Array.from(oppMap.values());
+            const customCompanies = [...liveBackendComps, ...localCompanies];
+
+            if (customOpps.length === 0) return [];
+
+            const companyMap = new Map();
+
+            customOpps.forEach(opp => {
+              const compMeta = customCompanies.find(c => c.id === opp.companyId || (c.name && opp.companyName && c.name.toLowerCase() === opp.companyName.toLowerCase())) || {};
+              const companyName = opp.companyName || compMeta.name || 'Verified HR Partner';
+              const compId = 'custom-' + companyName.toLowerCase().replace(/[^a-z0-9]/g, '-');
+              const logoUrl = compMeta.logoUrl || opp.logoUrl || userLogo || '';
+
+              if (!companyMap.has(compId)) {
+                companyMap.set(compId, {
+                  id: compId,
+                  name: companyName,
+                  logoUrl: logoUrl,
+                  avatarText: companyName.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase(),
+                  tier: 'faang',
+                  tierLabel: '★ HR Verified Partner',
+                  location: opp.location || compMeta.location || 'India (Hybrid/Remote)',
+                  hiringBar: '9.2 / 10',
+                  summary: compMeta.description || opp.description || 'Verified partner company connecting directly with HIERO AI talent network for campus hiring.',
+                  interviewFormat: '1 Tech Screen + 1 Coding Round + 1 Culture Fit',
+                  culture: 'Fast Paced, AI First, Direct Hiring',
+                  l5Comp: opp.salary || 'Competitive',
+                  remoteFlex: opp.workMode || 'Hybrid / Remote',
+                  roles: []
+                });
+              }
+
+              const comp = companyMap.get(compId);
+              comp.roles.push({
+                id: opp.id,
+                title: opp.title,
+                domain: opp.domain || 'all',
+                level: opp.employmentType || (opp.type === 'internship' ? 'Internship' : 'Full-time'),
+                comp: opp.salary || 'Competitive',
+                matchScore: 92,
+                location: opp.location || 'India',
+                techStack: opp.requiredSkills?.map(s => s.name || s) || ['Python', 'React', 'TypeScript', 'SQL'],
+                description: opp.description || 'Verified opportunity published via Connect-Portal.',
+                rounds: [
+                  { name: 'Round 1: HIERO Skill Evaluation', duration: '45 min', desc: 'Automated skill fit & coding test' },
+                  { name: 'Round 2: Technical & Behavioral Discussion', duration: '60 min', desc: 'Direct interview with recruiting manager' }
+                ]
+              });
+            });
+
+            return Array.from(companyMap.values());
+          } catch (e) {
+            console.error('Error loading custom HR companies:', e);
+            return [];
+          }
         }
 
         // ==========================================
         // 2. RENDER FUNCTIONS
         // ==========================================
         function getFilteredCompanies() {
-          return COMPANIES_DATA.map(company => {
+          const customHRList = loadCustomHRCompanies();
+          const allCompanies = [...customHRList, ...COMPANIES_DATA];
+
+          return allCompanies.map(company => {
             // Filter roles inside company
             const filteredRoles = company.roles.filter(role => {
-              // Domain filter
-              if (currentDomain !== 'all' && role.domain !== currentDomain) return false;
+              // Domain filter (allow 'all' or matching domain)
+              if (currentDomain !== 'all' && role.domain !== 'all' && role.domain !== currentDomain) return false;
               // Search filter
               if (currentSearch) {
                 const query = currentSearch.toLowerCase();
@@ -3298,17 +3468,163 @@
           document.getElementById('new-role-tags').value = '';
         }
 
-        async function applyToCompany(companyName, btn) {
-          if (btn) {
-            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Submitting...`;
-            btn.disabled = true;
+        let pendingApplyState = null;
+        let selectedResumeChoice = 'saved';
+        let newlyUploadedResumeFile = null;
+
+        function applyToCompany(companyName, btn, oppId) {
+          const customOpps = JSON.parse(localStorage.getItem('hc_custom_opportunities') || '[]');
+          const targetOpp = customOpps.find(o => o.companyName === companyName || o.id === oppId) || customOpps[0];
+
+          pendingApplyState = {
+            companyName: companyName,
+            btn: btn,
+            oppId: oppId,
+            targetOpp: targetOpp
+          };
+
+          const compElem = document.getElementById('apply-modal-comp-name');
+          const roleElem = document.getElementById('apply-modal-job-title');
+          if (compElem) compElem.innerText = companyName;
+          if (roleElem) roleElem.innerText = targetOpp ? targetOpp.title : 'Software Engineer';
+
+          const userStr = localStorage.getItem('user');
+          let resumeName = 'Jaswanth_Kumar_Resume_AI_Engineer.pdf';
+          if (userStr) {
+            try {
+              const u = JSON.parse(userStr);
+              if (u.name) resumeName = u.name.replace(/\s+/g, '_') + '_Resume_2026.pdf';
+            } catch(e) {}
           }
+          const savedNameElem = document.getElementById('modal-saved-resume-name');
+          if (savedNameElem) savedNameElem.innerText = resumeName;
+
+          selectResumeOption('saved');
+
+          const modal = document.getElementById('apply-resume-modal');
+          if (modal) modal.classList.add('active');
+        }
+
+        function selectResumeOption(choice) {
+          selectedResumeChoice = choice;
+          const radioSaved = document.getElementById('radio-resume-saved');
+          const radioNew = document.getElementById('radio-resume-new');
+          const cardSaved = document.getElementById('opt-card-saved');
+          const cardNew = document.getElementById('opt-card-new');
+
+          if (choice === 'saved') {
+            if (radioSaved) radioSaved.checked = true;
+            if (cardSaved) {
+              cardSaved.style.borderColor = 'var(--primary-accent)';
+              cardSaved.style.background = 'rgba(7, 226, 25, 0.08)';
+            }
+            if (cardNew) {
+              cardNew.style.borderColor = 'var(--border-color)';
+              cardNew.style.background = 'var(--surface-1)';
+            }
+          } else {
+            const radioNewElem = document.getElementById('radio-resume-new');
+            if (radioNewElem) radioNewElem.checked = true;
+            if (cardNew) {
+              cardNew.style.borderColor = '#a855f7';
+              cardNew.style.background = 'rgba(168, 85, 247, 0.08)';
+            }
+            if (cardSaved) {
+              cardSaved.style.borderColor = 'var(--border-color)';
+              cardSaved.style.background = 'var(--surface-1)';
+            }
+          }
+        }
+
+        function handleModalNewResumeChange(event) {
+          const file = event.target.files[0];
+          if (file) {
+            newlyUploadedResumeFile = file;
+            const label = document.getElementById('new-resume-file-label');
+            if (label) {
+              label.innerText = `📄 ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+              label.style.color = '#a855f7';
+            }
+            selectResumeOption('new');
+          }
+        }
+
+        function closeApplyResumeModal() {
+          const modal = document.getElementById('apply-resume-modal');
+          if (modal) modal.classList.remove('active');
+        }
+
+        async function confirmApplicationSubmission() {
+          if (!pendingApplyState) return;
+          const { companyName, btn, oppId, targetOpp } = pendingApplyState;
+
+          const submitBtn = document.getElementById('confirm-submit-apply-btn');
+          if (submitBtn) {
+            submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Submitting...`;
+            submitBtn.disabled = true;
+          }
+
+          const finalResumeName = (selectedResumeChoice === 'new' && newlyUploadedResumeFile)
+            ? newlyUploadedResumeFile.name
+            : (document.getElementById('modal-saved-resume-name')?.innerText || 'Jaswanth_Kumar_Resume_2026.pdf');
 
           try {
             const userStr = localStorage.getItem('user');
             const user = userStr ? JSON.parse(userStr) : {};
-            const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
 
+            const customApps = JSON.parse(localStorage.getItem('hc_custom_applications') || '[]');
+            const customOpps = JSON.parse(localStorage.getItem('hc_custom_opportunities') || '[]');
+            const opportunityId = oppId || (targetOpp ? targetOpp.id : 'j-1');
+
+            customApps.unshift({
+              id: 'app-' + Date.now(),
+              opportunityId: opportunityId,
+              companyId: targetOpp ? targetOpp.companyId : 'comp-1',
+              studentId: 'cand-1',
+              status: 'applied',
+              matchScore: 92,
+              appliedAt: new Date().toISOString(),
+              resumeUrl: `/resumes/${finalResumeName}`,
+              skillsMatch: {
+                matched: ['React', 'TypeScript', 'Python', 'SQL'],
+                missing: ['Kubernetes']
+              }
+            });
+            localStorage.setItem('hc_custom_applications', JSON.stringify(customApps));
+
+            if (targetOpp) {
+              targetOpp.applicantsCount = (targetOpp.applicantsCount || 0) + 1;
+              localStorage.setItem('hc_custom_opportunities', JSON.stringify(customOpps));
+            }
+
+            const appPayload = {
+              opportunityId: opportunityId,
+              companyName: companyName,
+              studentName: user.name || 'Jaswanth Kumar',
+              email: user.email || 'jaswanth@hiero.ai',
+              matchScore: 92,
+              resumeUrl: `/resumes/${finalResumeName}`
+            };
+
+            // Sync with Python Backend (port 5050)
+            try {
+              fetch('http://localhost:5050/api/opportunities/apply', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(appPayload)
+              });
+            } catch (err) {}
+
+            // Sync with Gateway (port 2816)
+            try {
+              fetch('/api/opportunities/apply', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(appPayload)
+              });
+            } catch (err) {}
+
+            const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
             await fetch('/api/resume/apply-company', {
               method: 'POST',
               headers: {
@@ -3317,25 +3633,29 @@
               },
               body: JSON.stringify({
                 companyName: companyName,
-                jobRole: 'Software Engineer',
-                matchScore: '85%',
+                jobRole: targetOpp ? targetOpp.title : 'Software Development Engineer',
+                matchScore: '92%',
                 userId: user.id || user.userId || user.email || 'user_123',
                 email: user.email || 'jaswanth@hiero.ai',
-                fullName: user.name || 'Jaswanth Kumar'
+                fullName: user.name || 'Jaswanth Kumar',
+                resumeName: finalResumeName
               })
             });
           } catch (err) {
-            console.warn('Backend application log error:', err);
+            console.warn('Application submit error:', err);
           }
+
+          closeApplyResumeModal();
 
           if (btn) {
             btn.innerHTML = `<i class="fa-solid fa-check"></i> Applied`;
             btn.classList.add('applied');
           }
 
+          const roleTitle = targetOpp ? targetOpp.title : 'Software Development Engineer';
           setTimeout(() => {
-            window.location.href = `job_success.html?company=${encodeURIComponent(companyName)}&role=${encodeURIComponent('Senior Software Engineer / AI Systems')}&score=88%25`;
-          }, 450);
+            window.location.href = `job_success.html?company=${encodeURIComponent(companyName)}&role=${encodeURIComponent(roleTitle)}&score=92%25`;
+          }, 350);
         }
 
         // ==========================================
@@ -3461,6 +3781,7 @@
           renderRoleMatrix();
           renderComparisonTable();
           initAmbientCanvas();
+          fetchLiveBackendOpportunities();
         });
 
         function initAmbientCanvas() {

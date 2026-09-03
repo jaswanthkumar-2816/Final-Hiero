@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Builder Debug</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            padding: 20px; 
+            background: #1a1a1a; 
+            color: #fff; 
+        }
+        .container { 
+            max-width: 800px; 
+            margin: 0 auto; 
+            background: #2a2a2a; 
+            padding: 20px; 
+            border-radius: 10px; 
+        }
+        .test-section { 
+            margin: 20px 0; 
+            padding: 15px; 
+            border: 1px solid #45c604; 
+            border-radius: 5px; 
+        }
+        .success { background: rgba(69, 198, 4, 0.1); }
+        .error { background: rgba(255, 0, 0, 0.1); }
+        button { 
+            padding: 10px 20px; 
+            margin: 5px; 
+            background: #45c604; 
+            color: #000; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+        }
+        pre { 
+            background: #000; 
+            padding: 10px; 
+            border-radius: 5px; 
+            overflow: auto; 
+            max-height: 300px;
+        }
+        .form-section { display: none; }
+        .form-section.active { display: block; }
+        .input-field {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            background: #333;
+            border: 1px solid #45c604;
+            border-radius: 5px;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Resume Builder Debug Tool</h1>
+        
+        <div class="test-section">
+            <h3>1. Server Connectivity Test</h3>
+            <button onclick="testBackend()">Test Backend Connection</button>
+            <div id="backend-result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>2. Authentication Test</h3>
+            <button onclick="testAuth()">Test Authentication</button>
+            <button onclick="clearAuth()">Clear Auth Token</button>
+            <div id="auth-result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>3. Template Loading Test</h3>
+            <button onclick="testTemplates()">Load Templates</button>
+            <div id="template-result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>4. Form Submission Test</h3>
+            <button onclick="testBasicForm()">Test Basic Form</button>
+            <div id="form-result"></div>
+            
+            <!-- Basic form for testing -->
+            <div id="basicForm" class="form-section">
+                <h4>Basic Information Test</h4>
+                <input id="basicName" type="text" placeholder="Full Name" class="input-field">
+                <input id="basicEmail" type="email" placeholder="Email" class="input-field">
+                <input id="basicPhone" type="text" placeholder="Phone" class="input-field">
+                <button onclick="submitBasicTest()">Submit Basic Info</button>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>5. Resume Builder Link</h3>
+            <a href="resume-builder.html" style="color: #45c604;">Open Resume Builder</a>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5003';
+        
+        // Test backend connectivity
+        async function testBackend() {
+            const resultDiv = document.getElementById('backend-result');
+            try {
+                const response = await fetch(`${API_BASE}/api/resume/templates`);
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `
+                    <div class="success">
+                        <strong>✅ Backend Connected!</strong><br>
+                        Status: ${response.status}<br>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <strong>❌ Backend Error!</strong><br>
+                        ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // Test authentication
+        async function testAuth() {
+            const resultDiv = document.getElementById('auth-result');
+            const token = localStorage.getItem('jwtToken') || 'test-token-123';
+            
+            if (!localStorage.getItem('jwtToken')) {
+                localStorage.setItem('jwtToken', token);
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/resume/basic`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        full_name: 'Test User',
+                        contact_info: {
+                            email: 'test@example.com',
+                            phone: '123-456-7890'
+                        }
+                    })
+                });
+                
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `
+                    <div class="${response.ok ? 'success' : 'error'}">
+                        <strong>${response.ok ? '✅' : '❌'} Auth Test</strong><br>
+                        Status: ${response.status}<br>
+                        Token: ${token.substring(0, 20)}...<br>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <strong>❌ Auth Error!</strong><br>
+                        ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        function clearAuth() {
+            localStorage.removeItem('jwtToken');
+            document.getElementById('auth-result').innerHTML = '<p>Auth token cleared</p>';
+        }
+
+        // Test template loading
+        async function testTemplates() {
+            const resultDiv = document.getElementById('template-result');
+            try {
+                const response = await fetch(`${API_BASE}/api/resume/templates`);
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `
+                    <div class="success">
+                        <strong>✅ Templates Loaded!</strong><br>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <strong>❌ Template Error!</strong><br>
+                        ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // Test basic form
+        function testBasicForm() {
+            const form = document.getElementById('basicForm');
+            form.classList.add('active');
+            document.getElementById('form-result').innerHTML = '<p>Basic form loaded for testing</p>';
+        }
+
+        // Submit basic form test
+        async function submitBasicTest() {
+            const resultDiv = document.getElementById('form-result');
+            const token = localStorage.getItem('jwtToken') || 'test-token-123';
+            
+            const formData = {
+                full_name: document.getElementById('basicName').value || 'Test User',
+                contact_info: {
+                    email: document.getElementById('basicEmail').value || 'test@example.com',
+                    phone: document.getElementById('basicPhone').value || '123-456-7890'
+                }
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/resume/basic`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `
+                    <div class="${response.ok ? 'success' : 'error'}">
+                        <strong>${response.ok ? '✅' : '❌'} Form Submission</strong><br>
+                        Status: ${response.status}<br>
+                        <pre>Sent: ${JSON.stringify(formData, null, 2)}</pre>
+                        <pre>Response: ${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <strong>❌ Form Error!</strong><br>
+                        ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // Auto-run backend test on load
+        window.onload = function() {
+            testBackend();
+        };
+    </script>
+</body>
+</html>

@@ -327,11 +327,43 @@
     }
 
     .res-box {
-      background: rgba(0, 0, 0, 0.4);
+      background: rgba(0,0,0,0.3);
       padding: 12px;
       border-radius: 10px;
       font-size: 12px;
+      color: var(--text-muted);
     }
+
+    .clip-card {
+      margin-top: 14px;
+      border: 1px solid rgba(4, 171, 7, 0.35);
+      border-radius: 14px;
+      overflow: hidden;
+      background: rgba(4, 171, 7, 0.06);
+    }
+    .clip-meta {
+      padding: 12px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .clip-meta strong { color: var(--primary); font-size: 14px; }
+    .clip-meta span { font-size: 12px; color: var(--text-muted); }
+    .clip-player { width: 100%; aspect-ratio: 16/9; border: 0; background: #000; }
+    .skill-chips { display: flex; gap: 8px; justify-content: center; margin: -24px auto 28px; flex-wrap: wrap; }
+    .skill-chips button {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .skill-chips button:hover { border-color: var(--primary); color: var(--primary); }
 
     .res-box i { color: var(--primary); margin-right: 6px; }
   </style>
@@ -341,13 +373,18 @@
   <div class="container">
     <div class="header-box">
       <h1>Skill Graph & Adaptive Mastery Studio</h1>
-      <p>Demonstrating the full 6-Stage Pipeline: Skill Generator → Graph → Diagnostic → Student Knowledge → Weak Concepts → Recommendations</p>
+      <p>Detect (wrong subtopic) → Learn (exact 3-minute clip from timed captions) → Verify on re-test. Not whole-video guessing.</p>
     </div>
 
     <!-- Skill Search Input -->
     <div class="skill-input-bar">
-      <input type="text" id="skill-input" value="Python" placeholder="Enter any skill (e.g. Python, Deep Learning, React, Kubernetes)...">
+      <input type="text" id="skill-input" value="SQL" placeholder="Enter any skill (e.g. SQL, Python, Deep Learning, React)...">
       <button onclick="loadSkillGraph()"><i class="fa-solid fa-wand-magic-sparkles"></i> Generate Graph</button>
+    </div>
+    <div class="skill-chips">
+      <button onclick="document.getElementById('skill-input').value='SQL'; loadSkillGraph();">SQL (Joins demo)</button>
+      <button onclick="document.getElementById('skill-input').value='Python'; loadSkillGraph();">Python</button>
+      <button onclick="document.getElementById('skill-input').value='Deep Learning'; loadSkillGraph();">Deep Learning</button>
     </div>
 
     <div class="studio-grid">
@@ -522,25 +559,74 @@
             </div>
           `;
 
-          html += '<h4 style="font-size: 15px; margin-bottom: 14px;">🎯 Targeted 3-Resource Packs for Weak Concepts:</h4>';
+          html += '<h4 style="font-size: 15px; margin-bottom: 14px;">Targeted 3-resource pack + exact Learn clip</h4>';
 
           json.recommendations.forEach(rec => {
             html += `
-              <div class="rec-card">
+              <div class="rec-card" id="rec-${rec.nodeId}">
                 <div class="rec-header"><i class="fa-solid fa-circle-exclamation"></i> ${rec.reason}</div>
                 <div class="res-pack">
                   <div class="res-box"><i class="fa-brands fa-youtube"></i> 1. Video: ${rec.resources?.videos?.[0]?.title || 'Targeted Deep Dive'}</div>
                   <div class="res-box"><i class="fa-solid fa-book-open"></i> 2. Guide: ${rec.resources?.courses?.[0]?.title || 'Documentation Reference'}</div>
                   <div class="res-box"><i class="fa-solid fa-code"></i> 3. Exercise: ${rec.resources?.exercises?.[0]?.title || 'Interactive Code Challenge'}</div>
                 </div>
+                <div class="clip-card" id="clip-${rec.nodeId}">
+                  <div class="clip-meta"><span><i class="fa-solid fa-spinner fa-spin"></i> Matching timed transcript to the missed subtopic…</span></div>
+                </div>
               </div>
             `;
           });
 
           outDiv.innerHTML = html;
+          loadExactClips(skillName, json.wrongSubtopics || []);
         }
       } catch (err) {
         outDiv.innerHTML = `<p style="color:#fb7185;">Evaluation failed: ${err.message}</p>`;
+      }
+    }
+
+    async function loadExactClips(skillName, wrongSubtopics) {
+      const seen = new Set();
+      for (const w of wrongSubtopics) {
+        const key = `${w.nodeId}:${w.subtopic}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        const slot = document.getElementById(`clip-${w.nodeId}`);
+        if (!slot) continue;
+        try {
+          const res = await fetch('/api/adaptive/match-segment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              skillName,
+              nodeId: w.nodeId,
+              subtopic: w.subtopic,
+              questionText: w.question,
+              description: w.path
+            })
+          });
+          const m = await res.json();
+          if (!m.success) {
+            slot.innerHTML = `<div class="clip-meta"><span>Could not match a clip: ${m.message || m.error || 'unknown'}</span></div>`;
+            continue;
+          }
+          slot.innerHTML = `
+            <div class="clip-meta">
+              <div>
+                <strong><i class="fa-solid fa-scissors"></i> Exact fix: ${m.startLabel} – ${m.endLabel}</strong>
+                <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">${m.path || w.path || w.subtopic} · ${m.title || ''}</div>
+              </div>
+              <span>score ${m.score} · ${m.method} · ${m.chunksScored || 0} caption windows</span>
+            </div>
+            <iframe class="clip-player" src="${m.embedUrl}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            <div class="clip-meta">
+              <span>${(m.snippet || '').slice(0, 180)}</span>
+              <a href="${m.watchUrl}" target="_blank" rel="noopener" style="color:var(--primary);font-weight:800;font-size:12px;">Open on YouTube at ${m.startLabel} →</a>
+            </div>
+          `;
+        } catch (err) {
+          slot.innerHTML = `<div class="clip-meta"><span>Clip match failed: ${err.message}</span></div>`;
+        }
       }
     }
 

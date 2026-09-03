@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hiero — Device Preview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    :root {
+      --bg: #080b0f;
+      --surface: #0d1117;
+      --card: rgba(15,20,28,0.85);
+      --border: rgba(255,255,255,0.07);
+      --green: #04ab07;
+      --green-glow: rgba(4,171,7,0.2);
+      --green-mid: #00e676;
+      --accent: rgba(4,171,7,0.12);
+      --text: #f0f4f8;
+      --muted: #64748b;
+      --muted2: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      top: -200px; left: -200px;
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(4,171,7,0.07) 0%, transparent 70%);
+      pointer-events: none; z-index: 0;
+    }
+    /* Header */
+    .header {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(8,11,15,0.92);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 32px;
+      display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+    }
+    .logo { display:flex;align-items:center;gap:10px;font-size:18px;font-weight:800;white-space:nowrap; }
+    .logo .g { background:linear-gradient(135deg,var(--green),var(--green-mid));-webkit-background-clip:text;-webkit-text-fill-color:transparent; }
+    .url-bar-wrap {
+      flex:1;min-width:200px;max-width:560px;
+      display:flex;align-items:center;gap:8px;
+      background:rgba(255,255,255,0.04);border:1px solid var(--border);
+      border-radius:12px;padding:8px 14px;
+      transition:border-color 0.2s;
+    }
+    .url-bar-wrap:focus-within { border-color:rgba(4,171,7,0.4);box-shadow:0 0 0 3px rgba(4,171,7,0.08); }
+    .url-bar-wrap i { color:var(--muted);font-size:13px; }
+    .url-bar { flex:1;background:none;border:none;outline:none;font-size:13px;font-family:'Inter',monospace;color:var(--text); }
+    .url-bar::placeholder { color:var(--muted); }
+    .go-btn {
+      background:linear-gradient(135deg,var(--green),var(--green-mid));
+      color:#000;border:none;padding:8px 18px;border-radius:10px;
+      font-size:13px;font-weight:700;cursor:pointer;
+      transition:opacity 0.2s,transform 0.15s;white-space:nowrap;
+    }
+    .go-btn:hover { opacity:0.9;transform:scale(1.02); }
+    .header-right { display:flex;align-items:center;gap:8px; }
+    .hbtn {
+      background:rgba(4,171,7,0.1);border:1px solid rgba(4,171,7,0.2);
+      color:var(--text);padding:7px 14px;border-radius:8px;
+      font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s;
+    }
+    .hbtn:hover { background:rgba(4,171,7,0.2);color:var(--green); }
+
+    /* Canvas */
+    .canvas { position:relative;z-index:1;padding:32px; }
+    .page-title { text-align:center;margin-bottom:30px; }
+    .page-title h1 {
+      font-size:clamp(20px,3vw,32px);font-weight:800;letter-spacing:-1px;
+      background:linear-gradient(135deg,#fff 40%,var(--green-mid));
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px;
+    }
+    .page-title p { color:var(--muted2);font-size:14px; }
+
+    /* Info bar */
+    .info-bar { display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;margin-bottom:24px; }
+    .info-chip {
+      display:flex;align-items:center;gap:6px;
+      background:var(--card);border:1px solid var(--border);
+      backdrop-filter:blur(10px);border-radius:20px;
+      padding:5px 12px;font-size:11px;color:var(--muted2);
+    }
+    .info-chip i { color:var(--green); }
+
+    /* View pills */
+    .view-controls { display:flex;justify-content:center;gap:8px;margin-bottom:32px;flex-wrap:wrap; }
+    .view-pill {
+      display:flex;align-items:center;gap:6px;
+      padding:8px 16px;border-radius:30px;border:1px solid var(--border);
+      background:var(--card);backdrop-filter:blur(10px);
+      color:var(--muted2);font-size:12px;font-weight:600;cursor:pointer;transition:all 0.25s;
+    }
+    .view-pill:hover { border-color:rgba(4,171,7,0.4);color:var(--green); }
+    .view-pill.active { border-color:var(--green);background:var(--green-glow);color:var(--green);box-shadow:0 0 20px rgba(4,171,7,0.15); }
+
+    /* Device grid */
+    .devices-grid { display:flex;flex-wrap:wrap;gap:32px;justify-content:center;align-items:flex-start; }
+    .device-card { display:flex;flex-direction:column;align-items:center;gap:14px;animation:fadeUp 0.5s ease both; }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+    .device-label { font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted2);display:flex;align-items:center;gap:6px; }
+    .device-label i { color:var(--green);font-size:12px; }
+    .device-size-badge { font-size:10px;background:var(--accent);border:1px solid rgba(4,171,7,0.2);color:var(--green);padding:2px 8px;border-radius:20px;font-weight:600; }
+    .device-frame-wrap { position:relative;filter:drop-shadow(0 24px 60px rgba(0,0,0,0.6));transition:transform 0.3s ease; }
+    .device-frame-wrap:hover { transform:translateY(-6px) scale(1.01); }
+
+    /* Desktop */
+    .frame-desktop .monitor-outer { background:#1a1d24;border:2px solid #2a2e3a;border-radius:12px;padding:10px;position:relative; }
+    .frame-desktop .monitor-outer::before { content:'';position:absolute;top:10px;left:50%;transform:translateX(-50%);width:8px;height:8px;background:#2a2e3a;border-radius:50%; }
+    .frame-desktop .screen-area { border-radius:6px;overflow:hidden;background:#000; }
+    .frame-desktop .stand { width:120px;height:18px;background:#1a1d24;margin:0 auto;clip-path:polygon(15% 0%,85% 0%,100% 100%,0% 100%);border:2px solid #2a2e3a; }
+    .frame-desktop .base { width:180px;height:10px;background:#1a1d24;border:2px solid #2a2e3a;border-radius:5px;margin:0 auto; }
+
+    /* Laptop */
+    .frame-laptop .lid { background:#1a1d24;border:2px solid #2a2e3a;border-radius:10px 10px 0 0;padding:10px;position:relative; }
+    .frame-laptop .lid::before { content:'';position:absolute;top:10px;left:50%;transform:translateX(-50%);width:6px;height:6px;background:#2a2e3a;border-radius:50%; }
+    .frame-laptop .screen-area { border-radius:4px;overflow:hidden;background:#000; }
+    .frame-laptop .keyboard-base { background:#1e212b;border:2px solid #2a2e3a;border-radius:0 0 10px 10px;height:22px;position:relative; }
+    .frame-laptop .keyboard-base::after { content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:60px;height:6px;background:#2a2e3a;border-radius:4px 4px 0 0; }
+
+    /* Tablet */
+    .frame-tablet .tablet-outer { background:#1a1d24;border:2px solid #2a2e3a;border-radius:20px;padding:14px 10px;position:relative; }
+    .frame-tablet .screen-area { border-radius:8px;overflow:hidden;background:#000; }
+    .frame-tablet .home-btn { width:34px;height:34px;background:#2a2e3a;border-radius:50%;margin:10px auto 0; }
+
+    /* Phone */
+    .frame-phone .phone-outer { background:#1a1d24;border:2px solid #2a2e3a;border-radius:36px;padding:14px 8px;position:relative; }
+    .frame-phone .notch { width:90px;height:22px;background:#1a1d24;border-radius:0 0 16px 16px;margin:-14px auto 8px;position:relative;z-index:2;display:flex;align-items:center;justify-content:center;gap:6px; }
+    .frame-phone .notch-camera { width:8px;height:8px;background:#2a2e3a;border-radius:50%; }
+    .frame-phone .notch-speaker { width:40px;height:4px;background:#2a2e3a;border-radius:2px; }
+    .frame-phone .screen-area { border-radius:6px;overflow:hidden;background:#000; }
+    .frame-phone .home-indicator { width:50px;height:4px;background:#2a2e3a;border-radius:2px;margin:12px auto 0; }
+    .frame-phone .side-btn { position:absolute;right:-3px;top:80px;width:3px;height:40px;background:#2a2e3a;border-radius:0 2px 2px 0; }
+    .frame-phone .vol-btn { position:absolute;left:-3px;width:3px;background:#2a2e3a;border-radius:2px 0 0 2px; }
+
+    /* Small Phone */
+    .frame-small-phone .phone-outer { background:#1a1d24;border:2px solid #2a2e3a;border-radius:28px;padding:12px 6px;position:relative; }
+    .frame-small-phone .camera-bar { width:50px;height:14px;background:#2a2e3a;border-radius:0 0 10px 10px;margin:-12px auto 6px; }
+    .frame-small-phone .screen-area { border-radius:4px;overflow:hidden;background:#000; }
+    .frame-small-phone .home-indicator { width:36px;height:3px;background:#2a2e3a;border-radius:2px;margin:8px auto 0; }
+
+    iframe { display:block;border:none;background:#fff; }
+    .glow-ring { position:absolute;inset:-1px;border-radius:inherit;background:linear-gradient(135deg,rgba(4,171,7,0.3),transparent);z-index:-1;pointer-events:none;opacity:0;transition:opacity 0.3s; }
+    .device-frame-wrap:hover .glow-ring { opacity:1; }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">
+    <i class="fa-solid fa-layer-group" style="color:#04ab07"></i>
+    <span class="g">Hiero</span>
+    <span style="color:#94a3b8;font-weight:400;font-size:13px;">Device Preview</span>
+  </div>
+  <div class="url-bar-wrap">
+    <i class="fa-solid fa-link"></i>
+    <input class="url-bar" id="urlInput" type="url"
+      placeholder="Enter URL to preview…"
+      value="" id="urlInput" />
+  </div>
+  <button class="go-btn" onclick="loadUrl()"><i class="fa-solid fa-arrow-right"></i> Load</button>
+  <div class="header-right">
+    <button class="hbtn" onclick="refreshAll()"><i class="fa-solid fa-rotate-right"></i> Refresh All</button>
+  </div>
+</header>
+
+<main class="canvas">
+  <div class="page-title">
+    <h1>Responsive Device Preview</h1>
+    <p>See your Hiero app on every screen — simultaneously.</p>
+  </div>
+
+  <div class="info-bar">
+    <div class="info-chip"><i class="fa-solid fa-desktop"></i> Desktop 1440×900</div>
+    <div class="info-chip"><i class="fa-solid fa-laptop"></i> Laptop 1280×800</div>
+    <div class="info-chip"><i class="fa-solid fa-tablet-screen-button"></i> Tablet 768×1024</div>
+    <div class="info-chip"><i class="fa-solid fa-mobile-screen-button"></i> Mobile 390×844</div>
+    <div class="info-chip"><i class="fa-solid fa-mobile-alt"></i> Small 320×568</div>
+  </div>
+
+  <div class="view-controls">
+    <div class="view-pill active" id="pill-all" onclick="setView('all')"><i class="fa-solid fa-grid-2"></i> All Devices</div>
+    <div class="view-pill" id="pill-desktop" onclick="setView('desktop')"><i class="fa-solid fa-desktop"></i> Desktop</div>
+    <div class="view-pill" id="pill-laptop" onclick="setView('laptop')"><i class="fa-solid fa-laptop"></i> Laptop</div>
+    <div class="view-pill" id="pill-tablet" onclick="setView('tablet')"><i class="fa-solid fa-tablet-screen-button"></i> Tablet</div>
+    <div class="view-pill" id="pill-phone" onclick="setView('phone')"><i class="fa-solid fa-mobile-screen-button"></i> Phone</div>
+    <div class="view-pill" id="pill-small-phone" onclick="setView('small-phone')"><i class="fa-solid fa-mobile-alt"></i> Small</div>
+  </div>
+
+  <div class="devices-grid" id="devicesGrid">
+
+    <!-- Desktop -->
+    <div class="device-card" id="dc-desktop" style="animation-delay:0s">
+      <div class="device-label"><i class="fa-solid fa-desktop"></i> Desktop<span class="device-size-badge">1440 × 900</span></div>
+      <div class="device-frame-wrap frame-desktop">
+        <div class="glow-ring"></div>
+        <div class="monitor-outer">
+          <div class="screen-area" style="width:680px;height:420px;">
+            <iframe id="iframe-desktop" src=""
+              style="width:1440px;height:900px;transform:scale(0.4722);transform-origin:0 0;"></iframe>
+          </div>
+        </div>
+        <div class="stand"></div>
+        <div class="base"></div>
+      </div>
+    </div>
+
+    <!-- Laptop -->
+    <div class="device-card" id="dc-laptop" style="animation-delay:0.08s">
+      <div class="device-label"><i class="fa-solid fa-laptop"></i> Laptop<span class="device-size-badge">1280 × 800</span></div>
+      <div class="device-frame-wrap frame-laptop">
+        <div class="glow-ring"></div>
+        <div class="lid">
+          <div class="screen-area" style="width:560px;height:350px;">
+            <iframe id="iframe-laptop" src=""
+              style="width:1280px;height:800px;transform:scale(0.4375);transform-origin:0 0;"></iframe>
+          </div>
+        </div>
+        <div class="keyboard-base"></div>
+      </div>
+    </div>
+
+    <!-- Tablet -->
+    <div class="device-card" id="dc-tablet" style="animation-delay:0.16s">
+      <div class="device-label"><i class="fa-solid fa-tablet-screen-button"></i> Tablet<span class="device-size-badge">768 × 1024</span></div>
+      <div class="device-frame-wrap frame-tablet">
+        <div class="glow-ring"></div>
+        <div class="tablet-outer">
+          <div class="screen-area" style="width:300px;height:400px;">
+            <iframe id="iframe-tablet" src=""
+              style="width:768px;height:1024px;transform:scale(0.3906);transform-origin:0 0;"></iframe>
+          </div>
+          <div class="home-btn"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phone -->
+    <div class="device-card" id="dc-phone" style="animation-delay:0.24s">
+      <div class="device-label"><i class="fa-solid fa-mobile-screen-button"></i> iPhone<span class="device-size-badge">390 × 844</span></div>
+      <div class="device-frame-wrap frame-phone">
+        <div class="glow-ring"></div>
+        <div class="phone-outer">
+          <div class="vol-btn" style="top:70px;height:30px;"></div>
+          <div class="vol-btn" style="top:110px;height:50px;"></div>
+          <div class="vol-btn" style="top:170px;height:50px;"></div>
+          <div class="side-btn"></div>
+          <div class="notch">
+            <div class="notch-camera"></div>
+            <div class="notch-speaker"></div>
+            <div class="notch-camera"></div>
+          </div>
+          <div class="screen-area" style="width:200px;height:432px;">
+            <iframe id="iframe-phone" src=""
+              style="width:390px;height:844px;transform:scale(0.5128);transform-origin:0 0;"></iframe>
+          </div>
+          <div class="home-indicator"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Small Phone -->
+    <div class="device-card" id="dc-small-phone" style="animation-delay:0.32s">
+      <div class="device-label"><i class="fa-solid fa-mobile-alt"></i> Small Phone<span class="device-size-badge">320 × 568</span></div>
+      <div class="device-frame-wrap frame-small-phone">
+        <div class="glow-ring"></div>
+        <div class="phone-outer">
+          <div class="camera-bar"></div>
+          <div class="screen-area" style="width:180px;height:320px;">
+            <iframe id="iframe-small-phone" src=""
+              style="width:320px;height:568px;transform:scale(0.5625);transform-origin:0 0;"></iframe>
+          </div>
+          <div class="home-indicator"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+  // Auto-detect origin so this works on any port (2816, 3001, etc.)
+  const BASE = window.location.origin;
+  const DEFAULT_PAGE = '/resume-builder.html';
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const input = document.getElementById('urlInput');
+    input.value = BASE + DEFAULT_PAGE;
+    input.addEventListener('keydown', e => { if (e.key === 'Enter') loadUrl(); });
+    // Load all iframes
+    ['desktop','laptop','tablet','phone','small-phone'].forEach(id => {
+      const f = document.getElementById('iframe-' + id);
+      if (f) f.src = BASE + DEFAULT_PAGE;
+    });
+  });
+
+  function loadUrl() {
+    const url = document.getElementById('urlInput').value.trim();
+    if (!url) return;
+    ['desktop','laptop','tablet','phone','small-phone'].forEach(id => {
+      const f = document.getElementById('iframe-' + id);
+      if (f) { f.src = ''; setTimeout(() => f.src = url, 50); }
+    });
+  }
+
+  function refreshAll() {
+    ['desktop','laptop','tablet','phone','small-phone'].forEach(id => {
+      const f = document.getElementById('iframe-' + id);
+      try { f.contentWindow.location.reload(); } catch(e) { f.src = f.src; }
+    });
+  }
+
+  function setView(view) {
+    document.querySelectorAll('.view-pill').forEach(p => p.classList.remove('active'));
+    document.getElementById('pill-' + view).classList.add('active');
+    const map = { desktop:'dc-desktop', laptop:'dc-laptop', tablet:'dc-tablet', phone:'dc-phone', 'small-phone':'dc-small-phone' };
+    if (view === 'all') {
+      Object.values(map).forEach(id => document.getElementById(id).style.display = 'flex');
+    } else {
+      Object.entries(map).forEach(([k,id]) => {
+        document.getElementById(id).style.display = (k === view) ? 'flex' : 'none';
+      });
+    }
+  }
+</script>
+</body>
+</html>

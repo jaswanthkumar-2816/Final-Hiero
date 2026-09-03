@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Backend Connection Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .test-section {
+      background: white;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .success { color: green; }
+    .error { color: red; }
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h1>Backend Connection Test</h1>
+  
+  <div class="test-section">
+    <h2>Test Video API</h2>
+    <button onclick="testVideoAPI()">Test Video Tutorials API</button>
+    <div id="video-result"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>Test Resume Analysis</h2>
+    <p>Upload test files to verify the analysis endpoint:</p>
+    <form id="test-form">
+      <div>
+        <label for="test-resume">Resume (PDF):</label>
+        <input type="file" id="test-resume" accept=".pdf" required>
+      </div>
+      <div>
+        <label for="test-jd">Job Description (PDF/TXT):</label>
+        <input type="file" id="test-jd" accept=".pdf,.txt" required>
+      </div>
+      <button type="submit">Test Analysis</button>
+    </form>
+    <div id="analysis-result"></div>
+  </div>
+
+  <script>
+    async function testVideoAPI() {
+      const resultDiv = document.getElementById('video-result');
+      resultDiv.innerHTML = 'Testing...';
+      
+      try {
+        const response = await fetch('http://localhost:5001/api/test-videos/python');
+        const data = await response.json();
+        
+        if (response.ok) {
+          resultDiv.innerHTML = `<div class="success">✅ Success! Found ${data.length} videos for Python</div>
+            <ul>${data.map(video => `<li><a href="${video.url}" target="_blank">${video.title}</a></li>`).join('')}</ul>`;
+        } else {
+          resultDiv.innerHTML = `<div class="error">❌ Error: ${data.error}</div>`;
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `<div class="error">❌ Connection failed: ${error.message}</div>`;
+      }
+    }
+
+    document.getElementById('test-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const resultDiv = document.getElementById('analysis-result');
+      resultDiv.innerHTML = 'Analyzing...';
+      
+      const formData = new FormData();
+      formData.append('resume', document.getElementById('test-resume').files[0]);
+      formData.append('jd', document.getElementById('test-jd').files[0]);
+      
+      try {
+        const response = await fetch('http://localhost:5001/api/resume/analyze', {
+          method: 'POST',
+          body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          resultDiv.innerHTML = `
+            <div class="success">
+              ✅ Analysis Complete!
+              <br>Score: ${data.score}%
+              <br>Missing Skills: ${data.missingSkills.length}
+              <br>Matched Skills: ${data.matchedSkills.length}
+            </div>
+          `;
+        } else {
+          resultDiv.innerHTML = `<div class="error">❌ Analysis failed: ${data.error}</div>`;
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `<div class="error">❌ Connection failed: ${error.message}</div>`;
+      }
+    });
+  </script>
+</body>
+</html> 

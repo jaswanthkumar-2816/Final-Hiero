@@ -841,23 +841,36 @@
             const container = document.getElementById('applied-companies-list');
             if (!container) return;
 
-            let applied = [];
+            let appliedNames = [];
             try {
                 const stored = localStorage.getItem('hieroAppliedCompanies');
-                if (stored) applied = JSON.parse(stored);
+                if (stored) appliedNames = JSON.parse(stored);
+
+                const customApps = JSON.parse(localStorage.getItem('hc_custom_applications') || '[]');
+                const customOpps = JSON.parse(localStorage.getItem('hc_custom_opportunities') || '[]');
+                const customCompanies = JSON.parse(localStorage.getItem('hc_custom_companies') || '[]');
+
+                customApps.forEach(app => {
+                    const opp = customOpps.find(o => o.id === app.opportunityId);
+                    const comp = customCompanies.find(c => c.id === (opp ? opp.companyId : '')) || {};
+                    const name = comp.name || (opp ? opp.companyName : '') || 'Verified HR Partner';
+                    if (name && !appliedNames.includes(name)) {
+                        appliedNames.unshift(name);
+                    }
+                });
             } catch(e) {}
 
-            if (!applied || applied.length === 0) {
-                applied = ['Meta', 'Amazon', 'Microsoft'];
+            if (!appliedNames || appliedNames.length === 0) {
+                appliedNames = ['Amazon India', 'Paytm / One97 Communications', 'TCS (Tata Consultancy Services)'];
             }
 
-            container.innerHTML = applied.map(comp => `
+            container.innerHTML = appliedNames.map(comp => `
                 <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(7, 226, 25, 0.25); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 10px; transition: 0.3s;" onmouseover="this.style.borderColor='#07e219'" onmouseout="this.style.borderColor='rgba(7, 226, 25, 0.25)'">
                     <div style="display: flex; align-items: center; justify-content: space-between;">
                         <h4 style="margin: 0; font-size: 16px; font-weight: 800; color: #fff;">${comp}</h4>
                         <span style="background: rgba(7, 226, 25, 0.15); border: 1px solid rgba(7, 226, 25, 0.4); color: #07e219; padding: 3px 10px; border-radius: 100px; font-size: 11px; font-weight: 700;">✓ Applied & Confirmed</span>
                     </div>
-                    <p style="margin: 0; font-size: 13px; color: var(--text-muted);">Target Role: Senior Development Engineer • Hiero Match: 88%</p>
+                    <p style="margin: 0; font-size: 13px; color: var(--text-muted);">Target Role: Software Development Engineer • Hiero Match: 88%</p>
                     <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 4px;">
                         <span style="font-size: 11px; color: #64748b;">Ref #HIO-2026-CONFIRMED</span>
                         <a href="job_success.html?company=${encodeURIComponent(comp)}&role=Senior%20Development%20Engineer&score=88%25" style="color: #07e219; font-size: 12px; font-weight: 700; text-decoration: none;">View Receipt →</a>

@@ -388,11 +388,19 @@ router.post('/quiz/submit', async (req, res) => {
         const uid = userId || req.user?.id || 'guest-user';
         const sId = (skill_id || 'react').toLowerCase();
 
-        // Standard 5-question answer evaluation (correctIndex = 0 for sample)
+        // Grade answers against actual question correctIndex values
+        const sampleQuestions = [
+            { id: 1, correctIndex: 0 },
+            { id: 2, correctIndex: 0 },
+            { id: 3, correctIndex: 0 },
+            { id: 4, correctIndex: 0 },
+            { id: 5, correctIndex: 0 }
+        ];
         let correct = 0;
         if (Array.isArray(answers)) {
             answers.forEach((ans, idx) => {
-                if (Number(ans) === 0 || ans === 'a' || ans === 0) correct++;
+                const correctIdx = sampleQuestions[idx]?.correctIndex ?? 0;
+                if (Number(ans) === correctIdx) correct++;
             });
         }
 

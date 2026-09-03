@@ -1,0 +1,50 @@
+// App-level build.gradle for HIERO (in.hiero.app)
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 34
+    namespace 'in.hiero.app'
+
+    defaultConfig {
+        applicationId "in.hiero.app"
+        minSdkVersion 24          // Android 7.0+ (wide coverage)
+        targetSdkVersion 34       // Android 14 (Play Store 2025/2026 compliance)
+        versionCode 1
+        versionName "1.0.0"
+    }
+
+    signingConfigs {
+        release {
+            // ⚠️ Fill these with your keystore details after running generate_keystore.sh
+            keyAlias "hiero-key"
+            keyPassword "HieroKey2024!"
+            storeFile file("../../hiero-release.keystore")
+            storePassword "HieroKey2024!"
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.release
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            applicationIdSuffix ".debug"
+            versionNameSuffix "-debug"
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+    // Google Trusted Web Activity (TWA)
+    implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.5.4'
+    // AndroidX Core
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'androidx.core:core-ktx:1.13.1'
+}
