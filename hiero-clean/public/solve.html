@@ -998,8 +998,25 @@
         <span id="p-id">LVL-1</span>
       </div>
       <div class="context-body">
-        <!-- Progressive Level Switcher -->
-        <div class="problem-level-tabs" id="problem-level-tabs">
+        <!-- 9-Pack Navigator & Level Switcher -->
+        <div class="nine-pack-nav-bar" id="nine-pack-nav-bar" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-glass); border-radius: 12px; padding: 6px 12px;">
+          <button type="button" id="btn-prev-problem" onclick="navigate9Pack(-1)" style="background: rgba(255,255,255,0.06); border: 1px solid var(--border-glass); color: #fff; cursor: pointer; font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 8px; transition: all 0.2s;">
+            <i class="fas fa-chevron-left"></i> Prev
+          </button>
+          <div style="text-align: center;">
+            <span id="nav-problem-indicator" style="font-size: 12px; font-weight: 800; color: var(--orbit-green); letter-spacing: 0.5px; display: block;">
+              Question 1 of 9
+            </span>
+            <span id="nav-tier-indicator" style="font-size: 10px; color: var(--text-secondary); text-transform: uppercase; font-weight: 700;">
+              Easy 1
+            </span>
+          </div>
+          <button type="button" id="btn-next-problem" onclick="navigate9Pack(1)" style="background: rgba(255,255,255,0.06); border: 1px solid var(--border-glass); color: #fff; cursor: pointer; font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 8px; transition: all 0.2s;">
+            Next <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+
+        <div class="problem-level-tabs" id="problem-level-tabs" style="display: flex; gap: 4px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 14px;">
           <button class="level-tab-btn active" onclick="selectProblemLevel(0)" id="lvl-tab-0">
             <span class="lvl-num">1</span>
             <span class="lvl-name">Starter</span>
@@ -1232,8 +1249,54 @@
       const pId = params.get('id');
       if (pId) document.getElementById('p-id').innerText = pId;
 
-      // Load 3-level progressive beginner problem catalog
-      loadSkillProblems(currentSkill);
+      // Person C Architecture: Check for hieroActiveProblem & hieroSkillProblems in localStorage
+      let activeProblem = null;
+      try {
+        const rawActive = localStorage.getItem('hieroActiveProblem');
+        if (rawActive) activeProblem = JSON.parse(rawActive);
+      } catch (e) {
+        console.warn('Failed to parse hieroActiveProblem:', e);
+      }
+
+      let skillProblems = [];
+      try {
+        const rawList = localStorage.getItem('hieroSkillProblems');
+        if (rawList) skillProblems = JSON.parse(rawList);
+      } catch (e) {}
+
+      const urlTitle = params.get('title');
+      const urlId = params.get('id');
+
+      if (Array.isArray(skillProblems) && skillProblems.length > 0) {
+        ninePackProblems = skillProblems;
+        if (urlId) {
+          const matchIdx = skillProblems.findIndex(p => p.id === urlId || String(p.id).toLowerCase() === urlId.toLowerCase());
+          if (matchIdx !== -1) {
+            current9PackIndex = matchIdx;
+            activeProblem = skillProblems[matchIdx];
+          }
+        } else if (urlTitle) {
+          const matchIdx = skillProblems.findIndex(p => p.title === urlTitle || p.title.toLowerCase().includes(urlTitle.toLowerCase()) || urlTitle.toLowerCase().includes(p.title.toLowerCase()));
+          if (matchIdx !== -1) {
+            current9PackIndex = matchIdx;
+            activeProblem = skillProblems[matchIdx];
+          }
+        } else if (activeProblem) {
+          const matchIdx = skillProblems.findIndex(p => p.id === activeProblem.id || p.title === activeProblem.title);
+          if (matchIdx !== -1) current9PackIndex = matchIdx;
+        }
+      } else if (activeProblem) {
+        ninePackProblems = [activeProblem];
+        current9PackIndex = 0;
+      }
+
+      if (activeProblem) {
+        // Requirement Person C: If hieroActiveProblem exists, DO NOT call loadSkillProblems.
+        select9PackProblem(current9PackIndex);
+      } else {
+        // Fallback: Load 3-level progressive beginner problem catalog
+        loadSkillProblems(currentSkill);
+      }
 
       // Language mismatch detection
       const isPythonSkill = currentSkill.toLowerCase().includes('python') || currentSkill.toLowerCase().includes('tensorflow') || currentSkill.toLowerCase().includes('learning') || currentSkill.toLowerCase().includes('science');
@@ -1820,7 +1883,7 @@ try {
       ];
     }
 
-    function loadSkillProblems(skillName) {
+    async function loadSkillProblems(skillName) {
       const key = (skillName || '').toLowerCase().trim();
       let matched = null;
 
@@ -1846,6 +1909,46 @@ try {
 
       currentProblems = matched;
       selectProblemLevel(0);
+
+      // Dynamically fetch curated 9-pack problems from backend API if available
+      try {
+        const resp = await fetch(`/api/problems/by-skill?skill=${encodeURIComponent(skillName)}`);
+        const data = await resp.json();
+        if (data.success && Array.isArray(data.problems) && data.problems.length >= 3) {
+          const backendProblems = data.problems.map((p, idx) => ({
+            id: p.id,
+            levelName: p.difficulty === 'easy' ? 'Starter' : (p.difficulty === 'medium' ? 'Core Logic' : 'Practical'),
+            difficulty: `${(p.difficulty || 'easy').toUpperCase()} - LEVEL ${idx + 1}`,
+            diffClass: p.difficulty || 'easy',
+            title: p.title,
+            source: `${p.skill || skillName} Reference Standard`,
+            desc: p.description,
+            example: (p.testCases && p.testCases[0]) ? `// Input: ${p.testCases[0].input}\n// Expected: ${p.testCases[0].expectedOutput}` : '',
+            hint: p.hint,
+            starter: p.starterCode || `// Starter code for ${p.title}`,
+            sourceSolution: "",
+            sourceExplanation: `Automated official reference solution for ${p.title}.`,
+            testCases: p.testCases || []
+          }));
+
+          const easyP = backendProblems.find(p => p.diffClass === 'easy') || backendProblems[0];
+          const medP = backendProblems.find(p => p.diffClass === 'medium') || backendProblems[1];
+          const hardP = backendProblems.find(p => p.diffClass === 'hard') || backendProblems[2];
+          
+          currentProblems = [easyP, medP, hardP].filter(Boolean);
+
+          const urlParams = new URLSearchParams(window.location.search);
+          const targetId = urlParams.get('id');
+          let targetIdx = 0;
+          if (targetId) {
+            const foundIdx = currentProblems.findIndex(p => p.id === targetId || p.id.toLowerCase() === targetId.toLowerCase());
+            if (foundIdx !== -1) targetIdx = foundIdx;
+          }
+          selectProblemLevel(targetIdx);
+        }
+      } catch (err) {
+        console.warn("Backend 9-pack load failed, continuing with built-in catalog:", err);
+      }
     }
 
     function selectProblemLevel(idx) {
@@ -1932,76 +2035,286 @@ try {
       });
     }
 
-    function submitAndRateSolution() {
-      const code = editor.value;
-      const currentProb = currentProblems[currentLevelIdx];
-      if (!currentProb) return;
+    // ==========================================
+    // 9-PACK NAVIGATION ENGINE (Person C Flow)
+    // ==========================================
+    let ninePackProblems = [];
+    let current9PackIndex = 0;
 
-      if (!code || code.trim().length < 15) {
-        alert("Please write your solution in the editor before submitting for rating.");
+    function render9PackNavigation() {
+      const tabsContainer = document.getElementById('problem-level-tabs');
+      const indicator = document.getElementById('nav-problem-indicator');
+      const tierInd = document.getElementById('nav-tier-indicator');
+
+      if (!Array.isArray(ninePackProblems) || ninePackProblems.length === 0) return;
+
+      const currentProb = ninePackProblems[current9PackIndex];
+      const tierLabels = ['E1', 'E2', 'E3', 'M1', 'M2', 'M3', 'H1', 'H2', 'H3'];
+      const tierNames = ['Easy 1', 'Easy 2', 'Easy 3', 'Medium 1', 'Medium 2', 'Medium 3', 'Hard 1', 'Hard 2', 'Hard 3'];
+
+      if (indicator) indicator.innerText = `Question ${current9PackIndex + 1} of ${ninePackProblems.length}`;
+      if (tierInd) tierInd.innerText = tierNames[current9PackIndex] || (currentProb.difficulty || 'Easy').toUpperCase();
+
+      if (tabsContainer) {
+        tabsContainer.innerHTML = '';
+        ninePackProblems.forEach((prob, i) => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = `level-tab-btn ${i === current9PackIndex ? 'active' : ''}`;
+          btn.style.padding = '6px 8px';
+          btn.style.minWidth = '32px';
+          btn.style.textAlign = 'center';
+          btn.title = prob.title;
+          
+          const label = tierLabels[i] || `${i + 1}`;
+          btn.innerHTML = `<span class="lvl-num" style="font-size:12px; font-weight:800;">${label}</span>`;
+          btn.onclick = () => select9PackProblem(i);
+          tabsContainer.appendChild(btn);
+        });
+      }
+    }
+
+    function select9PackProblem(idx) {
+      if (!Array.isArray(ninePackProblems) || idx < 0 || idx >= ninePackProblems.length) return;
+      current9PackIndex = idx;
+      const prob = ninePackProblems[idx];
+
+      // Save to localStorage as hieroActiveProblem
+      localStorage.setItem('hieroActiveProblem', JSON.stringify(prob));
+
+      // Display problem statement and title
+      const pTitleEl = document.getElementById('p-title');
+      const pDescEl = document.getElementById('p-desc');
+      const pIdEl = document.getElementById('p-id');
+      const pDiffEl = document.getElementById('p-diff');
+      const pSourceEl = document.getElementById('p-source');
+      const pExampleEl = document.getElementById('p-example');
+      const hintTextEl = document.getElementById('hint-text');
+
+      if (pTitleEl) pTitleEl.innerText = prob.title;
+      if (pDescEl) pDescEl.innerText = prob.description || prob.statement || prob.desc || '';
+      if (pIdEl) pIdEl.innerText = prob.id || `PROB-${idx + 1}`;
+      if (pDiffEl) {
+        pDiffEl.innerText = (prob.difficulty || 'easy').toUpperCase();
+        pDiffEl.className = `difficulty ${(prob.difficulty || 'easy').toLowerCase()}`;
+      }
+      if (pSourceEl) pSourceEl.innerText = `${prob.skill || currentSkill} Reference Standard`;
+      if (pExampleEl && prob.testCases && prob.testCases[0]) {
+        pExampleEl.innerText = `// Test: ${prob.testCases[0].name || 'Case 1'}\n// Input: ${prob.testCases[0].input}\n// Expected: ${prob.testCases[0].expectedOutput}`;
+      }
+      if (hintTextEl) hintTextEl.innerText = prob.hint || 'Carefully check inputs and return types.';
+
+      // Load starterCode into the editor without changing the editor itself
+      if (editor) {
+        editor.value = prob.starterCode || prob.starter || '';
+      }
+
+      // Reset rating and source solution cards
+      const ratingCard = document.getElementById('rating-result-card');
+      if (ratingCard) ratingCard.style.display = 'none';
+
+      const sourceCard = document.getElementById('source-solution-card');
+      if (sourceCard) sourceCard.style.display = 'none';
+
+      const lockedNotice = document.getElementById('source-solution-locked');
+      if (lockedNotice) lockedNotice.style.display = 'flex';
+
+      render9PackNavigation();
+    }
+
+    function navigate9Pack(direction) {
+      if (!Array.isArray(ninePackProblems) || ninePackProblems.length === 0) return;
+      let nextIdx = current9PackIndex + direction;
+      if (nextIdx < 0) nextIdx = ninePackProblems.length - 1;
+      if (nextIdx >= ninePackProblems.length) nextIdx = 0;
+      select9PackProblem(nextIdx);
+    }
+
+    async function submitAndRateSolution() {
+      const code = editor.value;
+      const currentProb = (ninePackProblems && ninePackProblems.length > 0 && ninePackProblems[current9PackIndex])
+        ? ninePackProblems[current9PackIndex]
+        : ((currentProblems && currentProblems[currentLevelIdx]) ? currentProblems[currentLevelIdx] : {});
+      
+      const problemId = document.getElementById('p-id') ? document.getElementById('p-id').innerText : (currentProb.id || '');
+      const pTitle = document.getElementById('p-title') ? document.getElementById('p-title').innerText : (currentProb.title || currentLesson);
+
+      setConsoleOpen(true);
+      terminalOut.innerText = "> SUBMITTING CODE FOR ASSESSMENT...\n> Evaluating against test harness on a 0–10 scale...";
+      terminalOut.scrollTop = terminalOut.scrollHeight;
+
+      // 1. Strict empty / blank code check -> 0 Score
+      if (!code || !code.trim()) {
+        const ratingCard = document.getElementById('rating-result-card');
+        const ratingPill = document.getElementById('rating-score-pill');
+        const ratingTag = document.getElementById('rating-status-tag');
+        const rateLogic = document.getElementById('rate-metric-logic');
+        const rateSyntax = document.getElementById('rate-metric-syntax');
+        const rateStyle = document.getElementById('rate-metric-style');
+        const rateMsg = document.getElementById('rating-feedback-msg');
+
+        if (ratingPill) ratingPill.innerText = "0 / 10 Points";
+        if (ratingTag) ratingTag.innerText = "⚠️ EMPTY SUBMISSION";
+        if (rateLogic) rateLogic.innerText = "0 / 5 pts";
+        if (rateSyntax) rateSyntax.innerText = "0 / 3 pts";
+        if (rateStyle) rateStyle.innerText = "0 / 2 pts";
+        if (rateMsg) rateMsg.innerText = "Please write your solution in the editor before submitting for rating.";
+        if (ratingCard) ratingCard.style.display = 'block';
+
+        terminalOut.innerText = "> SUBMISSION EVALUATION RESULT\n> Final Score: 0 / 10\n> Status: Empty submission. Please write your code before submitting to receive a score.";
         return;
       }
 
-      // 1. Evaluate Solution
-      let result;
-      if (typeof currentProb.validate === 'function') {
-        result = currentProb.validate(code);
-      } else {
-        const hasLength = code && code.trim().length > 30;
-        result = {
-          score: hasLength ? 10 : 4,
-          logic: hasLength ? 5 : 2,
-          syntax: hasLength ? 3 : 1,
-          style: hasLength ? 2 : 1,
-          feedback: hasLength ? "Solution verified against standard test cases!" : "Please write a full implementation."
-        };
-      }
+      try {
+        const response = await fetch('/api/problems/evaluate-solution', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            skill: currentSkill,
+            problemId: problemId,
+            problemTitle: pTitle,
+            userSolution: code,
+            testCases: currentProb.testCases || []
+          })
+        });
 
-      // 2. Render Rating Card (out of 10 points)
-      const ratingCard = document.getElementById('rating-result-card');
-      const ratingPill = document.getElementById('rating-score-pill');
-      const ratingTag = document.getElementById('rating-status-tag');
-      const rateLogic = document.getElementById('rate-metric-logic');
-      const rateSyntax = document.getElementById('rate-metric-syntax');
-      const rateStyle = document.getElementById('rate-metric-style');
-      const rateMsg = document.getElementById('rating-feedback-msg');
+        const result = await response.json();
 
-      if (ratingPill) ratingPill.innerText = `${result.score} / 10 Points`;
-      if (ratingTag) {
-        ratingTag.innerText = result.score >= 9 ? "🌟 PERFECT SOLUTION" : (result.score >= 7 ? "✨ EXCELLENT WORK" : "⚡ PRACTICE RECOMMENDED");
-      }
-      if (rateLogic) rateLogic.innerText = `${result.logic} / 5 pts`;
-      if (rateSyntax) rateSyntax.innerText = `${result.syntax} / 3 pts`;
-      if (rateStyle) rateStyle.innerText = `${result.style} / 2 pts`;
-      if (rateMsg) rateMsg.innerText = result.feedback;
+        // 2. Render Test Results in drawer if available
+        if (result.testResults && result.testResults.length > 0) {
+          const totalTests = result.totalTests || result.testResults.length;
+          const passedTests = result.passedTests || 0;
+          
+          let testHtml = `
+            <div style="padding-bottom: 8px; border-bottom: 1px solid var(--border-glass); margin-bottom: 2px;">
+              <h2 style="color: var(--orbit-green); font-size: 15px; margin-bottom: 2px;">FINAL EVALUATION SCORE: ${result.score} / 10</h2>
+              <div style="font-size: 11px; color: var(--text-secondary); font-weight: 700;">
+                Passed: <span style="color: ${passedTests === totalTests ? 'var(--orbit-green)' : '#ffaa00'}">${passedTests} / ${totalTests}</span>
+              </div>
+            </div>
+          `;
 
-      if (ratingCard) ratingCard.style.display = 'block';
+          result.testResults.forEach(t => {
+            const isPassed = t.passed;
+            const statusColor = isPassed ? 'var(--orbit-green)' : '#ff3232';
+            const icon = isPassed ? '✓' : '✗';
+            
+            testHtml += `<div style="font-size: 13px; line-height: 1.6; margin-bottom: 4px; display: flex; align-items: flex-start;">` +
+              `<span style="color: ${statusColor}; font-weight: 800; margin-right: 10px; font-size: 15px;">${icon}</span>` +
+              `<div>` +
+                `<span style="color: var(--text-secondary); opacity: 0.8;">Case ${t.case} — </span>` +
+                `<span style="color: ${isPassed ? 'var(--text-primary)' : statusColor}; font-weight: 500;">${t.name}</span>` +
+                (t.error ? `<div style="font-size: 11px; color: #ff6666;">Error: ${t.error}</div>` : '') +
+              `</div>` +
+            `</div>`;
+          });
+          testsOut.innerHTML = testHtml;
+        }
 
-      // 3. Reveal Source Solution Card & Hide Locked Notice (Only after submit!)
-      const lockedNotice = document.getElementById('source-solution-locked');
-      if (lockedNotice) lockedNotice.style.display = 'none';
+        // 3. Render 10-point Rating Card in Problem Panel
+        const ratingCard = document.getElementById('rating-result-card');
+        const ratingPill = document.getElementById('rating-score-pill');
+        const ratingTag = document.getElementById('rating-status-tag');
+        const rateLogic = document.getElementById('rate-metric-logic');
+        const rateSyntax = document.getElementById('rate-metric-syntax');
+        const rateStyle = document.getElementById('rate-metric-style');
+        const rateMsg = document.getElementById('rating-feedback-msg');
 
-      const sourceCard = document.getElementById('source-solution-card');
-      const sourceTag = document.getElementById('source-solution-source-tag');
-      const sourceCode = document.getElementById('source-code-display');
-      const sourceExpl = document.getElementById('source-explanation-text');
+        const score = typeof result.score === 'number' ? result.score : 0;
+        const logicPts = Math.min(5, Math.round(score * 0.5));
+        const syntaxPts = Math.min(3, Math.round(score * 0.3));
+        const stylePts = Math.max(0, score - logicPts - syntaxPts);
 
-      if (sourceTag) sourceTag.innerText = `Source: ${currentProb.source}`;
-      if (sourceCode) sourceCode.innerText = currentProb.sourceSolution;
-      if (sourceExpl) sourceExpl.innerText = currentProb.sourceExplanation;
+        if (ratingPill) ratingPill.innerText = `${score} / 10 Points`;
+        if (ratingTag) {
+          ratingTag.innerText = score >= 9 ? "🌟 PERFECT SOLUTION" : (score >= 7 ? "✨ EXCELLENT WORK" : (score >= 4 ? "⚡ PRACTICE RECOMMENDED" : "⚠️ NEEDS IMPROVEMENT"));
+        }
+        if (rateLogic) rateLogic.innerText = `${logicPts} / 5 pts`;
+        if (rateSyntax) rateSyntax.innerText = `${syntaxPts} / 3 pts`;
+        if (rateStyle) rateStyle.innerText = `${stylePts} / 2 pts`;
+        if (rateMsg) rateMsg.innerText = result.feedback || `Score: ${score}/10 based on automated testing.`;
 
-      if (sourceCard) sourceCard.style.display = 'block';
+        if (ratingCard) ratingCard.style.display = 'block';
 
-      // 4. Smooth scroll to show rating and unlocked official solution
-      if (ratingCard) {
-        ratingCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }
+        // 4. Reveal Official Source Solution Card & Hide Locked Notice (Only after submit!)
+        const lockedNotice = document.getElementById('source-solution-locked');
+        if (lockedNotice) lockedNotice.style.display = 'none';
 
-      // 5. Output to Virtual Terminal Drawer
-      setConsoleOpen(true);
-      if (terminalOut) {
-        terminalOut.innerText = `> SOLUTION SUBMITTED & RATED\n> Score: ${result.score} / 10 Points\n> Status: ${ratingTag ? ratingTag.innerText : 'Evaluated'}\n> Breakdown: Logic ${result.logic}/5 | Syntax ${result.syntax}/3 | Style ${result.style}/2\n> Feedback: ${result.feedback}\n\n> [OFFICIAL SOURCE SOLUTION UNLOCKED IN PROBLEM PANEL]\n> Source: ${currentProb.source}`;
+        const sourceCard = document.getElementById('source-solution-card');
+        const sourceTag = document.getElementById('source-solution-source-tag');
+        const sourceCode = document.getElementById('source-code-display');
+        const sourceExpl = document.getElementById('source-explanation-text');
+
+        const officialAnswer = result.officialAnswer || result.referenceSolution || currentProb.sourceSolution || "// Reference solution unavailable";
+        if (sourceTag) sourceTag.innerText = `Source: ${currentProb.source || 'Official Reference'}`;
+        if (sourceCode) sourceCode.innerText = officialAnswer;
+        if (sourceExpl) sourceExpl.innerText = currentProb.sourceExplanation || `Automated Reference Solution for ${pTitle}.`;
+
+        if (sourceCard) sourceCard.style.display = 'block';
+
+        // 5. Scroll to rating card
+        if (ratingCard) {
+          ratingCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // 6. Format Virtual Terminal Output
+        let officialBlock = "";
+        if (officialAnswer) {
+          officialBlock = `\n\n========================================\n💡 OFFICIAL REFERENCE SOLUTION:\n========================================\n${officialAnswer}\n========================================`;
+        }
+
+        terminalOut.innerText = `> SUBMISSION EVALUATION RESULT\n` +
+          `> Final Score: ${score} / 10\n` +
+          `> Tests Passed: ${result.passedTests || 0} / ${result.totalTests || 0}\n` +
+          `> Feedback: ${result.feedback || ''}` + officialBlock;
         terminalOut.scrollTop = terminalOut.scrollHeight;
+
+        // 7. High Score Celebration Overlay
+        if (score >= 7) {
+          setTimeout(() => {
+            const overlay = document.getElementById('master-overlay');
+            const hero = document.getElementById('hero-card');
+            if (overlay && hero) {
+              const h2 = hero.querySelector('h2');
+              const p = hero.querySelector('p');
+              if (h2) h2.innerText = `SCORE: ${score} / 10`;
+              if (p) p.innerText = result.feedback || "Challenge completed successfully!";
+              overlay.style.display = 'flex';
+              setTimeout(() => {
+                overlay.style.opacity = '1';
+                hero.classList.add('pop');
+              }, 50);
+            }
+          }, 800);
+        }
+      } catch (err) {
+        terminalOut.innerText = `> Transmission Error: Could not evaluate solution.`;
+        console.error("Submission Failure:", err);
+
+        // Fallback to local validation if server is unreachable
+        if (typeof currentProb.validate === 'function') {
+          const fallback = currentProb.validate(code);
+          const ratingCard = document.getElementById('rating-result-card');
+          const ratingPill = document.getElementById('rating-score-pill');
+          const ratingTag = document.getElementById('rating-status-tag');
+          const rateLogic = document.getElementById('rate-metric-logic');
+          const rateSyntax = document.getElementById('rate-metric-syntax');
+          const rateStyle = document.getElementById('rate-metric-style');
+          const rateMsg = document.getElementById('rating-feedback-msg');
+
+          if (ratingPill) ratingPill.innerText = `${fallback.score} / 10 Points`;
+          if (ratingTag) ratingTag.innerText = fallback.score >= 7 ? "✨ EXCELLENT WORK" : "⚡ PRACTICE RECOMMENDED";
+          if (rateLogic) rateLogic.innerText = `${fallback.logic} / 5 pts`;
+          if (rateSyntax) rateSyntax.innerText = `${fallback.syntax} / 3 pts`;
+          if (rateStyle) rateStyle.innerText = `${fallback.style} / 2 pts`;
+          if (rateMsg) rateMsg.innerText = fallback.feedback;
+          if (ratingCard) ratingCard.style.display = 'block';
+
+          const lockedNotice = document.getElementById('source-solution-locked');
+          if (lockedNotice) lockedNotice.style.display = 'none';
+          const sourceCard = document.getElementById('source-solution-card');
+          if (sourceCard) sourceCard.style.display = 'block';
+        }
       }
     }
 

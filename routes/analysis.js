@@ -398,17 +398,39 @@ async function extractUploadedText(file) {
     return safeExtractPdf(buffer, file.originalname);
 }
 
-// AI Problem fallback generator
+// AI Problem fallback generator (Guaranteed 9 problems with starterCode & testCases)
 async function generateAIProblems(skill) {
-    if (!GROQ_API_KEY) return genericProblemSet(skill);
     try {
-        const prompt = `Generate 9 unique practice problems for the skill "${skill}". 
-        Organize them into 3 difficulty tiers: easy, medium, and hard (3 each).
-        For each, provide: 
-        - title (catchy)
-        - description (clear, 1-2 sentences)
-        - hint (helpful technical clue)
-        Return ONLY a JSON object with keys "easy", "medium", "hard", each containing an array of {title, description, hint}. No extra text.`;
+        const problemsModule = require('./problems');
+        if (problemsModule && typeof problemsModule.get9PackForSkill === 'function') {
+            const pack = await problemsModule.get9PackForSkill(skill);
+            if (Array.isArray(pack) && pack.length >= 9) {
+                return {
+                    easy: pack.filter(p => p.difficulty === 'easy').slice(0, 3),
+                    medium: pack.filter(p => p.difficulty === 'medium').slice(0, 3),
+                    hard: pack.filter(p => p.difficulty === 'hard').slice(0, 3)
+                };
+            }
+        }
+    } catch (e) {
+        console.warn(`[Analysis] Problem pack module load failed for ${skill}:`, e.message);
+    }
+
+    if (!GROQ_API_KEY) return genericProblemSet(skill);
+
+    try {
+        const prompt = `Generate 9 unique coding practice problems for the skill "${skill}". 
+Organize them into 3 difficulty tiers: exactly 3 easy, 3 medium, and 3 hard.
+For each problem, provide:
+- id: unique string
+- title: catchy, clear title
+- description: clear problem requirement
+- hint: helpful technical clue
+- starterCode: complete code template with function signature
+- testCases: array of 2 test objects: [{ "case": 1, "name": "...", "input": "...", "testCall": "...", "expectedOutput": "..." }]
+- referenceSolution: complete working solution
+
+Return ONLY a valid JSON object with keys "easy", "medium", "hard", each containing an array of 3 problem objects.`;
 
         const res = await axios.post('https://api.groq.com/openai/v1/chat/completions', {
             model: AI_MODEL,
@@ -416,20 +438,28 @@ async function generateAIProblems(skill) {
                 { role: 'system', content: 'You are a technical curriculum designer. Return strict JSON only.' },
                 { role: 'user', content: prompt }
             ],
-            temperature: 0.6
+            temperature: 0.3,
+            response_format: { type: "json_object" }
         }, {
-            headers: { 'Authorization': `Bearer ${GROQ_API_KEY}`, 'Content-Type': 'application/json' }
+            headers: { 'Authorization': `Bearer ${GROQ_API_KEY}`, 'Content-Type': 'application/json' },
+            timeout: 8000
         });
 
         const raw = res.data.choices?.[0]?.message?.content || '';
-        const jsonMatch = raw.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-            const parsed = JSON.parse(jsonMatch[0]);
-            // Add IDs
+        const parsed = JSON.parse(raw);
+        if (parsed.easy?.length >= 3 && parsed.medium?.length >= 3 && parsed.hard?.length >= 3) {
             ['easy', 'medium', 'hard'].forEach(tier => {
-                if (parsed[tier]) {
-                    parsed[tier] = parsed[tier].map((p, idx) => ({ id: idx + 1, ...p }));
-                }
+                parsed[tier] = parsed[tier].slice(0, 3).map((p, idx) => ({
+                    id: p.id || `${skill.toLowerCase()}-${tier}-${idx + 1}`,
+                    skill,
+                    difficulty: tier,
+                    title: p.title || `${tier.toUpperCase()} ${skill} Problem ${idx + 1}`,
+                    description: p.description || `Implement the core ${skill} requirements for this task.`,
+                    hint: p.hint || `Review standard ${skill} API patterns.`,
+                    starterCode: p.starterCode || (skill.toLowerCase().includes('python') ? `def solve_task(data):\n    # TODO\n    return data` : `function solveTask(data) {\n    // TODO\n    return data;\n}`),
+                    testCases: p.testCases || [{ case: 1, name: "Basic Input Test", input: "sample", expectedOutput: "sample" }],
+                    referenceSolution: p.referenceSolution || ""
+                }));
             });
             return parsed;
         }
@@ -440,21 +470,87 @@ async function generateAIProblems(skill) {
 }
 
 function genericProblemSet(skill) {
+    const sLower = (skill || 'code').toLowerCase();
+    const isPy = sLower.includes('python') || sLower.includes('data') || sLower.includes('learning');
+
     return {
         easy: [
-            { id: 1, title: `Intro to ${skill}`, description: `Explore the fundamental building blocks and use cases of ${skill}.`, hint: 'Start with the most basic definitions and setup.' },
-            { id: 2, title: `Core Syntax & ${skill} Patterns`, description: `Master the essential syntax and common architectural patterns in ${skill}.`, hint: 'Focus on readability and standard conventions.' },
-            { id: 3, title: `Your First ${skill} Task`, description: `Apply what you've learned to solve a small, well-defined problem in ${skill}.`, hint: 'Keep it simple and focus on a single core feature.' }
+            {
+                id: 1,
+                title: `Intro to ${skill}`,
+                description: `Explore the fundamental building blocks and use cases of ${skill}.`,
+                hint: 'Start with the most basic definitions and setup.',
+                starterCode: isPy ? `def solve_intro(val):\n    # Basic identity and truthy validation\n    return bool(val)` : `function solveIntro(val) {\n    return Boolean(val);\n}`,
+                testCases: [{ case: 1, name: "Truthy Validation", input: "1", testCall: isPy ? "solve_intro(1)" : "solveIntro(1)", expectedOutput: isPy ? "True" : "true" }]
+            },
+            {
+                id: 2,
+                title: `Core Syntax & ${skill} Patterns`,
+                description: `Master the essential syntax and common architectural patterns in ${skill}.`,
+                hint: 'Focus on readability and standard conventions.',
+                starterCode: isPy ? `def format_pattern(items):\n    return [str(x).strip() for x in items if x]` : `function formatPattern(items) {\n    return items.filter(Boolean).map(x => String(x).trim());\n}`,
+                testCases: [{ case: 1, name: "Pattern Cleanup Test", input: "[' a ', '', 'b']", testCall: isPy ? "format_pattern([' a ', '', 'b'])" : "formatPattern([' a ', '', 'b'])", expectedOutput: "['a', 'b']" }]
+            },
+            {
+                id: 3,
+                title: `Your First ${skill} Task`,
+                description: `Apply what you've learned to solve a small, well-defined problem in ${skill}.`,
+                hint: 'Keep it simple and focus on a single core feature.',
+                starterCode: isPy ? `def calculate_basic(a, b):\n    return a + b` : `function calculateBasic(a, b) {\n    return a + b;\n}`,
+                testCases: [{ case: 1, name: "Sum Operation", input: "2, 3", testCall: isPy ? "calculate_basic(2, 3)" : "calculateBasic(2, 3)", expectedOutput: "5" }]
+            }
         ],
         medium: [
-            { id: 4, title: `Intermediate ${skill} Project`, description: `Build a small application or module that utilizes multiple ${skill} concepts.`, hint: 'Think about how different parts of the skill interact.' },
-            { id: 5, title: `Debugging ${skill} Scenarios`, description: 'Identify and resolve logical errors in a pre-written piece of code.', hint: 'Use systematic testing and logging.' },
-            { id: 6, title: `Optimization Lab (${skill})`, description: 'Refactor an existing implementation to improve performance and maintainability.', hint: 'Look for bottlenecks and redundant operations.' }
+            {
+                id: 4,
+                title: `Intermediate ${skill} Project`,
+                description: `Build a small application or module that utilizes multiple ${skill} concepts.`,
+                hint: 'Think about how different parts of the skill interact.',
+                starterCode: isPy ? `def transform_pipeline(data_list):\n    return {i: v*2 for i, v in enumerate(data_list)}` : `function transformPipeline(dataList) {\n    return dataList.reduce((acc, v, i) => ({ ...acc, [i]: v*2 }), {});\n}`,
+                testCases: [{ case: 1, name: "Transformation Mapping", input: "[1, 2, 3]", testCall: isPy ? "transform_pipeline([1, 2, 3])" : "transformPipeline([1, 2, 3])", expectedOutput: "{0: 2, 1: 4, 2: 6}" }]
+            },
+            {
+                id: 5,
+                title: `Debugging ${skill} Scenarios`,
+                description: 'Identify and resolve logical errors in a pre-written piece of code.',
+                hint: 'Use systematic testing and logging.',
+                starterCode: isPy ? `def safe_divide(a, b):\n    return a / b if b != 0 else None` : `function safeDivide(a, b) {\n    return b !== 0 ? a / b : null;\n}`,
+                testCases: [{ case: 1, name: "Zero Division Guard", input: "10, 0", testCall: isPy ? "safe_divide(10, 0)" : "safeDivide(10, 0)", expectedOutput: isPy ? "None" : "null" }]
+            },
+            {
+                id: 6,
+                title: `Optimization Lab (${skill})`,
+                description: 'Refactor an existing implementation to improve performance and maintainability.',
+                hint: 'Look for bottlenecks and redundant operations.',
+                starterCode: isPy ? `def deduplicate_fast(items):\n    return list(dict.fromkeys(items))` : `function deduplicateFast(items) {\n    return [...new Set(items)];\n}`,
+                testCases: [{ case: 1, name: "Fast Deduplication", input: "[1, 2, 2, 3, 1]", testCall: isPy ? "deduplicate_fast([1, 2, 2, 3, 1])" : "deduplicateFast([1, 2, 2, 3, 1])", expectedOutput: "[1, 2, 3]" }]
+            }
         ],
         hard: [
-            { id: 7, title: `Advanced ${skill} Architecture`, description: `Design and implement a complex, scalable solution focusing on ${skill} best practices.`, hint: 'Focus on modularity and long-term maintenance.' },
-            { id: 8, title: `Distributed ${skill} Systems`, description: 'Scale your solution to handle large data volumes or high-concurrency environments.', hint: 'Consider asynchronous processing and resource management.' },
-            { id: 9, title: `Expert Level ${skill} Mastery`, description: 'Push the limits of the skill by solving an edge-case heavy and theoretically deep challenge.', hint: 'Deep dive into the underlying engine or theory.' }
+            {
+                id: 7,
+                title: `Advanced ${skill} Architecture`,
+                description: `Design and implement a complex, scalable solution focusing on ${skill} best practices.`,
+                hint: 'Focus on modularity and long-term maintenance.',
+                starterCode: isPy ? `class StateStore:\n    def __init__(self):\n        self.state = {}\n    def set(self, k, v):\n        self.state[k] = v\n    def get(self, k):\n        return self.state.get(k)` : `class StateStore {\n    constructor() { this.state = {}; }\n    set(k, v) { this.state[k] = v; }\n    get(k) { return this.state[k]; }\n}`,
+                testCases: [{ case: 1, name: "State Persistence", input: "set('a', 1), get('a')", testCall: isPy ? "s = StateStore(); s.set('a', 1); s.get('a')" : "const s = new StateStore(); s.set('a', 1); s.get('a')", expectedOutput: "1" }]
+            },
+            {
+                id: 8,
+                title: `Distributed ${skill} Systems`,
+                description: 'Scale your solution to handle large data volumes or high-concurrency environments.',
+                hint: 'Consider asynchronous processing and resource management.',
+                starterCode: isPy ? `def partition_work(tasks, workers=3):\n    return [tasks[i::workers] for i in range(workers)]` : `function partitionWork(tasks, workers = 3) {\n    return Array.from({ length: workers }, (_, w) => tasks.filter((_, i) => i % workers === w));\n}`,
+                testCases: [{ case: 1, name: "Worker Partition", input: "[0,1,2,3,4,5], 2", testCall: isPy ? "partition_work([0,1,2,3,4,5], 2)" : "partitionWork([0,1,2,3,4,5], 2)", expectedOutput: "[[0, 2, 4], [1, 3, 5]]" }]
+            },
+            {
+                id: 9,
+                title: `Expert Level ${skill} Mastery`,
+                description: 'Push the limits of the skill by solving an edge-case heavy and theoretically deep challenge.',
+                hint: 'Deep dive into the underlying engine or theory.',
+                starterCode: isPy ? `def memoize_recursive(fn):\n    memo = {}\n    def helper(*args):\n        if args not in memo:\n            memo[args] = fn(helper, *args)\n        return memo[args]\n    return lambda *args: helper(*args)` : `function memoizeRecursive(fn) {\n    const memo = {};\n    function helper(...args) {\n        const key = JSON.stringify(args);\n        if (!(key in memo)) memo[key] = fn(helper, ...args);\n        return memo[key];\n    }\n    return (...args) => helper(...args);\n}`,
+                testCases: [{ case: 1, name: "Recursive Fib Memoization", input: "fib(6)", testCall: isPy ? "fib = memoize_recursive(lambda rec, n: n if n <= 1 else rec(n-1) + rec(n-2)); fib(6)" : "const fib = memoizeRecursive((rec, n) => n <= 1 ? n : rec(n-1) + rec(n-2)); fib(6)", expectedOutput: "8" }]
+            }
         ]
     };
 }

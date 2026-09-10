@@ -694,6 +694,109 @@
       transform: rotate(-15deg) scale(1.1);
     }
 
+    /* 9-Pack Practice Cards Styles */
+    .practice-group {
+      margin-bottom: 28px;
+    }
+    .practice-group-header {
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .practice-group-header.easy { color: #22c55e; }
+    .practice-group-header.medium { color: #f59e0b; }
+    .practice-group-header.hard { color: #ef4444; }
+
+    .group-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .practice-group-header.easy .group-dot { background: #22c55e; box-shadow: 0 0 8px rgba(34, 197, 94, 0.6); }
+    .practice-group-header.medium .group-dot { background: #f59e0b; box-shadow: 0 0 8px rgba(245, 158, 11, 0.6); }
+    .practice-group-header.hard .group-dot { background: #ef4444; box-shadow: 0 0 8px rgba(239, 68, 68, 0.6); }
+
+    .practice-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+      gap: 16px;
+    }
+
+    .practice-card {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      padding: 20px;
+      border-radius: 16px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      min-height: 145px;
+    }
+    .practice-card:hover {
+      border-color: var(--primary);
+      background: rgba(4, 171, 7, 0.05);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 12px var(--primary-glow);
+    }
+    .practice-card-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 6px;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+      width: fit-content;
+    }
+    .practice-card-badge.easy { color: #22c55e; background: rgba(34, 197, 94, 0.12); border: 1px solid rgba(34, 197, 94, 0.25); }
+    .practice-card-badge.medium { color: #f59e0b; background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.25); }
+    .practice-card-badge.hard { color: #ef4444; background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.25); }
+
+    .practice-card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.4;
+      margin-bottom: 8px;
+    }
+    .practice-card-desc {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      margin-bottom: 14px;
+    }
+    .practice-card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-top: auto;
+    }
+    .practice-not-ready {
+      padding: 40px 24px;
+      text-align: center;
+      background: var(--glass);
+      border: 1px dashed rgba(255, 255, 255, 0.15);
+      border-radius: 18px;
+    }
+
     /* Floating Orbit Chatbot Widget (Always Easily Accessible) */
     .orbit-floating-widget {
       position: fixed;
@@ -1853,6 +1956,24 @@
             <!-- Injected by JS -->
           </div>
         </section>
+
+        <!-- 9 Practice Problems Section (Organized into 3 Groups: Easy, Medium, Hard) -->
+        <section class="practice-pack-section" id="practice-pack-section" style="margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--border-glass);">
+          <div class="section-header" style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: flex-start;">
+            <div>
+              <h2 style="font-size: 22px; font-weight: 800; color: #fff; margin-bottom: 4px; display: flex; align-items: center; gap: 10px;">
+                <i class="fa-solid fa-code" style="color: var(--primary);"></i> Practice Challenges (9-Pack)
+              </h2>
+              <p style="color: var(--text-muted); font-size: 14px; margin: 0;">Step-by-step challenges categorized by difficulty. Click any question to start solving in the IDE.</p>
+            </div>
+            <span class="count-badge" id="practice-count-badge" style="background: rgba(0, 255, 102, 0.1); border: 1px solid var(--primary); color: var(--primary); font-weight: 800;">9 Problems</span>
+          </div>
+
+          <!-- Container for 3 groups (Easy, Medium, Hard) or Not Ready State -->
+          <div id="practice-problems-container">
+            <p style="color: var(--text-muted);"><i class="fa-solid fa-spinner fa-spin"></i> Loading practice challenges...</p>
+          </div>
+        </section>
       </div>
     </div>
   </div>
@@ -2881,12 +3002,18 @@
           const videoList = videoData[langParam] || videoData['english'] || (Array.isArray(videoData) ? videoData : Object.values(videoData)[0]) || [];
           renderVideos(Array.isArray(videoList) ? videoList : []);
           try {
-            if (json.data.problems) renderProblems(json.data.problems);
+            if (json.data.problems && has9Pack(json.data.problems)) {
+              renderProblems(json.data.problems);
+            } else {
+              loadProblemsForSkill(currentSkill);
+            }
           } catch (probErr) {
             console.error('Failed to render problems', probErr);
+            loadProblemsForSkill(currentSkill);
           }
         } else {
           renderVideos([]);
+          loadProblemsForSkill(currentSkill);
         }
       } catch (err) {
         console.error('Failed to load videos/problems', err);
@@ -3177,32 +3304,151 @@
     vClose.onclick = closeVideo;
     vModal.onclick = (e) => { if (e.target === vModal) closeVideo(); };
 
-    function renderProblems(problems) {
-      const container = document.getElementById('problems-container');
+    function has9Pack(pData) {
+      if (!pData) return false;
+      if (Array.isArray(pData)) {
+        const e = pData.filter(p => (p.difficulty || '').toLowerCase() === 'easy');
+        const m = pData.filter(p => (p.difficulty || '').toLowerCase() === 'medium');
+        const h = pData.filter(p => (p.difficulty || '').toLowerCase() === 'hard');
+        return e.length === 3 && m.length === 3 && h.length === 3;
+      }
+      if (typeof pData === 'object') {
+        const e = Array.isArray(pData.easy) ? pData.easy : [];
+        const m = Array.isArray(pData.medium) ? pData.medium : [];
+        const h = Array.isArray(pData.hard) ? pData.hard : [];
+        return e.length === 3 && m.length === 3 && h.length === 3;
+      }
+      return false;
+    }
+
+    async function loadProblemsForSkill(skillName) {
+      const container = document.getElementById('practice-problems-container') || document.getElementById('problems-container');
+      if (!container) return;
+
+      try {
+        const resp = await fetch(`/api/problems/by-skill?skill=${encodeURIComponent(skillName)}`);
+        const data = await resp.json();
+        if (data.success && Array.isArray(data.problems) && has9Pack(data.problems)) {
+          renderProblems(data.problems);
+          return;
+        }
+      } catch (err) {
+        console.warn('Could not fetch by-skill problems:', err);
+      }
+      renderProblems([]);
+    }
+
+    function renderProblems(problemsData) {
+      const container = document.getElementById('practice-problems-container') || document.getElementById('problems-container');
+      const badge = document.getElementById('practice-count-badge');
       if (!container) return;
       container.innerHTML = '';
-      let hasProblems = false;
-      ['easy', 'medium', 'hard'].forEach(diff => {
-        const list = problems[diff] || [];
-        list.forEach(p => {
-          hasProblems = true;
-          const item = document.createElement('div');
-          item.className = 'problem-item';
-          item.onclick = () => {
-            const params = new URLSearchParams({ skill: currentSkill, title: p.title, description: p.description, hint: p.hint, difficulty: diff, userId });
-            location.href = `solve.html?${params.toString()}`;
-          };
-          item.innerHTML = `
-            <div class="prob-main">
-              <div class="prob-badges"><span class="diff-badge ${diff}">${diff}</span></div>
-              <h4>${p.title}</h4>
-              <p style="font-size:13px;color:var(--text-muted)">${p.description.substring(0,100)}...</p>
+
+      let easyList = [];
+      let medList = [];
+      let hardList = [];
+
+      if (Array.isArray(problemsData)) {
+        easyList = problemsData.filter(p => (p.difficulty || '').toLowerCase() === 'easy');
+        medList = problemsData.filter(p => (p.difficulty || '').toLowerCase() === 'medium');
+        hardList = problemsData.filter(p => (p.difficulty || '').toLowerCase() === 'hard');
+      } else if (problemsData && typeof problemsData === 'object') {
+        easyList = Array.isArray(problemsData.easy) ? problemsData.easy : [];
+        medList = Array.isArray(problemsData.medium) ? problemsData.medium : [];
+        hardList = Array.isArray(problemsData.hard) ? problemsData.hard : [];
+      }
+
+      // Check if we have exactly 9 questions (3 easy, 3 medium, 3 hard)
+      const hasExact9 = (easyList.length === 3 && medList.length === 3 && hardList.length === 3);
+
+      if (!hasExact9) {
+        if (badge) {
+          badge.innerText = 'Not Ready';
+          badge.style.borderColor = '#f59e0b';
+          badge.style.color = '#f59e0b';
+          badge.style.background = 'rgba(245, 158, 11, 0.1)';
+        }
+        container.innerHTML = `
+          <div class="practice-not-ready">
+            <i class="fa-solid fa-clock-rotate-left" style="font-size: 32px; color: #f59e0b; margin-bottom: 12px; display: inline-block;"></i>
+            <h3 style="font-size: 18px; font-weight: 800; color: #fff; margin-bottom: 6px;">Practice Challenges Not Ready</h3>
+            <p style="color: var(--text-muted); font-size: 14px; max-width: 520px; margin: 0 auto; line-height: 1.5;">
+              A 9-question practice pack (3 Easy, 3 Medium, 3 Hard) for <strong>${currentSkill}</strong> is currently being prepared. Please check back soon or select another skill track above.
+            </p>
+          </div>
+        `;
+        return;
+      }
+
+      if (badge) {
+        badge.innerText = '9 Problems';
+        badge.style.borderColor = 'var(--primary)';
+        badge.style.color = 'var(--primary)';
+        badge.style.background = 'rgba(0, 255, 102, 0.1)';
+      }
+
+      const all9 = [...easyList.slice(0, 3), ...medList.slice(0, 3), ...hardList.slice(0, 3)];
+
+      const tiers = [
+        { key: 'easy', label: 'EASY CHALLENGES (3)', list: easyList.slice(0, 3), prefix: 'Easy' },
+        { key: 'medium', label: 'MEDIUM CHALLENGES (3)', list: medList.slice(0, 3), prefix: 'Medium' },
+        { key: 'hard', label: 'HARD CHALLENGES (3)', list: hardList.slice(0, 3), prefix: 'Hard' }
+      ];
+
+      tiers.forEach(tier => {
+        const groupEl = document.createElement('div');
+        groupEl.className = 'practice-group';
+
+        const headerEl = document.createElement('div');
+        headerEl.className = `practice-group-header ${tier.key}`;
+        headerEl.innerHTML = `<span class="group-dot"></span> ${tier.label}`;
+        groupEl.appendChild(headerEl);
+
+        const gridEl = document.createElement('div');
+        gridEl.className = 'practice-cards-grid';
+
+        tier.list.forEach((p, idx) => {
+          const card = document.createElement('div');
+          card.className = 'practice-card';
+          card.setAttribute('data-tier', tier.key);
+          card.setAttribute('data-index', idx + 1);
+
+          const badgeText = `${tier.prefix} ${idx + 1}`;
+          const descText = p.description || p.desc || 'Complete the implementation according to requirements.';
+
+          card.innerHTML = `
+            <div>
+              <span class="practice-card-badge ${tier.key}">${badgeText}</span>
+              <div class="practice-card-title">${p.title}</div>
+              <div class="practice-card-desc">${descText}</div>
             </div>
-            <div class="solve-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>`;
-          container.appendChild(item);
+            <div class="practice-card-footer">
+              <span>Open in Solve IDE</span>
+              <i class="fa-solid fa-arrow-right"></i>
+            </div>
+          `;
+
+          card.onclick = () => {
+            // Person C requirement: save hieroActiveProblem and hieroSkillProblems into localStorage
+            localStorage.setItem('hieroActiveProblem', JSON.stringify(p));
+            localStorage.setItem('hieroSkillProblems', JSON.stringify(all9));
+
+            const params = new URLSearchParams({
+              skill: currentSkill,
+              id: p.id || `${tier.key}-${idx + 1}`,
+              title: p.title,
+              difficulty: p.difficulty || tier.key,
+              userId: userId || ''
+            });
+            window.location.href = `solve.html?${params.toString()}`;
+          };
+
+          gridEl.appendChild(card);
         });
+
+        groupEl.appendChild(gridEl);
+        container.appendChild(groupEl);
       });
-      if (!hasProblems) container.innerHTML = `<p class="text-muted">No specific challenges available for this skill yet. Keep exploring!</p>`;
     }
 
     function toggleOrbitWidget(expand) {
