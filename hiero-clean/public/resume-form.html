@@ -4061,11 +4061,25 @@
           });
 
           if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || 'Upload failed');
+            let errorMsg = 'Upload failed';
+            try {
+              const errorData = await response.json();
+              errorMsg = errorData.error || errorData.message || errorMsg;
+            } catch (jsonErr) {
+              try {
+                const textErr = await response.text();
+                errorMsg = textErr.replace(/<[^>]*>?/gm, ' ').replace(/\s+/g, ' ').trim().slice(0, 150) || `Server error (${response.status})`;
+              } catch (textErr) {}
+            }
+            throw new Error(errorMsg);
           }
 
-          const result = await response.json();
+          let result;
+          try {
+            result = await response.json();
+          } catch (jsonErr) {
+            throw new Error('Server returned an invalid response format.');
+          }
 
           if (result.success && result.data) {
             statusDiv.innerHTML = '<i class="fas fa-check-circle"></i> Resume imported successfully!';

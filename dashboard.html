@@ -59,6 +59,7 @@
             border-bottom: 1px solid var(--card-border); position: sticky; top: 0; z-index: 100;
         }
         .nav-logo { display: flex; align-items: center; gap: 12px; font-weight: 800; font-size: 24px; color: #fff; text-decoration: none; }
+        .nav-logo img { width: 34px; height: 34px; object-fit: contain; filter: drop-shadow(0 0 10px rgba(7, 226, 25, 0.7)); }
         .nav-logo i { color: var(--primary); font-size: 28px; text-shadow: 0 0 15px var(--primary-glow); }
         .nav-links { display: flex; gap: 30px; }
         .nav-links a { color: var(--text-muted); text-decoration: none; font-weight: 500; transition: 0.3s; }
@@ -496,7 +497,7 @@
     <!-- Navigation -->
     <nav class="hiero-nav">
         <a href="dashboard.html" class="nav-logo">
-            <i class="fas fa-bolt"></i> Hiero
+            <img src="hiero-logo-icon.png" alt="Hiero Logo"> Hiero
         </a>
         <div class="nav-links">
             <a href="dashboard.html" class="active">Dashboard</a>

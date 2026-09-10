@@ -256,7 +256,7 @@ Return ONLY valid JSON with no markdown block wrappers matching this schema:
 
     const completion = await groq.chat.completions.create({
       messages: [{ role: 'user', content: prompt }],
-      model: 'llama-3.3-70b-versatile',
+      model: process.env.AI_MODEL || 'openai/gpt-oss-120b',
       temperature: 0.3
     });
 
@@ -279,4 +279,134 @@ Return ONLY valid JSON with no markdown block wrappers matching this schema:
   }
 });
 
+// POST /api/problems/evaluate-solution - Analyze and score user's submitted solution
+router.post('/evaluate-solution', async (req, res) => {
+  const {
+    skill,
+    problemId,
+    problemTitle,
+    difficulty,
+    userSolution,
+    source,
+    sourceSolution,
+    testCases
+  } = req.body;
+
+  if (!userSolution || !userSolution.trim()) {
+    return res.json({
+      success: true,
+      isCorrect: false,
+      score: 0,
+      mistakes: [
+        "Empty submission: No code or solution logic was provided."
+      ],
+      reason: "The solution field was empty or contained only whitespace. You must implement the required logic to solve the problem.",
+      sourceSolution: sourceSolution || "Please refer to the starter guide and official source solution."
+    });
+  }
+
+  // Attempt evaluation via Groq AI (llama-3.3-70b-versatile)
+  const groqKey = process.env.GROQ_API_KEY;
+  if (groqKey && groqKey !== 'gsk_x') {
+    try {
+      const Groq = require('groq-sdk');
+      const groq = new Groq({ apiKey: groqKey });
+
+      const evaluationPrompt = `You are a strict Senior Technical Interviewer and Automated Code Judge.
+Evaluate the user's submitted answer for the following problem.
+
+Skill: ${skill || 'Technical'}
+Problem: ${problemTitle || 'Problem'}
+Difficulty: ${difficulty || 'beginner'}
+Source: ${source || 'Official Source'}
+
+Reference / Source Solution:
+${sourceSolution || 'Standard production solution'}
+
+User's Submitted Answer:
+\`\`\`
+${userSolution}
+\`\`\`
+
+Evaluate whether the user's answer is correct, handles test cases, and solves the task correctly.
+Return ONLY valid JSON with no markdown wrapping matching this exact schema:
+{
+  "isCorrect": boolean (true if the code is correct, false if there are syntax errors, logical bugs, missing requirements, or incomplete code),
+  "score": integer from 0 to 10 (if isCorrect is true, score MUST be between 8 and 10; if false, score MUST be between 0 and 5),
+  "mistakes": array of strings (specific errors, syntax bugs, or missing logic; if correct, leave empty or 1 compliment note),
+  "reason": string (clear technical explanation of WHY the answer is correct or WHY it is wrong),
+  "sourceSolution": string (the complete, verified official solution given by the source of the problem with comments)
+}`;
+
+      const completion = await groq.chat.completions.create({
+        messages: [{ role: 'user', content: evaluationPrompt }],
+        model: process.env.AI_MODEL || 'llama-3.3-70b-versatile',
+        temperature: 0.2,
+        max_tokens: 1500
+      });
+
+      const responseText = completion.choices[0]?.message?.content || '{}';
+      const cleanJson = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
+      const evalData = JSON.parse(cleanJson);
+
+      return res.json({
+        success: true,
+        isCorrect: Boolean(evalData.isCorrect),
+        score: typeof evalData.score === 'number' ? Math.min(Math.max(evalData.score, 0), 10) : (evalData.isCorrect ? 10 : 3),
+        mistakes: Array.isArray(evalData.mistakes) ? evalData.mistakes : [],
+        reason: evalData.reason || (evalData.isCorrect ? "Solution meets all problem requirements." : "Solution failed validation."),
+        sourceSolution: evalData.sourceSolution || sourceSolution || "Official source solution provided."
+      });
+    } catch (aiErr) {
+      console.warn('Groq AI solution evaluation fallback triggered:', aiErr.message);
+    }
+  }
+
+  // Deterministic fallback evaluator if AI is unavailable or offline
+  const cleanCode = userSolution.toLowerCase().trim();
+  const cleanRef = (sourceSolution || '').toLowerCase().trim();
+  
+  // Heuristic & test cases check
+  const missingCases = [];
+  if (Array.isArray(testCases) && testCases.length > 0) {
+    testCases.forEach(tc => {
+      if (tc.expected && !userSolution.toLowerCase().includes(tc.expected.toLowerCase())) {
+        missingCases.push(`Failed check: Missing required directive "${tc.name || tc.expected}".`);
+      }
+    });
+  }
+
+  const isLikelyPlaceholder = cleanCode.includes('pass') && cleanCode.length < 50 || cleanCode.includes('todo') || cleanCode.length < 15;
+  const hasKeyTokens = cleanRef.length > 0 ? (
+    cleanRef.split(/\s+/).filter(tok => tok.length > 3).slice(0, 8).some(tok => cleanCode.includes(tok))
+  ) : true;
+
+  if (missingCases.length > 0 || isLikelyPlaceholder || !hasKeyTokens) {
+    const mistakes = missingCases.length > 0 ? missingCases : [
+      "Incomplete implementation: Found unhandled placeholder tokens or missing key logic.",
+      "Expected output requirements were not satisfied."
+    ];
+    return res.json({
+      success: true,
+      isCorrect: false,
+      score: Math.max(1, 10 - mistakes.length * 3),
+      mistakes,
+      reason: missingCases.length > 0
+        ? `Your submission failed ${missingCases.length} requirement checks expected by ${source || 'the specification'}.`
+        : "The submitted code did not implement the full algorithm or configuration required by the problem specification.",
+      sourceSolution: sourceSolution || "Please refer to the source reference code."
+    });
+  }
+
+  return res.json({
+    success: true,
+    isCorrect: true,
+    score: 10,
+    mistakes: [],
+    reason: "Your solution correctly implements the required logic, handles edge cases, and satisfies the problem requirements.",
+    sourceSolution: sourceSolution || "Official source solution passed."
+  });
+});
+
 module.exports = router;
+

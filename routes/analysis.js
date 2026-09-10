@@ -752,8 +752,94 @@ router.get('/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString(), service: 'analysis-integrated' });
 });
 
-// Analyze endpoint (supports both /analyze and legacy /analyze-full)
-router.post(['/analyze', '/analyze-full'], upload.fields([{ name: 'resume' }, { name: 'jd' }]), async (req, res) => {
+// Default role benchmarks when no custom JD is provided
+const DEFAULT_ROLE_BENCHMARKS = {
+    'software engineer': 'Software Engineer / Full Stack Developer proficient in modern programming (JavaScript, Python, Java, C++), data structures, algorithms, REST APIs, databases (SQL, MongoDB), Git version control, unit testing, Docker, CI/CD, and scalable system architecture.',
+    'frontend developer': 'Frontend Developer skilled in HTML5, CSS3, JavaScript (ES6+), TypeScript, React.js, Vue, responsive design, state management, REST APIs, web performance, testing, and modern UI/UX design systems.',
+    'backend developer': 'Backend Developer proficient in Node.js, Python, Java, relational and NoSQL databases (PostgreSQL, MongoDB, Redis), RESTful API design, microservices, authentication (OAuth, JWT), cloud services (AWS/GCP), Docker, and caching strategies.',
+    'full stack developer': 'Full Stack Developer with expertise in frontend technologies (React, Next.js, HTML/CSS/JS), backend systems (Node.js, Express, Python), database management (SQL, MongoDB), REST APIs, cloud deployment, Git, and automated testing.',
+    'data scientist': 'Data Scientist proficient in Python, SQL, Pandas, NumPy, Scikit-Learn, machine learning, data cleaning, statistical modeling, data visualization, deep learning fundamentals, and analytical problem solving.',
+    'devops engineer': 'DevOps Engineer proficient in Docker, Kubernetes, CI/CD pipelines (GitHub Actions, Jenkins), cloud infrastructure (AWS, Azure, GCP), Linux administration, Terraform, monitoring, and scripting.'
+};
+
+function convertResumeDataToText(resumeData) {
+    if (!resumeData) return '';
+    if (typeof resumeData === 'string') return resumeData;
+    const parts = [];
+    if (resumeData.personalInfo) {
+        const p = resumeData.personalInfo;
+        parts.push(`Name: ${p.fullName || ''}`);
+        if (p.title || p.targetRole) parts.push(`Target Role: ${p.title || p.targetRole}`);
+        if (p.email) parts.push(`Email: ${p.email}`);
+        if (p.phone) parts.push(`Phone: ${p.phone}`);
+        if (p.location) parts.push(`Location: ${p.location}`);
+    }
+    if (resumeData.summary) parts.push(`Professional Summary:\n${resumeData.summary}`);
+    
+    // Skills
+    const skills = [];
+    if (resumeData.technicalSkills) {
+        if (typeof resumeData.technicalSkills === 'string') skills.push(resumeData.technicalSkills);
+        else if (Array.isArray(resumeData.technicalSkills)) skills.push(...resumeData.technicalSkills);
+        else if (typeof resumeData.technicalSkills === 'object') {
+            for (const key of Object.keys(resumeData.technicalSkills)) {
+                const val = resumeData.technicalSkills[key];
+                if (Array.isArray(val)) skills.push(...val);
+                else if (typeof val === 'string') skills.push(val);
+            }
+        }
+    }
+    if (Array.isArray(resumeData.skills)) skills.push(...resumeData.skills);
+    if (skills.length > 0) parts.push(`Technical Skills:\n${skills.join(', ')}`);
+
+    // Experience
+    if (Array.isArray(resumeData.experience) && resumeData.experience.length > 0) {
+        const expTexts = resumeData.experience.map(exp => {
+            const role = exp.title || exp.role || exp.position || '';
+            const comp = exp.company || exp.organization || '';
+            const dates = exp.duration || `${exp.startDate || ''} - ${exp.endDate || ''}`.trim();
+            const desc = exp.description || '';
+            const bullets = Array.isArray(exp.bullets) ? exp.bullets.join('\n- ') : (Array.isArray(exp.highlights) ? exp.highlights.join('\n- ') : '');
+            return `${role} at ${comp} (${dates})\n${desc}\n${bullets ? '- ' + bullets : ''}`.trim();
+        });
+        parts.push(`Work Experience:\n${expTexts.join('\n\n')}`);
+    }
+
+    // Projects
+    if (Array.isArray(resumeData.projects) && resumeData.projects.length > 0) {
+        const projTexts = resumeData.projects.map(proj => {
+            const name = proj.title || proj.name || '';
+            const tech = proj.technologies || proj.techStack || '';
+            const desc = proj.description || '';
+            const bullets = Array.isArray(proj.bullets) ? proj.bullets.join('\n- ') : '';
+            return `Project: ${name} (${tech})\n${desc}\n${bullets ? '- ' + bullets : ''}`.trim();
+        });
+        parts.push(`Projects:\n${projTexts.join('\n\n')}`);
+    }
+
+    // Education
+    if (Array.isArray(resumeData.education) && resumeData.education.length > 0) {
+        const eduTexts = resumeData.education.map(edu => {
+            const deg = edu.degree || '';
+            const field = edu.field || edu.major || '';
+            const inst = edu.institution || edu.school || edu.college || '';
+            const yr = edu.graduationYear || edu.year || '';
+            return `${deg} in ${field}, ${inst} (${yr})`.trim();
+        });
+        parts.push(`Education:\n${eduTexts.join('\n')}`);
+    }
+
+    // Certifications
+    if (Array.isArray(resumeData.certifications) && resumeData.certifications.length > 0) {
+        const certTexts = resumeData.certifications.map(c => typeof c === 'string' ? c : (c.name || c.title || '')).filter(Boolean);
+        if (certTexts.length) parts.push(`Certifications:\n${certTexts.join(', ')}`);
+    }
+
+    return parts.join('\n\n');
+}
+
+// Analyze endpoint (supports /analyze, /analyze-full, and /analyze-resume)
+router.post(['/analyze', '/analyze-full', '/analyze-resume'], upload.fields([{ name: 'resume' }, { name: 'jd' }]), async (req, res) => {
     console.log('[ANALYSIS] Request received');
     console.log('[ANALYSIS] Files:', Object.keys(req.files || {}));
     console.log('[ANALYSIS] Body keys:', Object.keys(req.body || {}));
@@ -763,34 +849,32 @@ router.post(['/analyze', '/analyze-full'], upload.fields([{ name: 'resume' }, { 
         const resumeFile = req.files?.resume?.[0];
         const jdFile = req.files?.jd?.[0];
         // Check multiple possible keys for jd_text
-        const jdTextField = req.body.jd_text || req.body.jd || req.body.description;
+        let jdTextField = req.body.jd_text || req.body.jdText || req.body.jd || req.body.description;
 
-        console.log('[ANALYSIS] JD source detected:', jdFile ? 'file' : (jdTextField ? 'text' : 'none'));
-
-        if (!resumeFile) {
-            console.error('[ANALYSIS] Missing resume file');
-            return res.status(400).json({ success: false, error: 'Missing resume file' });
+        // Resolve Resume Text from File OR direct JSON/text
+        let resumeText = '';
+        if (resumeFile) {
+            resumeFilePath = resumeFile.path;
+            resumeText = await extractUploadedText(resumeFile);
+        } else if (req.body.resumeText || req.body.resume_text) {
+            resumeText = req.body.resumeText || req.body.resume_text;
+        } else if (req.body.resumeData) {
+            resumeText = convertResumeDataToText(req.body.resumeData);
         }
-        if (!jdFile && !jdTextField) {
-            console.error('[ANALYSIS] Missing JD file and jd_text');
-            return res.status(400).json({ success: false, error: 'Provide JD file or jd_text' });
-        }
-
-        resumeFilePath = resumeFile.path;
-        if (jdFile) jdFilePath = jdFile.path;
-
-        const resumeText = await extractUploadedText(resumeFile);
 
         if (!resumeText || resumeText.length < 10) {
+            console.error('[ANALYSIS] Missing or invalid resume content');
             return res.status(400).json({
                 success: false,
                 error: 'Unable to extract usable text from the resume.',
-                details: 'Use a text-based PDF or a TXT file with at least a few lines of resume content.'
+                details: 'Provide a valid resume file or resumeData.'
             });
         }
 
+        // Resolve JD Text from File OR direct text OR auto-generated from Target Role
         let jdText = '';
         if (jdFile) {
+            jdFilePath = jdFile.path;
             jdText = await extractUploadedText(jdFile);
             if (!jdText || jdText.length < 10) {
                 return res.status(400).json({
@@ -799,9 +883,20 @@ router.post(['/analyze', '/analyze-full'], upload.fields([{ name: 'resume' }, { 
                     details: 'Use a text-based PDF or a TXT file with at least a few lines of job-description content.'
                 });
             }
-        } else if (jdTextField) {
-            jdText = jdTextField;
+        } else if (jdTextField && jdTextField.trim()) {
+            jdText = jdTextField.trim();
             console.log(`[ANALYSIS] Received JD Text from body: ${jdText.substring(0, 50)}...`);
+        } else {
+            // Auto benchmark against Target Role
+            let targetRole = (req.body.targetRole || req.body.role || '').trim();
+            if (!targetRole && req.body.resumeData?.personalInfo) {
+                targetRole = req.body.resumeData.personalInfo.title || req.body.resumeData.personalInfo.targetRole || '';
+            }
+            targetRole = targetRole || 'Software Engineer';
+            const roleKey = targetRole.toLowerCase().trim();
+            jdText = DEFAULT_ROLE_BENCHMARKS[roleKey] || 
+                `${targetRole} with competencies in modern application architecture, industry standard practices, core technical proficiencies, API integration, problem solving, and production delivery.`;
+            console.log(`[ANALYSIS] Using default benchmark JD for role: ${targetRole}`);
         }
 
         const strategy = (req.query.strategy || process.env.ANALYSIS_STRATEGY || 'hybrid').toLowerCase();
@@ -883,8 +978,8 @@ Return ONLY JSON:
         aiResult.missingSkills = Array.isArray(aiResult.missingSkills) ? aiResult.missingSkills.map(s => s.toString().trim()).filter(Boolean) : missingSkillsPre;
         aiResult.requiredSkills = Array.isArray(aiResult.requiredSkills) ? aiResult.requiredSkills.map(s => s.toString().trim()).filter(Boolean) : [];
         aiResult.matchedSkills = Array.isArray(aiResult.matchedSkills) ? aiResult.matchedSkills.map(s => s.toString().trim()).filter(Boolean) : [];
-        if (aiResult.score == null || isNaN(aiResult.score)) aiResult.score = baseScore;
-        const jobTitle = String(aiResult.jobTitle || '').trim();
+        const targetRoleParam = (req.body.targetRole || req.body.role || '').trim();
+        const jobTitle = String(aiResult.jobTitle || targetRoleParam || '').trim() || 'Software Engineer';
 
         let requiredSkills = cleanSkillList(aiResult.requiredSkills.length ? aiResult.requiredSkills : jdSkills);
         if (requiredSkills.length < 3) {

@@ -13,6 +13,14 @@ const { generatePuppeteerPDF } = require('./pdfTemplate');
 const router = express.Router();
 const crypto = require('crypto');
 
+// Mount import-service for resume import
+try {
+    const importService = require('./import-service');
+    router.use('/', importService);
+} catch (e) {
+    console.warn('Could not mount import-service in resume.js:', e.message);
+}
+
 async function generatePDFKitBuffer(data, templateId) {
     const tempDir = path.join(__dirname, '..', 'tmp');
     if (!fs.existsSync(tempDir)) {

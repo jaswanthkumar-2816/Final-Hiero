@@ -19,36 +19,36 @@
           --font-display: 'Outfit', sans-serif;
           --transition-speed: 0.25s;
 
-          /* Dark Mode Palette with Exact Brand Electric Neon Green (#07e219) */
-          --bg-color: #07090e;
-          --surface-1: #0d121c;
-          --surface-2: #131b28;
-          --surface-subtle: rgba(255, 255, 255, 0.025);
-          --nav-bg: rgba(7, 9, 14, 0.88);
+          /* Deep Pure Dark Mode Palette with Exact Brand Electric Neon Green (#07e219) */
+          --bg-color: #020302;
+          --surface-1: #060806;
+          --surface-2: #0b0e0b;
+          --surface-subtle: rgba(255, 255, 255, 0.015);
+          --nav-bg: rgba(2, 3, 2, 0.96);
 
-          --card-bg: rgba(13, 18, 28, 0.65);
-          --card-bg-hover: rgba(19, 27, 40, 0.85);
-          --card-border: rgba(255, 255, 255, 0.07);
-          --card-border-hover: rgba(7, 226, 25, 0.4);
-          --card-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.5);
-          --card-shadow-hover: 0 20px 40px -10px rgba(7, 226, 25, 0.15);
+          --card-bg: rgba(6, 8, 6, 0.92);
+          --card-bg-hover: rgba(11, 15, 11, 0.96);
+          --card-border: rgba(255, 255, 255, 0.05);
+          --card-border-hover: rgba(7, 226, 25, 0.45);
+          --card-shadow: 0 14px 36px -8px rgba(0, 0, 0, 0.92);
+          --card-shadow-hover: 0 20px 45px -10px rgba(7, 226, 25, 0.18);
 
           --text-main: #f8fafc;
           --text-muted: #94a3b8;
           --text-subtle: #64748b;
-          --border-color: rgba(255, 255, 255, 0.07);
-          --divider-color: rgba(255, 255, 255, 0.05);
+          --border-color: rgba(255, 255, 255, 0.05);
+          --divider-color: rgba(255, 255, 255, 0.035);
 
           --primary-accent: #07e219;
           --primary-accent-glow: rgba(7, 226, 25, 0.35);
           --primary-accent-subtle: rgba(7, 226, 25, 0.12);
           --nav-active-bg: rgba(7, 226, 25, 0.12);
           --nav-active-text: #07e219;
-          --glow-top: rgba(7, 226, 25, 0.12);
-          --glow-bottom: rgba(56, 189, 248, 0.06);
+          --glow-top: rgba(7, 226, 25, 0.05);
+          --glow-bottom: transparent;
 
-          --sub-card-bg: rgba(255, 255, 255, 0.02);
-          --sub-card-border: rgba(255, 255, 255, 0.05);
+          --sub-card-bg: rgba(255, 255, 255, 0.015);
+          --sub-card-border: rgba(255, 255, 255, 0.04);
 
           --c-green: #07e219;
           --c-green-bg: rgba(7, 226, 25, 0.12);
@@ -134,31 +134,24 @@
           height: 100%;
           pointer-events: none;
           z-index: 0;
-          opacity: 0.55;
+          opacity: 0.12;
         }
 
         .ambient-glow-1 {
           position: fixed;
           top: -120px;
           left: 15%;
-          width: 600px;
-          height: 600px;
+          width: 500px;
+          height: 500px;
           background: radial-gradient(circle, var(--glow-top) 0%, transparent 70%);
-          filter: blur(120px);
-          pointer-events: none;
-          z-index: 0;
-        }
-
-        .ambient-glow-2 {
-          position: fixed;
-          bottom: -150px;
-          right: 10%;
-          width: 700px;
-          height: 700px;
-          background: radial-gradient(circle, var(--glow-bottom) 0%, transparent 70%);
           filter: blur(140px);
           pointer-events: none;
           z-index: 0;
+          opacity: 0.3;
+        }
+
+        .ambient-glow-2 {
+          display: none;
         }
 
         /* =========================================================
@@ -186,32 +179,82 @@
           align-items: center;
           gap: 12px;
           text-decoration: none;
-          color: var(--text-main);
+          color: #ffffff;
           font-weight: 800;
-          font-size: 1.25rem;
+          font-size: 1.5rem;
           letter-spacing: -0.5px;
           font-family: var(--font-display);
+          transition: opacity 0.2s ease;
         }
 
-        .app-logo-box {
-          width: 38px;
-          height: 38px;
-          background: var(--surface-1);
-          border: 1px solid rgba(7, 226, 25, 0.35);
-          border-radius: 10px;
+        .app-brand:hover {
+          opacity: 0.9;
+        }
+
+        .hiero-brand-logo-img {
+          width: 32px;
+          height: 32px;
+          object-fit: contain;
+          display: block;
+          filter: drop-shadow(0 0 10px rgba(7, 226, 25, 0.7));
+          transition: transform 0.2s ease;
+        }
+
+        .app-brand:hover .hiero-brand-logo-img {
+          transform: scale(1.08);
+        }
+
+        .nav-left-group {
           display: flex;
           align-items: center;
-          justify-content: center;
-          position: relative;
-          box-shadow: 0 4px 14px rgba(7, 226, 25, 0.18);
-          overflow: hidden;
+          gap: 18px;
         }
 
-        .app-logo-box img {
-          width: 26px;
-          height: 26px;
-          object-fit: contain;
-          filter: drop-shadow(0 0 6px rgba(7, 226, 25, 0.45));
+        .back-dashboard-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          padding: 7px 16px;
+          background: rgba(255, 255, 255, 0.04);
+          border: 1px solid rgba(255, 255, 255, 0.12);
+          border-radius: 100px;
+          color: var(--text-muted);
+          font-size: 13px;
+          font-weight: 600;
+          text-decoration: none;
+          transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+          cursor: pointer;
+        }
+
+        .back-dashboard-btn i {
+          font-size: 12px;
+          color: var(--primary-accent);
+          transition: transform 0.2s ease;
+        }
+
+        .back-dashboard-btn:hover {
+          color: #ffffff;
+          border-color: var(--primary-accent);
+          background: rgba(7, 226, 25, 0.1);
+          box-shadow: 0 0 14px rgba(7, 226, 25, 0.25);
+        }
+
+        .back-dashboard-btn:hover i {
+          transform: translateX(-3px);
+        }
+
+        [data-theme="light"] .back-dashboard-btn,
+        body.light-mode .back-dashboard-btn {
+          background: #f1f5f9;
+          border-color: #cbd5e1;
+          color: #334155;
+        }
+
+        [data-theme="light"] .back-dashboard-btn:hover,
+        body.light-mode .back-dashboard-btn:hover {
+          background: rgba(5, 190, 20, 0.1);
+          border-color: #05be14;
+          color: #0f172a;
         }
 
         .nav-menu {
@@ -916,22 +959,26 @@
        COMPANY CARDS GRID
        ========================================================= */
         .companies-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(460px, 1fr));
-          gap: 24px;
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
           margin-bottom: 40px;
         }
 
         .company-card {
           background: var(--card-bg);
           border: 1px solid var(--card-border);
-          border-radius: 20px;
-          padding: 26px;
+          border-radius: 14px;
+          padding: 16px 24px;
           box-shadow: var(--card-shadow);
           display: flex;
-          flex-direction: column;
+          flex-direction: row;
+          align-items: center;
           justify-content: space-between;
-          transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+          gap: 20px;
+          cursor: pointer;
+          user-select: none;
+          transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
           position: relative;
           overflow: hidden;
         }
@@ -949,14 +996,378 @@
         }
 
         .company-card:hover {
-          transform: translateY(-4px);
-          border-color: var(--card-border-hover);
-          box-shadow: var(--card-shadow-hover);
-          background: var(--card-bg-hover);
+          transform: translateY(-2px);
+          border-color: var(--primary-accent);
+          background: rgba(7, 226, 25, 0.04);
+          box-shadow: 0 8px 26px -4px rgba(7, 226, 25, 0.22);
         }
 
         .company-card:hover::before {
           opacity: 1;
+        }
+
+        .company-card:hover .company-name-group h3 span:first-child {
+          color: var(--primary-accent);
+          transition: color 0.2s ease;
+        }
+
+        .company-card .view-company-arrow {
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          background: var(--surface-2);
+          border: 1px solid var(--border-color);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: var(--text-subtle);
+          font-size: 0.8rem;
+          transition: all 0.25s ease;
+          flex-shrink: 0;
+        }
+
+        .company-card:hover .view-company-arrow {
+          transform: translateX(4px);
+          background: rgba(7, 226, 25, 0.15);
+          border-color: var(--primary-accent);
+          color: var(--primary-accent);
+          box-shadow: 0 0 12px rgba(7, 226, 25, 0.3);
+        }
+
+        .detail-section {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
+
+        .detail-role-card {
+          background: var(--surface-2);
+          border: 1px solid var(--border-color);
+          border-radius: 16px;
+          padding: 20px;
+          transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .detail-role-card:hover {
+          border-color: rgba(7, 226, 25, 0.4);
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+        }
+
+        .detail-role-card-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          gap: 14px;
+        }
+
+        .role-tech-pill {
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
+          padding: 4px 10px;
+          background: var(--sub-card-bg);
+          border: 1px solid var(--border-color);
+          border-radius: 100px;
+          font-size: 0.78rem;
+          font-weight: 600;
+          color: var(--text-main);
+        }
+
+        .exit-detail-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          padding: 10px 18px;
+          background: rgba(7, 226, 25, 0.1);
+          border: 1px solid rgba(7, 226, 25, 0.35);
+          border-radius: 10px;
+          color: var(--primary-accent);
+          font-weight: 700;
+          font-size: 0.88rem;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+
+        .exit-detail-btn:hover {
+          background: rgba(7, 226, 25, 0.2);
+          border-color: var(--primary-accent);
+          box-shadow: 0 0 16px rgba(7, 226, 25, 0.28);
+          transform: translateX(-3px);
+        }
+
+        /* Unified Minimalist Company Details Page */
+        .company-detail-page-container {
+          padding: 8px 0 60px 0;
+          display: flex;
+          flex-direction: column;
+          gap: 20px;
+          animation: fadeIn 0.2s ease-out;
+        }
+
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(8px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+
+        .detail-page-top-bar {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 16px;
+          padding-bottom: 12px;
+          border-bottom: 1px solid var(--border-color);
+        }
+
+        .detail-breadcrumb {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 0.86rem;
+          color: var(--text-muted);
+        }
+
+        .company-profile-card {
+          background: var(--surface-1);
+          border: 1px solid var(--card-border);
+          border-radius: 20px;
+          padding: 32px;
+          display: flex;
+          flex-direction: column;
+          gap: 22px;
+          box-shadow: var(--card-shadow);
+          position: relative;
+          overflow: hidden;
+        }
+
+        .company-profile-card::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 3px;
+          background: linear-gradient(90deg, transparent, var(--primary-accent), transparent);
+        }
+
+        .profile-header-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 20px;
+          flex-wrap: wrap;
+        }
+
+        .profile-identity-group {
+          display: flex;
+          align-items: center;
+          gap: 20px;
+        }
+
+        .profile-company-name {
+          font-family: var(--font-display);
+          font-size: 2.1rem;
+          font-weight: 800;
+          color: var(--text-main);
+          margin: 0;
+          line-height: 1.2;
+        }
+
+        .profile-company-location {
+          font-size: 0.92rem;
+          color: var(--text-muted);
+          margin-top: 4px;
+        }
+
+        .profile-website-link {
+          color: var(--primary-accent);
+          font-size: 0.88rem;
+          font-weight: 700;
+          text-decoration: none;
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          padding: 8px 18px;
+          background: rgba(7, 226, 25, 0.08);
+          border: 1px solid rgba(7, 226, 25, 0.25);
+          border-radius: 8px;
+          transition: all 0.2s ease;
+        }
+
+        .profile-website-link:hover {
+          background: rgba(7, 226, 25, 0.16);
+          border-color: var(--primary-accent);
+        }
+
+        .profile-section-block {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+          padding-top: 18px;
+          border-top: 1px solid var(--divider-color);
+        }
+
+        .profile-section-heading {
+          font-family: var(--font-display);
+          font-size: 1.15rem;
+          font-weight: 800;
+          color: var(--text-main);
+          margin: 0 0 4px 0;
+          letter-spacing: -0.2px;
+        }
+
+        .profile-summary-text {
+          font-size: 0.94rem;
+          color: var(--text-muted);
+          line-height: 1.65;
+          margin: 0;
+        }
+
+        .profile-culture-row {
+          display: flex;
+          align-items: baseline;
+          gap: 8px;
+          font-size: 0.9rem;
+          color: var(--text-muted);
+          margin-top: 6px;
+        }
+
+        .culture-label {
+          color: var(--primary-accent);
+          font-weight: 700;
+          white-space: nowrap;
+        }
+
+        .culture-text {
+          color: var(--text-muted);
+        }
+
+        /* Minimalist 4-Metric Strip */
+        .profile-metrics-strip {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 16px;
+          padding-top: 18px;
+          border-top: 1px solid var(--divider-color);
+        }
+
+        @media (max-width: 860px) {
+          .profile-metrics-strip {
+            grid-template-columns: repeat(2, 1fr);
+          }
+        }
+        @media (max-width: 480px) {
+          .profile-metrics-strip {
+            grid-template-columns: 1fr;
+          }
+        }
+
+        .profile-metric-item {
+          background: var(--surface-2);
+          border: 1px solid var(--border-color);
+          border-radius: 12px;
+          padding: 14px 18px;
+        }
+
+        .metric-value {
+          font-family: var(--font-display);
+          font-size: 1.25rem;
+          font-weight: 800;
+          color: var(--text-main);
+          line-height: 1.2;
+        }
+
+        .metric-label {
+          font-size: 0.72rem;
+          text-transform: uppercase;
+          font-weight: 700;
+          color: var(--text-subtle);
+          letter-spacing: 0.5px;
+          margin-top: 4px;
+        }
+
+        /* Roles Section */
+        .company-roles-container {
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+        }
+
+        .roles-cards-list {
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+        }
+
+        .clean-role-card {
+          background: var(--surface-1);
+          border: 1px solid var(--card-border);
+          border-radius: 18px;
+          padding: 24px 28px;
+          box-shadow: var(--card-shadow);
+          transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .clean-role-card:hover {
+          border-color: rgba(7, 226, 25, 0.35);
+          box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);
+        }
+
+        .clean-role-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          gap: 16px;
+        }
+
+        .clean-role-title {
+          font-size: 1.2rem;
+          font-weight: 800;
+          color: var(--text-main);
+          margin: 0;
+        }
+
+        .clean-role-comp {
+          margin-top: 6px;
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          color: var(--primary-accent);
+          font-size: 0.92rem;
+          font-weight: 600;
+        }
+
+        .clean-field-label {
+          font-size: 0.76rem;
+          font-weight: 700;
+          color: var(--text-subtle);
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          margin-bottom: 6px;
+        }
+
+        .clean-role-desc {
+          font-size: 0.92rem;
+          color: var(--text-muted);
+          line-height: 1.6;
+          margin: 0;
+        }
+
+        .clean-tech-tag {
+          display: inline-flex;
+          align-items: center;
+          padding: 5px 12px;
+          background: var(--surface-2);
+          border: 1px solid var(--border-color);
+          border-radius: 100px;
+          font-size: 0.8rem;
+          font-weight: 600;
+          color: var(--text-main);
+        }
+
+        .detail-bottom-nav {
+          display: flex;
+          justify-content: flex-start;
+          padding-top: 10px;
         }
 
         .company-card-top {
@@ -1357,12 +1768,12 @@
           position: fixed;
           top: 0;
           right: 0;
-          width: 680px;
-          max-width: 95vw;
+          width: 760px;
+          max-width: 96vw;
           height: 100%;
           background: var(--surface-1);
           border-left: 1px solid var(--border-color);
-          box-shadow: -10px 0 40px rgba(0, 0, 0, 0.6);
+          box-shadow: -12px 0 50px rgba(0, 0, 0, 0.85);
           z-index: 1000;
           transform: translateX(100%);
           transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
@@ -1657,6 +2068,15 @@
             grid-template-columns: 1fr;
           }
         }
+
+        @media (max-width: 600px) {
+          .back-dashboard-btn span {
+            display: none;
+          }
+          .back-dashboard-btn {
+            padding: 7px 11px;
+          }
+        }
       </style>
     </head>
 
@@ -1668,33 +2088,16 @@
 
       <!-- Capsule Top Navigation -->
       <header class="nav-header">
-        <a href="index.html" class="app-brand">
-          <div class="app-logo-box">
-            <img src="logo-hiero.png" alt="Hiero Logo"
-              onerror="this.onerror=null; this.src='hiero-prototype/jss/hiero/hiero-last/public/logo-hiero.png';">
-          </div>
-          <span>HIERO</span>
-        </a>
-
-        <!-- Centered Capsule Menu -->
-        <nav class="nav-menu">
-          <a href="resume-builder.html" class="nav-btn">
-            <i class="fa-solid fa-file-invoice"></i> Resume Builder
+        <div class="nav-left-group">
+          <a href="dashboard.html" class="app-brand">
+            <img src="hiero-logo-icon.png" alt="Hiero Logo" class="hiero-brand-logo-img">
+            <span>Hiero</span>
           </a>
-          <a href="result.html" class="nav-btn">
-            <i class="fa-solid fa-chart-line"></i> Analyse Resume
+          <a href="dashboard.html" class="back-dashboard-btn" id="back-to-dashboard-btn" title="Return to Dashboard">
+            <i class="fa-solid fa-arrow-left"></i>
+            <span>Back to Dashboard</span>
           </a>
-          <a href="companies.html" class="nav-btn active">
-            <span class="active-dot"></span>
-            <i class="fa-solid fa-building"></i> Target Companies
-          </a>
-          <a href="mock-interview.html" class="nav-btn">
-            <i class="fa-solid fa-microphone"></i> Mock Interview
-          </a>
-          <a href="learn.html" class="nav-btn">
-            <i class="fa-solid fa-book-open"></i> Learn Skills
-          </a>
-        </nav>
+        </div>
 
         <!-- Top Right Actions -->
         <div class="nav-actions">
@@ -1771,71 +2174,10 @@
 
       <!-- Editorial Main Container -->
       <main class="container">
-        <div class="masthead-header">
-          <div class="masthead-left">
-            <div class="breadcrumb-row">
-              <span>Dashboard</span>
-              <i class="fa-solid fa-chevron-right" style="font-size: 0.65rem;"></i>
-              <span>Hiring Intelligence</span>
-              <i class="fa-solid fa-chevron-right" style="font-size: 0.65rem;"></i>
-              <span style="color: var(--primary-accent);">Target Companies & Top Roles</span>
-            </div>
-            <h1 class="page-title">Target <span>Companies & Top Roles</span></h1>
-            <p class="page-subtitle">
-              Benchmark your engineering profile against Tier-1 tech giants, AI research labs, and enterprise titans.
-              Analyze interview formats, level expectations, tech stacks, and live match readiness.
-            </p>
-          </div>
-
-          <div class="profile-readiness-badge">
-            <div class="target-profile-pill">
-              <i class="fa-solid fa-crosshairs"></i>
-              <span>Target Profile: Full Stack & AI Systems</span>
-            </div>
-            <div class="readiness-text">Overall Readiness: <b>78% Qualified for Tier-1</b></div>
-          </div>
-        </div>
-
-        <!-- KPI Benchmark Deck -->
-        <section class="kpi-benchmark-deck">
-          <div class="kpi-narrative">
-            <h4>
-              <i class="fa-solid fa-award" style="color: var(--primary-accent);"></i>
-              <span>Tier-1 Engineering Benchmark</span>
-            </h4>
-            <p>
-              Curated intelligence across 17 global leaders and 50+ flagship roles including Big Tech, AI Labs,
-              Enterprise Cloud, and Global Consulting.
-            </p>
-          </div>
-
-          <div class="kpi-stat-block">
-            <div class="kpi-stat-value" id="kpi-companies-count">17</div>
-            <div class="kpi-stat-label">Tracked Orgs</div>
-            <div class="kpi-stat-badge"><i class="fa-solid fa-check"></i> FAANG, AI & Enterprise</div>
-          </div>
-
-          <div class="kpi-stat-block">
-            <div class="kpi-stat-value" id="kpi-roles-count">50+</div>
-            <div class="kpi-stat-label">Active Roles</div>
-            <div class="kpi-stat-badge"><i class="fa-solid fa-arrow-trend-up"></i> High Demand</div>
-          </div>
-
-          <div class="kpi-stat-block">
-            <div class="kpi-stat-value">$295K</div>
-            <div class="kpi-stat-label">Median Total Comp</div>
-            <div class="kpi-stat-badge"><i class="fa-solid fa-bolt"></i> Base + Equity / Bonus</div>
-          </div>
-
-          <div class="kpi-stat-block">
-            <div class="kpi-stat-value" style="color: var(--primary-accent);">15 Roles</div>
-            <div class="kpi-stat-label">High Synergy (&gt;80%)</div>
-            <div class="kpi-stat-badge"><i class="fa-solid fa-circle-check"></i> Ready to Target</div>
-          </div>
-        </section>
-
-        <!-- Interactive Command & Filter Center -->
-        <section class="filter-command-center">
+        <!-- Main Target Companies List View -->
+        <div id="companies-list-view">
+          <!-- Interactive Command & Filter Center -->
+          <section class="filter-command-center">
           <div class="command-top-row">
             <!-- Live Search Input -->
             <div class="search-input-wrapper">
@@ -1863,7 +2205,7 @@
               <!-- View Mode Switcher -->
               <div class="view-mode-tabs">
                 <button class="view-tab-btn active" id="btn-view-grid" onclick="setViewMode('grid')">
-                  <i class="fa-solid fa-border-all"></i> Grid
+                  <i class="fa-solid fa-list"></i> Companies List
                 </button>
                 <button class="view-tab-btn" id="btn-view-matrix" onclick="setViewMode('matrix')">
                   <i class="fa-solid fa-list-ul"></i> Roles List
@@ -1962,40 +2304,11 @@
             </table>
           </div>
         </section>
+        </div> <!-- /#companies-list-view -->
+
+        <!-- Dedicated Full-Page Company Details View -->
+        <div id="company-detail-page-view" style="display: none;"></div>
       </main>
-
-      <!-- Detailed Role Inspection Drawer -->
-      <div class="drawer-overlay" id="drawer-overlay" onclick="closeRoleDrawer()"></div>
-      <aside class="role-detail-drawer" id="role-detail-drawer">
-        <div class="drawer-header">
-          <div class="drawer-title-group">
-            <h3 id="drawer-role-title">Role Title</h3>
-            <div class="drawer-company-meta">
-              <span id="drawer-company-name">Company</span>
-              <span>•</span>
-              <span id="drawer-role-level">Level</span>
-              <span>•</span>
-              <span id="drawer-role-location">Location</span>
-            </div>
-          </div>
-          <button class="drawer-close-btn" onclick="closeRoleDrawer()">
-            <i class="fa-solid fa-xmark"></i>
-          </button>
-        </div>
-
-        <div class="drawer-body" id="drawer-body-content">
-          <!-- Dynamic Drawer Content -->
-        </div>
-
-        <div class="drawer-footer">
-          <a href="resume-builder.html" class="card-secondary-btn" id="drawer-btn-resume">
-            <i class="fa-solid fa-pen-to-square"></i> Optimize Resume for This Role
-          </a>
-          <a href="mock-interview.html" class="primary-action-btn" id="drawer-btn-interview">
-            <i class="fa-solid fa-microphone"></i> Start Role Mock Interview
-          </a>
-        </div>
-      </aside>
 
       <!-- Add Custom Target Company Modal -->
       <div class="modal-overlay" id="add-company-modal">
@@ -2192,7 +2505,7 @@
           {
             id: 'meta',
             name: 'Meta',
-            logoUrl: 'meta.png',
+            logoUrl: 'meta.svg',
             avatarText: 'M',
             tier: 'faang',
             tierLabel: 'Big Tech / FAANG',
@@ -2293,7 +2606,7 @@
           {
             id: 'amazon',
             name: 'Amazon',
-            logoUrl: 'amazon.png',
+            logoUrl: 'amazon.svg',
             avatarText: 'AMZN',
             tier: 'faang',
             tierLabel: 'Big Tech / FAANG',
@@ -2907,14 +3220,14 @@
           const logo = company.logoUrl || '';
           if (logo) {
             return `
-          <div class="company-logo-avatar" style="width: ${size}; height: ${size}; min-width: ${size}; border-radius: 14px; overflow: hidden; display: flex; align-items: center; justify-content: center; background: rgba(7, 226, 25, 0.08); border: 1px solid rgba(7, 226, 25, 0.25);">
-            <img src="${logo}" alt="${company.name}" class="company-brand-logo-img" style="width: 100%; height: 100%; object-fit: cover; display: block;" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';">
+          <div class="company-logo-avatar" style="width: ${size}; height: ${size}; min-width: ${size}; max-width: ${size}; border-radius: 14px; overflow: hidden; display: flex; align-items: center; justify-content: center; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.12); padding: 8px; box-sizing: border-box;">
+            <img src="${logo}" alt="${company.name}" class="company-brand-logo-img" style="max-width: 100%; max-height: 100%; width: 100%; height: 100%; object-fit: contain; object-position: center; display: block; margin: auto;" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';">
             <span class="avatar-fallback-text" style="display: none; font-weight: 800; color: #07e219;">${company.avatarText || company.name.slice(0, 2).toUpperCase()}</span>
           </div>
         `;
           }
           return `
-          <div class="company-logo-avatar" style="width: ${size}; height: ${size}; min-width: ${size}; border-radius: 14px; overflow: hidden; display: flex; align-items: center; justify-content: center; background: rgba(7, 226, 25, 0.08); border: 1px solid rgba(7, 226, 25, 0.25);">
+          <div class="company-logo-avatar" style="width: ${size}; height: ${size}; min-width: ${size}; max-width: ${size}; border-radius: 14px; overflow: hidden; display: flex; align-items: center; justify-content: center; background: rgba(7, 226, 25, 0.08); border: 1px solid rgba(7, 226, 25, 0.25); box-sizing: border-box;">
             <span class="avatar-fallback-text" style="font-weight: 800; color: #07e219;">${company.avatarText || company.name.slice(0, 2).toUpperCase()}</span>
           </div>
         `;
@@ -3029,7 +3342,7 @@
         // ==========================================
         function getFilteredCompanies() {
           const customHRList = loadCustomHRCompanies();
-          const allCompanies = [...customHRList, ...COMPANIES_DATA];
+          const allCompanies = [...COMPANIES_DATA, ...customHRList];
 
           return allCompanies.map(company => {
             // Filter roles inside company
@@ -3078,6 +3391,11 @@
             filtered.sort((a, b) => b.matchingRoles.length - a.matchingRoles.length);
           }
 
+          // Keep companies with logos on top, and companies without logos at the bottom
+          const withLogo = filtered.filter(c => Boolean(c.logoUrl && c.logoUrl.trim()));
+          const withoutLogo = filtered.filter(c => !c.logoUrl || !c.logoUrl.trim());
+          filtered = [...withLogo, ...withoutLogo];
+
           if (filtered.length === 0) {
             container.innerHTML = `
           <div style="grid-column: 1 / -1; padding: 60px 20px; text-align: center; background: var(--surface-1); border: 1px dashed var(--border-color); border-radius: 20px;">
@@ -3092,72 +3410,43 @@
 
           container.innerHTML = filtered.map(company => {
             const tierClass = `tier-${company.tier}`;
-
-            const rolesHtml = company.matchingRoles.map(role => `
-          <div class="role-row-item" onclick="openRoleDrawer('${company.id}', '${role.id}')">
-            <div class="role-title-meta">
-              <div class="role-title-line">
-                <span class="role-name">${role.title}</span>
-                <span class="role-level-tag">${role.level}</span>
-              </div>
-              <div class="role-comp-meta">
-                <span><i class="fa-solid fa-money-bill-wave" style="color: var(--primary-accent); margin-right: 4px;"></i><b>${role.comp}</b></span>
-                <span>•</span>
-                <span>${role.location}</span>
-              </div>
-            </div>
-            <div class="role-match-score-badge">
-              <span class="match-percent-val match-high">${role.matchScore}%</span>
-              <span class="match-sublabel">Match Fit</span>
-            </div>
-          </div>
-        `).join('');
+            const rolesCount = (company.roles && company.roles.length) || (company.matchingRoles && company.matchingRoles.length) || 0;
 
             return `
-          <article class="company-card">
-            <div>
-              <div class="company-card-top">
-                <div class="company-brand-info">
-                  ${getCompanyLogoHtml(company, '50px')}
-                  <div class="company-name-group">
-                    <h3>
-                      <span>${company.name}</span>
-                      <span class="company-tier-badge ${tierClass}">${company.tierLabel}</span>
-                    </h3>
-                    <div class="company-location">
-                      <i class="fa-solid fa-location-dot"></i>
-                      <span>${company.location}</span>
-                    </div>
-                  </div>
+          <article class="company-card" onclick="openCompanyDetail('${company.id}')" title="Click to view details for ${company.name}">
+            <div class="company-brand-info">
+              ${getCompanyLogoHtml(company, '44px')}
+              <div class="company-name-group">
+                <h3>
+                  <span>${company.name}</span>
+                  <span class="company-tier-badge ${tierClass}">${company.tierLabel}</span>
+                </h3>
+                <div class="company-location">
+                  <i class="fa-solid fa-location-dot"></i>
+                  <span>${company.location}</span>
                 </div>
-
-                <div class="company-hiring-bar">
-                  <div class="hiring-bar-score">${company.hiringBar}</div>
-                  <div class="hiring-bar-label">Hiring Bar</div>
-                </div>
-              </div>
-
-              <p class="company-summary-text">${company.summary}</p>
-
-              <div class="company-interview-strip">
-                <div class="interview-strip-item">
-                  <i class="fa-solid fa-diagram-project"></i>
-                  <span><b>Format:</b> ${company.interviewFormat}</span>
-                </div>
-              </div>
-
-              <div class="company-roles-list">
-                ${rolesHtml}
               </div>
             </div>
 
-            <div class="company-card-actions">
-              <button class="card-secondary-btn" onclick="openRoleDrawer('${company.id}', '${company.matchingRoles[0]?.id}')">
-                <i class="fa-solid fa-circle-info"></i> Interview Rounds
-              </button>
-              <button class="card-primary-cta" onclick="applyToCompany('${company.name}', this)">
-                <i class="fa-solid fa-paper-plane"></i> Apply Now →
-              </button>
+            <div style="display: flex; align-items: center; gap: 16px; flex-shrink: 0;">
+              <div class="company-roles-stat" style="display: flex; align-items: center; gap: 8px; padding: 6px 12px; background: rgba(7, 226, 25, 0.06); border: 1px solid rgba(7, 226, 25, 0.22); border-radius: 10px;">
+                <i class="fa-solid fa-briefcase" style="color: var(--primary-accent); font-size: 0.85rem;"></i>
+                <div style="text-align: left;">
+                  <div style="font-family: var(--font-display); font-size: 0.95rem; font-weight: 800; color: var(--text-main); line-height: 1.1;">
+                    ${rolesCount} <span style="font-size: 0.76rem; font-weight: 600; color: var(--text-muted);">${rolesCount === 1 ? 'Role' : 'Roles'}</span>
+                  </div>
+                  <div style="font-size: 0.62rem; text-transform: uppercase; font-weight: 700; color: var(--text-subtle); letter-spacing: 0.4px;">Available</div>
+                </div>
+              </div>
+
+              <div class="company-hiring-bar">
+                <div class="hiring-bar-score">${company.hiringBar}</div>
+                <div class="hiring-bar-label">Hiring Bar</div>
+              </div>
+
+              <div class="view-company-arrow">
+                <i class="fa-solid fa-chevron-right"></i>
+              </div>
             </div>
           </article>
         `;
@@ -3278,7 +3567,7 @@
           document.getElementById('btn-view-matrix').classList.toggle('active', mode === 'matrix');
           document.getElementById('btn-view-compare').classList.toggle('active', mode === 'compare');
 
-          document.getElementById('companies-grid-container').style.display = mode === 'grid' ? 'grid' : 'none';
+          document.getElementById('companies-grid-container').style.display = mode === 'grid' ? 'flex' : 'none';
           document.getElementById('role-matrix-container').style.display = mode === 'matrix' ? 'flex' : 'none';
           document.getElementById('comparison-section').style.display = mode === 'compare' ? 'block' : 'none';
 
@@ -3300,96 +3589,256 @@
         }
 
         // ==========================================
-        // 4. ROLE DETAIL INSPECTION DRAWER
+        // 4. DEDICATED FULL-PAGE COMPANY DETAILS
         // ==========================================
-        function openRoleDrawer(companyId, roleId) {
-          const company = COMPANIES_DATA.find(c => c.id === companyId);
+        function openCompanyDetail(companyId, shouldPushState = true) {
+          const customHRList = loadCustomHRCompanies();
+          const allCompanies = [...COMPANIES_DATA, ...customHRList];
+          const company = allCompanies.find(c => c.id === companyId);
           if (!company) return;
-          const role = company.roles.find(r => r.id === roleId) || company.roles[0];
-          if (!role) return;
 
-          document.getElementById('drawer-role-title').textContent = role.title;
-          document.getElementById('drawer-company-name').textContent = company.name;
-          document.getElementById('drawer-role-level').textContent = role.level;
-          document.getElementById('drawer-role-location').textContent = role.location;
+          const tierClass = `tier-${company.tier}`;
+          const roles = company.roles || [];
 
-          const techPills = role.techStack.map(t => `
-        <span style="display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; background: var(--surface-2); border: 1px solid var(--border-color); border-radius: 100px; font-size: 0.78rem; font-weight: 600; color: var(--text-main);">
-          <i class="fa-solid fa-check" style="color: var(--primary-accent); font-size: 0.65rem;"></i> ${t}
-        </span>
-      `).join('');
+          const rolesHtml = roles.length ? roles.map((role) => {
+            const techPills = (role.techStack || []).map(t => `
+              <span class="clean-tech-tag">${t}</span>
+            `).join('');
 
-          const roundsHtml = (role.rounds || []).map((round, idx) => `
-        <div class="round-card">
-          <div class="round-card-header">
-            <h5>${round.name}</h5>
-            <span class="round-duration">${round.duration}</span>
-          </div>
-          <p>${round.desc}</p>
-        </div>
-      `).join('');
+            return `
+              <div class="clean-role-card">
+                <div class="clean-role-header">
+                  <div>
+                    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                      <h4 class="clean-role-title">${role.title}</h4>
+                      <span class="role-level-tag">${role.level || 'Full-time'}</span>
+                    </div>
+                    <div class="clean-role-comp">
+                      <strong>Salary: ${role.comp}</strong>
+                      <span style="color: var(--text-subtle);">•</span>
+                      <span style="color: var(--text-muted); font-size: 0.85rem;">${role.location}</span>
+                    </div>
+                  </div>
+                  <div class="role-match-score-badge">
+                    <span class="match-percent-val match-high">${role.matchScore}%</span>
+                    <span class="match-sublabel">Match Fit</span>
+                  </div>
+                </div>
 
-          document.getElementById('drawer-body-content').innerHTML = `
-        <div class="drawer-stat-grid">
-          <div class="drawer-stat-card">
-            <div class="val">${role.matchScore}%</div>
-            <div class="lbl">Candidate Fit</div>
-          </div>
-          <div class="drawer-stat-card">
-            <div class="val">${role.comp.split(' ')[0]}</div>
-            <div class="lbl">Total Comp (Est.)</div>
-          </div>
-          <div class="drawer-stat-card">
-            <div class="val" style="color: var(--text-main);">${company.hiringBar}</div>
-            <div class="lbl">Hiring Bar</div>
-          </div>
-        </div>
+                ${role.description ? `
+                <div style="margin-top: 14px;">
+                  <div class="clean-field-label">Job Description & Mission</div>
+                  <p class="clean-role-desc">${role.description}</p>
+                </div>` : ''}
 
-        <div>
-          <div class="drawer-section-title">
-            <i class="fa-solid fa-align-left"></i> Role Architecture & Mission
-          </div>
-          <p style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.55;">
-            ${role.description || company.summary}
-          </p>
-        </div>
+                ${techPills ? `
+                <div style="margin-top: 14px;">
+                  <div class="clean-field-label">Required Tech Stack</div>
+                  <div style="display: flex; flex-wrap: wrap; gap: 8px;">${techPills}</div>
+                </div>` : ''}
 
-        <div>
-          <div class="drawer-section-title">
-            <i class="fa-solid fa-layer-group"></i> Expected Core Tech Stack
-          </div>
-          <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-            ${techPills}
-          </div>
-        </div>
+                <div style="margin-top: 20px; display: flex; gap: 12px; flex-wrap: wrap;">
+                  <button class="card-primary-cta" onclick="applyToCompany('${company.name}', this)" style="flex: 1; justify-content: center; min-width: 200px;">
+                    Apply for ${role.title} →
+                  </button>
+                  <a href="mock-interview.html?company=${encodeURIComponent(company.name)}&role=${encodeURIComponent(role.title)}&desc=${encodeURIComponent(role.description || '')}&level=${encodeURIComponent(role.level || '')}&comp=${encodeURIComponent(role.comp || '')}&tech=${encodeURIComponent((role.techStack || []).join(','))}" onclick="startPracticeMockInterview(${JSON.stringify(company.name)}, ${JSON.stringify(role.title)}, ${JSON.stringify(role.description || '')}, ${JSON.stringify(role.level || '')}, ${JSON.stringify(role.comp || '')}, ${JSON.stringify(role.techStack || [])}); return false;" class="card-secondary-btn" style="text-decoration: none;">
+                    Practice Mock Interview
+                  </a>
+                </div>
+              </div>
+            `;
+          }).join('') : `
+            <div style="padding: 28px; text-align: center; background: var(--surface-2); border-radius: 14px; border: 1px dashed var(--border-color); color: var(--text-muted);">
+              <p style="margin: 0; font-size: 0.9rem;">No open roles listed at this moment. Verified opportunities will be published soon.</p>
+            </div>
+          `;
 
-        <div>
-          <div class="drawer-section-title">
-            <i class="fa-solid fa-list-check"></i> Exact Stage-by-Stage Interview Process
-          </div>
-          <div class="interview-timeline">
-            ${roundsHtml || `<p style="color: var(--text-muted); font-size: 0.84rem;">${company.interviewFormat}</p>`}
-          </div>
-        </div>
+          const detailContainer = document.getElementById('company-detail-page-view');
+          const listContainer = document.getElementById('companies-list-view');
+          if (!detailContainer || !listContainer) return;
 
-        <div style="background: var(--surface-2); border: 1px solid var(--border-color); border-radius: 14px; padding: 18px;">
-          <div class="drawer-section-title" style="margin-bottom: 8px;">
-            <i class="fa-solid fa-lightbulb" style="color: var(--c-orange);"></i> Key Preparation Strategy
-          </div>
-          <p style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.45;">
-            Focus on demonstrating high-concurrency patterns, trade-off analysis between latency and consistency, and practical clean code under time constraints.
-          </p>
-        </div>
-      `;
+          detailContainer.innerHTML = `
+            <div class="company-detail-page-container">
+              <!-- Top Navigation Bar with Clear Exit Button -->
+              <div class="detail-page-top-bar">
+                <button class="exit-detail-btn" onclick="returnToCompanyList()" title="Return to target company list">
+                  <i class="fa-solid fa-arrow-left"></i> Back to Company List
+                </button>
+                <div class="detail-breadcrumb">
+                  <span style="cursor: pointer;" onclick="returnToCompanyList()">Target Companies</span>
+                  <span style="color: var(--text-subtle);">/</span>
+                  <span style="color: var(--text-main); font-weight: 700;">${company.name}</span>
+                </div>
+              </div>
 
-          document.getElementById('drawer-overlay').classList.add('active');
-          document.getElementById('role-detail-drawer').classList.add('active');
+              <!-- Unified Company Profile Card -->
+              <div class="company-profile-card">
+                <div class="profile-header-row">
+                  <div class="profile-identity-group">
+                    ${getCompanyLogoHtml(company, '60px')}
+                    <div>
+                      <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                        <h1 class="profile-company-name">${company.name}</h1>
+                        <span class="company-tier-badge ${tierClass}">${company.tierLabel}</span>
+                      </div>
+                      <div class="profile-company-location">${company.location}</div>
+                    </div>
+                  </div>
+                  ${company.website ? `
+                  <a href="${company.website}" target="_blank" rel="noopener noreferrer" class="profile-website-link">
+                    Visit Careers Portal →
+                  </a>` : ''}
+                </div>
+
+                <!-- Company Information Section (Clean: No decorative heading icons) -->
+                <div class="profile-section-block">
+                  <h3 class="profile-section-heading">Company Information</h3>
+                  <p class="profile-summary-text">
+                    ${company.summary || 'Verified partner company connecting directly with HIERO AI talent network.'}
+                  </p>
+                  ${company.culture ? `
+                  <div class="profile-culture-row">
+                    <span class="culture-label">Culture & Values:</span>
+                    <span class="culture-text">${company.culture}</span>
+                  </div>` : ''}
+                </div>
+
+                <!-- Minimalist 4-Metric Strip (Clean: No decorative green icon squares) -->
+                <div class="profile-metrics-strip">
+                  <div class="profile-metric-item">
+                    <div class="metric-value">${company.hiringBar}</div>
+                    <div class="metric-label">Hiring Bar Score</div>
+                  </div>
+
+                  <div class="profile-metric-item">
+                    <div class="metric-value" style="font-size: 1.05rem;">${company.remoteFlex ? company.remoteFlex.split('/')[0].trim() : 'Hybrid / Remote'}</div>
+                    <div class="metric-label">Work Mode</div>
+                  </div>
+
+                  <div class="profile-metric-item">
+                    <div class="metric-value" style="color: var(--primary-accent);">${roles.length} ${roles.length === 1 ? 'Position' : 'Positions'}</div>
+                    <div class="metric-label">Available Roles</div>
+                  </div>
+
+                  <div class="profile-metric-item">
+                    <div class="metric-value" style="font-size: 1.05rem; color: #f59e0b;">${company.l5Comp || 'Competitive'}</div>
+                    <div class="metric-label">Benchmark Comp</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Available Roles & Salary Section (Clean: No decorative heading icons) -->
+              <div class="company-roles-container">
+                <div class="roles-section-header">
+                  <h3 class="profile-section-heading" style="margin: 0;">Available Roles & Salary (${roles.length})</h3>
+                </div>
+                <div class="roles-cards-list">
+                  ${rolesHtml}
+                </div>
+              </div>
+
+              <!-- Bottom Return Button -->
+              <div class="detail-bottom-nav">
+                <button class="card-secondary-btn" onclick="returnToCompanyList()" style="padding: 12px 28px; font-size: 0.95rem; display: inline-flex; align-items: center; gap: 8px;">
+                  <i class="fa-solid fa-arrow-left"></i> Return to Company List
+                </button>
+              </div>
+            </div>
+          `;
+
+          listContainer.style.display = 'none';
+          detailContainer.style.display = 'block';
+
+          if (shouldPushState) {
+            history.pushState({ companyId }, '', 'companies.html?id=' + encodeURIComponent(companyId));
+          }
+
+          window.scrollTo({ top: 0, behavior: 'instant' });
+        }
+
+        function returnToCompanyList(shouldPushState = true) {
+          const detailContainer = document.getElementById('company-detail-page-view');
+          const listContainer = document.getElementById('companies-list-view');
+          if (detailContainer) detailContainer.style.display = 'none';
+          if (listContainer) listContainer.style.display = 'block';
+
+          if (shouldPushState) {
+            history.pushState({}, '', 'companies.html');
+          }
+
+          window.scrollTo({ top: 0, behavior: 'instant' });
+        }
+
+        function closeCompanyDetail() {
+          returnToCompanyList();
+        }
+
+        function openRoleDrawer(companyId, roleId) {
+          openCompanyDetail(companyId);
         }
 
         function closeRoleDrawer() {
-          document.getElementById('drawer-overlay').classList.remove('active');
-          document.getElementById('role-detail-drawer').classList.remove('active');
+          returnToCompanyList();
         }
+
+        function startPracticeMockInterview(companyName, roleTitle, roleDesc, roleLevel, roleComp, techArr) {
+          const techStr = Array.isArray(techArr) ? techArr.join(', ') : (techArr || '');
+          const payload = {
+            company: companyName || '',
+            role: roleTitle || '',
+            desc: roleDesc || '',
+            level: roleLevel || '',
+            comp: roleComp || '',
+            tech: techStr
+          };
+          try {
+            sessionStorage.setItem('targetCompanyRole', JSON.stringify(payload));
+            localStorage.setItem('hieroInterviewContext', JSON.stringify({
+              company: payload.company,
+              jobTitle: payload.role,
+              role: payload.role,
+              jdText: payload.desc,
+              jobDescription: payload.desc,
+              level: payload.level,
+              comp: payload.comp,
+              techStack: payload.tech
+            }));
+          } catch (e) {
+            console.warn('Storage write error:', e);
+          }
+          const url = `mock-interview.html?company=${encodeURIComponent(payload.company)}&role=${encodeURIComponent(payload.role)}&desc=${encodeURIComponent(payload.desc)}&level=${encodeURIComponent(payload.level)}&comp=${encodeURIComponent(payload.comp)}&tech=${encodeURIComponent(payload.tech)}`;
+          window.location.href = url;
+        }
+
+        // Handle Browser Back / Forward navigation
+        window.addEventListener('popstate', () => {
+          const params = new URLSearchParams(window.location.search);
+          const compId = params.get('id') || params.get('company');
+          if (compId) {
+            openCompanyDetail(compId, false);
+          } else {
+            returnToCompanyList(false);
+          }
+        });
+
+        // Close detail view on Escape key
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') {
+            const detailContainer = document.getElementById('company-detail-page-view');
+            if (detailContainer && detailContainer.style.display !== 'none') {
+              returnToCompanyList();
+            }
+          }
+        });
+
+        // Check for ?id=... on initial page load
+        window.addEventListener('DOMContentLoaded', () => {
+          const params = new URLSearchParams(window.location.search);
+          const compId = params.get('id') || params.get('company');
+          if (compId) {
+            openCompanyDetail(compId, false);
+          }
+        });
 
         // ==========================================
         // 5. CUSTOM COMPANY ADDITION MODAL

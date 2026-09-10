@@ -153,7 +153,10 @@ function lazyRouter(modPath) {
     };
 }
 
+// 📄 Resume API & Resume Import Service
+app.use('/api/resume', lazyRouter('./routes/import-service'));
 app.use('/api/resume', lazyRouter('./routes/resume'));
+app.use('/', lazyRouter('./routes/import-service'));
 
 // Support templates and preview folder sharing
 app.use('/templates/previews', express.static(path.join(__dirname, 'hiero-backend', 'templates', 'previews')));
@@ -270,6 +273,14 @@ app.get(['/resume-builder', '/resume-builder.html', '/dashboard/resume-builder']
 app.get(['/resume-form', '/resume-form.html'], (req, res) => {
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     res.sendFile(path.join(resumeBuilderPath, 'resume-form.html'));
+});
+app.get(['/resume-review', '/resume-review.html'], (req, res) => {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.sendFile(path.join(resumeBuilderPath, 'resume-review.html'));
+});
+app.get(['/skill-problems', '/skill-problems.html'], (req, res) => {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.sendFile(path.join(resumeBuilderPath, 'skill-problems.html'));
 });
 app.get(['/pricing', '/pricing.html'], (req, res) => res.sendFile(path.join(__dirname, 'pricing.html')));
 app.get(['/template-verifier', '/template-verifier.html'], (req, res) => res.sendFile(path.join(__dirname, 'template-verifier.html')));

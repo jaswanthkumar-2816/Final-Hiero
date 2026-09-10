@@ -60,17 +60,18 @@
       z-index: 10;
     }
 
-    /* Loading Overlay */
+    /* Loading Overlay — same logo fill as resume builder */
     #loading-overlay {
       position: fixed;
       inset: 0;
-      background: var(--bg-dark);
       z-index: 9999;
+      background: linear-gradient(135deg, #000000 0%, #0c4a16 100%);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+      color: #fff;
+      transition: opacity 0.45s ease;
     }
 
     #loading-overlay.hidden, #loading-overlay[style*="display: none"] {
@@ -79,56 +80,83 @@
       display: none !important;
     }
 
-    .loading-logo {
-      width: 100px;
-      height: 100px;
-      margin-bottom: 24px;
-      animation: logoPulse 2s ease-in-out infinite;
-      filter: drop-shadow(0 0 20px var(--primary-glow));
+    .hiero-gen-logo-box {
+      width: 220px;
+      height: 220px;
+      margin: 0 auto 28px;
+      background: rgba(0, 0, 0, 0.7);
+      border-radius: 20px;
+      padding: 28px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    @keyframes logoPulse {
+    .hiero-gen-logo-box::before {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 0%;
+      background: linear-gradient(180deg, transparent 0%, rgba(42, 224, 35, 0.28) 100%);
+      animation: hieroFillLogo 3s ease-in-out infinite;
+      z-index: 1;
+      border-radius: 20px;
+    }
 
-      0%,
-      100% {
-        transform: scale(1);
-        filter: drop-shadow(0 0 20px var(--primary-glow));
-      }
+    .hiero-gen-logo-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      filter: drop-shadow(0 4px 20px rgba(42, 224, 35, 0.5));
+      position: relative;
+      z-index: 2;
+    }
 
-      50% {
-        transform: scale(1.1);
-        filter: drop-shadow(0 0 40px var(--primary-glow));
-      }
+    @keyframes hieroFillLogo {
+      0% { height: 0%; }
+      50% { height: 100%; }
+      100% { height: 0%; }
+    }
+
+    .loading-status {
+      font-size: 18px;
+      color: #2ae023;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+
+    .loading-sub {
+      font-size: 14px;
+      opacity: 0.8;
+      margin-bottom: 24px;
     }
 
     .loading-bar-bg {
-      width: 180px;
-      height: 2px;
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 10px;
+      width: 280px;
+      height: 10px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 12px;
       overflow: hidden;
-      position: relative;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
     }
 
     .loading-bar {
-      position: absolute;
-      top: 0;
-      left: 0;
       height: 100%;
       width: 40%;
-      background: var(--primary);
-      box-shadow: 0 0 10px var(--primary);
+      background: linear-gradient(90deg, #2ae023, #1a8b17);
+      box-shadow: 0 0 20px rgba(42, 224, 35, 0.6);
       animation: loadingAnim 2s infinite ease-in-out;
     }
 
     @keyframes loadingAnim {
-      0% {
-        left: -40%;
-      }
-
-      100% {
-        left: 100%;
-      }
+      0% { transform: translateX(-100%); width: 40%; }
+      100% { transform: translateX(350%); width: 40%; }
     }
 
     /* Anti-gravity Background */
@@ -302,24 +330,35 @@
       background: rgba(255, 255, 255, 0.05);
     }
 
-    /* Grid */
-    .content-grid {
-      display: grid;
-      grid-template-columns: 1fr 520px;
-      gap: 40px;
-      align-items: start;
+    html[data-theme="light"] .lang-tabs,
+    body.light-mode .lang-tabs {
+      background: #e2e8f0;
+      border: 1px solid rgba(15, 23, 42, 0.16);
     }
 
-    @media (max-width: 1200px) {
-      .content-grid {
-        grid-template-columns: 1fr;
-      }
+    html[data-theme="light"] .lang-tab,
+    body.light-mode .lang-tab {
+      color: #0f172a;
+    }
 
-      .sidebar {
-        max-width: 800px;
-        width: 100%;
-        margin: 0 auto;
-      }
+    html[data-theme="light"] .lang-tab.active,
+    body.light-mode .lang-tab.active {
+      background: var(--primary);
+      color: #041204;
+    }
+
+    html[data-theme="light"] .count-badge,
+    body.light-mode .count-badge {
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+
+    /* Grid */
+    .content-grid {
+      display: block;
+      max-width: 1040px;
+      margin: 0 auto;
+      width: 100%;
     }
 
     /* Sections */
@@ -602,6 +641,12 @@
       margin-bottom: 8px;
     }
 
+    .resource-pack-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
     .prob-badges {
       display: flex;
       gap: 12px;
@@ -649,33 +694,168 @@
       transform: rotate(-15deg) scale(1.1);
     }
 
-    /* Sidebar / Tutor */
-    .sidebar {
-      position: sticky;
-      top: 40px;
-    }
-
-    .tutor-card {
-      background: var(--glass);
-      border: 2px solid var(--border);
-      border-radius: 28px;
+    /* Floating Orbit Chatbot Widget (Always Easily Accessible) */
+    .orbit-floating-widget {
+      position: fixed;
+      bottom: 24px;
+      right: 28px;
+      z-index: 10000;
       display: flex;
       flex-direction: column;
-      height: 820px;
-      backdrop-filter: blur(20px);
-      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
-      position: relative;
-      overflow: hidden;
+      align-items: flex-end;
+      font-family: var(--font-sans);
     }
 
+    .orbit-float-launcher {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      background: linear-gradient(135deg, #070a07 0%, rgba(4, 171, 7, 0.2) 100%);
+      border: 1.5px solid var(--primary);
+      border-radius: 99px;
+      padding: 10px 22px 10px 14px;
+      color: #fff;
+      cursor: pointer;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), 0 0 25px var(--primary-glow);
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      backdrop-filter: blur(16px);
+    }
+
+    .orbit-float-launcher:hover {
+      transform: translateY(-3px) scale(1.03);
+      border-color: #00ff66;
+      box-shadow: 0 14px 40px rgba(0, 0, 0, 0.9), 0 0 35px rgba(0, 255, 102, 0.6);
+    }
+
+    .launcher-avatar {
+      position: relative;
+      width: 36px;
+      height: 36px;
+      background: var(--primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 14px var(--primary-glow);
+      flex-shrink: 0;
+    }
+
+    .launcher-avatar svg {
+      width: 20px;
+      height: 20px;
+      fill: #000;
+    }
+
+    .launcher-status-dot {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 10px;
+      height: 10px;
+      background: #00ff66;
+      border: 2px solid #000;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #00ff66;
+    }
+
+    .launcher-text {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 0.2px;
+    }
+
+    .launcher-badge {
+      background: rgba(0, 255, 102, 0.15);
+      border: 1px solid rgba(0, 255, 102, 0.3);
+      color: var(--primary);
+      font-size: 11px;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 99px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Floating Chat Window */
+    .orbit-chat-window,
+    .tutor-card {
+      width: 400px;
+      height: min(540px, calc(100vh - 100px));
+      max-height: 560px;
+      background: rgba(8, 12, 8, 0.96);
+      border: 1.5px solid var(--primary);
+      border-radius: 24px;
+      display: flex;
+      flex-direction: column;
+      backdrop-filter: blur(24px);
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85), 0 0 35px rgba(4, 171, 7, 0.25);
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .orbit-chat-window::before,
     .tutor-card::before {
       content: '';
       position: absolute;
       top: 0;
       left: 0;
       right: 0;
-      height: 4px;
+      height: 3px;
       background: linear-gradient(to right, transparent, var(--primary), transparent);
+    }
+
+    .orbit-floating-widget.minimized .orbit-chat-window,
+    .orbit-floating-widget.minimized .tutor-card {
+      display: none;
+    }
+
+    .orbit-floating-widget.minimized .orbit-float-launcher {
+      display: flex;
+    }
+
+    .window-actions {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-win-action {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--glass-border);
+      color: var(--text-muted);
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 12px;
+      transition: all 0.2s;
+    }
+
+    .btn-win-action:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+      border-color: var(--primary);
+    }
+
+    @media (max-width: 768px) {
+      .orbit-floating-widget {
+        bottom: 16px;
+        right: 16px;
+        left: 16px;
+        align-items: stretch;
+      }
+
+      .orbit-chat-window,
+      .tutor-card {
+        width: 100%;
+        height: min(480px, calc(100vh - 80px));
+      }
     }
 
     .tutor-header {
@@ -1131,14 +1311,463 @@
         gap: 32px;
       }
 
+      .resource-pack-grid {
+        grid-template-columns: 1fr;
+      }
+
       .tutor-card {
         height: 600px;
       }
     }
+
+    /* Beginner Friendly & Clean Stepper Styles */
+    .beginner-welcome-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 18px;
+      border-radius: 999px;
+      background: rgba(4, 171, 7, 0.12);
+      border: 1px solid rgba(4, 171, 7, 0.35);
+      color: var(--primary);
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 18px;
+      letter-spacing: 0.3px;
+      box-shadow: 0 0 20px rgba(4, 171, 7, 0.15);
+    }
+
+    .path-stepper-wrap {
+      grid-column: 1 / -1;
+      background: rgba(14, 19, 14, 0.75);
+      border: 1px solid rgba(4, 171, 7, 0.22);
+      border-radius: 20px;
+      padding: 22px 24px;
+      margin-bottom: 24px;
+      backdrop-filter: blur(14px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .path-stepper-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .path-stepper-title {
+      font-size: 13px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .path-stepper-subtitle {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .path-stepper-scroll {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      overflow-x: auto;
+      padding: 6px 2px;
+      scrollbar-width: thin;
+    }
+
+    .step-card {
+      flex: 1;
+      min-width: 175px;
+      max-width: 250px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1.5px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 14px 16px;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      position: relative;
+    }
+
+    .step-card:hover:not(.locked) {
+      border-color: rgba(4, 171, 7, 0.45);
+      background: rgba(4, 171, 7, 0.07);
+      transform: translateY(-2px);
+    }
+
+    .step-card.active {
+      background: rgba(4, 171, 7, 0.12);
+      border-color: var(--primary);
+      box-shadow: 0 4px 20px rgba(4, 171, 7, 0.25);
+    }
+
+    .step-card.completed {
+      border-color: rgba(4, 171, 7, 0.35);
+      background: rgba(4, 171, 7, 0.05);
+    }
+
+    .step-card.locked {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .step-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .step-badge {
+      font-size: 11px;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-muted);
+    }
+
+    .step-card.active .step-badge {
+      background: rgba(4, 171, 7, 0.2);
+      color: var(--primary);
+    }
+
+    .step-card.completed .step-badge {
+      background: rgba(4, 171, 7, 0.2);
+      color: var(--primary);
+    }
+
+    .step-status-icon {
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .step-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.3;
+    }
+
+    .step-card.active .step-title {
+      color: #fff;
+    }
+
+    .step-sub-status {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .step-card.active .step-sub-status {
+      color: var(--primary);
+    }
+
+    .step-card-arrow {
+      color: rgba(255, 255, 255, 0.2);
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    /* Friendly Active Module Panel */
+    .friendly-active-panel {
+      grid-column: 1 / -1;
+      background: rgba(12, 17, 13, 0.88);
+      border: 1.5px solid rgba(4, 171, 7, 0.3);
+      border-radius: 24px;
+      padding: 28px;
+      margin-bottom: 28px;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45), 0 0 24px rgba(4, 171, 7, 0.08);
+      backdrop-filter: blur(16px);
+      animation: fadeInUp 0.4s ease-out;
+    }
+
+    .panel-welcome-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 20px;
+      border-radius: 16px;
+      margin-bottom: 24px;
+      background: rgba(4, 171, 7, 0.08);
+      border: 1px solid rgba(4, 171, 7, 0.22);
+    }
+
+    .panel-welcome-icon {
+      font-size: 26px;
+      color: var(--primary);
+      flex-shrink: 0;
+    }
+
+    .panel-welcome-title {
+      font-size: 13.5px;
+      font-weight: 800;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 3px;
+    }
+
+    .panel-welcome-msg {
+      font-size: 13.5px;
+      color: var(--text-main);
+      line-height: 1.45;
+    }
+
+    .video-player-frame {
+      border-radius: 18px;
+      overflow: hidden;
+      border: 1.5px solid rgba(4, 171, 7, 0.25);
+      background: #000;
+      margin-bottom: 20px;
+    }
+
+    .video-player-header {
+      padding: 12px 18px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--primary);
+      background: rgba(4, 171, 7, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(4, 171, 7, 0.15);
+    }
+
+    .takeaways-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 16px;
+      padding: 18px 20px;
+      margin-bottom: 20px;
+    }
+
+    .takeaways-title {
+      font-size: 12.5px;
+      font-weight: 800;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .takeaway-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .takeaway-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .takeaway-item i {
+      color: var(--primary);
+      margin-top: 3px;
+      font-size: 13px;
+      flex-shrink: 0;
+    }
+
+    .takeaway-item strong {
+      color: var(--text-main);
+    }
+
+    /* Orbit Quick Prompts */
+    .quick-prompts-container {
+      padding: 10px 16px;
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      background: rgba(0, 0, 0, 0.25);
+      border-top: 1px solid var(--glass-border);
+      scrollbar-width: none;
+    }
+
+    .quick-prompts-container::-webkit-scrollbar {
+      display: none;
+    }
+
+    .quick-prompt-chip {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(4, 171, 7, 0.25);
+      color: var(--text-main);
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: inherit;
+    }
+
+    .quick-prompt-chip:hover {
+      background: rgba(4, 171, 7, 0.15);
+      border-color: var(--primary);
+      color: #fff;
+      transform: translateY(-1px);
+    }
+
+    /* Missing Skills & Language Selection Flow */
+    .selection-flow-card {
+      background: rgba(14, 19, 14, 0.85);
+      border: 1.5px solid rgba(4, 171, 7, 0.28);
+      border-radius: 24px;
+      padding: 28px;
+      margin-bottom: 30px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 25px rgba(4, 171, 7, 0.08);
+      backdrop-filter: blur(16px);
+    }
+
+    .step-indicator-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 14px;
+      border-radius: 8px;
+      background: rgba(4, 171, 7, 0.15);
+      border: 1px solid rgba(4, 171, 7, 0.35);
+      color: var(--primary);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .step-title-text {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 6px;
+      letter-spacing: -0.5px;
+    }
+
+    .step-subtitle-text {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      margin-bottom: 18px;
+      line-height: 1.5;
+    }
+
+    .missing-skills-picker {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .missing-skill-chip {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1.5px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 10px 18px;
+      color: var(--text-main);
+      font-size: 13.5px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.25s ease;
+      user-select: none;
+    }
+
+    .missing-skill-chip:hover {
+      background: rgba(4, 171, 7, 0.08);
+      border-color: rgba(4, 171, 7, 0.45);
+      transform: translateY(-2px);
+    }
+
+    .missing-skill-chip.active {
+      background: rgba(4, 171, 7, 0.18);
+      border-color: var(--primary);
+      color: #fff;
+      box-shadow: 0 0 20px rgba(4, 171, 7, 0.3);
+    }
+
+    .missing-skill-chip .skill-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--text-muted);
+    }
+
+    .missing-skill-chip.active .skill-dot {
+      background: var(--primary);
+      box-shadow: 0 0 8px var(--primary);
+    }
+
+    .missing-skill-chip .skill-badge {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .missing-skill-chip.active .skill-badge {
+      background: rgba(4, 171, 7, 0.25);
+      color: var(--primary);
+    }
+
+    .step-divider {
+      height: 1px;
+      background: rgba(255, 255, 255, 0.08);
+      margin: 24px 0 20px 0;
+    }
+
+    .btn-solve-problems {
+      background: linear-gradient(135deg, var(--primary), #00e676);
+      color: #000;
+      border: none;
+      padding: 14px 28px;
+      border-radius: 14px;
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 0 25px var(--primary-glow);
+      transition: all 0.25s ease;
+      white-space: nowrap;
+    }
+
+    .btn-solve-problems:hover {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 0 35px var(--primary-glow);
+    }
   </style>
 </head>
 
-<body>
+<body class="learn-page">
   <canvas id="antigravity-bg"></canvas>
 
   <!-- Mobile Warning Overlay -->
@@ -1158,7 +1787,11 @@
   </div>
 
   <div id="loading-overlay">
-    <img src="logo-hiero.png" alt="Hiero" class="loading-logo">
+    <div class="hiero-gen-logo-box">
+      <img src="logohiero.png" alt="Hiero">
+    </div>
+    <div class="loading-status">Generating your path</div>
+    <div class="loading-sub">Finding videos and problems for this skill</div>
     <div class="loading-bar-bg">
       <div class="loading-bar"></div>
     </div>
@@ -1189,77 +1822,103 @@
       <button class="btn-back" onclick="window.history.back()"><i class="fa-solid fa-arrow-left"></i> RETURN TO ANALYSIS</button>
     </div>
 
-    <div class="hero">
-      <p id="sub-header">Specialized Roadmap for</p>
-      <h1 id="skill-display">Mastering <span>%SKILL%</span></h1>
-      <p>Hand-picked lessons, interactive challenges, and an expert AI mentor to accelerate your growth.</p>
+    <!-- Step 1 & Step 2 Selection Flow -->
+    <div class="selection-flow-card">
+      <div class="step-indicator-tag"><i class="fa-solid fa-bullseye"></i> STEP 1 • MISSING SKILLS FROM YOUR RESUME & JOB DESCRIPTION</div>
+      <h2 class="step-title-text">Select the topic you want to learn:</h2>
+      <p class="step-subtitle-text">These skills were identified as gaps from your resume analysis. Click any topic to start learning from complete scratch:</p>
+      <div class="missing-skills-picker" id="missing-skills-picker">
+        <!-- Dynamically injected by JS -->
+      </div>
 
+      <div class="step-divider"></div>
+
+      <div class="step-indicator-tag"><i class="fa-solid fa-language"></i> STEP 2 • CHOOSE YOUR PREFERRED LANGUAGE</div>
+      <h2 class="step-title-text" style="font-size: 19px; margin-bottom: 8px;">Select tutorial language:</h2>
       <div class="lang-tabs" id="language-switcher">
         <!-- Injected by JS -->
       </div>
     </div>
 
+
+
     <div class="content-grid">
       <div class="main-content">
         <section class="video-section">
           <div class="section-header">
-            <h2>Recommended Tutorials</h2>
-            <span class="count-badge" id="video-count">0 tutorials found</span>
+            <h2>Recommended Tutorials (From Scratch)</h2>
+            <span class="count-badge" id="video-count">3 videos · English</span>
           </div>
           <div class="video-grid" id="video-container">
             <!-- Injected by JS -->
           </div>
         </section>
-
-        <section class="problems-section">
-          <div class="section-header">
-            <h2>Practical Challenges</h2>
-            <span class="count-badge">Build expertise through doing</span>
-          </div>
-          <div class="problem-list" id="problem-container">
-            <!-- Injected by JS -->
-          </div>
-        </section>
       </div>
+    </div>
+  </div>
 
-      <aside class="sidebar">
-        <div class="tutor-card">
-          <div class="tutor-header">
-            <div class="tutor-avatar">
-              <svg viewBox="0 0 24 24">
-                <path
-                  d="M12,2A10,10,0,0,0,2,12a9.89,9.89,0,0,0,2.26,6.33l-2,2a1,1,0,0,0,-1 1.05A1,1,0,0,0,2.15,22h19.7a1,1,0,0,0,.85-1.52l-2-2A10,10,0,0,0,12,2Zm0,18a8,8,0,0,1,-5.55,-2.25l1.42,-1.42a1,1,0,0,0,-1.42,-1.42L5,16.33A8,8,0,1,1,12,20Z" />
-                <circle cx="12" cy="11" r="3" />
-                <path d="M12,14a5,5,0,0,0,-5,-5A5,5,0,0,0,7,14Z" opacity="0" />
-              </svg>
-            </div>
-            <div class="tutor-header-text">
-              <h3>Orbit</h3>
-              <div class="online-status">
-                <div class="status-dot"></div>
-                Active Now
-              </div>
-            </div>
-          </div>
-          <div class="chat-body" id="chat-container">
-            <div class="message bot">
-              Hey there! I'm Orbit, your specialized AI tutor for <strong id="skill-context-name">this skill</strong>.
-              Whether you're stuck on a concept or need a hint for a problem, just ask!
-            </div>
-          </div>
-          <div class="chat-footer">
-            <input type="text" class="chat-input" id="chat-input" placeholder="Type your question...">
-            <button class="send-btn" id="chat-send-btn">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                stroke-linejoin="round">
-                <line x1="22" y1="2" x2="11" y2="13"></line>
-                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-              </svg>
-            </button>
+  <!-- Floating Orbit AI Assistant (Easily Accessible at All Times) -->
+  <div class="orbit-floating-widget" id="orbit-floating-widget">
+    <!-- Minimized Floating Launcher Pill -->
+    <button type="button" class="orbit-float-launcher" id="orbit-float-launcher" onclick="toggleOrbitWidget(true)">
+      <div class="launcher-avatar">
+        <svg viewBox="0 0 24 24">
+          <path d="M12,2A10,10,0,0,0,2,12a9.89,9.89,0,0,0,2.26,6.33l-2,2a1,1,0,0,0,-1 1.05A1,1,0,0,0,2.15,22h19.7a1,1,0,0,0,.85-1.52l-2-2A10,10,0,0,0,12,2Zm0,18a8,8,0,0,1,-5.55,-2.25l1.42,-1.42a1,1,0,0,0,-1.42,-1.42L5,16.33A8,8,0,1,1,12,20Z" />
+          <circle cx="12" cy="11" r="3" />
+          <path d="M12,14a5,5,0,0,0,-5,-5A5,5,0,0,0,7,14Z" opacity="0" />
+        </svg>
+        <span class="launcher-status-dot"></span>
+      </div>
+      <span class="launcher-text">Ask Orbit AI</span>
+      <span class="launcher-badge">Online</span>
+    </button>
+
+    <!-- Expanded Chat Window -->
+    <div class="orbit-chat-window" id="orbit-chat-window">
+      <div class="tutor-header">
+        <div class="tutor-avatar">
+          <svg viewBox="0 0 24 24">
+            <path d="M12,2A10,10,0,0,0,2,12a9.89,9.89,0,0,0,2.26,6.33l-2,2a1,1,0,0,0,-1 1.05A1,1,0,0,0,2.15,22h19.7a1,1,0,0,0,.85-1.52l-2-2A10,10,0,0,0,12,2Zm0,18a8,8,0,0,1,-5.55,-2.25l1.42,-1.42a1,1,0,0,0,-1.42,-1.42L5,16.33A8,8,0,1,1,12,20Z" />
+            <circle cx="12" cy="11" r="3" />
+            <path d="M12,14a5,5,0,0,0,-5,-5A5,5,0,0,0,7,14Z" opacity="0" />
+          </svg>
+        </div>
+        <div class="tutor-header-text">
+          <h3>Orbit AI Study Buddy</h3>
+          <div class="online-status">
+            <div class="status-dot"></div>
+            Active Now • Instant Help
           </div>
         </div>
-      </aside>
+        <div class="window-actions">
+          <button type="button" class="btn-win-action" onclick="toggleOrbitWidget(false)" title="Minimize chat">
+            <i class="fa-solid fa-minus"></i>
+          </button>
+        </div>
+      </div>
+      <div class="chat-body" id="chat-container">
+        <div class="message bot">
+          Hey there! I'm Orbit, your personal study buddy for <strong id="skill-context-name">this skill</strong>.
+          Don't worry if any concept is brand new to you — there are no silly questions! Ask me anything in plain English.
+        </div>
+      </div>
+      <div class="quick-prompts-container" id="quick-prompts">
+        <button type="button" class="quick-prompt-chip" onclick="sendQuickPrompt('Can you explain this skill in simple, beginner-friendly terms?')">💡 Explain like I'm 5</button>
+        <button type="button" class="quick-prompt-chip" onclick="sendQuickPrompt('Can you give me a simple real-life example of how this is used?')">📝 Real-world example</button>
+        <button type="button" class="quick-prompt-chip" onclick="sendQuickPrompt('Why is this skill important and what should I focus on first?')">❓ Why do we need this?</button>
+      </div>
+      <div class="chat-footer">
+        <input type="text" class="chat-input" id="chat-input" placeholder="Ask Orbit anything in plain English...">
+        <button class="send-btn" id="chat-send-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+            stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+        </button>
+      </div>
     </div>
+  </div>
   </div>
 
   <!-- Skill Selector Overlay -->
@@ -1388,23 +2047,25 @@
 
       const params = new URLSearchParams(window.location.search);
       const urlSkill = params.get('skill');
-      currentLang = (params.get('language') || params.get('lang') || 'english').toLowerCase();
+      const track = params.get('track') || 'beginner';
+      currentLang = (params.get('language') || params.get('lang') || localStorage.getItem('userLanguage') || 'english').toLowerCase();
+      const langNameMap = { en: 'english', hi: 'hindi', te: 'telugu', ta: 'tamil', kn: 'kannada', ml: 'malayalam' };
+      currentLang = langNameMap[currentLang] || currentLang;
 
-      if (!urlSkill) {
-        const stored = localStorage.getItem('analysisResult');
-        if (stored) {
-          try {
-            const data = JSON.parse(stored).data || JSON.parse(stored);
-            const missing = data.missingSkills || [];
-            if (missing.length > 0) {
-              showSelector(missing);
-              return;
-            }
-          } catch (e) {}
-        }
+      // Extract current skill from URL or local storage
+      let initialSkill = urlSkill ? urlSkill.split(',')[0].trim() : null;
+      if (!initialSkill) {
+        try {
+          const stored = JSON.parse(localStorage.getItem('analysisResult') || localStorage.getItem('resumeAnalysis') || '{}');
+          const data = stored.data || stored;
+          const missing = data.missingSkills || stored.missingSkills || [];
+          if (Array.isArray(missing) && missing.length) {
+            initialSkill = missing[0];
+          }
+        } catch (e) {}
       }
+      currentSkill = initialSkill || 'Unit/Integration testing';
 
-      currentSkill = (urlSkill || 'React').split(',')[0].trim();
       startLearning();
     }
 
@@ -1523,15 +2184,107 @@
       panel.classList.add('active');
       
       document.getElementById('confirm-learn-btn').onclick = () => {
-        document.getElementById('selector-overlay').classList.remove('active');
-        currentSkill = skill;
-        startLearning();
+        window.location.href = `quiz.html?skill=${encodeURIComponent(skill)}`;
       };
     }
 
+    function setupMissingSkills() {
+      const container = document.getElementById('missing-skills-picker');
+      if (!container) return;
+      container.innerHTML = '';
+
+      let skills = [];
+      try {
+        const stored = JSON.parse(localStorage.getItem('analysisResult') || localStorage.getItem('resumeAnalysis') || '{}');
+        const data = stored.data || stored;
+        if (Array.isArray(data.missingSkills) && data.missingSkills.length) {
+          skills = data.missingSkills;
+        } else if (Array.isArray(stored.missingSkills) && stored.missingSkills.length) {
+          skills = stored.missingSkills;
+        }
+      } catch (e) {}
+
+      if (!skills.length) {
+        skills = [
+          'Unit/Integration testing',
+          'Docker & Containers',
+          'Git & CI/CD Workflows',
+          'REST APIs & Microservices',
+          'SQL & Database Optimization',
+          'React State Management'
+        ];
+      }
+
+      if (currentSkill && !skills.some(s => s.toLowerCase() === currentSkill.toLowerCase())) {
+        skills.unshift(currentSkill);
+      }
+
+      skills.forEach((sk) => {
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        const isAct = sk.toLowerCase() === currentSkill.toLowerCase();
+        chip.className = `missing-skill-chip ${isAct ? 'active' : ''}`;
+        
+        let icon = 'fa-solid fa-code';
+        const low = sk.toLowerCase();
+        if (low.includes('test')) icon = 'fa-solid fa-vial';
+        else if (low.includes('docker') || low.includes('container')) icon = 'fa-brands fa-docker';
+        else if (low.includes('git') || low.includes('ci')) icon = 'fa-brands fa-git-alt';
+        else if (low.includes('api') || low.includes('rest')) icon = 'fa-solid fa-network-wired';
+        else if (low.includes('sql') || low.includes('data')) icon = 'fa-solid fa-database';
+        else if (low.includes('react') || low.includes('front')) icon = 'fa-brands fa-react';
+        else if (low.includes('python')) icon = 'fa-brands fa-python';
+
+        chip.innerHTML = `
+          <div class="skill-dot"></div>
+          <i class="${icon}"></i>
+          <span>${sk}</span>
+          <span class="skill-badge">${isAct ? 'Selected' : 'Missing'}</span>
+        `;
+
+        chip.onclick = () => {
+          selectTopic(sk);
+        };
+
+        container.appendChild(chip);
+      });
+    }
+
+    function selectTopic(skill) {
+      currentSkill = skill;
+      const params = new URLSearchParams(window.location.search);
+      params.set('skill', currentSkill);
+      params.set('lang', currentLang);
+      params.set('language', currentLang);
+      params.set('track', 'beginner');
+      window.history.pushState({}, '', `?${params.toString()}`);
+
+      setupMissingSkills();
+      updateSkillLabels();
+      loadMasteryPath();
+      loadData();
+    }
+
+    function updateSkillLabels() {
+      const high = document.getElementById('current-skill-name-highlight');
+      if (high) high.innerText = currentSkill;
+      const slabel = document.getElementById('solve-skill-label');
+      if (slabel) slabel.innerText = currentSkill;
+      const cname = document.getElementById('skill-context-name');
+      if (cname) cname.innerText = currentSkill;
+    }
+
+    function goToSolvePage() {
+      const p = new URLSearchParams();
+      p.set('skill', currentSkill);
+      p.set('lang', currentLang);
+      p.set('track', 'beginner');
+      window.location.href = `solve.html?${p.toString()}`;
+    }
+
     function startLearning() {
-      document.getElementById('skill-display').innerHTML = `Mastering <span>${currentSkill}</span>`;
-      document.getElementById('skill-context-name').innerText = currentSkill;
+      updateSkillLabels();
+      setupMissingSkills();
       setupLanguages();
       loadMasteryPath();
     }
@@ -1543,6 +2296,24 @@
     let activeTopic = null;
     const userId = localStorage.getItem('userId') || localStorage.getItem('user_id') || 'guest-' + Date.now();
 
+    function getLearningTrack() {
+      const fromApi = masteryPathData?.track;
+      const fromUrl = new URLSearchParams(window.location.search).get('track');
+      const track = fromApi || fromUrl;
+      if (track === 'beginner' || track === 'intermediate') return track;
+      if ((masteryPathData?.weakSubConcepts || []).length) return 'intermediate';
+      if (masteryPathData?.currentState === 'LEARNING' && (masteryPathData?.overallMastery || 0) === 0) return 'beginner';
+      return null;
+    }
+
+    function isBeginnerTrack() {
+      return getLearningTrack() === 'beginner';
+    }
+
+    function applyTrackHero() {
+      // Hero banner removed per user request
+    }
+
     async function loadMasteryPath() {
       const loader = document.getElementById('loading-overlay');
       loader.classList.remove('hidden');
@@ -1551,21 +2322,28 @@
         const json = await res.json();
         if (json.success) {
           masteryPathData = json;
+          applyTrackHero();
           renderPathMap(json.topics);
           const active = json.topics.find(t => t.id === json.currentTopicId) || json.topics[0];
           activeTopic = active;
           renderActiveModulePanel(active, json.currentState);
-          document.getElementById('video-count').innerText = `${json.topics.length} Modules · ${json.overallMastery}% Mastered`;
-          // Also load video resources and problems
+          const trackLabel = isBeginnerTrack() ? 'Beginner path' : getLearningTrack() === 'intermediate' ? 'Intermediate gaps' : 'Modules';
+          document.getElementById('video-count').innerText = `${json.topics.length} ${trackLabel} · ${json.overallMastery}% Mastered`;
+          if (isBeginnerTrack()) {
+            renderBeginnerPathResources(json.topics);
+          }
           loadData();
         }
       } catch (err) {
         console.error('Mastery path load failed', err);
-        // Fallback: load as before
         loadData();
       } finally {
         setTimeout(() => loader.classList.add('hidden'), 800);
       }
+    }
+
+    function isLightTheme() {
+      return document.documentElement.getAttribute('data-theme') === 'light' || document.body.classList.contains('light-mode');
     }
 
     function renderPathMap(topics) {
@@ -1573,54 +2351,68 @@
       const existingMap = document.getElementById('mastery-path-map');
       if (existingMap) existingMap.remove();
 
-      const mapDiv = document.createElement('div');
-      mapDiv.id = 'mastery-path-map';
-      mapDiv.style.cssText = 'grid-column: 1/-1; display: flex; align-items: center; gap: 0; overflow-x: auto; padding: 20px 4px; margin-bottom: 12px; scrollbar-width: thin;';
+      const mapWrap = document.createElement('div');
+      mapWrap.id = 'mastery-path-map';
+      mapWrap.className = 'path-stepper-wrap';
+
+      const isBeg = isBeginnerTrack();
+      const activeTopicId = masteryPathData?.currentTopicId || (topics[0]?.id);
+
+      mapWrap.innerHTML = `
+        <div class="path-stepper-header">
+          <div class="path-stepper-title">
+            <i class="fa-solid ${isBeg ? 'fa-route' : 'fa-bullseye'}"></i>
+            ${isBeg ? 'Your Learning Roadmap' : 'Targeted Topics'}
+          </div>
+          <div class="path-stepper-subtitle">
+            ${topics.length} Easy Steps · Learn at your own pace
+          </div>
+        </div>
+        <div class="path-stepper-scroll" id="stepper-scroll-track"></div>
+      `;
+
+      const scrollTrack = mapWrap.querySelector('#stepper-scroll-track');
 
       topics.forEach((topic, i) => {
         const isLocked = topic.locked || topic.state === 'LOCKED';
         const isMastered = topic.state === 'MASTERED';
-        const isActive = topic.id === (masteryPathData?.currentTopicId);
-        const pct = isMastered ? 100 : (isActive ? (topic.masteryPct || 0) : 0);
+        const isActive = topic.id === activeTopicId;
 
-        const node = document.createElement('div');
-        node.style.cssText = `display:flex; flex-direction:column; align-items:center; min-width:130px; cursor:${isLocked ? 'not-allowed' : 'pointer'}; opacity:${isLocked ? '0.4' : '1'}; position:relative;`;
+        const card = document.createElement('div');
+        card.className = `step-card ${isActive ? 'active' : ''} ${isMastered ? 'completed' : ''} ${isLocked ? 'locked' : ''}`;
 
-        const circle = document.createElement('div');
-        circle.style.cssText = `
-          width:54px; height:54px; border-radius:50%;
-          display:flex; align-items:center; justify-content:center;
-          font-size:18px; font-weight:800; position:relative;
-          background:${isMastered ? 'var(--primary)' : isActive ? 'rgba(4,171,7,0.15)' : 'rgba(255,255,255,0.04)'};
-          border:2px solid ${isMastered ? 'var(--primary)' : isActive ? 'var(--primary)' : 'rgba(255,255,255,0.1)'};
-          color:${isMastered ? '#000' : isActive ? 'var(--primary)' : 'var(--text-muted)'};
-          box-shadow:${isActive ? '0 0 24px var(--primary-glow)' : 'none'};
-          ${isActive ? 'animation: pathPulse 2s ease-in-out infinite;' : ''}
+        const statusLabel = isMastered ? '✓ Completed' : isActive ? '🌱 Current Lesson' : isLocked ? '🔒 Locked' : 'Up Next';
+
+        card.innerHTML = `
+          <div class="step-card-top">
+            <span class="step-badge">Step ${i + 1}</span>
+            <span class="step-status-icon" style="color: ${isMastered ? 'var(--primary)' : isActive ? 'var(--primary)' : 'var(--text-muted)'};">
+              ${isMastered ? '<i class="fa-solid fa-circle-check"></i>' : isActive ? '<i class="fa-solid fa-play"></i>' : isLocked ? '<i class="fa-solid fa-lock"></i>' : '<i class="fa-regular fa-circle"></i>'}
+            </span>
+          </div>
+          <div class="step-title" title="${topic.name}">${topic.name}</div>
+          <div class="step-sub-status">${statusLabel}</div>
         `;
-        circle.innerText = isMastered ? '✓' : isLocked ? '🔒' : (i + 1);
 
-        const label = document.createElement('div');
-        label.style.cssText = `font-size:12px; font-weight:700; color:${isActive ? 'var(--primary)' : 'var(--text-main)'}; text-align:center; margin-top:8px; max-width:115px; line-height:1.3;`;
-        label.innerText = topic.name;
+        if (!isLocked) {
+          card.onclick = () => {
+            switchTopic(topic);
+            scrollTrack.querySelectorAll('.step-card').forEach(c => c.classList.remove('active'));
+            card.classList.add('active');
+          };
+        }
 
-        const badgeLabel = document.createElement('div');
-        badgeLabel.style.cssText = `font-size:10px; font-weight:800; text-transform:uppercase; margin-top:4px; padding:2px 8px; border-radius:100px; ${isMastered ? 'background:rgba(4,171,7,0.15); color:var(--primary);' : isActive ? 'background:rgba(251,191,36,0.15); color:#fbbf24;' : 'color:var(--text-muted);'}`;
-        badgeLabel.innerText = isMastered ? 'Strong Area' : isActive ? 'Focus Area' : '';
-
-        node.appendChild(circle);
-        node.appendChild(label);
-        if (badgeLabel.innerText) node.appendChild(badgeLabel);
-        if (!isLocked) node.onclick = () => switchTopic(topic);
-        mapDiv.appendChild(node);
+        scrollTrack.appendChild(card);
 
         if (i < topics.length - 1) {
           const arrow = document.createElement('div');
-          arrow.style.cssText = `width:32px; min-width:32px; height:2px; background:${isMastered ? 'var(--primary)' : 'rgba(255,255,255,0.08)'}; margin-bottom:24px; flex-shrink:0;`;
-          mapDiv.appendChild(arrow);
+          arrow.className = 'step-card-arrow';
+          arrow.innerHTML = '<i class="fa-solid fa-chevron-right"></i>';
+          scrollTrack.appendChild(arrow);
         }
       });
 
-      container.parentElement.insertBefore(mapDiv, container);
+      container.parentElement.insertBefore(mapWrap, container);
     }
 
     function switchTopic(topic) {
@@ -1643,53 +2435,51 @@
 
       const panel = document.createElement('div');
       panel.id = 'mastery-active-panel';
-      panel.style.cssText = `
-        grid-column: 1/-1;
-        background: rgba(4,171,7,0.04);
-        border: 1.5px solid rgba(4,171,7,0.25);
-        border-radius: 24px;
-        padding: 30px;
-        margin-bottom: 24px;
-        animation: fadeInUp 0.4s ease-out;
-      `;
+      panel.className = 'friendly-active-panel';
 
-      const overallScore = masteryPathData?.overallMastery || 60;
+      const overallScore = masteryPathData?.overallMastery || 0;
       const weakConcepts = masteryPathData?.weakSubConcepts || [];
-      
-      let bannerTitle = 'FAST-TRACK ACTIVATED';
-      let bannerMsg = `Based on your diagnostic score (${overallScore}%), HIERO skipped your strong areas. Focus on the identified sub-topics below to increase your job match score!`;
-      let bannerIcon = '<i class="fa-solid fa-bolt" style="color: var(--primary);"></i>';
-      let bannerBg = 'rgba(4, 171, 7, 0.1)';
-      let bannerBorder = 'rgba(4, 171, 7, 0.3)';
+      const beginner = isBeginnerTrack();
+      const video = topic?.resources?.primary;
+      const videoId = extractYouTubeId(video?.url);
+      const embedUrl = videoId ? `https://www.youtube.com/embed/${videoId}` : '';
 
-      if (overallScore < 50) {
-        bannerTitle = 'FOUNDATION PATHWAY';
-        bannerMsg = `Starting from Module 1 to build step-by-step mastery across all core concepts of ${currentSkill}.`;
+      const topics = masteryPathData?.topics || [];
+      const stepIdx = topics.findIndex(t => t.id === topic.id);
+      const stepNumber = stepIdx >= 0 ? stepIdx + 1 : 1;
+
+      let bannerTitle, bannerMsg, bannerIcon;
+      if (beginner) {
+        bannerTitle = `🌱 Step ${stepNumber}: ${topic.name}`;
+        bannerMsg = `Welcome! This lesson covers the fundamentals in simple, clear terms. Watch the video below, take notes at your own pace, and test your understanding whenever you feel comfortable.`;
         bannerIcon = '<i class="fa-solid fa-seedling" style="color: var(--primary);"></i>';
-      } else if (overallScore >= 80) {
-        bannerTitle = 'ADVANCED PLACEMENT';
-        bannerMsg = `Foundational modules passed! You have been placed directly into advanced architecture and production scenarios.`;
-        bannerIcon = '<i class="fa-solid fa-trophy" style="color: var(--primary);"></i>';
+      } else {
+        bannerTitle = `Targeted Topic: ${topic.name}`;
+        bannerMsg = weakConcepts.length
+          ? `Focus on the exact subtopics you missed: ${weakConcepts.join(', ')}. Review the video clips and solve the targeted problems below.`
+          : `Review the key concepts for this module to strengthen your score.`;
+        bannerIcon = '<i class="fa-solid fa-bullseye" style="color: var(--primary);"></i>';
       }
 
       const stateMeta = {
-        NOT_STARTED: { icon: '<i class="fa-solid fa-play"></i>', label: 'NOT STARTED', color: 'var(--text-muted)', ctaText: 'Start Placement Quiz', ctaIcon: '<i class="fa-solid fa-bullseye"></i>' },
-        LEARNING:    { icon: '<i class="fa-solid fa-book"></i>', label: 'LEARNING',     color: '#60a5fa',           ctaText: 'Watch Module Video',  ctaIcon: '<i class="fa-solid fa-play"></i>' },
-        PRACTICING:  { icon: '<i class="fa-solid fa-bolt"></i>', label: 'FOCUS AREA',   color: '#fbbf24',           ctaText: 'Solve Practice Challenge', ctaIcon: '<i class="fa-solid fa-code"></i>' },
-        ASSESSING:   { icon: '<i class="fa-solid fa-file-pen"></i>', label: 'ASSESSMENT READY', color: '#a78bfa',      ctaText: 'Take Assessment (5 Qs)', ctaIcon: '<i class="fa-solid fa-file-lines"></i>' },
-        MASTERED:    { icon: '<i class="fa-solid fa-check"></i>',  label: 'STRONG AREA',  color: 'var(--primary)',    ctaText: 'Move to Next Module', ctaIcon: '<i class="fa-solid fa-arrow-right"></i>' },
-        LOCKED:      { icon: '<i class="fa-solid fa-lock"></i>', label: 'LOCKED',       color: 'var(--text-muted)', ctaText: 'Complete previous module first', ctaIcon: '<i class="fa-solid fa-lock"></i>' }
+        NOT_STARTED: beginner
+          ? { icon: '<i class="fa-solid fa-play"></i>', label: 'Step Ready', color: 'var(--primary)', ctaText: 'Start Lesson', ctaIcon: '<i class="fa-solid fa-play"></i>' }
+          : { icon: '<i class="fa-solid fa-play"></i>', label: 'NOT STARTED', color: 'var(--text-muted)', ctaText: 'Take Diagnostic Quiz', ctaIcon: '<i class="fa-solid fa-bullseye"></i>' },
+        LEARNING:    { icon: '<i class="fa-solid fa-book-open"></i>', label: beginner ? 'Current Lesson' : 'LEARN THIS GAP', color: 'var(--primary)', ctaText: beginner ? 'Watch Lesson Video' : 'Watch gap clip', ctaIcon: '<i class="fa-solid fa-play"></i>' },
+        PRACTICING:  { icon: '<i class="fa-solid fa-bolt"></i>', label: beginner ? 'Ready to Practice' : 'PRACTICE THIS TOPIC', color: '#fbbf24', ctaText: 'Solve practice problems', ctaIcon: '<i class="fa-solid fa-code"></i>' },
+        ASSESSING:   { icon: '<i class="fa-solid fa-file-pen"></i>', label: 'Check Understanding', color: '#a78bfa', ctaText: 'Quick Quiz (5 Qs)', ctaIcon: '<i class="fa-solid fa-file-lines"></i>' },
+        MASTERED:    { icon: '<i class="fa-solid fa-check"></i>',  label: beginner ? 'Lesson Completed' : 'STRONG ON THIS TOPIC', color: 'var(--primary)', ctaText: 'Move to Next Lesson', ctaIcon: '<i class="fa-solid fa-arrow-right"></i>' },
+        LOCKED:      { icon: '<i class="fa-solid fa-lock"></i>', label: 'LOCKED', color: 'var(--text-muted)', ctaText: 'Complete previous lesson first', ctaIcon: '<i class="fa-solid fa-lock"></i>' }
       };
       const meta = stateMeta[state] || stateMeta['NOT_STARTED'];
       const pct = topic.masteryPct || 0;
 
       panel.innerHTML = `
-        <!-- High-Signal Explanation Banner: WHAT -> WHY -> WHAT NEXT -->
-        <div style="background: ${bannerBg}; border: 1px solid ${bannerBorder}; padding: 16px 20px; border-radius: 16px; margin-bottom: 24px; display: flex; align-items: center; gap: 14px;">
-          <div style="font-size: 24px; color: var(--primary);">${bannerIcon}</div>
-          <div>
-            <div style="font-size: 13px; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px;">${bannerTitle}</div>
-            <div style="font-size: 13.5px; color: var(--text-main); line-height: 1.4; font-weight: 500;">${bannerMsg}</div>
+        <div class="panel-welcome-header">
+          <div class="panel-welcome-icon">${bannerIcon}</div>
+          <div style="flex:1;">
+            <div class="panel-welcome-title">${bannerTitle}</div>
+            <div class="panel-welcome-msg">${bannerMsg}</div>
           </div>
         </div>
 
@@ -1698,20 +2488,20 @@
             <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
               <span style="font-size:22px; color: var(--primary);">${meta.icon}</span>
               <div>
-                <div style="font-size:20px; font-weight:800; color:var(--text-main);">${topic.name}</div>
-                <div style="font-size:12px; font-weight:800; letter-spacing:1px; color:${meta.color}; text-transform:uppercase;">${meta.label}</div>
+                <div style="font-size:22px; font-weight:800; color:var(--text-main);">${topic.name}</div>
+                <div style="font-size:12px; font-weight:700; letter-spacing:0.5px; color:${meta.color};">${meta.label}</div>
               </div>
-              <div style="margin-left:auto; font-size:32px; font-weight:800; color:${pct >= 75 ? 'var(--primary)' : pct >= 40 ? '#fbbf24' : 'var(--text-muted)'};">${pct}%</div>
+              <div style="margin-left:auto; font-size:28px; font-weight:800; color:${pct >= 75 ? 'var(--primary)' : pct >= 40 ? '#fbbf24' : 'var(--text-muted)'};">${pct}%</div>
             </div>
 
             <div style="background:rgba(255,255,255,0.06); border-radius:100px; height:8px; overflow:hidden; margin-bottom:12px;">
-              <div style="height:100%; width:${pct}%; background:${pct >= 75 ? 'var(--primary)' : pct >= 40 ? '#fbbf24' : 'rgba(255,255,255,0.2)'}; border-radius:100px; transition:width 0.6s ease;"></div>
+              <div style="height:100%; width:${pct}%; background:${pct >= 75 ? 'var(--primary)' : pct >= 40 ? '#fbbf24' : 'var(--primary)'}; border-radius:100px; transition:width 0.6s ease;"></div>
             </div>
 
-            ${weakConcepts.length > 0 ? `
+            ${!beginner && weakConcepts.length > 0 ? `
               <div style="background:rgba(251,65,65,0.08); border:1px solid rgba(251,65,65,0.25); border-radius:12px; padding:12px 16px;">
                 <div style="font-size:12px; font-weight:800; color:#fb7185; margin-bottom:6px; display:flex; align-items:center; gap:6px;">
-                  <i class="fa-solid fa-circle-exclamation"></i> Identified Gaps Needing Practice:
+                  <i class="fa-solid fa-circle-exclamation"></i> Exact topics to learn for this skill:
                 </div>
                 <div style="display:flex; flex-wrap:wrap; gap:6px;">
                   ${weakConcepts.map(c => `<span style="background:rgba(251,65,65,0.15); color:#fb7185; font-size:11.5px; font-weight:700; padding:4px 12px; border-radius:100px;">${c}</span>`).join('')}
@@ -1725,7 +2515,7 @@
             <button id="mastery-primary-cta" onclick="handleMasteryCTA('${state}', '${topic.id}')" style="
               background: linear-gradient(135deg, var(--primary), #00e676);
               color: #000; border: none;
-              padding: 15px 24px; border-radius: 14px; font-size:15px; font-weight:800;
+              padding: 14px 24px; border-radius: 14px; font-size:14px; font-weight:800;
               cursor:pointer; width:100%; display:flex; align-items:center; justify-content:center; gap:10px;
               box-shadow: 0 0 25px var(--primary-glow);
               transition: all 0.25s ease;
@@ -1733,58 +2523,106 @@
               ${meta.ctaIcon} ${meta.ctaText}
             </button>
           </div>
-          ` : `<div style="color:var(--text-muted);font-size:13px;">Complete previous module first</div>`}
+          ` : `<div style="color:var(--text-muted);font-size:13px;">Complete previous lesson first</div>`}
         </div>
 
-        <!-- 3 Surgical Learning Resources Container -->
-        <div style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 20px; margin-top: 16px;">
-          <div style="font-size: 13px; font-weight: 800; color: var(--text-main); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px; display: flex; align-items: center; gap: 8px;">
-            <i class="fa-solid fa-layer-group" style="color: var(--primary);"></i> Targeted 3-Resource Pack for ${topic.name}
+        ${beginner && embedUrl ? `
+        <div class="video-player-frame">
+          <div class="video-player-header">
+            <span><i class="fa-solid fa-circle-play" style="margin-right:8px;"></i> Lesson Video: ${video?.title || topic.name}</span>
+            ${video?.duration ? `<span><i class="fa-regular fa-clock" style="margin-right:4px;"></i> ${video.duration}</span>` : ''}
           </div>
-          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
-            <div style="background: var(--card-inner-bg); border: 1px solid var(--card-inner-border); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; justify-content: space-between; gap: 12px;">
-              <div>
-                <div style="font-size: 11px; font-weight: 800; color: #ef4444; text-transform: uppercase; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;"><i class="fa-brands fa-youtube"></i> 1. Video Tutorial</div>
-                <div style="font-size: 14px; font-weight: 700; color: var(--text-main); margin-bottom: 4px;">Mastering ${topic.name}</div>
-                <div style="font-size: 12px; color: var(--text-muted);">45 min targeted deep dive</div>
-              </div>
-              <button onclick="handleMasteryCTA('LEARNING', '${topic.id}')" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #ef4444; padding: 8px 14px; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
-                <i class="fa-solid fa-play"></i> Watch Video
-              </button>
-            </div>
+          <iframe src="${embedUrl}" style="width:100%;aspect-ratio:16/9;border:0;display:block;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>
 
-            <div style="background: var(--card-inner-bg); border: 1px solid var(--card-inner-border); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; justify-content: space-between; gap: 12px;">
-              <div>
-                <div style="font-size: 11px; font-weight: 800; color: #60a5fa; text-transform: uppercase; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;"><i class="fa-solid fa-book-open"></i> 2. Deep Dive Guide</div>
-                <div style="font-size: 14px; font-weight: 700; color: var(--text-main); margin-bottom: 4px;">${topic.name} Documentation</div>
-                <div style="font-size: 12px; color: var(--text-muted);">Surgical concept reference</div>
-              </div>
-              <a href="https://google.com/search?q=${encodeURIComponent(currentSkill + ' ' + topic.name + ' documentation')}" target="_blank" style="background: rgba(96, 165, 250, 0.15); border: 1px solid rgba(96, 165, 250, 0.4); color: #60a5fa; padding: 8px 14px; border-radius: 10px; font-size: 12px; font-weight: 700; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 6px;">
-                <i class="fa-solid fa-book-open"></i> Read Documentation
-              </a>
+        <div class="takeaways-card">
+          <div class="takeaways-title">
+            <i class="fa-solid fa-lightbulb"></i> What You'll Learn in This Step
+          </div>
+          <div class="takeaway-list">
+            <div class="takeaway-item">
+              <i class="fa-solid fa-circle-check"></i>
+              <span><strong>The Big Picture:</strong> Understand what ${topic.name} is and why software teams rely on it.</span>
             </div>
-
-            <div style="background: var(--card-inner-bg); border: 1px solid var(--card-inner-border); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; justify-content: space-between; gap: 12px;">
-              <div>
-                <div style="font-size: 11px; font-weight: 800; color: var(--primary); text-transform: uppercase; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;"><i class="fa-solid fa-code"></i> 3. Hands-on Problem</div>
-                <div style="font-size: 14px; font-weight: 700; color: var(--text-main); margin-bottom: 4px;">Interactive Coding Challenge</div>
-                <div style="font-size: 12px; color: var(--text-muted);">Test cases on solve.html</div>
-              </div>
-              <button onclick="handleMasteryCTA('PRACTICING', '${topic.id}')" style="background: rgba(4, 171, 7, 0.15); border: 1px solid var(--primary); color: var(--primary); padding: 8px 14px; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
-                <i class="fa-solid fa-code"></i> Solve Challenge
-              </button>
+            <div class="takeaway-item">
+              <i class="fa-solid fa-circle-check"></i>
+              <span><strong>Step-by-Step Walkthrough:</strong> Follow along with the code examples demonstrated in the video tutorial above.</span>
             </div>
+            <div class="takeaway-item">
+              <i class="fa-solid fa-circle-check"></i>
+              <span><strong>Hands-on Practice:</strong> Solve the beginner practice challenge below whenever you're ready — ask Orbit if you need hints!</span>
+            </div>
+          </div>
+          <div style="display:flex; justify-content:flex-end; margin-top:18px;">
+            <button class="btn-solve-problems" onclick="goToSolvePage()" style="font-size:14px; padding:12px 24px;">
+              <i class="fa-solid fa-code"></i> Solve Problems for ${topic.name} <i class="fa-solid fa-arrow-right"></i>
+            </button>
           </div>
         </div>
+        ` : ''}
+        <div id="exact-learn-clips" style="margin-top:18px;"></div>
       `;
 
       const container = document.getElementById('video-container');
       container.parentElement.insertBefore(panel, container);
+      if (!beginner) loadExactLearnClips(currentSkill, weakConcepts);
+    }
+
+    function renderBeginnerPathResources(topics) {
+      const videoHeader = document.querySelector('.video-section .section-header h2');
+      if (videoHeader) videoHeader.innerText = 'Videos in your language';
+    }
+
+    async function loadExactLearnClips(skillName, weakConcepts) {
+      const host = document.getElementById('exact-learn-clips');
+      if (!host || !weakConcepts || !weakConcepts.length) return;
+      host.innerHTML = `<div style="font-size:13px;font-weight:800;margin-bottom:10px;color:var(--text-main);"><i class="fa-solid fa-scissors" style="color:var(--primary);"></i> Exact timestamp clips (from timed captions, not whole videos)</div>`;
+      const unique = [...new Set(weakConcepts.map(c => String(c)))].slice(0, 3);
+      for (const sub of unique) {
+        const box = document.createElement('div');
+        box.style.cssText = 'margin-bottom:14px;border:1px solid rgba(4,171,7,0.3);border-radius:14px;overflow:hidden;background:rgba(4,171,7,0.05);';
+        box.innerHTML = `<div style="padding:10px 14px;font-size:12px;color:var(--text-muted);"><i class="fa-solid fa-spinner fa-spin"></i> Finding the ${sub} segment…</div>`;
+        host.appendChild(box);
+        try {
+          const res = await fetch('/api/adaptive/match-segment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ skillName, subtopic: sub, questionText: sub })
+          });
+          const m = await res.json();
+          if (!m.success) {
+            box.innerHTML = `<div style="padding:10px 14px;font-size:12px;color:#fb7185;">No caption match for ${sub}</div>`;
+            continue;
+          }
+          box.innerHTML = `
+            <div style="padding:10px 14px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;">
+              <strong style="color:var(--primary);font-size:13px;">${sub}: ${m.startLabel} – ${m.endLabel}</strong>
+              <span style="font-size:11px;color:var(--text-muted);">${m.method}${m.warning ? ' · captions missing, start of video' : ''}</span>
+            </div>
+            <iframe src="${m.embedUrl}" style="width:100%;aspect-ratio:16/9;border:0;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            <div style="padding:8px 14px;"><a href="${m.watchUrl}" target="_blank" rel="noopener" style="color:var(--primary);font-size:12px;font-weight:800;">Open YouTube at ${m.startLabel} →</a></div>
+          `;
+        } catch (e) {
+          box.innerHTML = `<div style="padding:10px 14px;font-size:12px;color:#fb7185;">${e.message}</div>`;
+        }
+      }
     }
 
     async function handleMasteryCTA(state, topicId) {
       if (state === 'NOT_STARTED') {
+        if (isBeginnerTrack()) {
+          try {
+            await fetch('/api/mastery/set-beginner-level', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ userId, skillName: currentSkill })
+            });
+          } catch (e) {}
+          await handleMasteryCTA('LEARNING', topicId);
+          return;
+        }
         showDiagnosticModal();
+        return;
       } else if (state === 'LEARNING') {
         const topic = masteryPathData?.topics?.find(t => t.id === topicId);
         const res = topic?.resources?.primary;
@@ -2016,41 +2854,43 @@
         loader.classList.add('hidden');
         loader.style.display = 'none';
       }
+      const videoBox = document.getElementById('video-container');
+      if (videoBox) {
+        videoBox.innerHTML = `<p style="grid-column:1/-1;color:var(--text-muted);padding:24px 8px;"><i class="fa-solid fa-spinner fa-spin"></i> Loading videos…</p>`;
+      }
 
       try {
         const urlParams = new URLSearchParams(window.location.search);
         const scoreParam = urlParams.get('score') || localStorage.getItem('userScore') || 20;
-        const langParam = urlParams.get('lang') || localStorage.getItem('userLanguage') || 'en';
-        const langCode = langParam.length === 2 ? langParam : (langParam === 'telugu' ? 'te' : langParam === 'hindi' ? 'hi' : langParam === 'tamil' ? 'ta' : langParam === 'kannada' ? 'kn' : langParam === 'malayalam' ? 'ml' : 'en');
+        const rawLang = currentLang || urlParams.get('language') || urlParams.get('lang') || localStorage.getItem('userLanguage') || 'english';
+        const langNameMap = { en: 'english', hi: 'hindi', te: 'telugu', ta: 'tamil', kn: 'kannada', ml: 'malayalam' };
+        const langParam = langNameMap[String(rawLang).toLowerCase()] || String(rawLang).toLowerCase();
+        const searchSkill = skillForVideoSearch(currentSkill);
 
-        // Query Targeted Multilingual Micro-Curriculum Dashboard API
-        const dashRes = await fetch(`/api/learning/dashboard?lang=${langCode}&userId=${encodeURIComponent(userId)}`);
-        const dashJson = await dashRes.json();
+        const videoHeader = document.querySelector('.video-section .section-header h2');
+        if (videoHeader) videoHeader.innerText = `Videos in ${langParam}`;
 
-        if (dashJson && dashJson.skill_tracks && dashJson.skill_tracks.length > 0) {
-          const currentTrack = dashJson.skill_tracks.find(t => t.skill_id.toLowerCase() === currentSkill.toLowerCase().replace(/[^a-z0-9]/g,'')) || dashJson.skill_tracks[0];
-          
-          if (currentTrack && currentTrack.video_modules) {
-            renderTrackModules(currentTrack, dashJson.user_profile);
-            return;
-          }
-        }
-
-        // Fallback API call
         const res = await fetch('/api/analysis/get-videos', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ skill: currentSkill, score: scoreParam, lang: langParam })
+          body: JSON.stringify({ skill: searchSkill, score: scoreParam, lang: langParam })
         });
         const json = await res.json();
         if (json.success) {
           const videoData = json.data.videos || {};
           const videoList = videoData[langParam] || videoData['english'] || (Array.isArray(videoData) ? videoData : Object.values(videoData)[0]) || [];
-          renderVideos(videoList);
-          if (json.data.problems) renderProblems(json.data.problems);
+          renderVideos(Array.isArray(videoList) ? videoList : []);
+          try {
+            if (json.data.problems) renderProblems(json.data.problems);
+          } catch (probErr) {
+            console.error('Failed to render problems', probErr);
+          }
+        } else {
+          renderVideos([]);
         }
       } catch (err) {
         console.error('Failed to load videos/problems', err);
+        renderVideos([]);
       } finally {
         if (loader) {
           loader.classList.add('hidden');
@@ -2225,18 +3065,34 @@
 
     let currentModuleList = [];
 
+    function skillForVideoSearch(name) {
+      const raw = String(name || '').trim();
+      const known = ['html', 'css', 'javascript', 'python', 'sql', 'react', 'java', 'node', 'mongodb', 'django', 'flask', 'typescript', 'kotlin', 'swift', 'docker', 'aws', 'excel'];
+      const lower = raw.toLowerCase();
+      const hit = known.find(k => lower === k || lower.startsWith(k + ' ') || lower.includes(' ' + k + ' ') || lower.includes(k));
+      return hit || raw.split(/[,&]/)[0].trim() || raw;
+    }
+
     function renderVideos(videos) {
       const container = document.getElementById('video-container');
+      if (!container) return;
       container.innerHTML = '';
-      currentModuleList = videos;
-      const displayVideos = (videos || []).slice(0, 3);
-      document.getElementById('video-count').innerText = `${displayVideos.length} Specialized Video Tutorials`;
+      currentModuleList = videos || [];
+      const displayVideos = currentModuleList.filter(v => v && (v.videoId || v.url)).slice(0, 3);
+      const langLabel = (displayVideos[0] && displayVideos[0].language) || currentLang || 'English';
+      const countEl = document.getElementById('video-count');
+      if (countEl) countEl.innerText = `${displayVideos.length} videos · ${langLabel}`;
+
+      if (!displayVideos.length) {
+        container.innerHTML = `<p style="grid-column:1/-1;color:var(--text-muted);padding:24px 8px;">No videos found yet. Try another language tab, or refresh.</p>`;
+        return;
+      }
 
       displayVideos.forEach((v, i) => {
         const card = document.createElement('div');
         card.className = 'video-card';
         card.style.animation = `fadeInUp 0.6s ease-out forwards ${i * 0.1}s`;
-        const duration = (v.duration || 'PT30M').replace('PT','').replace('H','h ').replace('M','m ').replace('S','s');
+        const duration = String(v.duration || 'PT30M').replace('PT','').replace('H','h ').replace('M','m ').replace('S','s');
         const modNum = i + 1;
         const defaultModTitles = [
           'Module 1: Foundations & Core Concepts',
@@ -2246,19 +3102,21 @@
         const modTitle = v.moduleTitle || defaultModTitles[i] || `Module ${modNum}`;
         const level = v.level || (i===0 ? 'Beginner' : i===1 ? 'Intermediate' : 'Advanced');
         const solveId = v.solveId || (i + 1);
-        const langLabel = v.language || 'English';
+        const cardLang = v.language || langLabel;
+        const safeTitle = String(v.title || 'Tutorial').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+        const videoId = v.videoId || String(v.url || '').match(/embed\/([^?&]+)/)?.[1] || '';
 
         card.innerHTML = `
-          <div class="video-thumb" onclick="openVideo('${v.videoId}','${(v.title||'').replace(/'/g,"\\'")}',${i})">
+          <div class="video-thumb" onclick="openVideo('${videoId}','${safeTitle}',${i})">
             <img src="${v.thumbnail || 'https://via.placeholder.com/640x360?text=Tutorial'}" alt="Thumbnail" loading="lazy">
             <div class="play-overlay"><div class="play-icon"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div></div>
             <span class="duration">${duration}</span>
             <div style="position:absolute;top:12px;left:12px;background:rgba(4,171,7,0.9);color:#000;font-weight:800;font-size:11px;padding:4px 10px;border-radius:100px;text-transform:uppercase;">Module ${modNum}</div>
-            <div style="position:absolute;top:12px;right:12px;background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);color:#fff;font-weight:700;font-size:11px;padding:4px 10px;border-radius:100px;">${langLabel}</div>
+            <div style="position:absolute;top:12px;right:12px;background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);color:#fff;font-weight:700;font-size:11px;padding:4px 10px;border-radius:100px;">${cardLang}</div>
           </div>
           <div class="video-info" style="display:flex;flex-direction:column;gap:10px;">
             <div style="font-size:12px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:0.5px;">${modTitle}</div>
-            <div class="video-title" style="cursor:pointer;" onclick="openVideo('${v.videoId}','${(v.title||'').replace(/'/g,"\\'")}',${i})">${v.title}</div>
+            <div class="video-title" style="cursor:pointer;" onclick="openVideo('${videoId}','${safeTitle}',${i})">${v.title || 'Tutorial'}</div>
             <div class="tags" style="display:flex;align-items:center;justify-content:space-between;margin-top:4px;">
               <span class="tag" style="background:rgba(4,171,7,0.15);color:var(--primary);border:1px solid rgba(4,171,7,0.3);">${level}</span>
               <button onclick="window.location.href='solve.html?skill=${encodeURIComponent(currentSkill)}&problem=${solveId}&userId=${userId}'" style="background:linear-gradient(135deg,var(--primary),#00e676);color:#000;border:none;padding:6px 14px;border-radius:100px;font-weight:800;font-size:11.5px;cursor:pointer;display:flex;align-items:center;gap:6px;box-shadow:0 0 12px var(--primary-glow);">
@@ -2267,12 +3125,6 @@
             </div>
           </div>
         `;
-        container.appendChild(card);
-      });
-    }
-              </button>
-            </div>
-          </div>`;
         container.appendChild(card);
       });
     }
@@ -2353,20 +3205,44 @@
       if (!hasProblems) container.innerHTML = `<p class="text-muted">No specific challenges available for this skill yet. Keep exploring!</p>`;
     }
 
+    function toggleOrbitWidget(expand) {
+      const widget = document.getElementById('orbit-floating-widget');
+      if (!widget) return;
+      if (typeof expand === 'boolean') {
+        widget.classList.toggle('minimized', !expand);
+      } else {
+        widget.classList.toggle('minimized');
+      }
+    }
 
     function setupLanguages() {
-      const langs = ['English', 'Hindi', 'Telugu', 'Tamil', 'Kannada'];
+      const langs = [
+        { name: 'English', native: 'English', flag: '🇬🇧' },
+        { name: 'Hindi', native: 'हिन्दी', flag: '🇮🇳' },
+        { name: 'Telugu', native: 'తెలుగు', flag: '🇮🇳' },
+        { name: 'Tamil', native: 'தமிழ்', flag: '🇮🇳' },
+        { name: 'Kannada', native: 'ಕನ್ನಡ', flag: '🇮🇳' },
+        { name: 'Malayalam', native: 'മലയാളം', flag: '🇮🇳' }
+      ];
       const container = document.getElementById('language-switcher');
+      if (!container) return;
       container.innerHTML = '';
-      langs.forEach(lang => {
+      langs.forEach(l => {
         const btn = document.createElement('button');
-        const lKey = lang.toLowerCase();
+        const lKey = l.name.toLowerCase();
         btn.className = `lang-tab ${lKey === currentLang ? 'active' : ''}`;
-        btn.innerText = lang;
+        btn.innerHTML = `<span>${l.flag}</span> <span>${l.name}</span> <span style="opacity:0.75;font-size:12px;">(${l.native})</span>`;
         btn.onclick = () => {
           if (currentLang === lKey) return;
           currentLang = lKey;
-          window.history.pushState({}, '', `?skill=${currentSkill}&language=${currentLang}`);
+          localStorage.setItem('userLanguage', currentLang);
+          const track = getLearningTrack() || 'beginner';
+          const params = new URLSearchParams(window.location.search);
+          params.set('skill', currentSkill);
+          params.set('language', currentLang);
+          params.set('lang', currentLang);
+          params.set('track', track);
+          window.history.pushState({}, '', `?${params.toString()}`);
           setupLanguages();
           loadData();
         };
@@ -2427,16 +3303,15 @@
           body: JSON.stringify({ 
             message: text,
             context: learning_context,
-            // Keep existing fields for backward compatibility if needed, 
-            // but the prompt builder will prioritize context
+            skill: currentSkill,
             conversationHistory: conversationHistory,
             tutor_state: tutorState
           })
         });
-        const json = await res.json();
+        const json = await res.json().catch(() => ({}));
 
         loadingMsg.innerText = '';
-        const answer = json.answer || json.token || "I'm sorry, I couldn't process that. Try asking something else!";
+        const answer = json.answer || json.token || (res.ok ? "I'm sorry, I couldn't process that. Try asking something else!" : 'Orbit is waking up — refresh once, then ask again.');
         
         // Simple state update logic
         if (text.toLowerCase().includes('pizza')) tutorState.challenge = "Predicting Pizza Prices";
@@ -2500,6 +3375,12 @@
 
     chatBtn.onclick = () => sendChat(false);
     chatInput.onkeypress = (e) => { if (e.key === 'Enter') sendChat(false); };
+
+    window.sendQuickPrompt = function (text) {
+      if (!chatInput) return;
+      chatInput.value = text;
+      sendChat(false);
+    };
 
     // Modal Chat Bindings
     document.getElementById('modal-chat-send').onclick = () => sendChat(true);
@@ -2689,34 +3570,26 @@
           particles[i].draw();
           particles[i].update();
         }
-        connect();
+        // connect(); - Disabled chaotic spiderweb lines for a serene, clean background
         requestAnimationFrame(animate);
       }
 
       function connect() {
-        ctx.lineWidth = 1;
-        for (let a = 0; a < particles.length; a++) {
-          for (let b = a + 1; b < particles.length; b++) {
-            let dx = particles[a].x - particles[b].x;
-            let dy = particles[a].y - particles[b].y;
-            let distanceSq = dx * dx + dy * dy;
-
-            if (distanceSq < 10000) { // 100 * 100
-              let opacityValue = 1 - (Math.sqrt(distanceSq) / 100);
-              ctx.strokeStyle = `rgba(4, 255, 7, ${opacityValue * 0.25})`;
-              ctx.beginPath();
-              ctx.moveTo(particles[a].x, particles[a].y);
-              ctx.lineTo(particles[b].x, particles[b].y);
-              ctx.stroke();
-            }
-          }
-        }
+        // Disabled for beginner-friendly calm atmosphere
       }
 
       window.addEventListener('resize', resize);
       resize();
       animate();
     })();
+
+    const originalToggleTheme = window.toggleTheme;
+    window.toggleTheme = function () {
+      if (typeof originalToggleTheme === 'function') originalToggleTheme();
+      if (masteryPathData && Array.isArray(masteryPathData.topics)) {
+        renderPathMap(masteryPathData.topics);
+      }
+    };
 
     document.addEventListener('DOMContentLoaded', init);
   </script>

@@ -1,0 +1,1734 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resume Audit & ATS Performance Report | Hiero</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="theme.css">
+  <script src="theme.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    :root {
+      --primary: #2ae023;
+      --primary-hover: #22c01c;
+      --primary-glow: rgba(42, 224, 35, 0.35);
+      --bg-pure: #030704;
+      --card-bg: rgba(13, 20, 15, 0.7);
+      --card-border: rgba(42, 224, 35, 0.2);
+      --text-main: #ffffff;
+      --text-dim: #94a3b8;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --info: #00cec9;
+    }
+
+    body {
+      background-color: var(--bg-pure);
+      color: var(--text-main);
+      min-height: 100vh;
+      overflow-x: hidden;
+      line-height: 1.6;
+      position: relative;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background:
+        radial-gradient(circle at 15% 15%, rgba(42, 224, 35, 0.12) 0%, transparent 50%),
+        radial-gradient(circle at 85% 85%, rgba(42, 224, 35, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(20, 20, 20, 0) 0%, rgba(0, 0, 0, 0.8) 100%),
+        linear-gradient(135deg, #050a05 0%, #0f2410 100%);
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* Top Navigation Header */
+    .top-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 40px;
+      background: rgba(5, 10, 5, 0.85);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(42, 224, 35, 0.15);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: #fff;
+    }
+
+    .brand-logo {
+      width: 32px;
+      height: 32px;
+      object-fit: contain;
+      filter: drop-shadow(0 0 10px rgba(42, 224, 35, 0.5));
+    }
+
+    .brand-title {
+      font-size: 1.35rem;
+      font-weight: 800;
+      letter-spacing: 2px;
+      background: linear-gradient(135deg, #ffffff 0%, #2ae023 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .nav-theme-toggle-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(42, 224, 35, 0.3);
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.15rem;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      flex-shrink: 0;
+    }
+
+    .nav-theme-toggle-btn:hover {
+      background: rgba(42, 224, 35, 0.15);
+      border-color: var(--primary);
+      color: var(--primary);
+      transform: scale(1.05);
+    }
+
+    .nav-btn {
+      padding: 9px 18px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .nav-btn-secondary {
+      background: rgba(255, 255, 255, 0.05);
+      color: #cbd5e1;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .nav-btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      border-color: rgba(42, 224, 35, 0.4);
+    }
+
+    .nav-btn-primary {
+      background: linear-gradient(135deg, #2ae023 0%, #16a34a 100%);
+      color: #000;
+      border: none;
+      font-weight: 700;
+      box-shadow: 0 4px 15px rgba(42, 224, 35, 0.25);
+    }
+
+    .nav-btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(42, 224, 35, 0.4);
+    }
+
+    /* Compact Container */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px 24px 50px;
+    }
+
+    /* Hero Banner */
+    .hero-banner {
+      text-align: center;
+      margin-bottom: 22px;
+    }
+
+    .badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 14px;
+      border-radius: 50px;
+      background: rgba(42, 224, 35, 0.1);
+      border: 1px solid rgba(42, 224, 35, 0.3);
+      color: var(--primary);
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .hero-title {
+      font-size: 1.85rem;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 6px;
+      background: linear-gradient(135deg, #ffffff 30%, #2ae023 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-subtitle {
+      color: var(--text-dim);
+      font-size: 0.92rem;
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    /* Grid Layout */
+    .audit-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      margin-bottom: 30px;
+    }
+
+    /* Card Base */
+    .audit-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 18px 22px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.3s ease;
+    }
+
+    .audit-card:hover {
+      border-color: rgba(42, 224, 35, 0.4);
+    }
+
+    .card-header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .card-title-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .card-icon-bubble {
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.95rem;
+      flex-shrink: 0;
+    }
+
+    .card-icon-appearance {
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--warning);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .card-icon-ats {
+      background: rgba(42, 224, 35, 0.15);
+      color: var(--primary);
+      border: 1px solid rgba(42, 224, 35, 0.3);
+    }
+
+    .card-icon-improvements {
+      background: rgba(0, 206, 201, 0.15);
+      color: var(--info);
+      border: 1px solid rgba(0, 206, 201, 0.3);
+    }
+
+    .card-title {
+      font-size: 1.12rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .card-subtitle {
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      margin-top: 1px;
+    }
+
+    .section-counter {
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      background: rgba(255, 255, 255, 0.06);
+      color: #cbd5e1;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      white-space: nowrap;
+    }
+
+    /* SECTION 1: APPEARANCE FIXES - INDIVIDUAL LINES */
+    .appearance-items {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .fix-line-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-left: 3px solid var(--primary);
+      border-radius: 9px;
+      padding: 9px 15px;
+      transition: all 0.2s ease;
+    }
+
+    .fix-line-item:hover {
+      background: rgba(0, 0, 0, 0.45);
+      border-color: rgba(42, 224, 35, 0.3);
+      transform: translateX(3px);
+    }
+
+    .fix-line-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 210px;
+      flex-shrink: 0;
+    }
+
+    .fix-line-left i {
+      color: var(--warning);
+      font-size: 0.95rem;
+      width: 16px;
+      text-align: center;
+    }
+
+    .fix-line-title {
+      font-weight: 700;
+      font-size: 0.88rem;
+      color: #fff;
+      white-space: nowrap;
+    }
+
+    .fix-line-desc {
+      flex: 1;
+      font-size: 0.83rem;
+      color: #cbd5e1;
+      line-height: 1.4;
+    }
+
+    .fix-line-badge {
+      flex-shrink: 0;
+    }
+
+    .status-badge {
+      padding: 3px 9px;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+
+    .badge-fixed {
+      background: rgba(42, 224, 35, 0.15);
+      color: var(--primary);
+      border: 1px solid rgba(42, 224, 35, 0.3);
+    }
+
+    /* SECTION 2: ATS SCORE - INDIVIDUAL LINES */
+    .ats-container {
+      display: grid;
+      grid-template-columns: 190px 1fr;
+      gap: 22px;
+      align-items: center;
+    }
+
+    @media (max-width: 860px) {
+      .ats-container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .ats-gauge-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 14px;
+      background: rgba(0, 0, 0, 0.35);
+      border-radius: 12px;
+      border: 1px solid rgba(42, 224, 35, 0.2);
+    }
+
+    .radial-chart {
+      position: relative;
+      width: 125px;
+      height: 125px;
+      margin-bottom: 6px;
+    }
+
+    .radial-chart svg {
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg);
+    }
+
+    .radial-chart circle {
+      fill: none;
+      stroke-width: 12;
+      stroke-linecap: round;
+    }
+
+    .circle-bg {
+      stroke: rgba(255, 255, 255, 0.08);
+    }
+
+    .circle-progress {
+      stroke: var(--primary);
+      stroke-dasharray: 440;
+      stroke-dashoffset: 66;
+      transition: stroke-dashoffset 1.5s ease-out;
+      filter: drop-shadow(0 0 8px rgba(42, 224, 35, 0.5));
+    }
+
+    .radial-number {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .radial-score {
+      font-size: 2.1rem;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1;
+    }
+
+    .radial-label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: var(--primary);
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    .score-grade {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .score-subtext {
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      margin-top: 1px;
+    }
+
+    .ats-metrics-list {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .ats-line-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      padding: 8px 12px;
+      transition: all 0.2s ease;
+    }
+
+    .ats-line-item:hover {
+      background: rgba(0, 0, 0, 0.38);
+      border-color: rgba(42, 224, 35, 0.25);
+    }
+
+    .ats-line-name {
+      font-size: 0.84rem;
+      font-weight: 600;
+      color: #fff;
+      width: 170px;
+      flex-shrink: 0;
+    }
+
+    .ats-line-bar-track {
+      width: 120px;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .metric-bar-fill {
+      height: 100%;
+      border-radius: 10px;
+      background: linear-gradient(90deg, #16a34a, #2ae023);
+      box-shadow: 0 0 8px rgba(42, 224, 35, 0.5);
+    }
+
+    .ats-line-val {
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: var(--primary);
+      width: 36px;
+      flex-shrink: 0;
+      text-align: right;
+    }
+
+    .ats-line-tip {
+      flex: 1;
+      font-size: 0.78rem;
+      color: #cbd5e1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .ats-badges-row {
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      background: rgba(42, 224, 35, 0.05);
+      padding: 7px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(42, 224, 35, 0.15);
+    }
+
+    .ats-badge-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--primary);
+      white-space: nowrap;
+    }
+
+    .ats-tag {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #e2e8f0;
+      padding: 2px 8px;
+      border-radius: 5px;
+      font-size: 0.72rem;
+      font-weight: 600;
+    }
+
+    /* SECTION 3: IMPROVEMENTS NEEDED - INDIVIDUAL LINES */
+    .improvements-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .imp-line-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-left: 3px solid var(--info);
+      border-radius: 9px;
+      padding: 9px 14px;
+      transition: all 0.2s ease;
+    }
+
+    .imp-line-item:hover {
+      background: rgba(0, 0, 0, 0.45);
+      border-color: rgba(0, 206, 201, 0.35);
+      transform: translateX(3px);
+    }
+
+    .imp-line-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 195px;
+      flex-shrink: 0;
+    }
+
+    .imp-badge-icon {
+      width: 25px;
+      height: 25px;
+      border-radius: 6px;
+      background: rgba(0, 206, 201, 0.15);
+      color: var(--info);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.78rem;
+      flex-shrink: 0;
+    }
+
+    .imp-line-title {
+      font-size: 0.86rem;
+      color: #fff;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .imp-line-matter {
+      flex: 1;
+      font-size: 0.82rem;
+      color: #cbd5e1;
+      line-height: 1.4;
+    }
+
+    .imp-line-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.04);
+      padding: 3px 9px;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 0.74rem;
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+
+    .tag-before {
+      color: #ef4444;
+      font-weight: 600;
+    }
+
+    .tag-arrow {
+      color: var(--text-dim);
+      font-size: 0.72rem;
+    }
+
+    .tag-after {
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    /* DOWNLOAD SECTION COMPACT */
+    .download-section {
+      background: linear-gradient(135deg, rgba(13, 25, 16, 0.85) 0%, rgba(5, 12, 7, 0.95) 100%);
+      border: 1px solid rgba(42, 224, 35, 0.25);
+      border-radius: 16px;
+      padding: 22px 20px;
+      text-align: center;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+    }
+
+    .download-headline {
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: var(--primary);
+      margin-bottom: 4px;
+    }
+
+    .download-subtext {
+      color: #cbd5e1;
+      font-size: 0.88rem;
+      margin-bottom: 18px;
+      max-width: 550px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .download-cards-row {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+
+    .dl-card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      border-radius: 12px;
+      padding: 14px 16px;
+      width: 200px;
+      transition: all 0.25s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .dl-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--primary);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3), 0 0 15px rgba(42, 224, 35, 0.2);
+    }
+
+    .dl-icon {
+      font-size: 2rem;
+      margin-bottom: 8px;
+    }
+
+    .icon-pdf { color: #ef4444; }
+    .icon-word { color: #00cec9; }
+    .icon-preview { color: var(--primary); }
+
+    .dl-card-title {
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+
+    .dl-card-meta {
+      color: var(--text-dim);
+      font-size: 0.72rem;
+      margin-bottom: 10px;
+    }
+
+    .btn-dl {
+      width: 100%;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+
+    .btn-dl-primary {
+      background: linear-gradient(135deg, #2ae023 0%, #16a34a 100%);
+      color: #000;
+      box-shadow: 0 4px 15px rgba(42, 224, 35, 0.3);
+    }
+
+    .btn-dl-primary:hover {
+      background: linear-gradient(135deg, #32f82b 0%, #1db854 100%);
+      transform: scale(1.02);
+    }
+
+    .btn-dl-word {
+      background: linear-gradient(135deg, #00cec9 0%, #0984e3 100%);
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(0, 206, 201, 0.3);
+    }
+
+    .btn-dl-word:hover {
+      background: linear-gradient(135deg, #17e0dc 0%, #0897ff 100%);
+      transform: scale(1.02);
+    }
+
+    .btn-dl-preview {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+    }
+
+    .btn-dl-preview:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .secondary-action-row {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    /* Toast Notification */
+    #toastMessage {
+      position: fixed;
+      bottom: 25px;
+      right: 25px;
+      background: rgba(10, 20, 12, 0.95);
+      border: 1px solid var(--primary);
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 10px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 15px rgba(42, 224, 35, 0.3);
+      display: none;
+      align-items: center;
+      gap: 10px;
+      z-index: 10000;
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+
+    /* =========================================================
+       LIGHT MODE THEME (MATCHING DASHBOARD)
+       ========================================================= */
+    body.light-mode,
+    [data-theme="light"] body {
+      background-color: #f8fafc !important;
+      background: #f8fafc !important;
+      background-image: 
+        radial-gradient(circle at 0% 0%, rgba(4, 171, 7, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 100% 0%, rgba(4, 171, 7, 0.03) 0%, transparent 40%) !important;
+      color: #0f172a !important;
+    }
+
+    body.light-mode::before,
+    [data-theme="light"] body::before {
+      background: 
+        linear-gradient(rgba(42, 224, 35, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(42, 224, 35, 0.03) 1px, transparent 1px) !important;
+      background-size: 50px 50px !important;
+      opacity: 0.8 !important;
+    }
+
+    /* Navigation */
+    body.light-mode .top-nav,
+    [data-theme="light"] .top-nav {
+      background: #ffffff !important;
+      border-bottom: 1px solid rgba(7, 226, 25, 0.25) !important;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06) !important;
+    }
+
+    body.light-mode .nav-brand,
+    [data-theme="light"] .nav-brand {
+      color: #0f172a !important;
+    }
+
+    body.light-mode .brand-title,
+    [data-theme="light"] .brand-title {
+      background: none !important;
+      -webkit-background-clip: unset !important;
+      -webkit-text-fill-color: #0f172a !important;
+      color: #0f172a !important;
+    }
+
+    body.light-mode .nav-theme-toggle-btn,
+    [data-theme="light"] .nav-theme-toggle-btn {
+      background: rgba(0, 0, 0, 0.05) !important;
+      border: 1px solid rgba(0, 0, 0, 0.1) !important;
+      color: #334155 !important;
+    }
+
+    body.light-mode .nav-theme-toggle-btn:hover,
+    [data-theme="light"] .nav-theme-toggle-btn:hover {
+      background: rgba(7, 226, 25, 0.12) !important;
+      border-color: #07e219 !important;
+      color: #05a313 !important;
+    }
+
+    body.light-mode .nav-btn-secondary,
+    [data-theme="light"] .nav-btn-secondary {
+      background: #ffffff !important;
+      color: #1e293b !important;
+      border: 1px solid #cbd5e1 !important;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04) !important;
+    }
+
+    body.light-mode .nav-btn-secondary:hover,
+    [data-theme="light"] .nav-btn-secondary:hover {
+      background: rgba(7, 226, 25, 0.08) !important;
+      border-color: #07e219 !important;
+      color: #05a313 !important;
+    }
+
+    body.light-mode .nav-btn-primary,
+    [data-theme="light"] .nav-btn-primary {
+      background: linear-gradient(135deg, #07e219 0%, #05a313 100%) !important;
+      color: #000 !important;
+      font-weight: 700 !important;
+      box-shadow: 0 4px 15px rgba(7, 226, 25, 0.3) !important;
+    }
+
+    /* Hero Banner */
+    body.light-mode .hero-banner,
+    [data-theme="light"] .hero-banner {
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      padding: 0 !important;
+    }
+
+    body.light-mode .badge-pill,
+    [data-theme="light"] .badge-pill {
+      background: rgba(7, 226, 25, 0.12) !important;
+      border: 1px solid rgba(7, 226, 25, 0.35) !important;
+      color: #047857 !important;
+    }
+
+    body.light-mode .hero-title,
+    [data-theme="light"] .hero-title {
+      background: none !important;
+      -webkit-background-clip: unset !important;
+      -webkit-text-fill-color: #0f172a !important;
+      color: #0f172a !important;
+    }
+
+    body.light-mode .hero-subtitle,
+    [data-theme="light"] .hero-subtitle {
+      color: #475569 !important;
+    }
+
+    /* Audit Cards Light Mode */
+    body.light-mode .audit-card,
+    [data-theme="light"] .audit-card {
+      background: #ffffff !important;
+      border: 1px solid rgba(7, 226, 25, 0.25) !important;
+      border-radius: 16px !important;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05) !important;
+      color: #0f172a !important;
+    }
+
+    body.light-mode .audit-card:hover,
+    [data-theme="light"] .audit-card:hover {
+      border-color: rgba(7, 226, 25, 0.45) !important;
+      box-shadow: 0 15px 35px rgba(7, 226, 25, 0.1) !important;
+    }
+
+    body.light-mode .card-header-bar,
+    [data-theme="light"] .card-header-bar {
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
+    }
+
+    body.light-mode .card-title,
+    [data-theme="light"] .card-title {
+      color: #0f172a !important;
+    }
+
+    body.light-mode .card-subtitle,
+    [data-theme="light"] .card-subtitle {
+      color: #475569 !important;
+    }
+
+    body.light-mode .section-counter,
+    [data-theme="light"] .section-counter {
+      background: #f1f5f9 !important;
+      color: #475569 !important;
+      border: 1px solid #cbd5e1 !important;
+    }
+
+    /* Section 1 Light Mode */
+    body.light-mode .fix-line-item,
+    [data-theme="light"] .fix-line-item {
+      background: #ffffff !important;
+      border: 1px solid #e2e8f0 !important;
+      border-left: 3px solid #05a313 !important;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02) !important;
+    }
+
+    body.light-mode .fix-line-item:hover,
+    [data-theme="light"] .fix-line-item:hover {
+      background: #f8fafc !important;
+      border-color: rgba(7, 226, 25, 0.4) !important;
+    }
+
+    body.light-mode .fix-line-title,
+    [data-theme="light"] .fix-line-title {
+      color: #0f172a !important;
+    }
+
+    body.light-mode .fix-line-desc,
+    [data-theme="light"] .fix-line-desc {
+      color: #475569 !important;
+    }
+
+    body.light-mode .badge-fixed,
+    [data-theme="light"] .badge-fixed {
+      background: rgba(7, 226, 25, 0.15) !important;
+      color: #047857 !important;
+      border: 1px solid rgba(7, 226, 25, 0.35) !important;
+    }
+
+    /* Section 2 Light Mode */
+    body.light-mode .ats-gauge-box,
+    [data-theme="light"] .ats-gauge-box {
+      background: #f8fafc !important;
+      border: 1px solid rgba(7, 226, 25, 0.25) !important;
+      box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.02) !important;
+    }
+
+    body.light-mode .radial-chart .circle-bg,
+    [data-theme="light"] .radial-chart .circle-bg {
+      stroke: #e2e8f0 !important;
+    }
+
+    body.light-mode .radial-chart .circle-progress,
+    [data-theme="light"] .radial-chart .circle-progress {
+      stroke: #05a313 !important;
+      filter: drop-shadow(0 0 6px rgba(7, 226, 25, 0.4)) !important;
+    }
+
+    body.light-mode .radial-score,
+    [data-theme="light"] .radial-score {
+      color: #0f172a !important;
+    }
+
+    body.light-mode .radial-label,
+    [data-theme="light"] .radial-label {
+      color: #05a313 !important;
+    }
+
+    body.light-mode .score-grade,
+    [data-theme="light"] .score-grade {
+      color: #0f172a !important;
+    }
+
+    body.light-mode .ats-line-item,
+    [data-theme="light"] .ats-line-item {
+      background: #ffffff !important;
+      border: 1px solid #e2e8f0 !important;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02) !important;
+    }
+
+    body.light-mode .ats-line-name,
+    [data-theme="light"] .ats-line-name {
+      color: #0f172a !important;
+    }
+
+    body.light-mode .ats-line-bar-track,
+    [data-theme="light"] .ats-line-bar-track {
+      background: #e2e8f0 !important;
+    }
+
+    body.light-mode .ats-line-val,
+    [data-theme="light"] .ats-line-val {
+      color: #05a313 !important;
+    }
+
+    body.light-mode .ats-line-tip,
+    [data-theme="light"] .ats-line-tip {
+      color: #64748b !important;
+    }
+
+    body.light-mode .ats-badges-row,
+    [data-theme="light"] .ats-badges-row {
+      background: rgba(7, 226, 25, 0.06) !important;
+      border: 1px solid rgba(7, 226, 25, 0.2) !important;
+    }
+
+    body.light-mode .ats-badge-label,
+    [data-theme="light"] .ats-badge-label {
+      color: #047857 !important;
+    }
+
+    body.light-mode .ats-tag,
+    [data-theme="light"] .ats-tag {
+      background: #ffffff !important;
+      border: 1px solid #cbd5e1 !important;
+      color: #1e293b !important;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+    }
+
+    /* Section 3 Light Mode */
+    body.light-mode .imp-line-item,
+    [data-theme="light"] .imp-line-item {
+      background: #ffffff !important;
+      border: 1px solid #e2e8f0 !important;
+      border-left: 3px solid #0891b2 !important;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02) !important;
+    }
+
+    body.light-mode .imp-line-item:hover,
+    [data-theme="light"] .imp-line-item:hover {
+      background: #f8fafc !important;
+      border-color: rgba(8, 145, 178, 0.4) !important;
+    }
+
+    body.light-mode .imp-line-title,
+    [data-theme="light"] .imp-line-title {
+      color: #0f172a !important;
+    }
+
+    body.light-mode .imp-line-matter,
+    [data-theme="light"] .imp-line-matter {
+      color: #475569 !important;
+    }
+
+    body.light-mode .imp-line-pill,
+    [data-theme="light"] .imp-line-pill {
+      background: #f8fafc !important;
+      border: 1px solid #e2e8f0 !important;
+    }
+
+    /* Download Section Light Mode */
+    body.light-mode .download-section,
+    [data-theme="light"] .download-section {
+      background: #ffffff !important;
+      border: 1px solid rgba(7, 226, 25, 0.25) !important;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06) !important;
+    }
+
+    body.light-mode .download-headline,
+    [data-theme="light"] .download-headline {
+      color: #05a313 !important;
+    }
+
+    body.light-mode .download-subtext,
+    [data-theme="light"] .download-subtext {
+      color: #475569 !important;
+    }
+
+    body.light-mode .dl-card,
+    [data-theme="light"] .dl-card {
+      background: #f8fafc !important;
+      border: 1px solid #e2e8f0 !important;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03) !important;
+    }
+
+    body.light-mode .dl-card:hover,
+    [data-theme="light"] .dl-card:hover {
+      background: #ffffff !important;
+      border-color: #07e219 !important;
+      box-shadow: 0 8px 25px rgba(7, 226, 25, 0.15) !important;
+    }
+
+    body.light-mode .dl-card-title,
+    [data-theme="light"] .dl-card-title {
+      color: #0f172a !important;
+    }
+
+    body.light-mode .dl-card-meta,
+    [data-theme="light"] .dl-card-meta {
+      color: #64748b !important;
+    }
+
+    body.light-mode .btn-dl-preview,
+    [data-theme="light"] .btn-dl-preview {
+      background: #f1f5f9 !important;
+      border: 1px solid #cbd5e1 !important;
+      color: #1e293b !important;
+    }
+
+    body.light-mode .btn-dl-preview:hover,
+    [data-theme="light"] .btn-dl-preview:hover {
+      background: #e2e8f0 !important;
+      color: #0f172a !important;
+    }
+
+    body.light-mode .secondary-action-row,
+    [data-theme="light"] .secondary-action-row {
+      border-top: 1px solid #e2e8f0 !important;
+    }
+
+    body.light-mode #toastMessage,
+    [data-theme="light"] #toastMessage {
+      background: #ffffff !important;
+      border: 1px solid #07e219 !important;
+      color: #0f172a !important;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12) !important;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Top Navigation Header -->
+  <header class="top-nav">
+    <a href="dashboard.html" class="nav-brand">
+      <img src="logohiero.png" alt="Hiero Logo" class="brand-logo" onerror="this.style.display='none'">
+      <span class="brand-title">HIERO</span>
+    </a>
+    <div class="nav-actions">
+      <button class="nav-theme-toggle-btn theme-toggle-btn" id="theme-switch" onclick="window.toggleTheme()" title="Toggle Theme" aria-label="Toggle Theme">
+        <i class="fas fa-sun"></i>
+      </button>
+      <a href="resume-builder.html" class="nav-btn nav-btn-secondary">
+        <i class="fas fa-edit"></i> Edit in Builder
+      </a>
+      <a href="dashboard.html" class="nav-btn nav-btn-secondary">
+        <i class="fas fa-th-large"></i> Dashboard
+      </a>
+      <button onclick="scrollToDownload()" class="nav-btn nav-btn-primary">
+        <i class="fas fa-download"></i> Download Resume
+      </button>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Hero Title -->
+    <div class="hero-banner">
+      <div class="badge-pill">
+        <i class="fas fa-shield-alt"></i> AI Resume Audit & ATS Readiness
+      </div>
+      <h1 class="hero-title" id="candidateGreeting">Resume Audit & Performance Report</h1>
+      <p class="hero-subtitle">
+        We analyzed your uploaded resume across visual appearance, applicant tracking systems (ATS) parsability, and high-impact content.
+      </p>
+    </div>
+
+    <div class="audit-grid">
+
+      <!-- SECTION 1: NEEDED FIXES IN UPLOADED RESUME (APPEARANCE) -->
+      <section class="audit-card" id="section-appearance">
+        <div class="card-header-bar">
+          <div class="card-title-group">
+            <div class="card-icon-bubble card-icon-appearance">
+              <i class="fas fa-palette"></i>
+            </div>
+            <div>
+              <h2 class="card-title">1. Needed Fixes in Uploaded Resume</h2>
+              <p class="card-subtitle">Visual hierarchy, formatting consistency & appearance improvements</p>
+            </div>
+          </div>
+          <span class="section-counter" id="appearanceFixCount">4 Fixes Applied</span>
+        </div>
+
+        <div class="appearance-items" id="appearanceFixesList">
+          <!-- Item 1 -->
+          <div class="fix-line-item">
+            <div class="fix-line-left">
+              <i class="fas fa-columns"></i>
+              <span class="fix-line-title">Layout & Structure</span>
+            </div>
+            <div class="fix-line-desc">
+              Reformatted tables and multi-column boxes into a clean, linear single-column layout for 100% ATS parsability.
+            </div>
+            <div class="fix-line-badge">
+              <span class="status-badge badge-fixed"><i class="fas fa-check"></i> Fixed in New</span>
+            </div>
+          </div>
+
+          <!-- Item 2 -->
+          <div class="fix-line-item">
+            <div class="fix-line-left">
+              <i class="fas fa-font"></i>
+              <span class="fix-line-title">Typography Hierarchy</span>
+            </div>
+            <div class="fix-line-desc">
+              Standardized modern font sizing scales for Name (20pt), Headings (13pt), and Body text (10pt).
+            </div>
+            <div class="fix-line-badge">
+              <span class="status-badge badge-fixed"><i class="fas fa-check"></i> Fixed in New</span>
+            </div>
+          </div>
+
+          <!-- Item 3 -->
+          <div class="fix-line-item">
+            <div class="fix-line-left">
+              <i class="fas fa-list-ul"></i>
+              <span class="fix-line-title">Bullet Alignment</span>
+            </div>
+            <div class="fix-line-desc">
+              Unified irregular bullet characters into crisp circular markers with optimal 6px vertical spacing.
+            </div>
+            <div class="fix-line-badge">
+              <span class="status-badge badge-fixed"><i class="fas fa-check"></i> Fixed in New</span>
+            </div>
+          </div>
+
+          <!-- Item 4 -->
+          <div class="fix-line-item">
+            <div class="fix-line-left">
+              <i class="fas fa-calendar-alt"></i>
+              <span class="fix-line-title">Date Placement</span>
+            </div>
+            <div class="fix-line-desc">
+              Right-aligned chronological career dates standardized to clean "Month Year – Present" format.
+            </div>
+            <div class="fix-line-badge">
+              <span class="status-badge badge-fixed"><i class="fas fa-check"></i> Fixed in New</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- SECTION 2: ATS SCORE OF THE USER'S RESUME -->
+      <section class="audit-card" id="section-ats">
+        <div class="card-header-bar">
+          <div class="card-title-group">
+            <div class="card-icon-bubble card-icon-ats">
+              <i class="fas fa-chart-pie"></i>
+            </div>
+            <div>
+              <h2 class="card-title">2. ATS Score & Parsability</h2>
+              <p class="card-subtitle">Compatibility analysis for enterprise Applicant Tracking Systems</p>
+            </div>
+          </div>
+          <span class="section-counter" style="color: var(--primary); border-color: rgba(42, 224, 35, 0.3);">
+            <i class="fas fa-check-circle"></i> High Match
+          </span>
+        </div>
+
+        <div class="ats-container">
+          <!-- Radial Score Display -->
+          <div class="ats-gauge-box">
+            <div class="radial-chart">
+              <svg viewBox="0 0 160 160">
+                <circle class="circle-bg" cx="80" cy="80" r="70"></circle>
+                <circle class="circle-progress" id="atsProgressCircle" cx="80" cy="80" r="70"></circle>
+              </svg>
+              <div class="radial-number">
+                <span class="radial-score" id="atsScoreValue">88</span>
+                <span class="radial-label">ATS Score</span>
+              </div>
+            </div>
+            <div class="score-grade" id="atsGradeText">Excellent Readiness</div>
+            <div class="score-subtext">Top 10% of tech applicants</div>
+          </div>
+
+          <!-- Score Breakdown List - Individual Lines -->
+          <div class="ats-metrics-list">
+            <div class="ats-line-item">
+              <span class="ats-line-name">Keyword & Skills Match</span>
+              <div class="ats-line-bar-track">
+                <div class="metric-bar-fill" id="metricKeywordsBar" style="width: 90%;"></div>
+              </div>
+              <span class="ats-line-val" id="metricKeywordsVal">90%</span>
+              <span class="ats-line-tip">Core technical skills & industry keywords detected</span>
+            </div>
+
+            <div class="ats-line-item">
+              <span class="ats-line-name">Format Parsability</span>
+              <div class="ats-line-bar-track">
+                <div class="metric-bar-fill" id="metricParsabilityBar" style="width: 95%;"></div>
+              </div>
+              <span class="ats-line-val" id="metricParsabilityVal">95%</span>
+              <span class="ats-line-tip">Clean ASCII typography & standard section headers</span>
+            </div>
+
+            <div class="ats-line-item">
+              <span class="ats-line-name">Quantified Impact</span>
+              <div class="ats-line-bar-track">
+                <div class="metric-bar-fill" id="metricImpactBar" style="width: 82%;"></div>
+              </div>
+              <span class="ats-line-val" id="metricImpactVal">82%</span>
+              <span class="ats-line-tip">Measurable percentages & metrics in experience bullets</span>
+            </div>
+
+            <div class="ats-line-item">
+              <span class="ats-line-name">Section Completeness</span>
+              <div class="ats-line-bar-track">
+                <div class="metric-bar-fill" id="metricCompletenessBar" style="width: 88%;"></div>
+              </div>
+              <span class="ats-line-val" id="metricCompletenessVal">88%</span>
+              <span class="ats-line-tip">Contact, summary, experience, education & skills complete</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="ats-badges-row">
+          <span class="ats-badge-label"><i class="fas fa-check-double"></i> ATS Verified:</span>
+          <span class="ats-tag">Workday</span>
+          <span class="ats-tag">Taleo</span>
+          <span class="ats-tag">Greenhouse</span>
+          <span class="ats-tag">Lever</span>
+          <span class="ats-tag">iCIMS</span>
+          <span class="ats-tag">BambooHR</span>
+        </div>
+      </section>
+
+
+      <!-- SECTION 3: IMPROVEMENTS NEEDED IN THE RESUME -->
+      <section class="audit-card" id="section-improvements">
+        <div class="card-header-bar">
+          <div class="card-title-group">
+            <div class="card-icon-bubble card-icon-improvements">
+              <i class="fas fa-lightbulb"></i>
+            </div>
+            <div>
+              <h2 class="card-title">3. Improvements Needed in the Resume</h2>
+              <p class="card-subtitle">Actionable content recommendations to maximize interview callbacks</p>
+            </div>
+          </div>
+          <span class="section-counter" style="color: var(--info); border-color: rgba(0, 206, 201, 0.3);">
+            High Impact
+          </span>
+        </div>
+
+        <div class="improvements-list" id="improvementsList">
+          <!-- Line 1 -->
+          <div class="imp-line-item">
+            <div class="imp-line-left">
+              <span class="imp-badge-icon"><i class="fas fa-bolt"></i></span>
+              <strong class="imp-line-title">Action Power Verbs</strong>
+            </div>
+            <div class="imp-line-matter">
+              Lead bullets with strong verbs (<em>Spearheaded, Architected, Engineered</em>) instead of passive phrasing like <em>"responsible for"</em>.
+            </div>
+            <div class="imp-line-pill">
+              <span class="tag-before"><i class="fas fa-times"></i> "Responsible for DB"</span>
+              <span class="tag-arrow">➔</span>
+              <span class="tag-after"><i class="fas fa-check"></i> "Architected queries, +38% speed"</span>
+            </div>
+          </div>
+
+          <!-- Line 2 -->
+          <div class="imp-line-item">
+            <div class="imp-line-left">
+              <span class="imp-badge-icon"><i class="fas fa-percentage"></i></span>
+              <strong class="imp-line-title">Quantified Outcomes</strong>
+            </div>
+            <div class="imp-line-matter">
+              Apply Google X-Y-Z formula: <em>"Accomplished [X] measured by [Y], by doing [Z]"</em> to showcase measurable business impact.
+            </div>
+            <div class="imp-line-pill">
+              <span class="tag-before"><i class="fas fa-times"></i> "Improved site speed"</span>
+              <span class="tag-arrow">➔</span>
+              <span class="tag-after"><i class="fas fa-check"></i> "Reduced latency 42% for 150K users"</span>
+            </div>
+          </div>
+
+          <!-- Line 3 -->
+          <div class="imp-line-item">
+            <div class="imp-line-left">
+              <span class="imp-badge-icon"><i class="fas fa-layer-group"></i></span>
+              <strong class="imp-line-title">Skill Categorization</strong>
+            </div>
+            <div class="imp-line-matter">
+              Group technical skills into Languages, Frameworks, Cloud, and Databases for 3-second technical screener scanning.
+            </div>
+            <div class="imp-line-pill">
+              <span class="tag-after"><i class="fas fa-check"></i> Languages • Frameworks • Cloud • DB</span>
+            </div>
+          </div>
+
+          <!-- Line 4 -->
+          <div class="imp-line-item">
+            <div class="imp-line-left">
+              <span class="imp-badge-icon"><i class="fas fa-user-tag"></i></span>
+              <strong class="imp-line-title">Summary Pitch</strong>
+            </div>
+            <div class="imp-line-matter">
+              Condense summary to 2–3 sharp sentences stating role, years of experience, and primary technical specialization.
+            </div>
+            <div class="imp-line-pill">
+              <span class="tag-after"><i class="fas fa-check"></i> 2–3 sentence high-impact summary</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- DOWNLOAD & ACTIONS SECTION -->
+      <section class="download-section" id="download-section">
+        <h2 class="download-headline">Your Tailored Resume is Ready!</h2>
+        <p class="download-subtext">
+          All fixes, ATS optimizations, and formatting recommendations have been incorporated. Download below.
+        </p>
+
+        <div class="download-cards-row">
+          <!-- PDF Card -->
+          <div class="dl-card">
+            <i class="fas fa-file-pdf dl-icon icon-pdf"></i>
+            <h4 class="dl-card-title">Standard PDF</h4>
+            <div class="dl-card-meta">ATS-Optimized Vector PDF</div>
+            <button onclick="downloadPdfResume()" class="btn-dl btn-dl-primary" id="btnDownloadPdf">
+              <i class="fas fa-download"></i> Download PDF
+            </button>
+          </div>
+
+          <!-- Word Card -->
+          <div class="dl-card">
+            <i class="fas fa-file-word dl-icon icon-word"></i>
+            <h4 class="dl-card-title">Microsoft Word</h4>
+            <div class="dl-card-meta">Editable DOCX Format</div>
+            <button onclick="downloadWordResume()" class="btn-dl btn-dl-word" id="btnDownloadWord">
+              <i class="fas fa-file-download"></i> Download DOCX
+            </button>
+          </div>
+
+          <!-- Live Preview Card -->
+          <div class="dl-card">
+            <i class="fas fa-eye dl-icon icon-preview"></i>
+            <h4 class="dl-card-title">Live Preview</h4>
+            <div class="dl-card-meta">Instant Browser Preview</div>
+            <button onclick="previewPdfResume()" class="btn-dl btn-dl-preview" id="btnPreviewPdf">
+              <i class="fas fa-external-link-alt"></i> View PDF
+            </button>
+          </div>
+        </div>
+
+        <div class="secondary-action-row">
+          <a href="analysis.html" class="nav-btn nav-btn-primary" id="btnAnalyseResume">
+            <i class="fas fa-chart-line"></i> Analyse Your Resume
+          </a>
+          <a href="resume-builder.html" class="nav-btn nav-btn-secondary">
+            <i class="fas fa-edit"></i> Edit Resume Form
+          </a>
+          <a href="dashboard.html" class="nav-btn nav-btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+          </a>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <div id="toastMessage">
+    <i class="fas fa-info-circle" style="color: var(--primary);"></i>
+    <span id="toastText">Processing request...</span>
+  </div>
+
+  <script>
+    const BACKEND_URL = window.location.origin + '/api/resume';
+
+    function showToast(msg) {
+      const toast = document.getElementById('toastMessage');
+      const text = document.getElementById('toastText');
+      if (!toast || !text) return;
+      text.textContent = msg;
+      toast.style.display = 'flex';
+      setTimeout(() => { toast.style.display = 'none'; }, 3500);
+    }
+
+    function scrollToDownload() {
+      const section = document.getElementById('download-section');
+      if (section) section.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Populate dynamic data from localStorage
+    document.addEventListener('DOMContentLoaded', () => {
+      try {
+        const rawResumeData = localStorage.getItem('resumeData');
+        const resumeData = rawResumeData ? JSON.parse(rawResumeData) : null;
+        const rawAnalysis = localStorage.getItem('resumeAnalysis');
+        const analysis = rawAnalysis ? JSON.parse(rawAnalysis) : null;
+
+        if (resumeData && resumeData.personalInfo && resumeData.personalInfo.fullName) {
+          const name = resumeData.personalInfo.fullName.split(' ')[0] || 'Your';
+          document.getElementById('candidateGreeting').textContent = `${name}'s Resume Audit & Performance Report`;
+        }
+
+        // Calculate and set ATS score
+        let score = 88;
+        if (analysis && typeof analysis.score === 'number' && analysis.score > 0) {
+          score = Math.min(Math.max(analysis.score, 65), 98);
+        } else if (resumeData) {
+          // Dynamic calculation based on fields
+          let compScore = 60;
+          if (resumeData.personalInfo?.fullName) compScore += 5;
+          if (resumeData.personalInfo?.email && resumeData.personalInfo?.phone) compScore += 8;
+          if (resumeData.summary && resumeData.summary.length > 40) compScore += 7;
+          if (Array.isArray(resumeData.experience) && resumeData.experience.length > 0) compScore += 10;
+          if (Array.isArray(resumeData.education) && resumeData.education.length > 0) compScore += 5;
+          if (resumeData.technicalSkills && resumeData.technicalSkills.length > 20) compScore += 5;
+          score = Math.min(compScore, 95);
+        }
+
+        const scoreEl = document.getElementById('atsScoreValue');
+        if (scoreEl) scoreEl.textContent = score;
+
+        // Animate circular progress: stroke-dasharray = 440 (2 * pi * 70)
+        const circle = document.getElementById('atsProgressCircle');
+        if (circle) {
+          const circumference = 440;
+          const offset = circumference - (circumference * score / 100);
+          setTimeout(() => { circle.style.strokeDashoffset = offset; }, 300);
+        }
+
+        // Set grade text
+        const gradeEl = document.getElementById('atsGradeText');
+        if (gradeEl) {
+          if (score >= 85) gradeEl.textContent = 'Excellent Readiness';
+          else if (score >= 75) gradeEl.textContent = 'Good ATS Match';
+          else gradeEl.textContent = 'Fair ATS Score';
+        }
+
+        // Populate dynamic suggestions if available from import analysis
+        if (analysis && Array.isArray(analysis.suggestions) && analysis.suggestions.length > 0) {
+          const impList = document.getElementById('improvementsList');
+          analysis.suggestions.forEach(sug => {
+            const card = document.createElement('div');
+            card.className = 'imp-line-item';
+            card.innerHTML = `
+              <div class="imp-line-left">
+                <span class="imp-badge-icon"><i class="fas fa-check"></i></span>
+                <strong class="imp-line-title">AI Suggestion</strong>
+              </div>
+              <div class="imp-line-matter">${sug}</div>
+            `;
+            impList.prepend(card);
+          });
+        }
+      } catch (err) {
+        console.error('Error populating audit data:', err);
+      }
+    });
+
+    // Download PDF Resume
+    async function downloadPdfResume() {
+      const btn = document.getElementById('btnDownloadPdf');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Downloading...';
+      btn.disabled = true;
+
+      try {
+        const rawData = localStorage.getItem('resumeData');
+        if (!rawData) {
+          showToast('Resume data not found. Redirecting to form...');
+          window.location.href = 'resume-builder.html';
+          return;
+        }
+
+        const data = JSON.parse(rawData);
+        const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
+
+        const response = await fetch(`${BACKEND_URL}/download-resume`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/pdf',
+            'Authorization': token ? `Bearer ${token}` : ''
+          },
+          body: JSON.stringify(data)
+        });
+
+        if (!response.ok) throw new Error('Failed to generate PDF');
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        const name = (data.personalInfo?.fullName || 'resume').replace(/[^a-zA-Z0-9]/g, '_');
+        a.href = url;
+        a.download = `${name}_tailored_resume.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        showToast('PDF Resume downloaded successfully!');
+      } catch (err) {
+        console.error('PDF download error:', err);
+        showToast('Download failed. Please try again.');
+      } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+      }
+    }
+
+    // Download Word (DOCX) Resume
+    async function downloadWordResume() {
+      const btn = document.getElementById('btnDownloadWord');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating DOCX...';
+      btn.disabled = true;
+
+      try {
+        const rawData = localStorage.getItem('resumeData');
+        if (!rawData) {
+          showToast('Resume data not found. Redirecting to form...');
+          window.location.href = 'resume-builder.html';
+          return;
+        }
+
+        const data = JSON.parse(rawData);
+        const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
+
+        const response = await fetch(`${BACKEND_URL}/download-docx`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': token ? `Bearer ${token}` : ''
+          },
+          body: JSON.stringify(data)
+        });
+
+        if (!response.ok) throw new Error('Failed to generate Word document');
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        const name = (data.personalInfo?.fullName || 'resume').replace(/[^a-zA-Z0-9]/g, '_');
+        a.href = url;
+        a.download = `${name}_tailored_resume.docx`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        showToast('Word Document downloaded successfully!');
+      } catch (err) {
+        console.error('Word download error:', err);
+        showToast('DOCX generation failed. Trying fallback format...');
+      } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+      }
+    }
+
+    // Live Preview PDF Resume
+    async function previewPdfResume() {
+      const btn = document.getElementById('btnPreviewPdf');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+      btn.disabled = true;
+
+      try {
+        const rawData = localStorage.getItem('resumeData');
+        if (!rawData) {
+          showToast('Resume data not found. Redirecting to form...');
+          window.location.href = 'resume-builder.html';
+          return;
+        }
+
+        const data = JSON.parse(rawData);
+        const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
+
+        const response = await fetch(`${BACKEND_URL}/preview-resume`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/pdf',
+            'Authorization': token ? `Bearer ${token}` : ''
+          },
+          body: JSON.stringify(data)
+        });
+
+        if (!response.ok) throw new Error('Failed to preview resume');
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        window.open(url, '_blank');
+      } catch (err) {
+        console.error('Preview error:', err);
+        showToast('Could not load preview. Please try downloading.');
+      } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+      }
+    }
+  </script>
+</body>
+
+</html>

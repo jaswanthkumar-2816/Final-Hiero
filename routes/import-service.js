@@ -15,14 +15,29 @@ function getTesseract() {
 }
 
 const router = express.Router();
+const os = require('os');
 
 const upload = multer({
-    dest: '/tmp',
-    limits: { fileSize: 5 * 1024 * 1024 },
+    dest: os.tmpdir(),
+    limits: { fileSize: 15 * 1024 * 1024 },
     fileFilter: (req, file, cb) => {
-        const allowedTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/msword'];
-        if (allowedTypes.includes(file.mimetype)) cb(null, true);
-        else cb(new Error('Invalid file type.'));
+        const allowedTypes = [
+            'application/pdf',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'application/msword',
+            'application/octet-stream',
+            'image/png',
+            'image/jpeg',
+            'image/jpg',
+            'image/webp'
+        ];
+        const ext = path.extname(file.originalname || '').toLowerCase();
+        const allowedExts = ['.pdf', '.doc', '.docx', '.png', '.jpg', '.jpeg', '.webp'];
+        if (allowedTypes.includes(file.mimetype) || allowedExts.includes(ext)) {
+            cb(null, true);
+        } else {
+            cb(new Error('Invalid file type. Please upload a PDF, Word document, or image.'));
+        }
     }
 });
 
@@ -31,24 +46,69 @@ function normalizeText(text) {
     return text.replace(/[•►▪■●·–—*]/g, '-').replace(/\u00A0/g, ' ').replace(/\r\n/g, '\n').replace(/\n{2,}/g, '\n').replace(/[ ]{2,}/g, ' ').trim();
 }
 
-async function extractTextFromPdf(filePath) {
+function extractRawPdfTextFallback(dataBuffer) {
     try {
-        const dataBuffer = fs.readFileSync(filePath);
-        const data = await getPdfParse()(dataBuffer);
-        let text = data.text || '';
-        if (text.trim().length < 50) {
-            const { data: { text: ocrText } } = await getTesseract().recognize(filePath, 'eng');
-            text = ocrText;
+        const str = dataBuffer.toString('latin1');
+        const matches = [];
+        const tjRegex = /\(([^)]+)\)\s*Tj/g;
+        let m;
+        while ((m = tjRegex.exec(str)) !== null) {
+            if (m[1] && m[1].length > 1) matches.push(m[1]);
         }
-        return text;
-    } catch (error) { throw new Error('Failed to extract PDF text.'); }
+        const arrayTjRegex = /\[([^\]]+)\]\s*TJ/g;
+        while ((m = arrayTjRegex.exec(str)) !== null) {
+            const inner = m[1].match(/\(([^)]+)\)/g);
+            if (inner) {
+                inner.forEach(s => {
+                    const clean = s.slice(1, -1);
+                    if (clean.length > 0) matches.push(clean);
+                });
+            }
+        }
+        return matches.join(' ').replace(/\\([()\\])/g, '$1').trim();
+    } catch (e) {
+        return '';
+    }
+}
+
+async function extractTextFromPdf(filePath) {
+    const dataBuffer = fs.readFileSync(filePath);
+    let text = '';
+
+    // Primary: pdf-parse with Node 20/22/24 Uint8Array slice fix
+    try {
+        const cleanUint8 = new Uint8Array(
+            dataBuffer.buffer.slice(dataBuffer.byteOffset, dataBuffer.byteOffset + dataBuffer.byteLength)
+        );
+        const data = await getPdfParse()(cleanUint8);
+        text = data.text || '';
+    } catch (pdfErr) {
+        console.warn('pdf-parse primary extraction failed:', pdfErr.message);
+    }
+
+    // Fallback: raw stream text regex
+    if (!text || text.trim().length < 50) {
+        const rawText = extractRawPdfTextFallback(dataBuffer);
+        if (rawText && rawText.trim().length > (text ? text.trim().length : 0)) {
+            text = (text ? text + '\n' : '') + rawText;
+        }
+    }
+
+    if (!text || text.trim().length < 10) {
+        throw new Error('Unable to extract text from resume. Please ensure the file is not empty or password protected.');
+    }
+    return text;
 }
 
 async function extractFromDocx(filePath) {
     try {
         const result = await getMammoth().extractRawText({ path: filePath });
-        return result.value || '';
-    } catch (error) { throw new Error('Failed to extract DOCX text.'); }
+        const text = result.value || '';
+        if (!text || text.trim().length < 10) {
+            throw new Error('Unable to extract text from DOCX resume.');
+        }
+        return text;
+    } catch (error) { throw new Error(error.message || 'Failed to extract DOCX text.'); }
 }
 
 /**
@@ -323,7 +383,7 @@ async function parseResumeText(rawText) {
         try {
             console.log('⚡ Initializing Groq Perfect Extraction...');
             const { data: response } = await axios.post('https://api.groq.com/openai/v1/chat/completions', {
-                model: 'llama-3.3-70b-versatile',
+                model: 'openai/gpt-oss-120b',
                 messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: `Parse this resume:\n\n${textToParse}` }],
                 temperature: 0.1, response_format: { type: "json_object" }
             }, { headers: { 'Authorization': `Bearer ${process.env.GROQ_API_KEY}`, 'Content-Type': 'application/json' } });
@@ -351,15 +411,45 @@ async function parseResumeText(rawText) {
     return parseResumeTextRuleBased(rawText);
 }
 
-router.post('/import', (req, res) => {
+const handleImportRequest = (req, res) => {
     upload.single('resume')(req, res, async (err) => {
-        if (err || !req.file) return res.status(400).json({ success: false, error: err?.message || 'No file' });
+        if (err || !req.file) {
+            return res.status(400).json({ success: false, error: err?.message || 'No resume file uploaded' });
+        }
         try {
             const jd = req.body.jobDescription || '';
-            const ext = path.extname(req.file.originalname).toLowerCase();
-            let text = (ext === '.pdf') ? await extractTextFromPdf(req.file.path) : await extractFromDocx(req.file.path);
+            const ext = path.extname(req.file.originalname || '').toLowerCase();
+            let text = '';
+
+            if (ext === '.pdf') {
+                text = await extractTextFromPdf(req.file.path);
+            } else if (ext === '.docx' || ext === '.doc') {
+                text = await extractFromDocx(req.file.path);
+            } else if (['.png', '.jpg', '.jpeg', '.webp'].includes(ext) || (req.file.mimetype && req.file.mimetype.startsWith('image/'))) {
+                try {
+                    const { data: { text: ocrText } } = await getTesseract().recognize(req.file.path, 'eng');
+                    text = ocrText;
+                } catch (imgErr) {
+                    throw new Error('Failed to extract text from image: ' + imgErr.message);
+                }
+            } else {
+                try {
+                    text = await extractTextFromPdf(req.file.path);
+                } catch (pdfErr) {
+                    text = await extractFromDocx(req.file.path);
+                }
+            }
+
+            if (!text || text.trim().length < 10) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'Unable to extract text from resume. Please ensure the file is not empty or password protected.'
+                });
+            }
+
             const parsedData = await parseResumeText(text);
             const qualityAnalysis = analyzeResumeQuality(parsedData, text);
+
             if (jd) {
                 const jdKeywords = jd.toLowerCase().split(/\W+/).filter(w => w.length > 4);
                 const resumeText = text.toLowerCase();
@@ -370,11 +460,26 @@ router.post('/import', (req, res) => {
                 qualityAnalysis.matchingScore = Math.min(matchScore, 100);
                 qualityAnalysis.matchKeywords = matchFound.slice(0, 10);
             }
-            if (fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
-            res.json({ success: true, data: parsedData, analysis: qualityAnalysis, meta: { parsedWith: 'Hiero-Perfect-Extraction-V16' } });
-        } catch (e) { res.status(500).json({ success: false, error: e.message }); }
+
+            res.json({
+                success: true,
+                data: parsedData,
+                analysis: qualityAnalysis,
+                meta: { parsedWith: 'Hiero-Perfect-Extraction-V16' }
+            });
+        } catch (e) {
+            console.error('Import processing error:', e);
+            res.status(500).json({ success: false, error: e.message || 'Error processing resume file.' });
+        } finally {
+            if (req.file && fs.existsSync(req.file.path)) {
+                try { fs.unlinkSync(req.file.path); } catch (ign) {}
+            }
+        }
     });
-});
+};
+
+router.post('/import', handleImportRequest);
+router.post('/', handleImportRequest);
 
 module.exports = router;
 module.exports.parseResumeText = parseResumeText;

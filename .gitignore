@@ -44,3 +44,5 @@ test_*.js
 !mock_interview/**
 !UPDATE.md
 
+
+scratch/

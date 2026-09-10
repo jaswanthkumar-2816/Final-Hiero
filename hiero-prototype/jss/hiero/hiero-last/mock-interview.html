@@ -108,6 +108,72 @@
       letter-spacing: 0.2px;
     }
 
+    .back-to-company-btn {
+      position: absolute;
+      top: 56px;
+      left: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 16px;
+      background: rgba(10, 14, 10, 0.92);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 100px;
+      color: #f0f4f8;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+      z-index: 100;
+    }
+
+    .back-to-company-btn i {
+      font-size: 12px;
+      color: var(--g);
+      transition: transform 0.2s ease;
+    }
+
+    .back-to-company-btn:hover {
+      color: #ffffff;
+      border-color: var(--g);
+      background: rgba(9, 192, 6, 0.12);
+      box-shadow: 0 0 16px rgba(9, 192, 6, 0.3);
+      transform: translateX(-2px);
+    }
+
+    .back-to-company-btn:hover i {
+      transform: translateX(-3px);
+    }
+
+    [data-theme="light"] .back-to-company-btn {
+      background: rgba(255, 255, 255, 0.96);
+      border-color: #cbd5e1;
+      color: #334155;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+    }
+
+    [data-theme="light"] .back-to-company-btn:hover {
+      background: rgba(9, 192, 6, 0.08);
+      border-color: var(--g);
+      color: #0f172a;
+    }
+
+    @media (max-width: 680px) {
+      .back-to-company-btn {
+        top: 52px;
+      }
+      .back-to-company-btn span {
+        display: none;
+      }
+      .back-to-company-btn {
+        padding: 7px 11px;
+      }
+    }
+
     /* ─── THEME TOGGLE ─────────────────────────────────────── */
     .theme-btn {
       width: 40px;
@@ -1076,7 +1142,7 @@
   <!-- NAV -->
   <nav>
     <!-- Normal Nav (stages 1, 2, 3, 5) -->
-    <div class="nav-normal" style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+    <div class="nav-normal" style="display:flex; justify-content:space-between; align-items:center; width:100%; position:relative;">
       <div style="display:flex; align-items:center; gap:12px;">
         <a href="/index.html" class="logo" style="text-decoration:none">
           <img src="/logo-hiero.png" alt="Hiero" style="height:28px">
@@ -1086,6 +1152,10 @@
           <i class="fas fa-moon" id="theme-icon"></i>
         </button>
       </div>
+      <a href="companies.html" id="back-to-company-btn" onclick="event.preventDefault(); returnToCompanyDetails();" class="back-to-company-btn" title="Return to Company Details">
+        <i class="fas fa-arrow-left"></i>
+        <span>Back to Company Details</span>
+      </a>
       <div class="nav-profile" id="nav-profile">
         <span class="user-email" id="badge-email">Log In Required</span>
         <img src="https://ui-avatars.com/api/?name=H&background=09c006&color=fff" class="user-img" id="badge-img">
@@ -2376,7 +2446,7 @@
           <!-- Top Companies Roles Pills -->
           <div>
             <label style="font-size:0.75rem;font-weight:700;color:var(--muted);letter-spacing:1px;margin-bottom:10px;display:block;text-transform:uppercase;">Built-in Roles from Top Companies</label>
-            <div class="company-roles-grid" style="display:grid; grid-template-columns:repeat(2, 1fr); gap:12px; max-height:280px; overflow-y:auto; padding-right:6px;">
+            <div class="company-roles-grid" style="display:grid; grid-template-columns:repeat(2, 1fr); gap:12px; max-height:360px; overflow-y:auto; padding-right:6px;">
               <!-- Google Card -->
               <div class="comp-role-card" onclick="selectCompanyRole('google')" data-company="google">
                 <div style="width:40px;height:40px;border-radius:8px;background:#ffffff;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid rgba(255,255,255,0.15);">
@@ -2546,28 +2616,19 @@
                   </svg>
                 </div>
                 <div style="text-align:left;overflow:hidden;">
-                  <p style="font-size:0.8rem;font-weight:700;margin:0;color:#fff;">Custom</p>
-                  <p style="font-size:0.65rem;color:var(--muted);margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Write your own role</p>
+                  <p id="analyzed-job-card-title" style="font-size:0.8rem;font-weight:700;margin:0;color:#fff;">Your analyzed job</p>
+                  <p id="analyzed-job-card-sub" style="font-size:0.65rem;color:var(--muted);margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Same resume + JD from analysis</p>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Target Job Role TextArea -->
-          <div>
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-              <label style="font-size:0.75rem;font-weight:700;color:var(--muted);letter-spacing:1px;display:block;text-transform:uppercase;margin:0;">
-                Target Job Role / Description <span style="color:#ef4444;font-size:0.9rem;">*</span>
-              </label>
-              <span id="role-desc-len" style="font-size:0.68rem;color:var(--muted);font-weight:600;">0 chars (min 35)</span>
-            </div>
-            <textarea id="ctx-role" rows="6"
-              placeholder="e.g. Senior Frontend Engineer...&#10;Paste the full job requirements and description here to tailor your AI questions."
-              style="width:100%;background:rgba(255,255,255,0.02);border:1px solid var(--border);color:#fff;padding:16px;border-radius:12px;font-family:inherit;font-size:0.9rem;outline:none;resize:vertical;transition:all 0.3s;box-shadow: inset 0 2px 8px rgba(0,0,0,0.2);"
-              oninput="handleRoleInput(this)"></textarea>
-            <div id="ctx-role-error" style="display:none;align-items:center;gap:8px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:8px 12px;margin-top:10px;">
-              <i class="fas fa-exclamation-triangle" style="color:#ef4444;font-size:0.85rem;"></i>
-              <span id="ctx-role-error-text" style="font-size:0.75rem;color:#ef4444;font-weight:700;">Please enter a valid, detailed job description.</span>
+          <!-- Target Job Role Storage (Hidden from UI per user specification) -->
+          <div style="display:none;" aria-hidden="true">
+            <span id="role-desc-len"></span>
+            <textarea id="ctx-role"></textarea>
+            <div id="ctx-role-error">
+              <span id="ctx-role-error-text"></span>
             </div>
           </div>
         </div>
@@ -2693,6 +2754,18 @@
     ];
     let currentPassphrase = passphrases[0];
 
+    function returnToCompanyDetails() {
+      const params = new URLSearchParams(window.location.search);
+      const comp = params.get('company') || params.get('id');
+      if (comp) {
+        window.location.href = `companies.html?id=${encodeURIComponent(comp.toLowerCase())}`;
+      } else if (document.referrer && document.referrer.includes('compan')) {
+        window.location.href = document.referrer;
+      } else {
+        window.location.href = 'companies.html';
+      }
+    }
+
     window.addEventListener('DOMContentLoaded', () => {
       // Restore user context
       const savedCtx = sessionStorage.getItem('mockContext');
@@ -2710,6 +2783,16 @@
 
       // Initialize premium cards
       selectCompanyRole('custom', true);
+      applyAnalyzedJobContext();
+
+      const params = new URLSearchParams(window.location.search);
+      const fromApply = params.get('from') === 'apply' || params.get('autostart') === '1';
+      if (fromApply) {
+        showContextOverlay();
+        if (params.get('autostart') === '1' && (uploadedResumeText || document.getElementById('ctx-role')?.value.trim())) {
+          setTimeout(() => submitContext(), 250);
+        }
+      }
 
       // Restore stage location directly so reload doesn't reset to phase 1
       let savedStage = parseInt(sessionStorage.getItem('mockCurStage')) || 1;
@@ -2783,13 +2866,127 @@
     let interviewDuration = 5;
     window.sessionId = sessionStorage.getItem('mockSessionId') || ("hiero-sess-" + Date.now());
     sessionStorage.setItem('mockSessionId', window.sessionId);
-    window.userContext = { level: 'Mid' };
+    window.userContext = Object.assign({ level: 'Mid' }, window.userContext || {});
 
     function showContextOverlay() {
       document.getElementById('context-overlay').style.display = 'flex';
+      const ta = document.getElementById('ctx-role');
+      if (!ta || !ta.value.trim()) {
+        selectCompanyRole('custom', true);
+        applyAnalyzedJobContext();
+      }
     }
 
     let uploadedResumeText = "";
+    let analyzedCompanyName = "";
+
+    function readAnalysisPayload() {
+      try {
+        const stored = JSON.parse(localStorage.getItem('analysisResult') || '{}');
+        const data = stored.data || stored || {};
+        let extra = {};
+        try { extra = JSON.parse(localStorage.getItem('hieroInterviewContext') || '{}'); } catch (e) {}
+        return { data, extra, stored };
+      } catch (e) {
+        return { data: {}, extra: {}, stored: {} };
+      }
+    }
+
+    function buildJdText(data, extra, company) {
+      if (extra.jdText && extra.jdText.trim().length > 30) return extra.jdText.trim();
+      if (data.jdText && data.jdText.trim().length > 30) return data.jdText.trim();
+      const title = extra.jobTitle || data.jobTitle || '';
+      const required = (data.jdSkills || []).join(', ');
+      const matched = (data.matchedSkills || []).join(', ');
+      const missing = (data.missingSkills || []).join(', ');
+      const parts = [];
+      if (company) parts.push(`Company: ${company}`);
+      if (title) parts.push(`Role: ${title}`);
+      if (required) parts.push(`Job requirements:\n${required}`);
+      if (matched) parts.push(`On the candidate resume:\n${matched}`);
+      if (missing) parts.push(`Gaps to probe:\n${missing}`);
+      return parts.join('\n\n');
+    }
+
+    function markAnalyzedResumeLinked(text) {
+      uploadedResumeText = text || '';
+      const label = document.getElementById('ctx-resume-label');
+      const sublabel = document.getElementById('ctx-resume-sublabel');
+      const box = document.getElementById('ctx-resume-box');
+      const icon = document.getElementById('ctx-resume-icon');
+      const badge = document.getElementById('resume-parse-badge');
+      const badgeText = document.getElementById('resume-parse-badge-text');
+      if (!uploadedResumeText || uploadedResumeText.length < 10) return;
+      if (label) label.innerHTML = `<span style="color:var(--g)">✓ Resume from your last analysis</span>`;
+      if (sublabel) sublabel.textContent = `${(uploadedResumeText.length / 1000).toFixed(1)}k characters loaded — same file you scored against this JD`;
+      if (box) {
+        box.style.background = 'rgba(9, 192, 6, 0.06)';
+        box.style.borderColor = 'var(--g)';
+      }
+      if (icon) {
+        icon.className = 'fas fa-file-pdf';
+        icon.style.color = 'var(--g)';
+      }
+      if (badge) badge.style.display = 'flex';
+      if (badgeText) badgeText.textContent = 'Using the same resume as this job application';
+    }
+
+    function applyAnalyzedJobContext() {
+      const params = new URLSearchParams(window.location.search);
+      const company = (params.get('company') || '').trim();
+      const roleParam = (params.get('role') || '').trim();
+      const { data, extra } = readAnalysisPayload();
+      analyzedCompanyName = company || extra.company || '';
+
+      const jdText = buildJdText(data, extra, analyzedCompanyName);
+      const resumeText = extra.resumeText || data.resumeText || '';
+      let linkedResume = resumeText;
+      if (!linkedResume || linkedResume.length < 10) {
+        try {
+          const rd = JSON.parse(localStorage.getItem('resumeData') || '{}');
+          const bits = [
+            rd.personalInfo?.fullName,
+            rd.personalInfo?.professionalTitle,
+            rd.summary,
+            rd.technicalSkills,
+            Array.isArray(rd.experience) ? rd.experience.map((e) => e.title || e.company || JSON.stringify(e)).join('\n') : ''
+          ].filter(Boolean);
+          if (bits.length) linkedResume = bits.join('\n');
+        } catch (e) {}
+      }
+      const jobTitle = extra.jobTitle || data.jobTitle || roleParam || '';
+
+      const ta = document.getElementById('ctx-role');
+      if (ta && jdText) {
+        ta.value = jdText;
+        const len = document.getElementById('role-desc-len');
+        if (len) len.textContent = jdText.length + ' chars';
+      }
+
+      const titleBits = [analyzedCompanyName, jobTitle].filter(Boolean);
+      selectedRoleTitle = titleBits.join(' — ') || jobTitle || 'Analyzed job';
+
+      const cardTitle = document.getElementById('analyzed-job-card-title');
+      const cardSub = document.getElementById('analyzed-job-card-sub');
+      if (cardTitle && (jobTitle || analyzedCompanyName)) {
+        cardTitle.textContent = selectedRoleTitle;
+      }
+      if (cardSub) {
+        cardSub.textContent = jdText ? 'Same JD + resume from your analysis' : 'Write or paste a job description';
+      }
+
+      if (linkedResume && linkedResume.length > 10) {
+        markAnalyzedResumeLinked(linkedResume);
+      }
+
+      try {
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        const nameInput = document.getElementById('ctx-candidate-name');
+        if (nameInput && !nameInput.value.trim() && (user.name || user.username)) {
+          nameInput.value = user.name || user.username;
+        }
+      } catch (e) {}
+    }
 
     const companyRoles = {
       google: {
@@ -2918,9 +3115,9 @@ Key Requirements:
         selectedRoleTitle = "Custom Role";
         if (!skipUpdateTextarea) {
           const roleEl = document.getElementById('ctx-role');
-          roleEl.value = '';
-          roleEl.style.borderColor = 'var(--border)';
-          roleEl.style.background = 'rgba(255,255,255,0.02)';
+          if (roleEl && !roleEl.value.trim()) {
+            roleEl.value = 'Software Engineer - Technical interview evaluation covering software engineering competencies, architecture, problem solving, and modern development standards.';
+          }
           const lenEl = document.getElementById('role-desc-len');
           if (lenEl) lenEl.innerHTML = `<span style="color:var(--muted);">0 chars (min 35)</span>`;
           const errBox = document.getElementById('ctx-role-error');
@@ -3116,7 +3313,7 @@ Key Requirements:
     }
 
     async function submitContext() {
-      const role = document.getElementById('ctx-role').value;
+      let role = (document.getElementById('ctx-role')?.value || '').trim();
       const candidateNameInput = document.getElementById('ctx-candidate-name');
       const candidateName = candidateNameInput.value.trim() || 'Candidate';
       const resumeErrBox = document.getElementById('ctx-resume-error');
@@ -3146,21 +3343,21 @@ Key Requirements:
         return;
       }
 
-      // Job Description validation (prevents "abcd" or spam/gibberish)
-      const jdValidation = validateJobDescription(role);
+      // Auto-populate role if empty or too short now that the input box is removed
+      if (!role || role.length < 35) {
+        if (selectedRoleTitle && selectedRoleTitle !== 'Custom Role') {
+          role = `${selectedRoleTitle} - Comprehensive technical interview evaluation assessing system design, problem solving, algorithms, and engineering execution.`;
+        } else {
+          role = "Software Engineer - Technical interview evaluation covering software engineering competencies, architecture, problem solving, and modern development standards.";
+        }
+        if (roleTextarea) roleTextarea.value = role;
+      }
+
+      // Job Description validation
+      let jdValidation = validateJobDescription(role);
       if (!jdValidation.valid) {
-        if (roleErrBox) {
-          document.getElementById('ctx-role-error-text').textContent = jdValidation.message;
-          roleErrBox.style.display = 'flex';
-        }
-        if (roleTextarea) {
-          roleTextarea.style.borderColor = 'var(--red)';
-          roleTextarea.style.background = 'rgba(239, 68, 68, 0.05)';
-          roleTextarea.style.animation = 'shakeModal 0.4s ease';
-          setTimeout(() => { if (roleTextarea) roleTextarea.style.animation = ''; }, 400);
-          roleTextarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-        return;
+        role = "Software Engineer - Technical interview evaluation covering software engineering competencies, architecture, problem solving, and modern development standards.";
+        if (roleTextarea) roleTextarea.value = role;
       }
 
       let resumeText = uploadedResumeText;
@@ -3182,7 +3379,10 @@ Key Requirements:
         level: 'Mid',
         role: role,
         roleTitle: displayRoleTitle,
+        jobTitle: displayRoleTitle,
+        jdText: role,
         resumeText: resumeText,
+        company: analyzedCompanyName || '',
         duration: interviewDuration
       };
 
@@ -4187,7 +4387,12 @@ Key Requirements:
     // ─── SPEECH ──────────────────────────────────────────────────────────────
     function initRecognition() {
       const R = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!R) return;
+      if (!R) {
+        const lbl = document.getElementById('mic-label');
+        if (lbl) lbl.textContent = 'Text Mode (No Mic)';
+        console.warn('SpeechRecognition API not available in this browser. Falling back to manual text input.');
+        return;
+      }
       recognition = new R();
       recognition.continuous = true; recognition.interimResults = true;
       recognition.onstart = () => {
