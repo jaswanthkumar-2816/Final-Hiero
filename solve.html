@@ -1428,20 +1428,94 @@
       }
     };
 
-    document.getElementById('btn-submit').onclick = () => {
-      consoleDrawer.classList.add('open');
-      consoleOut.innerText = "> DEPLOYING TO ORBITAL STATION...\n> Validating against 128 production streams...\n> 100% Match.\n\nMission Successful.";
+    document.getElementById('btn-submit').onclick = async () => {
+      setConsoleOpen(true);
+      terminalOut.innerText = "> SUBMITTING CODE FOR ASSESSMENT...\n> Evaluating against test harness on a 0–10 scale...";
+      terminalOut.scrollTop = terminalOut.scrollHeight;
 
-      setTimeout(() => {
-        const overlay = document.getElementById('master-overlay');
-        const hero = document.getElementById('hero-card');
-        overlay.style.display = 'flex';
-        setTimeout(() => {
-          overlay.style.opacity = '1';
-          hero.classList.add('pop');
-        }, 50);
-      }, 1200);
+      const userCode = editor.value;
+      const problemId = document.getElementById('p-id') ? document.getElementById('p-id').innerText : '';
+      const pTitle = document.getElementById('p-title') ? document.getElementById('p-title').innerText : currentLesson;
+
+      try {
+        const response = await fetch('/api/problems/evaluate-solution', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            skill: currentSkill,
+            problemId: problemId,
+            problemTitle: pTitle,
+            userSolution: userCode
+          })
+        });
+
+        const result = await response.json();
+
+        // Render Test Results if available
+        if (result.testResults && result.testResults.length > 0) {
+          const totalTests = result.totalTests || result.testResults.length;
+          const passedTests = result.passedTests || 0;
+          
+          let testHtml = `
+            <div style="padding-bottom: 8px; border-bottom: 1px solid var(--border-glass); margin-bottom: 2px;">
+              <h2 style="color: var(--orbit-green); font-size: 15px; margin-bottom: 2px;">FINAL EVALUATION SCORE: ${result.score} / 10</h2>
+              <div style="font-size: 11px; color: var(--text-secondary); font-weight: 700;">
+                Passed: <span style="color: ${passedTests === totalTests ? 'var(--orbit-green)' : '#ffaa00'}">${passedTests} / ${totalTests}</span>
+              </div>
+            </div>
+          `;
+
+          result.testResults.forEach(t => {
+            const isPassed = t.passed;
+            const statusColor = isPassed ? 'var(--orbit-green)' : '#ff3232';
+            const icon = isPassed ? '✓' : '✗';
+            
+            testHtml += `<div style="font-size: 13px; line-height: 1.6; margin-bottom: 4px; display: flex; align-items: flex-start;">` +
+              `<span style="color: ${statusColor}; font-weight: 800; margin-right: 10px; font-size: 15px;">${icon}</span>` +
+              `<div>` +
+                `<span style="color: var(--text-secondary); opacity: 0.8;">Case ${t.case} — </span>` +
+                `<span style="color: ${isPassed ? 'var(--text-primary)' : statusColor}; font-weight: 500;">${t.name}</span>` +
+                (t.error ? `<div style="font-size: 11px; color: #ff6666;">Error: ${t.error}</div>` : '') +
+              `</div>` +
+            `</div>`;
+          });
+          testsOut.innerHTML = testHtml;
+        }
+
+        let officialBlock = "";
+        if (result.officialAnswer) {
+          officialBlock = `\n\n========================================\n💡 OFFICIAL REFERENCE SOLUTION:\n========================================\n${result.officialAnswer}\n========================================`;
+        }
+
+        terminalOut.innerText = `> SUBMISSION EVALUATION RESULT\n` +
+          `> Final Score: ${result.score} / 10\n` +
+          `> Tests Passed: ${result.passedTests || 0} / ${result.totalTests || 0}\n` +
+          `> Feedback: ${result.feedback || ''}` + officialBlock;
+        terminalOut.scrollTop = terminalOut.scrollHeight;
+
+        if (result.score >= 7) {
+          setTimeout(() => {
+            const overlay = document.getElementById('master-overlay');
+            const hero = document.getElementById('hero-card');
+            if (overlay && hero) {
+              const h2 = hero.querySelector('h2');
+              const p = hero.querySelector('p');
+              if (h2) h2.innerText = `SCORE: ${result.score} / 10`;
+              if (p) p.innerText = result.feedback || "Challenge completed successfully!";
+              overlay.style.display = 'flex';
+              setTimeout(() => {
+                overlay.style.opacity = '1';
+                hero.classList.add('pop');
+              }, 50);
+            }
+          }, 800);
+        }
+      } catch (err) {
+        terminalOut.innerText = `> Transmission Error: Could not evaluate solution.`;
+        console.error("Submission Failure:", err);
+      }
     };
+
 
     initialize();
   </script>
