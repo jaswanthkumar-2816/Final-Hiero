@@ -1464,7 +1464,7 @@
       <a href="result.html" class="nav-btn"><i class="fa-solid fa-magnifying-glass"></i><span>Analyse Resume</span></a>
       <a href="companies.html" class="nav-btn"><i class="fa-solid fa-building"></i><span>Target Companies</span></a>
       <a href="mock-interview.html" class="nav-btn"><i class="fa-solid fa-microphone"></i><span>Mock Interview</span></a>
-      <a href="learn.html" class="nav-btn active"><i class="fa-solid fa-book-open"></i><span>Learn Skills</span></a>
+      <a href="quiz.html" class="nav-btn active"><i class="fa-solid fa-book-open"></i><span>Learn Skills</span></a>
     </nav>
     <div class="nav-actions">
       <button class="theme-toggle-btn" id="theme-switch" onclick="window.toggleTheme()" title="Switch Theme"><i class="fa-solid fa-moon"></i></button>
@@ -1913,10 +1913,10 @@
           const data = await res.json();
           updateHieroGenerating('Opening your path', 'Taking you to videos and problems…', 90);
           if (data.success) {
-            window.location.href = `learn.html?skill=${encodeURIComponent(selectedSkill)}&track=beginner`;
+            window.location.href = `learn-beginner.html?skill=${encodeURIComponent(selectedSkill)}&track=beginner`;
           }
         } catch (e) {
-          window.location.href = `learn.html?skill=${encodeURIComponent(selectedSkill)}&track=beginner`;
+          window.location.href = `learn-beginner.html?skill=${encodeURIComponent(selectedSkill)}&track=beginner`;
         }
       } else {
         document.getElementById('card-intermediate').classList.add('selected');
@@ -2259,6 +2259,15 @@
       }
 
       window.selectedSkillsToLearn = [...skillsToLearn];
+      try {
+        localStorage.setItem('hieroIntermediateGaps', JSON.stringify({
+          skill: selectedSkill,
+          weakTopics: skillsToLearn,
+          score: overallScore,
+          savedAt: Date.now()
+        }));
+        localStorage.setItem('userSelectedSkills', JSON.stringify(skillsToLearn));
+      } catch (e) {}
       renderSkillsToLearnGrid();
 
       // Populate Detailed Question Explanations ("Why You Got This Score")
@@ -2451,7 +2460,7 @@
         localStorage.setItem('userSelectedSkills', JSON.stringify(window.selectedSkillsToLearn));
       }
 
-      window.location.href = `learn.html?skill=${encodeURIComponent(selectedSkill)}&score=${currentScoreVal}&lang=${currentSelectedLang}&track=intermediate`;
+      window.location.href = `learn-intermediate.html?skill=${encodeURIComponent(selectedSkill)}&score=${currentScoreVal}&lang=${currentSelectedLang}&track=intermediate`;
     }
 
     // Minimal Particle Background Canvas

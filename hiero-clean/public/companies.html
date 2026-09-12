@@ -181,8 +181,8 @@
           text-decoration: none;
           color: #ffffff;
           font-weight: 800;
-          font-size: 1.5rem;
-          letter-spacing: -0.5px;
+          font-size: 1.4rem;
+          letter-spacing: 0.5px;
           font-family: var(--font-display);
           transition: opacity 0.2s ease;
         }
@@ -191,17 +191,36 @@
           opacity: 0.9;
         }
 
-        .hiero-brand-logo-img {
-          width: 32px;
-          height: 32px;
-          object-fit: contain;
-          display: block;
-          filter: drop-shadow(0 0 10px rgba(7, 226, 25, 0.7));
-          transition: transform 0.2s ease;
+        .app-logo-box {
+          width: 42px;
+          height: 42px;
+          padding: 4px;
+          box-sizing: border-box;
+          background: rgba(7, 226, 25, 0.1);
+          border: 1px solid rgba(7, 226, 25, 0.35);
+          border-radius: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 0 16px rgba(7, 226, 25, 0.25);
+          overflow: hidden;
+          flex-shrink: 0;
+          transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
-        .app-brand:hover .hiero-brand-logo-img {
-          transform: scale(1.08);
+        .app-logo-box img,
+        .hiero-brand-logo-img {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+          object-position: center;
+          display: block;
+          filter: drop-shadow(0 0 6px rgba(7, 226, 25, 0.65));
+        }
+
+        .app-brand:hover .app-logo-box {
+          transform: scale(1.05);
+          box-shadow: 0 0 20px rgba(7, 226, 25, 0.4);
         }
 
         .nav-left-group {
@@ -2090,8 +2109,10 @@
       <header class="nav-header">
         <div class="nav-left-group">
           <a href="dashboard.html" class="app-brand">
-            <img src="hiero-logo-icon.png" alt="Hiero Logo" class="hiero-brand-logo-img">
-            <span>Hiero</span>
+            <div class="app-logo-box">
+              <img src="hiero-logo-icon.png?v=2" alt="Hiero Logo" class="hiero-brand-logo-img" onerror="this.onerror=null;this.src='logo-hiero.png';">
+            </div>
+            <span>HIERO</span>
           </a>
           <a href="dashboard.html" class="back-dashboard-btn" id="back-to-dashboard-btn" title="Return to Dashboard">
             <i class="fa-solid fa-arrow-left"></i>

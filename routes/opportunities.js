@@ -260,4 +260,48 @@ router.get('/applications', (req, res) => {
     }
 });
 
+// POST /api/opportunities/applications/status — recruiter shortlist / selection from Connect
+router.post('/applications/status', (req, res) => {
+    try {
+        const body = req.body || {};
+        const apps = loadJSON(APPS_FILE, []);
+        const status = body.status || 'shortlisted';
+        let app = apps.find(a =>
+            a.id === body.applicationId ||
+            (body.studentId && body.opportunityId && a.studentId === body.studentId && a.opportunityId === body.opportunityId) ||
+            (body.email && a.email && String(a.email).toLowerCase() === String(body.email).toLowerCase())
+        );
+        if (!app) {
+            app = {
+                id: body.applicationId || `app-${Date.now()}`,
+                opportunityId: body.opportunityId,
+                companyName: body.companyName,
+                studentId: body.studentId,
+                studentName: body.studentName,
+                email: body.email,
+                matchScore: body.matchScore || 0,
+                appliedAt: new Date().toISOString(),
+                resumeUrl: body.resumeUrl,
+            };
+            apps.unshift(app);
+        }
+        app.status = status;
+        app.notes = body.notes || app.notes;
+        app.notifiedAt = new Date().toISOString();
+        saveJSON(APPS_FILE, apps);
+
+        const currentOpps = loadJSON(OPPS_FILE, opportunities);
+        const targetOpp = currentOpps.find(o => o.id === app.opportunityId);
+        if (targetOpp && (status === 'shortlisted' || status === 'selected')) {
+            targetOpp.shortlistedCount = (targetOpp.shortlistedCount || 0) + 1;
+            saveJSON(OPPS_FILE, currentOpps);
+        }
+
+        console.log(`✅ [Opportunities Backend] ${status} recorded for ${app.studentName || app.email}`);
+        res.json({ success: true, application: app });
+    } catch (e) {
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
 module.exports = router;

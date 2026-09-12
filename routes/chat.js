@@ -256,19 +256,86 @@ async function handleOrbitChat(req, res) {
 
         // Step 3: Learning Context Prompt Builder
         let learningPrompt = "";
+        let locate = null;
+        let watchingVideo = false;
         if (context && context.page_type === "learning") {
             const skillName = context.skill || skill || "this topic";
-            learningPrompt = `\n\n[LEARNING CONTEXT]\nThe user is currently on the learning dashboard for ${skillName}. Recommend tutorials and guide the learning path based on available tutorials and challenges.
-- Available Tutorials: ${Array.isArray(context.tutorials) ? context.tutorials.join(', ') : 'None'}
-- Available Challenges: ${Array.isArray(context.challenges) ? context.challenges.join(', ') : 'None'}
-- Language: ${context.language || 'english'}
+            const videoId = context.videoId || req.body.videoId;
+            const videoTitle = context.videoTitle || req.body.videoTitle || '';
+            const modules = context.modules || req.body.modules || [];
+            watchingVideo = !!(videoId || videoTitle);
+            const stepLines = (Array.isArray(modules) ? modules : []).slice(0, 5).map((m) => {
+                const when = [m.startLabel, m.endLabel].filter(Boolean).join('–');
+                return `${m.order || ''}. ${m.title || 'Step'} ${when ? `(${when})` : ''}: ${m.summary || ''}`.trim();
+            }).filter(Boolean).join('\n');
 
-BEHAVIOR RULES:
-If the user asks "which video should I start" or similar:
-1. Check available tutorials.
-2. Recommend the beginner tutorial first (usually the first in the list).
-3. Suggest the next challenge after the tutorial.
-Example: "For ${skillName} beginners, start with **${context.tutorials?.[0] || 'the first tutorial'}**. After completing it, try the **${context.challenges?.[0] || 'first challenge'}** challenge to practice."`;
+            const gapTopics = Array.isArray(context.gapTopics) ? context.gapTopics.filter(Boolean) : [];
+            const codingLang = context.codingLang || '';
+            const isIntermediate = context.track === 'intermediate' || gapTopics.length > 0;
+
+            if (watchingVideo) {
+                learningPrompt = `\n\n[NOW PLAYING]
+The user is watching this exact video on the same page. You already know it. NEVER ask which tutorial, video, or part they mean.
+- Video title: ${videoTitle || 'the video on screen'}
+- Skill: ${skillName}
+- Language: ${context.language || 'english'}
+- Coding language: ${codingLang || 'not set'}
+- Track: ${isIntermediate ? 'intermediate — close diagnostic gaps only' : 'beginner'}
+- Weak topics they missed: ${gapTopics.length ? gapTopics.join(', ') : 'none listed'}
+- Video id: ${videoId || 'unknown'}
+
+Steps in this video:
+${stepLines || 'Steps are loading.'}
+
+HOW TO ANSWER:
+- Understand the user's words even with spelling mistakes (joints = joins, nosql = NoSQL).
+- ${isIntermediate ? 'They already know the basics. Teach only the weak topic they asked about. Do not restart from zero.' : 'Speak like a friendly beginner teacher.'}
+- Use short, simple sentences. No jargon unless you explain it in one line.
+- If they ask "what is X" / explain / define: FIRST explain the idea in 3 simple sentences. THEN give the exact video timestamp and step number.
+- If they only name a topic (joins, trees, indexes): briefly say what that part is, then give the timestamp.
+- If VIDEO LOCATE is present, use those exact timestamps. Do not invent other times.
+- Never ask which video they mean.
+- Answer in simple English unless they write in another language.`;
+            } else {
+                learningPrompt = `\n\n[LEARNING CONTEXT]
+The user is on the ${isIntermediate ? 'intermediate gap' : 'learning'} page for ${skillName}.
+- Weak topics they missed: ${gapTopics.length ? gapTopics.join(', ') : 'none listed'}
+- Coding language: ${codingLang || 'not set'}
+- Available Tutorials: ${Array.isArray(context.tutorials) ? context.tutorials.join(', ') : 'None'}
+- Language: ${context.language || 'english'}
+${isIntermediate
+    ? 'Explain only the gap they ask about. Assume they already know the basics. Point them to the matching gap clip when you can.'
+    : 'Answer in short, simple beginner sentences.'}`;
+            }
+
+            const skipLocate = /^(hi|hello|hey|thanks|thank you|ok|okay|cool|yes|no)$/i.test(String(message || '').trim());
+            if (videoId && !skipLocate) {
+                try {
+                    const { locateTopicInVideo } = require('../services/transcriptMatcher');
+                    locate = await locateTopicInVideo({
+                        youtubeId: videoId,
+                        query: message,
+                        skill: skillName,
+                        lang: context.language || 'en',
+                        modules
+                    });
+                    if (locate?.success) {
+                        const explainFirst = /\b(what is|what's|whats|explain|mean|define|definition|why)\b/i.test(String(message || ''));
+                        locate.mode = explainFirst ? 'explain' : 'seek';
+                        learningPrompt += `\n\n[VIDEO LOCATE]
+Detected topic: ${locate.topic}
+Matched words: ${locate.matchedWord}
+Step: ${locate.step ? `Step ${locate.step.order} — ${locate.step.title}` : 'this video'}
+Timestamp: ${locate.startLabel}
+What this part covers: ${locate.snippet}
+${explainFirst
+    ? 'First explain the concept in simple words. Then say: watch it at this timestamp in this step.'
+    : 'The video should jump to this timestamp. Confirm the topic and the time in one short sentence after a simple explanation.'}`;
+                    }
+                } catch (e) {
+                    console.warn('[Orbit] video locate skipped:', e.message);
+                }
+            }
         }
 
         const rawExec = terminal_output || execution_output;
@@ -328,7 +395,7 @@ Example: "For ${skillName} beginners, start with **${context.tutorials?.[0] || '
         const workspaceContext = `\n\n[WORKSPACE CONTEXT]\n- Editor Code: ${safeCode}\n- Cursor Line: ${cursor_line || 'Unknown'}`;
         const schemaContext = `\n\n[DATASET SCHEMA]\nColumns: ${Array.isArray(dataset_schema) ? dataset_schema.join(', ') : 'Not loaded'}`;
         const executionContext = `\n\n[EXECUTION OUTPUT]\n${safeExec}`;
-        const contextPrompt = workspaceContext + schemaContext + executionContext + toolContext;
+        const contextPrompt = watchingVideo ? toolContext : (workspaceContext + schemaContext + executionContext + toolContext);
 
         let completion = await callGroqWithFallback({
             messages: [
@@ -341,7 +408,11 @@ Example: "For ${skillName} beginners, start with **${context.tutorials?.[0] || '
         });
 
         const finalContent = completion.choices[0].message.content || "";
-        res.json({ success: true, answer: applySafetyFilter(normalizeResponse(finalContent), context || recommended_tutorials, message) });
+        res.json({
+            success: true,
+            answer: applySafetyFilter(normalizeResponse(finalContent), context || recommended_tutorials, message),
+            locate: locate && locate.success ? locate : null
+        });
 
     } catch (error) {
         console.error('Orbit Chat Error:', error.message);

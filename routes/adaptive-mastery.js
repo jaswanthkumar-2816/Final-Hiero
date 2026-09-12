@@ -642,35 +642,196 @@ router.post('/update-knowledge', async (req, res) => {
 // LEARN STEP: transcript-timestamp matching (not whole-video pick)
 // =========================================================
 router.post('/match-segment', async (req, res) => {
-  const { subtopic, description, questionText, skillName, nodeId, candidateVideos } = req.body || {};
+  const { subtopic, description, questionText, skillName, nodeId, candidateVideos, codingLang, lang } = req.body || {};
   if (!subtopic && !questionText) {
     return res.status(400).json({ success: false, message: 'subtopic or questionText required.' });
   }
 
   try {
     const { matchLearnSegment } = require('../services/transcriptMatcher');
+    const topic = subtopic || questionText;
     let videos = Array.isArray(candidateVideos) ? candidateVideos : [];
     if (!videos.length && skillName) {
       const graph = await getOrGenerateSkillGraph(skillName);
       const node = nodeId
         ? graph.nodes.find(n => n.id === nodeId)
         : graph.nodes.find(n =>
-            (n.subConcepts || []).some(s => String(s).toLowerCase() === String(subtopic).toLowerCase())
+            (n.subConcepts || []).some(s => String(s).toLowerCase() === String(topic).toLowerCase())
           ) || graph.nodes[0];
       videos = node?.resources?.videos || [];
     }
 
+    try {
+      const { searchOneGapVideo } = require('./analysis');
+      const found = await searchOneGapVideo(skillName || topic, topic, lang || 'english', codingLang);
+      if (found?.videoId) {
+        videos = [{ youtubeId: found.videoId, title: found.title, url: found.url }, ...videos];
+      }
+    } catch (searchErr) {
+      console.warn('[Adaptive] gap video search skipped:', searchErr.message);
+    }
+
     const match = await matchLearnSegment({
-      subtopic: subtopic || questionText,
+      subtopic: topic,
       description,
       questionText,
-      candidateVideos: videos
+      candidateVideos: videos,
+      codingLang,
+      lang,
+      skillName
     });
 
     res.json(match);
   } catch (err) {
     console.error('[Adaptive] match-segment error:', err.message);
     res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+router.post('/video-chapters', async (req, res) => {
+  const { videoId, youtubeId, url, title, skillName, stepName, subtopics, durationSec, lang, track } = req.body || {};
+  if (track && track !== 'beginner') {
+    return res.status(400).json({ success: false, message: 'Video chapters are beginner-only.' });
+  }
+  const id = videoId || youtubeId || url;
+  if (!id) return res.status(400).json({ success: false, message: 'videoId required.' });
+  try {
+    const { chapterizeVideo } = require('../services/transcriptMatcher');
+    const result = await chapterizeVideo({
+      youtubeId: id,
+      title,
+      skillName,
+      stepName,
+      subtopics,
+      durationSec,
+      lang
+    });
+    res.json(result);
+  } catch (err) {
+    console.error('[Adaptive] video-chapters error:', err.message);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+router.post('/video-transcript', async (req, res) => {
+  const { videoId, youtubeId, lang, track, startSec, endSec } = req.body || {};
+  if (track && track !== 'beginner') {
+    return res.status(400).json({ success: false, message: 'Video transcript is beginner-only.' });
+  }
+  const id = videoId || youtubeId;
+  if (!id) return res.status(400).json({ success: false, message: 'videoId required.' });
+  try {
+    const { fetchTimedTranscript, extractVideoId, formatClock } = require('../services/transcriptMatcher');
+    const youtubeIdClean = extractVideoId(id);
+    if (!youtubeIdClean) {
+      return res.status(400).json({ success: false, youtubeId: id, cueCount: 0, transcript: [], message: 'Invalid YouTube video id.' });
+    }
+    console.log(`[Adaptive] video-transcript start ${youtubeIdClean} lang=${lang || 'en'}`);
+    const cues = await fetchTimedTranscript(youtubeIdClean, lang || 'en');
+    const start = Number(startSec);
+    const end = Number(endSec);
+    const duration = cues.length ? Number(cues[cues.length - 1].end) || 0 : 0;
+    const windowSec = Math.max(20, Math.min(90, Math.round((duration || 600) / 280)));
+    const filtered = cues.filter((c) => {
+      if (Number.isFinite(start) && c.end < start) return false;
+      if (Number.isFinite(end) && end > 0 && c.start > end) return false;
+      return true;
+    });
+    const lines = [];
+    let cur = null;
+    for (const c of filtered) {
+      if (!cur || c.start - cur.startSec >= windowSec || (cur.text || '').length > 180) {
+        if (cur) lines.push(cur);
+        cur = { startSec: Math.floor(c.start), endSec: Math.ceil(c.end), text: c.text };
+      } else {
+        cur.endSec = Math.ceil(c.end);
+        cur.text = `${cur.text} ${c.text}`.replace(/\s+/g, ' ').trim();
+      }
+    }
+    if (cur) lines.push(cur);
+    if (lines.length > 360) {
+      const step = (lines.length - 1) / 359;
+      const capped = [];
+      for (let i = 0; i < 360; i++) capped.push(lines[Math.round(i * step)]);
+      lines.length = 0;
+      lines.push(...capped);
+    }
+    const transcript = lines.map((l, i) => ({
+      ...l,
+      order: i + 1,
+      startLabel: formatClock(l.startSec),
+      endLabel: formatClock(l.endSec)
+    }));
+    console.log(`[Adaptive] video-transcript done ${youtubeIdClean} cues=${cues.length} lines=${transcript.length}`);
+    res.json({
+      success: true,
+      youtubeId: youtubeIdClean,
+      cueCount: cues.length,
+      transcript,
+      warning: cues.length ? null : 'Timed captions were not available for this video.'
+    });
+  } catch (err) {
+    console.error('[Adaptive] video-transcript error:', err.message);
+    res.status(500).json({ success: false, message: err.message, transcript: [] });
+  }
+});
+
+router.post('/video-modules', async (req, res) => {
+  const { videoId, youtubeId, lang, language, track, topic, skill, skillName, title, durationSec } = req.body || {};
+  if (track && track !== 'beginner' && track !== 'intermediate') {
+    return res.status(400).json({ success: false, message: 'Video modules are for learning tracks only.', modules: [] });
+  }
+  const id = videoId || youtubeId;
+  if (!id) return res.status(400).json({ success: false, message: 'videoId required.', modules: [] });
+  try {
+    const { segmentVideoIntoModules } = require('../services/transcriptModules');
+    console.log(`[Adaptive] video-modules start ${id} lang=${lang || language || 'en'} topic=${topic || skillName || skill || title || ''}`);
+    const result = await segmentVideoIntoModules({
+      youtubeId: id,
+      lang: lang || language || 'en',
+      topic: topic || skillName || skill || title,
+      title,
+      durationSec
+    });
+    console.log(`[Adaptive] video-modules done ${result.youtubeId} count=${(result.modules || []).length} method=${result.method || 'none'}`);
+    res.json(result);
+  } catch (err) {
+    console.error('[Adaptive] video-modules error:', err.message);
+    res.status(500).json({ success: false, message: err.message, modules: [] });
+  }
+});
+
+router.post('/locate-topic', async (req, res) => {
+  const { videoId, youtubeId, query, message, skill, topic, lang, language, modules } = req.body || {};
+  const id = videoId || youtubeId;
+  const q = query || message;
+  if (!id || !q) return res.status(400).json({ success: false, message: 'videoId and query required.' });
+  try {
+    const { locateTopicInVideo } = require('../services/transcriptMatcher');
+    const result = await locateTopicInVideo({
+      youtubeId: id,
+      query: q,
+      skill: skill || topic,
+      lang: lang || language || 'en',
+      modules
+    });
+    res.json(result);
+  } catch (err) {
+    console.error('[Adaptive] locate-topic error:', err.message);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+router.post('/translate-steps', async (req, res) => {
+  const list = Array.isArray(req.body?.steps) ? req.body.steps : (Array.isArray(req.body?.modules) ? req.body.modules : []);
+  if (!list.length) return res.json({ success: false, message: 'steps required', modules: [] });
+  try {
+    const { translateModulesToEnglish } = require('../services/transcriptModules');
+    const modules = await translateModulesToEnglish(list);
+    res.json({ success: true, modules });
+  } catch (err) {
+    console.error('[Adaptive] translate-steps error:', err.message);
+    res.status(500).json({ success: false, message: err.message, modules: list });
   }
 });
 

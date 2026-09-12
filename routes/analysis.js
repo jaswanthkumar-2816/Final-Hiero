@@ -704,13 +704,29 @@ function get3FallbackVideos(skill, score, lang) {
 // YouTube video fetcher for the selected language
 const YT_LANG_CODES = { english: 'en', hindi: 'hi', telugu: 'te', tamil: 'ta', kannada: 'kn', malayalam: 'ml' };
 const YT_LANG_SCRIPTS = { hindi: 'हिंदी', telugu: 'తెలుగు', tamil: 'தமிழ்', kannada: 'ಕನ್ನಡ', malayalam: 'മലയാളം' };
-
-function languageSearchQuery(skill, lang) {
-    const l = (lang || 'english').toLowerCase();
-    if (l === 'english') return `${skill} tutorial for beginners`;
-    const native = YT_LANG_SCRIPTS[l] || '';
-    return `${skill} tutorial ${l} ${native}`.trim();
-}
+const YT_ACCEPT_LANG = {
+    english: 'en-US,en;q=0.9',
+    hindi: 'hi-IN,hi;q=0.9,en;q=0.4',
+    telugu: 'te-IN,te;q=0.9,en;q=0.4',
+    tamil: 'ta-IN,ta;q=0.9,en;q=0.4',
+    kannada: 'kn-IN,kn;q=0.9,en;q=0.4',
+    malayalam: 'ml-IN,ml;q=0.9,en;q=0.4'
+};
+const BEGINNER_MODULE_TITLES = [
+    'Tutorial 1: Foundations & Core Concepts',
+    'Tutorial 2: Hands-on Walkthrough',
+    'Tutorial 3: Beginner Project Practice'
+];
+const LANG_TITLE_MARKERS = {
+    hindi: [/hindi/i, /हिंदी/, /हिन्दी/],
+    telugu: [/telugu/i, /తెలుగు/],
+    tamil: [/tamil/i, /தமிழ்/],
+    kannada: [/kannada/i, /ಕನ್ನಡ/],
+    malayalam: [/malayalam/i, /മലയാളം/]
+};
+const ALL_LANG_MARKERS = Object.values(LANG_TITLE_MARKERS).flat();
+const MIN_TUTORIAL_SECONDS = 8 * 60;
+const MIN_GAP_TUTORIAL_SECONDS = 20 * 60;
 
 function languageLabel(lang) {
     const l = (lang || 'english').toLowerCase();
@@ -722,13 +738,314 @@ function languageLabel(lang) {
     return 'English';
 }
 
-async function searchYouTubeKeyless(query, limit = 5) {
+function normalizeCodingLang(value) {
+    const s = String(value || '').toLowerCase().trim();
+    if (s === 'c++' || s === 'cpp' || s === 'cplusplus') return 'C++';
+    if (s === 'c' || s === 'clang') return 'C';
+    if (s === 'js' || s === 'javascript') return 'JavaScript';
+    if (s === 'python' || s === 'py') return 'Python';
+    if (s === 'java') return 'Java';
+    return '';
+}
+
+function inferCodingLangFromSkill(skill) {
+    const s = String(skill || '').toLowerCase();
+    if (/\bjavascript\b/.test(s)) return 'JavaScript';
+    if (/\bjava\b/.test(s)) return 'Java';
+    if (/\bpython\b/.test(s)) return 'Python';
+    if (/\bc\+\+|cpp\b/.test(s)) return 'C++';
+    if (/\bc programming\b|\bin c\b/.test(s)) return 'C';
+    return '';
+}
+
+function skillSearchPhrase(skill, codingLang) {
+    const raw = String(skill || '').replace(/\s+/g, ' ').trim();
+    const lower = raw.toLowerCase();
+    let phrase = raw;
+    if (/\bjava\b/.test(lower) && /\boop\b|object[\s-]?oriented/.test(lower)) phrase = 'Java OOP object oriented programming';
+    else if (/\boop\b|object[\s-]?oriented/.test(lower)) phrase = 'object oriented programming';
+    else if (/\bdsa\b|data structures?|algorithms?/.test(lower)) phrase = 'data structures and algorithms';
+    else if (/\bleetcode\b|coding interview/.test(lower)) phrase = 'coding interview data structures';
+    const code = inferCodingLangFromSkill(raw) || normalizeCodingLang(codingLang);
+    if (code && !new RegExp(code.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i').test(phrase)) {
+        if (code === 'C') return `${phrase} in C programming`;
+        return `${phrase} in ${code}`;
+    }
+    return phrase;
+}
+
+function gapFocusPhrase(skill, gapTopic) {
+    let gap = String(gapTopic || '').replace(/\s+/g, ' ').trim();
+    const drop = new Set(
+        String(skill || '').toLowerCase().split(/[^a-z0-9+]+/).filter((w) => w.length > 2)
+    );
+    gap = gap.split(/[^a-zA-Z0-9+]+/).filter((w) => {
+        const key = w.toLowerCase();
+        return key.length > 2 && !drop.has(key) && !['and', 'the', 'for', 'with'].includes(key);
+    }).join(' ');
+    return gap.replace(/\b(introduction|intro|advanced|production)\b/ig, '').replace(/\s+/g, ' ').trim();
+}
+
+function videoMatchesSkill(v, skill, codingLang) {
+    const t = String(v?.title || '');
+    const code = inferCodingLangFromSkill(skill) || normalizeCodingLang(codingLang);
+    if (code && !videoMatchesCodingLang(v, code)) return false;
+    const s = String(skill || '').toLowerCase();
+    if (/\boop\b|object[\s-]?oriented/.test(s)) {
+        return /oop|object[\s-]?oriented|\bclasses\b|inheritance|polymorphism|\bjava\b/i.test(t) && !/javascript/i.test(t);
+    }
+    if (/\bdsa\b|data structures?|algorithms?/.test(s)) {
+        return /dsa|data structure|algorithm/i.test(t);
+    }
+    const tokens = String(skill || '').toLowerCase().split(/[^a-z0-9+]+/).filter((w) => w.length > 3 && !['and', 'with'].includes(w));
+    if (!tokens.length) return true;
+    return tokens.some((tok) => t.toLowerCase().includes(tok));
+}
+
+function codingSearchPhrase(skill, codingLang) {
+    return skillSearchPhrase(skill, codingLang);
+}
+
+function videoMatchesCodingLang(v, codingLang) {
+    const code = normalizeCodingLang(codingLang);
+    if (!code) return true;
+    const t = String(v?.title || '');
+    if (code === 'C++') return /c\+\+|cpp|cplusplus/i.test(t);
+    if (code === 'C') return /(\bc programming\b|\bin c\b|\bc language\b|(?:^|[^\w+])c(?:[^\w+]|$))/i.test(t) && !/c\+\+|cpp|c#/i.test(t);
+    if (code === 'Java') return /\bjava\b/i.test(t) && !/javascript/i.test(t);
+    if (code === 'JavaScript') return /javascript|\bjs\b/i.test(t);
+    return new RegExp(code.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i').test(t);
+}
+
+function beginnerSearchQueries(skill, lang, codingLang) {
+    const s = codingSearchPhrase(skill, codingLang);
+    const l = (lang || 'english').toLowerCase();
+    const native = YT_LANG_SCRIPTS[l] || '';
+    if (l === 'english') {
+        return [
+            `${s} full course tutorial for beginners`,
+            `${s} complete tutorial from scratch`,
+            `${s} crash course full tutorial beginner`
+        ];
+    }
+    return [
+        `${s} full course in ${l}`,
+        `${s} tutorial in ${l} for beginners`,
+        `${s} ${native} full tutorial beginner`.trim(),
+        `${s} ${native} complete course`.trim(),
+        `${s} ${l} beginner full course`
+    ];
+}
+
+function intermediateSkillSearchQueries(skill, lang, codingLang) {
+    const s = codingSearchPhrase(skill, codingLang);
+    const l = (lang || 'english').toLowerCase();
+    const native = YT_LANG_SCRIPTS[l] || '';
+    if (l === 'english') {
+        return [
+            `${s} intermediate tutorial explained`,
+            `${s} interview questions tutorial`,
+            `${s} core concepts deep dive`
+        ];
+    }
+    return [
+        `${s} intermediate tutorial in ${l}`,
+        `${s} ${native} interview tutorial`.trim(),
+        `${s} ${l} explained`
+    ];
+}
+
+function normalizeGapList(raw) {
+    const list = Array.isArray(raw) ? raw : (raw ? [raw] : []);
+    const seen = new Set();
+    const out = [];
+    for (const item of list) {
+        const name = String(item || '').replace(/\s+/g, ' ').trim();
+        if (!name) continue;
+        const key = name.toLowerCase();
+        if (seen.has(key)) continue;
+        seen.add(key);
+        out.push(name);
+    }
+    return out.slice(0, 5);
+}
+
+function gapTopicTokens(gapTopic) {
+    return String(gapTopic || '')
+        .toLowerCase()
+        .replace(/[^a-z0-9+\s]/g, ' ')
+        .split(/\s+/)
+        .filter((t) => t.length > 2 && !['the', 'and', 'for', 'with', 'this', 'that', 'from'].includes(t));
+}
+
+function titleMentionsGap(title, gapTopic) {
+    const t = String(title || '').toLowerCase();
+    const tokens = gapTopicTokens(gapTopic);
+    if (!tokens.length) return /tutorial|explained|lecture|concept/i.test(t);
+    const hits = tokens.filter((tok) => t.includes(tok)).length;
+    return hits >= Math.min(tokens.length, tokens.length <= 2 ? 1 : 2);
+}
+
+function intermediateGapSearchQueries(skill, gapTopic, lang, codingLang) {
+    const l = (lang || 'english').toLowerCase();
+    const native = YT_LANG_SCRIPTS[l] || '';
+    const skillBit = skillSearchPhrase(skill, codingLang);
+    const focus = gapFocusPhrase(skill, gapTopic);
+    const compact = [skillBit, focus].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
+    if (l === 'english') {
+        return [
+            `${compact} full course tutorial`,
+            `${skillBit} full course tutorial`,
+            `${compact} complete tutorial`
+        ].filter(Boolean);
+    }
+    return [
+        `${compact} full course tutorial in ${l}`,
+        `${skillBit} ${native} complete tutorial`.trim(),
+        `${compact} ${l} full tutorial`.trim()
+    ].filter(Boolean);
+}
+
+function titleMatchesLang(title, lang) {
+    const t = String(title || '');
+    const l = (lang || 'english').toLowerCase();
+    if (l === 'english') {
+        return !ALL_LANG_MARKERS.some((rx) => rx.test(t));
+    }
+    const mine = LANG_TITLE_MARKERS[l] || [];
+    return mine.some((rx) => rx.test(t));
+}
+
+function titleConflictsOtherLang(title, lang) {
+    const t = String(title || '');
+    const l = (lang || 'english').toLowerCase();
+    return Object.entries(LANG_TITLE_MARKERS).some(([key, markers]) => {
+        if (key === l) return false;
+        return markers.some((rx) => rx.test(t));
+    });
+}
+
+function parseDurationToSeconds(raw) {
+    if (!raw) return 0;
+    const iso = String(raw);
+    const isoMatch = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/i);
+    if (isoMatch && /PT/i.test(iso)) {
+        return (+isoMatch[1] || 0) * 3600 + (+isoMatch[2] || 0) * 60 + (+isoMatch[3] || 0);
+    }
+    const clock = iso.match(/^(?:(\d+):)?(\d{1,2}):(\d{2})$/);
+    if (clock) {
+        const h = clock[1] ? +clock[1] : 0;
+        return h * 3600 + (+clock[2]) * 60 + (+clock[3]);
+    }
+    return 0;
+}
+
+function formatDurationLabel(seconds, fallback) {
+    if (!seconds) return fallback || 'Full tutorial';
+    const h = Math.floor(seconds / 3600);
+    const m = Math.round((seconds % 3600) / 60);
+    if (h > 0) return `${h}h ${m}m`;
+    return `${Math.max(m, 1)}m`;
+}
+
+function decodeEntities(s) {
+    return String(s || '')
+        .replace(/&amp;/g, '&')
+        .replace(/&#39;|&apos;/g, "'")
+        .replace(/&quot;/g, '"')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>');
+}
+
+function toVideoCard(base, lang, idx) {
+    const seconds = base.durationSec || parseDurationToSeconds(base.duration);
+    return {
+        title: decodeEntities(base.title),
+        videoId: base.videoId,
+        url: `https://www.youtube.com/embed/${base.videoId}`,
+        duration: base.duration || `PT${Math.max(1, Math.round(seconds / 60))}M`,
+        durationLabel: formatDurationLabel(seconds, base.duration),
+        durationSec: seconds,
+        thumbnail: base.thumbnail || `https://i.ytimg.com/vi/${base.videoId}/hqdefault.jpg`,
+        moduleNumber: idx + 1,
+        moduleTitle: BEGINNER_MODULE_TITLES[idx] || `Tutorial ${idx + 1}`,
+        level: 'Beginner',
+        language: languageLabel(lang),
+        isFallback: !!base.isFallback
+    };
+}
+
+async function searchYouTubeApi(query, lang, durationPref, limit = 10) {
+    if (!YOUTUBE_API_KEY) return [];
+    const l = (lang || 'english').toLowerCase();
+    const langCode = YT_LANG_CODES[l] || 'en';
+    const ytRes = await axios.get('https://www.googleapis.com/youtube/v3/search', {
+        params: {
+            part: 'snippet',
+            type: 'video',
+            maxResults: limit,
+            q: query,
+            key: YOUTUBE_API_KEY,
+            order: 'relevance',
+            relevanceLanguage: langCode,
+            hl: langCode,
+            videoDuration: durationPref,
+            videoEmbeddable: 'true',
+            safeSearch: 'moderate',
+            regionCode: l === 'english' ? 'US' : 'IN'
+        },
+        timeout: 12000
+    });
+    return (ytRes.data.items || []).filter((item) => item.id?.videoId).map((item) => ({
+        title: item.snippet.title,
+        videoId: item.id.videoId,
+        thumbnail: item.snippet.thumbnails?.high?.url || `https://i.ytimg.com/vi/${item.id.videoId}/hqdefault.jpg`,
+        duration: 'PT30M'
+    }));
+}
+
+async function hydrateYouTubeDurations(videos) {
+    if (!YOUTUBE_API_KEY || !videos.length) return videos;
+    const ids = [...new Set(videos.map((v) => v.videoId).filter(Boolean))].slice(0, 20);
+    if (!ids.length) return videos;
+    try {
+        const ytRes = await axios.get('https://www.googleapis.com/youtube/v3/videos', {
+            params: {
+                part: 'contentDetails,status,snippet',
+                id: ids.join(','),
+                key: YOUTUBE_API_KEY
+            },
+            timeout: 10000
+        });
+        const byId = {};
+        for (const item of ytRes.data.items || []) {
+            const sec = parseDurationToSeconds(item.contentDetails?.duration);
+            byId[item.id] = {
+                duration: item.contentDetails?.duration || 'PT30M',
+                durationSec: sec,
+                defaultAudioLanguage: item.snippet?.defaultAudioLanguage || '',
+                defaultLanguage: item.snippet?.defaultLanguage || ''
+            };
+        }
+        return videos.map((v) => {
+            const extra = byId[v.videoId];
+            if (!extra) return v;
+            return { ...v, ...extra };
+        }).filter((v) => v.embeddable !== false);
+    } catch (e) {
+        console.warn('[YT details]', e.message);
+        return videos;
+    }
+}
+
+async function searchYouTubeKeyless(query, lang, limit = 8) {
+    const l = (lang || 'english').toLowerCase();
     const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
     const ytRes = await axios.get(url, {
         timeout: 12000,
         headers: {
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
-            'Accept-Language': 'en-US,en;q=0.9'
+            'Accept-Language': YT_ACCEPT_LANG[l] || 'en-US,en;q=0.9'
         }
     });
     const html = typeof ytRes.data === 'string' ? ytRes.data : '';
@@ -742,11 +1059,14 @@ async function searchYouTubeKeyless(query, limit = 5) {
         for (const item of items) {
             const v = item.videoRenderer;
             if (!v?.videoId) continue;
+            const title = v.title?.runs?.[0]?.text || v.title?.simpleText || query;
+            const lengthText = v.lengthText?.simpleText || '';
             videos.push({
-                title: v.title?.runs?.[0]?.text || v.title?.simpleText || query,
+                title,
                 videoId: v.videoId,
                 url: `https://www.youtube.com/embed/${v.videoId}`,
-                duration: v.lengthText?.simpleText || 'PT30M',
+                duration: lengthText || 'PT30M',
+                durationSec: parseDurationToSeconds(lengthText),
                 thumbnail: `https://i.ytimg.com/vi/${v.videoId}/hqdefault.jpg`
             });
             if (videos.length >= limit) return videos;
@@ -755,77 +1075,319 @@ async function searchYouTubeKeyless(query, limit = 5) {
     return videos;
 }
 
-async function searchVideosForLanguage(skill, score, lang) {
+function videoMatchesLang(v, lang) {
     const l = (lang || 'english').toLowerCase();
-    const langLabel = languageLabel(l);
-    const searchQuery = languageSearchQuery(skill, l);
-    const langCode = YT_LANG_CODES[l] || 'en';
+    if (l === 'english') return !titleConflictsOtherLang(v.title, l);
+    const code = YT_LANG_CODES[l] || '';
+    const audio = String(v.defaultAudioLanguage || v.defaultLanguage || '').toLowerCase();
+    if (code && audio && audio.startsWith(code)) return true;
+    return titleMatchesLang(v.title, l);
+}
 
-    if (YOUTUBE_API_KEY) {
-        try {
-            const ytRes = await axios.get('https://www.googleapis.com/youtube/v3/search', {
-                params: {
-                    part: 'snippet',
-                    type: 'video',
-                    maxResults: 5,
-                    q: searchQuery,
-                    key: YOUTUBE_API_KEY,
-                    order: 'relevance',
-                    relevanceLanguage: langCode,
-                    safeSearch: 'moderate'
-                },
-                timeout: 12000
-            });
-            const items = ytRes.data.items || [];
-            if (items.length) {
-                return items.slice(0, 3).map((item, idx) => ({
-                    title: item.snippet.title,
-                    videoId: item.id.videoId,
-                    url: `https://www.youtube.com/embed/${item.id.videoId}`,
-                    duration: 'PT30M',
-                    thumbnail: item.snippet.thumbnails?.high?.url || `https://i.ytimg.com/vi/${item.id.videoId}/hqdefault.jpg`,
-                    moduleNumber: idx + 1,
-                    language: langLabel
-                }));
+function pickThreeTutorials(candidates, lang, codingLang) {
+    const seen = new Set();
+    const unique = [];
+    for (const v of candidates) {
+        if (!v?.videoId || seen.has(v.videoId)) continue;
+        if (/#shorts|youtube shorts/i.test(v.title || '')) continue;
+        seen.add(v.videoId);
+        unique.push(v);
+    }
+
+    const longEnough = unique.filter((v) => (v.durationSec || 0) === 0 || v.durationSec >= MIN_TUTORIAL_SECONDS);
+    const pool = longEnough.length >= 3 ? longEnough : unique;
+
+    const langHit = pool.filter((v) => videoMatchesLang(v, lang));
+    const noConflict = pool.filter((v) => !titleConflictsOtherLang(v.title, lang));
+    const ranked = [...langHit, ...noConflict.filter((v) => !langHit.includes(v)), ...pool.filter((v) => !langHit.includes(v) && !noConflict.includes(v))];
+
+    ranked.sort((a, b) => {
+        const aCode = videoMatchesCodingLang(a, codingLang) ? 1 : 0;
+        const bCode = videoMatchesCodingLang(b, codingLang) ? 1 : 0;
+        if (bCode !== aCode) return bCode - aCode;
+        const aLang = videoMatchesLang(a, lang) ? 1 : 0;
+        const bLang = videoMatchesLang(b, lang) ? 1 : 0;
+        if (bLang !== aLang) return bLang - aLang;
+        return (b.durationSec || 0) - (a.durationSec || 0);
+    });
+
+    return ranked.slice(0, 3);
+}
+
+async function collectTutorialCandidates(skill, lang, codingLang, track = 'beginner') {
+    const queries = track === 'intermediate'
+        ? intermediateSkillSearchQueries(skill, lang, codingLang)
+        : beginnerSearchQueries(skill, lang, codingLang);
+    const gathered = [];
+    for (const query of queries.slice(0, 2)) {
+        if (YOUTUBE_API_KEY) {
+            try {
+                gathered.push(...await searchYouTubeApi(query, lang, 'long', 10));
+            } catch (e) {
+                console.warn('[YT API long]', lang, e.message);
             }
+        }
+        if (gathered.length < 6) {
+            try {
+                gathered.push(...await searchYouTubeKeyless(query, lang, 8));
+            } catch (e) {
+                console.warn('[YT scrape]', lang, e.message);
+            }
+        }
+        const hydrated = await hydrateYouTubeDurations(gathered);
+        const good = pickThreeTutorials(hydrated, lang, codingLang).filter((v) => (
+            (v.durationSec || 0) === 0 || v.durationSec >= MIN_TUTORIAL_SECONDS
+        ) && (lang === 'english' || videoMatchesLang(v, lang)));
+        if (good.length >= 3) return hydrated;
+        if (gathered.length >= 10) return hydrated;
+    }
+    if (gathered.length < 6 && YOUTUBE_API_KEY) {
+        try {
+            gathered.push(...await searchYouTubeApi(queries[0], lang, 'medium', 8));
         } catch (e) {
-            console.warn('[YT API]', l, e.message);
+            console.warn('[YT API medium]', lang, e.message);
+        }
+    }
+    return hydrateYouTubeDurations(gathered);
+}
+
+function titleLooksShortLesson(title) {
+    return /\b(in\s+\d+\s*min|#shorts|shorts|10 minutes|5 minutes|quick recap|tl;dr)\b/i.test(String(title || ''));
+}
+
+function gapDurationScore(sec) {
+    if (sec >= 45 * 60 && sec <= 3 * 3600) return 5;
+    if (sec >= 25 * 60 && sec <= 4 * 3600) return 4;
+    if (sec >= 20 * 60) return 3;
+    if (sec >= 12 * 60) return 1;
+    return 0;
+}
+
+function rankGapTopicVideos(candidates, lang, codingLang, gapTopic, skill) {
+    const seen = new Set();
+    const unique = [];
+    for (const v of candidates || []) {
+        if (!v?.videoId || seen.has(v.videoId)) continue;
+        if (/#shorts|youtube shorts/i.test(v.title || '')) continue;
+        if (titleLooksShortLesson(v.title)) continue;
+        seen.add(v.videoId);
+        unique.push(v);
+    }
+
+    return unique.slice().sort((a, b) => {
+        const aSkill = videoMatchesSkill(a, skill || gapTopic, codingLang) ? 1 : 0;
+        const bSkill = videoMatchesSkill(b, skill || gapTopic, codingLang) ? 1 : 0;
+        if (bSkill !== aSkill) return bSkill - aSkill;
+        const aDur = gapDurationScore(a.durationSec || 0);
+        const bDur = gapDurationScore(b.durationSec || 0);
+        if (bDur !== aDur) return bDur - aDur;
+        const aGap = titleMentionsGap(a.title, gapTopic) ? 1 : 0;
+        const bGap = titleMentionsGap(b.title, gapTopic) ? 1 : 0;
+        if (bGap !== aGap) return bGap - aGap;
+        const aConflict = titleConflictsOtherLang(a.title, lang) ? 1 : 0;
+        const bConflict = titleConflictsOtherLang(b.title, lang) ? 1 : 0;
+        if (aConflict !== bConflict) return aConflict - bConflict;
+        const aCode = videoMatchesCodingLang(a, codingLang) ? 1 : 0;
+        const bCode = videoMatchesCodingLang(b, codingLang) ? 1 : 0;
+        if (bCode !== aCode) return bCode - aCode;
+        const aLang = videoMatchesLang(a, lang) ? 1 : 0;
+        const bLang = videoMatchesLang(b, lang) ? 1 : 0;
+        if (bLang !== aLang) return bLang - aLang;
+        return (b.durationSec || 0) - (a.durationSec || 0);
+    });
+}
+
+function pickGapTopicVideo(candidates, lang, codingLang, gapTopic, skill) {
+    return rankGapTopicVideos(candidates, lang, codingLang, gapTopic, skill)[0] || null;
+}
+
+function pickGapTopicVideos(candidates, lang, codingLang, gapTopic, limit = 3, skill) {
+    const ranked = rankGapTopicVideos(candidates, lang, codingLang, gapTopic, skill);
+    const skillHit = ranked.filter((v) => videoMatchesSkill(v, skill || gapTopic, codingLang));
+    const base = skillHit.length >= limit ? skillHit : ranked;
+    const longEnough = base.filter((v) => (v.durationSec || 0) === 0 || v.durationSec >= MIN_GAP_TUTORIAL_SECONDS);
+    const pool = longEnough.length >= limit ? longEnough : base;
+    return pool.slice(0, limit);
+}
+
+async function collectGapTopicCandidates(skill, gapTopic, lang, codingLang) {
+    const queries = intermediateGapSearchQueries(skill, gapTopic, lang, codingLang);
+    const gathered = [];
+    for (const query of queries.slice(0, 3)) {
+        if (YOUTUBE_API_KEY) {
+            try {
+                gathered.push(...await searchYouTubeApi(query, lang, 'long', 10));
+            } catch (e) {
+                console.warn('[YT API gap long]', lang, gapTopic, e.message);
+            }
+        }
+        if (gathered.length < 10) {
+            try {
+                gathered.push(...await searchYouTubeKeyless(query, lang, 8));
+            } catch (e) {
+                console.warn('[YT scrape gap]', lang, gapTopic, e.message);
+            }
+        }
+        if (gathered.length >= 12) break;
+    }
+    if (gathered.length < 8 && YOUTUBE_API_KEY) {
+        try {
+            gathered.push(...await searchYouTubeApi(queries[0], lang, 'medium', 8));
+        } catch (e) {
+            console.warn('[YT API gap medium]', lang, gapTopic, e.message);
+        }
+    }
+    return hydrateYouTubeDurations(gathered);
+}
+
+function toGapVideoCard(base, lang, idx, gapTopic) {
+    const seconds = base.durationSec || parseDurationToSeconds(base.duration);
+    return {
+        title: decodeEntities(base.title),
+        videoId: base.videoId,
+        url: `https://www.youtube.com/embed/${base.videoId}`,
+        duration: base.duration || `PT${Math.max(1, Math.round(seconds / 60))}M`,
+        durationLabel: formatDurationLabel(seconds, base.duration),
+        durationSec: seconds,
+        thumbnail: base.thumbnail || `https://i.ytimg.com/vi/${base.videoId}/hqdefault.jpg`,
+        moduleNumber: idx + 1,
+        moduleTitle: `Tutorial ${idx + 1}`,
+        gapTopic,
+        level: `Tutorial ${idx + 1}`,
+        language: languageLabel(lang),
+        isFallback: !!base.isFallback
+    };
+}
+
+async function searchOneGapVideo(skill, gapTopic, lang, codingLang) {
+    const l = (lang || 'english').toLowerCase();
+    let candidates = await collectGapTopicCandidates(skill, gapTopic, l, codingLang);
+    let picked = pickGapTopicVideo(candidates, l, codingLang, gapTopic, skill);
+    if (!picked && l !== 'english') {
+        candidates = await collectGapTopicCandidates(skill, gapTopic, 'english', codingLang);
+        picked = pickGapTopicVideo(candidates, 'english', codingLang, gapTopic, skill);
+        if (picked) picked.isFallback = true;
+    }
+    return picked || null;
+}
+
+async function fetchThreeVideosForGap(skill, gapTopic, lang, codingLang) {
+    const l = (lang || 'english').toLowerCase();
+    const topic = String(gapTopic || '').trim();
+    if (!topic) return [];
+    let candidates = await collectGapTopicCandidates(skill, topic, l, codingLang);
+    let picked = pickGapTopicVideos(candidates, l, codingLang, topic, 3, skill);
+    if (picked.length < 3 && l !== 'english') {
+        const english = pickGapTopicVideos(
+            await collectGapTopicCandidates(skill, topic, 'english', codingLang),
+            'english',
+            codingLang,
+            topic,
+            3,
+            skill
+        );
+        for (const v of english) {
+            if (picked.length >= 3) break;
+            if (picked.some((p) => p.videoId === v.videoId)) continue;
+            picked.push({ ...v, isFallback: true });
+        }
+    }
+    if (picked.length < 3) {
+        const extra = await collectTutorialCandidates(skillSearchPhrase(skill, codingLang), l, codingLang, 'intermediate');
+        for (const v of pickGapTopicVideos(extra, l, codingLang, topic, 5, skill)) {
+            if (picked.length >= 3) break;
+            if (picked.some((p) => p.videoId === v.videoId)) continue;
+            picked.push(v);
+        }
+    }
+    return picked.slice(0, 3).map((v, idx) => toGapVideoCard(v, v.isFallback ? 'english' : l, idx, topic));
+}
+
+async function fetchGapVideos(skill, weakTopics, lang, codingLang, videosPerTopic = 1) {
+    const unique = normalizeGapList(weakTopics);
+    if (!unique.length) return [];
+    if (Number(videosPerTopic) === 3 || unique.length === 1) {
+        return fetchThreeVideosForGap(skill, unique[0], lang, codingLang);
+    }
+    const videos = [];
+    const seen = new Set();
+    for (let i = 0; i < unique.slice(0, 3).length; i++) {
+        const topic = unique[i];
+        const found = await searchOneGapVideo(skill, topic, lang, codingLang);
+        if (!found?.videoId || seen.has(found.videoId)) continue;
+        seen.add(found.videoId);
+        videos.push(toGapVideoCard(found, found.isFallback ? 'english' : lang, videos.length, topic));
+    }
+    return videos;
+}
+
+async function searchVideosForLanguage(skill, score, lang, track = 'beginner', codingLang) {
+    const l = (lang || 'english').toLowerCase();
+    const isBeginner = track !== 'intermediate';
+    const candidates = await collectTutorialCandidates(skill, l, codingLang, track);
+    let picked = pickThreeTutorials(candidates, l, codingLang);
+
+    if (l !== 'english') {
+        picked = picked.filter((v) => videoMatchesLang(v, l));
+    }
+
+    if (picked.length === 0 && l !== 'english') {
+        const englishFill = pickThreeTutorials(await collectTutorialCandidates(skill, 'english', codingLang, track), 'english', codingLang)
+            .map((v) => ({ ...v, isFallback: true }));
+        for (const v of englishFill) {
+            if (picked.length >= 3) break;
+            if (picked.some((p) => p.videoId === v.videoId)) continue;
+            picked.push(v);
         }
     }
 
-    try {
-        const scraped = await searchYouTubeKeyless(searchQuery, 5);
-        if (scraped.length) {
-            return scraped.slice(0, 3).map((v, idx) => ({
-                ...v,
-                moduleNumber: idx + 1,
-                language: langLabel
-            }));
+    if (picked.length < 3) {
+        const fallback = get3FallbackVideos(skill, isBeginner ? 20 : score, 'english');
+        for (const v of fallback) {
+            if (picked.length >= 3) break;
+            if (picked.some((p) => p.videoId === v.videoId)) continue;
+            picked.push({ ...v, isFallback: true, durationSec: parseDurationToSeconds(v.duration) });
         }
-    } catch (e) {
-        console.warn('[YT scrape]', l, e.message);
     }
 
-    return get3FallbackVideos(skill, score, 'english').map(v => ({
-        ...v,
-        language: 'English',
-        isFallback: true
-    }));
+    return picked.slice(0, 3).map((v, idx) => toVideoCard(v, v.isFallback ? 'english' : l, idx));
 }
 
 function skillForVideoSearch(query) {
-    const raw = String(query || 'Python').replace(/ \(.+\)/g, '').trim();
-    const known = ['html', 'css', 'javascript', 'python', 'sql', 'react', 'java', 'node', 'mongodb', 'django', 'flask', 'typescript'];
-    const lower = raw.toLowerCase();
-    const hit = known.find(k => lower === k || lower.startsWith(k + ' ') || lower.includes(k));
-    return hit || raw.split(/[,&]/)[0].trim() || raw;
+    const raw = String(query || 'Python').replace(/ \(.+\)/g, '').replace(/\s+/g, ' ').trim();
+    if (!raw) return 'Python';
+    return raw.split(/[,&]/)[0].trim().slice(0, 80) || raw;
 }
 
-async function fetchVideos(query, score = 20, lang = 'english') {
+async function fetchVideos(query, score = 20, lang = 'english', track = 'beginner', codingLang) {
     const queryClean = skillForVideoSearch(query);
     const requested = (lang || 'english').toLowerCase();
-    const videos = await searchVideosForLanguage(queryClean, score, requested);
+    const videos = await searchVideosForLanguage(queryClean, score, requested, track, codingLang);
     return { [requested]: videos };
+}
+
+function prefetchBeginnerVideoModules(videosByLang, lang, skill) {
+    setImmediate(() => {
+        try {
+            const { segmentVideoIntoModules } = require('../services/transcriptModules');
+            const requested = String(lang || 'english').toLowerCase();
+            const list = videosByLang?.[requested] || Object.values(videosByLang || {})[0] || [];
+            (Array.isArray(list) ? list : []).slice(0, 3).forEach((v) => {
+                if (!v?.videoId) return;
+                segmentVideoIntoModules({
+                    youtubeId: v.videoId,
+                    lang: requested,
+                    topic: skill,
+                    title: v.title,
+                    durationSec: v.durationSec
+                }).then((r) => {
+                    console.log(`[Analysis] modules ready ${v.videoId} lang=${r.lang} count=${(r.modules || []).length} method=${r.method}`);
+                }).catch((e) => console.warn(`[Analysis] module prefetch ${v.videoId}:`, e.message));
+            });
+        } catch (e) {
+            console.warn('[Analysis] module prefetch skipped:', e.message);
+        }
+    });
 }
 
 // Multer setup
@@ -1400,21 +1962,42 @@ Return ONLY JSON:
 });
 
 router.post('/get-videos', async (req, res) => {
-    const { skill, score, lang } = req.body;
+    const { skill, score, lang, track, codingLang, codeLang, weakTopics, gapTopics, weakSubConcepts } = req.body;
     if (!skill) return res.status(400).json({ success: false, error: 'Missing skill parameter' });
 
     try {
-        console.log(`[Analysis] Fetching score-tiered tutorials for: ${skill} (Score: ${score}%, Lang: ${lang || 'english'})`);
-        const videos = await fetchVideos(skill, score, lang || 'english');
+        const resolvedTrack = track === 'intermediate' ? 'intermediate' : 'beginner';
+        const resolvedScore = resolvedTrack === 'beginner' ? 20 : score;
+        const resolvedCode = normalizeCodingLang(codingLang || codeLang) || inferCodingLangFromSkill(skill);
+        const requestedLang = (lang || 'english').toLowerCase();
+        const gaps = normalizeGapList(weakTopics || gapTopics || weakSubConcepts);
+        const videosPerTopic = Number(req.body.videosPerTopic) === 3 || gaps.length === 1 ? 3 : 1;
+        const topicLabel = resolvedCode ? `${skill} in ${resolvedCode}` : skill;
+        let videos;
 
-        // Ensure problems exists and matches structure
-        let skillProblems = problems[skill];
-        if (!skillProblems || !skillProblems.easy) {
-            console.log(`[Analysis] No local problems for ${skill}, generating with AI/Fallback`);
-            skillProblems = await generateAIProblems(skill);
+        if (resolvedTrack === 'intermediate' && gaps.length) {
+            console.log(`[Analysis] Fetching ${videosPerTopic} clip(s) for ${topicLabel}: ${gaps.join(', ')} (Lang: ${requestedLang})`);
+            const gapList = await fetchGapVideos(skill, gaps, requestedLang, resolvedCode, videosPerTopic);
+            videos = { [requestedLang]: gapList };
+        } else {
+            console.log(`[Analysis] Fetching 3 tutorials for: ${topicLabel} (Track: ${resolvedTrack}, Lang: ${requestedLang})`);
+            videos = await fetchVideos(skill, resolvedScore, requestedLang, resolvedTrack, resolvedCode);
         }
 
-        res.json({ success: true, data: { videos, problems: skillProblems } });
+        if (resolvedTrack === 'beginner') {
+            prefetchBeginnerVideoModules(videos, requestedLang, topicLabel);
+        }
+
+        const problemLabel = gaps.length
+            ? `${topicLabel} focusing on ${gaps.slice(0, 2).join(' and ')}`
+            : topicLabel;
+        let skillProblems = !gaps.length ? problems[skill] : null;
+        if (!skillProblems || !skillProblems.easy) {
+            console.log(`[Analysis] No local problems for ${problemLabel}, generating with AI/Fallback`);
+            skillProblems = await generateAIProblems(problemLabel);
+        }
+
+        res.json({ success: true, data: { videos, problems: skillProblems, weakTopics: gaps } });
     } catch (error) {
         console.error('Error fetching videos:', error);
         res.status(500).json({ success: false, error: 'Failed to fetch videos' });
@@ -1693,3 +2276,6 @@ Pedagogical Behavior & Rules:
 });
 
 module.exports = router;
+module.exports.searchOneGapVideo = searchOneGapVideo;
+module.exports.normalizeCodingLang = normalizeCodingLang;
+module.exports.normalizeGapList = normalizeGapList;

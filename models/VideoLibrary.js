@@ -18,6 +18,17 @@ const videoLibrarySchema = new mongoose.Schema({
     youtubeId: { type: String, required: true },
     durationSec: { type: Number, default: 1800 },
     description: { type: String },
+    modules: [{
+        title: String,
+        startSec: Number,
+        endSec: Number,
+        summary: String,
+        startLabel: String,
+        endLabel: String,
+        order: Number
+    }],
+    modulesByLang: { type: Map, of: [mongoose.Schema.Types.Mixed] },
+    modulesGeneratedAt: { type: Date },
     isActive: { type: Boolean, default: true },
     createdAt: { type: Date, default: Date.now }
 });

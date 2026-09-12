@@ -191,7 +191,7 @@ function parseXmlCaptions(xml) {
 }
 
 function parseJson3Captions(json) {
-    const events = json.events || [];
+    const events = (json && json.events) || [];
     const cues = [];
     events.forEach(ev => {
         const start = (ev.tStartMs || 0) / 1000;
@@ -202,44 +202,160 @@ function parseJson3Captions(json) {
     return cues;
 }
 
-async function fetchTimedTranscript(videoId) {
-    if (transcriptCache.has(videoId)) return transcriptCache.get(videoId);
-
-    let cues = [];
+function captionFmtUrl(baseUrl, fmt, tlang) {
+    const raw = String(baseUrl || '').replace(/\\u0026/g, '&');
     try {
-        const { data: html } = await axios.get(`https://www.youtube.com/watch?v=${videoId}`, {
-            headers: YT_HEADERS,
-            timeout: 12000
+        const u = new URL(raw);
+        u.searchParams.delete('fmt');
+        u.searchParams.set('fmt', fmt);
+        if (tlang && tlang !== 'en') u.searchParams.set('tlang', tlang);
+        return u.toString();
+    } catch {
+        const extra = tlang && tlang !== 'en' ? `&tlang=${tlang}` : '';
+        return `${raw}${raw.includes('?') ? '&' : '?'}fmt=${fmt}${extra}`;
+    }
+}
+
+function pickCaptionTrack(tracks, pref) {
+    const list = Array.isArray(tracks) ? tracks : [];
+    const code = String(pref || 'en').toLowerCase().slice(0, 2);
+    const native = list.find(t => String(t.languageCode || '').toLowerCase().startsWith(code) && t.kind !== 'asr')
+        || list.find(t => String(t.languageCode || '').toLowerCase().startsWith(code));
+    if (native) return { track: native, tlang: null };
+    const en = list.find(t => String(t.languageCode || '').toLowerCase().startsWith('en'));
+    if (en && code !== 'en') return { track: en, tlang: code };
+    if (list[0] && code !== 'en') return { track: list[0], tlang: code };
+    return { track: list[0] || null, tlang: null };
+}
+
+function tracksFromPlayer(payload) {
+    return payload?.captions?.playerCaptionsTracklistRenderer?.captionTracks || [];
+}
+
+async function downloadCaptionCues(baseUrl, headers, tlang) {
+    if (!baseUrl) return [];
+    try {
+        const cap = await axios.get(captionFmtUrl(baseUrl, 'json3', tlang), {
+            headers,
+            timeout: 8000,
+            responseType: 'text',
+            transformResponse: [d => d]
         });
-        const player = extractPlayerResponse(html);
-        const tracks = player?.captions?.playerCaptionsTracklistRenderer?.captionTracks || [];
-        const track = tracks.find(t => (t.languageCode || '').startsWith('en')) || tracks[0];
-        if (track?.baseUrl) {
-            const url = track.baseUrl.replace(/\\u0026/g, '&') + '&fmt=json3';
-            const cap = await axios.get(url, { headers: YT_HEADERS, timeout: 12000 });
-            if (typeof cap.data === 'object') cues = parseJson3Captions(cap.data);
-            else cues = parseXmlCaptions(String(cap.data));
+        const body = String(cap.data || '').trim();
+        if (!body) return [];
+        try {
+            const cues = parseJson3Captions(JSON.parse(body));
+            if (cues.length) return cues;
+        } catch {
+            return parseXmlCaptions(body);
         }
     } catch (e) {
-        console.warn(`[TranscriptMatcher] watch-page captions failed for ${videoId}:`, e.message);
+        console.warn('[TranscriptMatcher] caption json3 failed:', e.message);
     }
+    return [];
+}
 
-    if (!cues.length) {
-        try {
-            const { data } = await axios.get('https://www.youtube.com/api/timedtext', {
-                params: { v: videoId, lang: 'en', fmt: 'srv1' },
-                headers: YT_HEADERS,
-                timeout: 10000
-            });
-            cues = parseXmlCaptions(String(data || ''));
-        } catch (e) {
-            console.warn(`[TranscriptMatcher] timedtext failed for ${videoId}:`, e.message);
-        }
-    }
+async function playerViaInnertube(videoId, client, headers, apiKey) {
+    const url = apiKey
+        ? `https://www.youtube.com/youtubei/v1/player?key=${encodeURIComponent(apiKey)}&prettyPrint=false`
+        : 'https://www.youtube.com/youtubei/v1/player?prettyPrint=false';
+    const { data } = await axios.post(
+        url,
+        {
+            context: { client },
+            videoId,
+            contentCheckOk: true,
+            racyCheckOk: true
+        },
+        { headers: { ...headers, 'Content-Type': 'application/json' }, timeout: 7000 }
+    );
+    return data;
+}
 
-    transcriptCache.set(videoId, cues);
-    saveDiskCache();
+const fetchInFlight = new Map();
+
+async function cuesViaAndroid(videoId, pref, apiKey) {
+    const headers = {
+        'User-Agent': 'com.google.android.youtube/20.10.38 (Linux; U; Android 14) gzip',
+        'X-YouTube-Client-Name': '3',
+        'X-YouTube-Client-Version': '20.10.38'
+    };
+    const data = await playerViaInnertube(
+        videoId,
+        {
+            clientName: 'ANDROID',
+            clientVersion: '20.10.38',
+            androidSdkVersion: 34,
+            hl: pref,
+            gl: pref === 'en' ? 'US' : 'IN',
+            osName: 'Android',
+            osVersion: '14'
+        },
+        headers,
+        apiKey
+    );
+    const picked = pickCaptionTrack(tracksFromPlayer(data), pref);
+    if (!picked.track?.baseUrl) return [];
+    const cues = await downloadCaptionCues(picked.track.baseUrl, headers, picked.tlang);
+    if (cues.length) console.log(`[TranscriptMatcher] ${videoId} via ANDROID: ${cues.length} cues`);
     return cues;
+}
+
+function captionLang(langPref) {
+    const s = String(langPref || 'en').toLowerCase().trim();
+    const map = {
+        english: 'en', en: 'en',
+        hindi: 'hi', hi: 'hi',
+        telugu: 'te', te: 'te',
+        tamil: 'ta', ta: 'ta',
+        kannada: 'kn', kn: 'kn', ka: 'kn',
+        malayalam: 'ml', ml: 'ml', ma: 'ml'
+    };
+    if (map[s]) return map[s];
+    if (s.length === 2) return s;
+    return s.slice(0, 2) || 'en';
+}
+
+async function fetchTimedTranscript(videoId, langPref = 'en') {
+    if (!videoId) return [];
+    const pref = captionLang(langPref);
+    const cacheKey = `${videoId}::${pref}::v2`;
+    const cached = transcriptCache.get(cacheKey)
+        || transcriptCache.get(`${videoId}::${pref}`)
+        || (pref === 'en' ? transcriptCache.get(videoId) : null);
+    if (Array.isArray(cached) && cached.length) return cached;
+    if (fetchInFlight.has(cacheKey)) return fetchInFlight.get(cacheKey);
+
+    const work = (async () => {
+        let cues = [];
+        try {
+            cues = await cuesViaAndroid(videoId, pref);
+        } catch (e) {
+            console.warn(`[TranscriptMatcher] ANDROID captions failed for ${videoId}:`, e.message);
+        }
+        if (!cues.length && pref !== 'en') {
+            try {
+                cues = await cuesViaAndroid(videoId, 'en');
+            } catch (e) {
+                console.warn(`[TranscriptMatcher] ANDROID en fallback failed for ${videoId}:`, e.message);
+            }
+        }
+        if (cues.length) {
+            transcriptCache.set(cacheKey, cues);
+            if (pref === 'en') transcriptCache.set(videoId, cues);
+            if (cues.length < 2500) saveDiskCache();
+        } else {
+            console.warn(`[TranscriptMatcher] no captions for ${videoId} (${pref})`);
+        }
+        return cues;
+    })();
+
+    fetchInFlight.set(cacheKey, work);
+    try {
+        return await work;
+    } finally {
+        fetchInFlight.delete(cacheKey);
+    }
 }
 
 function chunkCues(cues, windowSec = 45, hopSec = 20) {
@@ -354,8 +470,10 @@ async function llmRerank(subtopic, topChunks, groqKey) {
 
 function formatClock(sec) {
     const s = Math.max(0, Math.floor(sec));
-    const m = Math.floor(s / 60);
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
     const r = s % 60;
+    if (h > 0) return `${h}:${String(m).padStart(2, '0')}:${String(r).padStart(2, '0')}`;
     return `${m}:${String(r).padStart(2, '0')}`;
 }
 
@@ -368,16 +486,18 @@ function formatClock(sec) {
  */
 async function matchLearnSegment(opts = {}) {
     const subtopic = opts.subtopic || 'inner-join';
-    const cacheKey = `${subtopic}::${(opts.questionText || '').slice(0, 80)}`;
+    const cacheKey = `${subtopic}::${opts.skillName || ''}::${opts.codingLang || ''}::${opts.lang || ''}::${(opts.questionText || '').slice(0, 80)}`;
     if (matchCache.has(cacheKey)) return matchCache.get(cacheKey);
 
     const poolKey = resolvePoolKey(subtopic);
+    const searched = (opts.candidateVideos || []).map(v => ({
+        youtubeId: extractVideoId(v.youtubeId || v.url || v.videoId),
+        title: v.title || 'Candidate video'
+    })).filter(v => v.youtubeId);
+    const useHardcodedPool = !opts.codingLang && !searched.length;
     const pool = [
-        ...(SUBTOPIC_VIDEO_POOLS[poolKey] || []),
-        ...((opts.candidateVideos || []).map(v => ({
-            youtubeId: extractVideoId(v.youtubeId || v.url),
-            title: v.title || 'Candidate video'
-        })))
+        ...searched,
+        ...(useHardcodedPool ? (SUBTOPIC_VIDEO_POOLS[poolKey] || []) : [])
     ].filter(v => v.youtubeId);
 
     const seen = new Set();
@@ -477,9 +597,368 @@ async function matchLearnSegment(opts = {}) {
     return result;
 }
 
+async function generateStepSubtopics(skillName, stepName) {
+    const skill = skillName || 'this skill';
+    const step = stepName || skill;
+    const fallback = [
+        `What is ${skill}`,
+        `${step} setup`,
+        `Core ideas in ${step}`,
+        `Beginner ${skill} example`
+    ];
+    const groqKey = process.env.GROQ_API_KEY;
+    if (!groqKey) return fallback;
+    try {
+        const { data } = await axios.post(
+            'https://api.groq.com/openai/v1/chat/completions',
+            {
+                model: process.env.AI_MODEL || 'llama-3.3-70b-versatile',
+                temperature: 0.2,
+                max_tokens: 220,
+                messages: [
+                    {
+                        role: 'system',
+                        content: 'Return JSON only: {"subtopics":["...","...","...","..."]}. Exactly 4 short beginner subtopic labels for one roadmap step. No timestamps.'
+                    },
+                    {
+                        role: 'user',
+                        content: `Skill: ${skill}\nRoadmap step: ${step}\nThese labels will be matched to timestamped captions inside one tutorial video.`
+                    }
+                ]
+            },
+            { headers: { Authorization: `Bearer ${groqKey}`, 'Content-Type': 'application/json' }, timeout: 10000 }
+        );
+        const raw = data.choices?.[0]?.message?.content || '';
+        const jsonMatch = raw.match(/\{[\s\S]*\}/);
+        const parsed = jsonMatch ? JSON.parse(jsonMatch[0]) : null;
+        const list = (parsed?.subtopics || []).map(s => String(s).trim()).filter(Boolean).slice(0, 4);
+        return list.length >= 3 ? list : fallback;
+    } catch (e) {
+        console.warn('[TranscriptMatcher] subtopic generation skipped:', e.message);
+        return fallback;
+    }
+}
+
+function resolveOverlaps(chapters) {
+    const sorted = chapters.slice().sort((a, b) => a.startSec - b.startSec);
+    for (let i = 1; i < sorted.length; i++) {
+        const prev = sorted[i - 1];
+        const cur = sorted[i];
+        if (cur.startSec < prev.endSec) {
+            if (cur.startSec - prev.startSec >= 25) prev.endSec = cur.startSec;
+            cur.startSec = Math.max(cur.startSec, prev.endSec);
+            if (cur.endSec - cur.startSec < 25) cur.endSec = cur.startSec + 40;
+        }
+        prev.endLabel = formatClock(prev.endSec);
+        cur.startLabel = formatClock(cur.startSec);
+        cur.endLabel = formatClock(cur.endSec);
+    }
+    return sorted.map((c, i) => ({
+        ...c,
+        order: i + 1,
+        startLabel: formatClock(c.startSec),
+        endLabel: formatClock(c.endSec)
+    }));
+}
+
+async function chapterizeVideo(opts = {}) {
+    const youtubeId = extractVideoId(opts.youtubeId || opts.videoId || opts.url);
+    if (!youtubeId) return { success: false, error: 'videoId required' };
+
+    const skillName = opts.skillName || 'this skill';
+    const stepName = opts.stepName || skillName;
+    const lang = opts.lang || 'en';
+    const durationSec = Math.max(90, Number(opts.durationSec) || 1800);
+    const subtopics = Array.isArray(opts.subtopics) && opts.subtopics.length
+        ? opts.subtopics.slice(0, 4)
+        : await generateStepSubtopics(skillName, stepName);
+
+    const cues = await fetchTimedTranscript(youtubeId, lang);
+    if (!cues.length) {
+        const slice = Math.floor(durationSec / subtopics.length);
+        const chapters = subtopics.map((subTopic, i) => {
+            const startSec = i * slice;
+            const endSec = Math.min(durationSec, (i + 1) * slice);
+            return {
+                subTopic,
+                startSec,
+                endSec,
+                startLabel: formatClock(startSec),
+                endLabel: formatClock(endSec),
+                snippet: '',
+                score: 0,
+                watchUrl: `https://www.youtube.com/watch?v=${youtubeId}&t=${startSec}s`,
+                embedUrl: `https://www.youtube.com/embed/${youtubeId}?start=${startSec}&end=${endSec}&rel=0`
+            };
+        });
+        return {
+            success: true,
+            method: 'even-split-no-captions',
+            warning: 'Timed captions were unavailable, so this step was split evenly across the video.',
+            youtubeId,
+            title: opts.title || stepName,
+            chapters: resolveOverlaps(chapters)
+        };
+    }
+
+    const chunks = chunkCues(cues, 50, 22);
+    const chapters = [];
+    for (const subTopic of subtopics) {
+        const query = `${skillName}. ${stepName}. ${subTopic}. beginner tutorial explanation`;
+        const docs = [query, ...chunks.map(c => c.text)];
+        const vectors = tfidfVectors(docs);
+        const scored = chunks.map((c, i) => ({ ...c, score: cosine(vectors[0], vectors[i + 1]) }));
+        const best = mergeAdjacent(scored, 0.06, 18);
+        if (!best) continue;
+        const startSec = Math.max(0, Math.floor(best.start));
+        const endSec = Math.max(startSec + 30, Math.min(Math.floor(best.end), startSec + 240));
+        chapters.push({
+            subTopic,
+            startSec,
+            endSec,
+            startLabel: formatClock(startSec),
+            endLabel: formatClock(endSec),
+            snippet: String(best.text || '').slice(0, 180),
+            score: Number((best.score || 0).toFixed(4)),
+            watchUrl: `https://www.youtube.com/watch?v=${youtubeId}&t=${startSec}s`,
+            embedUrl: `https://www.youtube.com/embed/${youtubeId}?start=${startSec}&end=${endSec}&rel=0`
+        });
+    }
+
+    return {
+        success: true,
+        method: 'tfidf-cosine-chapters',
+        youtubeId,
+        title: opts.title || stepName,
+        chapters: resolveOverlaps(chapters)
+    };
+}
+
+const TOPIC_ALIASES = {
+    joints: ['join', 'joins', 'inner join', 'left join'],
+    joint: ['join', 'joins'],
+    join: ['joins', 'inner join'],
+    joins: ['join', 'inner join', 'left join'],
+    nosql: ['no sql', 'mongodb', 'mongo', 'document database'],
+    'no-sql': ['nosql', 'mongodb'],
+    mongodb: ['mongo', 'nosql'],
+    indexes: ['index', 'indexing', 'unique index'],
+    indexs: ['index', 'indexes'],
+    index: ['indexes', 'indexing'],
+    trees: ['tree', 'binary tree', 'bst'],
+    tree: ['trees', 'binary tree'],
+    loops: ['loop', 'for loop', 'while'],
+    loop: ['loops', 'for loop']
+};
+
+const TOPIC_STOP = new Set('want learn teach explain show find where which what how does can please tell video tutorial part step module topic skill course help understand looking searching search about this that the a an and for with from you me my'.split(' '));
+
+function normalizeUserQuery(message) {
+    return String(message || '')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .replace(/\bno[\s-]*sql\b/gi, 'nosql')
+        .replace(/\bjoints?\b/gi, 'joins')
+        .replace(/\bindexs\b/gi, 'indexes');
+}
+
+function extractSearchTopic(message, skill) {
+    const raw = normalizeUserQuery(message);
+    const tokens = looseTokens(raw).filter((t) => !TOPIC_STOP.has(t) && t.length > 1);
+    const skillTokens = new Set(looseTokens(skill || '').filter((t) => t.length > 2));
+    const focused = tokens.filter((t) => !skillTokens.has(t));
+    const topic = (focused.length ? focused : tokens).slice(0, 6).join(' ');
+    return topic || raw.slice(0, 80);
+}
+
+function expandTopicTokens(tokens) {
+    const out = [];
+    for (const t of tokens || []) {
+        out.push(t);
+        const aliases = TOPIC_ALIASES[t];
+        if (aliases) {
+            aliases.forEach((a) => out.push(...String(a).split(/\s+/)));
+        }
+        if (t.endsWith('s') && t.length > 3) out.push(t.slice(0, -1));
+        else if (t.length > 2) out.push(`${t}s`);
+    }
+    return [...new Set(out.filter((t) => t.length > 1))];
+}
+
+function textHasTopic(text, tokens) {
+    const lower = String(text || '').toLowerCase();
+    return (tokens || []).filter((tok) => {
+        if (tok.length < 2) return false;
+        if (lower.includes(tok)) return true;
+        if (tok.startsWith('join') && /\bjoins?\b/.test(lower)) return true;
+        if (tok === 'nosql' && /(no\s*sql|mongodb|mongo)/i.test(lower)) return true;
+        return false;
+    });
+}
+
+function looseTokens(text) {
+    return String(text || '')
+        .toLowerCase()
+        .split(/[^\p{L}\p{N}_]+/u)
+        .filter((t) => t.length > 1);
+}
+
+function matchNumberedStep(query, modules) {
+    const list = Array.isArray(modules) ? modules : [];
+    if (!list.length) return null;
+    const q = String(query || '');
+    const hit = q.match(/\b(?:part|step|module|chapter)\s*([1-9])\b/i)
+        || q.match(/\b([1-9])(?:st|nd|rd|th)?\s*(?:part|step|module|chapter)\b/i);
+    if (!hit) return null;
+    const n = Number(hit[1]);
+    return list.find((m) => Number(m.order) === n) || list[n - 1] || null;
+}
+
+function moduleLocateResult(youtubeId, topic, module, method) {
+    const startSec = Math.max(0, Math.floor(Number(module.startSec) || 0));
+    const endSec = Math.max(startSec + 25, Math.floor(Number(module.endSec) || startSec + 60));
+    return {
+        success: true,
+        method,
+        topic,
+        matchedWord: topic,
+        youtubeId,
+        startSec,
+        endSec,
+        startLabel: module.startLabel || formatClock(startSec),
+        endLabel: module.endLabel || formatClock(endSec),
+        snippet: String(module.summary || module.title || '').replace(/\s+/g, ' ').trim().slice(0, 180),
+        score: 1,
+        step: {
+            order: module.order,
+            title: module.title,
+            startSec: module.startSec,
+            startLabel: module.startLabel,
+            endLabel: module.endLabel
+        }
+    };
+}
+
+function mapTimeToModule(startSec, modules) {
+    const list = Array.isArray(modules) ? modules : [];
+    if (!list.length) return null;
+    const exact = list.find((m) => startSec >= Number(m.startSec || 0) && startSec < Number(m.endSec || 0));
+    if (exact) return exact;
+    return list.reduce((best, m) => {
+        const d = Math.abs(Number(m.startSec || 0) - startSec);
+        return !best || d < best._d ? { ...m, _d: d } : best;
+    }, null);
+}
+
+function snippetAround(cues, startSec, topicTokens) {
+    const window = (cues || []).filter((c) => c.start >= startSec - 15 && c.start <= startSec + 35);
+    const hit = window.find((c) => textHasTopic(c.text, topicTokens).length) || window[0];
+    return hit ? String(hit.text || '').replace(/\s+/g, ' ').trim().slice(0, 180) : '';
+}
+
+async function locateTopicInVideo(opts = {}) {
+    const youtubeId = extractVideoId(opts.youtubeId || opts.videoId || opts.url);
+    const query = normalizeUserQuery(opts.query || opts.message || '');
+    if (!youtubeId || !query) {
+        return { success: false, message: 'videoId and query required' };
+    }
+
+    const topic = extractSearchTopic(query, opts.skill || opts.topic);
+    const topicTokens = expandTopicTokens([...new Set([...looseTokens(topic), ...looseTokens(query)])].filter((t) => !TOPIC_STOP.has(t) && t.length > 1));
+    const lang = opts.lang || 'en';
+    const modules = Array.isArray(opts.modules) ? opts.modules : [];
+    const numbered = matchNumberedStep(query, modules);
+    if (numbered) {
+        return moduleLocateResult(youtubeId, `part ${numbered.order}`, numbered, 'step-number');
+    }
+    const cues = await fetchTimedTranscript(youtubeId, lang);
+
+    if (!cues.length) {
+        const titleHit = modules.find((m) => textHasTopic(`${m.title || ''} ${m.summary || ''}`, topicTokens).length);
+        if (!titleHit) {
+            return { success: false, topic, youtubeId, message: 'No captions available for this video.' };
+        }
+        const startSec = Math.max(0, Math.floor(Number(titleHit.startSec) || 0));
+        return {
+            success: true,
+            method: 'module-title',
+            topic,
+            matchedWord: topicTokens.find((tok) => `${titleHit.title} ${titleHit.summary}`.toLowerCase().includes(tok)) || topic,
+            youtubeId,
+            startSec,
+            endSec: Math.max(startSec + 25, Math.floor(Number(titleHit.endSec) || startSec + 60)),
+            startLabel: formatClock(startSec),
+            endLabel: titleHit.endLabel || formatClock(Number(titleHit.endSec) || startSec + 60),
+            snippet: String(titleHit.summary || titleHit.title || '').slice(0, 180),
+            score: 0.4,
+            step: {
+                order: titleHit.order,
+                title: titleHit.title,
+                startSec: titleHit.startSec,
+                startLabel: titleHit.startLabel,
+                endLabel: titleHit.endLabel
+            }
+        };
+    }
+
+    const chunks = chunkCues(cues, 40, 18);
+    if (!chunks.length) {
+        return { success: false, topic, youtubeId, message: 'Transcript was too short to search.' };
+    }
+
+    const searchQuery = topicTokens.join(' ') || topic;
+    const docs = [searchQuery, ...chunks.map((c) => c.text)];
+    const vectors = tfidfVectors(docs);
+    const qVec = vectors[0];
+    const scored = chunks.map((c, i) => {
+        let score = cosine(qVec, vectors[i + 1]);
+        const hits = textHasTopic(c.text, topicTokens);
+        if (hits.length) score += 0.45 + hits.length * 0.15;
+        return { ...c, score, hits };
+    }).sort((a, b) => b.score - a.score);
+
+    const best = scored[0];
+    if (!best || best.score < 0.08) {
+        return { success: false, topic, youtubeId, message: 'That topic was not found in this video transcript.' };
+    }
+
+    const startSec = Math.max(0, Math.floor(best.start));
+    const endSec = Math.max(startSec + 25, Math.floor(best.end));
+    const module = mapTimeToModule(startSec, modules);
+    const snippet = snippetAround(cues, startSec, topicTokens.length ? topicTokens : looseTokens(topic)) || String(best.text || '').replace(/\s+/g, ' ').trim().slice(0, 180);
+    const matchedWord = (best.hits && best.hits[0])
+        || topicTokens.find((t) => snippet.toLowerCase().includes(t))
+        || topic;
+
+    return {
+        success: true,
+        method: 'transcript-tfidf',
+        topic,
+        matchedWord,
+        youtubeId,
+        startSec,
+        endSec,
+        startLabel: formatClock(startSec),
+        endLabel: formatClock(endSec),
+        snippet,
+        score: Number(best.score.toFixed(4)),
+        step: module ? {
+            order: module.order,
+            title: module.title,
+            startSec: module.startSec,
+            startLabel: module.startLabel,
+            endLabel: module.endLabel
+        } : null
+    };
+}
+
 module.exports = {
     matchLearnSegment,
+    chapterizeVideo,
+    generateStepSubtopics,
+    locateTopicInVideo,
     fetchTimedTranscript,
     extractVideoId,
+    formatClock,
     SUBTOPIC_VIDEO_POOLS
 };

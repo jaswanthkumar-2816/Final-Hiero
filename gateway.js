@@ -248,6 +248,8 @@ app.get('/.well-known/assetlinks.json', (req, res) => {
 
 
 app.get(['/learn', '/learn.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'learn.html')));
+app.get(['/learn-beginner', '/learn-beginner.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'learn-beginner.html')));
+app.get(['/learn-intermediate', '/learn-intermediate.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'learn-intermediate.html')));
 app.get(['/quiz', '/quiz.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'quiz.html')));
 app.get(['/hiero-explained', '/hiero-explained.html'], (req, res) => {
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
