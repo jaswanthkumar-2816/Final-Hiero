@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hiero Astra · Official Logo Path Animation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    /* OpenAI Dotcom Chart Theme Color Scope */
+    :root, .dotcom-chart-theme-scope {
+      --color-background: #000000;
+      --color-primary-solid-100: #ffffff;
+      --color-primary-solid-60: rgba(255, 255, 255, 0.6);
+      --color-primary-solid-12: rgba(255, 255, 255, 0.12);
+      --color-primary-12: rgba(255, 255, 255, 0.12);
+      --color-primary-44: rgba(255, 255, 255, 0.44);
+      --color-tertiary-80: rgba(18, 18, 22, 0.8);
+      --color-primary-4: rgba(255, 255, 255, 0.04);
+      --dotcom-chart-theme-blue-1-ink: #133463;
+      --dotcom-chart-theme-blue-1-bounded-fill: #173e76;
+      --dotcom-chart-theme-blue-2-bounded-fill: #2c67c5;
+      --dotcom-chart-theme-blue-3-bounded-fill: #539af8;
+      --dotcom-chart-theme-blue-4-bounded-fill: #a4cdfb;
+      --dotcom-chart-theme-blue-5-bounded-fill: #e8f3fe;
+      --dotcom-chart-theme-purple-3-bounded-fill: #a67df2;
+      --hiero-green: #32c14a;
+      --dotcom-chart-theme-green-2-bounded-fill: #1f9a34;
+      --dotcom-chart-theme-green-3-bounded-fill: #32c14a;
+      --dotcom-chart-theme-green-4-bounded-fill: #7ee089;
+      --dotcom-chart-theme-yellow-3-bounded-fill: #f6c543;
+      --dotcom-chart-theme-yellow-4-bounded-fill: #fae598;
+      --dotcom-chart-theme-orange-3-bounded-fill: #ee7c37;
+      --dotcom-chart-theme-orange-4-bounded-fill: #f4ba96;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: var(--color-background);
+      color: #fff;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    #field {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      z-index: 1;
+      cursor: grab;
+    }
+    #field:active {
+      cursor: grabbing;
+    }
+
+    /* Ambient atmospheric glow */
+    .nebula-glow {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 2;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(50, 193, 74, 0.03) 0%, rgba(50, 193, 74, 0.01) 30%, rgba(0, 0, 0, 0) 65%),
+        radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0) 45%, rgba(0, 0, 0, 0.92) 100%);
+    }
+
+    .ui {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 24px;
+    }
+
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+    }
+
+    .back-btn {
+      pointer-events: auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: rgba(255, 255, 255, 0.6);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      padding: 8px 16px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      transition: all 0.25s ease;
+    }
+    .back-btn:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.25);
+      transform: translateX(-2px);
+    }
+
+    .badge {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.55);
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .badge span {
+      color: #32c14a;
+      margin-right: 4px;
+    }
+
+    /* Central Typography & Under-Glow (Complements the Starry Lotus) */
+    .brand-caption {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, calc(-50% + 38vh));
+      pointer-events: none;
+      z-index: 5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      transition: transform 0.15s ease-out, opacity 0.4s ease;
+      will-change: transform;
+    }
+
+    .brand-caption .tagline {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: #32c14a;
+      font-size: 9px;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+      font-weight: 500;
+      opacity: 0.85;
+    }
+    .brand-caption .tagline i {
+      display: block;
+      width: 30px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #32c14a, transparent);
+    }
+
+    /* Soft celestial radiance behind the lotus constellation */
+    .logo-aura {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 240px;
+      height: 240px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(80, 230, 110, 0.084) 0%, rgba(50, 193, 74, 0.028) 50%, rgba(0, 0, 0, 0) 72%);
+      filter: blur(28px);
+      pointer-events: none;
+      z-index: 2;
+      animation: auraPulse 6s ease-in-out infinite alternate;
+    }
+
+    /* Bottom interactive controls pill */
+    .controls-bar {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      pointer-events: none;
+    }
+
+    .hint-text {
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.4);
+      letter-spacing: 0.04em;
+    }
+
+    .pill-group {
+      pointer-events: auto;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(18, 18, 22, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 999px;
+      padding: 4px 6px;
+    }
+
+    .pill-btn {
+      background: transparent;
+      border: none;
+      color: rgba(255, 255, 255, 0.65);
+      font-size: 11px;
+      font-weight: 500;
+      padding: 6px 12px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .pill-btn:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.08);
+    }
+    .pill-btn.active {
+      color: #32c14a;
+      background: rgba(50, 193, 74, 0.16);
+      border: 1px solid rgba(50, 193, 74, 0.4);
+    }
+
+    @keyframes auraPulse {
+      0% { transform: translate(-50%, -50%) scale(0.92); opacity: 0.7; }
+      100% { transform: translate(-50%, -50%) scale(1.08); opacity: 1; }
+    }
+
+    @media (max-width: 640px) {
+      .ui { padding: 16px; }
+      .badge { display: none; }
+      .hint-text { display: none; }
+    }
+  </style>
+
+  <!-- Pre-extracted pristine lotus coordinate points array -->
+  <script src="lotus_points.js"></script>
+</head>
+<body>
+  <!-- Official HIERO lockup paths, sampled like Astra via getPointAtLength -->
+  <div id="hieroShapeHost" aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden;pointer-events:none;"></div>
+
+  <canvas id="field"></canvas>
+  <div class="logo-aura"></div>
+  <div class="nebula-glow"></div>
+
+
+  <div class="ui">
+    <div class="top-bar">
+      <a class="back-btn" href="/eval">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        <span>Back</span>
+      </a>
+      <div class="badge">
+        <span>●</span> Hiero logo paths
+      </div>
+    </div>
+
+    <div class="controls-bar">
+      <div class="hint-text">Move over the logo to disturb the path</div>
+      <div class="pill-group">
+        <button class="pill-btn active" id="modeSwirlBtn" title="Flow particles along the official logo paths">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="9"/>
+            <path d="M12 3a9 9 0 0 1 9 9M12 7a5 5 0 0 1 5 5"/>
+          </svg>
+          Path Flow
+        </button>
+        <button class="pill-btn" id="toggleFlaresBtn" title="Toggle 4-Point Diffraction Flares">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0L14.5 9.5L24 12L14.5 14.5L12 24L9.5 14.5L0 12L9.5 9.5L12 0Z"/>
+          </svg>
+          Flares
+        </button>
+        <button class="pill-btn" id="toggleOrbitBtn" title="Toggle 3D Orbit Motion">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+          </svg>
+          Orbit
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="hiero-astra-engine.js"></script>
+</body>
+</html>
