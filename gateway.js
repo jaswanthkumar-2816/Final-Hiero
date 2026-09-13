@@ -90,13 +90,16 @@ app.use(passport.initialize());
 // ======================
 if (process.env.MONGODB_URI) {
     console.log('⏳ Connecting to MongoDB...');
-    mongoose.set('bufferCommands', true);
+    mongoose.set('bufferCommands', false);
 
     // Safe debug: Check first few chars and total length (don't log secrets)
     const uri = process.env.MONGODB_URI;
     console.log(`[DB Debug] URI starts with: "${uri.substring(0, 5)}...", Total length: ${uri.length}`);
 
-    mongoose.connect(process.env.MONGODB_URI)
+    mongoose.connect(process.env.MONGODB_URI, {
+        serverSelectionTimeoutMS: 5000,
+        connectTimeoutMS: 5000
+    })
         .then(() => console.log('✅ MongoDB connected successfully'))
         .catch(err => {
             console.error('❌ MongoDB connection error:', err.message);
@@ -170,6 +173,7 @@ app.use('/api/chat', lazyRouter('./routes/chat'));
 app.use('/api/interview', lazyRouter('./routes/interview'));
 app.use('/api/reel', lazyRouter('./routes/reel'));
 app.use('/api/run', lazyRouter('./routes/run'));
+app.use('/api/visualize', lazyRouter('./routes/visualize'));
 app.use('/api/mastery', lazyRouter('./routes/mastery'));
 app.use('/api/learning', lazyRouter('./routes/learning'));
 app.use('/api', lazyRouter('./routes/ai-photo'));
@@ -268,6 +272,8 @@ app.get(['/adaptive-test', '/adaptive-test.html'], (req, res) => {
     res.sendFile(path.join(resumeBuilderPath, 'adaptive-test.html'));
 });
 app.get(['/solve', '/solve.html'], (req, res) => res.sendFile(path.join(__dirname, 'solve.html')));
+app.get(['/solve-beginner', '/solve-beginner.html'], (req, res) => res.sendFile(path.join(__dirname, 'solve-beginner.html')));
+app.get(['/solve-intermediate', '/solve-intermediate.html'], (req, res) => res.sendFile(path.join(__dirname, 'solve-intermediate.html')));
 app.get(['/resume-builder', '/resume-builder.html', '/dashboard/resume-builder'], (req, res) => {
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     res.sendFile(path.join(resumeBuilderPath, 'resume-builder.html'));
@@ -283,6 +289,10 @@ app.get(['/resume-review', '/resume-review.html'], (req, res) => {
 app.get(['/skill-problems', '/skill-problems.html'], (req, res) => {
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     res.sendFile(path.join(resumeBuilderPath, 'skill-problems.html'));
+});
+app.get(['/questions', '/questions.html', '/problems', '/problems.html'], (req, res) => {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.sendFile(path.join(resumeBuilderPath, 'questions.html'));
 });
 app.get(['/pricing', '/pricing.html'], (req, res) => res.sendFile(path.join(__dirname, 'pricing.html')));
 app.get(['/template-verifier', '/template-verifier.html'], (req, res) => res.sendFile(path.join(__dirname, 'template-verifier.html')));

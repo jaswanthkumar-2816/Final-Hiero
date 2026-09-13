@@ -220,10 +220,12 @@
     }
 
     .desc-p {
-      font-size: 15px;
-      color: var(--text-secondary);
-      line-height: 1.7;
+      font-size: 15.5px;
+      color: #e2e8f0;
+      line-height: 1.75;
       margin-bottom: 24px;
+      font-weight: 400;
+      word-break: break-word;
     }
 
     .hint-toggle {
@@ -312,13 +314,15 @@
 
     /* Workspace Footer Controls */
     .footer-shelf {
-      height: 72px;
-      background: rgba(0, 0, 0, 0.9);
+      min-height: 84px;
+      height: auto;
+      background: rgba(0, 0, 0, 0.95);
       border-top: 1px solid var(--border-glass);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 32px;
+      padding: 10px 32px;
+      z-index: 40;
     }
 
     .console-tab {
@@ -341,43 +345,68 @@
       color: var(--orbit-green);
     }
 
+    /* Stacked Action Buttons below user's code section */
     .master-btns {
       display: flex;
-      gap: 16px;
+      flex-direction: column;
+      gap: 8px;
+      min-width: 250px;
+      align-items: stretch;
     }
 
-    .btn-run {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid var(--border-glass);
-      color: var(--text-primary);
+    .btn-visualize {
+      background: linear-gradient(135deg, #0284c7 0%, #6366f1 100%);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      color: #ffffff;
       padding: 10px 24px;
       border-radius: 10px;
-      font-size: 14px;
-      font-weight: 700;
+      font-size: 13.5px;
+      font-weight: 800;
       cursor: pointer;
-      transition: 0.3s;
+      box-shadow: 0 4px 16px rgba(14, 165, 233, 0.35);
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      letter-spacing: 0.3px;
     }
 
-    .btn-run:hover {
-      background: rgba(255, 255, 255, 0.08);
+    .btn-visualize:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.15);
+      box-shadow: 0 6px 22px rgba(99, 102, 241, 0.5);
+    }
+
+    .btn-visualize:active {
+      transform: translateY(0);
     }
 
     .btn-submit {
       background: linear-gradient(135deg, var(--orbit-green) 0%, #00cc55 100%);
       border: none;
       color: #000;
-      padding: 10px 32px;
+      padding: 10px 24px;
       border-radius: 10px;
-      font-size: 14px;
+      font-size: 13.5px;
       font-weight: 800;
       cursor: pointer;
       box-shadow: 0 4px 15px var(--orbit-green-glow);
-      transition: 0.3s;
+      transition: all 0.25s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      letter-spacing: 0.3px;
     }
 
     .btn-submit:hover {
       transform: translateY(-2px);
       filter: brightness(1.1);
+    }
+
+    .btn-submit:active {
+      transform: translateY(0);
     }
 
     /* Console Drawer */
@@ -965,6 +994,843 @@
         right: 0;
       }
     }
+
+    /* =========================================================
+       ✨ VISUALIZATION THEATER & STORYTELLING ENGINE
+       ========================================================= */
+    .visualizer-theater {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at 50% 20%, #0d1715 0%, #060908 75%, #020303 100%);
+      z-index: 55;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      border-left: 1px solid var(--border-glass);
+      animation: visFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes visFadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .vis-header {
+      padding: 10px 20px;
+      background: rgba(0, 0, 0, 0.82);
+      border-bottom: 1px solid var(--border-glass);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      backdrop-filter: blur(10px);
+    }
+
+    .vis-header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .vis-title {
+      font-size: 13px;
+      font-weight: 800;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      letter-spacing: 0.3px;
+    }
+
+    .vis-title i {
+      color: #38bdf8;
+      font-size: 14px;
+    }
+
+    .vis-ds-badge {
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.35);
+    }
+
+    .vis-line-chip {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      background: rgba(255, 255, 255, 0.05);
+      padding: 3px 8px;
+      border-radius: 6px;
+      border: 1px solid var(--border-glass);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .vis-loop-chip {
+      font-size: 11px;
+      font-weight: 800;
+      color: #fbbf24;
+      background: rgba(251, 191, 36, 0.12);
+      border: 1px solid rgba(251, 191, 36, 0.35);
+      padding: 4px 10px;
+      border-radius: 99px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .vis-loop-chip.pop {
+      animation: loopPop 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes loopPop {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+
+    .vis-close-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-glass);
+      color: var(--text-secondary);
+      cursor: pointer;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: 0.2s;
+    }
+
+    .vis-close-btn:hover {
+      background: rgba(255, 50, 50, 0.15);
+      color: #ff5555;
+      border-color: rgba(255, 50, 50, 0.4);
+    }
+
+    /* Visualizer Body (Split Stage & Code Panel) */
+    .vis-body {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Visualizer Stage */
+    .vis-stage {
+      flex: 1.35;
+      position: relative;
+      overflow: auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background-image: 
+        radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+        linear-gradient(180deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.75) 100%);
+      background-size: 24px 24px, 100% 100%;
+    }
+
+    .vis-canvas-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    /* Array Display */
+    .vis-array-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      max-width: 100%;
+      overflow-x: auto;
+      padding: 20px 10px;
+    }
+
+    .vis-array-row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      position: relative;
+      padding-bottom: 8px;
+    }
+
+    .vis-array-cell {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      position: relative;
+    }
+
+    .vis-array-box {
+      min-width: 54px;
+      height: 60px;
+      padding: 0 12px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 2px solid rgba(255, 255, 255, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-code);
+      font-size: 20px;
+      font-weight: 800;
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+      transition: transform 0.2s ease-out, box-shadow 0.15s ease, border-color 0.15s ease, background 0.3s ease;
+      user-select: none;
+      position: relative;
+    }
+
+    /* Compare: Soft yellow outline glow, 150ms fade-in */
+    .vis-array-box.is-comparing {
+      border-color: #FFD54F !important;
+      box-shadow: 0 0 0 3px #FFD54F, 0 0 20px rgba(255, 213, 79, 0.45) !important;
+      color: #FFF9C4;
+      transition: all 150ms ease;
+    }
+
+    /* Assign/Update: scales up to 1.15x and back (200ms ease-out), flashes light green then fades over 300ms */
+    .vis-array-box.is-assigning {
+      border-color: var(--orbit-green) !important;
+      background: rgba(0, 255, 102, 0.25) !important;
+      box-shadow: 0 0 0 3px var(--orbit-green), 0 0 24px rgba(0, 255, 102, 0.5) !important;
+      animation: assignPulse 0.2s ease-out;
+      color: #fff;
+    }
+
+    @keyframes assignPulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+      100% { transform: scale(1); }
+    }
+
+    /* Physical Arc Swap Animation (400ms, ease: cubic-bezier(0.34, 1.56, 0.64, 1)) */
+    @keyframes arcSwapOver {
+      0% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(calc(var(--swap-dx, 66px) / 2), -30px) scale(1.08) rotate(4deg); }
+      100% { transform: translate(calc(var(--swap-dx, 66px)), 0) scale(1) rotate(0deg); }
+    }
+
+    @keyframes arcSwapUnder {
+      0% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(calc(var(--swap-dx, -66px) / 2), 30px) scale(1.08) rotate(-4deg); }
+      100% { transform: translate(calc(var(--swap-dx, -66px)), 0) scale(1) rotate(0deg); }
+    }
+
+    .vis-array-box.arc-swap-over {
+      animation: arcSwapOver 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+      z-index: 5;
+    }
+
+    .vis-array-box.arc-swap-under {
+      animation: arcSwapUnder 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+      z-index: 4;
+    }
+
+    .vis-box-index {
+      font-size: 11px;
+      font-family: var(--font-code);
+      font-weight: 700;
+      color: var(--text-secondary);
+    }
+
+    /* Pointer: bobbing gently underneath active box (CSS translateY oscillation, 2px, 600ms loop) */
+    .vis-pointer-arrow {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-size: 10px;
+      font-weight: 800;
+      color: #38bdf8;
+      height: 22px;
+      animation: pointerBob 600ms ease-in-out infinite alternate;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .vis-pointer-arrow.visible {
+      opacity: 1;
+    }
+
+    @keyframes pointerBob {
+      from { transform: translateY(0px); }
+      to { transform: translateY(-2px); }
+    }
+
+    /* Loop Lap Sweep Bar (thin colored bar sweeps left-to-right under active region, 200ms) */
+    .vis-sweep-bar {
+      width: 100%;
+      height: 3px;
+      border-radius: 99px;
+      background: linear-gradient(90deg, #38bdf8, var(--orbit-green));
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.8);
+      animation: sweepLap 200ms ease-out forwards;
+    }
+
+    @keyframes sweepLap {
+      0% { width: 0%; opacity: 0.2; }
+      100% { width: 100%; opacity: 1; }
+    }
+
+    /* Stack / Queue View */
+    .vis-stack-queue-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      width: 100%;
+    }
+
+    .vis-sq-container {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      padding: 16px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--border-glass);
+      border-radius: 12px;
+      min-height: 80px;
+    }
+
+    .vis-sq-container.is-stack {
+      flex-direction: column-reverse;
+      min-width: 120px;
+      border-bottom: 3px solid #38bdf8;
+    }
+
+    .vis-sq-container.is-queue {
+      flex-direction: row;
+      border-left: 3px solid #38bdf8;
+      border-right: 3px solid var(--orbit-green);
+    }
+
+    .vis-sq-item {
+      padding: 10px 18px;
+      border-radius: 8px;
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      color: #fff;
+      font-family: var(--font-code);
+      font-weight: 700;
+      font-size: 16px;
+      transition: all 0.25s ease;
+    }
+
+    .vis-sq-item.push-in {
+      animation: pushInBounce 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .vis-sq-item.pop-out {
+      animation: popOutFade 0.2s ease-in forwards;
+    }
+
+    @keyframes pushInBounce {
+      from { transform: translateY(-16px) scale(0.85); opacity: 0; }
+      to { transform: translateY(0) scale(1); opacity: 1; }
+    }
+
+    @keyframes popOutFade {
+      from { transform: translateY(0) scale(1); opacity: 1; }
+      to { transform: translateY(-16px) scale(0.7); opacity: 0; }
+    }
+
+    /* Linked List / Tree / Graph SVG View */
+    .vis-graph-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+    }
+
+    .vis-graph-svg {
+      width: 100%;
+      max-width: 520px;
+      height: 240px;
+    }
+
+    .vis-node-circle {
+      fill: rgba(255, 255, 255, 0.08);
+      stroke: rgba(255, 255, 255, 0.3);
+      stroke-width: 2;
+      transition: all 0.2s ease;
+    }
+
+    .vis-node-circle.visiting {
+      transform-origin: center;
+      transform: scale(1.2);
+      stroke: #38bdf8;
+      filter: drop-shadow(0 0 10px #38bdf8);
+    }
+
+    .vis-node-circle.visited {
+      fill: #0284c7;
+      stroke: #38bdf8;
+    }
+
+    .vis-node-text {
+      fill: #fff;
+      font-family: var(--font-code);
+      font-size: 13px;
+      font-weight: 700;
+      text-anchor: middle;
+      dominant-baseline: central;
+    }
+
+    .vis-edge-line {
+      stroke: rgba(255, 255, 255, 0.2);
+      stroke-width: 2;
+    }
+
+    .vis-edge-line.active {
+      stroke: #38bdf8;
+      stroke-dasharray: 6 4;
+      animation: dashMove 0.8s linear infinite;
+    }
+
+    @keyframes dashMove {
+      to { stroke-dashoffset: -10; }
+    }
+
+    /* Execution Trace (Variables Panel) */
+    .vis-trace-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+      max-width: 380px;
+      padding: 16px;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid var(--border-glass);
+      border-radius: 12px;
+    }
+
+    .vis-trace-title {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .vis-variables-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .vis-var-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 12px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-glass);
+      border-radius: 8px;
+    }
+
+    .vis-var-name {
+      font-family: var(--font-code);
+      font-size: 12px;
+      font-weight: 700;
+      color: #38bdf8;
+    }
+
+    .vis-var-val {
+      font-family: var(--font-code);
+      font-size: 12.5px;
+      font-weight: 800;
+      color: var(--orbit-green);
+    }
+
+    /* Call Stack & Recursion Column */
+    .vis-call-stack {
+      position: absolute;
+      right: 16px;
+      top: 16px;
+      bottom: 16px;
+      width: 190px;
+      background: rgba(0, 0, 0, 0.65);
+      border: 1px solid var(--border-glass);
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column-reverse;
+      gap: 8px;
+      overflow-y: auto;
+      backdrop-filter: blur(8px);
+      z-index: 6;
+    }
+
+    .vis-stack-title {
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+      text-align: center;
+    }
+
+    .vis-stack-frame {
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      color: #e0f2fe;
+      font-family: var(--font-code);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 8px 10px;
+      border-radius: 8px;
+      animation: stackSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      word-break: break-all;
+    }
+
+    @keyframes stackSlideUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Synchronized Live Code Viewer Panel */
+    .vis-code-panel {
+      flex: 1;
+      max-width: 440px;
+      border-left: 1px solid var(--border-glass);
+      background: #050807;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .vis-code-header {
+      padding: 10px 16px;
+      background: rgba(0, 0, 0, 0.6);
+      border-bottom: 1px solid var(--border-glass);
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .vis-code-header i {
+      color: #38bdf8;
+    }
+
+    .vis-code-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 0;
+      font-family: var(--font-code);
+      font-size: 12.5px;
+      line-height: 1.6;
+    }
+
+    .vis-code-line {
+      display: flex;
+      align-items: center;
+      padding: 2px 14px;
+      color: #94a3b8;
+      transition: background 0.2s ease;
+      position: relative;
+    }
+
+    .vis-code-line .line-num {
+      width: 28px;
+      color: rgba(255, 255, 255, 0.25);
+      font-size: 11px;
+      user-select: none;
+      flex-shrink: 0;
+    }
+
+    .vis-code-line .line-text {
+      flex: 1;
+      white-space: pre;
+      overflow-x: hidden;
+      color: #cbd5e1;
+    }
+
+    /* Current line highlighted in sync with current step */
+    .vis-code-line.active-line {
+      background: rgba(56, 189, 248, 0.22);
+      border-left: 3px solid #38bdf8;
+      color: #ffffff;
+    }
+
+    .vis-code-line.active-line .line-num {
+      color: #38bdf8;
+      font-weight: 800;
+    }
+
+    /* Runtime error highlighted line in muted red (#E57373) */
+    .vis-code-line.error-line {
+      background: rgba(229, 115, 115, 0.28) !important;
+      border-left: 3px solid #E57373 !important;
+      color: #ffebee !important;
+    }
+
+    .vis-code-line.error-line .line-num {
+      color: #E57373 !important;
+      font-weight: 800;
+    }
+
+    /* Branch condition badge next to current line */
+    .line-branch-badge {
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 99px;
+      margin-left: 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      letter-spacing: 0.3px;
+    }
+
+    .line-branch-badge.taken {
+      background: rgba(0, 255, 102, 0.18);
+      color: var(--orbit-green);
+      border: 1px solid rgba(0, 255, 102, 0.4);
+      animation: branchPop 0.2s ease-out;
+    }
+
+    .line-branch-badge.skipped {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-glass);
+      animation: branchFade 0.2s ease-in forwards;
+    }
+
+    @keyframes branchPop {
+      0% { transform: scale(0.85); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes branchFade {
+      0% { opacity: 1; }
+      100% { opacity: 0.5; }
+    }
+
+    /* Caption Bubble */
+    .vis-caption-card {
+      padding: 14px 20px;
+      background: rgba(10, 15, 13, 0.92);
+      border-top: 1px solid var(--border-glass);
+      border-bottom: 1px solid var(--border-glass);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-shrink: 0;
+      backdrop-filter: blur(8px);
+    }
+
+    .vis-caption-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.2), rgba(0, 255, 102, 0.2));
+      border: 1px solid rgba(0, 255, 102, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+      box-shadow: 0 0 12px rgba(0, 255, 102, 0.2);
+    }
+
+    .vis-caption-text-area {
+      flex: 1;
+    }
+
+    .vis-caption-speech {
+      font-size: 14.5px;
+      font-weight: 700;
+      color: #ffffff;
+      line-height: 1.4;
+      margin: 0 0 2px 0;
+      letter-spacing: -0.2px;
+    }
+
+    .vis-caption-subtext {
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Playback Controls Footer */
+    .vis-controls-bar {
+      padding: 10px 20px;
+      background: rgba(0, 0, 0, 0.92);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .vis-step-progress {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 130px;
+    }
+
+    .vis-step-text {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-secondary);
+    }
+
+    .vis-step-bar-bg {
+      width: 120px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .vis-step-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--orbit-green);
+      transition: width 0.2s ease;
+    }
+
+    .vis-btn-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .vis-ctrl-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-glass);
+      color: #fff;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.2s;
+    }
+
+    .vis-ctrl-btn:hover:not(:disabled) {
+      background: rgba(0, 255, 102, 0.12);
+      color: var(--orbit-green);
+      border-color: var(--orbit-green);
+      transform: translateY(-2px);
+    }
+
+    .vis-ctrl-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .vis-ctrl-btn.play-btn {
+      background: var(--orbit-green);
+      color: #000;
+      border-color: var(--orbit-green);
+      width: 40px;
+      height: 40px;
+      font-size: 14px;
+      box-shadow: 0 0 14px var(--orbit-green-glow);
+    }
+
+    .vis-ctrl-btn.play-btn:hover {
+      filter: brightness(1.15);
+      color: #000;
+    }
+
+    .vis-speed-picker {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-glass);
+      padding: 3px;
+      border-radius: 8px;
+    }
+
+    .vis-speed-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 10.5px;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .vis-speed-btn.active {
+      background: rgba(56, 189, 248, 0.2);
+      color: #38bdf8;
+    }
+
+    /* Friendly Warning / Celebration Banner */
+    .vis-banner {
+      padding: 9px 16px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 10px 20px 0 20px;
+      animation: visFadeIn 0.3s ease;
+    }
+
+    .vis-banner.success {
+      background: rgba(0, 255, 102, 0.12);
+      border: 1px solid var(--orbit-green);
+      color: #e2e8f0;
+    }
+
+    .vis-banner.warning {
+      background: rgba(251, 191, 36, 0.12);
+      border: 1px solid #fbbf24;
+      color: #fef3c7;
+    }
+
+    .vis-banner.error {
+      background: rgba(255, 50, 50, 0.12);
+      border: 1px solid #ff5555;
+      color: #fecaca;
+    }
   </style>
 </head>
 
@@ -982,7 +1848,7 @@
       <span id="b-skill" class="active">REACT</span>
     </div>
     <div class="action-btns">
-      <button class="btn-minimal" onclick="location.href='learn.html' + window.location.search">
+      <button class="btn-minimal" onclick="location.href=(new URLSearchParams(location.search).get('track')==='intermediate'?'learn-intermediate.html':'learn-beginner.html') + window.location.search">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <path d="M19 12H5M12 19l-7-7 7-7" />
         </svg>
@@ -1034,14 +1900,14 @@
         <!-- Source Citation Badge -->
         <div class="source-citation-badge" id="source-badge">
           <i class="fas fa-book-bookmark"></i>
-          <span>SOURCE: <strong id="p-source">Official Jest Documentation (jestjs.io)</strong></span>
+          <span>SOURCE: <strong id="p-source">Official Reference Standard</strong></span>
         </div>
 
         <!-- Difficulty, Title, Description -->
-        <div id="p-diff" class="difficulty easy">BEGINNER - LEVEL 1</div>
-        <h1 id="p-title" class="title-h1">Write Your First Assertion</h1>
+        <div id="p-diff" class="difficulty easy">BEGINNER</div>
+        <h1 id="p-title" class="title-h1">Practice Problem</h1>
         <p id="p-desc" class="desc-p">
-          In unit testing, an assertion checks whether a piece of code behaves as expected. Write a simple test assertion for an addition function.
+          Select a practice question to start.
         </p>
 
         <!-- Problem Example Box -->
@@ -1115,15 +1981,137 @@
 
     <main class="panel editor-container">
       <div class="editor-toolbar">
-        <div class="toolbar-tab">
+        <div class="toolbar-tab active" id="tab-editor-code" onclick="closeVisualizer()" style="cursor: pointer;">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
             <path
               d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm4.24 16L12 15.45 7.77 18l1.12-4.81-3.73-3.23 4.92-.42L12 5l1.92 4.53 4.92.42-3.73 3.23L16.23 18z" />
           </svg>
           <span id="file-tab-name">SOLUTIONS.JS</span>
         </div>
+        <div class="toolbar-tab" id="tab-editor-vis" onclick="openAndRunVisualizer()" style="cursor: pointer;">
+          <i class="fas fa-wand-magic-sparkles" style="font-size: 11px; color: #38bdf8; margin-right: 6px;"></i>
+          <span>STORY VISUALIZER</span>
+        </div>
       </div>
       <textarea id="code-area" spellcheck="false"></textarea>
+
+      <!-- ✨ Visualizer Theater & Storytelling Canvas -->
+      <div class="visualizer-theater" id="visualizer-theater">
+        <div class="vis-header">
+          <div class="vis-header-left">
+            <div class="vis-title">
+              <i class="fas fa-wand-magic-sparkles"></i>
+              <span>Story Mode Visualizer</span>
+            </div>
+            <span class="vis-ds-badge" id="vis-ds-badge">ARRAY</span>
+            <div class="vis-line-chip" id="vis-line-chip">
+              <i class="fas fa-code"></i> Line <span id="vis-line-num">1</span>
+            </div>
+            <div class="vis-loop-chip" id="vis-loop-chip" style="display: none;">
+              <i class="fas fa-repeat"></i> <span id="vis-loop-text">Loop 1 of 5</span>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <button class="vis-close-btn" id="vis-close-btn" onclick="closeVisualizer()" title="Close Visualizer (Esc)">
+              <i class="fas fa-times"></i> Close
+            </button>
+          </div>
+        </div>
+
+        <div class="vis-body">
+          <div class="vis-stage" id="vis-stage">
+            <canvas class="vis-canvas-overlay" id="vis-confetti-canvas"></canvas>
+            
+            <!-- Array Display -->
+            <div class="vis-array-wrapper" id="vis-array-wrapper">
+              <div class="vis-array-row" id="vis-array-row">
+                <!-- Array boxes rendered dynamically -->
+              </div>
+              <div class="vis-sweep-bar" id="vis-sweep-bar" style="display: none;"></div>
+            </div>
+
+            <!-- Stack / Queue Display -->
+            <div class="vis-stack-queue-wrapper" id="vis-stack-queue-wrapper" style="display: none;">
+              <div class="vis-sq-container" id="vis-sq-container"></div>
+            </div>
+
+            <!-- Linked List / Tree / Graph Display -->
+            <div class="vis-graph-wrapper" id="vis-graph-wrapper" style="display: none;">
+              <svg class="vis-graph-svg" id="vis-graph-svg" viewBox="0 0 500 240"></svg>
+            </div>
+
+            <!-- Execution Trace (Variables Panel) -->
+            <div class="vis-trace-wrapper" id="vis-trace-wrapper" style="display: none;">
+              <div class="vis-trace-title"><i class="fas fa-table-list"></i> Variables Live Inspection</div>
+              <div class="vis-variables-grid" id="vis-variables-grid"></div>
+            </div>
+
+            <!-- Call Stack Side Panel for Recursion -->
+            <div class="vis-call-stack" id="vis-call-stack" style="display: none;">
+              <div class="vis-stack-title"><i class="fas fa-layer-group"></i> Call Stack</div>
+              <div id="vis-stack-frames"></div>
+            </div>
+          </div>
+
+          <!-- Synchronized Live Code Execution Panel -->
+          <div class="vis-code-panel" id="vis-code-panel">
+            <div class="vis-code-header">
+              <i class="fas fa-terminal"></i> <span>Live Code Execution</span>
+            </div>
+            <div class="vis-code-scroll" id="vis-code-scroll">
+              <div class="vis-code-lines" id="vis-code-lines">
+                <!-- Populated dynamically with active line highlights -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Banner for Correctness / Warning / Errors -->
+        <div id="vis-banner-container"></div>
+
+        <!-- Storytelling Caption Bubble -->
+        <div class="vis-caption-card">
+          <div class="vis-caption-avatar" id="vis-avatar">🤖</div>
+          <div class="vis-caption-text-area">
+            <p class="vis-caption-speech" id="vis-caption-text">Click "Visualize My Code" to start the story.</p>
+            <p class="vis-caption-subtext" id="vis-caption-subtext">
+              <span><i class="fas fa-info-circle"></i> Step-by-step plain English execution</span>
+            </p>
+          </div>
+        </div>
+
+        <!-- Playback Controller Bar -->
+        <div class="vis-controls-bar">
+          <div class="vis-step-progress">
+            <div class="vis-step-text" id="vis-step-counter">Step 0 of 0</div>
+            <div class="vis-step-bar-bg">
+              <div class="vis-step-bar-fill" id="vis-step-bar-fill"></div>
+            </div>
+          </div>
+
+          <div class="vis-btn-group">
+            <button class="vis-ctrl-btn" id="vis-btn-restart" onclick="visualizerRestart()" title="Restart (Home)">
+              <i class="fas fa-rotate-left"></i>
+            </button>
+            <button class="vis-ctrl-btn" id="vis-btn-prev" onclick="visualizerStep(-1)" title="Step Back (Left Arrow)">
+              <i class="fas fa-backward-step"></i>
+            </button>
+            <button class="vis-ctrl-btn play-btn" id="vis-btn-play" onclick="visualizerTogglePlay()" title="Play / Pause (Space)">
+              <i class="fas fa-play" id="vis-play-icon"></i>
+            </button>
+            <button class="vis-ctrl-btn" id="vis-btn-next" onclick="visualizerStep(1)" title="Step Forward (Right Arrow)">
+              <i class="fas fa-forward-step"></i>
+            </button>
+          </div>
+
+          <div class="vis-speed-picker">
+            <span style="font-size: 10px; font-weight: 700; color: var(--text-secondary); margin: 0 4px;">SPEED:</span>
+            <button class="vis-speed-btn" id="vis-spd-slow" onclick="setVisualizerSpeed('slow')">Slow</button>
+            <button class="vis-speed-btn active" id="vis-spd-normal" onclick="setVisualizerSpeed('normal')">Normal</button>
+            <button class="vis-speed-btn" id="vis-spd-fast" onclick="setVisualizerSpeed('fast')">Fast</button>
+          </div>
+        </div>
+      </div>
 
       <div class="console-drawer" id="console">
         <div class="resizer" id="resizer"></div>
@@ -1155,9 +2143,11 @@
       <div class="c-tab" id="tab-tests">TEST CASES</div>
     </div>
     <div class="master-btns">
-      <button class="btn-run" id="btn-run">RUN LOGIC</button>
+      <button class="btn-visualize" id="btn-visualize" onclick="openAndRunVisualizer()">
+        <i class="fas fa-wand-magic-sparkles"></i> Visualize My Code
+      </button>
       <button class="btn-submit" id="btn-submit" onclick="submitAndRateSolution()">
-        <i class="fas fa-check-circle" style="margin-right: 8px;"></i> SUBMIT SOLUTION FOR RATING
+        <i class="fas fa-check-circle"></i> Submit Your Answer
       </button>
     </div>
   </footer>
@@ -1171,7 +2161,7 @@
       </div>
       <h2>MISSION ACCOMPLISHED</h2>
       <p>Neural stream synchronized. Signal stability at 99.8%.</p>
-      <button class="btn-submit btn-return-station" onclick="location.href='learn.html' + window.location.search"
+      <button class="btn-submit btn-return-station" onclick="location.href=(new URLSearchParams(location.search).get('track')==='intermediate'?'learn-intermediate.html':'learn-beginner.html') + window.location.search"
         style="font-size: 16px; padding: 16px 48px;">RETURN TO STATION</button>
     </div>
   </div>
@@ -1237,19 +2227,14 @@
       return String(msg);
     }
 
-    function initialize() {
+    async function initialize() {
       const params = new URLSearchParams(window.location.search);
-      currentSkill = params.get('skill') || 'Unit/Integration testing';
-      currentLesson = params.get('title') || '';
-      const desc = params.get('description') || '';
-      lessonDifficulty = params.get('difficulty') || 'easy';
+      const urlSkill = params.get('skill');
+      const urlTitle = params.get('title');
+      const urlId = params.get('id');
+      const urlDiff = params.get('difficulty');
 
-      document.getElementById('b-skill').innerText = currentSkill.toUpperCase();
-      
-      const pId = params.get('id');
-      if (pId) document.getElementById('p-id').innerText = pId;
-
-      // Person C Architecture: Check for hieroActiveProblem & hieroSkillProblems in localStorage
+      // 1. Check for active problem & skill problems in localStorage
       let activeProblem = null;
       try {
         const rawActive = localStorage.getItem('hieroActiveProblem');
@@ -1264,79 +2249,126 @@
         if (rawList) skillProblems = JSON.parse(rawList);
       } catch (e) {}
 
-      const urlTitle = params.get('title');
-      const urlId = params.get('id');
+      currentSkill = urlSkill || (activeProblem && activeProblem.skill) || 'Java';
+      currentLesson = urlTitle || (activeProblem && activeProblem.title) || `${currentSkill} Coding Challenge`;
+      lessonDifficulty = urlDiff || (activeProblem && activeProblem.difficulty) || 'easy';
 
+      // ⚡ IMMEDIATE LEFT-SIDE DISPLAY (Never leave placeholder text visible)
+      const pTitleEl = document.getElementById('p-title');
+      const pDescEl = document.getElementById('p-desc');
+      const pIdEl = document.getElementById('p-id');
+      const pDiffEl = document.getElementById('p-diff');
+      const bSkillEl = document.getElementById('b-skill');
+      const pSourceEl = document.getElementById('p-source');
+
+      if (bSkillEl) bSkillEl.innerText = currentSkill.toUpperCase();
+      if (pIdEl) pIdEl.innerText = urlId || (activeProblem && activeProblem.id) || 'PROB-1';
+      if (pTitleEl) pTitleEl.innerText = currentLesson;
+      if (pDiffEl) {
+        pDiffEl.innerText = lessonDifficulty.toUpperCase();
+        pDiffEl.className = `difficulty ${lessonDifficulty.toLowerCase()}`;
+      }
+      if (pSourceEl) pSourceEl.innerText = (activeProblem && activeProblem.source) || `${currentSkill} Reference Standard`;
+
+      const initialDesc = (activeProblem && (activeProblem.description || activeProblem.statement || activeProblem.desc)) ||
+        `Solve this ${lessonDifficulty} challenge for ${currentSkill}. Implement clean, robust logic according to industry standards.`;
+      if (pDescEl) pDescEl.innerText = initialDesc;
+
+      if (editor && activeProblem && (activeProblem.starterCode || activeProblem.starter || activeProblem.starter_code)) {
+        editor.value = activeProblem.starterCode || activeProblem.starter || activeProblem.starter_code;
+      }
+
+      // 2. Fetch 9-pack from backend API if not in localStorage or incomplete
+      if (!Array.isArray(skillProblems) || skillProblems.length < 9) {
+        try {
+          const resp = await fetch(`/api/problems/by-skill?skill=${encodeURIComponent(currentSkill)}`);
+          const data = await resp.json();
+          if (data.success && Array.isArray(data.problems) && data.problems.length > 0) {
+            skillProblems = data.problems;
+            localStorage.setItem('hieroSkillProblems', JSON.stringify(skillProblems));
+          }
+        } catch (err) {
+          console.warn('Failed to fetch by-skill problems:', err);
+        }
+      }
+
+      if (!Array.isArray(skillProblems) || skillProblems.length === 0) {
+        if (activeProblem) {
+          skillProblems = [activeProblem];
+        }
+      }
+
+      // 3. Resolve active problem from activeProblem or URL title/id or first problem
       if (Array.isArray(skillProblems) && skillProblems.length > 0) {
         ninePackProblems = skillProblems;
-        if (urlId) {
-          const matchIdx = skillProblems.findIndex(p => p.id === urlId || String(p.id).toLowerCase() === urlId.toLowerCase());
-          if (matchIdx !== -1) {
-            current9PackIndex = matchIdx;
-            activeProblem = skillProblems[matchIdx];
+        let targetIdx = -1;
+
+        if (activeProblem) {
+          targetIdx = skillProblems.findIndex(p => 
+            (activeProblem.id && p.id === activeProblem.id) ||
+            (activeProblem.title && p.title && p.title.toLowerCase().trim() === activeProblem.title.toLowerCase().trim())
+          );
+          if (targetIdx !== -1) {
+            skillProblems[targetIdx] = Object.assign({}, skillProblems[targetIdx], activeProblem);
           }
-        } else if (urlTitle) {
-          const matchIdx = skillProblems.findIndex(p => p.title === urlTitle || p.title.toLowerCase().includes(urlTitle.toLowerCase()) || urlTitle.toLowerCase().includes(p.title.toLowerCase()));
-          if (matchIdx !== -1) {
-            current9PackIndex = matchIdx;
-            activeProblem = skillProblems[matchIdx];
-          }
-        } else if (activeProblem) {
-          const matchIdx = skillProblems.findIndex(p => p.id === activeProblem.id || p.title === activeProblem.title);
-          if (matchIdx !== -1) current9PackIndex = matchIdx;
         }
+
+        if (targetIdx === -1 && urlId) {
+          targetIdx = skillProblems.findIndex(p => p.id === urlId || String(p.id).toLowerCase() === urlId.toLowerCase());
+        }
+
+        if (targetIdx === -1 && urlTitle) {
+          targetIdx = skillProblems.findIndex(p => 
+            p.title && (p.title.toLowerCase().trim() === urlTitle.toLowerCase().trim() ||
+            p.title.toLowerCase().includes(urlTitle.toLowerCase().trim()) ||
+            urlTitle.toLowerCase().includes(p.title.toLowerCase().trim()))
+          );
+        }
+
+        if (targetIdx === -1) {
+          targetIdx = 0;
+        }
+
+        select9PackProblem(targetIdx);
       } else if (activeProblem) {
         ninePackProblems = [activeProblem];
-        current9PackIndex = 0;
+        select9PackProblem(0);
       }
 
-      if (activeProblem) {
-        // Requirement Person C: If hieroActiveProblem exists, DO NOT call loadSkillProblems.
-        select9PackProblem(current9PackIndex);
-      } else {
-        // Fallback: Load 3-level progressive beginner problem catalog
-        loadSkillProblems(currentSkill);
+      // Configure marked safely
+      if (typeof marked !== 'undefined' && marked.Renderer) {
+        try {
+          const renderer = new marked.Renderer();
+          renderer.code = (content, language) => {
+            const code = typeof content === 'object' ? (content.text || "") : (content || "");
+            const lang = typeof content === 'object' ? (content.lang || "") : (language || "");
+            const id = 'code-' + Math.random().toString(36).substr(2, 9);
+            return `
+              <div class="code-block-wrapper">
+                <button class="copy-btn" onclick="copyToClipboard('${id}')">COPY</button>
+                <pre><code id="${id}" class="language-${lang}">${code}</code></pre>
+              </div>
+            `;
+          };
+          marked.setOptions({
+            renderer,
+            breaks: true,
+            gfm: true
+          });
+        } catch (e) {
+          console.warn('marked config skipped:', e);
+        }
       }
-
-      // Language mismatch detection
-      const isPythonSkill = currentSkill.toLowerCase().includes('python') || currentSkill.toLowerCase().includes('tensorflow') || currentSkill.toLowerCase().includes('learning') || currentSkill.toLowerCase().includes('science');
-      const isJSInEditor = editor.value.includes('function') || editor.value.includes('const');
-
-      if (isPythonSkill && isJSInEditor) {
-        setTimeout(() => {
-          const switchApprove = confirm(`This challenge requires Python (TensorFlow), but your editor content looks like JavaScript. Would you like to switch to a Python template?`);
-          if (switchApprove) refreshBoilerplate('python');
-        }, 1000);
-      }
-
-      // Configure marked to handle code blocks with custom wrappers
-      const renderer = new marked.Renderer();
-      renderer.code = (content, language) => {
-        // Handle both older (content as string) and newer (content as object) Marked versions
-        const code = typeof content === 'object' ? (content.text || "") : (content || "");
-        const lang = typeof content === 'object' ? (content.lang || "") : (language || "");
-        const id = 'code-' + Math.random().toString(36).substr(2, 9);
-        return `
-          <div class="code-block-wrapper">
-            <button class="copy-btn" onclick="copyToClipboard('${id}')">COPY</button>
-            <pre><code id="${id}" class="language-${lang}">${code}</code></pre>
-          </div>
-        `;
-      };
-      marked.setOptions({
-        renderer,
-        breaks: true,
-        gfm: true
-      });
 
       // Dynamic File Tab Name & Terminal Header
       const isPython = currentSkill.toLowerCase().includes('python') || currentSkill.toLowerCase().includes('tensorflow') || currentSkill.toLowerCase().includes('learning') || currentSkill.toLowerCase().includes('science');
-      const tabName = isPython ? 'SOLUTIONS.PY' : 'SOLUTIONS.JS';
-      document.getElementById('file-tab-name').innerText = tabName;
+      const tabName = isPython ? 'SOLUTIONS.PY' : (currentSkill.toLowerCase().includes('java') && !currentSkill.toLowerCase().includes('script') ? 'SOLUTION.JAVA' : 'SOLUTIONS.JS');
+      const tabEl = document.getElementById('file-tab-name');
+      if (tabEl) tabEl.innerText = tabName;
 
       const terminalHeader = document.querySelector('.c-header span');
       if (terminalHeader) {
-        terminalHeader.innerText = isPython ? 'PYTHON KERNEL v3.10.x' : 'VIRTUAL TERMINAL v1.4.0';
+        terminalHeader.innerText = isPython ? 'PYTHON KERNEL v3.10.x' : (currentSkill.toLowerCase().includes('java') && !currentSkill.toLowerCase().includes('script') ? 'JAVA RUNTIME v17.x' : 'VIRTUAL TERMINAL v1.4.0');
       }
     }
 
@@ -1478,7 +2510,9 @@
       }
     };
 
-    document.getElementById('btn-run').onclick = async () => {
+    const btnRun = document.getElementById('btn-run');
+    if (btnRun) {
+      btnRun.onclick = async () => {
       setConsoleOpen(true);
       terminalOut.innerText = "> Initializing Neural Kernel...\n> Submitting code for execution...";
       terminalOut.scrollTop = terminalOut.scrollHeight;
@@ -1590,6 +2624,7 @@
         console.error("Run Logic Failure:", err);
       }
     };
+  }
 
     // ==========================================
     // PROGRESSIVE PROBLEM CATALOG & RATING ENGINE
@@ -2091,22 +3126,28 @@ try {
       const pExampleEl = document.getElementById('p-example');
       const hintTextEl = document.getElementById('hint-text');
 
-      if (pTitleEl) pTitleEl.innerText = prob.title;
-      if (pDescEl) pDescEl.innerText = prob.description || prob.statement || prob.desc || '';
+      if (pTitleEl) pTitleEl.innerText = prob.title || currentLesson;
+      if (pDescEl) pDescEl.innerText = prob.description || prob.statement || prob.desc || prob.title || '';
       if (pIdEl) pIdEl.innerText = prob.id || `PROB-${idx + 1}`;
       if (pDiffEl) {
         pDiffEl.innerText = (prob.difficulty || 'easy').toUpperCase();
         pDiffEl.className = `difficulty ${(prob.difficulty || 'easy').toLowerCase()}`;
       }
-      if (pSourceEl) pSourceEl.innerText = `${prob.skill || currentSkill} Reference Standard`;
-      if (pExampleEl && prob.testCases && prob.testCases[0]) {
-        pExampleEl.innerText = `// Test: ${prob.testCases[0].name || 'Case 1'}\n// Input: ${prob.testCases[0].input}\n// Expected: ${prob.testCases[0].expectedOutput}`;
+      if (pSourceEl) pSourceEl.innerText = prob.source || `${prob.skill || currentSkill} Reference Standard`;
+      if (pExampleEl) {
+        if (prob.testCases && prob.testCases[0]) {
+          pExampleEl.innerText = `// Test: ${prob.testCases[0].name || 'Case 1'}\n// Input: ${prob.testCases[0].input}\n// Expected: ${prob.testCases[0].expectedOutput}`;
+        } else if (prob.example) {
+          pExampleEl.innerText = prob.example;
+        } else {
+          pExampleEl.innerText = '// Implement according to challenge requirements.';
+        }
       }
       if (hintTextEl) hintTextEl.innerText = prob.hint || 'Carefully check inputs and return types.';
 
       // Load starterCode into the editor without changing the editor itself
       if (editor) {
-        editor.value = prob.starterCode || prob.starter || '';
+        editor.value = prob.starterCode || prob.starter_code || prob.starter || `// Write your solution for ${prob.title || currentLesson}\n\n`;
       }
 
       // Reset rating and source solution cards
@@ -2118,6 +3159,17 @@ try {
 
       const lockedNotice = document.getElementById('source-solution-locked');
       if (lockedNotice) lockedNotice.style.display = 'flex';
+
+      // Reset console & drawer output
+      if (testsOut) testsOut.style.display = 'none';
+      if (terminalOut) {
+        terminalOut.style.display = 'block';
+        terminalOut.innerText = `> READY: Loaded "${prob.title}". Write your solution and click SUBMIT SOLUTION FOR RATING.`;
+      }
+      const tabTerm = document.getElementById('tab-terminal');
+      const tabTests = document.getElementById('tab-tests');
+      if (tabTerm) tabTerm.classList.add('active');
+      if (tabTests) tabTests.classList.remove('active');
 
       render9PackNavigation();
     }
@@ -2143,28 +3195,6 @@ try {
       terminalOut.innerText = "> SUBMITTING CODE FOR ASSESSMENT...\n> Evaluating against test harness on a 0–10 scale...";
       terminalOut.scrollTop = terminalOut.scrollHeight;
 
-      // 1. Strict empty / blank code check -> 0 Score
-      if (!code || !code.trim()) {
-        const ratingCard = document.getElementById('rating-result-card');
-        const ratingPill = document.getElementById('rating-score-pill');
-        const ratingTag = document.getElementById('rating-status-tag');
-        const rateLogic = document.getElementById('rate-metric-logic');
-        const rateSyntax = document.getElementById('rate-metric-syntax');
-        const rateStyle = document.getElementById('rate-metric-style');
-        const rateMsg = document.getElementById('rating-feedback-msg');
-
-        if (ratingPill) ratingPill.innerText = "0 / 10 Points";
-        if (ratingTag) ratingTag.innerText = "⚠️ EMPTY SUBMISSION";
-        if (rateLogic) rateLogic.innerText = "0 / 5 pts";
-        if (rateSyntax) rateSyntax.innerText = "0 / 3 pts";
-        if (rateStyle) rateStyle.innerText = "0 / 2 pts";
-        if (rateMsg) rateMsg.innerText = "Please write your solution in the editor before submitting for rating.";
-        if (ratingCard) ratingCard.style.display = 'block';
-
-        terminalOut.innerText = "> SUBMISSION EVALUATION RESULT\n> Final Score: 0 / 10\n> Status: Empty submission. Please write your code before submitting to receive a score.";
-        return;
-      }
-
       try {
         const response = await fetch('/api/problems/evaluate-solution', {
           method: 'POST',
@@ -2173,23 +3203,23 @@ try {
             skill: currentSkill,
             problemId: problemId,
             problemTitle: pTitle,
-            userSolution: code,
+            userSolution: code || '',
             testCases: currentProb.testCases || []
           })
         });
 
         const result = await response.json();
 
-        // 2. Render Test Results in drawer if available
+        // 1. Render Test Results & what went wrong in drawer
         if (result.testResults && result.testResults.length > 0) {
           const totalTests = result.totalTests || result.testResults.length;
           const passedTests = result.passedTests || 0;
           
           let testHtml = `
-            <div style="padding-bottom: 8px; border-bottom: 1px solid var(--border-glass); margin-bottom: 2px;">
-              <h2 style="color: var(--orbit-green); font-size: 15px; margin-bottom: 2px;">FINAL EVALUATION SCORE: ${result.score} / 10</h2>
+            <div style="padding-bottom: 8px; border-bottom: 1px solid var(--border-glass); margin-bottom: 8px;">
+              <h2 style="color: var(--orbit-green); font-size: 15px; margin-bottom: 4px;">TEST RESULTS: ${result.score} / 10</h2>
               <div style="font-size: 11px; color: var(--text-secondary); font-weight: 700;">
-                Passed: <span style="color: ${passedTests === totalTests ? 'var(--orbit-green)' : '#ffaa00'}">${passedTests} / ${totalTests}</span>
+                Passed: <span style="color: ${passedTests === totalTests && totalTests > 0 ? 'var(--orbit-green)' : '#ffaa00'}">${passedTests} / ${totalTests}</span>
               </div>
             </div>
           `;
@@ -2199,19 +3229,24 @@ try {
             const statusColor = isPassed ? 'var(--orbit-green)' : '#ff3232';
             const icon = isPassed ? '✓' : '✗';
             
-            testHtml += `<div style="font-size: 13px; line-height: 1.6; margin-bottom: 4px; display: flex; align-items: flex-start;">` +
+            testHtml += `<div style="font-size: 13px; line-height: 1.6; margin-bottom: 6px; padding: 6px 8px; background: rgba(255,255,255,0.02); border-radius: 6px; display: flex; align-items: flex-start;">` +
               `<span style="color: ${statusColor}; font-weight: 800; margin-right: 10px; font-size: 15px;">${icon}</span>` +
-              `<div>` +
+              `<div style="flex: 1;">` +
                 `<span style="color: var(--text-secondary); opacity: 0.8;">Case ${t.case} — </span>` +
-                `<span style="color: ${isPassed ? 'var(--text-primary)' : statusColor}; font-weight: 500;">${t.name}</span>` +
-                (t.error ? `<div style="font-size: 11px; color: #ff6666;">Error: ${t.error}</div>` : '') +
+                `<span style="color: ${isPassed ? 'var(--text-primary)' : statusColor}; font-weight: 500;">${t.name || 'Test Case'}</span>` +
+                (t.error ? `<div style="font-size: 12px; color: #ff6666; margin-top: 2px;">What went wrong: ${t.error}</div>` : '') +
+                (!isPassed && t.expected ? `<div style="font-size: 11px; color: var(--text-secondary); margin-top: 2px;">Expected: ${t.expected} | Actual: ${t.actual || 'None'}</div>` : '') +
               `</div>` +
             `</div>`;
           });
           testsOut.innerHTML = testHtml;
+          testsOut.style.display = 'block';
+          terminalOut.style.display = 'none';
+          document.getElementById('tab-tests').classList.add('active');
+          document.getElementById('tab-terminal').classList.remove('active');
         }
 
-        // 3. Render 10-point Rating Card in Problem Panel
+        // 2. Render 10-point Rating Card in Problem Panel
         const ratingCard = document.getElementById('rating-result-card');
         const ratingPill = document.getElementById('rating-score-pill');
         const ratingTag = document.getElementById('rating-status-tag');
@@ -2227,16 +3262,16 @@ try {
 
         if (ratingPill) ratingPill.innerText = `${score} / 10 Points`;
         if (ratingTag) {
-          ratingTag.innerText = score >= 9 ? "🌟 PERFECT SOLUTION" : (score >= 7 ? "✨ EXCELLENT WORK" : (score >= 4 ? "⚡ PRACTICE RECOMMENDED" : "⚠️ NEEDS IMPROVEMENT"));
+          ratingTag.innerText = score === 10 ? "🌟 PERFECT SOLUTION" : (score >= 7 ? "✨ EXCELLENT WORK" : (score > 0 ? "⚡ PRACTICE RECOMMENDED" : "⚠️ NEEDS IMPROVEMENT"));
         }
         if (rateLogic) rateLogic.innerText = `${logicPts} / 5 pts`;
         if (rateSyntax) rateSyntax.innerText = `${syntaxPts} / 3 pts`;
         if (rateStyle) rateStyle.innerText = `${stylePts} / 2 pts`;
-        if (rateMsg) rateMsg.innerText = result.feedback || `Score: ${score}/10 based on automated testing.`;
+        if (rateMsg) rateMsg.innerText = result.feedback || (score === 0 ? "Empty submission. Please write your code before submitting to receive a score." : `Score: ${score}/10 based on automated testing.`);
 
         if (ratingCard) ratingCard.style.display = 'block';
 
-        // 4. Reveal Official Source Solution Card & Hide Locked Notice (Only after submit!)
+        // 3. Reveal Official Source Solution Card & Hide Locked Notice (Only after submit!)
         const lockedNotice = document.getElementById('source-solution-locked');
         if (lockedNotice) lockedNotice.style.display = 'none';
 
@@ -2245,19 +3280,19 @@ try {
         const sourceCode = document.getElementById('source-code-display');
         const sourceExpl = document.getElementById('source-explanation-text');
 
-        const officialAnswer = result.officialAnswer || result.referenceSolution || currentProb.sourceSolution || "// Reference solution unavailable";
-        if (sourceTag) sourceTag.innerText = `Source: ${currentProb.source || 'Official Reference'}`;
+        const officialAnswer = result.officialAnswer || result.referenceSolution || currentProb.referenceSolution || currentProb.sourceSolution || "// Reference solution unavailable";
+        if (sourceTag) sourceTag.innerText = `Source: ${currentProb.source || (currentProb.skill || currentSkill) + ' Reference'}`;
         if (sourceCode) sourceCode.innerText = officialAnswer;
-        if (sourceExpl) sourceExpl.innerText = currentProb.sourceExplanation || `Automated Reference Solution for ${pTitle}.`;
+        if (sourceExpl) sourceExpl.innerText = currentProb.sourceExplanation || `Official Reference Solution for ${pTitle}.`;
 
         if (sourceCard) sourceCard.style.display = 'block';
 
-        // 5. Scroll to rating card
+        // 4. Scroll to rating card
         if (ratingCard) {
           ratingCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
 
-        // 6. Format Virtual Terminal Output
+        // 5. Format Virtual Terminal Output
         let officialBlock = "";
         if (officialAnswer) {
           officialBlock = `\n\n========================================\n💡 OFFICIAL REFERENCE SOLUTION:\n========================================\n${officialAnswer}\n========================================`;
@@ -2269,7 +3304,7 @@ try {
           `> Feedback: ${result.feedback || ''}` + officialBlock;
         terminalOut.scrollTop = terminalOut.scrollHeight;
 
-        // 7. High Score Celebration Overlay
+        // 6. High Score Celebration Overlay
         if (score >= 7) {
           setTimeout(() => {
             const overlay = document.getElementById('master-overlay');
@@ -2318,7 +3353,707 @@ try {
       }
     }
 
-    document.getElementById('btn-submit').onclick = submitAndRateSolution;
+    // =========================================================
+    // ✨ VISUALIZE MY CODE - STORYTELLING ENGINE
+    // =========================================================
+    const SWAP_DURATION_MS = 400;
+    const COMPARE_DURATION_MS = 150;
+    const ASSIGN_SCALE_DURATION_MS = 200;
+    const ASSIGN_FADE_DURATION_MS = 300;
+    const LOOP_POP_MS = 150;
+    const LOOP_SWEEP_MS = 200;
+    const BRANCH_FADE_MS = 200;
+    const CALL_STACK_SLIDE_MS = 250;
+    const NODE_VISIT_DURATION_MS = 200;
+    const STACK_PUSH_MS = 250;
+    const STACK_POP_MS = 200;
+    const SPEED_SLOW_MS = 1200;
+    const SPEED_NORMAL_MS = 700;
+    const SPEED_FAST_MS = 350;
+
+    let visSteps = [];
+    let visCurrentIndex = 0;
+    let visIsPlaying = false;
+    let visPlayTimer = null;
+    let visSpeedMode = 'normal';
+    let visStepDelay = SPEED_NORMAL_MS; // slow: 1200, normal: 700, fast: 350
+    let visDataStructure = 'array';
+    let visIsCorrect = false;
+    let visRawCode = '';
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function populateVisualizerCode(code) {
+      visRawCode = code || '';
+      const linesContainer = document.getElementById('vis-code-lines');
+      if (!linesContainer) return;
+
+      const lines = visRawCode.split('\n');
+      linesContainer.innerHTML = lines.map((line, i) => {
+        const lineNum = i + 1;
+        return `
+          <div class="vis-code-line" id="vis-line-row-${lineNum}" data-line="${lineNum}">
+            <span class="line-num">${lineNum}</span>
+            <span class="line-text">${escapeHtml(line) || '&nbsp;'}</span>
+            <span class="line-branch-badge" id="vis-branch-badge-${lineNum}"></span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function openAndRunVisualizer() {
+      const codeArea = document.getElementById('code-area');
+      const userCode = codeArea ? codeArea.value : '';
+      const btn = document.getElementById('btn-visualize');
+      const theater = document.getElementById('visualizer-theater');
+
+      if (!userCode || !userCode.trim()) {
+        alert('Please write or paste some JavaScript code in the editor first!');
+        return;
+      }
+
+      const origBtnHtml = btn ? btn.innerHTML : '';
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right: 8px;"></i> Crafting Story...';
+      }
+
+      // Read problem metadata
+      const pTitle = document.getElementById('p-title') ? document.getElementById('p-title').innerText : '';
+      const pDiff = document.getElementById('p-diff') ? document.getElementById('p-diff').innerText : '';
+      let testCases = [];
+      if (window.currentActiveProblem && window.currentActiveProblem.tests) {
+        testCases = window.currentActiveProblem.tests;
+      }
+
+      try {
+        const response = await fetch('/api/visualize', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            code: userCode,
+            problemTitle: pTitle,
+            problemType: pDiff,
+            testCases: testCases
+          })
+        });
+
+        const data = await response.json();
+
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = origBtnHtml;
+        }
+
+        populateVisualizerCode(userCode);
+
+        if (!data.success && data.errorType === 'syntax') {
+          // Syntax Error: do not run animation; show inline friendly message
+          theater.style.display = 'flex';
+          visSteps = [{
+            stepNumber: 0,
+            type: 'error',
+            line: data.line || 1,
+            caption: data.friendlyCaption || `There's a small typo somewhere — check line ${data.line || 1}.`,
+            state: {
+              variables: {},
+              dataStructure: { type: 'trace', values: [], visited: [] },
+              activeIndices: [],
+              callStack: [],
+              loop: null
+            }
+          }];
+          visCurrentIndex = 0;
+          visDataStructure = 'trace';
+          visIsCorrect = false;
+          showVisualizerBanner('error', data.friendlyCaption || `There's a small typo somewhere — check line ${data.line || 1}.`);
+          visualizerPause();
+          renderVisualizerStep(0);
+          return;
+        }
+
+        if (data.steps && data.steps.length > 0) {
+          visSteps = data.steps;
+          visCurrentIndex = 0;
+          visDataStructure = data.dsType || 'array';
+          visIsCorrect = Boolean(data.isCorrect);
+
+          theater.style.display = 'flex';
+          const dsBadge = document.getElementById('vis-ds-badge');
+          if (dsBadge) {
+            dsBadge.innerText = visDataStructure.replace('-', ' ').toUpperCase();
+          }
+
+          if (data.runtimeError) {
+            showVisualizerBanner('warning', data.runtimeError);
+          } else if (data.isInfiniteLoop) {
+            showVisualizerBanner('warning', "This looks like it might be looping forever — want to double check the loop's condition?");
+          } else if (visIsCorrect) {
+            showVisualizerBanner('success', "Nice work — that's correct! 🎉");
+          } else {
+            clearVisualizerBanner();
+          }
+
+          // Default: sitting paused at step 0 waiting for user to press Play!
+          visualizerPause();
+          renderVisualizerStep(0);
+        } else {
+          alert('Could not generate visualization steps. Please check your function.');
+        }
+
+      } catch (err) {
+        console.warn('Network error or offline visualizer:', err);
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = origBtnHtml;
+        }
+        runClientFallbackVisualizer(userCode);
+      }
+    }
+
+    function closeVisualizer() {
+      visualizerPause();
+      const theater = document.getElementById('visualizer-theater');
+      if (theater) theater.style.display = 'none';
+      clearVisualizerBanner();
+    }
+
+    function showVisualizerBanner(type, message) {
+      const c = document.getElementById('vis-banner-container');
+      if (!c) return;
+      const icon = type === 'success' ? 'fa-circle-check' : (type === 'warning' ? 'fa-triangle-exclamation' : 'fa-circle-xmark');
+      c.innerHTML = `
+        <div class="vis-banner ${type}">
+          <i class="fas ${icon}"></i>
+          <span>${message}</span>
+        </div>
+      `;
+    }
+
+    function clearVisualizerBanner() {
+      const c = document.getElementById('vis-banner-container');
+      if (c) c.innerHTML = '';
+    }
+
+    function setVisualizerSpeed(mode) {
+      visSpeedMode = mode;
+      document.querySelectorAll('.vis-speed-btn').forEach(b => b.classList.remove('active'));
+      const activeBtn = document.getElementById(`vis-spd-${mode}`);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      if (mode === 'slow') visStepDelay = SPEED_SLOW_MS;
+      else if (mode === 'normal') visStepDelay = SPEED_NORMAL_MS;
+      else if (mode === 'fast') visStepDelay = SPEED_FAST_MS;
+
+      if (visIsPlaying) {
+        visualizerPause();
+        visualizerPlay();
+      }
+    }
+
+    function visualizerTogglePlay() {
+      if (visIsPlaying) {
+        visualizerPause();
+      } else {
+        visualizerPlay();
+      }
+    }
+
+    function visualizerPlay() {
+      if (visCurrentIndex >= visSteps.length - 1) {
+        visCurrentIndex = 0;
+      }
+      visIsPlaying = true;
+      const playIcon = document.getElementById('vis-play-icon');
+      if (playIcon) {
+        playIcon.className = 'fas fa-pause';
+      }
+
+      clearInterval(visPlayTimer);
+      visPlayTimer = setInterval(() => {
+        if (visCurrentIndex < visSteps.length - 1) {
+          visCurrentIndex++;
+          renderVisualizerStep(visCurrentIndex);
+        } else {
+          visualizerPause();
+          if (visIsCorrect) {
+            triggerConfettiBurst();
+          }
+        }
+      }, visStepDelay);
+    }
+
+    function visualizerPause() {
+      visIsPlaying = false;
+      clearInterval(visPlayTimer);
+      visPlayTimer = null;
+      const playIcon = document.getElementById('vis-play-icon');
+      if (playIcon) {
+        playIcon.className = 'fas fa-play';
+      }
+    }
+
+    function visualizerStep(delta) {
+      visualizerPause();
+      const newIdx = visCurrentIndex + delta;
+      if (newIdx >= 0 && newIdx < visSteps.length) {
+        visCurrentIndex = newIdx;
+        renderVisualizerStep(visCurrentIndex);
+      }
+    }
+
+    function visualizerRestart() {
+      visualizerPause();
+      visCurrentIndex = 0;
+      renderVisualizerStep(0);
+    }
+
+    function renderVisualizerStep(idx) {
+      if (!visSteps || visSteps.length === 0) return;
+      const step = visSteps[idx];
+      if (!step) return;
+
+      // 1. Progress counter and fill
+      const counterEl = document.getElementById('vis-step-counter');
+      if (counterEl) counterEl.innerText = `Step ${idx + 1} of ${visSteps.length}`;
+      const fillEl = document.getElementById('vis-step-bar-fill');
+      if (fillEl) fillEl.style.width = `${Math.round(((idx + 1) / visSteps.length) * 100)}%`;
+
+      // 2. Active line indicator chip
+      const lineEl = document.getElementById('vis-line-num');
+      if (lineEl) lineEl.innerText = step.line || 1;
+
+      // 3. Synchronized Live Code Line Highlighting
+      const allCodeRows = document.querySelectorAll('.vis-code-line');
+      allCodeRows.forEach(r => {
+        r.classList.remove('active-line');
+        r.classList.remove('error-line');
+      });
+
+      const activeRow = document.getElementById(`vis-line-row-${step.line}`);
+      if (activeRow) {
+        if (step.type === 'error' || (step.state && step.state.runtimeError)) {
+          activeRow.classList.add('error-line');
+        } else {
+          activeRow.classList.add('active-line');
+        }
+        activeRow.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      }
+
+      // 4. Conditionals Fork Branch Tag (next to line & in badge)
+      document.querySelectorAll('.line-branch-badge').forEach(b => { b.innerHTML = ''; });
+      if (step.type === 'branch') {
+        const branchBadge = document.getElementById(`vis-branch-badge-${step.line}`);
+        const taken = step.data && step.data.taken !== undefined
+          ? step.data.taken
+          : (step.caption && step.caption.includes('is true'));
+        if (branchBadge) {
+          branchBadge.className = `line-branch-badge ${taken ? 'taken' : 'skipped'}`;
+          branchBadge.innerHTML = taken
+            ? '<i class="fas fa-code-branch"></i> <i class="fas fa-check"></i> True'
+            : '<i class="fas fa-code-branch"></i> False';
+        }
+      }
+
+      // 5. Loop counter chip with pop animation & sweep bar
+      const loopChip = document.getElementById('vis-loop-chip');
+      const loopText = document.getElementById('vis-loop-text');
+      const sweepBar = document.getElementById('vis-sweep-bar');
+
+      if (step.state && step.state.loop) {
+        if (loopChip) {
+          loopChip.style.display = 'flex';
+          loopChip.classList.remove('pop');
+          void loopChip.offsetWidth; // trigger reflow
+          loopChip.classList.add('pop');
+        }
+        if (loopText) {
+          const totalStr = step.state.loop.total ? ` of ${step.state.loop.total}` : '';
+          loopText.innerText = `Loop ${step.state.loop.current}${totalStr}`;
+        }
+        if (sweepBar) {
+          sweepBar.style.display = 'block';
+          sweepBar.style.animation = 'none';
+          void sweepBar.offsetWidth; // trigger reflow
+          sweepBar.style.animation = `sweepLap ${LOOP_SWEEP_MS}ms ease-out forwards`;
+        }
+      } else if (step.type !== 'loop-iter') {
+        if (loopChip && idx === 0) loopChip.style.display = 'none';
+        if (sweepBar) sweepBar.style.display = 'none';
+      }
+
+      // 6. Conversational caption speech bubble (friendly, max ~12 words)
+      const speechEl = document.getElementById('vis-caption-text');
+      if (speechEl) speechEl.innerText = step.caption || 'Executing next step...';
+
+      // 7. Recursion & Call Stack Column
+      const callStackEl = document.getElementById('vis-call-stack');
+      const stackFramesEl = document.getElementById('vis-stack-frames');
+      if (step.state && step.state.callStack && step.state.callStack.length > 1) {
+        if (callStackEl) callStackEl.style.display = 'flex';
+        if (stackFramesEl) {
+          stackFramesEl.innerHTML = step.state.callStack.map(f => `
+            <div class="vis-stack-frame"><i class="fas fa-cube" style="margin-right: 4px; color: #38bdf8;"></i> ${escapeHtml(f)}</div>
+          `).join('');
+        }
+      } else if (callStackEl && idx === 0) {
+        callStackEl.style.display = 'none';
+      }
+
+      // 8. Render Data Structure depending on problem type
+      const arrayWrap = document.getElementById('vis-array-wrapper');
+      const sqWrap = document.getElementById('vis-stack-queue-wrapper');
+      const graphWrap = document.getElementById('vis-graph-wrapper');
+      const traceWrap = document.getElementById('vis-trace-wrapper');
+
+      // Hide all by default
+      if (arrayWrap) arrayWrap.style.display = 'none';
+      if (sqWrap) sqWrap.style.display = 'none';
+      if (graphWrap) graphWrap.style.display = 'none';
+      if (traceWrap) traceWrap.style.display = 'none';
+
+      if (visDataStructure === 'array') {
+        if (arrayWrap) arrayWrap.style.display = 'flex';
+        renderArrayStructure(step);
+      } else if (visDataStructure === 'stack' || visDataStructure === 'queue') {
+        if (sqWrap) sqWrap.style.display = 'flex';
+        renderStackQueueStructure(step, visDataStructure);
+      } else if (visDataStructure === 'linked-list' || visDataStructure === 'tree' || visDataStructure === 'graph') {
+        if (graphWrap) graphWrap.style.display = 'flex';
+        renderGraphStructure(step, visDataStructure);
+      } else {
+        // Fallback: Execution Trace Only Mode
+        if (traceWrap) traceWrap.style.display = 'flex';
+        renderTraceVariables(step);
+      }
+
+      // 9. Positive Reinforcement on Completion
+      if (idx === visSteps.length - 1) {
+        if (visIsCorrect) {
+          triggerConfettiBurst();
+          showVisualizerBanner('success', "Nice work — that's correct! 🎉");
+        } else if (!step.state.runtimeError) {
+          showVisualizerBanner('success', "This works! There's also a faster way to do this — want a hint?");
+        }
+      }
+    }
+
+    // --- RENDERER: ARRAYS ---
+    function renderArrayStructure(step) {
+      const row = document.getElementById('vis-array-row');
+      if (!row || !step.state || !step.state.dataStructure) return;
+
+      const values = step.state.dataStructure.values || [];
+      const activeIdxs = step.state.activeIndices || [];
+
+      row.innerHTML = values.map((val, i) => {
+        const isActive = activeIdxs.includes(i);
+        let extraBoxClass = '';
+        if (isActive) {
+          if (step.type === 'compare') extraBoxClass = 'is-comparing';
+          else if (step.type === 'assign') extraBoxClass = 'is-assigning';
+        }
+
+        let pointerLabel = '';
+        if (isActive) {
+          const varNames = [];
+          if (step.state.variables) {
+            for (const [k, v] of Object.entries(step.state.variables)) {
+              if (v === i) varNames.push(k);
+            }
+          }
+          pointerLabel = varNames.length > 0 ? `▲ ${varNames.join(', ')}` : '▲';
+        }
+
+        return `
+          <div class="vis-array-cell" data-index="${i}">
+            <div class="vis-array-box ${extraBoxClass}" id="vis-box-${i}">
+              ${escapeHtml(val)}
+            </div>
+            <span class="vis-box-index">${i}</span>
+            <div class="vis-pointer-arrow ${isActive ? 'visible' : ''}">
+              <span>${pointerLabel}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Physical arc swap animation (400ms cubic-bezier)
+      if (step.type === 'swap' && activeIdxs.length >= 2) {
+        const i1 = Math.min(activeIdxs[0], activeIdxs[1]);
+        const i2 = Math.max(activeIdxs[0], activeIdxs[1]);
+        const box1 = document.getElementById(`vis-box-${i1}`);
+        const box2 = document.getElementById(`vis-box-${i2}`);
+
+        if (box1 && box2) {
+          const rect1 = box1.getBoundingClientRect();
+          const rect2 = box2.getBoundingClientRect();
+          const dx = Math.abs(rect2.left - rect1.left) || 66;
+
+          box1.style.setProperty('--swap-dx', `${dx}px`);
+          box2.style.setProperty('--swap-dx', `-${dx}px`);
+
+          box1.classList.add('arc-swap-over');
+          box2.classList.add('arc-swap-under');
+        }
+      }
+    }
+
+    // --- RENDERER: STACKS / QUEUES ---
+    function renderStackQueueStructure(step, type) {
+      const container = document.getElementById('vis-sq-container');
+      if (!container || !step.state || !step.state.dataStructure) return;
+
+      const values = step.state.dataStructure.values || [];
+      const isStack = type === 'stack';
+      container.className = `vis-sq-container ${isStack ? 'is-stack' : 'is-queue'}`;
+
+      let itemsHtml = '';
+      if (values.length === 0) {
+        itemsHtml = `<span style="font-size: 12px; color: var(--text-secondary); padding: 12px;">(Empty ${isStack ? 'Stack' : 'Queue'})</span>`;
+      } else {
+        itemsHtml = values.map((val, i) => {
+          const isLatest = i === values.length - 1;
+          const animClass = isLatest && (step.type === 'stack-push' || step.type === 'queue-enqueue') ? 'push-in' : '';
+          return `<div class="vis-sq-item ${animClass}">${escapeHtml(val)}</div>`;
+        }).join('');
+      }
+
+      container.innerHTML = `
+        <div style="font-size: 10px; font-weight: 800; color: #38bdf8; text-transform: uppercase; margin-bottom: 4px;">
+          ${isStack ? '▲ Top of Stack' : '◀ Front ... Back ▶'}
+        </div>
+        ${itemsHtml}
+      `;
+    }
+
+    // --- RENDERER: LINKED LISTS / TREES / GRAPHS ---
+    function renderGraphStructure(step, type) {
+      const svg = document.getElementById('vis-graph-svg');
+      if (!svg) return;
+
+      const visited = (step.state && step.state.dataStructure && step.state.dataStructure.visited) || [];
+      const values = (step.state && step.state.dataStructure && step.state.dataStructure.values) || [1, 2, 3, 4, 5];
+
+      let svgContent = '';
+      if (type === 'linked-list') {
+        const startX = 40;
+        const spacing = 85;
+        const y = 120;
+
+        values.forEach((v, i) => {
+          const x = startX + i * spacing;
+          const isVisited = visited.includes(String(v));
+          const isCurrent = step.data && (step.data.value === v || step.data.nodeId === v);
+
+          svgContent += `
+            <circle cx="${x}" cy="${y}" r="22" class="vis-node-circle ${isCurrent ? 'visiting' : (isVisited ? 'visited' : '')}" id="vis-node-${i}" />
+            <text x="${x}" y="${y}" class="vis-node-text">${escapeHtml(v)}</text>
+          `;
+
+          if (i < values.length - 1) {
+            const nextX = startX + (i + 1) * spacing - 24;
+            svgContent += `
+              <line x1="${x + 22}" y1="${y}" x2="${nextX}" y2="${y}" class="vis-edge-line ${isCurrent ? 'active' : ''}" />
+              <polygon points="${nextX},${y-4} ${nextX+8},${y} ${nextX},${y+4}" fill="#38bdf8" />
+            `;
+          }
+        });
+      } else {
+        // Binary Tree or Graph layout
+        const nodes = [
+          { id: 1, val: values[0] || 'A', x: 250, y: 50 },
+          { id: 2, val: values[1] || 'B', x: 160, y: 130 },
+          { id: 3, val: values[2] || 'C', x: 340, y: 130 },
+          { id: 4, val: values[3] || 'D', x: 110, y: 200 },
+          { id: 5, val: values[4] || 'E', x: 210, y: 200 }
+        ];
+
+        const edges = [
+          { from: 0, to: 1 },
+          { from: 0, to: 2 },
+          { from: 1, to: 3 },
+          { from: 1, to: 4 }
+        ];
+
+        edges.forEach(e => {
+          const n1 = nodes[e.from];
+          const n2 = nodes[e.to];
+          svgContent += `<line x1="${n1.x}" y1="${n1.y}" x2="${n2.x}" y2="${n2.y}" class="vis-edge-line" />`;
+        });
+
+        nodes.forEach(n => {
+          const isVisited = visited.includes(String(n.val));
+          const isCurrent = step.data && (step.data.value === n.val || step.data.nodeId === n.val);
+          svgContent += `
+            <circle cx="${n.x}" cy="${n.y}" r="20" class="vis-node-circle ${isCurrent ? 'visiting' : (isVisited ? 'visited' : '')}" />
+            <text x="${n.x}" y="${n.y}" class="vis-node-text">${escapeHtml(n.val)}</text>
+          `;
+        });
+      }
+
+      svg.innerHTML = svgContent;
+    }
+
+    // --- RENDERER: EXECUTION TRACE VARIABLES ---
+    function renderTraceVariables(step) {
+      const grid = document.getElementById('vis-variables-grid');
+      if (!grid) return;
+
+      const vars = (step.state && step.state.variables) || {};
+      const entries = Object.entries(vars);
+
+      if (entries.length === 0) {
+        grid.innerHTML = '<span style="font-size: 12px; color: var(--text-secondary);">(No variables active yet)</span>';
+        return;
+      }
+
+      grid.innerHTML = entries.map(([name, val]) => `
+        <div class="vis-var-row">
+          <span class="vis-var-name">${escapeHtml(name)}</span>
+          <span class="vis-var-val">${escapeHtml(typeof val === 'object' ? JSON.stringify(val) : String(val))}</span>
+        </div>
+      `).join('');
+    }
+
+    // Lightweight Confetti Particle Engine (< 30 particles)
+    function triggerConfettiBurst() {
+      const canvas = document.getElementById('vis-confetti-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      canvas.width = canvas.parentElement ? canvas.parentElement.offsetWidth : 600;
+      canvas.height = canvas.parentElement ? canvas.parentElement.offsetHeight : 300;
+
+      const colors = ['#00ff66', '#38bdf8', '#fbbf24', '#f43f5e', '#a855f7'];
+      const particles = [];
+      const PARTICLE_COUNT = 28;
+
+      for (let i = 0; i < PARTICLE_COUNT; i++) {
+        particles.push({
+          x: canvas.width / 2 + (Math.random() - 0.5) * 80,
+          y: canvas.height / 2 + (Math.random() - 0.5) * 30,
+          vx: (Math.random() - 0.5) * 8,
+          vy: -Math.random() * 6 - 3,
+          size: Math.random() * 6 + 4,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          rotation: Math.random() * 360,
+          rotSpeed: (Math.random() - 0.5) * 10,
+          life: 1.0
+        });
+      }
+
+      let animId;
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        let alive = 0;
+
+        for (const p of particles) {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.22; // gravity
+          p.rotation += p.rotSpeed;
+          p.life -= 0.015;
+
+          if (p.life > 0) {
+            alive++;
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate((p.rotation * Math.PI) / 180);
+            ctx.fillStyle = p.color;
+            ctx.globalAlpha = Math.max(0, p.life);
+            ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.65);
+            ctx.restore();
+          }
+        }
+
+        if (alive > 0) {
+          animId = requestAnimationFrame(animate);
+        } else {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          cancelAnimationFrame(animId);
+        }
+      }
+
+      animate();
+    }
+
+    // Keyboard Shortcuts for Theater
+    document.addEventListener('keydown', (e) => {
+      const theater = document.getElementById('visualizer-theater');
+      if (!theater || theater.style.display !== 'flex') return;
+
+      if (e.key === 'Escape') {
+        closeVisualizer();
+      } else if (e.key === ' ' || e.code === 'Space') {
+        e.preventDefault();
+        visualizerTogglePlay();
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        visualizerStep(1);
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        visualizerStep(-1);
+      } else if (e.key === 'Home') {
+        e.preventDefault();
+        visualizerRestart();
+      }
+    });
+
+    // Client Fallback if Server Unreachable
+    function runClientFallbackVisualizer(code) {
+      const theater = document.getElementById('visualizer-theater');
+      if (!theater) return;
+      populateVisualizerCode(code);
+      theater.style.display = 'flex';
+      visSteps = [
+        {
+          stepNumber: 0,
+          type: 'call',
+          line: 1,
+          caption: 'Starting execution with sample inputs.',
+          state: { dataStructure: { type: 'array', values: [5, 1, 4, 2, 8], visited: [] }, activeIndices: [], variables: {} }
+        },
+        {
+          stepNumber: 1,
+          type: 'compare',
+          line: 4,
+          caption: 'Comparing 5 and 1 — is 5 bigger than 1?',
+          state: { dataStructure: { type: 'array', values: [5, 1, 4, 2, 8], visited: [] }, activeIndices: [0, 1], variables: { i: 0, j: 0 } }
+        },
+        {
+          stepNumber: 2,
+          type: 'swap',
+          line: 6,
+          caption: 'Yep! 5 is bigger, so we swap them.',
+          state: { dataStructure: { type: 'array', values: [1, 5, 4, 2, 8], visited: [] }, activeIndices: [0, 1], variables: { i: 0, j: 0 } }
+        },
+        {
+          stepNumber: 3,
+          type: 'return',
+          line: 10,
+          caption: 'All done! Returning the sorted list [1, 2, 4, 5, 8].',
+          state: { dataStructure: { type: 'array', values: [1, 2, 4, 5, 8], visited: [] }, activeIndices: [], variables: {} }
+        }
+      ];
+      visCurrentIndex = 0;
+      visDataStructure = 'array';
+      visIsCorrect = true;
+      visualizerPause();
+      renderVisualizerStep(0);
+    }
+
+    const btnSub = document.getElementById('btn-submit');
+    if (btnSub) btnSub.onclick = submitAndRateSolution;
+
+    const btnVis = document.getElementById('btn-visualize');
+    if (btnVis) btnVis.onclick = openAndRunVisualizer;
 
     initialize();
   </script>

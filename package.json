@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
+    "acorn": "^8.18.0",
+    "acorn-walk": "^8.3.5",
     "axios": "^1.6.0",
     "bcryptjs": "^2.4.3",
     "compression": "^1.8.1",
@@ -32,9 +34,9 @@
     "pdf-parse": "^1.1.1",
     "pdfkit": "^0.13.0",
     "puppeteer": "^24.37.5",
+    "razorpay": "^2.9.2",
     "tesseract.js": "^5.1.1",
     "uuid": "^9.0.0",
-    "winston": "^3.11.0",
-    "razorpay": "^2.9.2"
+    "winston": "^3.11.0"
   }
 }
