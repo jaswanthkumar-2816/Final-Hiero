@@ -2491,7 +2491,7 @@ router.post('/ask', async (req, res) => {
         if (authHeader) {
             const token = authHeader.split(' ')[1];
             const jwt = require('jsonwebtoken');
-            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            const decoded = jwt.verify(token, process.env.JWT_SECRET || 'hiero_jwt_super_secret_key_2026');
             const user = authObj.users.find(u => u.id === decoded.userId);
             if (user) {
                 userContext = `User History: Completed ${user.completedSkills?.length || 0} skills. Weak topics (missing skills from resume): ${user.analysisHistory?.[0]?.missingSkills?.join(', ') || 'None'}.`;

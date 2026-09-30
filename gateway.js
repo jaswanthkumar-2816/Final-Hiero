@@ -350,7 +350,13 @@ app.get(['/questions', '/questions.html', '/problems', '/problems.html'], (req, 
 });
 app.get(['/pricing', '/pricing.html'], (req, res) => res.sendFile(path.join(__dirname, 'pricing.html')));
 app.get(['/template-verifier', '/template-verifier.html'], (req, res) => res.sendFile(path.join(__dirname, 'template-verifier.html')));
+// /feedback.html is the MOCK INTERVIEW evaluation report (reads ?session=),
+// linked from mock-interview.html and session.html. Leave it as-is.
 app.get(['/feedback', '/feedback.html'], (req, res) => res.sendFile(path.join(__dirname, 'feedback.html')));
+// /share-feedback is the STAR RATING page (reads ?email=&name=&rating=),
+// linked from the feedback request email. Previously the email pointed at
+// /feedback.html, which served the interview report and ignored its params.
+app.get(['/share-feedback', '/share-feedback.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'feedback.html')));
 app.get(['/design-tester', '/design-tester.html'], (req, res) => res.sendFile(path.join(__dirname, 'design-tester.html')));
 app.get(['/project', '/project.html'], (req, res) => res.sendFile(path.join(__dirname, 'project.html')));
 app.get(['/analysis', '/analysis.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'analysis.html')));

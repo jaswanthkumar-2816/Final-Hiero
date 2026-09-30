@@ -47,3 +47,9 @@ test_*.js
 
 
 scratch/
+
+# symlinked out of iCloud — the trailing-slash rule above does not match a symlink
+node_modules
+
+# login-tracking backups contain user emails/IPs — never publish
+backups/

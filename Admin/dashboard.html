@@ -1172,7 +1172,7 @@
       <!-- Global Error State -->
       <div id="errorState" class="state-message" style="display: none;">
         <div style="font-size: 36px; margin-bottom: 12px; color: hsl(var(--rose));">⚠️</div>
-        <h3 style="margin-bottom: 8px; color: var(--text-main);">Sync Handshake Failed</h3>
+        <h3 id="errorTitle" style="margin-bottom: 8px; color: var(--text-main);">Sync Handshake Failed</h3>
         <p id="errorMessage" style="color: hsl(var(--rose)); font-weight: 600;"></p>
         <button onclick="loadData()" class="btn btn-primary" style="margin: 20px auto 0; display: inline-flex;">Retry handshake</button>
       </div>
@@ -1635,9 +1635,10 @@
       addLog("info", "Executing data sync handshake...");
 
       try {
-        const backend = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-          ? 'http://localhost:2816'
-          : 'https://hiero-resume-backend.onrender.com';
+        // Same-origin: gateway.js serves both this page and /api/*, so the
+        // dashboard always reads the backend that recorded the logins.
+        // (Hard-coding onrender.com made hiero.in query a different backend.)
+        const backend = '';
         
         const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
         const res = await fetch(`${backend}/api/admin/dashboard`, {
@@ -1667,9 +1668,13 @@
         console.error(err);
         loading.style.display = 'none';
         error.style.display = 'block';
+        const errorTitle = document.getElementById('errorTitle');
         if (err.message.includes('Authentication Failed')) {
-          errorMsg.innerHTML = `${err.message}.<br><br><a href="/login.html" class="btn btn-primary" style="margin-top: 15px; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">Go to Login Portal</a>`;
+          // Not a sync failure — the admin simply is not signed in on this origin.
+          if (errorTitle) errorTitle.textContent = 'Admin Login Required';
+          errorMsg.innerHTML = `Sign in with an admin account on this site, then reopen this dashboard.<br><br><a href="/login.html" class="btn btn-primary" style="margin-top: 15px; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">Go to Login Portal</a>`;
         } else {
+          if (errorTitle) errorTitle.textContent = 'Sync Handshake Failed';
           errorMsg.textContent = err.message + '. Ensure the local server or Render container is running.';
         }
         addLog("warning", `Sync failure: ${err.message}`);
@@ -1924,9 +1929,10 @@
       addLog("info", `Triggering bulk feedback invitation emails to ${emails.length} selected users...`);
       
       try {
-        const backend = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-          ? 'http://localhost:2816'
-          : 'https://hiero-resume-backend.onrender.com';
+        // Same-origin: gateway.js serves both this page and /api/*, so the
+        // dashboard always reads the backend that recorded the logins.
+        // (Hard-coding onrender.com made hiero.in query a different backend.)
+        const backend = '';
           
         const token = localStorage.getItem('token');
         const res = await fetch(`${backend}/api/admin/send-feedback-email`, {

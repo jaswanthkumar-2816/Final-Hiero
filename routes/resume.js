@@ -52,7 +52,7 @@ const authenticateToken = (req, res, next) => {
 
     if (!token) return res.status(401).json({ error: 'Access token required' });
 
-    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    jwt.verify(token, process.env.JWT_SECRET || 'hiero_jwt_super_secret_key_2026', (err, decoded) => {
         if (err) return res.status(401).json({ error: 'Invalid token' });
         req.user = decoded;
         next();
@@ -74,7 +74,7 @@ router.post('/save-user-resume', async (req, res) => {
         if (authHeader && authHeader.startsWith('Bearer ')) {
             try {
                 const token = authHeader.split(' ')[1];
-                const decoded = jwt.verify(token, process.env.JWT_SECRET || 'hiero_secret');
+                const decoded = jwt.verify(token, process.env.JWT_SECRET || 'hiero_jwt_super_secret_key_2026');
                 if (decoded && (decoded.userId || decoded.id || decoded.email)) {
                     userId = decoded.userId || decoded.id || decoded.email;
                 }
@@ -138,7 +138,7 @@ router.get(['/get-user-resume', '/data'], async (req, res) => {
         if (authHeader && authHeader.startsWith('Bearer ')) {
             try {
                 const token = authHeader.split(' ')[1];
-                const decoded = jwt.verify(token, process.env.JWT_SECRET || 'hiero_secret');
+                const decoded = jwt.verify(token, process.env.JWT_SECRET || 'hiero_jwt_super_secret_key_2026');
                 if (decoded && (decoded.userId || decoded.id || decoded.email)) {
                     userId = decoded.userId || decoded.id || decoded.email;
                 }
@@ -409,7 +409,7 @@ function resumeFileName(data, ext = 'pdf') {
         .replace(/^_|_$/g, '')
         .slice(0, 80);
 
-    return `${safe || 'Resume'}_Resume.${ext}`;
+    return safe ? `${safe}_Resume.${ext}` : `Resume.${ext}`;
 }
 
 router.post('/download-resume', async (req, res) => {

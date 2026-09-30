@@ -5895,7 +5895,8 @@
         .replace(/^_|_$/g, '')
         .slice(0, 80);
 
-      return (safe || 'Resume') + '_Resume.' + (ext || 'pdf');
+      const e = ext || 'pdf';
+      return safe ? safe + '_Resume.' + e : 'Resume.' + e;
     }
 
     function collectFormData() {

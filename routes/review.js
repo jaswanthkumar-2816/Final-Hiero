@@ -59,6 +59,32 @@ const transporter = nodemailer.createTransport({
     },
 });
 
+/**
+ * Base URL for links inside outgoing emails.
+ *
+ * This is deliberately NOT plain PUBLIC_URL. A recipient can never open a
+ * localhost link, so an email sent from a dev machine must still point at the
+ * live site. gateway.js loads login-system/.env first (which pins PUBLIC_URL
+ * to http://localhost:2816), so PUBLIC_URL alone shipped localhost links.
+ *
+ * Order: EMAIL_LINK_BASE_URL -> PUBLIC_URL (only if not local) -> SITE_URL default.
+ */
+function getEmailLinkBaseUrl() {
+    const FALLBACK = process.env.SITE_URL || 'https://hiero.in';
+    const isLocal = (url) => /^https?:\/\/(localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\])(:\d+)?/i.test(url || '');
+
+    const explicit = (process.env.EMAIL_LINK_BASE_URL || '').trim();
+    if (explicit && !isLocal(explicit)) return explicit.replace(/\/+$/, '');
+
+    const publicUrl = (process.env.PUBLIC_URL || '').trim();
+    if (publicUrl && !isLocal(publicUrl)) return publicUrl.replace(/\/+$/, '');
+
+    if (publicUrl && isLocal(publicUrl)) {
+        console.warn(`\u26a0\ufe0f PUBLIC_URL is local (${publicUrl}); using ${FALLBACK} for email links instead.`);
+    }
+    return FALLBACK.replace(/\/+$/, '');
+}
+
 // Helper function to send the Green-Branded Hiero Feedback Request Email
 async function sendFeedbackRequestEmail(email, name) {
     if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
@@ -67,8 +93,10 @@ async function sendFeedbackRequestEmail(email, name) {
     }
 
     const userName = name || email.split('@')[0];
-    const appUrl = process.env.PUBLIC_URL || 'http://localhost:2816';
-    const feedbackUrl = `${appUrl}/feedback.html?email=${encodeURIComponent(email)}&name=${encodeURIComponent(userName)}`;
+    const appUrl = getEmailLinkBaseUrl();
+    // /share-feedback is the star-rating page. /feedback.html is the mock
+    // interview report and ignores email/name/rating entirely.
+    const feedbackUrl = `${appUrl}/share-feedback?email=${encodeURIComponent(email)}&name=${encodeURIComponent(userName)}`;
 
     const mailOptions = {
         from: `"Hiero Team" <${process.env.EMAIL_USER}>`,
@@ -241,7 +269,7 @@ const authenticateToken = (req, res, next) => {
         return res.status(401).json({ error: 'Access token required' });
     }
 
-    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    jwt.verify(token, process.env.JWT_SECRET || 'hiero_jwt_super_secret_key_2026', (err, decoded) => {
         if (err) {
             return res.status(403).json({ error: 'Invalid or expired token' });
         }
@@ -501,6 +529,13 @@ router.post('/login-track', authenticateToken, async (req, res) => {
                 loginTimestamp: { $gte: fiveMinutesAgo }
             });
 
+            // The 5-minute window above exists to stop every page load from
+            // being counted as a fresh login. It was computed but never acted
+            // on, which inflated visit counts (42% of rows were duplicates).
+            if (recentLogin) {
+                return res.json({ success: true, message: 'Login already tracked recently', deduped: true });
+            }
+
             const loginRecord = new LoginTracking({
                 userId: user._id,
                 userEmail: user.email,
@@ -671,7 +706,61 @@ function mergeReviews(mongoReviews, localReviews) {
 }
 
 // Helper to merge MongoDB users and local users
-function mergeUsers(mongoUsers, localUsers) {
+// ==================== INTERNAL / BOT ACCOUNT EXCLUSION ====================
+// Analytics should reflect real visitors. Staff accounts and automated test
+// accounts are excluded from the counts, NOT deleted — set
+// INCLUDE_INTERNAL_ACCOUNTS=true to see raw totals again.
+const INTERNAL_EMAILS = (process.env.INTERNAL_EMAILS ||
+    'jaswanthkumarmuthoju@gmail.com,hiero@test.com,admin@hiero.com,jaswanthkumar@example.com')
+    .split(',').map(e => e.trim().toLowerCase()).filter(Boolean);
+
+const BOT_EMAIL_PATTERNS = [
+    /^qa[._-]/i,
+    /@example\.(test|com)$/i,
+    /\btest\d*@/i,
+    /^test[._-]/i,
+    /gemini_test/i,
+    /(playwright|puppeteer|selenium|automation)/i,
+    /\+test@/i
+];
+
+function isInternalAccount(email) {
+    const e = (email || '').toLowerCase().trim();
+    if (!e) return false;
+    if (process.env.INCLUDE_INTERNAL_ACCOUNTS === 'true') return false;
+    if (INTERNAL_EMAILS.includes(e)) return true;
+    return BOT_EMAIL_PATTERNS.some(p => p.test(e));
+}
+
+/**
+ * Builds authoritative per-user login stats from actual LoginTracking rows.
+ * Returns Map<lowercased email, { loginCount, lastLogin }>.
+ * This is the source of truth — `users.json` / Mongo `createdAt` only ever
+ * approximated it, and a missing value used to be filled with "now".
+ */
+function buildLoginStats(loginRows = []) {
+    const stats = new Map();
+    loginRows.forEach(row => {
+        const email = (row.userEmail || row.email || '').toLowerCase().trim();
+        if (!email) return;
+        const ts = new Date(row.loginTimestamp || row.timestamp || row.createdAt || 0).getTime();
+        const cur = stats.get(email);
+        if (!cur) {
+            stats.set(email, { loginCount: 1, lastLoginMs: ts });
+        } else {
+            cur.loginCount += 1;
+            if (ts > cur.lastLoginMs) cur.lastLoginMs = ts;
+        }
+    });
+    const out = new Map();
+    stats.forEach((v, k) => out.set(k, {
+        loginCount: v.loginCount,
+        lastLogin: v.lastLoginMs ? new Date(v.lastLoginMs).toISOString() : null
+    }));
+    return out;
+}
+
+function mergeUsers(mongoUsers, localUsers, loginStats = new Map()) {
     const mergedMap = new Map();
 
     // 1. Add local users first (skip test accounts)
@@ -681,8 +770,10 @@ function mergeUsers(mongoUsers, localUsers) {
                 id: u.id,
                 username: u.name || u.email.split('@')[0],
                 email: u.email,
-                loginCount: u.loginCount || 1,
-                lastLogin: u.lastLogin || new Date().toISOString(),
+                // Never fabricate "now" — that pinned never-seen users to the
+                // top of a list sorted by lastLogin, on every single fetch.
+                loginCount: (loginStats.get(u.email.toLowerCase().trim()) || {}).loginCount || u.loginCount || 0,
+                lastLogin: (loginStats.get(u.email.toLowerCase().trim()) || {}).lastLogin || u.lastLogin || null,
                 isPro: !!u.isPro,
                 proPlan: u.proPlan || '',
                 proUntil: u.proUntil || ''
@@ -699,8 +790,8 @@ function mergeUsers(mongoUsers, localUsers) {
                 id: u._id,
                 username: u.username || u.email.split('@')[0],
                 email: u.email,
-                loginCount: 1,
-                lastLogin: u.createdAt,
+                loginCount: (loginStats.get(emailKey) || {}).loginCount || 0,
+                lastLogin: (loginStats.get(emailKey) || {}).lastLogin || u.createdAt || null,
                 isPro: !!u.isPro,
                 proPlan: u.proPlan || '',
                 proUntil: u.proUntil || ''
@@ -715,7 +806,8 @@ function mergeUsers(mongoUsers, localUsers) {
                     id: mongoUser.id,
                     username: mongoUser.username,
                     email: mongoUser.email,
-                    loginCount: (existing.loginCount || 1) + 1,
+                    loginCount: (loginStats.get(emailKey) || {}).loginCount
+                        || Math.max(existing.loginCount || 0, mongoUser.loginCount || 0),
                     lastLogin: mongoTime > existingTime ? mongoUser.lastLogin : existing.lastLogin,
                     isPro: mongoUser.isPro || existing.isPro,
                     proPlan: mongoUser.proPlan || existing.proPlan,
@@ -762,22 +854,36 @@ async function serveLocalDashboard(res) {
         const allReviews = getLocalReviews().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         const payments = await fetchRazorpayPayments();
         
-        // Map Mongoose User structure format for response compat (filter test accounts)
-        const usersData = localUsers
-            .filter(u => u.email && !isTestAccount(u.email))
-            .map(u => ({
-                id: u.id,
-                username: u.name || u.email.split('@')[0],
-                email: u.email,
-                loginCount: u.loginCount || 1, // Fallback default to 1 if tracked
-                lastLogin: u.lastLogin || new Date().toISOString(),
-                isPro: !!u.isPro,
-                proPlan: u.proPlan || '',
-                proUntil: u.proUntil || ''
-            }));
+        // Real login rows drive loginCount / lastLogin here too.
+        const loginStats = buildLoginStats(logins);
 
-        const totalUsers = localUsers.length;
-        const totalVisits = logins.length > 0 ? logins.length : localUsers.reduce((sum, u) => sum + (u.loginCount || 1), 0);
+        // Map Mongoose User structure format for response compat
+        // (filter test accounts AND internal/staff accounts)
+        const usersData = localUsers
+            .filter(u => u.email && !isTestAccount(u.email) && !isInternalAccount(u.email))
+            .map(u => {
+                const stat = loginStats.get(u.email.toLowerCase().trim()) || {};
+                return {
+                    id: u.id,
+                    username: u.name || u.email.split('@')[0],
+                    email: u.email,
+                    loginCount: stat.loginCount || u.loginCount || 0,
+                    // Never fabricate "now" — it pinned never-seen users to the top.
+                    lastLogin: stat.lastLogin || u.lastLogin || null,
+                    isPro: !!u.isPro,
+                    proPlan: u.proPlan || '',
+                    proUntil: u.proUntil || ''
+                };
+            })
+            .sort((a, b) => {
+                const ta = a.lastLogin ? new Date(a.lastLogin).getTime() : -Infinity;
+                const tb = b.lastLogin ? new Date(b.lastLogin).getTime() : -Infinity;
+                return tb - ta;
+            });
+
+        const realLogins = logins.filter(l => !isInternalAccount(l.userEmail || l.email));
+        const totalUsers = usersData.length;
+        const totalVisits = realLogins.length;
         const avgRating = allReviews.length > 0 ? (allReviews.reduce((sum, r) => sum + r.rating, 0) / allReviews.length).toFixed(2) : 0.0;
 
         return res.json({
@@ -817,10 +923,24 @@ router.get('/admin/dashboard', authenticateToken, requireAdmin, async (req, res)
 
             // Merge reviews and users seamlessly
             const allReviews = mergeReviews(mongoReviews, localReviews);
-            const usersData = mergeUsers(mongoUsers, localUsers).sort((a, b) => new Date(b.lastLogin) - new Date(a.lastLogin));
+            // Real login rows drive loginCount / lastLogin for every user.
+            const loginStats = buildLoginStats([...logins, ...mongoLogins]);
+            const mergedUsers = mergeUsers(mongoUsers, localUsers, loginStats).sort((a, b) => {
+                // Users who have actually logged in rank first, newest first.
+                // Never-logged-in users sort last instead of floating to the top.
+                const ta = a.lastLogin ? new Date(a.lastLogin).getTime() : -Infinity;
+                const tb = b.lastLogin ? new Date(b.lastLogin).getTime() : -Infinity;
+                return tb - ta;
+            });
+
+            // Exclude staff/test accounts from analytics (data is retained).
+            const usersData = mergedUsers.filter(u => !isInternalAccount(u.email));
+            const excludedUsers = mergedUsers.length - usersData.length;
+
+            const realLogins = [...logins, ...mongoLogins].filter(l => !isInternalAccount(l.userEmail || l.email));
 
             const totalUsers = usersData.length;
-            const totalVisits = logins.length + mongoLogins.length;
+            const totalVisits = realLogins.length;
             const avgRating = allReviews.length > 0 ? (allReviews.reduce((sum, r) => sum + r.rating, 0) / allReviews.length).toFixed(2) : 0;
 
             return res.json({
@@ -832,7 +952,9 @@ router.get('/admin/dashboard', authenticateToken, requireAdmin, async (req, res)
                     totalReviews: allReviews.length,
                     uniqueUsersCount: totalUsers,
                     totalSales: payments.reduce((sum, p) => sum + p.amount, 0),
-                    paidDownloadsCount: payments.length
+                    paidDownloadsCount: payments.length,
+                    excludedInternalAccounts: excludedUsers,
+                    excludedLoginRecords: (logins.length + mongoLogins.length) - realLogins.length
                 },
                 users: usersData,
                 reviews: allReviews,
