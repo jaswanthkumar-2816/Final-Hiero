@@ -5,8 +5,13 @@
   "main": "gateway.js",
   "scripts": {
     "start": "PORT=2816 node gateway.js",
-    "build": "echo 'Build complete'",
-    "dev": "PORT=2816 nodemon gateway.js"
+    "connect": "PORT=2004 node connect_server.js",
+    "bridge": "PORT=2410 node academia_server.js",
+    "build": "echo 'HTML portal ready on port 2816'",
+    "dev": "PORT=2816 nodemon gateway.js",
+    "extraction": "PORT=4040 node extraction/src/server.js",
+    "web": "npm run dev --prefix web",
+    "web:build": "npm run build --prefix web"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

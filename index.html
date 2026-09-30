@@ -152,32 +152,36 @@
       position: relative;
       z-index: 5;
       width: 100%;
-      max-width: 1200px;
-      margin: 80px auto;
-      padding: 0 40px;
+      max-width: 1080px;
+      margin: 56px auto 80px;
+      padding: 0 32px;
     }
 
     .hero-greeting {
-      margin-bottom: 50px;
-      animation: entrance-slide 1s cubic-bezier(0.2, 0, 0.3, 1);
+      margin-bottom: 36px;
+      max-width: 820px;
+      animation: entrance-slide 0.9s cubic-bezier(0.2, 0, 0.3, 1);
     }
 
     .greet-label {
       color: var(--primary);
       text-transform: uppercase;
-      font-size: 14px;
+      font-size: 12px;
       font-weight: 800;
-      letter-spacing: 2px;
-      margin-bottom: 12px;
-      display: block;
+      letter-spacing: 0.16em;
+      margin-bottom: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
     }
 
     .hero-h1 {
-      font-size: 56px;
-      font-weight: 950;
-      letter-spacing: -3px;
-      line-height: 1.05;
-      margin-bottom: 25px;
+      font-size: clamp(2rem, 4.6vw, 3.25rem);
+      font-weight: 900;
+      letter-spacing: -0.045em;
+      line-height: 1.08;
+      margin-bottom: 16px;
+      color: var(--text-main);
     }
 
     .hero-h1 span {
@@ -185,10 +189,11 @@
     }
 
     .hero-p {
-      color: #888;
-      max-width: 650px;
-      font-size: 18px;
-      line-height: 1.6;
+      color: var(--text-muted);
+      max-width: 560px;
+      font-size: 1.05rem;
+      line-height: 1.55;
+      font-weight: 500;
     }
 
     .pills-track {
@@ -305,6 +310,458 @@
     .card-act-btn.ghost-outline { border: 1px solid #222; color: #888; }
 
     .grid-card:hover .ghost-outline { border-color: #555; color: white; }
+
+    .pills-track { display: none !important; }
+    .grid-layout { display: none !important; }
+    .dream-panel { display: none !important; }
+
+    .hero-greeting {
+      margin-bottom: 36px;
+      max-width: 820px;
+      animation: entrance-slide 0.9s cubic-bezier(0.2, 0, 0.3, 1);
+    }
+
+    .greet-label {
+      color: var(--primary);
+      text-transform: uppercase;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.16em;
+      margin-bottom: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .greet-label::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--primary);
+      box-shadow: 0 0 12px var(--primary);
+    }
+
+    .hero-h1 {
+      font-size: clamp(2rem, 4.6vw, 3.25rem);
+      font-weight: 900;
+      letter-spacing: -0.045em;
+      line-height: 1.08;
+      margin-bottom: 16px;
+      color: var(--text-main);
+    }
+
+    .hero-h1 span { color: var(--primary); }
+
+    .hero-p {
+      color: var(--text-muted);
+      max-width: 560px;
+      font-size: 1.05rem;
+      line-height: 1.55;
+      font-weight: 500;
+    }
+
+    /* —— Goal start (primary action) —— */
+    .goal-panel {
+      width: 100%;
+      margin-bottom: 22px;
+      padding: 28px 30px;
+      border-radius: 28px;
+      border: 1px solid rgba(7, 226, 25, 0.35);
+      background:
+        radial-gradient(ellipse 80% 120% at 0% 0%, rgba(7, 226, 25, 0.16), transparent 55%),
+        linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.015));
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255,255,255,0.06);
+      backdrop-filter: blur(22px);
+      position: relative;
+      overflow: hidden;
+      animation: entrance-slide 1s cubic-bezier(0.2, 0, 0.3, 1) 0.05s both;
+    }
+
+    .goal-panel::after {
+      content: '';
+      position: absolute;
+      right: -60px;
+      top: -60px;
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, rgba(7,226,25,0.2), transparent 70%);
+      pointer-events: none;
+    }
+
+    .goal-question {
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 18px;
+      color: var(--text-main);
+      position: relative;
+      z-index: 1;
+    }
+
+    .goal-row {
+      display: grid;
+      grid-template-columns: minmax(200px, 1fr) minmax(240px, 1.35fr) auto;
+      gap: 14px;
+      align-items: end;
+      position: relative;
+      z-index: 1;
+    }
+
+    .goal-field { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+
+    .goal-field label {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .goal-field select,
+    .goal-field textarea {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      color: var(--text-main);
+      padding: 15px 18px;
+      font-size: 15px;
+      font-weight: 600;
+      font-family: inherit;
+      outline: none;
+      resize: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .goal-field select:focus,
+    .goal-field textarea:focus {
+      border-color: rgba(7, 226, 25, 0.55);
+      box-shadow: 0 0 0 3px rgba(7, 226, 25, 0.12);
+    }
+
+    body.light-mode .goal-field select,
+    body.light-mode .goal-field textarea {
+      background: #fff;
+      border-color: rgba(15, 23, 42, 0.12);
+    }
+
+    .goal-field textarea { min-height: 54px; height: 54px; }
+
+    .goal-field select option { background: #0d121c; color: #fff; }
+
+    .goal-start-btn {
+      border: none;
+      cursor: pointer;
+      border-radius: 100px;
+      padding: 16px 30px;
+      font-weight: 800;
+      font-size: 15px;
+      background: linear-gradient(135deg, #07e219, #00b248);
+      color: #000;
+      box-shadow: 0 10px 28px rgba(7, 226, 25, 0.35);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: transform 0.2s, filter 0.2s;
+      height: 54px;
+    }
+
+    .goal-start-btn:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.06);
+    }
+
+    /* —— Progress after target set —— */
+    .progress-board {
+      display: none;
+      width: 100%;
+      margin-bottom: 32px;
+      padding: 28px;
+      border-radius: 28px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background:
+        linear-gradient(145deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01)),
+        rgba(8, 10, 14, 0.72);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(18px);
+      animation: entrance-slide 0.7s ease both;
+    }
+
+    .progress-board.active { display: block; }
+
+    body.light-mode .progress-board {
+      background: #fff;
+      border-color: rgba(15, 23, 42, 0.08);
+      box-shadow: 0 16px 40px rgba(15, 23, 42, 0.06);
+    }
+
+    .target-line {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 14px;
+      align-items: center;
+      margin-bottom: 22px;
+    }
+
+    .target-line .kicker {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--primary);
+    }
+
+    .target-line .target-name {
+      font-size: 1.45rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: var(--text-main);
+    }
+
+    .target-line .level-chip {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      border: 1px solid var(--border-soft);
+      border-radius: 999px;
+      padding: 5px 12px;
+      background: rgba(255,255,255,0.03);
+    }
+
+    .score-row {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 24px;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .score-ring {
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      background: conic-gradient(var(--primary) calc(var(--pct) * 1%), rgba(255,255,255,0.08) 0);
+      display: grid;
+      place-items: center;
+      box-shadow: 0 0 32px rgba(7, 226, 25, 0.15);
+    }
+
+    .score-ring-inner {
+      width: 74px;
+      height: 74px;
+      border-radius: 50%;
+      background: #05070b;
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      font-size: 1.25rem;
+      color: var(--text-main);
+    }
+
+    body.light-mode .score-ring-inner { background: #fff; color: #0f172a; }
+
+    .score-meta .score-label {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .score-meta .score-label strong {
+      color: var(--text-main);
+      font-size: 1.05rem;
+    }
+
+    .score-meta .delta {
+      color: var(--primary);
+      font-weight: 800;
+      font-size: 13px;
+    }
+
+    .missing-line {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 18px;
+      line-height: 1.5;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border-soft);
+    }
+
+    .missing-line strong { color: var(--text-main); }
+
+    .next-step-card {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px 20px;
+      border-radius: 18px;
+      border: 1px solid rgba(7, 226, 25, 0.35);
+      background: linear-gradient(135deg, rgba(7, 226, 25, 0.12), rgba(7, 226, 25, 0.04));
+      margin-bottom: 22px;
+    }
+
+    .next-step-card .ns-kicker {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--primary);
+      margin-bottom: 6px;
+    }
+
+    .next-step-card .ns-body {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-main);
+      letter-spacing: -0.01em;
+      max-width: 480px;
+    }
+
+    .path-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      list-style: none;
+    }
+
+    .path-strip li {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border-soft);
+      background: rgba(255,255,255,0.02);
+    }
+
+    .path-strip li.done {
+      color: var(--primary);
+      border-color: rgba(7, 226, 25, 0.4);
+      background: rgba(7, 226, 25, 0.1);
+    }
+
+    .path-strip li.current {
+      color: #7dd3fc;
+      border-color: rgba(56, 189, 248, 0.45);
+      background: rgba(56, 189, 248, 0.12);
+    }
+
+    .path-strip li .n {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 800;
+      background: rgba(255,255,255,0.08);
+    }
+
+    .path-strip li.done .n { background: var(--primary); color: #000; }
+    .path-strip li.current .n { background: rgba(56, 189, 248, 0.25); color: #7dd3fc; }
+
+    /* —— Tools (secondary) —— */
+    .tools-section { margin-top: 8px; animation: entrance-fade 1s ease 0.15s both; }
+
+    .tools-heading {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+    }
+
+    .tools-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    .tool-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px;
+      padding: 22px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text-main);
+      min-height: 148px;
+      transition: transform 0.25s, border-color 0.25s, background 0.25s;
+    }
+
+    body.light-mode .tool-card {
+      background: #fff;
+      border-color: rgba(15, 23, 42, 0.08);
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+    }
+
+    .tool-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(7, 226, 25, 0.35);
+      background: rgba(7, 226, 25, 0.04);
+    }
+
+    .tool-card.locked { opacity: 0.78; }
+    .tool-card.locked:hover { border-color: rgba(245, 158, 11, 0.35); }
+
+    .tool-card i {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      color: var(--primary);
+      background: rgba(7, 226, 25, 0.1);
+      border: 1px solid rgba(7, 226, 25, 0.2);
+    }
+
+    .tool-card h3 { font-size: 1rem; font-weight: 800; letter-spacing: -0.02em; }
+
+    .tool-card p {
+      font-size: 13px;
+      color: var(--text-muted);
+      flex: 1;
+      line-height: 1.45;
+    }
+
+    .tool-link {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--primary);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tool-card.locked .tool-link { color: #f59e0b; }
+
+    .lock-note {
+      font-size: 11px;
+      font-weight: 700;
+      color: #f59e0b;
+    }
+
+    @media (max-width: 1000px) {
+      .goal-row, .tools-row, .score-row { grid-template-columns: 1fr; }
+      .goal-start-btn { width: 100%; }
+      .content-stage { margin: 48px auto; padding: 0 20px; }
+    }
 
     /* --- DROPDOWN --- */
     .logout-box {
@@ -490,43 +947,101 @@
       <div class="hero-greeting">
         <span class="greet-label">WELCOME BACK, <span id="userGreetName">USER</span></span>
         <h1 class="hero-h1">
-          Your AI-powered <span>Career Assistant</span>
+          Know exactly what stands between you and the <span>job</span> — and fix it.
         </h1>
         <p class="hero-p">
-          Hiero helps students and job seekers get shortlisted faster. We combine 
-          resume optimization, job match scoring, and AI mock interviews — 
-          so you don't just apply for jobs, you get them.
+          Start with the job you want. HIERO turns it into a living path — resume, skill gaps, practice, and apply — with one clear next step every time you return.
         </p>
       </div>
 
-      <div class="pills-track">
-        <div class="skill-pill">Resume Builder</div>
-        <div class="skill-pill">Resume Match Score</div>
-        <div class="skill-pill">AI Mock Interviews</div>
-      </div>
+      <section class="goal-panel" aria-label="Choose your dream job">
+        <div class="goal-question">What job are you going for?</div>
+        <div class="goal-row">
+          <div class="goal-field">
+            <label for="goalRoleSelect">Target role</label>
+            <select id="goalRoleSelect">
+              <option value="">Pick a role…</option>
+              <option>Data Analyst</option>
+              <option>Software Engineer</option>
+              <option>Frontend Developer</option>
+              <option>Backend Developer</option>
+              <option>Full Stack Developer</option>
+              <option>ML Engineer</option>
+              <option>AI Engineer</option>
+              <option>DevOps Engineer</option>
+              <option>Product Manager</option>
+              <option>UI/UX Designer</option>
+              <option>Cybersecurity Analyst</option>
+              <option value="__custom">Other / browse all domains…</option>
+            </select>
+          </div>
+          <div class="goal-field">
+            <label for="goalJdPaste">Or paste a job description</label>
+            <textarea id="goalJdPaste" placeholder="Paste a JD here (optional)"></textarea>
+          </div>
+          <button type="button" class="goal-start-btn" id="goalStartBtn">
+            Start <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
+      </section>
 
-      <div class="grid-layout">
-        <a href="/domain-selection.html" class="grid-card special">
-          <i class="fa-solid fa-file-lines" style="font-size: 28px; color: var(--icon-color); margin-bottom: 12px;"></i>
-          <h3>Create Resume</h3>
-          <p>Build a professional resume with smart templates</p>
-          <div class="card-act-btn primary-solid">Start <i class="fa-solid fa-arrow-right"></i></div>
-        </a>
+      <section class="progress-board" id="progressBoard" aria-live="polite">
+        <div class="target-line">
+          <span class="kicker">Target</span>
+          <span class="target-name" id="pbTargetName">—</span>
+          <span class="level-chip" id="pbLevelChip">Fresher</span>
+        </div>
+        <div class="score-row">
+          <div class="score-ring" id="pbScoreRing" style="--pct: 0">
+            <div class="score-ring-inner" id="pbScoreVal">0</div>
+          </div>
+          <div class="score-meta">
+            <div class="score-label">Match score <strong id="pbScoreText">0 / 100</strong></div>
+            <div class="delta" id="pbDelta">Set a target to start tracking</div>
+          </div>
+        </div>
+        <p class="missing-line" id="pbMissing"><strong>Missing:</strong> —</p>
+        <div class="next-step-card">
+          <div>
+            <div class="ns-kicker">Your next step</div>
+            <div class="ns-body" id="pbNextStep">Choose a dream role to unlock your roadmap.</div>
+          </div>
+          <a class="goal-start-btn" id="pbContinueBtn" href="/domain-selection.html?next=roadmap">Continue <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+        <ul class="path-strip" id="pbPathStrip">
+          <li class="current"><span class="n">1</span> Target</li>
+          <li><span class="n">2</span> Resume</li>
+          <li><span class="n">3</span> Close gaps</li>
+          <li><span class="n">4</span> Prove skills</li>
+          <li><span class="n">5</span> Mock interview</li>
+          <li><span class="n">6</span> Apply</li>
+        </ul>
+      </section>
 
-        <a href="/analysis.html" class="grid-card">
-          <i class="fa-solid fa-magnifying-glass" style="font-size: 28px; color: var(--icon-color); margin-bottom: 12px;"></i>
-          <h3>Analyse Resume</h3>
-          <p>Get your match score against any job description</p>
-          <div class="card-act-btn ghost-outline">Analyse <i class="fa-solid fa-arrow-right"></i></div>
-        </a>
-
-        <a href="/mock-interview.html" class="grid-card">
-          <i class="fa-solid fa-comments" style="font-size: 28px; color: var(--icon-color); margin-bottom: 12px;"></i>
-          <h3>Mock Interview</h3>
-          <p>Practice AI Interviews tailored to your resume</p>
-          <div class="card-act-btn ghost-outline">Practice <i class="fa-solid fa-arrow-right"></i></div>
-        </a>
-      </div>
+      <section class="tools-section" aria-label="Tools">
+        <div class="tools-heading">Tools · use these on the path to your dream job</div>
+        <div class="tools-row">
+          <a href="/domain-selection.html?next=resume" class="tool-card">
+            <i class="fa-solid fa-file-lines"></i>
+            <h3>Create Resume</h3>
+            <p>Build a role-ready resume with HIERO templates.</p>
+            <span class="tool-link">Open <i class="fa-solid fa-arrow-right"></i></span>
+          </a>
+          <a href="/analysis.html" class="tool-card">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <h3>Analyse Resume</h3>
+            <p>See the gap between you and the job — then fix it.</p>
+            <span class="tool-link">Analyse <i class="fa-solid fa-arrow-right"></i></span>
+          </a>
+          <a href="/mock-interview.html" class="tool-card" id="mockToolCard">
+            <i class="fa-solid fa-comments"></i>
+            <h3>Mock Interview</h3>
+            <p>Practice for your target role once your match score is strong.</p>
+            <span class="tool-link" id="mockToolLink">Practice <i class="fa-solid fa-arrow-right"></i></span>
+            <span class="lock-note" id="mockLockNote" style="display:none">Unlocks at match score 75+</span>
+          </a>
+        </div>
+      </section>
     </main>
   </div>
 
@@ -648,6 +1163,192 @@
         avatarContainer.appendChild(img);
       }
     }
+
+    // --- Goal-first dashboard: target + progress loop ---
+    function getDreamTarget() {
+      try {
+        const saved = JSON.parse(localStorage.getItem('hiero_dream_target') || 'null');
+        if (saved && saved.role) return saved;
+      } catch (e) {}
+      const role = localStorage.getItem('selectedRole');
+      const domain = localStorage.getItem('selectedDomain');
+      if (role) return { role, domain: domain || '', level: 'Fresher' };
+      return null;
+    }
+
+    function saveDreamTarget(target) {
+      localStorage.setItem('hiero_dream_target', JSON.stringify(target));
+      if (target.role) localStorage.setItem('selectedRole', target.role);
+      if (target.domain) localStorage.setItem('selectedDomain', target.domain);
+      localStorage.setItem('domainNext', 'roadmap');
+    }
+
+    function estimateMatchFromRoadmap() {
+      try {
+        const rm = JSON.parse(localStorage.getItem('hiero_roadmap') || 'null');
+        if (!rm || !Array.isArray(rm.skills) || !rm.skills.length) return null;
+        const sum = rm.skills.reduce((a, s) => a + (Number(s.masteryPct) || (s.status === 'have' || s.status === 'done' ? 100 : 0)), 0);
+        return Math.round(sum / rm.skills.length);
+      } catch (e) { return null; }
+    }
+
+    function missingSkillsFromRoadmap() {
+      try {
+        const rm = JSON.parse(localStorage.getItem('hiero_roadmap') || 'null');
+        if (!rm || !Array.isArray(rm.skills)) return [];
+        return rm.skills
+          .filter((s) => s.priority === 'must-have' && s.status !== 'have' && s.status !== 'done')
+          .map((s) => s.name)
+          .slice(0, 4);
+      } catch (e) { return []; }
+    }
+
+    function nextSkillFromRoadmap() {
+      const missing = missingSkillsFromRoadmap();
+      if (missing[0]) return missing[0];
+      try {
+        const rm = JSON.parse(localStorage.getItem('hiero_roadmap') || 'null');
+        const open = (rm && rm.skills || []).find((s) => s.status !== 'have' && s.status !== 'done');
+        return open ? open.name : null;
+      } catch (e) { return null; }
+    }
+
+    function hasResumeBuilt() {
+      try {
+        const d = JSON.parse(localStorage.getItem('resumeData') || 'null');
+        return !!(d && d.personalInfo && d.personalInfo.fullName);
+      } catch (e) { return false; }
+    }
+
+    function renderProgressBoard() {
+      const board = document.getElementById('progressBoard');
+      const target = getDreamTarget();
+      if (!board) return;
+      if (!target || !target.role) {
+        board.classList.remove('active');
+        return;
+      }
+      board.classList.add('active');
+
+      const scoreStored = Number(localStorage.getItem('hiero_match_score') || '');
+      const scoreDelta = Number(localStorage.getItem('hiero_match_delta') || '');
+      const score = Number.isFinite(scoreStored) && scoreStored > 0
+        ? scoreStored
+        : (estimateMatchFromRoadmap() || 0);
+
+      document.getElementById('pbTargetName').textContent = target.role;
+      document.getElementById('pbLevelChip').textContent = target.level || 'Fresher';
+      document.getElementById('pbScoreRing').style.setProperty('--pct', Math.min(100, score));
+      document.getElementById('pbScoreVal').textContent = String(score);
+      document.getElementById('pbScoreText').textContent = score + ' / 100';
+      document.getElementById('pbDelta').textContent = scoreDelta
+        ? (scoreDelta > 0 ? '▲ +' + scoreDelta + ' this week' : '▼ ' + scoreDelta + ' this week')
+        : (score ? 'Keep closing gaps to raise this score' : 'Build resume & close gaps to earn a score');
+
+      const missing = missingSkillsFromRoadmap();
+      document.getElementById('pbMissing').innerHTML = missing.length
+        ? '<strong>Missing:</strong> ' + missing.join(' · ')
+        : '<strong>Missing:</strong> Pick skills on your roadmap to see gaps here.';
+
+      const nextSkill = nextSkillFromRoadmap();
+      const resumeDone = hasResumeBuilt();
+      let nextCopy = 'Open your roadmap and start Phase 1.';
+      let nextHref = '/roadmap.html?from=dream-job&role=' + encodeURIComponent(target.role) +
+        (target.domain ? '&domain=' + encodeURIComponent(target.domain) : '');
+      if (!resumeDone) {
+        nextCopy = 'Create a resume tailored to ' + target.role + '.';
+        nextHref = '/domain-selection.html?next=resume';
+      } else if (nextSkill) {
+        nextCopy = 'Learn ' + nextSkill + ' → then take the Level-1 check.';
+        nextHref = '/quiz.html';
+      } else if (score >= 75) {
+        nextCopy = 'Match score is strong — practice a mock interview.';
+        nextHref = '/mock-interview.html';
+      }
+      document.getElementById('pbNextStep').textContent = nextCopy;
+      document.getElementById('pbContinueBtn').href = nextHref;
+
+      const steps = [
+        { id: 1, done: true },
+        { id: 2, done: resumeDone },
+        { id: 3, done: missing.length === 0 && score > 0, current: resumeDone && missing.length > 0 },
+        { id: 4, done: score >= 60 },
+        { id: 5, done: score >= 75 },
+        { id: 6, done: false }
+      ];
+      let currentSet = false;
+      const strip = document.getElementById('pbPathStrip');
+      const labels = ['Target', 'Resume', 'Close gaps', 'Prove skills', 'Mock interview', 'Apply'];
+      strip.innerHTML = labels.map((label, i) => {
+        const s = steps[i];
+        let cls = '';
+        if (s.done) cls = 'done';
+        else if (!currentSet && (s.current || !s.done)) { cls = 'current'; currentSet = true; }
+        return '<li class="' + cls + '"><span class="n">' + (i + 1) + '</span> ' + label +
+          (i === 2 && resumeDone && missing.length ? ' (' + Math.min(missing.length, 3) + '/3)' : '') +
+          '</li>';
+      }).join('');
+
+      const mockCard = document.getElementById('mockToolCard');
+      const mockNote = document.getElementById('mockLockNote');
+      const mockLink = document.getElementById('mockToolLink');
+      if (mockCard && mockNote) {
+        if (score < 75) {
+          mockCard.classList.add('locked');
+          mockNote.style.display = 'block';
+          mockCard.href = '/analysis.html';
+          if (mockLink) mockLink.innerHTML = 'Raise score first <i class="fa-solid fa-lock"></i>';
+        } else {
+          mockCard.classList.remove('locked');
+          mockNote.style.display = 'none';
+          mockCard.href = '/mock-interview.html';
+          if (mockLink) mockLink.innerHTML = 'Practice <i class="fa-solid fa-arrow-right"></i>';
+        }
+      }
+
+      const sel = document.getElementById('goalRoleSelect');
+      if (sel && target.role) {
+        let found = false;
+        Array.from(sel.options).forEach((o) => {
+          if (o.value === target.role || o.textContent === target.role) {
+            sel.value = o.value || o.textContent;
+            found = true;
+          }
+        });
+        if (!found) {
+          const opt = document.createElement('option');
+          opt.value = target.role;
+          opt.textContent = target.role;
+          opt.selected = true;
+          sel.insertBefore(opt, sel.options[1] || null);
+        }
+      }
+    }
+
+    function startDreamGoal() {
+      const sel = document.getElementById('goalRoleSelect');
+      const jd = (document.getElementById('goalJdPaste')?.value || '').trim();
+      let role = sel ? sel.value : '';
+      if (role === '__custom' || !role) {
+        if (jd) localStorage.setItem('hiero_pasted_jd', jd);
+        localStorage.setItem('domainNext', 'roadmap');
+        window.location.href = '/domain-selection.html?next=roadmap';
+        return;
+      }
+      const target = {
+        role,
+        domain: localStorage.getItem('selectedDomain') || 'Engineering & Tech',
+        level: 'Fresher',
+        jd: jd || ''
+      };
+      saveDreamTarget(target);
+      if (jd) localStorage.setItem('hiero_pasted_jd', jd);
+      window.location.href = '/roadmap.html?from=dream-job&role=' + encodeURIComponent(role) +
+        '&domain=' + encodeURIComponent(target.domain);
+    }
+
+    document.getElementById('goalStartBtn')?.addEventListener('click', startDreamGoal);
+    renderProgressBoard();
 
     function toggleUserDropdown() {
       document.getElementById('userDropdown').classList.toggle('show');

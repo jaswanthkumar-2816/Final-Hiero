@@ -251,13 +251,62 @@
     }
 
     .editor-toolbar {
-      height: 44px;
+      min-height: 44px;
+      height: auto;
       background: #080a08;
       border-bottom: 1px solid var(--border-glass);
       display: flex;
       align-items: center;
-      padding: 0 20px;
-      gap: 20px;
+      flex-wrap: wrap;
+      padding: 6px 16px;
+      gap: 12px 16px;
+    }
+
+    .solve-lang-wrap {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .solve-lang-label {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+
+    .solve-lang-tabs {
+      display: flex;
+      gap: 4px;
+      padding: 3px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-glass);
+      border-radius: 999px;
+    }
+
+    .solve-lang-tab {
+      border: none;
+      background: transparent;
+      color: #94a3b8;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 6px 10px;
+      border-radius: 999px;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .solve-lang-tab.active {
+      background: var(--orbit-green);
+      color: #000;
+    }
+
+    .solve-lang-tab:hover:not(.active) {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.06);
     }
 
     .toolbar-tab {
@@ -1218,6 +1267,32 @@
       color: #fff;
     }
 
+    .vis-array-box.is-truthy {
+      border-color: rgba(50, 193, 74, 0.85);
+      background: rgba(50, 193, 74, 0.16);
+    }
+
+    .vis-array-box.is-falsy {
+      border-style: dashed;
+      border-color: rgba(255, 255, 255, 0.28);
+      color: rgba(255, 255, 255, 0.62);
+    }
+
+    .vis-array-box {
+      font-size: 16px;
+    }
+
+    .vis-truth-tag {
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.55);
+    }
+
+    .vis-truth-tag.is-truthy { color: #59b03a; }
+    .vis-truth-tag.is-falsy { color: rgba(255, 255, 255, 0.45); }
+
     @keyframes assignPulse {
       0% { transform: scale(1); }
       50% { transform: scale(1.15); }
@@ -1992,6 +2067,10 @@
           <i class="fas fa-wand-magic-sparkles" style="font-size: 11px; color: #38bdf8; margin-right: 6px;"></i>
           <span>STORY VISUALIZER</span>
         </div>
+        <div class="solve-lang-wrap">
+          <span class="solve-lang-label">Language</span>
+          <div class="solve-lang-tabs" id="solve-lang-tabs" role="tablist" aria-label="Coding language"></div>
+        </div>
       </div>
       <textarea id="code-area" spellcheck="false"></textarea>
 
@@ -2073,9 +2152,9 @@
         <div class="vis-caption-card">
           <div class="vis-caption-avatar" id="vis-avatar">🤖</div>
           <div class="vis-caption-text-area">
-            <p class="vis-caption-speech" id="vis-caption-text">Click "Visualize My Code" to start the story.</p>
+            <p class="vis-caption-speech" id="vis-caption-text">Write some JavaScript, then press Visualize My Code.</p>
             <p class="vis-caption-subtext" id="vis-caption-subtext">
-              <span><i class="fas fa-info-circle"></i> Step-by-step plain English execution</span>
+              <span><i class="fas fa-info-circle"></i> Space play/pause · arrows step · Esc close</span>
             </p>
           </div>
         </div>
@@ -2171,6 +2250,91 @@
     const consoleDrawer = document.getElementById('console');
     const consoleOut = document.getElementById('console-out');
     let currentSkill = 'React';
+    let currentCodingLang = 'python';
+    const SOLVE_LANGS = [
+      { id: 'python', name: 'Python', ext: 'PY' },
+      { id: 'java', name: 'Java', ext: 'JAVA' },
+      { id: 'c', name: 'C', ext: 'C' },
+      { id: 'cpp', name: 'C++', ext: 'CPP' },
+      { id: 'javascript', name: 'JavaScript', ext: 'JS' }
+    ];
+
+    function normalizeSolveLang(value) {
+      const s = String(value || '').toLowerCase().trim();
+      if (s === 'c++' || s === 'cpp' || s === 'cplusplus') return 'cpp';
+      if (s === 'c' || s === 'clang') return 'c';
+      if (s === 'js' || s === 'javascript') return 'javascript';
+      if (s === 'python' || s === 'py' || s === 'python3') return 'python';
+      if (s === 'java') return 'java';
+      return '';
+    }
+
+    function inferSolveLangFromSkill(skill) {
+      const s = String(skill || '').toLowerCase();
+      if (s.includes('javascript') || s.includes('js') || s.includes('git')) return 'javascript';
+      if (s.includes('python') || s.includes('tensorflow') || s.includes('learning') || s.includes('science')) return 'python';
+      if (s.includes('java') && !s.includes('script')) return 'java';
+      if (s.includes('c++') || s.includes('cpp')) return 'cpp';
+      if (/(^|\b)c(\b|$)/.test(s) && !s.includes('c++')) return 'c';
+      return 'python';
+    }
+
+    function applySolveLangChrome() {
+      const meta = SOLVE_LANGS.find((l) => l.id === currentCodingLang) || SOLVE_LANGS[0];
+      const tabEl = document.getElementById('file-tab-name');
+      if (tabEl) tabEl.innerText = `SOLUTION.${meta.ext}`;
+      const terminalHeader = document.querySelector('.c-header span');
+      if (terminalHeader) {
+        const labels = {
+          python: 'PYTHON KERNEL v3.10.x',
+          java: 'JAVA RUNTIME v17.x',
+          c: 'GCC / C11',
+          cpp: 'G++ / C++17',
+          javascript: 'VIRTUAL TERMINAL v1.4.0'
+        };
+        terminalHeader.innerText = labels[currentCodingLang] || 'VIRTUAL TERMINAL v1.4.0';
+      }
+      document.querySelectorAll('.solve-lang-tab').forEach((btn) => {
+        btn.classList.toggle('active', btn.dataset.lang === currentCodingLang);
+      });
+    }
+
+    function renderSolveLangTabs() {
+      const wrap = document.getElementById('solve-lang-tabs');
+      if (!wrap) return;
+      wrap.innerHTML = SOLVE_LANGS.map((l) => (
+        `<button type="button" class="solve-lang-tab${l.id === currentCodingLang ? ' active' : ''}" data-lang="${l.id}">${l.name}</button>`
+      )).join('');
+      wrap.querySelectorAll('.solve-lang-tab').forEach((btn) => {
+        btn.onclick = () => setSolveLanguage(btn.dataset.lang);
+      });
+    }
+
+    async function setSolveLanguage(nextLang) {
+      const lang = normalizeSolveLang(nextLang);
+      if (!lang || lang === currentCodingLang) return;
+      currentCodingLang = lang;
+      const params = new URLSearchParams(window.location.search);
+      params.set('code', lang === 'cpp' ? 'c++' : lang);
+      window.history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
+      applySolveLangChrome();
+      await reloadProblemsForLanguage();
+    }
+
+    async function reloadProblemsForLanguage() {
+      try {
+        const resp = await fetch(`/api/problems/by-skill?skill=${encodeURIComponent(currentSkill)}&lang=${encodeURIComponent(currentCodingLang)}`);
+        const data = await resp.json();
+        if (data.success && Array.isArray(data.problems) && data.problems.length > 0) {
+          ninePackProblems = data.problems;
+          localStorage.setItem('hieroSkillProblems', JSON.stringify(ninePackProblems));
+          localStorage.setItem('hieroSkillProblemsSkill', `${currentSkill}::${currentCodingLang}`);
+          select9PackProblem(0);
+        }
+      } catch (err) {
+        console.warn('Failed to reload problems for language:', err);
+      }
+    }
     let currentLesson = 'Neural Stream Analysis';
     let lessonDifficulty = 'intermediate';
     let conversationHistory = [];
@@ -2245,8 +2409,11 @@
 
       let skillProblems = [];
       try {
+        const storedSkill = localStorage.getItem('hieroSkillProblemsSkill');
         const rawList = localStorage.getItem('hieroSkillProblems');
-        if (rawList) skillProblems = JSON.parse(rawList);
+        if (rawList && storedSkill && storedSkill.toLowerCase() === String(urlSkill || '').toLowerCase()) {
+          skillProblems = JSON.parse(rawList);
+        }
       } catch (e) {}
 
       currentSkill = urlSkill || (activeProblem && activeProblem.skill) || 'Java';
@@ -2278,18 +2445,16 @@
         editor.value = activeProblem.starterCode || activeProblem.starter || activeProblem.starter_code;
       }
 
-      // 2. Fetch 9-pack from backend API if not in localStorage or incomplete
-      if (!Array.isArray(skillProblems) || skillProblems.length < 9) {
-        try {
-          const resp = await fetch(`/api/problems/by-skill?skill=${encodeURIComponent(currentSkill)}`);
-          const data = await resp.json();
-          if (data.success && Array.isArray(data.problems) && data.problems.length > 0) {
-            skillProblems = data.problems;
-            localStorage.setItem('hieroSkillProblems', JSON.stringify(skillProblems));
-          }
-        } catch (err) {
-          console.warn('Failed to fetch by-skill problems:', err);
+      try {
+        const resp = await fetch(`/api/problems/by-skill?skill=${encodeURIComponent(currentSkill)}`);
+        const data = await resp.json();
+        if (data.success && Array.isArray(data.problems) && data.problems.length > 0) {
+          skillProblems = data.problems;
+          localStorage.setItem('hieroSkillProblems', JSON.stringify(skillProblems));
+          localStorage.setItem('hieroSkillProblemsSkill', currentSkill);
         }
+      } catch (err) {
+        console.warn('Failed to fetch by-skill problems:', err);
       }
 
       if (!Array.isArray(skillProblems) || skillProblems.length === 0) {
@@ -3171,7 +3336,19 @@ try {
       if (tabTerm) tabTerm.classList.add('active');
       if (tabTests) tabTests.classList.remove('active');
 
+      window.currentActiveProblem = prob;
       render9PackNavigation();
+    }
+
+    function getActiveSolveProblem() {
+      if (Array.isArray(ninePackProblems) && ninePackProblems[current9PackIndex]) {
+        return ninePackProblems[current9PackIndex];
+      }
+      if (window.currentActiveProblem) return window.currentActiveProblem;
+      if (typeof currentProblems !== 'undefined' && Array.isArray(currentProblems) && currentProblems[currentLevelIdx]) {
+        return currentProblems[currentLevelIdx];
+      }
+      return null;
     }
 
     function navigate9Pack(direction) {
@@ -3204,11 +3381,19 @@ try {
             problemId: problemId,
             problemTitle: pTitle,
             userSolution: code || '',
+            language: /function\s|=>|const\s|let\s/.test(code || '') ? 'javascript' : (/^\s*def\s/m.test(code || '') ? 'python' : ''),
             testCases: currentProb.testCases || []
           })
         });
 
-        const result = await response.json();
+        const raw = await response.text();
+        let result;
+        try { result = JSON.parse(raw); } catch (_) {
+          throw new Error(raw.slice(0, 120) || 'Bad evaluator response');
+        }
+        if (!result || result.success === false && !result.testResults) {
+          throw new Error(result && result.feedback ? result.feedback : 'Evaluator returned no result');
+        }
 
         // 1. Render Test Results & what went wrong in drawer
         if (result.testResults && result.testResults.length > 0) {
@@ -3382,7 +3567,7 @@ try {
     let visRawCode = '';
 
     function escapeHtml(str) {
-      if (!str) return '';
+      if (str === undefined || str === null) return '';
       return String(str)
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
@@ -3408,14 +3593,75 @@ try {
       }).join('');
     }
 
-    async function openAndRunVisualizer() {
+    function detectVisualizeLanguage(userCode) {
+      if (typeof currentCodingLang === 'string' && currentCodingLang) return currentCodingLang;
+      const src = String(userCode || '');
+      if (/^\s*def\s+/m.test(src)) return 'python';
+      if (/#include\s*<iostream>|std::|using namespace/.test(src)) return 'cpp';
+      if (/#include\s*</.test(src)) return 'c';
+      if (/\bpublic\s+class\b|System\.out/.test(src)) return 'java';
+      return 'javascript';
+    }
+
+    function openAndRunVisualizer() {
+      const codeArea = document.getElementById('code-area');
+      const userCode = codeArea ? codeArea.value : '';
+      if (!userCode || !userCode.trim()) {
+        const terminalOut = document.getElementById('console-out');
+        if (terminalOut) {
+          terminalOut.style.display = 'block';
+          terminalOut.innerText = '> Write or paste some code first, then click Visualize My Code.';
+        }
+        return;
+      }
+
+      const activeProb = getActiveSolveProblem();
+      const pTitle = (document.getElementById('p-title') && document.getElementById('p-title').innerText)
+        || (activeProb && activeProb.title) || '';
+      const pDiff = (document.getElementById('p-diff') && document.getElementById('p-diff').innerText)
+        || (activeProb && activeProb.difficulty) || '';
+      const rawTests = (activeProb && (activeProb.testCases || activeProb.tests)) || [];
+      const className = (userCode.match(/class\s+([A-Za-z_][\w]*)/) || [])[1] || '';
+      const defNames = [...userCode.matchAll(/\bdef\s+([A-Za-z_][\w]*)/g)].map((m) => m[1]).filter((n) => n !== '__init__');
+      const writtenFn = (userCode.match(/function\s+([A-Za-z_$][\w$]*)/) || userCode.match(/(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=/) || [])[1]
+        || defNames[0]
+        || (userCode.match(/\bint\s+([A-Za-z_][\w]*)\s*\(/) || userCode.match(/\bstatic\s+int\s+([A-Za-z_][\w]*)\s*\(/) || [])[1]
+        || '';
+      const testCases = className
+        ? rawTests.filter((t) => !t.testCall || String(t.testCall).includes(className))
+        : writtenFn
+          ? rawTests.filter((t) => !t.testCall || String(t.testCall).includes(writtenFn + '(') || String(t.testCall).includes('.' + writtenFn + '('))
+          : rawTests;
+
+      localStorage.setItem('hieroVisualizePayload', JSON.stringify({
+        code: userCode,
+        language: detectVisualizeLanguage(userCode),
+        problemTitle: pTitle,
+        problemType: pDiff,
+        testCases
+      }));
+
+      const visWin = window.open('/visualize.html', 'hiero-visualize');
+      if (!visWin) window.location.href = '/visualize.html';
+    }
+
+    async function openAndRunVisualizerLegacy() {
       const codeArea = document.getElementById('code-area');
       const userCode = codeArea ? codeArea.value : '';
       const btn = document.getElementById('btn-visualize');
       const theater = document.getElementById('visualizer-theater');
+      if (!theater) return;
+
+      theater.style.display = 'flex';
+      populateVisualizerCode(userCode || '');
 
       if (!userCode || !userCode.trim()) {
-        alert('Please write or paste some JavaScript code in the editor first!');
+        showVisualizerBanner('warning', 'Write or paste some code in the editor first.');
+        const speechEl = document.getElementById('vis-caption-text');
+        if (speechEl) speechEl.innerText = 'I need some code before I can tell the story.';
+        visSteps = [];
+        visCurrentIndex = 0;
+        visualizerPause();
         return;
       }
 
@@ -3425,13 +3671,21 @@ try {
         btn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right: 8px;"></i> Crafting Story...';
       }
 
-      // Read problem metadata
-      const pTitle = document.getElementById('p-title') ? document.getElementById('p-title').innerText : '';
-      const pDiff = document.getElementById('p-diff') ? document.getElementById('p-diff').innerText : '';
-      let testCases = [];
-      if (window.currentActiveProblem && window.currentActiveProblem.tests) {
-        testCases = window.currentActiveProblem.tests;
-      }
+      const speechEl = document.getElementById('vis-caption-text');
+      if (speechEl) speechEl.innerText = 'Crafting the story of your code...';
+      clearVisualizerBanner();
+
+      const activeProb = getActiveSolveProblem();
+      const pTitle = (document.getElementById('p-title') && document.getElementById('p-title').innerText)
+        || (activeProb && activeProb.title) || '';
+      const pDiff = (document.getElementById('p-diff') && document.getElementById('p-diff').innerText)
+        || (activeProb && activeProb.difficulty) || '';
+      const rawTests = (activeProb && (activeProb.testCases || activeProb.tests)) || [];
+      const writtenFn = (userCode.match(/function\s+([A-Za-z_$][\w$]*)/) || userCode.match(/(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=/) || userCode.match(/def\s+([A-Za-z_][\w]*)/))?.[1] || '';
+      const testCases = writtenFn
+        ? rawTests.filter((t) => !t.testCall || String(t.testCall).includes(writtenFn + '('))
+        : rawTests;
+      const language = /^\s*def\s+/m.test(userCode) ? 'python' : 'javascript';
 
       try {
         const response = await fetch('/api/visualize', {
@@ -3439,13 +3693,20 @@ try {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             code: userCode,
+            language,
             problemTitle: pTitle,
             problemType: pDiff,
             testCases: testCases
           })
         });
 
-        const data = await response.json();
+        const raw = await response.text();
+        let data;
+        try {
+          data = JSON.parse(raw);
+        } catch (_) {
+          throw new Error(raw.slice(0, 120) || 'Visualizer returned a non-JSON response');
+        }
 
         if (btn) {
           btn.disabled = false;
@@ -3454,14 +3715,12 @@ try {
 
         populateVisualizerCode(userCode);
 
-        if (!data.success && data.errorType === 'syntax') {
-          // Syntax Error: do not run animation; show inline friendly message
-          theater.style.display = 'flex';
+        if (!data.success && (data.errorType === 'syntax' || !data.steps || !data.steps.length)) {
           visSteps = [{
             stepNumber: 0,
             type: 'error',
             line: data.line || 1,
-            caption: data.friendlyCaption || `There's a small typo somewhere — check line ${data.line || 1}.`,
+            caption: data.friendlyCaption || data.error || `There's a small typo somewhere — check line ${data.line || 1}.`,
             state: {
               variables: {},
               dataStructure: { type: 'trace', values: [], visited: [] },
@@ -3473,7 +3732,7 @@ try {
           visCurrentIndex = 0;
           visDataStructure = 'trace';
           visIsCorrect = false;
-          showVisualizerBanner('error', data.friendlyCaption || `There's a small typo somewhere — check line ${data.line || 1}.`);
+          showVisualizerBanner('error', visSteps[0].caption);
           visualizerPause();
           renderVisualizerStep(0);
           return;
@@ -3482,13 +3741,12 @@ try {
         if (data.steps && data.steps.length > 0) {
           visSteps = data.steps;
           visCurrentIndex = 0;
-          visDataStructure = data.dsType || 'array';
+          visDataStructure = data.dsType || 'trace';
           visIsCorrect = Boolean(data.isCorrect);
 
-          theater.style.display = 'flex';
           const dsBadge = document.getElementById('vis-ds-badge');
           if (dsBadge) {
-            dsBadge.innerText = visDataStructure.replace('-', ' ').toUpperCase();
+            dsBadge.innerText = String(visDataStructure).replace('-', ' ').toUpperCase();
           }
 
           if (data.runtimeError) {
@@ -3501,11 +3759,12 @@ try {
             clearVisualizerBanner();
           }
 
-          // Default: sitting paused at step 0 waiting for user to press Play!
           visualizerPause();
           renderVisualizerStep(0);
+          visualizerPlay();
         } else {
-          alert('Could not generate visualization steps. Please check your function.');
+          showVisualizerBanner('warning', 'I could not turn this into steps. Check the function and try again.');
+          if (speechEl) speechEl.innerText = 'Nothing to play yet — the story came back empty.';
         }
 
       } catch (err) {
@@ -3619,6 +3878,15 @@ try {
       if (!visSteps || visSteps.length === 0) return;
       const step = visSteps[idx];
       if (!step) return;
+      if (!step.state) {
+        step.state = {
+          variables: {},
+          dataStructure: { type: visDataStructure || 'trace', values: [], visited: [] },
+          activeIndices: [],
+          callStack: [],
+          loop: null
+        };
+      }
 
       // 1. Progress counter and fill
       const counterEl = document.getElementById('vis-step-counter');
@@ -3722,6 +3990,10 @@ try {
       if (visDataStructure === 'array') {
         if (arrayWrap) arrayWrap.style.display = 'flex';
         renderArrayStructure(step);
+        if (traceWrap && step.state && step.state.variables && Object.keys(step.state.variables).length) {
+          traceWrap.style.display = 'flex';
+          renderTraceVariables(step);
+        }
       } else if (visDataStructure === 'stack' || visDataStructure === 'queue') {
         if (sqWrap) sqWrap.style.display = 'flex';
         renderStackQueueStructure(step, visDataStructure);
@@ -3735,30 +4007,50 @@ try {
       }
 
       // 9. Positive Reinforcement on Completion
-      if (idx === visSteps.length - 1) {
+      if (idx === visSteps.length - 1 && visSteps.length > 1) {
         if (visIsCorrect) {
           triggerConfettiBurst();
           showVisualizerBanner('success', "Nice work — that's correct! 🎉");
-        } else if (!step.state.runtimeError) {
-          showVisualizerBanner('success', "This works! There's also a faster way to do this — want a hint?");
+        } else if (step.state && step.state.runtimeError) {
+          showVisualizerBanner('warning', step.state.runtimeError);
         }
       }
     }
 
     // --- RENDERER: ARRAYS ---
+    function formatBoxValue(val) {
+      if (val === null || val === undefined) return 'None';
+      if (val === true) return 'True';
+      if (val === false) return 'False';
+      if (Array.isArray(val)) return val.length ? val.map(formatBoxValue).join(', ') : '[]';
+      if (typeof val === 'object') {
+        const keys = Object.keys(val);
+        return keys.length ? keys.map((k) => `${k}:${formatBoxValue(val[k])}`).join(', ') : '{}';
+      }
+      return String(val);
+    }
+
     function renderArrayStructure(step) {
       const row = document.getElementById('vis-array-row');
       if (!row || !step.state || !step.state.dataStructure) return;
 
       const values = step.state.dataStructure.values || [];
+      const flags = step.state.dataStructure.flags || [];
+      const visited = step.state.dataStructure.visited || [];
       const activeIdxs = step.state.activeIndices || [];
 
       row.innerHTML = values.map((val, i) => {
         const isActive = activeIdxs.includes(i);
+        const seen = visited.includes(i);
+        const truthy = flags[i];
         let extraBoxClass = '';
         if (isActive) {
           if (step.type === 'compare') extraBoxClass = 'is-comparing';
           else if (step.type === 'assign') extraBoxClass = 'is-assigning';
+        } else if (seen && truthy === true) {
+          extraBoxClass = 'is-truthy';
+        } else if (seen && truthy === false) {
+          extraBoxClass = 'is-falsy';
         }
 
         let pointerLabel = '';
@@ -3772,11 +4064,18 @@ try {
           pointerLabel = varNames.length > 0 ? `▲ ${varNames.join(', ')}` : '▲';
         }
 
+        const tag = seen && truthy === true
+          ? '<div class="vis-truth-tag is-truthy">truthy</div>'
+          : seen && truthy === false
+            ? '<div class="vis-truth-tag is-falsy">falsy</div>'
+            : '';
+
         return `
           <div class="vis-array-cell" data-index="${i}">
             <div class="vis-array-box ${extraBoxClass}" id="vis-box-${i}">
-              ${escapeHtml(val)}
+              ${escapeHtml(formatBoxValue(val))}
             </div>
+            ${tag}
             <span class="vis-box-index">${i}</span>
             <div class="vis-pointer-arrow ${isActive ? 'visible' : ''}">
               <span>${pointerLabel}</span>
@@ -4006,47 +4305,40 @@ try {
       }
     });
 
-    // Client Fallback if Server Unreachable
+    // Client Fallback if Server Unreachable — walk the student's own lines
     function runClientFallbackVisualizer(code) {
       const theater = document.getElementById('visualizer-theater');
       if (!theater) return;
       populateVisualizerCode(code);
       theater.style.display = 'flex';
-      visSteps = [
-        {
-          stepNumber: 0,
-          type: 'call',
-          line: 1,
-          caption: 'Starting execution with sample inputs.',
-          state: { dataStructure: { type: 'array', values: [5, 1, 4, 2, 8], visited: [] }, activeIndices: [], variables: {} }
-        },
-        {
-          stepNumber: 1,
-          type: 'compare',
-          line: 4,
-          caption: 'Comparing 5 and 1 — is 5 bigger than 1?',
-          state: { dataStructure: { type: 'array', values: [5, 1, 4, 2, 8], visited: [] }, activeIndices: [0, 1], variables: { i: 0, j: 0 } }
-        },
-        {
-          stepNumber: 2,
-          type: 'swap',
-          line: 6,
-          caption: 'Yep! 5 is bigger, so we swap them.',
-          state: { dataStructure: { type: 'array', values: [1, 5, 4, 2, 8], visited: [] }, activeIndices: [0, 1], variables: { i: 0, j: 0 } }
-        },
-        {
-          stepNumber: 3,
-          type: 'return',
-          line: 10,
-          caption: 'All done! Returning the sorted list [1, 2, 4, 5, 8].',
-          state: { dataStructure: { type: 'array', values: [1, 2, 4, 5, 8], visited: [] }, activeIndices: [], variables: {} }
-        }
-      ];
+      const lines = String(code || '').split('\n');
+      const empty = { dataStructure: { type: 'trace', values: [], visited: [] }, activeIndices: [], variables: {}, callStack: [], loop: null };
+      visSteps = lines.map((line, i) => {
+        const trimmed = line.trim();
+        let caption = 'Looking at this line.';
+        if (/function\s|=>/.test(trimmed)) caption = 'This function is about to run.';
+        else if (/^\s*if\b/.test(trimmed)) caption = 'Checking this condition.';
+        else if (/^\s*(for|while)\b/.test(trimmed)) caption = 'Starting this loop.';
+        else if (/return\b/.test(trimmed)) caption = 'About to return a value.';
+        else if (!trimmed || trimmed.startsWith('//')) caption = 'Skipping a blank or comment line.';
+        return {
+          stepNumber: i,
+          type: /return\b/.test(trimmed) ? 'return' : (/^\s*if\b/.test(trimmed) ? 'branch' : 'assign'),
+          line: i + 1,
+          caption,
+          state: empty
+        };
+      }).filter(s => s.caption !== 'Skipping a blank or comment line.');
+      if (visSteps.length === 0) {
+        visSteps = [{ stepNumber: 0, type: 'call', line: 1, caption: 'Could not reach the story engine. Showing your code only.', state: empty }];
+      }
       visCurrentIndex = 0;
-      visDataStructure = 'array';
-      visIsCorrect = true;
+      visDataStructure = 'trace';
+      visIsCorrect = false;
+      showVisualizerBanner('warning', 'Story engine is offline — playing a simple line walk instead.');
       visualizerPause();
       renderVisualizerStep(0);
+      visualizerPlay();
     }
 
     const btnSub = document.getElementById('btn-submit');

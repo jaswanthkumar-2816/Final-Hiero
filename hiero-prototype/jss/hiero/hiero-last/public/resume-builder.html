@@ -2372,18 +2372,18 @@
                       <input type="text" id="degree1" name="degree[]" placeholder="Bachelor of Science">
                     </div>
                     <div class="form-group">
-                      <label for="school1">School</label>
-                      <input type="text" id="school1" name="school[]" placeholder="University Name">
+                      <label for="school1">University / College</label>
+                      <input type="text" id="school1" name="school[]" placeholder="University — College">
                     </div>
                   </div>
                   <div class="form-row">
                     <div class="form-group">
                       <label for="gradYear1">Year</label>
-                      <input type="number" id="gradYear1" name="gradYear[]" min="1950" max="2030" placeholder="2024">
+                      <input type="text" id="gradYear1" name="gradYear[]" placeholder="2024 or Pursuing">
                     </div>
                     <div class="form-group">
-                      <label for="gpa1">GPA</label>
-                      <input type="text" id="gpa1" name="gpa[]" placeholder="3.8/4.0">
+                      <label for="gpa1">Marks / %</label>
+                      <input type="text" id="gpa1" name="gpa[]" placeholder="72% or 8.5 CGPA">
                     </div>
                   </div>
                 </div>
@@ -2547,12 +2547,12 @@
                 <i class="fas fa-info-circle"></i> Add any additional sections you need (e.g., Publications, Volunteer
                 Work, Awards, etc.)
               </p>
+              <div class="form-group" id="customSectionTitleWrapper" style="margin-bottom: 20px;">
+                <label for="customSectionTitle">Custom Section Title</label>
+                <input type="text" id="customSectionTitle" placeholder="e.g., Publications">
+              </div>
               <div id="customDetailsContainer">
                 <div class="custom-detail-item">
-                  <div class="form-group" id="customSectionTitleWrapper">
-                    <label for="customSectionTitle">Custom Section Title</label>
-                    <input type="text" id="customSectionTitle" placeholder="e.g., Publications">
-                  </div>
                   <div class="form-group">
                     <label for="customHeading1">Item Heading</label>
                     <input type="text" id="customHeading1" name="customHeading[]" placeholder="e.g., Research Paper A">
@@ -3936,105 +3936,6 @@
     // Note: Template preview is now fetched from backend via /preview-resume API
     // The previewTemplate() function above handles fetching and rendering
 
-    // ========== Auto-fill imported resume data into form ==========
-    function fillFormWithImportedData(data) {
-    // console.log("ðŸŽ¯ Filling form with imported data:", data);
-
-      // Personal Info
-      document.getElementById("fullName").value = data.personalInfo?.fullName || "";
-      document.getElementById("email").value = data.personalInfo?.email || "";
-      document.getElementById("phone").value = data.personalInfo?.phone || "";
-      document.getElementById("address").value = data.personalInfo?.address || "";
-      document.getElementById("linkedin").value = data.personalInfo?.linkedin || "";
-      document.getElementById("website").value = data.personalInfo?.website || "";
-
-      // Summary
-      document.getElementById("summary").value = data.summary || "";
-
-      // Experience
-      const expSection = document.getElementById("section-experience");
-      if (data.experience && data.experience.length > 0 && expSection && expSection.classList.contains('skipped')) {
-        toggleSection('experience');
-      }
-      const expContainer = document.getElementById("experienceContainer");
-      expContainer.innerHTML = "";
-      (data.experience || []).forEach((exp, i) => {
-
-        addExperience();
-        document.getElementsByName("jobTitle[]")[i].value = exp.jobTitle || "";
-        document.getElementsByName("company[]")[i].value = exp.company || "";
-
-        // Handle Start Date
-        const startDateInput = document.getElementsByName("startDate[]")[i];
-        if (exp.startDate) {
-          // Attempt to normalize date for type="month" (YYYY-MM)
-          const date = exp.startDate.match(/\d{4}-\d{2}/) ? exp.startDate : "";
-          startDateInput.value = date;
-        }
-
-        // Handle End Date & Checkbox
-        const endDateInput = document.getElementsByName("endDate[]")[i];
-        const currentCheckbox = document.getElementById(`current${i + 1}`);
-        if (exp.endDate && (exp.endDate.toLowerCase().includes('present') || exp.endDate.toLowerCase().includes('current'))) {
-          if (currentCheckbox) {
-            currentCheckbox.checked = true;
-            toggleWorking(currentCheckbox); // Trigger UI change
-          }
-          endDateInput.value = "";
-        } else if (exp.endDate) {
-          const date = exp.endDate.match(/\d{4}-\d{2}/) ? exp.endDate : "";
-          endDateInput.value = date;
-        }
-
-        document.getElementsByName("jobDescription[]")[i].value = exp.description || "";
-      });
-
-      // Education
-      const eduSection = document.getElementById("section-education");
-      if (data.education && data.education.length > 0 && eduSection && eduSection.classList.contains('skipped')) {
-        toggleSection('education');
-      }
-      const eduContainer = document.getElementById("educationContainer");
-      eduContainer.innerHTML = "";
-      (data.education || []).forEach((edu, i) => {
-
-        addEducation();
-        document.getElementsByName("degree[]")[i].value = edu.degree || "";
-        document.getElementsByName("school[]")[i].value = edu.school || "";
-        document.getElementsByName("gradYear[]")[i].value = edu.gradYear || "";
-        document.getElementsByName("gpa[]")[i].value = edu.gpa || "";
-      });
-
-      // Skills
-      document.getElementById("technicalSkills").value = data.technicalSkills || "";
-      document.getElementById("softSkills").value = data.softSkills || "";
-
-      // Projects
-      const projSection = document.getElementById("section-projects");
-      if (data.projects && data.projects.length > 0 && projSection && projSection.classList.contains('skipped')) {
-        toggleSection('projects');
-      }
-      const projContainer = document.getElementById("projectsContainer");
-      projContainer.innerHTML = "";
-      (data.projects || []).forEach((project, i) => {
-
-        addProject();
-        document.getElementsByName("projectName[]")[i].value = project.name || "";
-        document.getElementsByName("projectTech[]")[i].value = project.tech || "";
-        document.getElementsByName("projectDuration[]")[i].value = project.duration || "";
-        document.getElementsByName("projectDescription[]")[i].value = project.description || "";
-        document.getElementsByName("projectLink[]")[i].value = project.link || "";
-        document.getElementsByName("projectAchievement[]")[i].value = project.achievement || "";
-      });
-
-      // Additional Information
-      document.getElementById("certifications").value = (data.certifications || []).join(", ");
-      document.getElementById("languages").value = (data.languages || []).join(", ");
-      document.getElementById("achievements").value = data.achievements || "";
-      document.getElementById("hobbies").value = data.hobbies || "";
-
-      console.log('[OK] Auto-fill completed successfully');
-    }
 
     // Start building with selected template
     function startBuilding(templateId) {
@@ -4212,12 +4113,18 @@
             localStorage.setItem('importedResumeData', JSON.stringify(result.data));
             if (result.analysis) localStorage.setItem('resumeAnalysis', JSON.stringify(result.analysis));
 
-            // Close modal and show form after a short delay
+            if (selectedTemplate) {
+              result.data.template = selectedTemplate;
+              localStorage.setItem('selectedTemplate', selectedTemplate);
+            }
+            localStorage.setItem('resumeData', JSON.stringify(result.data));
+
+            // Close modal and open the form
             setTimeout(() => {
               closeImportModal();
               proceedToForm();
 
-              // Fill form after a short delay to ensure form fields are created
+              // Fill form after modal closes and layout displays
               setTimeout(() => {
                 const importedData = JSON.parse(localStorage.getItem('importedResumeData'));
                 const analysisData = JSON.parse(localStorage.getItem('resumeAnalysis'));
@@ -4231,8 +4138,8 @@
                     localStorage.removeItem('resumeAnalysis');
                   }
                 }
-              }, 500);
-            }, 1000);
+              }, 400);
+            }, 600);
           } else {
             throw new Error('Invalid response from server');
           }
@@ -4512,28 +4419,52 @@
         setVal("professionalTitle", data.personalInfo?.professionalTitle || data.professionalTitle);
         setVal("professionalHeadline", data.personalInfo?.professionalHeadline || data.professionalHeadline);
 
-        // 2. Summary & Skills
+        // 2. Summary & Skills — exact copy, no invented text
         setVal("summary", data.summary);
 
         let techSkills = data.technicalSkills || "";
         if (!techSkills && data.skills) {
-          techSkills = Array.isArray(data.skills) ? data.skills.join(", ") : data.skills;
+          if (Array.isArray(data.skills)) {
+            techSkills = data.skills.map((s) => (typeof s === 'string' ? s : s.name)).filter(Boolean).join(", ");
+          } else if (typeof data.skills === 'object') {
+            // Reconciler shape: { categorized: {...}, technicalSkills: [...], softSkills: [...] }
+            const flat = Array.isArray(data.skills.technicalSkills)
+              ? data.skills.technicalSkills
+              : Object.values(data.skills.categorized || data.skills).flat().filter((v) => typeof v === 'string');
+            techSkills = [...new Set(flat)].filter(Boolean).join(", ");
+          } else {
+            techSkills = data.skills;
+          }
         }
         setVal("technicalSkills", techSkills);
-        setVal("softSkills", data.softSkills);
+        const softSrc = data.softSkills || (data.skills && !Array.isArray(data.skills) ? data.skills.softSkills : null);
+        setVal("softSkills", Array.isArray(softSrc) ? softSrc.join(", ") : (softSrc || ""));
 
         // 3. Additional Information Fields
-        const certs = Array.isArray(data.certifications) ? data.certifications.join(", ") : (data.certifications || "");
-        const langs = Array.isArray(data.languages) ? data.languages.join(", ") : (data.languages || "");
+        const certs = Array.isArray(data.certifications)
+          ? data.certifications.map((c) => (typeof c === 'string' ? c : (c.name || c.title || ''))).filter(Boolean).join(", ")
+          : (data.certifications || "");
+        const langs = Array.isArray(data.languages)
+          ? data.languages.map((l) => (typeof l === 'string' ? l : (l.name || ''))).filter(Boolean).join(", ")
+          : (data.languages || "");
         setVal("certifications", certs);
         setVal("languages", langs);
-        setVal("achievements", data.achievements);
-        setVal("hobbies", data.hobbies);
+        setVal("achievements", typeof data.achievements === 'string' ? data.achievements : (Array.isArray(data.achievements) ? data.achievements.join("\n") : ""));
+        setVal("hobbies", Array.isArray(data.hobbies) ? data.hobbies.join(", ") : (data.hobbies || ""));
 
-        const extras = Array.isArray(data.extraCurricular) ? data.extraCurricular.join("\n") : (data.extraCurricular || "");
+        // Seminars + extra curricular — map faithfully into Extra-Curricular field
+        const seminarBits = Array.isArray(data.seminarsConferences)
+          ? data.seminarsConferences.map((s) => (typeof s === 'string' ? s : (s.title || s.name || ''))).filter(Boolean)
+          : [];
+        const extrasArr = Array.isArray(data.extraCurricular)
+          ? data.extraCurricular
+          : (data.extraCurricular ? String(data.extraCurricular).split("\n") : []);
+        const extras = [...extrasArr, ...seminarBits].filter(Boolean).join("\n");
         setVal("extraCurricular", extras);
         setVal("publications", data.publications);
-        setVal("additionalInfo", data.additionalInfo);
+        setVal("additionalInfo", data.additionalInfo || (Array.isArray(data.customDetails)
+          ? data.customDetails.map((c) => `${c.heading || ''}\n${c.content || ''}`).join("\n\n")
+          : ""));
 
         // 4. Experience (Dynamic)
         const expContainer = document.getElementById("experienceContainer");
@@ -4552,7 +4483,11 @@
             if (starts[i]) starts[i].value = exp.startDate || "";
 
             if (ends[i]) {
-              const isPresent = exp.endDate === 'Present' || !exp.endDate;
+              // Trust the reconciler's isCurrent flag; a blank endDate alone is
+              // not proof of a current role (it can just be unparseable).
+              const isPresent = exp.isCurrent === true
+                || exp.endDate === 'Present'
+                || /present|current|till\s*date|now/i.test(exp.endDateText || '');
               if (isPresent) {
                 const checkbox = expContainer.querySelectorAll('.experience-item')[i].querySelector('input[type="checkbox"]');
                 if (checkbox) {
@@ -4568,7 +4503,7 @@
           });
         }
 
-        // 5. Education (Dynamic)
+        // 5. Education (Dynamic) — university + college, marks as %, allow "Pursuing"
         const eduContainer = document.getElementById("educationContainer");
         if (eduContainer) {
           eduContainer.innerHTML = "";
@@ -4580,9 +4515,18 @@
             const years = document.querySelectorAll("[name='gradYear[]']");
             const gpas = document.querySelectorAll("[name='gpa[]']");
             if (degrees[i]) degrees[i].value = edu.degree || "";
-            if (schools[i]) schools[i].value = edu.school || "";
-            if (years[i]) years[i].value = edu.gradYear || "";
-            if (gpas[i]) gpas[i].value = edu.gpa || "";
+            const uni = (edu.university || "").trim();
+            const col = (edu.college || "").trim();
+            let schoolVal = edu.school || edu.institution || "";
+            if (uni && col && !String(schoolVal).includes(uni)) schoolVal = `${uni} — ${col}`;
+            else if (uni && !schoolVal) schoolVal = uni;
+            else if (col && !schoolVal) schoolVal = col;
+            if (schools[i]) schools[i].value = schoolVal;
+            if (years[i]) years[i].value = edu.gradYear || edu.year || "";
+            let marks = edu.marks || edu.gpa || "";
+            if (marks && /^\d+(\.\d+)?$/.test(String(marks).trim()) && parseFloat(marks) > 4) marks = `${marks}%`;
+            if (marks && /\/\s*100/i.test(String(marks))) marks = String(marks).replace(/\/\s*100/i, "%");
+            if (gpas[i]) gpas[i].value = marks;
           });
         }
 
@@ -4755,7 +4699,13 @@
         });
 
         console.log('[OK] Auto-fill completed successfully');
-        alert(' Imported resume data has been filled into the form. Review and generate your resume.');
+        // Soft notice — the form is filled; the user downloads when ready.
+        const notice = document.createElement('div');
+        notice.id = 'importDownloadNotice';
+        notice.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:10001;background:#0d121c;border:1px solid rgba(7,226,25,0.4);color:#fff;padding:14px 22px;border-radius:14px;font-weight:700;font-size:14px;box-shadow:0 12px 40px rgba(0,0,0,0.45);';
+        notice.innerHTML = '<i class="fas fa-check-circle" style="color:#07e219;margin-right:8px"></i> Details extracted — review the form, then hit <span style="color:#07e219">Download</span>.';
+        document.body.appendChild(notice);
+        setTimeout(() => { if (notice.parentNode) notice.remove(); }, 8000);
 
         // 11. Final UI Update
         const templateSelection = document.getElementById('templateSelection');
@@ -4770,7 +4720,9 @@
         if (window.showLivePreviewToggle) window.showLivePreviewToggle();
 
         history.pushState({ step: 2, template: localStorage.getItem('selectedTemplate') }, '', '');
+        data.template = selectedTemplate || localStorage.getItem('selectedTemplate') || 'hiero-cool';
         localStorage.setItem('resumeData', JSON.stringify(data));
+        localStorage.setItem('selectedTemplate', data.template);
 
       } catch (err) {
     // console.error('âŒ Error in fillFormWithImportedData:', err);
@@ -5133,7 +5085,7 @@
 
     function addEducation() {
       const container = document.getElementById('educationContainer');
-      if (container && container.querySelectorAll('.education-item').length >= 4) {
+      if (container && container.querySelectorAll('.education-item').length >= 10) {
         showMaxLimitModal('Education');
         return;
       }
@@ -5144,11 +5096,11 @@
         <button type="button" class="remove-btn" aria-label="Remove entry" onclick="this.parentElement.remove(); if(window.calculateATS) window.calculateATS();">Remove</button>
         <div class="form-row">
           <div class="form-group"><label>Degree</label><input type="text" name="degree[]" placeholder="Bachelor of Science"></div>
-          <div class="form-group"><label>School</label><input type="text" name="school[]" placeholder="University Name"></div>
+          <div class="form-group"><label>University / College</label><input type="text" name="school[]" placeholder="University — College"></div>
         </div>
         <div class="form-row">
-          <div class="form-group"><label>Year</label><input type="number" name="gradYear[]" min="1950" max="2030" placeholder="2024"></div>
-          <div class="form-group"><label>GPA</label><input type="text" name="gpa[]" placeholder="3.8/4.0"></div>
+          <div class="form-group"><label>Year</label><input type="text" name="gradYear[]" placeholder="2024 or Pursuing"></div>
+          <div class="form-group"><label>Marks / %</label><input type="text" name="gpa[]" placeholder="72% or 8.5 CGPA"></div>
         </div>
       `;
       container.appendChild(div);
@@ -5862,8 +5814,21 @@
           setTimeout(() => {
             overlay.remove();
 
-            // Redirect to dedicated Resume Review & Audit page
-            window.location.href = 'resume-review.html';
+            // Show results selection section (Download PDF, Microsoft Word, Live Preview)
+            const resultsSection = document.getElementById('resultsSection');
+            if (resultsSection) {
+              resultsSection.style.display = 'block';
+              resultsSection.scrollIntoView({ behavior: 'smooth' });
+            }
+
+            // Hide main form layout
+            const mainLayout = document.querySelector('.main-layout');
+            const bottomActions = document.querySelector('.bottom-actions');
+            const stepIndicator = document.getElementById('formStepIndicator');
+
+            if (mainLayout) mainLayout.style.display = 'none';
+            if (bottomActions) bottomActions.style.display = 'none';
+            if (stepIndicator) stepIndicator.style.display = 'none';
           }, 500);
         }, 1200);
 
@@ -5909,6 +5874,28 @@
           alert(' ' + errorMsg);
         }, 3000);
       }
+    }
+
+    /**
+     * Download filename built from the candidate's name, matching what the
+     * server sends in Content-Disposition (e.g. "Karthik_R_Resume.pdf").
+     */
+    function resumeFileName(data, ext) {
+      const raw = (
+        (data && data.personalInfo && data.personalInfo.fullName) ||
+        (data && data.fullName) ||
+        (document.getElementById('fullName') && document.getElementById('fullName').value) ||
+        ''
+      ).toString().trim();
+
+      const safe = raw
+        .replace(/[\\/:*?"<>|]+/g, '')
+        .replace(/\s+/g, '_')
+        .replace(/_+/g, '_')
+        .replace(/^_|_$/g, '')
+        .slice(0, 80);
+
+      return (safe || 'Resume') + '_Resume.' + (ext || 'pdf');
     }
 
     function collectFormData() {
@@ -6500,7 +6487,7 @@
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `${data.personalInfo?.fullName || 'resume'}_${data.template}.doc`;
+        a.download = resumeFileName(data, 'doc');
         document.body.appendChild(a);
         a.click();
         
@@ -6529,7 +6516,7 @@
       const user = JSON.parse(localStorage.getItem('user') || '{}');
       const isPro = !!user.isPro;
       const plan = user.proPlan || '';
-      const currentTemplateId = selectedTemplate || localStorage.getItem('selectedTemplate') || 'classic';
+      const currentTemplateId = selectedTemplate || localStorage.getItem('selectedTemplate') || 'hiero-cool';
 
       const premiumTemplates = ['hiero-royal', 'hiero-signature', 'hiero-prestige', 'hiero-elite', 'hiero-vision', 'hiero-vertex', 'hiero-premium', 'rishi'];
       const affordableTemplates = ['hiero-executive', 'hiero-nova', 'hiero-urban', 'hiero-monethon', 'template4', 'hiero-timeline', 'hiero-studio', 'hiero-retail', 'hiero-essence', 'hiero-velocity', 'hiero-legion'];
@@ -6552,12 +6539,16 @@
         initiateTemplateCheckout(currentTemplateId, upgradeTier, 'pdf');
         return;
       }
-      const btn = event.target;
-      const originalText = btn.innerHTML;
+      const btn = (typeof event !== 'undefined' && event && event.target && event.target.closest)
+        ? (event.target.closest('button') || event.target)
+        : document.querySelector('[onclick*="downloadResume"]');
+      const originalText = btn && btn.innerHTML ? btn.innerHTML : 'Download';
 
       // Show more informative loading message
-      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating PDF... (this may take 5-10 seconds)';
-      btn.disabled = true;
+      if (btn) {
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating PDF... (this may take 5-10 seconds)';
+        btn.disabled = true;
+      }
 
       try {
         let data = {};
@@ -6572,10 +6563,10 @@
           localStorage.setItem('resumeData', JSON.stringify(data));
         }
 
-        // Ensure template is included
-        if (!data.template) {
-          data.template = selectedTemplate || localStorage.getItem('selectedTemplate') || 'classic';
-        }
+        // Ensure template is always the selected one (e.g. hiero-cool after upload)
+        data.template = selectedTemplate || localStorage.getItem('selectedTemplate') || data.template || 'hiero-cool';
+        localStorage.setItem('resumeData', JSON.stringify(data));
+        localStorage.setItem('selectedTemplate', data.template);
 
         const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
     // console.log('ðŸ"¡ POST', `${BACKEND_URL}/download-resume`);
@@ -6615,7 +6606,7 @@
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `${data.personalInfo?.fullName || 'resume'}_${data.template}_resume.pdf`;
+        a.download = resumeFileName(data, 'pdf');
         a.style.display = 'none';
         document.body.appendChild(a);
         a.click();
@@ -6632,8 +6623,64 @@
         console.error('Download error full:', error);
         alert(`Failed to download resume: ${error.message}. Please try again.`);
       } finally {
-        btn.innerHTML = originalText;
-        btn.disabled = false;
+        if (btn) {
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+        }
+      }
+    }
+
+    /** After upload+extract: download PDF using Cool (or selected) template */
+    async function downloadExtractedResumePdf(templateId) {
+      const tpl = templateId || selectedTemplate || localStorage.getItem('selectedTemplate') || 'hiero-cool';
+      selectedTemplate = tpl;
+      localStorage.setItem('selectedTemplate', tpl);
+
+      let data = {};
+      try {
+        data = collectFormData();
+      } catch (e) {
+        try { data = JSON.parse(localStorage.getItem('resumeData') || '{}'); } catch (_) {}
+      }
+      if (!data || !data.personalInfo) {
+        try { data = JSON.parse(localStorage.getItem('resumeData') || '{}'); } catch (_) {}
+      }
+      data.template = tpl;
+      localStorage.setItem('resumeData', JSON.stringify(data));
+
+      const notice = document.getElementById('importDownloadNotice');
+      try {
+        const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
+        const response = await fetch(`${BACKEND_URL}/download-resume`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/pdf',
+            'Authorization': token ? `Bearer ${token}` : ''
+          },
+          body: JSON.stringify(data)
+        });
+        if (!response.ok) throw new Error('Download failed (' + response.status + ')');
+        const blob = await response.blob();
+        if (!blob.size) throw new Error('Empty PDF');
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = resumeFileName(data, 'pdf');
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => { try { document.body.removeChild(a); } catch (_) {} }, 120);
+        if (notice) {
+          notice.innerHTML = '<i class="fas fa-check-circle" style="color:#07e219;margin-right:8px"></i> <span style="color:#07e219">HIERO Cool</span> PDF downloaded — review the form anytime.';
+          setTimeout(() => { if (notice.parentNode) notice.remove(); }, 5000);
+        }
+        showPostDownloadModal(tpl, 'PDF Document', url);
+      } catch (err) {
+        console.error('Auto Cool download failed:', err);
+        if (notice) {
+          notice.innerHTML = '<i class="fas fa-exclamation-circle" style="color:#f59e0b;margin-right:8px"></i> Extracted OK — click <b>Download</b> to get Cool PDF.';
+          setTimeout(() => { if (notice.parentNode) notice.remove(); }, 7000);
+        }
       }
     }
 
@@ -7400,10 +7447,11 @@
 
   function loadSavedData() {
     try {
-      const raw = localStorage.getItem(SAVE_KEY);
-      if (!raw) return false;
-      const data = JSON.parse(raw);
-      if (!data.personalInfo?.fullName && !data.personalInfo?.email) return false;
+      const auto = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null');
+      const uploaded = JSON.parse(localStorage.getItem('resumeData') || 'null');
+      const data = (uploaded && uploaded.hieroEvalAdded) ? uploaded : (auto || uploaded);
+      if (!data) return false;
+      if (!data.personalInfo?.fullName && !data.personalInfo?.email && !data.technicalSkills && !data.skills) return false;
       fillFormWithData(data);
       return true;
     } catch(e) { return false; }
@@ -7422,9 +7470,14 @@
     setVal('website', pi.website);
     setVal('professionalTitle', pi.professionalTitle);
     setVal('summary', data.summary);
-    setVal('technicalSkills', data.skills || data.technicalSkills);
+    const skillsVal = typeof data.technicalSkills === 'string' ? data.technicalSkills
+      : typeof data.skills === 'string' ? data.skills
+      : Array.isArray(data.technicalSkills) ? data.technicalSkills.join(', ')
+      : Array.isArray(data.skills) ? data.skills.map((s) => (typeof s === 'string' ? s : (s.name || s.skill || ''))).filter(Boolean).join(', ')
+      : '';
+    setVal('technicalSkills', skillsVal);
     setVal('softSkills', data.softSkills);
-    setVal('certifications', data.certifications);
+    setVal('certifications', Array.isArray(data.certifications) ? data.certifications.join('\n') : data.certifications);
     setVal('languages', data.languages);
     setVal('achievements', data.achievements);
   }

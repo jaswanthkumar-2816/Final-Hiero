@@ -1,5 +1,487 @@
 [
   {
+    "id": "app-1790667563427",
+    "opportunityId": "j-1789018667575",
+    "companyName": "Stripe Corp",
+    "companyId": "c-jaswanth-stripe-in",
+    "jobTitle": "AI / Machine Learning Engineer",
+    "studentId": "jaswanthkumarmuthoju@gmail.com",
+    "studentName": "Jaswanth Kumar",
+    "email": "jaswanthkumarmuthoju@gmail.com",
+    "phone": "",
+    "status": "applied",
+    "matchScore": 92,
+    "atsScore": null,
+    "appliedAt": "2026-09-29T07:39:23.427Z",
+    "resumeUrl": "/resumes/Jaswanth_Kumar_Resume_2026.pdf",
+    "skillsMatch": {
+      "matched": [],
+      "missing": []
+    },
+    "verifiedSkills": [],
+    "profile": {
+      "fullName": "Jaswanth Kumar",
+      "email": "jaswanthkumarmuthoju@gmail.com",
+      "phone": "",
+      "college": "",
+      "degree": "",
+      "branch": "",
+      "graduationYear": "",
+      "cgpa": "",
+      "city": "",
+      "candidateType": "student",
+      "headline": "",
+      "linkedin": "",
+      "github": "",
+      "portfolio": "",
+      "skills": [],
+      "softSkills": [],
+      "experienceYears": "",
+      "experienceSummary": "",
+      "projects": "",
+      "about": "",
+      "verifiedSkills": []
+    }
+  },
+  {
+    "id": "app-1789894606452",
+    "opportunityId": "j-1789892716804",
+    "companyName": "Hiero",
+    "studentId": "cand-1",
+    "studentName": "Sushanth",
+    "email": "suchi@gmail.com",
+    "status": "applied",
+    "matchScore": 92,
+    "appliedAt": "2026-09-20T08:56:46.453Z",
+    "resumeUrl": "/resumes/main_resume.pdf",
+    "skillsMatch": {
+      "matched": [
+        "Python",
+        "React",
+        "TypeScript",
+        "SQL"
+      ],
+      "missing": [
+        "Docker"
+      ]
+    }
+  },
+  {
+    "id": "app-sel-1789893479142",
+    "opportunityId": "j-1789892716804",
+    "companyName": "Hiero",
+    "studentId": "s1",
+    "studentName": "Aisha Patel",
+    "email": "aisha.patel@hiero.ai",
+    "matchScore": 96,
+    "appliedAt": "2026-09-20T08:37:59.158Z",
+    "resumeUrl": "/resumes/Aisha_Patel_Resume_Master.pdf",
+    "status": "selected",
+    "notes": "Recruiter selected Aisha Patel for Software Developer Apprentice at Hiero. Placement cell notified.",
+    "notifiedAt": "2026-09-20T08:37:59.158Z"
+  },
+  {
+    "id": "app-1789892758379",
+    "opportunityId": "j-1789892716804",
+    "companyName": "Hiero",
+    "studentId": "cand-1",
+    "studentName": "Jaswanth Kumar",
+    "email": "jaswanthkumarmuthoju@gmail.com",
+    "status": "shortlisted",
+    "matchScore": 92,
+    "appliedAt": "2026-09-20T08:25:58.380Z",
+    "resumeUrl": "/resumes/Jaswanth_Kumar_Resume_2026.pdf",
+    "skillsMatch": {
+      "matched": [
+        "Python",
+        "React",
+        "TypeScript",
+        "SQL"
+      ],
+      "missing": [
+        "Docker"
+      ]
+    },
+    "notes": "Shortlisted by recruiter in Connect.",
+    "notifiedAt": "2026-09-20T08:36:34.819Z"
+  },
+  {
+    "id": "app-1789718327302",
+    "opportunityId": "j-1789623992919",
+    "companyName": "Verified HR Partner",
+    "studentId": "cand-1",
+    "studentName": "Jaswanth Kumar",
+    "email": "jaswanthkumarmuthoju@gmail.com",
+    "status": "applied",
+    "matchScore": 92,
+    "appliedAt": "2026-09-18T07:58:47.303Z",
+    "resumeUrl": "/resumes/Jaswanth_Kumar_Resume_2026.pdf",
+    "skillsMatch": {
+      "matched": [
+        "Python",
+        "React",
+        "TypeScript",
+        "SQL"
+      ],
+      "missing": [
+        "Docker"
+      ]
+    }
+  },
+  {
+    "id": "app-1789632791395",
+    "opportunityId": "j-1",
+    "companyName": "Meta",
+    "studentId": "cand-1",
+    "studentName": "Jaswanth Kumar",
+    "email": "jaswanthkumarmuthoju@gmail.com",
+    "status": "applied",
+    "matchScore": 92,
+    "appliedAt": "2026-09-17T08:13:11.396Z",
+    "resumeUrl": "/resumes/Jaswanth_Kumar_Resume_2026.pdf",
+    "skillsMatch": {
+      "matched": [
+        "Python",
+        "React",
+        "TypeScript",
+        "SQL"
+      ],
+      "missing": [
+        "Docker"
+      ]
+    }
+  },
+  {
+    "id": "app-1789552369932",
+    "opportunityId": "j-1",
+    "companyName": "Deloitte",
+    "studentId": "cand-1",
+    "studentName": "Jaswanth Kumar",
+    "email": "jaswanthkumarmuthoju@gmail.com",
+    "status": "applied",
+    "matchScore": 92,
+    "appliedAt": "2026-09-16T09:52:49.932Z",
+    "resumeUrl": "/resumes/Jaswanth_Kumar_Resume_2026.pdf",
+    "skillsMatch": {
+      "matched": [
+        "Python",
+        "React",
+        "TypeScript",
+        "SQL"
+      ],
+      "missing": [
+        "Docker"
+      ]
+    }
+  },
+  {
+    "id": "app-1789030215698",
+    "opportunityId": "j-1789029806318",
+    "companyName": "TechNova Inc.",
+    "studentId": "cand-1",
+    "studentName": "Jaswanth Kumar",
+    "email": "jaswanthkumarmuthoju@gmail.com",
+    "status": "applied",
+    "matchScore": 92,
+    "appliedAt": "2026-09-10T08:50:15.698Z",
+    "resumeUrl": "/resumes/Jaswanth_Kumar_Resume_2026.pdf",
+    "skillsMatch": {
+      "matched": [
+        "Python",
+        "React",
+        "TypeScript",
+        "SQL"
+      ],
+      "missing": [
+        "Docker"
+      ]
+    }
+  },
+  {
+    "id": "app-1789029903169",
+    "opportunityId": "j-1789029806318",
+    "companyName": "TechNova Inc.",
+    "studentId": "cand-1",
+    "studentName": "Jaswanth Kumar",
+    "email": "jaswanthkumarmuthoju@gmail.com",
+    "status": "applied",
+    "matchScore": 92,
+    "appliedAt": "2026-09-10T08:45:03.169Z",
+    "resumeUrl": "/resumes/Jaswanth_Kumar_Resume_2026.pdf",
+    "skillsMatch": {
+      "matched": [
+        "Python",
+        "React",
+        "TypeScript",
+        "SQL"
+      ],
+      "missing": [
+        "Docker"
+      ]
+    }
+  },
+  {
+    "id": "app-1789021402056",
+    "opportunityId": "j-1",
+    "companyName": "Meta",
+    "studentId": "cand-1",
+    "studentName": "Jaswanth Kumar",
+    "email": "jaswanthkumarmuthoju@gmail.com",
+    "status": "applied",
+    "matchScore": 92,
+    "appliedAt": "2026-09-10T06:23:22.056Z",
+    "resumeUrl": "/resumes/Jaswanth_Kumar_Resume_2026.pdf",
+    "skillsMatch": {
+      "matched": [
+        "Python",
+        "React",
+        "TypeScript",
+        "SQL"
+      ],
+      "missing": [
+        "Docker"
+      ]
+    }
+  },
+  {
+    "id": "app-1789021036673",
+    "opportunityId": "j-1",
+    "companyName": "TechNova AI",
+    "studentId": "cand-1",
+    "studentName": "Jaswanth Kumar",
+    "email": "jaswanthkumarmuthoju@gmail.com",
+    "status": "applied",
+    "matchScore": 92,
+    "appliedAt": "2026-09-10T06:17:16.673Z",
+    "resumeUrl": "/resumes/Jaswanth_Kumar_Resume_2026.pdf",
+    "skillsMatch": {
+      "matched": [
+        "Python",
+        "React",
+        "TypeScript",
+        "SQL"
+      ],
+      "missing": [
+        "Docker"
+      ]
+    }
+  },
+  {
+    "id": "app-1789020658724",
+    "opportunityId": "j-1789020592813",
+    "companyName": "TechNova Inc.",
+    "studentId": "STU-006",
+    "studentName": "Ananya Iyer",
+    "email": "ananya.iyer@college.edu",
+    "status": "rejected",
+    "matchScore": 99,
+    "appliedAt": "2026-09-10T06:10:58.724Z",
+    "resumeUrl": "https://hiero.io/resumes/ananya-iyer-2026.pdf",
+    "skillsMatch": {
+      "matched": [
+        "Python",
+        "React",
+        "TypeScript",
+        "SQL"
+      ],
+      "missing": [
+        "Docker"
+      ]
+    },
+    "notes": "Rejected by recruiter in Connect.",
+    "notifiedAt": "2026-09-20T08:36:24.067Z"
+  },
+  {
+    "id": "app-1789020658723",
+    "opportunityId": "j-1789020592813",
+    "companyName": "TechNova Inc.",
+    "studentId": "STU-005",
+    "studentName": "Vikram Singh",
+    "email": "vikram.singh@college.edu",
+    "status": "applied",
+    "matchScore": 93,
+    "appliedAt": "2026-09-10T06:10:58.723Z",
+    "resumeUrl": "https://hiero.io/resumes/vikram-singh-2026.pdf",
+    "skillsMatch": {
+      "matched": [
+        "Python",
+        "React",
+        "TypeScript",
+        "SQL"
+      ],
+      "missing": [
+        "Docker"
+      ]
+    }
+  },
+  {
+    "id": "app-1789020658721",
+    "opportunityId": "j-1789020592813",
+    "companyName": "TechNova Inc.",
+    "studentId": "STU-003",
+    "studentName": "Rohan Verma",
+    "email": "rohan.verma@college.edu",
+    "status": "applied",
+    "matchScore": 89,
+    "appliedAt": "2026-09-10T06:10:58.721Z",
+    "resumeUrl": "https://hiero.io/resumes/rohan-verma-2026.pdf",
+    "skillsMatch": {
+      "matched": [
+        "Python",
+        "React",
+        "TypeScript",
+        "SQL"
+      ],
+      "missing": [
+        "Docker"
+      ]
+    }
+  },
+  {
+    "id": "app-1789020658718",
+    "opportunityId": "j-1789020592813",
+    "companyName": "TechNova Inc.",
+    "studentId": "STU-002",
+    "studentName": "Diya Patel",
+    "email": "diya.patel@college.edu",
+    "status": "shortlisted",
+    "matchScore": 99,
+    "appliedAt": "2026-09-10T06:10:58.718Z",
+    "resumeUrl": "https://hiero.io/resumes/diya-patel-2026.pdf",
+    "skillsMatch": {
+      "matched": [
+        "Python",
+        "React",
+        "TypeScript",
+        "SQL"
+      ],
+      "missing": [
+        "Docker"
+      ]
+    },
+    "notes": "Shortlisted by recruiter in Connect.",
+    "notifiedAt": "2026-09-20T08:28:01.936Z"
+  },
+  {
+    "id": "app-1789020658693",
+    "opportunityId": "j-1789020592813",
+    "companyName": "TechNova Inc.",
+    "studentId": "STU-001",
+    "studentName": "Aarav Sharma",
+    "email": "aarav.sharma@college.edu",
+    "status": "shortlisted",
+    "matchScore": 97,
+    "appliedAt": "2026-09-10T06:10:58.693Z",
+    "resumeUrl": "https://hiero.io/resumes/aarav-sharma-2026.pdf",
+    "skillsMatch": {
+      "matched": [
+        "Python",
+        "React",
+        "TypeScript",
+        "SQL"
+      ],
+      "missing": [
+        "Docker"
+      ]
+    },
+    "notes": "Shortlisted by recruiter in Connect.",
+    "notifiedAt": "2026-09-20T08:28:04.002Z"
+  },
+  {
+    "id": "app-1789019576499",
+    "opportunityId": "j-1789018667575",
+    "companyName": "Stripe Corp",
+    "studentId": "cand-1",
+    "studentName": "Jaswanth Kumar",
+    "email": "jaswanthkumarmuthoju@gmail.com",
+    "status": "applied",
+    "matchScore": 92,
+    "appliedAt": "2026-09-10T05:52:56.499Z",
+    "resumeUrl": "/resumes/Jaswanth_Kumar_Resume_2026.pdf",
+    "skillsMatch": {
+      "matched": [
+        "Python",
+        "React",
+        "TypeScript",
+        "SQL"
+      ],
+      "missing": [
+        "Docker"
+      ]
+    }
+  },
+  {
+    "id": "app-1789019219638",
+    "opportunityId": "j-1789018567388",
+    "companyName": "LTM",
+    "studentId": "STU-001",
+    "studentName": "Aarav Sharma",
+    "email": "aarav.sharma@college.edu",
+    "status": "shortlisted",
+    "matchScore": 97,
+    "appliedAt": "2026-09-10T05:46:59.638Z",
+    "resumeUrl": "https://hiero.io/resumes/aarav-sharma-2026.pdf",
+    "skillsMatch": {
+      "matched": [
+        "Python",
+        "React",
+        "TypeScript",
+        "SQL"
+      ],
+      "missing": [
+        "Docker"
+      ]
+    },
+    "notes": "Shortlisted by recruiter in Connect.",
+    "notifiedAt": "2026-09-20T08:28:03.969Z"
+  },
+  {
+    "id": "app-1789019219626",
+    "opportunityId": "j-1789018567388",
+    "companyName": "LTM",
+    "studentId": "STU-9613",
+    "studentName": "Rahul Deshpande",
+    "email": "candidate@hiero.in",
+    "status": "applied",
+    "matchScore": 89,
+    "appliedAt": "2026-09-10T05:46:59.626Z",
+    "resumeUrl": "/resumes/jaswanth_resume.pdf",
+    "skillsMatch": {
+      "matched": [
+        "Python",
+        "React",
+        "TypeScript",
+        "SQL"
+      ],
+      "missing": [
+        "Docker"
+      ]
+    }
+  },
+  {
+    "id": "app-1789019219622",
+    "opportunityId": "j-1789018567388",
+    "companyName": "LTM",
+    "studentId": "STU-9553",
+    "studentName": "Meera Krishnan",
+    "email": "candidate@hiero.in",
+    "status": "applied",
+    "matchScore": 95,
+    "appliedAt": "2026-09-10T05:46:59.622Z",
+    "resumeUrl": "/resumes/jaswanth_resume.pdf",
+    "skillsMatch": {
+      "matched": [
+        "Python",
+        "React",
+        "TypeScript",
+        "SQL"
+      ],
+      "missing": [
+        "Docker"
+      ]
+    }
+  },
+  {
     "id": "app-1788194917829",
     "opportunityId": "j-1",
     "companyName": "Tesla AI Vision",

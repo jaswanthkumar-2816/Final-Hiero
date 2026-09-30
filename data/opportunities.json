@@ -1,5 +1,744 @@
 [
   {
+    "id": "j-1789892716804",
+    "companyId": "c-hiero",
+    "companyName": "Hiero",
+    "logoUrl": "",
+    "type": "apprenticeship",
+    "title": "Software Developer Apprentice",
+    "department": "Apprenticeship",
+    "description": "Skills Required\n\n* Basic Java or Python\n* HTML, CSS, JavaScript\n* SQL fundamentals\n* Git/GitHub\n* Basic understanding of REST APIs\n* Problem-solving skills\n\nWhat the apprentice will do\n\n* Develop and maintain web applications\n* Work with senior developers on real projects\n* Build and test APIs\n* Write SQL queries\n* Fix bugs and improve existing features\n* Participate in code reviews\n* Learn industry development practices\n\nTraining Provided\n\nDuring the 12-month apprenticeship, the candidate will receive practical training in:\n\nMonth 1–2:\nProgramming + Git + Development fundamentals\n\nMonth 3–5:\nBackend/API development + databases\n\nMonth 6–8:\nReal project development\n\nMonth 9–11:\nAdvanced development + testing + deployment\n\nMonth 12:\nFinal project + evaluation\n\nSelection Process\n\nApplication → Resume Screening → Technical Assessment → Technical Interview → HR Interview → Apprenticeship Onboarding\n\nFull-Time Opportunity\n\nSuccessful apprentices may be considered for a full-time Software Developer position based on performance, business requirements and applicable company policies.",
+    "requiredSkills": [
+      {
+        "name": "* Basic Java or Python* HTML",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "CSS",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "JavaScript* SQL fundamentals* Git/GitHub* Basic understanding of REST APIs* Problem-solving skills",
+        "importance": "high",
+        "category": "required"
+      }
+    ],
+    "preferredSkills": [],
+    "eligibility": "CSE, IT, AI/ML, ISE",
+    "location": "Yelhanka",
+    "workMode": "hybrid",
+    "employmentType": "Apprenticeship",
+    "salary": "20000/month",
+    "deadline": "2026-09-25",
+    "status": "active",
+    "applicantsCount": 2,
+    "shortlistedCount": 3,
+    "createdAt": "2026-09-20"
+  },
+  {
+    "id": "j-cors-test",
+    "companyId": "c-ltm",
+    "companyName": "LTM",
+    "logoUrl": "",
+    "type": "internship",
+    "title": "CORS Check Intern",
+    "department": "Engineering",
+    "description": "cors",
+    "requiredSkills": [
+      {
+        "name": "Python",
+        "importance": "high",
+        "category": "required"
+      }
+    ],
+    "preferredSkills": [],
+    "eligibility": "Open",
+    "location": "Hyderabad",
+    "workMode": "hybrid",
+    "employmentType": "Internship",
+    "salary": "40k",
+    "deadline": "2026-10-30",
+    "status": "active",
+    "applicantsCount": 0,
+    "shortlistedCount": 0,
+    "createdAt": "2026-09-20"
+  },
+  {
+    "id": "j-test-diag-1",
+    "companyId": "c-ltm",
+    "companyName": "LTM",
+    "logoUrl": "",
+    "type": "internship",
+    "title": "Diag Backend Intern",
+    "department": "Internship",
+    "description": "Test post from Connect diagnostic",
+    "requiredSkills": [
+      {
+        "name": "Python",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "SQL",
+        "importance": "high",
+        "category": "required"
+      }
+    ],
+    "preferredSkills": [],
+    "eligibility": "B.Tech CS",
+    "location": "Hyderabad",
+    "workMode": "hybrid",
+    "employmentType": "Internship",
+    "salary": "40000/mo",
+    "deadline": "2026-10-30",
+    "status": "active",
+    "applicantsCount": 0,
+    "shortlistedCount": 0,
+    "createdAt": "2026-09-20"
+  },
+  {
+    "id": "j-1789717403986",
+    "companyId": "c-jaswanthkumarmuthoju-gmail-com",
+    "companyName": "TechNova Inc.",
+    "logoUrl": "",
+    "type": "full-time",
+    "title": "AI / Machine Learning Engineer",
+    "department": "Artificial Intelligence & Data",
+    "description": "We are hiring an AI / Machine Learning Engineer to design and deploy state-of-the-art machine learning models and LLM solutions.\n\nKey Responsibilities:\n- Build, train, and evaluate machine learning models using PyTorch, TensorFlow, and scikit-learn.\n- Optimize deep learning inference pipelines for production deployment.\n- Integrate LLM APIs, RAG (Retrieval-Augmented Generation), and vector databases.\n- Perform data preprocessing, feature engineering, and SQL analytics.\n- Collaborate with cloud platform engineers to deploy ML pipelines on AWS and Docker containers.\n\nRequirements & Skills:\n- Deep expertise in Python, PyTorch, TensorFlow, and Computer Vision / NLP algorithms.\n- Solid understanding of SQL, REST APIs, Docker, and AWS cloud infrastructure.\n- Strong mathematical background in Linear Algebra, Calculus, and Probability.",
+    "requiredSkills": [
+      {
+        "name": "Python",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "TypeScript",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "SQL",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "AWS",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "Docker",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "Machine Learning",
+        "importance": "high",
+        "category": "required"
+      }
+    ],
+    "preferredSkills": [
+      {
+        "name": "TensorFlow",
+        "importance": "high",
+        "category": "preferred"
+      },
+      {
+        "name": "PyTorch",
+        "importance": "high",
+        "category": "preferred"
+      },
+      {
+        "name": "REST APIs",
+        "importance": "high",
+        "category": "preferred"
+      }
+    ],
+    "eligibility": "B.Tech / M.Tech in CS / AI / Data Science",
+    "location": "Hyderabad, India",
+    "workMode": "hybrid",
+    "employmentType": "Full-time",
+    "salary": "₹14 - 18 LPA",
+    "deadline": "2026-11-15",
+    "status": "active",
+    "applicantsCount": 0,
+    "shortlistedCount": 0,
+    "createdAt": "2026-09-18"
+  },
+  {
+    "id": "j-1789623992919",
+    "companyId": "c-hr-google-com",
+    "companyName": "Verified HR Partner",
+    "logoUrl": "",
+    "type": "full-time",
+    "title": "Full Stack Engineer (Node & React)",
+    "department": "Engineering & Artificial Intelligence",
+    "description": "We are hiring a high-caliber Full Stack Engineer (Node & React) for our team at Google Corp. You will architect mission-critical systems, collaborate with verified tier-1 campus talent, and build scalable production software.",
+    "requiredSkills": [
+      {
+        "name": "React",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "TypeScript",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "JavaScript",
+        "importance": "high",
+        "category": "required"
+      }
+    ],
+    "preferredSkills": [
+      {
+        "name": "Tailwind CSS",
+        "importance": "medium",
+        "category": "preferred"
+      },
+      {
+        "name": "Next.js",
+        "importance": "medium",
+        "category": "preferred"
+      }
+    ],
+    "eligibility": "B.Tech/BE",
+    "location": "Remote (India)",
+    "workMode": "remote",
+    "employmentType": "Full-time",
+    "salary": "₹18,00,000 - ₹26,00,000 / annum",
+    "deadline": "2026-12-31",
+    "status": "active",
+    "applicantsCount": 1,
+    "shortlistedCount": 0,
+    "createdAt": "2026-09-17"
+  },
+  {
+    "id": "j-1789552722030",
+    "companyId": "c-jaswanthkumarmuthoju-gmail-com",
+    "companyName": "TechNova Inc.",
+    "logoUrl": "",
+    "type": "full-time",
+    "title": "AI / Machine Learning Engineer",
+    "department": "Artificial Intelligence & Data",
+    "description": "We are hiring an AI / Machine Learning Engineer to design and deploy state-of-the-art machine learning models and LLM solutions.\n\nKey Responsibilities:\n- Build, train, and evaluate machine learning models using PyTorch, TensorFlow, and scikit-learn.\n- Optimize deep learning inference pipelines for production deployment.\n- Integrate LLM APIs, RAG (Retrieval-Augmented Generation), and vector databases.\n- Perform data preprocessing, feature engineering, and SQL analytics.\n- Collaborate with cloud platform engineers to deploy ML pipelines on AWS and Docker containers.\n\nRequirements & Skills:\n- Deep expertise in Python, PyTorch, TensorFlow, and Computer Vision / NLP algorithms.\n- Solid understanding of SQL, REST APIs, Docker, and AWS cloud infrastructure.\n- Strong mathematical background in Linear Algebra, Calculus, and Probability.",
+    "requiredSkills": [
+      {
+        "name": "Python",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "TypeScript",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "SQL",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "AWS",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "Docker",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "Machine Learning",
+        "importance": "high",
+        "category": "required"
+      }
+    ],
+    "preferredSkills": [
+      {
+        "name": "TensorFlow",
+        "importance": "high",
+        "category": "preferred"
+      },
+      {
+        "name": "PyTorch",
+        "importance": "high",
+        "category": "preferred"
+      },
+      {
+        "name": "REST APIs",
+        "importance": "high",
+        "category": "preferred"
+      }
+    ],
+    "eligibility": "B.Tech / M.Tech in CS / AI / Data Science",
+    "location": "Hyderabad, India",
+    "workMode": "hybrid",
+    "employmentType": "Full-time",
+    "salary": "₹14 - 18 LPA",
+    "deadline": "2026-11-15",
+    "status": "active",
+    "applicantsCount": 0,
+    "shortlistedCount": 0,
+    "createdAt": "2026-09-16"
+  },
+  {
+    "id": "j-1789032171604",
+    "companyId": "c-jaswanthkumarmuthoju-gmail-com",
+    "companyName": "TechNova Inc.",
+    "logoUrl": "",
+    "type": "full-time",
+    "title": "AI / Machine Learning Engineer",
+    "department": "Artificial Intelligence & Data",
+    "description": "We are hiring an AI / Machine Learning Engineer to design and deploy state-of-the-art machine learning models and LLM solutions.\n\nKey Responsibilities:\n- Build, train, and evaluate machine learning models using PyTorch, TensorFlow, and scikit-learn.\n- Optimize deep learning inference pipelines for production deployment.\n- Integrate LLM APIs, RAG (Retrieval-Augmented Generation), and vector databases.\n- Perform data preprocessing, feature engineering, and SQL analytics.\n- Collaborate with cloud platform engineers to deploy ML pipelines on AWS and Docker containers.\n\nRequirements & Skills:\n- Deep expertise in Python, PyTorch, TensorFlow, and Computer Vision / NLP algorithms.\n- Solid understanding of SQL, REST APIs, Docker, and AWS cloud infrastructure.\n- Strong mathematical background in Linear Algebra, Calculus, and Probability.",
+    "requiredSkills": [
+      {
+        "name": "Python",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "TypeScript",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "SQL",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "AWS",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "Docker",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "Machine Learning",
+        "importance": "high",
+        "category": "required"
+      }
+    ],
+    "preferredSkills": [
+      {
+        "name": "TensorFlow",
+        "importance": "high",
+        "category": "preferred"
+      },
+      {
+        "name": "PyTorch",
+        "importance": "high",
+        "category": "preferred"
+      },
+      {
+        "name": "REST APIs",
+        "importance": "high",
+        "category": "preferred"
+      }
+    ],
+    "eligibility": "B.Tech / M.Tech in CS / AI / Data Science",
+    "location": "Hyderabad, India",
+    "workMode": "hybrid",
+    "employmentType": "Full-time",
+    "salary": "₹14 - 18 LPA",
+    "deadline": "2026-11-15",
+    "status": "active",
+    "applicantsCount": 0,
+    "shortlistedCount": 0,
+    "createdAt": "2026-09-10"
+  },
+  {
+    "id": "j-1789029806318",
+    "companyId": "c-jaswanthkumarmuthoju-gmail-com",
+    "companyName": "TechNova Inc.",
+    "logoUrl": "",
+    "type": "internship",
+    "title": "Software Development Engineer Intern",
+    "department": "Core Engineering",
+    "description": "We are seeking a high-caliber Software Development Engineer Intern to join our core engineering team. In this role, you will build scalable web applications and REST APIs using modern technologies.\n\nKey Responsibilities:\n- Design and develop clean, maintainable code in Python, React, and TypeScript.\n- Build and consume REST APIs using Node.js and Express.\n- Collaborate with senior engineers to implement relational database models using PostgreSQL and MySQL.\n- Use Git and GitHub for version control and workflow collaboration.\n- Write unit tests and participate in technical design reviews.\n\nRequirements & Skills:\n- Strong proficiency in JavaScript, TypeScript, React, and Python.\n- Hands-on experience with Node.js, REST APIs, and SQL databases.\n- Familiarity with Git, Linux command line, and Docker containers.\n- Strong problem-solving skills and algorithmic thinking.",
+    "requiredSkills": [
+      {
+        "name": "Python",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "JavaScript",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "React",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "TypeScript",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "SQL",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "Docker",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "Machine Learning",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "Git",
+        "importance": "high",
+        "category": "required"
+      }
+    ],
+    "preferredSkills": [
+      {
+        "name": "Node.js",
+        "importance": "high",
+        "category": "preferred"
+      },
+      {
+        "name": "Java",
+        "importance": "high",
+        "category": "preferred"
+      },
+      {
+        "name": "Linux",
+        "importance": "high",
+        "category": "preferred"
+      },
+      {
+        "name": "REST APIs",
+        "importance": "high",
+        "category": "preferred"
+      }
+    ],
+    "eligibility": "B.Tech / BE in CS / IT (2025/2026 Batch)",
+    "location": "Bangalore, India",
+    "workMode": "hybrid",
+    "employmentType": "Internship",
+    "salary": "₹35,000/month",
+    "deadline": "2026-10-30",
+    "status": "active",
+    "applicantsCount": 2,
+    "shortlistedCount": 0,
+    "createdAt": "2026-09-10"
+  },
+  {
+    "id": "j-1789029704636",
+    "companyId": "c-jaswanthkumarmuthoju-gmail-com",
+    "companyName": "TechNova Inc.",
+    "logoUrl": "",
+    "type": "full-time",
+    "title": "AI / Machine Learning Engineer",
+    "department": "Artificial Intelligence & Data",
+    "description": "We are hiring an AI / Machine Learning Engineer to design and deploy state-of-the-art machine learning models and LLM solutions.\n\nKey Responsibilities:\n- Build, train, and evaluate machine learning models using PyTorch, TensorFlow, and scikit-learn.\n- Optimize deep learning inference pipelines for production deployment.\n- Integrate LLM APIs, RAG (Retrieval-Augmented Generation), and vector databases.\n- Perform data preprocessing, feature engineering, and SQL analytics.\n- Collaborate with cloud platform engineers to deploy ML pipelines on AWS and Docker containers.\n\nRequirements & Skills:\n- Deep expertise in Python, PyTorch, TensorFlow, and Computer Vision / NLP algorithms.\n- Solid understanding of SQL, REST APIs, Docker, and AWS cloud infrastructure.\n- Strong mathematical background in Linear Algebra, Calculus, and Probability.",
+    "requiredSkills": [
+      {
+        "name": "Python",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "TypeScript",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "SQL",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "AWS",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "Docker",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "Machine Learning",
+        "importance": "high",
+        "category": "required"
+      }
+    ],
+    "preferredSkills": [
+      {
+        "name": "TensorFlow",
+        "importance": "high",
+        "category": "preferred"
+      },
+      {
+        "name": "PyTorch",
+        "importance": "high",
+        "category": "preferred"
+      },
+      {
+        "name": "REST APIs",
+        "importance": "high",
+        "category": "preferred"
+      }
+    ],
+    "eligibility": "B.Tech / M.Tech in CS / AI / Data Science",
+    "location": "Hyderabad, India",
+    "workMode": "hybrid",
+    "employmentType": "Full-time",
+    "salary": "₹14 - 18 LPA",
+    "deadline": "2026-11-15",
+    "status": "active",
+    "applicantsCount": 0,
+    "shortlistedCount": 0,
+    "createdAt": "2026-09-10"
+  },
+  {
+    "id": "j-1789020592813",
+    "companyId": "c-jaswanthkumarmuthoju-gmail-com",
+    "companyName": "TechNova Inc.",
+    "logoUrl": "",
+    "type": "full-time",
+    "title": "DevOps & Cloud Infrastructure Engineer",
+    "department": "Platform Engineering",
+    "description": "Architect and manage robust cloud infrastructure and automated CI/CD pipelines for our global microservices architecture.\n\nKey Responsibilities:\n- Provision and maintain scalable AWS cloud environments using Infrastructure as Code (Terraform).\n- Manage Docker containers and Kubernetes clusters across staging and production.\n- Build resilient CI/CD pipelines using GitHub Actions and Jenkins.\n- Monitor system reliability, uptime, and security metrics using Prometheus and Grafana.\n\nRequirements & Skills:\n- Advanced skills in AWS, Docker, Kubernetes, Linux, and Terraform.\n- Scripting knowledge in Python, Bash, and Shell.",
+    "requiredSkills": [
+      {
+        "name": "Python",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "TypeScript",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "AWS",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "Docker",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "Kubernetes",
+        "importance": "high",
+        "category": "required"
+      }
+    ],
+    "preferredSkills": [
+      {
+        "name": "Machine Learning",
+        "importance": "high",
+        "category": "preferred"
+      },
+      {
+        "name": "Git",
+        "importance": "high",
+        "category": "preferred"
+      },
+      {
+        "name": "Linux",
+        "importance": "high",
+        "category": "preferred"
+      }
+    ],
+    "eligibility": "B.Tech in CS/IT (1-4 years exp)",
+    "location": "Remote, India",
+    "workMode": "remote",
+    "employmentType": "Full-time",
+    "salary": "₹15 - 22 LPA",
+    "deadline": "2026-12-01",
+    "status": "active",
+    "applicantsCount": 5,
+    "shortlistedCount": 5,
+    "createdAt": "2026-09-10"
+  },
+  {
+    "id": "j-1789018667575",
+    "companyId": "c-jaswanth-stripe-in",
+    "companyName": "Stripe Corp",
+    "logoUrl": "",
+    "type": "full-time",
+    "title": "AI / Machine Learning Engineer",
+    "department": "Artificial Intelligence & Data",
+    "description": "We are hiring an AI / Machine Learning Engineer to design and deploy state-of-the-art machine learning models and LLM solutions.\n\nKey Responsibilities:\n- Build, train, and evaluate machine learning models using PyTorch, TensorFlow, and scikit-learn.\n- Optimize deep learning inference pipelines for production deployment.\n- Integrate LLM APIs, RAG (Retrieval-Augmented Generation), and vector databases.\n- Perform data preprocessing, feature engineering, and SQL analytics.\n- Collaborate with cloud platform engineers to deploy ML pipelines on AWS and Docker containers.\n\nRequirements & Skills:\n- Deep expertise in Python, PyTorch, TensorFlow, and Computer Vision / NLP algorithms.\n- Solid understanding of SQL, REST APIs, Docker, and AWS cloud infrastructure.\n- Strong mathematical background in Linear Algebra, Calculus, and Probability.",
+    "requiredSkills": [
+      {
+        "name": "Python",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "TypeScript",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "SQL",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "AWS",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "Docker",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "Machine Learning",
+        "importance": "high",
+        "category": "required"
+      }
+    ],
+    "preferredSkills": [
+      {
+        "name": "TensorFlow",
+        "importance": "high",
+        "category": "preferred"
+      },
+      {
+        "name": "PyTorch",
+        "importance": "high",
+        "category": "preferred"
+      },
+      {
+        "name": "REST APIs",
+        "importance": "high",
+        "category": "preferred"
+      }
+    ],
+    "eligibility": "B.Tech / M.Tech in CS / AI / Data Science",
+    "location": "Hyderabad, India",
+    "workMode": "hybrid",
+    "employmentType": "Full-time",
+    "salary": "₹14 - 18 LPA",
+    "deadline": "2026-11-15",
+    "status": "active",
+    "applicantsCount": 2,
+    "shortlistedCount": 0,
+    "createdAt": "2026-09-10"
+  },
+  {
+    "id": "j-1789018567388",
+    "companyId": "c-ltm",
+    "companyName": "LTM",
+    "logoUrl": "",
+    "type": "full-time",
+    "title": "Full Stack Fresher",
+    "department": "Engineering",
+    "description": "LTM is hiring Full Stack Freshers for the 2026 graduating batch. Work on React, Node.js, Python, and SQL. Minimum CGPA 7.5 / 10. Eligible: B.Tech / BE / MCA.",
+    "requiredSkills": [
+      {
+        "name": "React",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "Node.js",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "Python",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "SQL",
+        "importance": "high",
+        "category": "required"
+      }
+    ],
+    "preferredSkills": [
+      {
+        "name": "TypeScript",
+        "importance": "medium",
+        "category": "preferred"
+      },
+      {
+        "name": "Git",
+        "importance": "medium",
+        "category": "preferred"
+      }
+    ],
+    "eligibility": "B.Tech / BE / MCA | Minimum CGPA 7.5 / 10 | 2026 fresher batch",
+    "location": "Hyderabad, India (Hybrid)",
+    "workMode": "hybrid",
+    "employmentType": "Full-time",
+    "salary": "₹6–8 LPA",
+    "deadline": "2026-11-15",
+    "status": "active",
+    "applicantsCount": 3,
+    "shortlistedCount": 1,
+    "createdAt": "2026-09-10"
+  },
+  {
+    "id": "j-1789018466270",
+    "companyId": "c1",
+    "companyName": "TechNova",
+    "logoUrl": "",
+    "type": "internship",
+    "title": "HIERO Live Demo — Full Stack Intern",
+    "department": "Engineering",
+    "description": "Live demo role posted from Connect Portal so you can see it on HIERO (2816) and Bridge (2410). Build React + Python APIs with the campus talent network.",
+    "requiredSkills": [
+      {
+        "name": "Python",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "React",
+        "importance": "high",
+        "category": "required"
+      },
+      {
+        "name": "TypeScript",
+        "importance": "high",
+        "category": "required"
+      }
+    ],
+    "preferredSkills": [
+      {
+        "name": "Docker",
+        "importance": "medium",
+        "category": "preferred"
+      }
+    ],
+    "eligibility": "B.Tech / BE in CS or related fields, 2026 batch",
+    "location": "Bangalore, India (Hybrid)",
+    "workMode": "hybrid",
+    "employmentType": "Internship",
+    "salary": "₹40,000/month",
+    "deadline": "2026-10-30",
+    "status": "active",
+    "applicantsCount": 0,
+    "shortlistedCount": 0,
+    "createdAt": "2026-09-10"
+  },
+  {
     "id": "j-1788424184096",
     "companyId": "c-jas-hiero-in",
     "companyName": "Hiero Corp",

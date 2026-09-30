@@ -211,21 +211,54 @@ router.post('/apply', (req, res) => {
             saveJSON(OPPS_FILE, currentOpps);
         }
 
+        const profileIn = (body.profile && typeof body.profile === 'object') ? body.profile : {};
+        const studentName = body.studentName || profileIn.fullName || 'Candidate';
+        const email = body.email || profileIn.email || 'candidate@hiero.in';
+        const profile = {
+            fullName: profileIn.fullName || studentName,
+            email: profileIn.email || email,
+            phone: profileIn.phone || body.phone || '',
+            college: profileIn.college || '',
+            degree: profileIn.degree || '',
+            branch: profileIn.branch || '',
+            graduationYear: profileIn.graduationYear || '',
+            cgpa: profileIn.cgpa || '',
+            city: profileIn.city || profileIn.location || '',
+            candidateType: profileIn.candidateType || 'student',
+            headline: profileIn.headline || profileIn.targetRole || '',
+            linkedin: profileIn.linkedin || '',
+            github: profileIn.github || '',
+            portfolio: profileIn.portfolio || '',
+            skills: Array.isArray(profileIn.skills) ? profileIn.skills : String(profileIn.skills || '').split(/[,|]/).map(s => s.trim()).filter(Boolean),
+            softSkills: Array.isArray(profileIn.softSkills) ? profileIn.softSkills : String(profileIn.softSkills || '').split(/[,|]/).map(s => s.trim()).filter(Boolean),
+            experienceYears: profileIn.experienceYears || '',
+            experienceSummary: profileIn.experienceSummary || '',
+            projects: profileIn.projects || '',
+            about: profileIn.about || '',
+            verifiedSkills: Array.isArray(profileIn.verifiedSkills) ? profileIn.verifiedSkills : (body.verifiedSkills || [])
+        };
+
         const newApp = {
             id: `app-${Date.now()}`,
             opportunityId: targetOpp ? targetOpp.id : opportunityId,
             companyName: companyName,
-            studentId: body.studentId || 'cand-1',
-            studentName: body.studentName || 'Jaswanth Kumar',
-            email: body.email || 'candidate@hiero.in',
+            companyId: body.companyId || (targetOpp && targetOpp.companyId) || '',
+            jobTitle: body.jobTitle || (targetOpp && targetOpp.title) || '',
+            studentId: body.studentId || email,
+            studentName,
+            email,
+            phone: profile.phone,
             status: 'applied',
-            matchScore: body.matchScore || 92,
+            matchScore: typeof body.matchScore === 'number' ? body.matchScore : (parseInt(body.matchScore, 10) || 0),
+            atsScore: body.atsScore || profileIn.atsScore || null,
             appliedAt: new Date().toISOString(),
-            resumeUrl: body.resumeUrl || '/resumes/jaswanth_resume.pdf',
+            resumeUrl: body.resumeUrl || profileIn.resumeUrl || '',
             skillsMatch: body.skillsMatch || {
-                matched: ['Python', 'React', 'TypeScript', 'SQL'],
-                missing: ['Docker']
-            }
+                matched: profile.skills.slice(0, 8),
+                missing: []
+            },
+            verifiedSkills: profile.verifiedSkills,
+            profile
         };
 
         currentApps.unshift(newApp);
@@ -246,10 +279,19 @@ router.post('/apply', (req, res) => {
 // GET /api/opportunities/applications - Fetch applications for Connect-Portal HR Inbox
 router.get('/applications', (req, res) => {
     try {
-        const { companyId, opportunityId } = req.query;
+        const { companyId, opportunityId, companyName } = req.query;
         let apps = loadJSON(APPS_FILE, []);
         if (opportunityId) {
             apps = apps.filter(a => a.opportunityId === opportunityId);
+        }
+        if (companyName) {
+            const q = String(companyName).toLowerCase();
+            apps = apps.filter(a => String(a.companyName || '').toLowerCase().includes(q));
+        }
+        if (companyId) {
+            const opps = loadJSON(OPPS_FILE, opportunities);
+            const ids = new Set(opps.filter(o => o.companyId === companyId).map(o => o.id));
+            apps = apps.filter(a => ids.has(a.opportunityId) || String(a.companyId || '') === companyId);
         }
         res.json({
             success: true,

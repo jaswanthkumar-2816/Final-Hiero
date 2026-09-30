@@ -93,6 +93,63 @@
       margin: 0 auto;
     }
 
+    .dream-flow-banner {
+      display: none;
+      width: 100%;
+      max-width: 720px;
+      margin: 0 auto 36px;
+      padding: 16px 20px;
+      border-radius: 16px;
+      border: 1px solid rgba(7, 226, 25, 0.25);
+      background: rgba(7, 226, 25, 0.06);
+      text-align: left;
+    }
+
+    .dream-flow-banner.active { display: block; }
+
+    .dream-flow-banner .flow-title {
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--primary);
+      margin-bottom: 10px;
+    }
+
+    .dream-flow-steps {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 14px;
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .dream-flow-steps li {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .dream-flow-steps li .num {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: rgba(7, 226, 25, 0.15);
+      color: var(--primary);
+      font-size: 11px;
+      font-weight: 800;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .dream-flow-steps li.done .num { background: var(--primary); color: #000; }
+    .dream-flow-steps li.current { color: var(--primary); }
+
     .domains-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -177,6 +234,76 @@
       font-size: 0.95rem;
       line-height: 1.6;
       font-weight: 500;
+      margin: 0;
+    }
+
+    .domain-card-arrow {
+      display: none;
+    }
+
+    /* Dream Job only — stacked domain list */
+    body.dream-job-flow .domains-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    body.dream-job-flow .domain-card {
+      border-radius: 20px;
+      padding: 22px 28px;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 22px;
+    }
+
+    body.dream-job-flow .domain-card:hover {
+      transform: translateX(6px);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+    }
+
+    body.dream-job-flow .icon-wrapper {
+      width: 56px;
+      height: 56px;
+      flex-shrink: 0;
+      margin: 0;
+      font-size: 1.4rem;
+    }
+
+    body.dream-job-flow .domain-card:hover .icon-wrapper {
+      transform: scale(1.08);
+      box-shadow: 0 0 24px rgba(7, 226, 25, 0.3);
+    }
+
+    body.dream-job-flow .domain-card-body {
+      flex: 1;
+      min-width: 0;
+    }
+
+    body.dream-job-flow .domain-title {
+      font-size: 1.25rem;
+      margin-bottom: 6px;
+    }
+
+    body.dream-job-flow .domain-desc {
+      line-height: 1.5;
+    }
+
+    body.dream-job-flow .domain-card-arrow {
+      display: block;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      opacity: 0.45;
+      flex-shrink: 0;
+      transition: all 0.3s;
+    }
+
+    body.dream-job-flow .domain-card:hover .domain-card-arrow {
+      color: var(--primary);
+      opacity: 1;
+      transform: translateX(4px);
     }
 
     /* Modal Styles */
@@ -474,8 +601,17 @@
       <a href="/" style="text-decoration: none; display: block; margin-bottom: 30px;">
         <img src="logo-hiero.png" alt="Hiero" style="height: 60px;">
       </a>
-      <h1>Select Career Domain</h1>
-      <p>Choose your industry and specialization. Our AI will automatically tailor the resume format, suggested skills, and layout specifically for your exact field.</p>
+      <h1 id="pageTitle">Select Career Domain</h1>
+      <p id="pageSubtitle">Choose your industry and specialization. Our AI will automatically tailor the resume format, suggested skills, and layout specifically for your exact field.</p>
+    </div>
+
+    <div class="dream-flow-banner" id="dreamFlowBanner">
+      <div class="flow-title">Dream Job path</div>
+      <ul class="dream-flow-steps">
+        <li class="current" id="step1"><span class="num">1</span> Choose domain</li>
+        <li id="step2"><span class="num">2</span> Select dream role</li>
+        <li id="step3"><span class="num">3</span> Personalized roadmap</li>
+      </ul>
     </div>
 
     <div class="domains-grid" id="domainsGrid">
@@ -509,6 +645,12 @@
   </div>
 
   <script>
+    // Create Resume vs Dream Job — sticky via ?next=
+    const flowParams = new URLSearchParams(window.location.search);
+    const flowNext = flowParams.get('next') === 'roadmap' ? 'roadmap' : 'resume';
+    localStorage.setItem('domainNext', flowNext);
+    const isDreamJob = flowNext === 'roadmap';
+
     const domainsData = [
       {
         id: 'engineering',
@@ -811,8 +953,11 @@
           <div class="icon-wrapper">
             <i class="fa-solid ${d.icon}"></i>
           </div>
-          <h3 class="domain-title">${d.title}</h3>
-          <p class="domain-desc">${d.desc}</p>
+          <div class="domain-card-body">
+            <h3 class="domain-title">${d.title}</h3>
+            <p class="domain-desc">${d.desc}</p>
+          </div>
+          <i class="fa-solid fa-chevron-right domain-card-arrow"></i>
         `;
         
         card.addEventListener('click', () => openModal(d));
@@ -825,11 +970,20 @@
     function openModal(domainObj) {
       currentDomain = domainObj;
       modalTitle.textContent = domainObj.title;
-      modalSubtitle.textContent = "Choose your specific focus area for more precision.";
+      modalSubtitle.textContent = isDreamJob
+        ? 'Step 2 — pick the dream role you want a roadmap for.'
+        : 'Choose your specific focus area for more precision.';
       modalBack.style.display = 'none';
       searchContainer.style.display = 'none';
       subList.innerHTML = '';
       modalSearch.value = '';
+
+      if (isDreamJob) {
+        const step1 = document.getElementById('step1');
+        const step2 = document.getElementById('step2');
+        if (step1) { step1.classList.add('done'); step1.classList.remove('current'); }
+        if (step2) step2.classList.add('current');
+      }
 
       // Check if it has subgroups (like Tech vs Core)
       if (domainObj.subgroups) {
@@ -844,7 +998,9 @@
     }
 
     function renderSubgroups(subgroups) {
-      modalSubtitle.textContent = "Select your engineering path to see specialized roles.";
+      modalSubtitle.textContent = isDreamJob
+        ? 'Choose your path, then pick a dream role for the roadmap.'
+        : 'Select your engineering path to see specialized roles.';
       searchContainer.style.display = 'none';
       subList.innerHTML = '<div class="subgroup-selection"></div>';
       const container = subList.querySelector('.subgroup-selection');
@@ -861,7 +1017,9 @@
         div.addEventListener('click', () => {
           modalBack.style.display = 'flex';
           searchContainer.style.display = 'block';
-          modalSubtitle.textContent = `Specialized roles in ${name}`;
+          modalSubtitle.textContent = isDreamJob
+            ? `Step 2 — pick your dream role in ${name}`
+            : `Specialized roles in ${name}`;
           currentFilteredData = data;
           renderSubdomains(data);
         });
@@ -917,6 +1075,12 @@
 
     function closeModal() {
       modal.classList.remove('active');
+      if (isDreamJob) {
+        const step1 = document.getElementById('step1');
+        const step2 = document.getElementById('step2');
+        if (step1) { step1.classList.add('current'); step1.classList.remove('done'); }
+        if (step2) step2.classList.remove('current', 'done');
+      }
     }
 
     closeBtn.addEventListener('click', closeModal);
@@ -924,19 +1088,45 @@
       if(e.target === modal) closeModal();
     });
 
-    // The core redirection function
+    // The core redirection function — Create Resume vs Dream Job (roadmap)
     function selectPath(domain, sub) {
       const expertise = encodeURIComponent(`${domain} - ${sub}`);
-      
-      // Save the clean subdomain key for the builder to use
       const subKey = sub.toLowerCase().replace(/[^a-z0-9]/g, '-');
+      localStorage.setItem('selectedDomain', domain);
       localStorage.setItem('selectedSubdomain', subKey);
-      
-      console.log(`Selected Subdomain: ${subKey}`);
-      
-      // Redirect to builder and pass the domain as a query parameter
+      localStorage.setItem('selectedRole', sub);
+      localStorage.setItem('domainNext', flowNext);
+
+      if (isDreamJob) {
+        const step2 = document.getElementById('step2');
+        const step3 = document.getElementById('step3');
+        if (step2) { step2.classList.add('done'); step2.classList.remove('current'); }
+        if (step3) step3.classList.add('current');
+        window.location.href = `/roadmap.html?domain=${encodeURIComponent(domain)}&role=${encodeURIComponent(sub)}&from=dream-job`;
+        return;
+      }
+
       window.location.href = `/resume-builder.html?domain=${expertise}`;
     }
+
+    // Dream Job entry: copy + progress banner + stack layout
+    (function setupDreamJobFlow() {
+      if (!isDreamJob) return;
+      document.body.classList.add('dream-job-flow');
+      const banner = document.getElementById('dreamFlowBanner');
+      const title = document.getElementById('pageTitle');
+      const subtitle = document.getElementById('pageSubtitle');
+      const back = document.querySelector('.back-btn');
+      if (banner) banner.classList.add('active');
+      if (title) title.textContent = 'Pick your dream job domain';
+      if (subtitle) {
+        subtitle.textContent = 'Step 1 of 3 — choose a domain, then your dream role. HIERO builds a personalized roadmap that updates as you progress.';
+      }
+      if (back) {
+        back.innerHTML = '<i class="fas fa-arrow-left"></i> HOME';
+        back.href = '/index.html';
+      }
+    })();
   </script>
 </body>
 </html>

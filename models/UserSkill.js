@@ -11,6 +11,9 @@ const userSkillSchema = new mongoose.Schema({
     },
     score: { type: Number, default: 0, min: 0, max: 100 },
     status: { type: String, enum: ['learning', 'validated', 'mastered'], default: 'learning' },
+    verifiedLevel: { type: Number, min: 1, max: 3, default: null },
+    verifiedAt: { type: Date, default: null },
+    evalScore: { type: Number, min: 0, max: 100, default: null },
     lastAttemptAt: { type: Date },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }

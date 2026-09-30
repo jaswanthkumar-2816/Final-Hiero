@@ -55,6 +55,7 @@ const LANGUAGES = {
 
 // ─── CORS ──────────────────────────────────────────────
 const CORS_ORIGINS = [
+    'http://localhost:2341',
     'http://localhost:2816',
     'http://localhost:5173',
     'http://localhost:3000',

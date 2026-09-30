@@ -66,6 +66,23 @@ def init_db():
             skills_match TEXT
         )
     ''')
+    # Migrate: profile JSON for Connect candidate card
+    try:
+        cursor.execute("ALTER TABLE applications ADD COLUMN profile TEXT")
+    except Exception:
+        pass
+    try:
+        cursor.execute("ALTER TABLE applications ADD COLUMN job_title TEXT")
+    except Exception:
+        pass
+    try:
+        cursor.execute("ALTER TABLE applications ADD COLUMN phone TEXT")
+    except Exception:
+        pass
+    try:
+        cursor.execute("ALTER TABLE applications ADD COLUMN verified_skills TEXT")
+    except Exception:
+        pass
     
     conn.commit()
     
@@ -260,22 +277,49 @@ def db_add_application(data):
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
     
+    profile_in = data.get("profile") if isinstance(data.get("profile"), dict) else {}
     app_id = f"app-{int(datetime.now().timestamp()*1000)}"
     opp_id = data.get("opportunityId") or data.get("jobId") or "opp-demo-1"
     company_name = data.get("companyName") or "Verified HR Partner"
-    student_id = data.get("studentId") or "cand-1"
-    student_name = data.get("studentName") or "Jaswanth Kumar"
-    email = data.get("email") or "candidate@hiero.in"
-    match_score = data.get("matchScore") or 92
+    student_name = data.get("studentName") or profile_in.get("fullName") or "Candidate"
+    email = data.get("email") or profile_in.get("email") or "candidate@hiero.in"
+    student_id = data.get("studentId") or email
+    phone = data.get("phone") or profile_in.get("phone") or ""
+    job_title = data.get("jobTitle") or ""
+    match_score = data.get("matchScore") or 0
     applied_at = datetime.now().isoformat()
-    resume_url = data.get("resumeUrl") or "/resumes/jaswanth_resume.pdf"
-    skills_match = json.dumps(data.get("skillsMatch") or {"matched": ["Python", "React"], "missing": []})
+    resume_url = data.get("resumeUrl") or profile_in.get("resumeUrl") or ""
+    skills_match = json.dumps(data.get("skillsMatch") or {"matched": [], "missing": []})
+    verified = data.get("verifiedSkills") or profile_in.get("verifiedSkills") or []
+    profile = {
+        "fullName": profile_in.get("fullName") or student_name,
+        "email": profile_in.get("email") or email,
+        "phone": phone,
+        "college": profile_in.get("college") or "",
+        "degree": profile_in.get("degree") or "",
+        "branch": profile_in.get("branch") or "",
+        "graduationYear": profile_in.get("graduationYear") or "",
+        "cgpa": profile_in.get("cgpa") or "",
+        "city": profile_in.get("city") or profile_in.get("location") or "",
+        "candidateType": profile_in.get("candidateType") or "student",
+        "headline": profile_in.get("headline") or profile_in.get("targetRole") or "",
+        "linkedin": profile_in.get("linkedin") or "",
+        "github": profile_in.get("github") or "",
+        "portfolio": profile_in.get("portfolio") or "",
+        "skills": profile_in.get("skills") or [],
+        "softSkills": profile_in.get("softSkills") or [],
+        "experienceYears": profile_in.get("experienceYears") or "",
+        "experienceSummary": profile_in.get("experienceSummary") or "",
+        "projects": profile_in.get("projects") or "",
+        "about": profile_in.get("about") or "",
+        "verifiedSkills": verified
+    }
     
     cursor.execute('''
         INSERT INTO applications (
-            id, opportunity_id, company_name, student_id, student_name, email, status, match_score, applied_at, resume_url, skills_match
-        ) VALUES (?, ?, ?, ?, ?, ?, 'applied', ?, ?, ?, ?)
-    ''', (app_id, opp_id, company_name, student_id, student_name, email, match_score, applied_at, resume_url, skills_match))
+            id, opportunity_id, company_name, student_id, student_name, email, status, match_score, applied_at, resume_url, skills_match, profile, job_title, phone, verified_skills
+        ) VALUES (?, ?, ?, ?, ?, ?, 'applied', ?, ?, ?, ?, ?, ?, ?, ?)
+    ''', (app_id, opp_id, company_name, student_id, student_name, email, match_score, applied_at, resume_url, skills_match, json.dumps(profile), job_title, phone, json.dumps(verified)))
     
     cursor.execute("UPDATE opportunities SET applicants_count = applicants_count + 1 WHERE id = ?", (opp_id,))
     conn.commit()
@@ -287,10 +331,17 @@ def db_add_application(data):
             "id": app_id,
             "opportunityId": opp_id,
             "companyName": company_name,
+            "jobTitle": job_title,
             "studentName": student_name,
+            "email": email,
+            "phone": phone,
             "status": "applied",
             "matchScore": match_score,
-            "appliedAt": applied_at
+            "appliedAt": applied_at,
+            "resumeUrl": resume_url,
+            "skillsMatch": json.loads(skills_match),
+            "verifiedSkills": verified,
+            "profile": profile
         }
     }
 
@@ -300,7 +351,36 @@ def db_get_applications():
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM applications ORDER BY applied_at DESC")
     rows = cursor.fetchall()
-    apps = [dict(r) for r in rows]
+    apps = []
+    for r in rows:
+        d = dict(r)
+        out = {
+            "id": d.get("id"),
+            "opportunityId": d.get("opportunity_id"),
+            "companyName": d.get("company_name"),
+            "studentId": d.get("student_id"),
+            "studentName": d.get("student_name"),
+            "email": d.get("email"),
+            "phone": d.get("phone") or "",
+            "jobTitle": d.get("job_title") or "",
+            "status": d.get("status"),
+            "matchScore": d.get("match_score"),
+            "appliedAt": d.get("applied_at"),
+            "resumeUrl": d.get("resume_url"),
+        }
+        try:
+            out["skillsMatch"] = json.loads(d.get("skills_match") or "{}")
+        except Exception:
+            out["skillsMatch"] = {}
+        try:
+            out["profile"] = json.loads(d.get("profile") or "{}")
+        except Exception:
+            out["profile"] = {}
+        try:
+            out["verifiedSkills"] = json.loads(d.get("verified_skills") or "[]")
+        except Exception:
+            out["verifiedSkills"] = out.get("profile", {}).get("verifiedSkills") or []
+        apps.append(out)
     conn.close()
     return {"success": True, "applications": apps}
 

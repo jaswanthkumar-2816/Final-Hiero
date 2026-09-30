@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HIERO Connect | Industry Portal (Port 2004)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --font-main: 'Plus Jakarta Sans', sans-serif;
+      --font-display: 'Outfit', sans-serif;
+      --bg: #07090e;
+      --surface: #0d121c;
+      --card: rgba(13, 18, 28, 0.85);
+      --border: rgba(255,255,255,0.08);
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --green: #07e219;
+      --blue: #38bdf8;
+      --warn: #f59e0b;
+      --danger: #f87171;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-main); }
+    body { background: var(--bg); color: var(--text); min-height: 100vh; }
+    .glow {
+      position: fixed; top: -160px; left: 30%; width: 640px; height: 640px;
+      background: radial-gradient(circle, rgba(56,189,248,0.22) 0%, transparent 70%);
+      filter: blur(120px); pointer-events: none; z-index: 0;
+    }
+    .navbar {
+      position: sticky; top: 0; z-index: 40;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1rem 1.6rem; background: rgba(7,9,14,0.88); backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+    .brand { display: flex; align-items: center; gap: 0.7rem; text-decoration: none; color: #fff; }
+    .brand-logo {
+      width: 38px; height: 38px; border-radius: 10px; font-weight: 800;
+      display: flex; align-items: center; justify-content: center; color: #000;
+      background: linear-gradient(135deg, var(--blue), var(--green));
+    }
+    .brand-text { font-family: var(--font-display); font-weight: 800; font-size: 1.25rem; }
+    .brand-tag {
+      font-size: 0.72rem; font-weight: 700; color: var(--blue);
+      border: 1px solid rgba(56,189,248,0.35); background: rgba(56,189,248,0.12);
+      padding: 0.2rem 0.55rem; border-radius: 20px;
+    }
+    .nav-links { display: flex; gap: 0.5rem; list-style: none; align-items: center; }
+    .nav-links a, .nav-links button.tab {
+      color: var(--muted); background: none; border: none; cursor: pointer;
+      font-size: 0.9rem; font-weight: 600; padding: 0.45rem 0.8rem; border-radius: 8px;
+      text-decoration: none;
+    }
+    .nav-links a:hover, .nav-links button.tab:hover, .nav-links button.tab.active {
+      color: var(--green); background: rgba(7,226,25,0.1);
+    }
+    .hr-chip { font-size: 0.8rem; color: var(--muted); }
+    .container { max-width: 1180px; margin: 0 auto; padding: 2rem 1.4rem 3rem; position: relative; z-index: 1; }
+    h1 { font-family: var(--font-display); font-size: 1.9rem; margin-bottom: 0.4rem; }
+    .sub { color: var(--muted); margin-bottom: 1.6rem; }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.6rem; }
+    .stat { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.1rem 1.3rem; }
+    .stat b { display: block; font-family: var(--font-display); font-size: 1.6rem; color: var(--green); }
+    .stat span { font-size: 0.8rem; color: var(--muted); }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 1.3rem; }
+    .grid { display: grid; gap: 1rem; }
+    .jobs { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
+    label { display: block; font-size: 0.8rem; font-weight: 700; color: var(--muted); margin: 0 0 0.35rem; }
+    input, select, textarea {
+      width: 100%; background: #131b28; border: 1px solid var(--border); color: #fff;
+      border-radius: 10px; padding: 0.7rem 0.85rem; font-size: 0.95rem; outline: none;
+    }
+    textarea { min-height: 110px; resize: vertical; }
+    input:focus, select:focus, textarea:focus { border-color: var(--blue); }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; }
+    .btn {
+      border: none; cursor: pointer; border-radius: 10px; font-weight: 800; font-size: 0.92rem;
+      padding: 0.75rem 1.1rem;
+    }
+    .btn-primary { background: var(--green); color: #000; }
+    .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+    .btn-danger { background: rgba(248,113,113,0.12); color: var(--danger); border: 1px solid rgba(248,113,113,0.3); }
+    .hidden { display: none !important; }
+    .login-wrap { min-height: 80vh; display: flex; align-items: center; justify-content: center; }
+    .login-card { width: min(440px, 92vw); }
+    .hint { font-size: 0.8rem; color: var(--muted); margin-top: 0.8rem; line-height: 1.45; }
+    .job-card h3 { font-size: 1.05rem; margin-bottom: 0.2rem; }
+    .muted { color: var(--muted); font-size: 0.85rem; }
+    .chips { display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0.7rem 0; }
+    .chip { font-size: 0.75rem; padding: 0.2rem 0.5rem; border-radius: 6px; border: 1px solid var(--border); }
+    .chip.ok { border-color: rgba(7,226,25,0.4); color: var(--green); }
+    .chip.miss { border-color: rgba(248,113,113,0.35); color: var(--danger); }
+    .badge { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; padding: 0.2rem 0.5rem; border-radius: 6px; }
+    .b-intern { background: rgba(56,189,248,0.12); color: var(--blue); }
+    .b-full { background: rgba(7,226,25,0.12); color: var(--green); }
+    .b-applied { background: rgba(148,163,184,0.15); color: var(--muted); }
+    .b-short { background: rgba(7,226,25,0.15); color: var(--green); }
+    .b-reject { background: rgba(248,113,113,0.15); color: var(--danger); }
+    .inbox-row {
+      display: grid; grid-template-columns: 1fr auto; gap: 1rem; align-items: center;
+      border: 1px solid var(--border); border-radius: 14px; padding: 1rem 1.1rem; background: var(--surface);
+      cursor: pointer;
+    }
+    .inbox-row:hover { border-color: rgba(56,189,248,0.45); }
+    .profile-drawer {
+      position: fixed; top: 0; right: 0; width: min(420px, 100vw); height: 100vh; z-index: 80;
+      background: #0d121c; border-left: 1px solid var(--border); padding: 1.2rem 1.3rem 2rem;
+      overflow-y: auto; box-shadow: -20px 0 50px rgba(0,0,0,0.45);
+    }
+    .profile-drawer h2 { font-family: var(--font-display); font-size: 1.25rem; margin: 0.4rem 0 0.2rem; }
+    .profile-drawer .section { margin-top: 1rem; }
+    .profile-drawer .section h4 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); margin-bottom: 0.4rem; }
+    .profile-drawer p { font-size: 0.9rem; line-height: 1.45; color: var(--text); }
+    .profile-drawer a { color: var(--blue); word-break: break-all; }
+    .drawer-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 70; }
+    .score { font-family: var(--font-display); font-size: 1.5rem; color: var(--green); font-weight: 800; text-align: right; }
+    .actions { display: flex; gap: 0.45rem; flex-wrap: wrap; margin-top: 0.7rem; }
+    .empty { text-align: center; color: var(--muted); padding: 2.5rem 1rem; }
+    .form-grid { display: grid; gap: 0.85rem; }
+    @media (max-width: 720px) {
+      .stats, .row, .inbox-row { grid-template-columns: 1fr; }
+      .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="glow"></div>
+  <nav class="navbar">
+    <a class="brand" href="/">
+      <div class="brand-logo">H</div>
+      <span class="brand-text">HIERO</span>
+      <span class="brand-tag">CONNECT PORTAL (2004)</span>
+    </a>
+    <ul class="nav-links" id="app-nav">
+      <li><button class="tab active" data-view="post">Post drive</button></li>
+      <li><button class="tab" data-view="drives">My drives</button></li>
+      <li><button class="tab" data-view="inbox">Inbox</button></li>
+      <li><a href="http://localhost:2410" target="_blank">Bridge :2410</a></li>
+      <li><a href="http://localhost:2816/companies" target="_blank">Hiero :2816</a></li>
+    </ul>
+    <div>
+      <span class="hr-chip" id="hr-label"></span>
+      <button class="btn btn-ghost" id="logout-btn" style="margin-left:8px;padding:0.4rem 0.7rem;font-size:0.8rem;">Logout</button>
+    </div>
+  </nav>
+
+  <div class="container">
+    <section id="login-view" class="login-wrap">
+      <div class="card login-card">
+        <h1>Industry login</h1>
+        <p class="sub">Post one job. Bridge and Hiero see the same drive. Shortlist writes back.</p>
+        <form id="login-form" class="form-grid">
+          <div>
+            <label>Company name</label>
+            <input id="login-company" required placeholder="TechNova Inc.">
+          </div>
+          <div>
+            <label>HR email</label>
+            <input id="login-email" type="email" required placeholder="hr@technova.in">
+          </div>
+          <button class="btn btn-primary" type="submit">Open Connect inbox</button>
+        </form>
+        <p class="hint">No password for the SIH demo. Use the same company name you want students to see on Bridge and Final Hiero.</p>
+      </div>
+    </section>
+
+    <section id="app-view" class="hidden">
+      <h1>Connect — industry workspace</h1>
+      <p class="sub">Publish once into the shared job store. Applications from Hiero and Bridge land in this inbox.</p>
+      <div class="stats">
+        <div class="stat"><b id="stat-drives">0</b><span>Active drives</span></div>
+        <div class="stat"><b id="stat-apps">0</b><span>Applications</span></div>
+        <div class="stat"><b id="stat-short">0</b><span>Shortlisted</span></div>
+      </div>
+
+      <div id="view-post" class="card">
+        <h2 style="margin-bottom:1rem;font-size:1.15rem;">Post a job / internship</h2>
+        <form id="post-form" class="form-grid">
+          <div class="row">
+            <div>
+              <label>Role title</label>
+              <input id="job-title" required placeholder="AI / Machine Learning Engineer">
+            </div>
+            <div>
+              <label>Type</label>
+              <select id="job-type">
+                <option value="internship">Internship</option>
+                <option value="full-time">Full-time</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label>Required skills (comma separated)</label>
+            <input id="job-skills" required placeholder="Python, SQL, Machine Learning, Docker">
+          </div>
+          <div class="row">
+            <div>
+              <label>Eligibility</label>
+              <input id="job-elig" placeholder="B.Tech / M.Tech in CS">
+            </div>
+            <div>
+              <label>Location</label>
+              <input id="job-loc" placeholder="Hyderabad, India (Hybrid)">
+            </div>
+          </div>
+          <div class="row">
+            <div>
+              <label>Stipend / CTC</label>
+              <input id="job-sal" placeholder="₹35,000 / month">
+            </div>
+            <div>
+              <label>Deadline</label>
+              <input id="job-deadline" type="date">
+            </div>
+          </div>
+          <div>
+            <label>Job description</label>
+            <textarea id="job-desc" placeholder="Paste the real JD. Hiero scores resumes against these skills."></textarea>
+          </div>
+          <button class="btn btn-primary" type="submit">Publish to shared store</button>
+          <p class="hint" id="post-msg"></p>
+        </form>
+      </div>
+
+      <div id="view-drives" class="hidden">
+        <div class="grid jobs" id="drives-list"></div>
+      </div>
+
+      <div id="view-inbox" class="hidden">
+        <div class="grid" id="inbox-list"></div>
+      </div>
+    </section>
+  </div>
+
+  <div id="drawer-backdrop" class="drawer-backdrop hidden" onclick="closeProfileDrawer()"></div>
+  <aside id="profile-drawer" class="profile-drawer hidden" aria-label="Candidate profile"></aside>
+
+<script>
+  const GATEWAY = 'http://localhost:2816';
+  const PYTHON = 'http://localhost:5050';
+  const SESSION_KEY = 'hiero_connect_hr';
+
+  const $ = (id) => document.getElementById(id);
+  let session = null;
+  let drives = [];
+  let apps = [];
+
+  function esc(s) {
+    return String(s || '').replace(/[&<>"']/g, (c) => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+  }
+
+  function companyIdFrom(email, name) {
+    const base = String(email || name || 'partner').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    return 'c-' + base;
+  }
+
+  async function api(path, options) {
+    const opts = Object.assign({ headers: { 'Content-Type': 'application/json' } }, options || {});
+    const urls = [GATEWAY + path];
+    if (path.indexOf('/api/opportunities/applications') === 0 && path.indexOf('status') === -1) {
+      urls.push(PYTHON + '/api/applications');
+    } else {
+      urls.push(PYTHON + path);
+    }
+    let lastErr;
+    for (let i = 0; i < urls.length; i++) {
+      try {
+        const res = await fetch(urls[i], opts);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return await res.json();
+      } catch (e) { lastErr = e; }
+    }
+    throw lastErr || new Error('store offline');
+  }
+
+  function normApp(a) {
+    let skills = a.skillsMatch || a.skills_match || {};
+    if (typeof skills === 'string') {
+      try { skills = JSON.parse(skills); } catch (e) { skills = {}; }
+    }
+    let profile = a.profile || {};
+    if (typeof profile === 'string') {
+      try { profile = JSON.parse(profile); } catch (e) { profile = {}; }
+    }
+    let verified = a.verifiedSkills || a.verified_skills || profile.verifiedSkills || [];
+    if (typeof verified === 'string') {
+      try { verified = JSON.parse(verified); } catch (e) { verified = []; }
+    }
+    return {
+      id: a.id,
+      opportunityId: a.opportunityId || a.opportunity_id,
+      companyName: a.companyName || a.company_name,
+      jobTitle: a.jobTitle || a.job_title || '',
+      studentName: a.studentName || a.student_name || profile.fullName || 'Candidate',
+      email: a.email || profile.email || '',
+      phone: a.phone || profile.phone || '',
+      status: a.status || 'applied',
+      matchScore: Number(a.matchScore || a.match_score || 0),
+      atsScore: a.atsScore || profile.atsScore || null,
+      appliedAt: a.appliedAt || a.applied_at,
+      resumeUrl: a.resumeUrl || a.resume_url || '',
+      skillsMatch: skills,
+      verifiedSkills: verified,
+      profile: profile
+    };
+  }
+
+  function openProfileDrawer(appId) {
+    const a = apps.map(normApp).find((x) => x.id === appId);
+    if (!a) return;
+    const p = a.profile || {};
+    const matched = (a.skillsMatch && a.skillsMatch.matched) || p.skills || [];
+    const missing = (a.skillsMatch && a.skillsMatch.missing) || [];
+    const verified = (a.verifiedSkills || []).map((v) => typeof v === 'string' ? v : (v.label || v.name)).filter(Boolean);
+    const drawer = $('profile-drawer');
+    drawer.innerHTML =
+      '<div style="display:flex;justify-content:space-between;align-items:center">' +
+        '<span class="badge ' + (a.status === 'shortlisted' || a.status === 'selected' ? 'b-short' : a.status === 'rejected' ? 'b-reject' : 'b-applied') + '">' + esc(a.status) + '</span>' +
+        '<button class="btn btn-ghost" type="button" onclick="closeProfileDrawer()" style="padding:0.35rem 0.6rem">Close</button>' +
+      '</div>' +
+      '<h2>' + esc(a.studentName) + '</h2>' +
+      '<p class="muted">' + esc(p.headline || a.jobTitle || 'Candidate') + ' · ' + esc(p.candidateType === 'job_seeker' ? 'Job seeker' : 'Campus student') + '</p>' +
+      '<div class="score" style="text-align:left;margin-top:0.6rem">' + (Math.round(a.matchScore) || '—') + '% match</div>' +
+      '<div class="section"><h4>Contact</h4><p>' + esc(a.email) + '<br>' + esc(a.phone || p.phone || '—') + '<br>' + esc(p.city || '—') + '</p></div>' +
+      '<div class="section"><h4>Education</h4><p>' + esc([p.degree, p.branch].filter(Boolean).join(' · ') || '—') + '<br>' + esc(p.college || '—') +
+        (p.graduationYear ? '<br>Class of ' + esc(p.graduationYear) : '') +
+        (p.cgpa ? '<br>CGPA ' + esc(p.cgpa) : '') + '</p></div>' +
+      '<div class="section"><h4>Skills</h4><div class="chips">' +
+        verified.map((v) => '<span class="chip ok">' + esc(v) + '</span>').join('') +
+        matched.slice(0, 12).map((s) => '<span class="chip ok">' + esc(s) + '</span>').join('') +
+        missing.slice(0, 6).map((s) => '<span class="chip miss">' + esc(s) + '</span>').join('') +
+        (p.softSkills || []).slice(0, 6).map((s) => '<span class="chip">' + esc(s) + '</span>').join('') +
+      '</div></div>' +
+      '<div class="section"><h4>Projects / experience</h4><p>' + esc(p.projects || p.experienceSummary || '—') + '</p></div>' +
+      (p.about ? '<div class="section"><h4>About</h4><p>' + esc(p.about) + '</p></div>' : '') +
+      '<div class="section"><h4>Links</h4><p>' +
+        (p.linkedin ? '<a href="' + esc(p.linkedin.indexOf('http') === 0 ? p.linkedin : 'https://' + p.linkedin) + '" target="_blank" rel="noopener">LinkedIn</a><br>' : '') +
+        (p.github ? '<a href="' + esc(p.github.indexOf('http') === 0 ? p.github : 'https://' + p.github) + '" target="_blank" rel="noopener">GitHub</a><br>' : '') +
+        (p.portfolio ? '<a href="' + esc(p.portfolio.indexOf('http') === 0 ? p.portfolio : 'https://' + p.portfolio) + '" target="_blank" rel="noopener">Portfolio</a><br>' : '') +
+        (a.resumeUrl ? '<span class="muted">Resume: ' + esc(a.resumeUrl) + '</span>' : '') +
+      '</p></div>' +
+      '<div class="actions" style="margin-top:1.2rem">' +
+        '<button class="btn btn-primary" data-act="shortlisted" data-id="' + esc(a.id) + '">Shortlist</button>' +
+        '<button class="btn btn-danger" data-act="rejected" data-id="' + esc(a.id) + '">Reject</button>' +
+      '</div>';
+    drawer.classList.remove('hidden');
+    $('drawer-backdrop').classList.remove('hidden');
+  }
+
+  function closeProfileDrawer() {
+    $('profile-drawer').classList.add('hidden');
+    $('drawer-backdrop').classList.add('hidden');
+  }
+  window.closeProfileDrawer = closeProfileDrawer;
+
+  function showView(name) {
+    ['post', 'drives', 'inbox'].forEach((v) => {
+      const el = $('view-' + v);
+      if (el) el.classList.toggle('hidden', v !== name);
+    });
+    document.querySelectorAll('.tab').forEach((t) => t.classList.toggle('active', t.dataset.view === name));
+  }
+
+  function mine(list) {
+    const name = (session.companyName || '').toLowerCase();
+    const id = session.companyId;
+    return (list || []).filter((item) => {
+      const cn = String(item.companyName || item.company_name || '').toLowerCase();
+      return item.companyId === id || (name && cn.indexOf(name) !== -1);
+    });
+  }
+
+  function renderStats() {
+    const myDrives = mine(drives);
+    const myApps = mine(apps.map(normApp));
+    $('stat-drives').textContent = myDrives.length;
+    $('stat-apps').textContent = myApps.length;
+    $('stat-short').textContent = myApps.filter((a) => a.status === 'shortlisted' || a.status === 'selected').length;
+  }
+
+  function renderDrives() {
+    const list = mine(drives);
+    const box = $('drives-list');
+    if (!list.length) {
+      box.innerHTML = '<div class="card empty">No drives yet. Post one — Bridge and Hiero will show it.</div>';
+      return;
+    }
+    box.innerHTML = list.map((job) => {
+      const skills = Array.isArray(job.requiredSkills) ? job.requiredSkills : [];
+      const isIntern = String(job.type || '').toLowerCase() === 'internship';
+      return '<article class="card job-card">' +
+        '<span class="badge ' + (isIntern ? 'b-intern' : 'b-full') + '">' + (isIntern ? 'Internship' : 'Full-time') + '</span>' +
+        '<h3 style="margin-top:0.5rem">' + esc(job.title) + '</h3>' +
+        '<p class="muted">' + esc(job.companyName) + ' · ' + esc(job.location || '') + '</p>' +
+        '<div class="chips">' + skills.map((s) => '<span class="chip">' + esc(typeof s === 'string' ? s : s.name) + '</span>').join('') + '</div>' +
+        '<p class="muted">Deadline ' + esc(job.deadline || '—') + ' · ' + esc(job.salary || '') + '</p>' +
+        '<p class="muted" style="margin-top:0.4rem">' + (job.applicantsCount || 0) + ' applied</p></article>';
+    }).join('');
+  }
+
+  function renderInbox() {
+    const list = mine(apps.map(normApp));
+    const box = $('inbox-list');
+    if (!list.length) {
+      box.innerHTML = '<div class="card empty">Inbox empty. When a student completes the apply profile on Hiero, the full card appears here.</div>';
+      return;
+    }
+    box.innerHTML = list.map((a) => {
+      const p = a.profile || {};
+      const matched = (a.skillsMatch && a.skillsMatch.matched) || p.skills || [];
+      const missing = (a.skillsMatch && a.skillsMatch.missing) || [];
+      const st = a.status || 'applied';
+      const badge = st === 'shortlisted' || st === 'selected' ? 'b-short' : st === 'rejected' ? 'b-reject' : 'b-applied';
+      const verified = (a.verifiedSkills || []).map((v) => typeof v === 'string' ? v : (v.label || v.name)).filter(Boolean);
+      const edu = [p.degree, p.branch, p.college].filter(Boolean).join(' · ');
+      return '<article class="inbox-row" data-open-profile="' + esc(a.id) + '"><div>' +
+        '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><strong>' + esc(a.studentName) + '</strong><span class="badge ' + badge + '">' + esc(st) + '</span>' +
+        (p.candidateType === 'job_seeker' ? '<span class="badge b-intern">Job seeker</span>' : '<span class="badge b-full">Student</span>') +
+        '</div>' +
+        '<p class="muted">' + esc(a.email) + (a.phone ? ' · ' + esc(a.phone) : '') + (edu ? '<br>' + esc(edu) : '') + '</p>' +
+        (p.headline ? '<p class="muted" style="margin-top:4px">' + esc(p.headline) + (a.jobTitle ? ' → ' + esc(a.jobTitle) : '') + '</p>' : '') +
+        '<div class="chips">' +
+          verified.map((v) => '<span class="chip ok">' + esc(v) + '</span>').join('') +
+          matched.slice(0, 6).map((s) => '<span class="chip ok">' + esc(s) + '</span>').join('') +
+          missing.slice(0, 4).map((s) => '<span class="chip miss">' + esc(s) + '</span>').join('') +
+        '</div>' +
+        '<div class="actions">' +
+          '<button class="btn btn-ghost" type="button" data-open-profile="' + esc(a.id) + '">View profile</button>' +
+          '<button class="btn btn-primary" data-act="shortlisted" data-id="' + esc(a.id) + '">Shortlist</button>' +
+          '<button class="btn btn-danger" data-act="rejected" data-id="' + esc(a.id) + '">Reject</button>' +
+        '</div></div><div><div class="score">' + (Math.round(a.matchScore) || '—') + '%</div><div class="muted">match score</div></div></article>';
+    }).join('');
+  }
+
+  async function loadStore() {
+    try {
+      const jobs = await api('/api/opportunities');
+      drives = jobs.opportunities || [];
+    } catch (e) { drives = []; }
+    try {
+      const q = '?companyName=' + encodeURIComponent(session.companyName);
+      const data = await api('/api/opportunities/applications' + q);
+      const raw = data.applications || [];
+      const byId = new Map();
+      raw.map(normApp).forEach((a) => byId.set(a.id, a));
+      apps = Array.from(byId.values());
+    } catch (e) { apps = []; }
+    renderStats();
+    renderDrives();
+    renderInbox();
+  }
+
+  function enterApp() {
+    $('login-view').classList.add('hidden');
+    $('app-view').classList.remove('hidden');
+    $('hr-label').textContent = session.companyName + ' · ' + session.email;
+    $('logout-btn').classList.remove('hidden');
+    loadStore();
+  }
+
+  $('login-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const companyName = $('login-company').value.trim();
+    const email = $('login-email').value.trim();
+    session = { companyName, email, companyId: companyIdFrom(email, companyName) };
+    localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+    enterApp();
+  });
+
+  $('logout-btn').addEventListener('click', () => {
+    localStorage.removeItem(SESSION_KEY);
+    session = null;
+    location.reload();
+  });
+
+  document.querySelectorAll('.tab').forEach((btn) => {
+    btn.addEventListener('click', () => showView(btn.dataset.view));
+  });
+
+  $('post-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const skills = $('job-skills').value.split(',').map((s) => s.trim()).filter(Boolean)
+      .map((name) => ({ name: name, category: 'required' }));
+    const payload = {
+      companyId: session.companyId,
+      companyName: session.companyName,
+      title: $('job-title').value.trim(),
+      type: $('job-type').value,
+      requiredSkills: skills,
+      eligibility: $('job-elig').value.trim() || 'B.Tech / BE',
+      location: $('job-loc').value.trim() || 'India',
+      salary: $('job-sal').value.trim() || 'Competitive',
+      deadline: $('job-deadline').value || '2026-12-31',
+      description: $('job-desc').value.trim(),
+      employmentType: $('job-type').value === 'internship' ? 'Internship' : 'Full-time'
+    };
+    $('post-msg').textContent = 'Publishing…';
+    try {
+      await fetch(GATEWAY + '/api/opportunities', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      $('post-msg').textContent = 'Published. Same drive is now on Bridge :2410 and Final Hiero :2816.';
+      $('post-form').reset();
+      await loadStore();
+      showView('drives');
+    } catch (err) {
+      $('post-msg').textContent = 'Could not reach gateway :2816. Start it, then publish again.';
+    }
+  });
+
+  $('inbox-list').addEventListener('click', async (e) => {
+    const openBtn = e.target.closest('[data-open-profile]');
+    if (openBtn && !e.target.closest('button[data-act]')) {
+      openProfileDrawer(openBtn.getAttribute('data-open-profile'));
+      return;
+    }
+    const btn = e.target.closest('button[data-act]');
+    if (!btn) return;
+    e.stopPropagation();
+    const status = btn.dataset.act;
+    const applicationId = btn.dataset.id;
+    const app = apps.map(normApp).find((a) => a.id === applicationId);
+    try {
+      await fetch(GATEWAY + '/api/opportunities/applications/status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          applicationId: applicationId,
+          status: status,
+          companyName: session.companyName,
+          studentName: app && app.studentName,
+          email: app && app.email,
+          opportunityId: app && app.opportunityId,
+          matchScore: app && app.matchScore,
+          notes: 'Updated from Connect Portal'
+        })
+      });
+      await loadStore();
+      if (!$('profile-drawer').classList.contains('hidden')) openProfileDrawer(applicationId);
+    } catch (err) {
+      alert('Status did not save. Confirm gateway :2816 is running.');
+    }
+  });
+
+  $('profile-drawer').addEventListener('click', async (e) => {
+    const btn = e.target.closest('button[data-act]');
+    if (!btn) return;
+    const status = btn.dataset.act;
+    const applicationId = btn.dataset.id;
+    const app = apps.map(normApp).find((a) => a.id === applicationId);
+    try {
+      await fetch(GATEWAY + '/api/opportunities/applications/status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          applicationId: applicationId,
+          status: status,
+          companyName: session.companyName,
+          studentName: app && app.studentName,
+          email: app && app.email,
+          opportunityId: app && app.opportunityId,
+          matchScore: app && app.matchScore,
+          notes: 'Updated from Connect Portal'
+        })
+      });
+      await loadStore();
+      openProfileDrawer(applicationId);
+    } catch (err) {
+      alert('Status did not save. Confirm gateway :2816 is running.');
+    }
+  });
+
+  (function init() {
+    $('logout-btn').classList.add('hidden');
+    try { session = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null'); } catch (e) { session = null; }
+    if (session && session.companyName && session.email) enterApp();
+  })();
+</script>
+</body>
+</html>

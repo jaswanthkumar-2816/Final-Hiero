@@ -928,6 +928,7 @@
           <!-- Steps injected here -->
               </div>
         <button class="btn btn-outline" style="margin-top: auto; padding-top: 12px;" id="start-learning-btn">Start Skill Module</button>
+        <button class="btn btn-outline" style="margin-top: 8px;" id="start-eval-btn" onclick="(function(){const s=new URLSearchParams(location.search).get('skill')||localStorage.getItem('selectedSkill')||''; location.href='eval.html?skill='+encodeURIComponent(s||'Python');})()">Verify with Hiero Eval</button>
           </div>
 
       <!-- Card 7: Resume Optimization (The Career Coach) -->

@@ -2080,7 +2080,7 @@
           }
 
           .kpi-benchmark-deck {
-            grid-template-columns: 1fr;
+            grid-template-columns: 1fr; 
           }
 
           .companies-grid {
@@ -2393,22 +2393,113 @@
         </div>
       </div>
 
-      <!-- Candidate Resume Selection & Application Confirmation Modal -->
+      <!-- Candidate Profile + Resume Confirmation Modal (required before apply) -->
       <div class="modal-overlay" id="apply-resume-modal">
-        <div class="custom-modal-content" style="width: 540px; padding: 26px;">
+        <div class="custom-modal-content" style="width: min(640px, 94vw); max-height: 90vh; overflow-y: auto; padding: 26px;">
           <div class="modal-header" style="margin-bottom: 12px; padding-bottom: 12px;">
-            <h3><i class="fa-solid fa-file-invoice" style="color: var(--primary-accent); margin-right: 8px;"></i> Confirm Application Resume</h3>
+            <h3><i class="fa-solid fa-id-card" style="color: var(--primary-accent); margin-right: 8px;"></i> Complete profile to apply</h3>
             <button class="drawer-close-btn" onclick="closeApplyResumeModal()" style="width: 30px; height: 30px;">
               <i class="fa-solid fa-xmark"></i>
             </button>
           </div>
 
-          <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px; line-height: 1.4;">
+          <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 14px; line-height: 1.4;">
             Applying to <strong id="apply-modal-comp-name" style="color: var(--text-main);">Company</strong> for <span id="apply-modal-job-title" style="color: var(--primary-accent); font-weight: 700;">Role</span>.
+            Connect HR sees this as your candidate profile.
+          </div>
+
+          <div id="apply-profile-form" style="display: grid; gap: 10px; margin-bottom: 14px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+              <div>
+                <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">Full name *</label>
+                <input id="ap-fullName" required placeholder="Your full name" style="width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--border-color); background: var(--surface-1); color: var(--text-main);">
+              </div>
+              <div>
+                <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">Email *</label>
+                <input id="ap-email" type="email" required placeholder="you@college.edu" style="width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--border-color); background: var(--surface-1); color: var(--text-main);">
+              </div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+              <div>
+                <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">Phone *</label>
+                <input id="ap-phone" required placeholder="+91 9XXXXXXXXX" style="width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--border-color); background: var(--surface-1); color: var(--text-main);">
+              </div>
+              <div>
+                <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">I am a *</label>
+                <select id="ap-candidateType" style="width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--border-color); background: var(--surface-1); color: var(--text-main);">
+                  <option value="student">Campus student</option>
+                  <option value="job_seeker">Job seeker</option>
+                </select>
+              </div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+              <div>
+                <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">College / Institution *</label>
+                <input id="ap-college" required placeholder="Your college name" style="width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--border-color); background: var(--surface-1); color: var(--text-main);">
+              </div>
+              <div>
+                <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">City *</label>
+                <input id="ap-city" required placeholder="Hyderabad" style="width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--border-color); background: var(--surface-1); color: var(--text-main);">
+              </div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+              <div>
+                <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">Degree *</label>
+                <input id="ap-degree" required placeholder="B.Tech" style="width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--border-color); background: var(--surface-1); color: var(--text-main);">
+              </div>
+              <div>
+                <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">Branch *</label>
+                <input id="ap-branch" required placeholder="CSE" style="width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--border-color); background: var(--surface-1); color: var(--text-main);">
+              </div>
+              <div>
+                <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">Grad year *</label>
+                <input id="ap-gradYear" required placeholder="2026" style="width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--border-color); background: var(--surface-1); color: var(--text-main);">
+              </div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+              <div>
+                <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">CGPA</label>
+                <input id="ap-cgpa" placeholder="8.2" style="width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--border-color); background: var(--surface-1); color: var(--text-main);">
+              </div>
+              <div>
+                <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">Target role / headline *</label>
+                <input id="ap-headline" required placeholder="Full Stack Developer" style="width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--border-color); background: var(--surface-1); color: var(--text-main);">
+              </div>
+            </div>
+            <div>
+              <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">Technical skills * (comma separated)</label>
+              <input id="ap-skills" required placeholder="Python, React, SQL, Docker" style="width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--border-color); background: var(--surface-1); color: var(--text-main);">
+            </div>
+            <div>
+              <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">Soft skills</label>
+              <input id="ap-softSkills" placeholder="Communication, Teamwork, Problem solving" style="width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--border-color); background: var(--surface-1); color: var(--text-main);">
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+              <div>
+                <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">LinkedIn</label>
+                <input id="ap-linkedin" placeholder="linkedin.com/in/you" style="width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--border-color); background: var(--surface-1); color: var(--text-main);">
+              </div>
+              <div>
+                <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">GitHub</label>
+                <input id="ap-github" placeholder="github.com/you" style="width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--border-color); background: var(--surface-1); color: var(--text-main);">
+              </div>
+              <div>
+                <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">Portfolio</label>
+                <input id="ap-portfolio" placeholder="yoursite.com" style="width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--border-color); background: var(--surface-1); color: var(--text-main);">
+              </div>
+            </div>
+            <div>
+              <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">Projects / experience (short) *</label>
+              <textarea id="ap-projects" required rows="2" placeholder="Built X using Y. Interned at Z…" style="width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--border-color); background: var(--surface-1); color: var(--text-main); resize: vertical;"></textarea>
+            </div>
+            <div>
+              <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">About you</label>
+              <textarea id="ap-about" rows="2" placeholder="One paragraph for the recruiter" style="width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--border-color); background: var(--surface-1); color: var(--text-main); resize: vertical;"></textarea>
+            </div>
+            <p id="ap-form-error" style="display:none; color:#f87171; font-size:12px; font-weight:600;"></p>
           </div>
 
           <div class="modal-body" style="padding: 0; display: flex; flex-direction: column; gap: 12px;">
-            <!-- Option 1: Existing Active Resume -->
             <div class="resume-option-card active" id="opt-card-saved" onclick="selectResumeOption('saved')" style="border: 1.5px solid var(--primary-accent); background: rgba(7, 226, 25, 0.08); border-radius: 16px; padding: 14px 16px; display: flex; gap: 12px; align-items: flex-start; cursor: pointer;">
               <input type="radio" name="resumeChoiceOption" id="radio-resume-saved" value="saved" checked style="accent-color: var(--primary-accent); margin-top: 3px;">
               <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(7, 226, 25, 0.15); border: 1px solid rgba(7, 226, 25, 0.3); color: var(--primary-accent); display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0;">
@@ -2416,14 +2507,13 @@
               </div>
               <div style="flex: 1; min-width: 0;">
                 <div style="font-size: 13px; font-weight: 700; color: var(--text-main);">Continue with Active Saved Resume</div>
-                <div style="font-size: 12px; font-weight: 600; color: var(--primary-accent); margin-top: 2px;" id="modal-saved-resume-name">Jaswanth_Kumar_Resume_AI_Engineer.pdf</div>
+                <div style="font-size: 12px; font-weight: 600; color: var(--primary-accent); margin-top: 2px;" id="modal-saved-resume-name">Resume.pdf</div>
                 <div style="font-size: 11px; color: var(--text-muted); margin-top: 3px;">
                   <span style="color: var(--primary-accent); font-weight: 700;">✓ Skill-Parsed</span> · Active HIERO Profile Resume
                 </div>
               </div>
             </div>
 
-            <!-- Option 2: Upload New Resume -->
             <div class="resume-option-card" id="opt-card-new" onclick="selectResumeOption('new')" style="border: 1.5px solid var(--border-color); background: var(--surface-1); border-radius: 16px; padding: 14px 16px; display: flex; gap: 12px; align-items: flex-start; cursor: pointer;">
               <input type="radio" name="resumeChoiceOption" id="radio-resume-new" value="new" style="accent-color: var(--primary-accent); margin-top: 3px;">
               <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(168, 85, 247, 0.12); border: 1px solid rgba(168, 85, 247, 0.3); color: #a855f7; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0;">
@@ -2443,7 +2533,7 @@
           <div class="modal-footer" style="margin-top: 18px; padding-top: 14px; display: flex; justify-content: flex-end; gap: 10px;">
             <button class="card-secondary-btn" onclick="closeApplyResumeModal()">Cancel</button>
             <button class="primary-action-btn" id="confirm-submit-apply-btn" onclick="confirmApplicationSubmission()">
-              <i class="fa-solid fa-paper-plane" style="margin-right: 6px;"></i> Confirm & Submit Application
+              <i class="fa-solid fa-paper-plane" style="margin-right: 6px;"></i> Submit to Connect
             </button>
           </div>
         </div>
@@ -3942,6 +4032,127 @@
         let selectedResumeChoice = 'saved';
         let newlyUploadedResumeFile = null;
 
+        function splitSkills(val) {
+          if (Array.isArray(val)) return val.map(String).map(s => s.trim()).filter(Boolean);
+          return String(val || '').split(/[,|;]/).map(s => s.trim()).filter(Boolean);
+        }
+
+        function loadApplyProfileDefaults() {
+          const saved = (() => { try { return JSON.parse(localStorage.getItem('hiero_apply_profile') || '{}'); } catch (e) { return {}; } })();
+          const user = (() => { try { return JSON.parse(localStorage.getItem('user') || '{}'); } catch (e) { return {}; } })();
+          const analysis = (() => {
+            try { return JSON.parse(localStorage.getItem('resumeAnalysis') || localStorage.getItem('hiero_analysis') || '{}'); } catch (e) { return {}; }
+          })();
+          const resume = (() => {
+            try { return JSON.parse(localStorage.getItem('resumeData') || localStorage.getItem('userResume') || '{}'); } catch (e) { return {}; }
+          })();
+          const pi = resume.personalInfo || resume.basic || {};
+          const skillsFromAnalysis = analysis.matchedSkills || analysis.resumeSkills || [];
+          const verified = analysis.verifiedSkills || resume.verifiedSkills || saved.verifiedSkills || [];
+
+          const defaults = {
+            fullName: saved.fullName || user.name || pi.fullName || pi.name || '',
+            email: saved.email || user.email || pi.email || localStorage.getItem('email') || '',
+            phone: saved.phone || pi.phone || '',
+            candidateType: saved.candidateType || 'student',
+            college: saved.college || (resume.education && resume.education[0] && (resume.education[0].school || resume.education[0].college)) || '',
+            city: saved.city || pi.address || pi.city || '',
+            degree: saved.degree || (resume.education && resume.education[0] && (resume.education[0].degree || resume.education[0].qualification)) || '',
+            branch: saved.branch || (resume.education && resume.education[0] && resume.education[0].field) || '',
+            graduationYear: saved.graduationYear || (resume.education && resume.education[0] && (resume.education[0].year || resume.education[0].endYear)) || '',
+            cgpa: saved.cgpa || '',
+            headline: saved.headline || pi.roleTitle || pi.headline || analysis.jobTitle || '',
+            skills: saved.skills || (Array.isArray(skillsFromAnalysis) ? skillsFromAnalysis.join(', ') : '') || (resume.technicalSkills || resume.skills || ''),
+            softSkills: saved.softSkills || resume.softSkills || '',
+            linkedin: saved.linkedin || pi.linkedin || '',
+            github: saved.github || pi.github || '',
+            portfolio: saved.portfolio || pi.website || pi.portfolio || '',
+            projects: saved.projects || '',
+            about: saved.about || resume.summary || pi.summary || '',
+            verifiedSkills: verified,
+            matchScore: analysis.score || analysis.matchScore || null,
+            atsScore: analysis.atsScore || null,
+            matchedSkills: analysis.matchedSkills || [],
+            missingSkills: analysis.missingSkills || []
+          };
+
+          const set = (id, val) => { const el = document.getElementById(id); if (el && val != null) el.value = val; };
+          set('ap-fullName', defaults.fullName);
+          set('ap-email', defaults.email);
+          set('ap-phone', defaults.phone);
+          set('ap-candidateType', defaults.candidateType);
+          set('ap-college', defaults.college);
+          set('ap-city', defaults.city);
+          set('ap-degree', defaults.degree);
+          set('ap-branch', defaults.branch);
+          set('ap-gradYear', defaults.graduationYear);
+          set('ap-cgpa', defaults.cgpa);
+          set('ap-headline', defaults.headline);
+          set('ap-skills', typeof defaults.skills === 'string' ? defaults.skills : splitSkills(defaults.skills).join(', '));
+          set('ap-softSkills', typeof defaults.softSkills === 'string' ? defaults.softSkills : splitSkills(defaults.softSkills).join(', '));
+          set('ap-linkedin', defaults.linkedin);
+          set('ap-github', defaults.github);
+          set('ap-portfolio', defaults.portfolio);
+          set('ap-projects', defaults.projects);
+          set('ap-about', defaults.about);
+          window.__applyProfileMeta = defaults;
+          const err = document.getElementById('ap-form-error');
+          if (err) { err.style.display = 'none'; err.textContent = ''; }
+        }
+
+        function collectApplyProfile() {
+          const g = (id) => (document.getElementById(id)?.value || '').trim();
+          const required = [
+            ['ap-fullName', 'Full name'],
+            ['ap-email', 'Email'],
+            ['ap-phone', 'Phone'],
+            ['ap-college', 'College'],
+            ['ap-city', 'City'],
+            ['ap-degree', 'Degree'],
+            ['ap-branch', 'Branch'],
+            ['ap-gradYear', 'Graduation year'],
+            ['ap-headline', 'Target role'],
+            ['ap-skills', 'Technical skills'],
+            ['ap-projects', 'Projects / experience']
+          ];
+          for (const [id, label] of required) {
+            if (!g(id)) {
+              const err = document.getElementById('ap-form-error');
+              if (err) {
+                err.style.display = 'block';
+                err.textContent = `${label} is required before you can apply.`;
+              }
+              document.getElementById(id)?.focus();
+              return null;
+            }
+          }
+          const meta = window.__applyProfileMeta || {};
+          const profile = {
+            fullName: g('ap-fullName'),
+            email: g('ap-email'),
+            phone: g('ap-phone'),
+            candidateType: g('ap-candidateType') || 'student',
+            college: g('ap-college'),
+            city: g('ap-city'),
+            degree: g('ap-degree'),
+            branch: g('ap-branch'),
+            graduationYear: g('ap-gradYear'),
+            cgpa: g('ap-cgpa'),
+            headline: g('ap-headline'),
+            skills: splitSkills(g('ap-skills')),
+            softSkills: splitSkills(g('ap-softSkills')),
+            linkedin: g('ap-linkedin'),
+            github: g('ap-github'),
+            portfolio: g('ap-portfolio'),
+            projects: g('ap-projects'),
+            about: g('ap-about'),
+            verifiedSkills: meta.verifiedSkills || [],
+            atsScore: meta.atsScore || null
+          };
+          try { localStorage.setItem('hiero_apply_profile', JSON.stringify(profile)); } catch (e) {}
+          return profile;
+        }
+
         function applyToCompany(companyName, btn, oppId) {
           const customOpps = JSON.parse(localStorage.getItem('hc_custom_opportunities') || '[]');
           const targetOpp = customOpps.find(o => o.companyName === companyName || o.id === oppId) || customOpps[0];
@@ -3959,7 +4170,7 @@
           if (roleElem) roleElem.innerText = targetOpp ? targetOpp.title : 'Software Engineer';
 
           const userStr = localStorage.getItem('user');
-          let resumeName = 'Jaswanth_Kumar_Resume_AI_Engineer.pdf';
+          let resumeName = 'Candidate_Resume_2026.pdf';
           if (userStr) {
             try {
               const u = JSON.parse(userStr);
@@ -3969,6 +4180,7 @@
           const savedNameElem = document.getElementById('modal-saved-resume-name');
           if (savedNameElem) savedNameElem.innerText = resumeName;
 
+          loadApplyProfileDefaults();
           selectResumeOption('saved');
 
           const modal = document.getElementById('apply-resume-modal');
@@ -4028,6 +4240,9 @@
           if (!pendingApplyState) return;
           const { companyName, btn, oppId, targetOpp } = pendingApplyState;
 
+          const profile = collectApplyProfile();
+          if (!profile) return;
+
           const submitBtn = document.getElementById('confirm-submit-apply-btn');
           if (submitBtn) {
             submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Submitting...`;
@@ -4036,29 +4251,38 @@
 
           const finalResumeName = (selectedResumeChoice === 'new' && newlyUploadedResumeFile)
             ? newlyUploadedResumeFile.name
-            : (document.getElementById('modal-saved-resume-name')?.innerText || 'Jaswanth_Kumar_Resume_2026.pdf');
+            : (document.getElementById('modal-saved-resume-name')?.innerText || 'Candidate_Resume_2026.pdf');
+
+          const meta = window.__applyProfileMeta || {};
+          const matchScore = typeof meta.matchScore === 'number' ? Math.round(meta.matchScore) : (parseInt(meta.matchScore, 10) || 0);
+          const jobTitle = targetOpp ? targetOpp.title : 'Software Development Engineer';
+          const opportunityId = oppId || (targetOpp ? targetOpp.id : 'j-1');
+          const skillsMatch = {
+            matched: (meta.matchedSkills && meta.matchedSkills.length) ? meta.matchedSkills : profile.skills.slice(0, 8),
+            missing: meta.missingSkills || []
+          };
 
           try {
-            const userStr = localStorage.getItem('user');
-            const user = userStr ? JSON.parse(userStr) : {};
-
             const customApps = JSON.parse(localStorage.getItem('hc_custom_applications') || '[]');
             const customOpps = JSON.parse(localStorage.getItem('hc_custom_opportunities') || '[]');
-            const opportunityId = oppId || (targetOpp ? targetOpp.id : 'j-1');
 
             customApps.unshift({
               id: 'app-' + Date.now(),
               opportunityId: opportunityId,
-              companyId: targetOpp ? targetOpp.companyId : 'comp-1',
-              studentId: 'cand-1',
+              companyId: targetOpp ? targetOpp.companyId : '',
+              companyName: companyName,
+              jobTitle: jobTitle,
+              studentId: profile.email,
+              studentName: profile.fullName,
+              email: profile.email,
+              phone: profile.phone,
               status: 'applied',
-              matchScore: 92,
+              matchScore: matchScore,
               appliedAt: new Date().toISOString(),
               resumeUrl: `/resumes/${finalResumeName}`,
-              skillsMatch: {
-                matched: ['React', 'TypeScript', 'Python', 'SQL'],
-                missing: ['Kubernetes']
-              }
+              skillsMatch: skillsMatch,
+              verifiedSkills: profile.verifiedSkills || [],
+              profile: profile
             });
             localStorage.setItem('hc_custom_applications', JSON.stringify(customApps));
 
@@ -4070,24 +4294,30 @@
             const appPayload = {
               opportunityId: opportunityId,
               companyName: companyName,
-              studentName: user.name || 'Jaswanth Kumar',
-              email: user.email || 'jaswanth@hiero.ai',
-              matchScore: 92,
-              resumeUrl: `/resumes/${finalResumeName}`
+              companyId: targetOpp ? targetOpp.companyId : '',
+              jobTitle: jobTitle,
+              studentName: profile.fullName,
+              email: profile.email,
+              phone: profile.phone,
+              studentId: profile.email,
+              matchScore: matchScore,
+              atsScore: meta.atsScore || null,
+              resumeUrl: `/resumes/${finalResumeName}`,
+              skillsMatch: skillsMatch,
+              verifiedSkills: profile.verifiedSkills || [],
+              profile: profile
             };
 
-            // Sync with Python Backend (port 5050)
             try {
-              fetch('http://localhost:5050/api/opportunities/apply', {
+              await fetch('http://localhost:5050/api/opportunities/apply', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(appPayload)
               });
             } catch (err) {}
 
-            // Sync with Gateway (port 2816)
             try {
-              fetch('/api/opportunities/apply', {
+              await fetch('/api/opportunities/apply', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(appPayload)
@@ -4103,12 +4333,13 @@
               },
               body: JSON.stringify({
                 companyName: companyName,
-                jobRole: targetOpp ? targetOpp.title : 'Software Development Engineer',
-                matchScore: '92%',
-                userId: user.id || user.userId || user.email || 'user_123',
-                email: user.email || 'jaswanth@hiero.ai',
-                fullName: user.name || 'Jaswanth Kumar',
-                resumeName: finalResumeName
+                jobRole: jobTitle,
+                matchScore: (matchScore || 0) + '%',
+                userId: profile.email,
+                email: profile.email,
+                fullName: profile.fullName,
+                resumeName: finalResumeName,
+                profile: profile
               })
             });
           } catch (err) {
@@ -4117,14 +4348,19 @@
 
           closeApplyResumeModal();
 
+          if (submitBtn) {
+            submitBtn.innerHTML = `<i class="fa-solid fa-paper-plane" style="margin-right: 6px;"></i> Submit to Connect`;
+            submitBtn.disabled = false;
+          }
+
           if (btn) {
             btn.innerHTML = `<i class="fa-solid fa-check"></i> Applied`;
             btn.classList.add('applied');
           }
 
-          const roleTitle = targetOpp ? targetOpp.title : 'Software Development Engineer';
+          const scoreQ = encodeURIComponent((matchScore || 0) + '%');
           setTimeout(() => {
-            window.location.href = `job_success.html?company=${encodeURIComponent(companyName)}&role=${encodeURIComponent(roleTitle)}&score=92%25`;
+            window.location.href = `job_success.html?company=${encodeURIComponent(companyName)}&role=${encodeURIComponent(jobTitle)}&score=${scoreQ}`;
           }, 350);
         }
 

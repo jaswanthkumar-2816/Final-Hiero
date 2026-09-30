@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HIERO · SIH 2026 · 6 slides</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:wght@700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --navy: #1e3a5f;
+      --green: #0f7b3a;
+      --green-d: #0b5c2c;
+      --ink: #122018;
+      --muted: #3d4f45;
+      --line: #d5e0d8;
+      --paper: #ffffff;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body { font-family: Inter, system-ui, sans-serif; background: #0e1a14; color: var(--ink); overflow: hidden; }
+    .slide {
+      display: none;
+      width: 100vw; height: 100vh;
+      background: var(--paper);
+      padding: 28px 36px 40px;
+      flex-direction: column;
+      position: relative;
+    }
+    .slide.on { display: flex; }
+    .top {
+      display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 3px solid var(--navy); padding-bottom: 10px; margin-bottom: 14px;
+    }
+    .brand {
+      font-weight: 800; color: var(--navy); font-size: 13px; letter-spacing: .12em;
+      border: 2px solid var(--navy); border-radius: 999px; padding: 4px 12px;
+    }
+    h1 {
+      font-family: Merriweather, Georgia, serif;
+      font-size: 28px; color: var(--navy); text-align: center; flex: 1;
+    }
+    .sih { font-size: 12px; font-weight: 800; color: var(--navy); text-align: right; line-height: 1.25; }
+    h2 { font-size: 15px; color: var(--green-d); margin-bottom: 6px; }
+    p, li { font-size: 13.5px; line-height: 1.4; color: var(--muted); }
+    .grid { display: grid; gap: 10px; flex: 1; min-height: 0; }
+    .g2 { grid-template-columns: 1.1fr .9fr; }
+    .g3 { grid-template-columns: 1fr 1fr 1fr; }
+    .g6 { grid-template-columns: repeat(6, 1fr); }
+    .box { border: 1px solid var(--line); border-radius: 12px; padding: 12px; background: #f7fbf8; }
+    .box h3 { font-size: 14px; margin-bottom: 6px; color: var(--ink); }
+    .port { font-size: 11px; font-weight: 800; color: var(--green); letter-spacing: .04em; }
+    .bar { background: var(--green-d); color: #fff; border-radius: 10px; padding: 10px 12px; font-size: 13px; font-weight: 600; }
+    .num { font-size: 18px; font-weight: 800; color: var(--green-d); }
+    ul { padding-left: 16px; }
+    li { margin: 3px 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+    th { background: #e8f2ec; color: var(--navy); text-align: left; padding: 7px 8px; }
+    td { border-bottom: 1px solid var(--line); padding: 7px 8px; vertical-align: top; }
+    .pg {
+      position: absolute; right: 28px; bottom: 12px;
+      font-size: 12px; font-weight: 800; color: var(--navy);
+    }
+    .foot {
+      position: absolute; left: 36px; bottom: 12px;
+      font-size: 11px; color: #6b7c72;
+    }
+    .title-h { font-family: Merriweather, Georgia, serif; font-size: 42px; color: var(--navy); text-align: center; margin: 8px 0 18px; }
+    .meta li { font-size: 20px; color: var(--ink); margin: 10px 0; }
+    .quote { border: 1px solid var(--navy); border-radius: 10px; padding: 8px 12px; font-size: 13px; margin-top: 8px; }
+    @media print {
+      body { overflow: visible; background: #fff; }
+      .slide { display: flex !important; page-break-after: always; width: 13.33in; height: 7.5in; }
+    }
+  </style>
+</head>
+<body>
+
+<section class="slide on">
+  <div class="top">
+    <div class="brand">HIERO</div>
+    <div class="sih">SMART INDIA<br>HACKATHON 2026</div>
+  </div>
+  <div class="title-h">HIERO</div>
+  <ul class="meta" style="max-width:920px;margin:0 auto;">
+    <li><b>Problem Statement ID –</b> 26044</li>
+    <li><b>Problem Statement Title –</b> Portal for Academia – Industry Collaboration for Skill Mapping, Internships and Placement</li>
+    <li><b>Theme –</b> Miscellaneous</li>
+    <li><b>PS Category –</b> Software</li>
+    <li><b>Team Name –</b> Hiero</li>
+  </ul>
+  <p class="foot">One ecosystem · three portals · one placement loop</p>
+  <div class="pg">1</div>
+</section>
+
+<section class="slide">
+  <div class="top">
+    <div class="brand">HIERO</div>
+    <h1>PROPOSED SOLUTION</h1>
+    <div class="sih">SMART INDIA<br>HACKATHON 2026</div>
+  </div>
+  <p style="text-align:center;font-weight:800;color:var(--navy);margin-bottom:10px">AI-powered academia–industry skill and placement ecosystem</p>
+  <div class="grid g2">
+    <div>
+      <div class="grid g3" style="margin-bottom:10px">
+        <div class="box"><div class="port">STUDENTS · :2816</div><h3>Final Hiero</h3><p>Learn, visualize, eval + named certificate, Deepgram interview, then apply.</p></div>
+        <div class="box"><div class="port">CAMPUS · :2410</div><h3>Bridge / Academia</h3><p>Placement cell sees the same live job feed. Campus applicants write into one store.</p></div>
+        <div class="box"><div class="port">HR · :2004</div><h3>Connect Portal</h3><p>Publish roles, read one inbox, shortlist. Status writes back to the student.</p></div>
+      </div>
+      <div class="bar">Industry publishes → Academia + students see the same drive → Student proves skill → Apply once → HR shortlists</div>
+      <div class="quote">“HIERO connects what Industry needs, what Academia teaches, and what Students can prove — in one competency-driven ecosystem.” · hiero.in</div>
+    </div>
+    <div class="box">
+      <h2>End-to-end loop (what we demo)</h2>
+      <ol style="padding-left:18px;color:var(--muted)">
+        <li><b>Connect</b> — HR publishes job, skills, deadline.</li>
+        <li><b>Sync</b> — Node gateway + Python :5050 push the feed.</li>
+        <li><b>Bridge + Hiero</b> — campus and students see one drive.</li>
+        <li><b>Prove</b> — gap score, Indic learning, eval certificate, interview.</li>
+        <li><b>Apply</b> — one application row, not three copies.</li>
+        <li><b>Inbox</b> — Connect shortlist writes status back.</li>
+      </ol>
+    </div>
+  </div>
+  <div class="pg">2</div>
+</section>
+
+<section class="slide">
+  <div class="top">
+    <div class="brand">HIERO</div>
+    <h1>TECHNICAL APPROACH</h1>
+    <div class="sih">SMART INDIA<br>HACKATHON 2026</div>
+  </div>
+  <div class="grid" style="grid-template-columns:1.15fr 1fr 1fr">
+    <div class="box">
+      <h2>Deterministic scoring (not LLM)</h2>
+      <ul>
+        <li><b>JD match</b> — skill coverage 70% + projects 12 + experience 10 + education 8. Extra skills do not inflate the score.</li>
+        <li><b>ATS</b> — keywords 30% + formatting 20% + readability 20% + structure 20% + action verbs 10%.</li>
+        <li><b>Skill gap</b> — set difference of JD vs resume; JD skills ranked Critical / Important / Optional by frequency × position.</li>
+        <li><b>Eval grade</b> — MCQ index match + Python test equality. Score = 60% quiz + 40% coding. Pass 70/75/80. Certificate only if passed.</li>
+        <li><b>Mastery</b> — 30% practice + 60% assessment + 10% recency decay.</li>
+      </ul>
+    </div>
+    <div class="box">
+      <h2>Retrieval + tracing</h2>
+      <ul>
+        <li><b>TF-IDF + cosine</b> — caption windows 30–60s; locate the exact YouTube clip for a weak subtopic (local vectors, no paid embedding API).</li>
+        <li><b>Interview rank</b> — company/role/JD/resume weights; Jaccard + bigram dedup (reject ≥ 0.45). LLM only phrases the top-4.</li>
+        <li><b>Python sys.settrace</b> + JS Acorn AST in Node <code>vm</code> — step-level visualize; C/C++/Java transpile then trace.</li>
+        <li><b>Proctor</b> — BlazeFace + COCO-SSD on client; tab-switch / copy-paste logged on server.</li>
+      </ul>
+    </div>
+    <div class="box">
+      <h2>Where Groq / Deepgram sit</h2>
+      <ul>
+        <li>Groq blends match score only if it is within ±25 of the formula (70% formula, 30% AI). Else formula wins.</li>
+        <li>Groq generates eval questions and interview wording — <b>never the grade</b>.</li>
+        <li>Deepgram Nova-3 STT / Aura-2 TTS for interview voice (not browser Web Speech).</li>
+        <li>FastAPI :5050 stores jobs/applications. Gateway :2816 is the only privileged hop.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="grid g6" style="flex:0;margin-top:10px">
+    <div class="box"><b>Weighted match</b><p>70 / 12 / 10 / 8</p></div>
+    <div class="box"><b>TF-IDF cosine</b><p>learn clips</p></div>
+    <div class="box"><b>Jaccard + n-gram</b><p>interview dedup</p></div>
+    <div class="box"><b>settrace + AST</b><p>visualize</p></div>
+    <div class="box"><b>Server tests</b><p>eval pass/fail</p></div>
+    <div class="box"><b>3 portals</b><p>2816 / 2410 / 2004</p></div>
+  </div>
+  <p class="foot">Clients never call models or sandboxes. Scores and certificates are computed on the gateway, not trusted from the browser.</p>
+  <div class="pg">3</div>
+</section>
+
+<section class="slide">
+  <div class="top">
+    <div class="brand">HIERO</div>
+    <h1>FEASIBILITY AND VIABILITY</h1>
+    <div class="sih">SMART INDIA<br>HACKATHON 2026</div>
+  </div>
+  <div class="grid" style="grid-template-columns:1.1fr 1fr 1fr">
+    <div class="box">
+      <h2>Why this is buildable now</h2>
+      <ul>
+        <li>Already running locally: Final Hiero :2816, Academia :2410, Connect :2004, jobs engine :5050.</li>
+        <li>One Node gateway, not a microservice fleet. Lazy-loaded routers for cheap cloud deploys (Render-ready).</li>
+        <li>If Mongo is down, auth and jobs still fall back to JSON files.</li>
+        <li>Open APIs we already wire: Groq, YouTube Data API, Deepgram, Edge-TTS, Razorpay.</li>
+      </ul>
+    </div>
+    <div class="box">
+      <h2>Risks we actually hit</h2>
+      <ul>
+        <li>LLM / STT cost and outage → Groq + OpenRouter + rule-based parse fallback.</li>
+        <li>Rural bandwidth → PWA / offline.html, video via YouTube not self-hosted.</li>
+        <li>Campus adoption → Bridge portal is the institutional face; students stay on Hiero.</li>
+        <li>Cheating on eval → camera + tab heartbeat; grades never trusted from the client.</li>
+      </ul>
+    </div>
+    <div class="box">
+      <h2>Business model (honest)</h2>
+      <ul>
+        <li>Core learn / apply loop free for students.</li>
+        <li>Razorpay plans already in the student app (₹9–₹249) for resume templates and extras.</li>
+        <li>Campus license later: Bridge as the placement-cell product.</li>
+        <li>Pilot: one college drive + one HR inbox, not a national rollout on day one.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="pg">4</div>
+</section>
+
+<section class="slide">
+  <div class="top">
+    <div class="brand">HIERO</div>
+    <h1>IMPACT AND BENEFITS</h1>
+    <div class="sih">SMART INDIA<br>HACKATHON 2026</div>
+  </div>
+  <div class="grid g3">
+    <div class="box">
+      <div class="port">STUDENTS · FINAL HIERO</div>
+      <h3>Prove skill against a real JD</h3>
+      <ul>
+        <li>See missing skills vs the posted role</li>
+        <li>Learn in en / hi / te / ta / kn</li>
+        <li>Pass L1–L3 eval → named certificate</li>
+        <li>Apply with a verified badge, not a self-claim</li>
+      </ul>
+    </div>
+    <div class="box">
+      <div class="port">INDUSTRY · CONNECT</div>
+      <h3>Hire from one inbox</h3>
+      <ul>
+        <li>Publish internships and FTE once</li>
+        <li>See campus + student applications together</li>
+        <li>Shortlist; status returns to the candidate</li>
+        <li>Less spreadsheet matching</li>
+      </ul>
+    </div>
+    <div class="box">
+      <div class="port">ACADEMIA · BRIDGE</div>
+      <h3>Same drive as HR</h3>
+      <ul>
+        <li>Placement cell uses the live job feed</li>
+        <li>No private copy of applications</li>
+        <li>Curriculum gap visible from JD skills</li>
+        <li>Supports Skill India / NEP language goals</li>
+      </ul>
+    </div>
+  </div>
+  <div class="bar" style="margin-top:10px">What industry needs → what academia shows → what students prove → better internships and placements</div>
+  <div class="pg">5</div>
+</section>
+
+<section class="slide">
+  <div class="top">
+    <div class="brand">HIERO</div>
+    <h1>RESEARCH AND REFERENCES</h1>
+    <div class="sih">SMART INDIA<br>HACKATHON 2026</div>
+  </div>
+  <table>
+    <thead>
+      <tr><th>Source</th><th>Why it supports this build</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Nexus: semantic job matching and AI resume analysis (2026)</td>
+        <td>JD–resume matching and LLM feedback — our Groq ATS JSON score</td>
+      </tr>
+      <tr>
+        <td>Semantic similarity job-matching frameworks (2025)</td>
+        <td>Candidate–role alignment beyond keywords — interview + apply match</td>
+      </tr>
+      <tr>
+        <td>Mapping skills to ESCO with language models (2026)</td>
+        <td>Skill extraction from JD/resume into a shared taxonomy</td>
+      </tr>
+      <tr>
+        <td>Evaluating ESCO skill classifiers — esco.ec.europa.eu</td>
+        <td>Evidence-based skill demand from job ads</td>
+      </tr>
+      <tr>
+        <td>Graduate skill gaps in applied higher education (2026)</td>
+        <td>Student–campus–employer triad — our three portals</td>
+      </tr>
+      <tr>
+        <td>University–industry collaboration and employability (2021)</td>
+        <td>Why Bridge (academia) and Connect (industry) must share one store</td>
+      </tr>
+    </tbody>
+  </table>
+  <p style="margin-top:10px">Problem statement 26044 asks for an academia–industry portal. Hiero answers with three faces on one job/application backbone, not three disconnected products.</p>
+  <p class="foot">Arrow keys to change slides · P to print / Save as PDF</p>
+  <div class="pg">6</div>
+</section>
+
+<script>
+  const slides = [...document.querySelectorAll('.slide')];
+  let i = 0;
+  function show(n) {
+    i = Math.max(0, Math.min(slides.length - 1, n));
+    slides.forEach((s, idx) => s.classList.toggle('on', idx === i));
+  }
+  document.addEventListener('keydown', (e) => {
+    if (['ArrowRight',' ','PageDown'].includes(e.key)) { e.preventDefault(); show(i + 1); }
+    if (['ArrowLeft','PageUp'].includes(e.key)) { e.preventDefault(); show(i - 1); }
+    if (e.key === 'Home') show(0);
+    if (e.key === 'End') show(slides.length - 1);
+  });
+  document.body.addEventListener('click', (e) => {
+    if (e.target.closest('a')) return;
+    show(i + (e.clientX > innerWidth / 2 ? 1 : -1));
+  });
+</script>
+</body>
+</html>

@@ -58,12 +58,13 @@ async function transcribeAudio(audioBuffer, mimeType = 'audio/webm', keyterms = 
  * @param {string} voiceModel - e.g. 'aura-asteria-en', 'aura-luna-en', 'aura-arcas-en'
  * @returns {Promise<Buffer>} - Audio MP3 buffer
  */
-async function textToSpeech(text, voiceModel = null) {
+async function textToSpeech(text, voiceModel = null, options = {}) {
     if (!DEEPGRAM_API_KEY) {
         throw new Error('DEEPGRAM_API_KEY is not configured');
     }
 
     const voice = voiceModel || process.env.DEEPGRAM_TTS_VOICE || 'aura-asteria-en';
+    const speed = Number(options && options.speed);
     
     // Clean text of markdown symbols that degrade speech synthesis
     const cleanText = text
@@ -75,8 +76,13 @@ async function textToSpeech(text, voiceModel = null) {
         throw new Error('Cannot synthesize empty text');
     }
 
+    let speakUrl = `https://api.deepgram.com/v1/speak?model=${encodeURIComponent(voice)}&encoding=mp3`;
+    if (Number.isFinite(speed) && speed >= 0.7 && speed <= 1.5) {
+        speakUrl += `&speed=${encodeURIComponent(speed)}`;
+    }
+
     const response = await axios.post(
-        `https://api.deepgram.com/v1/speak?model=${encodeURIComponent(voice)}`,
+        speakUrl,
         { text: cleanText },
         {
             headers: {

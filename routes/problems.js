@@ -6,7 +6,11 @@ const path = require('path');
 const os = require('os');
 const crypto = require('crypto');
 const axios = require('axios');
+const vm = require('vm');
 const dotenv = require('dotenv');
+const LANG_PACKS = require('./lang-packs');
+const { detectCodingLanguage } = require('./clike-to-js');
+const { evaluateCompiled, evaluateTranspiled } = require('./compiled-eval');
 
 dotenv.config();
 
@@ -410,56 +414,81 @@ def merge_k_sorted(arrays):
       id: 'py-hard-3',
       skill: 'Python',
       difficulty: 'hard',
-      subTopic: 'Concurrency & Rate Limiting',
-      title: 'Token Bucket Rate Limiter',
-      description: 'Implement a class `TokenBucket(capacity, refill_rate)` where `capacity` is the max token count and `refill_rate` is tokens added per second. `allow_request(tokens, current_time)` consumes `tokens` and returns `True` if available, or `False` otherwise.',
-      hint: "Calculate elapsed time: `elapsed = current_time - last_time`. Add `elapsed * refill_rate` tokens capped at `capacity`. Deduct tokens if `tokens >= needed`.",
-      starterCode: `class TokenBucket:
-    def __init__(self, capacity: float, refill_rate: float):
-        # Initialize capacity, refill rate, and token balance
-        pass
+      subTopic: 'Divide & Conquer · Merge Sort',
+      title: 'Merge Sort a Large Array',
+      description: 'Write `merge_sort(nums)` that returns a new list with the integers in non-decreasing order using classic merge sort: split the array in half, recursively sort each half, then merge the two sorted halves. Do not use `sorted()` or `.sort()`. The starter uses a 16-element array so Visualize My Code can show a full 4-level split/merge tree.',
+      hint: 'If the list has 0 or 1 items, return a copy. Otherwise take mid = len(nums)//2, sort nums[:mid] and nums[mid:], then merge with two pointers into a new list.',
+      starterCode: `def merge(left, right):
+    merged = []
+    i = 0
+    j = 0
+    while i < len(left) and j < len(right):
+        if left[i] <= right[j]:
+            merged.append(left[i])
+            i += 1
+        else:
+            merged.append(right[j])
+            j += 1
+    while i < len(left):
+        merged.append(left[i])
+        i += 1
+    while j < len(right):
+        merged.append(right[j])
+        j += 1
+    return merged
 
-    def allow_request(self, tokens: float, current_time: float) -> bool:
-        # Refill tokens and check if request can proceed
-        pass`,
+def merge_sort(nums):
+    if nums is None:
+        return []
+    if len(nums) <= 1:
+        return list(nums)
+    mid = len(nums) // 2
+    left = merge_sort(nums[:mid])
+    right = merge_sort(nums[mid:])
+    return merge(left, right)
+
+if __name__ == '__main__':
+    data = [38, 27, 43, 3, 9, 82, 10, 19, 50, 1, 62, 14, 7, 91, 4, 25]
+    print(merge_sort(data))`,
       testCases: [
         {
           case: 1,
-          name: "Burst & Refill Rate Check",
-          input: "Capacity 5, Rate 1: req(3, t=0)->T, req(3, t=0)->F, req(2, t=2)->T",
-          testCall: "tb = TokenBucket(5, 1); r1 = tb.allow_request(3, 0); r2 = tb.allow_request(3, 0); r3 = tb.allow_request(2, 2); [r1, r2, r3]",
-          expectedOutput: "[True, False, True]"
+          name: '16-element visualization array',
+          input: '[38, 27, 43, 3, 9, 82, 10, 19, 50, 1, 62, 14, 7, 91, 4, 25]',
+          testCall: 'merge_sort([38, 27, 43, 3, 9, 82, 10, 19, 50, 1, 62, 14, 7, 91, 4, 25])',
+          expectedOutput: '[1, 3, 4, 7, 9, 10, 14, 19, 25, 27, 38, 43, 50, 62, 82, 91]'
         },
         {
           case: 2,
-          name: "Over-Capacity Request Test",
-          input: "Capacity 10, Rate 2: req(10, t=0)->T, req(5, t=1)->F",
-          testCall: "tb = TokenBucket(10, 2); r1 = tb.allow_request(10, 0); r2 = tb.allow_request(5, 1); [r1, r2]",
-          expectedOutput: "[True, False]"
+          name: 'Duplicates and negatives',
+          input: '[5, -1, 5, 0, 12, -1, 8, 3]',
+          testCall: 'merge_sort([5, -1, 5, 0, 12, -1, 8, 3])',
+          expectedOutput: '[-1, -1, 0, 3, 5, 5, 8, 12]'
         },
         {
           case: 3,
-          name: "Full Refill Recovery Test",
-          input: "Capacity 4, Rate 2: req(4, t=0)->T, req(4, t=2)->T",
-          testCall: "tb = TokenBucket(4, 2); r1 = tb.allow_request(4, 0); r2 = tb.allow_request(4, 2); [r1, r2]",
-          expectedOutput: "[True, True]"
+          name: 'Already sorted and empty',
+          input: '[] then [1, 2, 3]',
+          testCall: '[merge_sort([]), merge_sort([1, 2, 3])]',
+          expectedOutput: '[[], [1, 2, 3]]'
         }
       ],
-      referenceSolution: `class TokenBucket:
-    def __init__(self, capacity: float, refill_rate: float):
-        self.capacity = float(capacity)
-        self.refill_rate = float(refill_rate)
-        self.tokens = float(capacity)
-        self.last_time = 0.0
+      referenceSolution: `def merge(left, right):
+    merged, i, j = [], 0, 0
+    while i < len(left) and j < len(right):
+        if left[i] <= right[j]:
+            merged.append(left[i]); i += 1
+        else:
+            merged.append(right[j]); j += 1
+    merged.extend(left[i:])
+    merged.extend(right[j:])
+    return merged
 
-    def allow_request(self, tokens: float, current_time: float) -> bool:
-        elapsed = max(0.0, current_time - self.last_time)
-        self.tokens = min(self.capacity, self.tokens + elapsed * self.refill_rate)
-        self.last_time = current_time
-        if self.tokens >= tokens:
-            self.tokens -= tokens
-            return True
-        return False`
+def merge_sort(nums):
+    if not nums or len(nums) <= 1:
+        return list(nums or [])
+    mid = len(nums) // 2
+    return merge(merge_sort(nums[:mid]), merge_sort(nums[mid:]))`
     }
   ],
 
@@ -567,74 +596,442 @@ def merge_k_sorted(arrays):
       id: 'js-hard-3',
       skill: 'JavaScript',
       difficulty: 'hard',
-      subTopic: 'Event Architecture',
-      title: 'Observable Event Emitter',
-      description: 'Implement an `EventEmitter` class with `on(event, listener)`, `off(event, listener)`, `emit(event, ...args)`, and `once(event, listener)`.',
-      hint: 'Use a Map of arrays to store event subscriber callbacks.',
-      starterCode: `class EventEmitter {\n    constructor() { this.events = new Map(); }\n    on(event, fn) {\n        if (!this.events.has(event)) this.events.set(event, []);\n        this.events.get(event).push(fn);\n    }\n    emit(event, ...args) {\n        (this.events.get(event) || []).forEach(fn => fn(...args));\n    }\n}`,
-      testCases: [{ case: 1, name: "Emit Listen Test", input: "on, emit", testCall: "const ee = new EventEmitter(); let c = 0; ee.on('hit', v => c += v); ee.emit('hit', 5); c", expectedOutput: "5" }],
-      referenceSolution: `class EventEmitter { constructor() { this.events = new Map(); } on(e, f) { if (!this.events.has(e)) this.events.set(e, []); this.events.get(e).push(f); } emit(e, ...a) { (this.events.get(e) || []).forEach(f => f(...a)); } }`
+      subTopic: 'Divide & Conquer · Merge Sort',
+      title: 'Merge Sort a Large Array',
+      description: 'Write `mergeSort(nums)` that returns a new array sorted non-decreasing using split, recursive sort, and merge. Do not use `.sort()`. The 16-element starter is built so Visualize My Code can show a full 4-level split/merge tree.',
+      hint: 'Base case: length <= 1. Split at mid, recurse, then two-pointer merge into a new array.',
+      starterCode: `function merge(left, right) {
+  const merged = [];
+  let i = 0;
+  let j = 0;
+  while (i < left.length && j < right.length) {
+    if (left[i] <= right[j]) {
+      merged.push(left[i]);
+      i += 1;
+    } else {
+      merged.push(right[j]);
+      j += 1;
+    }
+  }
+  while (i < left.length) {
+    merged.push(left[i]);
+    i += 1;
+  }
+  while (j < right.length) {
+    merged.push(right[j]);
+    j += 1;
+  }
+  return merged;
+}
+
+function mergeSort(nums) {
+  if (!nums || nums.length <= 1) return nums ? nums.slice() : [];
+  const mid = Math.floor(nums.length / 2);
+  const left = mergeSort(nums.slice(0, mid));
+  const right = mergeSort(nums.slice(mid));
+  return merge(left, right);
+}
+
+console.log(mergeSort([38, 27, 43, 3, 9, 82, 10, 19, 50, 1, 62, 14, 7, 91, 4, 25]));`,
+      testCases: [
+        { case: 1, name: '16-element visualization array', input: '[38, 27, 43, 3, 9, 82, 10, 19, 50, 1, 62, 14, 7, 91, 4, 25]', testCall: 'JSON.stringify(mergeSort([38, 27, 43, 3, 9, 82, 10, 19, 50, 1, 62, 14, 7, 91, 4, 25]))', expectedOutput: '[1,3,4,7,9,10,14,19,25,27,38,43,50,62,82,91]' },
+        { case: 2, name: 'Duplicates and negatives', input: '[5, -1, 5, 0, 12, -1, 8, 3]', testCall: 'JSON.stringify(mergeSort([5, -1, 5, 0, 12, -1, 8, 3]))', expectedOutput: '[-1,-1,0,3,5,5,8,12]' },
+        { case: 3, name: 'Empty', input: '[]', testCall: 'JSON.stringify(mergeSort([]))', expectedOutput: '[]' }
+      ],
+      referenceSolution: `function merge(left, right) {
+  const merged = [];
+  let i = 0, j = 0;
+  while (i < left.length && j < right.length) {
+    if (left[i] <= right[j]) merged.push(left[i++]);
+    else merged.push(right[j++]);
+  }
+  return merged.concat(left.slice(i), right.slice(j));
+}
+function mergeSort(nums) {
+  if (!nums || nums.length <= 1) return nums ? nums.slice() : [];
+  const mid = Math.floor(nums.length / 2);
+  return merge(mergeSort(nums.slice(0, mid)), mergeSort(nums.slice(mid)));
+}`
+    }
+  ],
+  git: [
+    {
+      id: 'git-easy-1',
+      skill: 'Git',
+      difficulty: 'easy',
+      subTopic: 'Branch naming rules',
+      title: 'Validate a Git branch name',
+      description: 'Write a function `isValidBranchName(name)` that takes a string and returns true if it is a valid Git branch name. A valid name is not empty, has no spaces, does not contain `..`, and does not start with `-` or `/`.',
+      hint: 'Reject empty strings first, then check the three illegal patterns.',
+      starterCode: `function isValidBranchName(name) {\n  // return true if name is a valid Git branch\n}`,
+      testCases: [
+        { case: 1, name: 'Feature branch', input: 'feature/login', testCall: 'isValidBranchName("feature/login")', expectedOutput: 'true' },
+        { case: 2, name: 'Empty name', input: '', testCall: 'isValidBranchName("")', expectedOutput: 'false' },
+        { case: 3, name: 'Starts with dash', input: '-hotfix', testCall: 'isValidBranchName("-hotfix")', expectedOutput: 'false' }
+      ],
+      referenceSolution: `function isValidBranchName(name) {\n  if (!name || typeof name !== 'string') return false;\n  if (name.includes(' ') || name.includes('..')) return false;\n  if (name.startsWith('-') || name.startsWith('/')) return false;\n  return true;\n}`
+    },
+    {
+      id: 'git-easy-2',
+      skill: 'Git',
+      difficulty: 'easy',
+      subTopic: 'Short status codes',
+      title: 'Parse git status --short',
+      description: 'Write a function `parseShortStatus(line)` that takes one porcelain status line such as `"M  src/app.js"` and returns `{ code, path }`. `code` is the first two characters trimmed of spaces (use the XY letters only), `path` is the remainder trimmed. Empty line returns `{ code: "", path: "" }`.',
+      hint: 'Take the first two characters as the code, then slice the rest as the path.',
+      starterCode: `function parseShortStatus(line) {\n  // return { code, path }\n}`,
+      testCases: [
+        { case: 1, name: 'Modified file', input: 'M  src/app.js', testCall: 'parseShortStatus("M  src/app.js")', expectedOutput: '{"code":"M","path":"src/app.js"}' },
+        { case: 2, name: 'Untracked file', input: '?? notes.txt', testCall: 'parseShortStatus("?? notes.txt")', expectedOutput: '{"code":"??","path":"notes.txt"}' },
+        { case: 3, name: 'Empty line', input: '', testCall: 'parseShortStatus("")', expectedOutput: '{"code":"","path":""}' }
+      ],
+      referenceSolution: `function parseShortStatus(line) {\n  if (!line) return { code: '', path: '' };\n  const code = line.slice(0, 2).replace(/ /g, '');\n  const path = line.slice(2).trim();\n  return { code, path };\n}`
+    },
+    {
+      id: 'git-easy-3',
+      skill: 'Git',
+      difficulty: 'easy',
+      subTopic: 'gitignore matching',
+      title: 'Match a simple gitignore rule',
+      description: 'Write a function `isIgnored(filePath, pattern)` that returns true if `filePath` matches a simple gitignore `pattern`. Support exact names and a trailing `*` wildcard (e.g. `*.log` matches `error.log`). Empty pattern never matches.',
+      hint: 'If the pattern ends with *, compare the suffix. Otherwise require an exact match.',
+      starterCode: `function isIgnored(filePath, pattern) {\n  // return true if the path should be ignored\n}`,
+      testCases: [
+        { case: 1, name: 'Log wildcard', input: 'error.log / *.log', testCall: 'isIgnored("error.log", "*.log")', expectedOutput: 'true' },
+        { case: 2, name: 'Exact node_modules', input: 'node_modules / node_modules', testCall: 'isIgnored("node_modules", "node_modules")', expectedOutput: 'true' },
+        { case: 3, name: 'Empty pattern', input: 'app.js / ""', testCall: 'isIgnored("app.js", "")', expectedOutput: 'false' }
+      ],
+      referenceSolution: `function isIgnored(filePath, pattern) {\n  if (!pattern) return false;\n  if (pattern.endsWith('*')) return filePath.endsWith(pattern.slice(0, -1).replace(/^\\*/, '')) || filePath.endsWith(pattern.slice(1));\n  return filePath === pattern || filePath.endsWith('/' + pattern);\n}`
+    },
+    {
+      id: 'git-med-1',
+      skill: 'Git',
+      difficulty: 'medium',
+      subTopic: 'Merge conflict files',
+      title: 'List files with conflict markers',
+      description: 'Write a function `conflictedFiles(entries)` that takes an array of `{ file, content }` objects and returns the file names whose content contains `<<<<<<<`. Empty array returns `[]`.',
+      hint: 'Filter entries whose content includes the start conflict marker.',
+      starterCode: `function conflictedFiles(entries) {\n  // return file names that still have conflict markers\n}`,
+      testCases: [
+        { case: 1, name: 'One conflict', input: 'app.js conflicted', testCall: 'conflictedFiles([{file:"app.js",content:"<<<<<<< HEAD\\nx\\n>>>>>>> main"},{file:"ok.js",content:"const x=1"}])', expectedOutput: '["app.js"]' },
+        { case: 2, name: 'No conflicts', input: 'clean files', testCall: 'conflictedFiles([{file:"a.js",content:"ok"}])', expectedOutput: '[]' },
+        { case: 3, name: 'Empty list', input: '[]', testCall: 'conflictedFiles([])', expectedOutput: '[]' }
+      ],
+      referenceSolution: `function conflictedFiles(entries) {\n  return (entries || []).filter(e => String(e.content || '').includes('<<<<<<<')).map(e => e.file);\n}`
+    },
+    {
+      id: 'git-med-2',
+      skill: 'Git',
+      difficulty: 'medium',
+      subTopic: 'Conventional commits',
+      title: 'Parse a conventional commit',
+      description: 'Write a function `parseCommit(message)` that reads a first line like `feat(auth): add login` and returns `{ type, scope, subject }`. If there is no scope, `scope` is `null`. Empty message returns `{ type: "", scope: null, subject: "" }`.',
+      hint: 'Use a regex like type(scope)?: subject',
+      starterCode: `function parseCommit(message) {\n  // return { type, scope, subject }\n}`,
+      testCases: [
+        { case: 1, name: 'Feat with scope', input: 'feat(auth): add login', testCall: 'parseCommit("feat(auth): add login")', expectedOutput: '{"type":"feat","scope":"auth","subject":"add login"}' },
+        { case: 2, name: 'Fix without scope', input: 'fix: null check', testCall: 'parseCommit("fix: null check")', expectedOutput: '{"type":"fix","scope":null,"subject":"null check"}' },
+        { case: 3, name: 'Empty message', input: '', testCall: 'parseCommit("")', expectedOutput: '{"type":"","scope":null,"subject":""}' }
+      ],
+      referenceSolution: `function parseCommit(message) {\n  if (!message) return { type: '', scope: null, subject: '' };\n  const m = String(message).trim().match(/^([a-zA-Z]+)(?:\\(([a-zA-Z0-9_-]+)\\))?:\\s*(.+)$/);\n  if (!m) return { type: '', scope: null, subject: String(message).trim() };\n  return { type: m[1], scope: m[2] || null, subject: m[3] };\n}`
+    },
+    {
+      id: 'git-med-3',
+      skill: 'Git',
+      difficulty: 'medium',
+      subTopic: 'Diff --stat parsing',
+      title: 'Parse a git diff --stat line',
+      description: 'Write a function `parseDiffStat(line)` that turns `"src/app.js | 12 ++++----"` into `{ file, changes }` where `changes` is the integer before the plus/minus bars. A blank line returns `{ file: "", changes: 0 }`.',
+      hint: 'Split on `|` and parse the first number in the right side.',
+      starterCode: `function parseDiffStat(line) {\n  // return { file, changes }\n}`,
+      testCases: [
+        { case: 1, name: 'Normal stat', input: 'src/app.js | 12 ++++----', testCall: 'parseDiffStat("src/app.js | 12 ++++----")', expectedOutput: '{"file":"src/app.js","changes":12}' },
+        { case: 2, name: 'Readme only plus', input: 'README.md | 3 +++', testCall: 'parseDiffStat("README.md | 3 +++")', expectedOutput: '{"file":"README.md","changes":3}' },
+        { case: 3, name: 'Blank line', input: '', testCall: 'parseDiffStat("")', expectedOutput: '{"file":"","changes":0}' }
+      ],
+      referenceSolution: `function parseDiffStat(line) {\n  if (!line || !line.includes('|')) return { file: '', changes: 0 };\n  const [left, right] = line.split('|');\n  const n = parseInt(String(right).trim(), 10);\n  return { file: left.trim(), changes: Number.isFinite(n) ? n : 0 };\n}`
+    },
+    {
+      id: 'git-hard-1',
+      skill: 'Git',
+      difficulty: 'hard',
+      subTopic: 'Ours vs theirs resolve',
+      title: 'Resolve a conflict hunk',
+      description: 'Write a function `resolveConflict(text, side)` that replaces a `<<<<<<<` / `=======` / `>>>>>>>` hunk. If `side` is `"ours"` keep the first block; if `"theirs"` keep the second. If there is no marker, return the text unchanged. Empty text returns `""`.',
+      hint: 'Split on the three markers and pick the block that matches side.',
+      starterCode: `function resolveConflict(text, side) {\n  // return the resolved file text\n}`,
+      testCases: [
+        { case: 1, name: 'Keep ours', input: 'conflict ours', testCall: 'resolveConflict("a\\n<<<<<<< HEAD\\nOURS\\n=======\\nTHEIRS\\n>>>>>>> main\\nb", "ours")', expectedOutput: '"a\\nOURS\\nb"' },
+        { case: 2, name: 'Keep theirs', input: 'conflict theirs', testCall: 'resolveConflict("<<<<<<< HEAD\\nOURS\\n=======\\nTHEIRS\\n>>>>>>> main", "theirs")', expectedOutput: '"THEIRS"' },
+        { case: 3, name: 'Empty text', input: '', testCall: 'resolveConflict("", "ours")', expectedOutput: '""' }
+      ],
+      referenceSolution: `function resolveConflict(text, side) {\n  if (!text) return '';\n  if (!text.includes('<<<<<<<')) return text;\n  return text.replace(/<<<<<<<[^\\n]*\\n([\\s\\S]*?)=======\\n([\\s\\S]*?)>>>>>>>[^\\n]*/g, (_, ours, theirs) => (side === 'theirs' ? theirs : ours).replace(/\\n$/, ''));\n}`
+    },
+    {
+      id: 'git-hard-2',
+      skill: 'Git',
+      difficulty: 'hard',
+      subTopic: 'Reflog action parsing',
+      title: 'Read the action from a reflog line',
+      description: 'Write a function `reflogAction(line)` that reads a line like `abc123 HEAD@{0}: commit: fix login` and returns the action word after the colon (`commit`). If the line has no action, return `""`.',
+      hint: 'Split on `: ` and take the first word of the second piece.',
+      starterCode: `function reflogAction(line) {\n  // return commit | checkout | reset | ""\n}`,
+      testCases: [
+        { case: 1, name: 'Commit entry', input: 'abc123 HEAD@{0}: commit: fix login', testCall: 'reflogAction("abc123 HEAD@{0}: commit: fix login")', expectedOutput: '"commit"' },
+        { case: 2, name: 'Checkout entry', input: 'def456 HEAD@{1}: checkout: moving from main to feat', testCall: 'reflogAction("def456 HEAD@{1}: checkout: moving from main to feat")', expectedOutput: '"checkout"' },
+        { case: 3, name: 'Empty line', input: '', testCall: 'reflogAction("")', expectedOutput: '""' }
+      ],
+      referenceSolution: `function reflogAction(line) {\n  if (!line || !line.includes(': ')) return '';\n  const after = line.split(': ').slice(1)[0] || '';\n  return after.split(/\\s+/)[0] || '';\n}`
+    },
+    {
+      id: 'git-hard-3',
+      skill: 'Git',
+      difficulty: 'hard',
+      subTopic: 'Commit ancestry',
+      title: 'Is this commit an ancestor?',
+      description: 'Write a function `isAncestor(parents, ancestor, commit)` where `parents` is an object mapping a commit id to its parent id or `null`. Return true if `ancestor` appears while walking parents from `commit`. A missing commit or empty map returns false. A commit is an ancestor of itself.',
+      hint: 'Walk parent pointers until you hit null or the ancestor.',
+      starterCode: `function isAncestor(parents, ancestor, commit) {\n  // walk parents[commit] until null\n}`,
+      testCases: [
+        { case: 1, name: 'Direct parent', input: 'c2 -> c1', testCall: 'isAncestor({c2:"c1",c1:null}, "c1", "c2")', expectedOutput: 'true' },
+        { case: 2, name: 'Same commit', input: 'c1 of c1', testCall: 'isAncestor({c1:null}, "c1", "c1")', expectedOutput: 'true' },
+        { case: 3, name: 'Empty graph', input: '{}', testCall: 'isAncestor({}, "a", "b")', expectedOutput: 'false' }
+      ],
+      referenceSolution: `function isAncestor(parents, ancestor, commit) {\n  if (!parents || !commit) return false;\n  let cur = commit;\n  const seen = new Set();\n  while (cur && !seen.has(cur)) {\n    if (cur === ancestor) return true;\n    seen.add(cur);\n    cur = parents[cur];\n  }\n  return false;\n}`
     }
   ]
 };
 
+CURATED_PROBLEMS_BY_SKILL.c = LANG_PACKS.c;
+CURATED_PROBLEMS_BY_SKILL.cpp = LANG_PACKS.cpp;
+CURATED_PROBLEMS_BY_SKILL.java = LANG_PACKS.java;
+
 // ==========================================
 // HELPER: BUILD 9-PACK FOR ANY SKILL
 // ==========================================
-async function get9PackForSkill(skillName) {
-  const normSkill = (skillName || 'Python').trim().toLowerCase();
+const PROBLEM_PACK_CACHE = new Map();
+const PROBLEM_MODELS = [...new Set([
+  process.env.AI_MODEL,
+  'llama-3.3-70b-versatile',
+  'openai/gpt-oss-20b'
+].filter(Boolean))];
 
-  // 1. Direct curated match
-  if (CURATED_PROBLEMS_BY_SKILL[normSkill]) {
-    return CURATED_PROBLEMS_BY_SKILL[normSkill];
+function curatedPackFor(normSkill) {
+  if (CURATED_PROBLEMS_BY_SKILL[normSkill]) return CURATED_PROBLEMS_BY_SKILL[normSkill];
+  const aliases = {
+    js: 'javascript', node: 'javascript', nodejs: 'javascript',
+    py: 'python', python3: 'python', gitops: 'git',
+    dsa: 'python', algorithms: 'python',
+    c: 'c', clang: 'c', cpp: 'cpp', 'c++': 'cpp', cplusplus: 'cpp', java: 'java'
+  };
+  if (aliases[normSkill] && CURATED_PROBLEMS_BY_SKILL[aliases[normSkill]]) {
+    return CURATED_PROBLEMS_BY_SKILL[aliases[normSkill]];
   }
-
-  // 2. Partial match in curated DB (e.g. "py", "python3")
-  for (const [key, pack] of Object.entries(CURATED_PROBLEMS_BY_SKILL)) {
-    if (normSkill.includes(key) || key.includes(normSkill)) {
-      return pack;
+  for (const key of Object.keys(CURATED_PROBLEMS_BY_SKILL)) {
+    if (key.length >= 4 && (normSkill === key || normSkill.startsWith(key + ' ') || normSkill.includes(' ' + key))) {
+      return CURATED_PROBLEMS_BY_SKILL[key];
     }
   }
+  return null;
+}
 
-  // 3. AI Generation via Groq (with strict schema)
+async function groqJsonObject(messages, timeoutMs = 25000) {
+  let lastErr = null;
+  for (const model of PROBLEM_MODELS) {
+    for (const useFormat of [true, false]) {
+      try {
+        const body = { model, messages, temperature: 0.35 };
+        if (useFormat) body.response_format = { type: 'json_object' };
+        const completion = await axios.post('https://api.groq.com/openai/v1/chat/completions', body, {
+          headers: { 'Authorization': `Bearer ${GROQ_API_KEY}`, 'Content-Type': 'application/json' },
+          timeout: timeoutMs
+        });
+        const raw = completion.data.choices?.[0]?.message?.content || '{}';
+        const cleaned = String(raw).replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+        return JSON.parse(cleaned);
+      } catch (e) {
+        lastErr = e;
+        const detail = e.response?.data?.error?.message || e.message;
+        console.warn(`[Problems API] Groq ${model} json=${useFormat} failed: ${detail}`);
+        if (e.response?.status === 429) break;
+      }
+    }
+  }
+  throw lastErr || new Error('Groq JSON generation failed');
+}
+
+function normalizeCodingLang(value) {
+  const s = String(value || '').toLowerCase().trim();
+  if (s === 'c++' || s === 'cpp' || s === 'cplusplus') return 'cpp';
+  if (s === 'c' || s === 'clang') return 'c';
+  if (s === 'js' || s === 'javascript') return 'javascript';
+  if (s === 'python' || s === 'py' || s === 'python3') return 'python';
+  if (s === 'java') return 'java';
+  return '';
+}
+
+function packForCodingLang(lang, skillName) {
+  const n = normalizeCodingLang(lang);
+  if (!n) return null;
+  if (n === 'javascript') {
+    const skill = String(skillName || '').toLowerCase();
+    if (skill.includes('git')) return CURATED_PROBLEMS_BY_SKILL.git;
+    return CURATED_PROBLEMS_BY_SKILL.javascript;
+  }
+  return CURATED_PROBLEMS_BY_SKILL[n] || null;
+}
+
+function isDsaSkill(name) {
+  return /\b(dsa|data.?struct|algorithm|sorting)\b/i.test(String(name || ''));
+}
+
+function mergeSortProblemForLang(lang, skillName) {
+  const skill = skillName || 'DSA';
+  if (lang === 'javascript') {
+    const base = (CURATED_PROBLEMS_BY_SKILL.javascript || []).find((p) => p.id === 'js-hard-3');
+    return base ? Object.assign({}, base, { skill, id: 'dsa-hard-mergesort' }) : null;
+  }
+  if (lang === 'java') {
+    return {
+      id: 'dsa-hard-mergesort',
+      skill,
+      difficulty: 'hard',
+      subTopic: 'Divide & Conquer · Merge Sort',
+      title: 'Merge Sort a Large Array',
+      description: 'Write `mergeSort(nums)` that returns a new array sorted non-decreasing using split, recursive sort, and merge. Do not use `Arrays.sort`. The 16-element starter is built so Visualize My Code can show a full 4-level split/merge tree.',
+      hint: 'If length <= 1 return nums. Split at mid, recurse, then two-pointer merge.',
+      starterCode: `public class Solution {
+    public static int[] merge(int[] left, int[] right) {
+        int[] merged = new int[left.length + right.length];
+        int i = 0, j = 0, k = 0;
+        while (i < left.length && j < right.length) {
+            if (left[i] <= right[j]) merged[k++] = left[i++];
+            else merged[k++] = right[j++];
+        }
+        while (i < left.length) merged[k++] = left[i++];
+        while (j < right.length) merged[k++] = right[j++];
+        return merged;
+    }
+
+    public static int[] mergeSort(int[] nums) {
+        if (nums == null || nums.length <= 1) return nums;
+        int mid = nums.length / 2;
+        int[] left = new int[mid];
+        int[] right = new int[nums.length - mid];
+        for (int i = 0; i < mid; i++) left[i] = nums[i];
+        for (int i = mid; i < nums.length; i++) right[i - mid] = nums[i];
+        return merge(mergeSort(left), mergeSort(right));
+    }
+}`,
+      testCases: [
+        { case: 1, name: '16-element visualization array', input: '[38, 27, 43, 3, 9, 82, 10, 19, 50, 1, 62, 14, 7, 91, 4, 25]', testCall: 'mergeSort(new int[]{38, 27, 43, 3, 9, 82, 10, 19, 50, 1, 62, 14, 7, 91, 4, 25})', expectedOutput: '[1, 3, 4, 7, 9, 10, 14, 19, 25, 27, 38, 43, 50, 62, 82, 91]' },
+        { case: 2, name: 'Duplicates and negatives', input: '[5, -1, 5, 0, 12, -1, 8, 3]', testCall: 'mergeSort(new int[]{5, -1, 5, 0, 12, -1, 8, 3})', expectedOutput: '[-1, -1, 0, 3, 5, 5, 8, 12]' },
+        { case: 3, name: 'Empty', input: '[]', testCall: 'mergeSort(new int[]{})', expectedOutput: '[]' }
+      ],
+      referenceSolution: `public class Solution {
+    public static int[] mergeSort(int[] nums) {
+        if (nums == null || nums.length <= 1) return nums;
+        int mid = nums.length / 2;
+        int[] left = new int[mid];
+        int[] right = new int[nums.length - mid];
+        for (int i = 0; i < mid; i++) left[i] = nums[i];
+        for (int i = mid; i < nums.length; i++) right[i - mid] = nums[i];
+        return merge(mergeSort(left), mergeSort(right));
+    }
+    public static int[] merge(int[] left, int[] right) {
+        int[] merged = new int[left.length + right.length];
+        int i = 0, j = 0, k = 0;
+        while (i < left.length && j < right.length) {
+            if (left[i] <= right[j]) merged[k++] = left[i++];
+            else merged[k++] = right[j++];
+        }
+        while (i < left.length) merged[k++] = left[i++];
+        while (j < right.length) merged[k++] = right[j++];
+        return merged;
+    }
+}`
+    };
+  }
+  const base = (CURATED_PROBLEMS_BY_SKILL.python || []).find((p) => p.id === 'py-hard-3');
+  return base ? Object.assign({}, base, { skill, id: lang === 'python' ? 'py-hard-3' : 'dsa-hard-mergesort' }) : null;
+}
+
+function injectMergeSortForDsa(pack, lang, skillName) {
+  if (!Array.isArray(pack)) return pack;
+  const pinLang = ['python', 'javascript', 'java'].includes(String(lang || '').toLowerCase());
+  if (!isDsaSkill(skillName) && !pinLang) return pack;
+  const ms = mergeSortProblemForLang(lang || 'python', skillName);
+  if (!ms) return pack;
+  const next = pack.filter((p) => {
+    const id = String(p.id || '');
+    const title = String(p.title || '').toLowerCase();
+    return id !== 'py-hard-3' && id !== 'js-hard-3' && id !== 'dsa-hard-mergesort'
+      && !title.includes('merge sort a large array');
+  });
+  const hardIdx = next.findIndex((p) => String(p.difficulty || '').toLowerCase() === 'hard');
+  if (hardIdx >= 0) next.splice(hardIdx, 0, ms);
+  else next.push(ms);
+  if (next.length > 9) {
+    for (let i = next.length - 1; i >= 0 && next.length > 9; i--) {
+      const p = next[i];
+      if (String(p.difficulty || '').toLowerCase() !== 'hard') continue;
+      if (p.id === ms.id || String(p.title || '') === ms.title) continue;
+      next.splice(i, 1);
+    }
+  }
+  return next;
+}
+
+async function get9PackForSkill(skillName, langName) {
+  const normSkill = (skillName || 'Python').trim().toLowerCase();
+  const normLang = normalizeCodingLang(langName) || normalizeCodingLang(normSkill);
+  const cacheKey = `${normLang || 'auto'}::${normSkill}`;
+  if (PROBLEM_PACK_CACHE.has(cacheKey)) return PROBLEM_PACK_CACHE.get(cacheKey);
+
+  const langPack = packForCodingLang(normLang, skillName);
+  if (langPack) {
+    const pack = injectMergeSortForDsa(langPack, normLang, skillName);
+    PROBLEM_PACK_CACHE.set(cacheKey, pack);
+    return pack;
+  }
+
+  const curated = curatedPackFor(normSkill);
+  if (curated) {
+    const pack = injectMergeSortForDsa(curated, normLang || 'python', skillName);
+    PROBLEM_PACK_CACHE.set(cacheKey, pack);
+    return pack;
+  }
+
+  const isPythonic = normSkill.includes('data') || normSkill.includes('machine') || normSkill.includes('deep') || normSkill.includes('ai') || normSkill.includes('backend') || normSkill.includes('python');
+
   if (GROQ_API_KEY) {
     try {
-      const prompt = `Generate exactly 9 real, high-quality coding practice problems for the skill "${skillName}".
-Organize them into 3 difficulty tiers: exactly 3 easy, 3 medium, and 3 hard.
-Every single problem MUST contain:
-- id: unique string e.g. "${normSkill}-easy-1"
-- skill: "${skillName}"
-- difficulty: "easy" | "medium" | "hard"
-- subTopic: specific subtopic title
-- title: clear problem title
-- description: clear 1-3 sentence problem statement with input/output format
-- hint: useful clue
-- starterCode: complete boilerplate code template with function signature
-- testCases: array of 2-3 test objects: [{ "case": 1, "name": "...", "input": "...", "testCall": "...", "expectedOutput": "..." }]
-- referenceSolution: complete, working official solution code
+      const prompt = `You are a senior curriculum designer creating coding practice problems for the skill "${skillName}", written in ${isPythonic ? 'Python' : 'JavaScript'}.
 
-Return ONLY a valid JSON object with format:
+Generate exactly 9 ORIGINAL problems (not copied from LeetCode/HackerRank/any known source) across 3 difficulty tiers: 3 easy, 3 medium, 3 hard.
+
+RULES (all mandatory):
+1. All 9 problems must cover 9 DIFFERENT sub-topics within "${skillName}" — no two problems may test the same concept. List the sub-topic explicitly in "subTopic".
+2. Difficulty must be real and progressive: easy = single concept, beginner-friendly; medium = combines 2 concepts or requires an edge case; hard = multi-step logic or a subtle trap a beginner would miss.
+3. Every problem's "starterCode", "testCases[].testCall", and "referenceSolution" MUST use the exact same function name and parameter order — this is validated programmatically, so a mismatch breaks grading.
+4. "testCases[].expectedOutput" must be the EXACT literal value the reference solution returns for that input — not a description. For Python, use Python literal syntax (e.g. {'a': 1}, [1, 2, 3], True). For JS, use JS literal syntax (e.g. {"a":1}, [1,2,3], true).
+5. Include one edge-case test per problem (empty input, zero, negative number, or boundary value) in addition to the normal-case tests.
+6. "description" must state the function name, input format, and output format explicitly — a beginner should never have to guess the expected shape.
+7. "hint" must nudge toward the approach without revealing the full solution.
+8. Avoid generic filler problems ("reverse a string", "check even/odd") unless "${skillName}" specifically requires that exact fundamental — prefer problems that test what someone using "${skillName}" on the job would actually need to know.
+9. Prefer a named function (not only a class) so Hiero can visualize and grade the same entry point. IDs must be "${normSkill}-easy-1" style.
+
+Return ONLY a valid JSON object, no markdown, no commentary, in this exact shape:
 {
-  "easy": [ { ... }, { ... }, { ... } ],
-  "medium": [ { ... }, { ... }, { ... } ],
-  "hard": [ { ... }, { ... }, { ... } ]
+  "easy": [ { "id": "...", "skill": "${skillName}", "difficulty": "easy", "subTopic": "...", "title": "...", "description": "...", "hint": "...", "starterCode": "...", "testCases": [ { "case": 1, "name": "...", "input": "...", "testCall": "...", "expectedOutput": "..." } ], "referenceSolution": "..." }, ... (3 total) ],
+  "medium": [ ... 3 total, same shape, "difficulty": "medium" ],
+  "hard": [ ... 3 total, same shape, "difficulty": "hard" ]
 }`;
 
-      const completion = await axios.post('https://api.groq.com/openai/v1/chat/completions', {
-        model: AI_MODEL,
-        messages: [
-          { role: 'system', content: 'You are a senior technical examiner. Return valid JSON only.' },
+      const parsed = await groqJsonObject([
+        { role: 'system', content: 'You are a senior curriculum designer. Return valid JSON only. No markdown.' },
           { role: 'user', content: prompt }
-        ],
-        temperature: 0.3,
-        response_format: { type: "json_object" }
-      }, {
-        headers: { 'Authorization': `Bearer ${GROQ_API_KEY}`, 'Content-Type': 'application/json' },
-        timeout: 9000
-      });
-
-      const rawContent = completion.data.choices?.[0]?.message?.content || '{}';
-      const parsed = JSON.parse(rawContent);
+      ]);
 
       if (parsed.easy?.length >= 3 && parsed.medium?.length >= 3 && parsed.hard?.length >= 3) {
         const fullList = [
@@ -642,6 +1039,7 @@ Return ONLY a valid JSON object with format:
           ...parsed.medium.slice(0, 3).map((p, idx) => ({ ...p, id: p.id || `${normSkill}-med-${idx+1}`, difficulty: 'medium', skill: skillName })),
           ...parsed.hard.slice(0, 3).map((p, idx) => ({ ...p, id: p.id || `${normSkill}-hard-${idx+1}`, difficulty: 'hard', skill: skillName }))
         ];
+        PROBLEM_PACK_CACHE.set(cacheKey, fullList);
         return fullList;
       }
     } catch (e) {
@@ -650,7 +1048,6 @@ Return ONLY a valid JSON object with format:
   }
 
   // 4. Guaranteed Deterministic Fallback 9-Pack (StarterCode + TestCases for any skill)
-  const isPythonic = normSkill.includes('data') || normSkill.includes('machine') || normSkill.includes('deep') || normSkill.includes('ai') || normSkill.includes('backend');
   const comment = isPythonic ? '#' : '//';
   const ext = isPythonic ? 'py' : 'js';
 
@@ -790,9 +1187,10 @@ function sanitizeProblemsForPublic(problemList) {
  */
 router.get('/by-skill', async (req, res) => {
   const skillQuery = req.query.skill || 'Python';
+  const langQuery = req.query.lang || req.query.code || req.query.language || '';
 
   try {
-    const allNine = await get9PackForSkill(skillQuery);
+    const allNine = await get9PackForSkill(skillQuery, langQuery);
     const sanitized = sanitizeProblemsForPublic(allNine);
 
     const easy = sanitized.filter(p => p.difficulty === 'easy').slice(0, 3);
@@ -958,7 +1356,7 @@ print("__ORBIT_EVAL_JSON__" + json.dumps(results))
   return new Promise((resolve) => {
     try {
       fs.writeFileSync(tempFilePath, testHarness, 'utf8');
-      const proc = spawn('python', [tempFilePath]);
+      const proc = spawn('python3', [tempFilePath]);
 
       let stdout = '';
       let stderr = '';
@@ -967,6 +1365,18 @@ print("__ORBIT_EVAL_JSON__" + json.dumps(results))
         try { proc.kill(); } catch (e) {}
         resolve({ success: false, error: 'Execution timed out (10s limit)', testResults: [] });
       }, 10000);
+
+      proc.on('error', (err) => {
+        clearTimeout(timeout);
+        try { if (fs.existsSync(tempFilePath)) fs.unlinkSync(tempFilePath); } catch (e) {}
+        resolve({
+          success: false,
+          score: 0,
+          passed: false,
+          error: err.code === 'ENOENT' ? 'Python 3 is not installed on this machine.' : err.message,
+          testResults: []
+        });
+      });
 
       proc.stdout.on('data', (d) => { stdout += d.toString(); });
       proc.stderr.on('data', (d) => { stderr += d.toString(); });
@@ -1016,6 +1426,71 @@ print("__ORBIT_EVAL_JSON__" + json.dumps(results))
       resolve({ success: false, error: err.message, testResults: [] });
     }
   });
+}
+
+function expectedMatches(actual, expectedStr) {
+  const expectedRaw = String(expectedStr ?? '').trim();
+  if (expectedRaw === '') return actual === '' || actual == null;
+  try {
+    const expected = vm.runInNewContext(`(${expectedRaw})`, {}, { timeout: 200 });
+    if (actual === expected) return true;
+    if (typeof actual === 'object' || typeof expected === 'object') {
+      return JSON.stringify(actual) === JSON.stringify(expected);
+    }
+  } catch (_) {}
+  if (String(actual) === expectedRaw) return true;
+  try {
+    return JSON.stringify(actual) === expectedRaw || JSON.stringify(actual) === JSON.stringify(JSON.parse(expectedRaw));
+  } catch (_) {
+    return false;
+  }
+}
+
+function evaluateJavaScriptCode(userCode, testCases) {
+  const cases = Array.isArray(testCases) ? testCases : [];
+  const results = cases.map((tc, idx) => {
+    const name = tc.name || `Case ${idx + 1}`;
+    const caseNum = tc.case || idx + 1;
+    try {
+      const sandbox = { console: { log() {}, warn() {}, error() {} } };
+      vm.createContext(sandbox);
+      vm.runInContext(String(userCode || ''), sandbox, { timeout: 2000 });
+      const actual = vm.runInContext(String(tc.testCall || ''), sandbox, { timeout: 2000 });
+      const passed = expectedMatches(actual, tc.expectedOutput);
+      let actualStr;
+      try { actualStr = JSON.stringify(actual); } catch (_) { actualStr = String(actual); }
+      return {
+        case: caseNum,
+        name,
+        passed,
+        input: tc.input || '',
+        expected: tc.expectedOutput || '',
+        actual: actualStr,
+        error: passed ? null : 'Output did not match expected value'
+      };
+    } catch (err) {
+      return {
+        case: caseNum,
+        name,
+        passed: false,
+        input: tc.input || '',
+        expected: tc.expectedOutput || '',
+        actual: null,
+        error: err.message
+      };
+    }
+  });
+  const passedTests = results.filter((r) => r.passed).length;
+  const totalTests = results.length;
+  const score = totalTests > 0 ? Math.round((passedTests / totalTests) * 10) : 0;
+  return {
+    success: true,
+    score,
+    passed: score >= 8,
+    passedTests,
+    totalTests,
+    testResults: results
+  };
 }
 
 /**
@@ -1090,10 +1565,12 @@ Return strictly a JSON object with:
  * 3. Hides official reference answer until after submit (returned NOW).
  */
 router.post('/evaluate-solution', async (req, res) => {
+  try {
   const { skill = 'Python', problemId, problemTitle, userSolution, language, testCases } = req.body;
+  const codingLang = detectCodingLanguage(userSolution, language);
 
   // 1. Locate the Problem & Reference Solution
-  const fullPack = await get9PackForSkill(skill);
+  const fullPack = await get9PackForSkill(skill, codingLang || language);
   let problem = null;
 
   if (problemId) {
@@ -1101,6 +1578,12 @@ router.post('/evaluate-solution', async (req, res) => {
   }
   if (!problem && problemTitle) {
     problem = fullPack.find(p => p.title.toLowerCase().includes(problemTitle.toLowerCase()) || problemTitle.toLowerCase().includes(p.title.toLowerCase()));
+  }
+  if (!problem && problemId) {
+    for (const pack of Object.values(CURATED_PROBLEMS_BY_SKILL)) {
+      problem = pack.find(p => p.id === problemId || p.id.toLowerCase() === String(problemId).toLowerCase());
+      if (problem) break;
+    }
   }
   if (!problem) {
     problem = fullPack[0] || {
@@ -1138,8 +1621,62 @@ router.post('/evaluate-solution', async (req, res) => {
     });
   }
 
-  // 3. Execution-Based Evaluation (Python Sandbox)
-  const isPython = (language === 'python') || (!language && (skill.toLowerCase().includes('python') || skill.toLowerCase().includes('data') || skill.toLowerCase().includes('learning')));
+  // 3. Execution-Based Evaluation
+  const codeHint = String(userSolution || '');
+  const looksLikeJs = /function\s|=>|const\s|let\s/.test(codeHint) && !/#include|public\s+class/.test(codeHint);
+  const looksLikePy = /^\s*(def |import |class )/m.test(codeHint) && !/\bpublic\s+class\b/.test(codeHint);
+  const isPython = codingLang === 'python' || language === 'python' || (!language && looksLikePy && !looksLikeJs) || (!language && !looksLikeJs && (skill.toLowerCase().includes('python') || skill.toLowerCase().includes('data') || skill.toLowerCase().includes('learning')));
+
+  if (activeTestCases.length > 0 && (codingLang === 'c' || codingLang === 'cpp' || codingLang === 'java')) {
+    let evalResult;
+    if (codingLang === 'java') {
+      try {
+        evalResult = await evaluateCompiled('java', userSolution, activeTestCases);
+        const javaBroken = (evalResult.testResults || []).some((r) => /Unable to locate a Java Runtime|javac is not installed|not found/i.test(String(r.error || '')));
+        if (javaBroken) evalResult = evaluateTranspiled(userSolution, activeTestCases, evaluateJavaScriptCode);
+      } catch (e) {
+        evalResult = evaluateTranspiled(userSolution, activeTestCases, evaluateJavaScriptCode);
+      }
+    } else {
+      evalResult = await evaluateCompiled(codingLang, userSolution, activeTestCases);
+    }
+    let feedback = '';
+    if (evalResult.score === 10) feedback = 'Outstanding! All test cases passed with 100% accuracy.';
+    else if (evalResult.score >= 7) feedback = `Good job! Passed ${evalResult.passedTests}/${evalResult.totalTests} tests. Check failing edge cases.`;
+    else feedback = `Passed ${evalResult.passedTests}/${evalResult.totalTests} tests. Review the official answer below to fix logic gaps.`;
+    return res.json({
+      success: true,
+      score: evalResult.score,
+      maxScore: 10,
+      passed: evalResult.passed,
+      passedTests: evalResult.passedTests,
+      totalTests: evalResult.totalTests,
+      testResults: evalResult.testResults,
+      feedback,
+      officialAnswer: officialAnswer,
+      referenceSolution: officialAnswer
+    });
+  }
+
+  if (activeTestCases.length > 0 && (looksLikeJs || (!isPython && !looksLikePy))) {
+    const evalResult = evaluateJavaScriptCode(userSolution, activeTestCases);
+    let feedback = '';
+    if (evalResult.score === 10) feedback = 'Outstanding! All test cases passed with 100% accuracy.';
+    else if (evalResult.score >= 7) feedback = `Good job! Passed ${evalResult.passedTests}/${evalResult.totalTests} tests. Check failing edge cases.`;
+    else feedback = `Passed ${evalResult.passedTests}/${evalResult.totalTests} tests. Review the official answer below to fix logic gaps.`;
+    return res.json({
+      success: true,
+      score: evalResult.score,
+      maxScore: 10,
+      passed: evalResult.passed,
+      passedTests: evalResult.passedTests,
+      totalTests: evalResult.totalTests,
+      testResults: evalResult.testResults,
+      feedback,
+      officialAnswer: officialAnswer,
+      referenceSolution: officialAnswer
+    });
+  }
 
   if (isPython && activeTestCases.length > 0) {
     const evalResult = await evaluatePythonCode(userSolution, activeTestCases);
@@ -1194,6 +1731,21 @@ router.post('/evaluate-solution', async (req, res) => {
     officialAnswer: officialAnswer,
     referenceSolution: officialAnswer
   });
+  } catch (err) {
+    console.error('[Problems API] evaluate-solution failed:', err.message);
+    res.status(200).json({
+      success: false,
+      score: 0,
+      maxScore: 10,
+      passed: false,
+      passedTests: 0,
+      totalTests: 0,
+      testResults: [],
+      feedback: 'Could not evaluate this solution. Check the function name matches the problem, then submit again.',
+      officialAnswer: '',
+      referenceSolution: ''
+    });
+  }
 });
 
 router.get9PackForSkill = get9PackForSkill;

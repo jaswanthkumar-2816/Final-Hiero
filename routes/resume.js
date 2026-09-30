@@ -388,6 +388,30 @@ router.post('/preview-resume', async (req, res) => {
     }
 });
 
+/**
+ * Builds the download filename from the candidate's own name, e.g.
+ * "Karthik R" -> "Karthik_R_Resume.pdf". Falls back to "Resume" when the
+ * form has no name yet.
+ */
+function resumeFileName(data, ext = 'pdf') {
+    const raw = (
+        data?.personalInfo?.fullName ||
+        data?.fullName ||
+        data?.basic?.full_name ||
+        data?.name ||
+        ''
+    ).toString().trim();
+
+    const safe = raw
+        .replace(/[\\/:*?"<>|]+/g, '')   // characters filesystems reject
+        .replace(/\s+/g, '_')
+        .replace(/_+/g, '_')
+        .replace(/^_|_$/g, '')
+        .slice(0, 80);
+
+    return `${safe || 'Resume'}_Resume.${ext}`;
+}
+
 router.post('/download-resume', async (req, res) => {
 	try {
 		const templateId = req.body.template || req.body.templateId || 'classic';
@@ -419,7 +443,7 @@ router.post('/download-resume', async (req, res) => {
 			res.setHeader('X-Render-Engine', 'pdfkit');
 		}
 		res.setHeader('Content-Type', 'application/pdf');
-		res.setHeader('Content-Disposition', `attachment; filename="resume_${templateId}.pdf"`);
+		res.setHeader('Content-Disposition', `attachment; filename="${resumeFileName(data, 'pdf')}"`);
 		return res.send(Buffer.isBuffer(pdfBuffer) ? pdfBuffer : Buffer.from(pdfBuffer));
 	} catch (e) {
 		console.error('download-resume error:', e);
@@ -494,17 +518,17 @@ router.post('/download-docx', async (req, res) => {
         if (mode === 'exact') {
             fileBuffer = htmlToWordDocBuffer(html);
             contentType = 'application/msword';
-            filename = `resume_${templateId}.doc`;
+            filename = resumeFileName(data, 'doc');
         } else {
             contentType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
-            filename = `resume_${templateId}.docx`;
+            filename = resumeFileName(data, 'docx');
             try {
                 fileBuffer = await htmlToDocxBuffer(html);
             } catch (err) {
                 console.error('html-to-docx failed:', err);
                 fileBuffer = htmlToWordDocBuffer(html);
                 contentType = 'application/msword';
-                filename = `resume_${templateId}.doc`;
+                filename = resumeFileName(data, 'doc');
             }
         }
 

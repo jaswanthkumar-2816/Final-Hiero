@@ -52,6 +52,25 @@
     };
   }
 
+  /* Helper to limit multi-line bullet fields without destroying commas inside sentences */
+  function limitBulletField(v, maxItems) {
+    if (!v) return { text: '', total: 0, imported: 0, truncated: false };
+    let lines = [];
+    if (Array.isArray(v)) {
+      lines = v.map(item => String(item).replace(/^[•\-\*⁃‣\d+\.\)]+/, '').trim()).filter(Boolean);
+    } else {
+      lines = String(v).split(/\n+/).map(l => l.replace(/^[•\-\*⁃‣\d+\.\)]+/, '').trim()).filter(Boolean);
+    }
+    const sliced = lines.slice(0, maxItems);
+    const formatted = sliced.map(line => `• ${line}`).join('\n');
+    return {
+      text: formatted,
+      total: lines.length,
+      imported: sliced.length,
+      truncated: lines.length > maxItems
+    };
+  }
+
   /* Helper to limit text content length and track stats */
   function limitTextLength(text, maxChars) {
     if (!text) return { text: '', total: 0, imported: 0, truncated: false };
@@ -94,14 +113,43 @@
     if (!visible && !isSkipped) { if (typeof skipField === 'function') skipField(fieldKey); }
   }
 
+  function toMonthInput(str) {
+    if (!str) return '';
+    const s = String(str).trim();
+    // YYYY-MM or YYYY/MM
+    const matchIso = s.match(/(\d{4})[-\/](\d{1,2})/);
+    if (matchIso) return `${matchIso[1]}-${String(matchIso[2]).padStart(2, '0')}`;
+
+    // MM/YYYY or MM-YYYY
+    const matchSlash = s.match(/(\d{1,2})[-\/](\d{4})/);
+    if (matchSlash) return `${matchSlash[2]}-${String(matchSlash[1]).padStart(2, '0')}`;
+
+    const months = {
+      jan:'01', feb:'02', mar:'03', apr:'04', may:'05', jun:'06',
+      jul:'07', aug:'08', sep:'09', oct:'10', nov:'11', dec:'12',
+      january:'01', february:'02', march:'03', april:'04', may:'05', june:'06',
+      july:'07', august:'08', september:'09', october:'10', november:'11', december:'12'
+    };
+    const monthMatch = s.match(/([a-zA-Z]{3,9})[\s,.-]+(\d{4})/i) || s.match(/(\d{4})[\s,.-]+([a-zA-Z]{3,9})/i);
+    if (monthMatch) {
+      const mWord = monthMatch[1].toLowerCase();
+      const yr = monthMatch[2];
+      const mNum = months[mWord] || months[mWord.slice(0, 3)];
+      if (mNum) return `${yr}-${mNum}`;
+    }
+    const yearOnly = s.match(/\b(19\d\d|20\d\d)\b/);
+    if (yearOnly) return `${yearOnly[1]}-01`;
+    return '';
+  }
+
   /* ── Dynamic containers with Smart Limits for Single Page ── */
   function fillExperience(data) {
     const container = document.getElementById('experienceContainer');
     if (!container) return;
     container.innerHTML = '';
     
-    // Capped at 2 experiences for single page
-    const res = limitArray(data.experience, 2);
+    // Up to 6 experiences
+    const res = limitArray(data.experience, 6);
     importStats.experience = res;
 
     res.items.forEach((exp, i) => {
@@ -113,15 +161,15 @@
       const descs      = document.getElementsByName('jobDescription[]');
       if (jobTitles[i])  jobTitles[i].value  = exp.jobTitle  || '';
       if (companies[i])  companies[i].value  = exp.company   || '';
-      if (startDates[i]) startDates[i].value = (exp.startDate || '').match(/\d{4}-\d{2}/) ? exp.startDate : '';
-      const isPresent = !exp.endDate || /present|current/i.test(exp.endDate);
+      if (startDates[i]) startDates[i].value = toMonthInput(exp.startDate) || exp.startDate || '';
+      const isPresent = !exp.endDate || /present|current|now|till date/i.test(exp.endDate);
       if (isPresent) {
         const cb = container.querySelectorAll('.experience-item')[i]?.querySelector('input[type="checkbox"]');
         if (cb) { cb.checked = true; if (typeof toggleWorking === 'function') toggleWorking(cb); }
       } else if (endDates[i]) {
-        endDates[i].value = (exp.endDate || '').match(/\d{4}-\d{2}/) ? exp.endDate : '';
+        endDates[i].value = toMonthInput(exp.endDate) || exp.endDate || '';
       }
-      if (descs[i]) descs[i].value = exp.description || exp.responsibilities || '';
+      if (descs[i]) descs[i].value = exp.description || exp.responsibilities || (Array.isArray(exp.bulletPoints) ? exp.bulletPoints.map(b => `• ${b}`).join('\n') : '');
     });
   }
 
@@ -130,8 +178,8 @@
     if (!container) return;
     container.innerHTML = '';
 
-    // Capped at 2 education entries for single page
-    const res = limitArray(data.education, 2);
+    // Up to 5 education entries
+    const res = limitArray(data.education, 5);
     importStats.education = res;
 
     res.items.forEach((edu, i) => {
@@ -141,9 +189,12 @@
       const years   = document.getElementsByName('gradYear[]');
       const gpas    = document.getElementsByName('gpa[]');
       if (degrees[i]) degrees[i].value = edu.degree  || '';
-      if (schools[i]) schools[i].value = edu.school  || '';
-      if (years[i])   years[i].value   = edu.gradYear || '';
-      if (gpas[i])    gpas[i].value    = edu.gpa      || '';
+      if (schools[i]) schools[i].value = edu.school  || edu.institution || edu.college || '';
+      if (years[i]) {
+        const yrMatch = String(edu.gradYear || '').match(/\b(19\d\d|20\d\d)\b/g);
+        years[i].value = yrMatch ? yrMatch[yrMatch.length - 1] : (edu.gradYear || '');
+      }
+      if (gpas[i])    gpas[i].value    = edu.gpa || edu.marks || edu.cgpaOrPercentage || '';
     });
   }
 
@@ -151,8 +202,8 @@
     const container = document.getElementById('internshipsContainer');
     if (!container) return;
 
-    // Capped at 2 internships for single page
-    const res = limitArray(data.internships, 2);
+    // Up to 4 internships
+    const res = limitArray(data.internships, 4);
     importStats.internships = res;
 
     if (!res.items.length) return;
@@ -166,10 +217,11 @@
       const descs  = document.getElementsByName('internDesc[]');
       if (roles[i])  roles[i].value  = intern.jobTitle || intern.role  || '';
       if (orgs[i])   orgs[i].value   = intern.company  || intern.org   || '';
-      if (starts[i]) starts[i].value = intern.startDate || intern.start || '';
-      if (ends[i])   ends[i].value   = intern.endDate  || intern.end   || '';
+      if (starts[i]) starts[i].value = toMonthInput(intern.startDate || intern.start) || (intern.startDate || intern.start || '');
+      if (ends[i])   ends[i].value   = toMonthInput(intern.endDate || intern.end) || (intern.endDate || intern.end || '');
       if (descs[i])  descs[i].value  = intern.description || intern.desc || '';
     });
+    setSection('section-internships', true);
   }
 
   function fillProjects(data) {
@@ -177,8 +229,8 @@
     if (!container) return;
     container.innerHTML = '';
 
-    // Capped at 2 projects for single page
-    const res = limitArray(data.projects, 2);
+    // Up to 6 projects
+    const res = limitArray(data.projects, 6);
     importStats.projects = res;
 
     res.items.forEach((project, i) => {
@@ -189,12 +241,12 @@
       const descs    = document.getElementsByName('projectDescription[]');
       const links    = document.getElementsByName('projectLink[]');
       const achs     = document.getElementsByName('projectAchievement[]');
-      if (names[i])     names[i].value     = project.name        || '';
-      if (techs[i])     techs[i].value     = project.tech        || project.technologies || '';
-      if (durations[i]) durations[i].value = project.duration    || '';
-      if (descs[i])     descs[i].value     = project.description || '';
+      if (names[i])     names[i].value     = project.name        || project.title || '';
+      if (techs[i])     techs[i].value     = project.tech        || project.technologies || (Array.isArray(project.techStack) ? project.techStack.join(', ') : '');
+      if (durations[i]) durations[i].value = project.duration    || project.projectDuration || project.year || '';
+      if (descs[i])     descs[i].value     = project.description || (Array.isArray(project.bulletPoints) ? project.bulletPoints.map(b => `• ${b}`).join('\n') : '');
       if (links[i])     links[i].value     = project.link        || '';
-      if (achs[i])      achs[i].value      = project.achievement || '';
+      if (achs[i])      achs[i].value      = project.achievement || project.projectAchievement || project.metrics || '';
     });
   }
 
@@ -202,8 +254,8 @@
     const container = document.getElementById('referencesContainer');
     if (!container) return;
 
-    // Capped at 1 reference for single page
-    const res = limitArray(data.references, 1);
+    // Up to 3 references
+    const res = limitArray(data.references, 3);
     importStats.references = res;
 
     if (!res.items.length) return;
@@ -221,15 +273,42 @@
       if (phones[i])    phones[i].value    = ref.phone   || '';
       if (emails[i])    emails[i].value    = ref.email   || '';
     });
+    setSection('section-references', true);
   }
 
   function fillCustomDetails(data) {
     const container = document.getElementById('customDetailsContainer');
     if (!container) return;
 
-    // Capped at 1 custom detail for single page
-    const res = limitArray(data.customDetails, 1);
+    // Collect all novel / custom items from either customDetails, additionalDetails, or customSections
+    let rawItems = [];
+    if (Array.isArray(data.customDetails) && data.customDetails.length) {
+      rawItems = data.customDetails.map(d => ({
+        heading: d.heading || d.title || 'Additional Detail',
+        content: d.content || (Array.isArray(d.items) ? d.items.join('\n• ') : (d.items || ''))
+      }));
+    } else if (Array.isArray(data.additionalDetails) && data.additionalDetails.length) {
+      rawItems = data.additionalDetails.map(d => ({
+        heading: d.heading || d.title || 'Additional Detail',
+        content: Array.isArray(d.items) ? d.items.join('\n• ') : (d.items || d.content || '')
+      }));
+    } else if (Array.isArray(data.customSections) && data.customSections.length) {
+      rawItems = data.customSections.map(s => ({
+        heading: s.title || 'Custom Section',
+        content: Array.isArray(s.items) ? s.items.join('\n• ') : (s.items || '')
+      }));
+    }
+
+    const res = limitArray(rawItems, 10);
     importStats.customDetails = res;
+
+    // Set custom section title if available
+    const customTitle = data.customSectionTitle || (data.customSections && data.customSections[0]?.title) || (rawItems[0] && rawItems[0].heading) || 'Custom Details';
+    val('customSectionTitle', customTitle);
+
+    if (data.customSectionContent) {
+      val('customSectionContent', data.customSectionContent);
+    }
 
     if (!res.items.length) return;
     container.innerHTML = '';
@@ -238,8 +317,17 @@
       const headings = document.getElementsByName('customHeading[]');
       const contents = document.getElementsByName('customContent[]');
       if (headings[i]) headings[i].value = detail.heading || '';
-      if (contents[i]) contents[i].value = detail.content || '';
+      if (contents[i]) {
+        let textContent = detail.content || '';
+        if (Array.isArray(detail.items) && detail.items.length) {
+          textContent = detail.items.map(it => `• ${it}`).join('\n');
+        }
+        contents[i].value = textContent;
+      }
     });
+
+    // Make sure custom section is active and visible
+    setSection('section-custom', true);
   }
 
   /* Render visual Page-Fit Warning/Notice banner */
@@ -355,6 +443,7 @@
       /* ── 1. Personal Info ── */
       const pi = data.personalInfo || {};
       val('fullName',            pi.fullName);
+      val('headline',            pi.professionalHeadline || pi.professionalTitle || pi.roleTitle || data.headline || data.jobTitle || '');
       val('email',               pi.email);
       val('phone',               pi.phone);
       val('address',             pi.address);
@@ -365,42 +454,44 @@
       val('professionalHeadline',pi.professionalHeadline|| data.professionalHeadline);
 
       /* ── 2. Summary & Skills (with Smart Limits) ── */
-      // Cap summary at 350 chars (~50-60 words) to avoid page overflow
-      const summaryRes = limitTextLength(data.summary, 350);
+      // Cap summary at 450 chars (~70 words) to avoid page overflow
+      const summaryRes = limitTextLength(data.summary, 450);
       importStats.summary = summaryRes;
       val('summary', summaryRes.text);
 
       // Skill caps
-      const techSkillsRes = limitFlatField(data.technicalSkills || data.skills, 15);
+      const rawTech = data.technicalSkills || (data.skills && data.skills.technicalSkills) || data.skills;
+      const techSkillsRes = limitFlatField(rawTech, 25);
       importStats.technicalSkills = techSkillsRes;
       val('technicalSkills', techSkillsRes.text);
 
-      const softSkillsRes = limitFlatField(data.softSkills, 8);
+      const rawSoft = data.softSkills || (data.skills && data.skills.softSkills);
+      const softSkillsRes = limitFlatField(rawSoft, 15);
       importStats.softSkills = softSkillsRes;
       val('softSkills', softSkillsRes.text);
 
       /* ── 3. Additional flat fields (with Smart Limits) ── */
-      const certsRes = limitFlatField(data.certifications, 4);
+      const certsRes = limitFlatField(data.certifications, 6);
       importStats.certifications = certsRes;
       val('certifications', certsRes.text);
 
-      const langRes = limitFlatField(data.languages, 4);
+      const langRes = limitFlatField(data.languages, 6);
       importStats.languages = langRes;
       val('languages', langRes.text);
 
-      const achRes = limitFlatField(data.achievements, 4);
+      const achRes = limitBulletField(data.achievements, 8);
       importStats.achievements = achRes;
       val('achievements', achRes.text);
 
-      const hobRes = limitFlatField(data.hobbies, 4);
+      const hobRes = limitFlatField(data.hobbies, 6);
       importStats.hobbies = hobRes;
       val('hobbies', hobRes.text);
 
-      const extraRes = limitFlatField(data.extraCurricular, 3);
+      const extraRes = limitBulletField(data.extraCurricular, 6);
       importStats.extraCurricular = extraRes;
       val('extraCurricular', extraRes.text);
 
-      const pubRes = limitFlatField(data.publications, 2);
+      const pubRes = limitBulletField(data.publications, 6);
       importStats.publications = pubRes;
       val('publications', pubRes.text);
 
@@ -417,7 +508,7 @@
       /* ── 5. Custom sections from LLM ── */
       if (Array.isArray(data.customSections) && data.customSections.length) {
         const first = data.customSections[0];
-        val('customSectionTitle',   first.title || 'Custom Section');
+        val('customSectionTitle',   first.title || 'Custom Details');
         val('customSectionContent', Array.isArray(first.items) ? first.items.join('\n• ') : (first.items || ''));
       }
 
@@ -432,7 +523,7 @@
         { id: 'section-additional-details', keys: ['certifications', 'languages'] },
         { id: 'section-additional',         keys: ['achievements', 'hobbies', 'extraCurricular', 'publications'] },
         { id: 'section-references',         keys: ['references'] },
-        { id: 'section-custom',             keys: ['customDetails', 'customSections'] }
+        { id: 'section-custom',             keys: ['customDetails', 'additionalDetails', 'customSections', 'customSectionContent'] }
       ];
       secRules.forEach(rule => {
         const visible = rule.keys.some(k => has(data[k]));
@@ -445,6 +536,7 @@
         { key: 'linkedin',             group: 'group-linkedin',             src: data.personalInfo?.linkedin             || data.linkedin },
         { key: 'github',               group: 'group-github',               src: data.personalInfo?.github               || data.github },
         { key: 'website',              group: 'group-website',              src: data.personalInfo?.website              || data.website },
+        { key: 'headline',             group: 'group-headline',             src: pi.professionalHeadline || pi.professionalTitle || pi.roleTitle || data.jobTitle },
         { key: 'professionalTitle',    group: 'group-professionalTitle',    src: data.personalInfo?.professionalTitle    || data.professionalTitle },
         { key: 'professionalHeadline', group: 'group-professionalHeadline', src: data.personalInfo?.professionalHeadline || data.professionalHeadline },
         { key: 'certifications',       group: 'group-certifications',       src: data.certifications },
@@ -468,16 +560,14 @@
       if (mainLayout)        mainLayout.style.display        = 'grid';
       if (bottomActions)     bottomActions.style.display     = 'flex';
 
-      history.pushState({ step: 2, template: localStorage.getItem('selectedTemplate') }, '', '');
-      localStorage.setItem('resumeData', JSON.stringify(data));
+      if (window.showLivePreviewToggle) {
+        window.showLivePreviewToggle();
+      }
 
       console.log('[UnifiedTemplate] ✅ Form filled successfully.');
       
       // Render our smart page fit notice banner at the top of the form
       renderPageFitNotice();
-      
-      // Let the user know import was successful with optimizations
-      alert('✅ Resume imported! We adjusted some section lengths for a perfect single-page layout. Review details at the top of the form.');
     } catch (err) {
       console.error('[UnifiedTemplate] ❌ Error:', err);
     }

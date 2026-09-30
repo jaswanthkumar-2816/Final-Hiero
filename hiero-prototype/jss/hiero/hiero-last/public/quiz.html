@@ -472,8 +472,11 @@
 
     .level-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr 1fr 1fr;
       gap: 22px;
+    }
+    .level-card.path-eval {
+      border-color: rgba(251,191,36,0.35);
     }
 
     @media (max-width: 780px) {
@@ -1465,6 +1468,7 @@
       <a href="companies.html" class="nav-btn"><i class="fa-solid fa-building"></i><span>Target Companies</span></a>
       <a href="mock-interview.html" class="nav-btn"><i class="fa-solid fa-microphone"></i><span>Mock Interview</span></a>
       <a href="quiz.html" class="nav-btn active"><i class="fa-solid fa-book-open"></i><span>Learn Skills</span></a>
+      <a href="eval.html" class="nav-btn"><i class="fa-solid fa-shield-halved"></i><span>Hiero Eval</span></a>
     </nav>
     <div class="nav-actions">
       <button class="theme-toggle-btn" id="theme-switch" onclick="window.toggleTheme()" title="Switch Theme"><i class="fa-solid fa-moon"></i></button>
@@ -1510,7 +1514,7 @@
           <i class="fa-solid fa-bullseye"></i> Skill · <span id="target-skill-name">React</span>
         </div>
         <h1 class="hero-title">Choose your <span>learning path</span></h1>
-        <p class="hero-subtitle">Pick how you want to start. Beginners follow a guided path. Intermediate learners take a short quiz so we can find the exact topics you still need.</p>
+        <p class="hero-subtitle">Learn first, or prove the skill with Hiero Eval. A pass adds a Verified badge to your resume. A fail never removes the skill — it stays unverified.</p>
       </div>
 
       <div class="path-picker">
@@ -1552,6 +1556,23 @@
               <li><i class="fa-solid fa-scissors"></i> Learn only those parts next</li>
             </ul>
             <button class="card-cta-btn">Take the diagnostic <i class="fa-solid fa-arrow-right"></i></button>
+          </div>
+
+          <div class="level-card path-eval" id="card-eval" onclick="selectLevel('eval')">
+            <div class="path-top">
+              <div class="path-icon"><i class="fa-solid fa-shield-halved"></i></div>
+              <span class="path-kicker">Resume verification</span>
+            </div>
+            <div class="card-info">
+              <h3>Hiero Eval</h3>
+              <p>Already learned <span class="skill-name-inline" style="font-weight:700;color:var(--text-main);">React</span>? Prove it. Level 1 is 3 questions in 5 minutes. Higher levels add coding.</p>
+            </div>
+            <ul class="path-steps">
+              <li><i class="fa-solid fa-certificate"></i> Verified badge on your profile</li>
+              <li><i class="fa-solid fa-clock"></i> Timed, randomized, one sitting</li>
+              <li><i class="fa-solid fa-rotate"></i> Fail = unverified, then improve &amp; re-verify</li>
+            </ul>
+            <button class="card-cta-btn">Verify this skill <i class="fa-solid fa-arrow-right"></i></button>
           </div>
         </div>
       </div>
@@ -1899,6 +1920,10 @@
       if (!selectedSkill) {
         document.getElementById('step-0-wrapper').style.display = 'block';
         document.getElementById('step-1-wrapper').style.display = 'none';
+        return;
+      }
+      if (level === 'eval') {
+        window.location.href = `eval.html?skill=${encodeURIComponent(selectedSkill)}&track=beginner`;
         return;
       }
       if (level === 'beginner') {

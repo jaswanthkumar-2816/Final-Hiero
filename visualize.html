@@ -1,0 +1,2700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Story Visualizer | Hiero</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('theme') || localStorage.getItem('hiero-theme') || 'dark';
+        var light = t === 'light';
+        document.documentElement.setAttribute('data-theme', light ? 'light' : 'dark');
+        document.documentElement.classList.toggle('light-mode', light);
+        document.documentElement.style.colorScheme = light ? 'light' : 'dark';
+      } catch (e) {}
+    })();
+  </script>
+  <style>
+    :root {
+      --orbit-green: #22c55e;
+      --orbit-green-dim: rgba(34, 197, 94, 0.16);
+      --orbit-green-glow: rgba(34, 197, 94, 0.42);
+      --bg-obsidian: #07110c;
+      --bg-void: #040807;
+      --panel-bg: rgba(10, 18, 14, 0.78);
+      --border-glass: rgba(34, 197, 94, 0.16);
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --font-main: 'Outfit', sans-serif;
+      --font-code: 'JetBrains Mono', monospace;
+      --vis-accent: #38bdf8;
+      --vis-page: #060b09;
+      --vis-theater: radial-gradient(1200px 720px at 40% 0%, #173528 0%, #0b1612 46%, #050807 100%);
+      --vis-header: rgba(5, 12, 9, 0.78);
+      --vis-stage-grid: rgba(255, 255, 255, 0.045);
+      --vis-stage-wash: linear-gradient(180deg, rgba(16, 42, 30, 0.28) 0%, rgba(4, 8, 6, 0.55) 100%);
+      --vis-glow: rgba(34, 197, 94, 0.2);
+      --vis-box-bg: linear-gradient(180deg, #22352d 0%, #14201b 100%);
+      --vis-box-border: rgba(255, 255, 255, 0.16);
+      --vis-box-text: #f8fafc;
+      --vis-box-shadow: 0 14px 28px rgba(0, 0, 0, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+      --vis-index: #7b8a99;
+      --vis-code-bg: #08130f;
+      --vis-code-header: rgba(0, 0, 0, 0.28);
+      --vis-code-text: #d7e5dc;
+      --vis-code-num: rgba(148, 163, 184, 0.55);
+      --vis-code-active: rgba(56, 189, 248, 0.18);
+      --vis-caption-bg: rgba(7, 16, 12, 0.9);
+      --vis-controls-bg: rgba(4, 9, 7, 0.94);
+      --vis-chip-bg: rgba(255, 255, 255, 0.06);
+      --vis-trace-bg: rgba(8, 16, 12, 0.76);
+      --vis-play-fg: #05210f;
+      --vis-rail: rgba(255, 255, 255, 0.06);
+    }
+    html[data-theme="light"],
+    html.light-mode,
+    body.light-mode {
+      --orbit-green: #04ab07;
+      --orbit-green-dim: rgba(4, 171, 7, 0.12);
+      --orbit-green-glow: rgba(4, 171, 7, 0.28);
+      --bg-obsidian: #f4faf6;
+      --bg-void: #eaf4ee;
+      --panel-bg: rgba(255, 255, 255, 0.86);
+      --border-glass: rgba(15, 23, 42, 0.1);
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --vis-accent: #0284c7;
+      --vis-page: #eef6f1;
+      --vis-theater: radial-gradient(1100px 680px at 38% -10%, #dcfae6 0%, #f3faf6 46%, #e7f1eb 100%);
+      --vis-header: rgba(255, 255, 255, 0.86);
+      --vis-stage-grid: rgba(15, 23, 42, 0.055);
+      --vis-stage-wash: linear-gradient(180deg, rgba(255, 255, 255, 0.45) 0%, rgba(226, 242, 230, 0.55) 100%);
+      --vis-glow: rgba(4, 171, 7, 0.16);
+      --vis-box-bg: linear-gradient(180deg, #ffffff 0%, #f2faf5 100%);
+      --vis-box-border: rgba(15, 23, 42, 0.12);
+      --vis-box-text: #0f172a;
+      --vis-box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08), inset 0 1px 0 #fff;
+      --vis-index: #64748b;
+      --vis-code-bg: #f7fbf8;
+      --vis-code-header: #eef6f1;
+      --vis-code-text: #1e293b;
+      --vis-code-num: #94a3b8;
+      --vis-code-active: rgba(4, 171, 7, 0.12);
+      --vis-caption-bg: rgba(255, 255, 255, 0.92);
+      --vis-controls-bg: rgba(255, 255, 255, 0.94);
+      --vis-chip-bg: rgba(15, 23, 42, 0.045);
+      --vis-trace-bg: rgba(255, 255, 255, 0.88);
+      --vis-play-fg: #ffffff;
+      --vis-rail: rgba(4, 171, 7, 0.08);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      height: 100%;
+      background: var(--vis-page);
+      color: var(--text-primary);
+      font-family: var(--font-main);
+      overflow: hidden;
+      color-scheme: dark;
+    }
+    html[data-theme="light"],
+    html.light-mode,
+    body.light-mode {
+      color-scheme: light;
+    }
+    /* =========================================================
+       ✨ VISUALIZATION THEATER & STORYTELLING ENGINE
+       ========================================================= */
+    .visualizer-theater {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: var(--vis-theater);
+      z-index: 55;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      border-left: 1px solid var(--border-glass);
+      animation: visFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes visFadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .vis-header {
+      padding: 12px 22px;
+      background: var(--vis-header);
+      border-bottom: 1px solid var(--border-glass);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      flex-wrap: wrap;
+      gap: 10px;
+      backdrop-filter: blur(18px) saturate(1.2);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    .vis-header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      min-width: 0;
+      flex: 1 1 auto;
+    }
+
+    .vis-title {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      letter-spacing: 0.3px;
+    }
+
+    .vis-title i {
+      color: var(--orbit-green);
+      font-size: 14px;
+    }
+
+    .vis-ds-badge {
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(56, 189, 248, 0.14);
+      color: var(--vis-accent);
+      border: 1px solid rgba(56, 189, 248, 0.32);
+    }
+
+    .vis-line-chip {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      background: var(--vis-chip-bg);
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border-glass);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .vis-loop-chip {
+      font-size: 11px;
+      font-weight: 800;
+      color: #fbbf24;
+      background: rgba(251, 191, 36, 0.12);
+      border: 1px solid rgba(251, 191, 36, 0.35);
+      padding: 4px 10px;
+      border-radius: 99px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .vis-loop-chip.pop {
+      animation: loopPop 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes loopPop {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+
+    .vis-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+
+    .vis-theme-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      border: 1px solid var(--border-glass);
+      background: var(--vis-chip-bg);
+      color: var(--text-primary);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+    }
+
+    .vis-theme-btn i {
+      line-height: 1;
+      transition: transform 0.28s ease, color 0.2s ease;
+    }
+
+    .vis-theme-btn:hover {
+      border-color: var(--orbit-green);
+      background: var(--orbit-green-dim);
+      transform: translateY(-1px);
+    }
+
+    html[data-theme="dark"] .vis-theme-btn i,
+    html:not([data-theme="light"]) .vis-theme-btn i {
+      color: #fbbf24;
+    }
+
+    html[data-theme="light"] .vis-theme-btn i {
+      color: #334155;
+    }
+
+    .vis-close-btn {
+      background: var(--vis-chip-bg);
+      border: 1px solid var(--border-glass);
+      color: var(--text-secondary);
+      cursor: pointer;
+      padding: 7px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: 0.2s;
+      font-family: var(--font-main);
+    }
+
+    .vis-close-btn:hover {
+      background: rgba(239, 68, 68, 0.12);
+      color: #ef4444;
+      border-color: rgba(239, 68, 68, 0.35);
+    }
+
+    /* Visualizer Body (Split Stage & Code Panel) */
+    .vis-body {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Visualizer Stage */
+    .vis-stage {
+      flex: 1.35;
+      position: relative;
+      overflow: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      padding: 20px 24px 16px;
+      background-image:
+        radial-gradient(var(--vis-stage-grid) 1px, transparent 1px),
+        var(--vis-stage-wash);
+      background-size: 24px 24px, 100% 100%;
+    }
+
+    .vis-canvas-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    /* Array Display */
+    .vis-array-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      max-width: 100%;
+      overflow-x: auto;
+      padding: 20px 10px;
+    }
+
+    .vis-array-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      align-items: center;
+      position: relative;
+      padding-bottom: 8px;
+      max-width: 100%;
+    }
+
+    .vis-array-cell {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      position: relative;
+    }
+
+    .vis-array-box {
+      min-width: 54px;
+      height: 60px;
+      padding: 0 12px;
+      border-radius: 12px;
+      background: var(--vis-box-bg);
+      border: 2px solid var(--vis-box-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-code);
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--vis-box-text);
+      box-shadow: var(--vis-box-shadow);
+      transition: transform 0.2s ease-out, box-shadow 0.15s ease, border-color 0.15s ease, background 0.3s ease;
+      user-select: none;
+      position: relative;
+    }
+
+    /* Compare: Soft yellow outline glow, 150ms fade-in */
+    .vis-array-box.is-comparing {
+      border-color: #FFD54F !important;
+      box-shadow: 0 0 0 3px #FFD54F, 0 0 20px rgba(255, 213, 79, 0.45) !important;
+      color: #FFF9C4;
+      transition: all 150ms ease;
+    }
+
+    /* Assign/Update: scales up to 1.15x and back (200ms ease-out), flashes light green then fades over 300ms */
+    .vis-array-box.is-assigning {
+      border-color: var(--orbit-green) !important;
+      background: rgba(0, 255, 102, 0.25) !important;
+      box-shadow: 0 0 0 3px var(--orbit-green), 0 0 24px rgba(0, 255, 102, 0.5) !important;
+      animation: assignPulse 0.2s ease-out;
+      color: #fff;
+    }
+
+    .vis-array-box.is-truthy {
+      border-color: rgba(50, 193, 74, 0.85);
+      background: rgba(50, 193, 74, 0.16);
+    }
+
+    .vis-array-box.is-falsy {
+      border-style: dashed;
+      border-color: rgba(255, 255, 255, 0.28);
+      color: rgba(255, 255, 255, 0.62);
+    }
+
+    .vis-array-box {
+      font-size: 16px;
+    }
+
+    .vis-truth-tag {
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.55);
+    }
+
+    .vis-truth-tag.is-truthy { color: #59b03a; }
+    .vis-truth-tag.is-falsy { color: rgba(255, 255, 255, 0.45); }
+
+    @keyframes assignPulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+      100% { transform: scale(1); }
+    }
+
+    /* Physical Arc Swap Animation (400ms, ease: cubic-bezier(0.34, 1.56, 0.64, 1)) */
+    @keyframes arcSwapOver {
+      0% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(calc(var(--swap-dx, 66px) / 2), -30px) scale(1.08) rotate(4deg); }
+      100% { transform: translate(calc(var(--swap-dx, 66px)), 0) scale(1) rotate(0deg); }
+    }
+
+    @keyframes arcSwapUnder {
+      0% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(calc(var(--swap-dx, -66px) / 2), 30px) scale(1.08) rotate(-4deg); }
+      100% { transform: translate(calc(var(--swap-dx, -66px)), 0) scale(1) rotate(0deg); }
+    }
+
+    .vis-array-box.arc-swap-over {
+      animation: arcSwapOver 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+      z-index: 5;
+    }
+
+    .vis-array-box.arc-swap-under {
+      animation: arcSwapUnder 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+      z-index: 4;
+    }
+
+    .vis-box-index {
+      font-size: 11px;
+      font-family: var(--font-code);
+      font-weight: 700;
+      color: var(--text-secondary);
+    }
+
+    /* Pointer: bobbing gently underneath active box (CSS translateY oscillation, 2px, 600ms loop) */
+    .vis-pointer-arrow {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-size: 10px;
+      font-weight: 800;
+      color: #38bdf8;
+      height: 22px;
+      animation: pointerBob 600ms ease-in-out infinite alternate;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .vis-pointer-arrow.visible {
+      opacity: 1;
+    }
+
+    @keyframes pointerBob {
+      from { transform: translateY(0px); }
+      to { transform: translateY(-2px); }
+    }
+
+    /* Loop Lap Sweep Bar (thin colored bar sweeps left-to-right under active region, 200ms) */
+    .vis-sweep-bar {
+      width: 100%;
+      height: 3px;
+      border-radius: 99px;
+      background: linear-gradient(90deg, #38bdf8, var(--orbit-green));
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.8);
+      animation: sweepLap 200ms ease-out forwards;
+    }
+
+    @keyframes sweepLap {
+      0% { width: 0%; opacity: 0.2; }
+      100% { width: 100%; opacity: 1; }
+    }
+
+    /* Stack / Queue View */
+    .vis-stack-queue-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      width: 100%;
+    }
+
+    .vis-sq-container {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      padding: 16px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--border-glass);
+      border-radius: 12px;
+      min-height: 80px;
+    }
+
+    .vis-sq-container.is-stack {
+      flex-direction: column-reverse;
+      min-width: 120px;
+      border-bottom: 3px solid #38bdf8;
+    }
+
+    .vis-sq-container.is-queue {
+      flex-direction: row;
+      border-left: 3px solid #38bdf8;
+      border-right: 3px solid var(--orbit-green);
+    }
+
+    .vis-sq-item {
+      padding: 10px 18px;
+      border-radius: 8px;
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      color: #fff;
+      font-family: var(--font-code);
+      font-weight: 700;
+      font-size: 16px;
+      transition: all 0.25s ease;
+    }
+
+    .vis-sq-item.push-in {
+      animation: pushInBounce 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .vis-sq-item.pop-out {
+      animation: popOutFade 0.2s ease-in forwards;
+    }
+
+    @keyframes pushInBounce {
+      from { transform: translateY(-16px) scale(0.85); opacity: 0; }
+      to { transform: translateY(0) scale(1); opacity: 1; }
+    }
+
+    @keyframes popOutFade {
+      from { transform: translateY(0) scale(1); opacity: 1; }
+      to { transform: translateY(-16px) scale(0.7); opacity: 0; }
+    }
+
+    /* Linked List / Tree / Graph SVG View */
+    .vis-graph-wrapper {
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      flex: 1 1 58%;
+      min-width: 280px;
+      height: 100%;
+      min-height: 0;
+    }
+
+    .vis-graph-stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      gap: 12px;
+    }
+
+    .vis-graph-legend {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      flex-wrap: wrap;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+    }
+
+    .vis-leg {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .vis-leg i {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      display: inline-block;
+      border: 2px solid rgba(255,255,255,0.25);
+      background: rgba(255,255,255,0.08);
+    }
+
+    .vis-leg-now i {
+      background: #32c14a;
+      border-color: #00ff66;
+      box-shadow: 0 0 10px rgba(0, 255, 102, 0.7);
+    }
+
+    .vis-leg-seen i {
+      background: #0284c7;
+      border-color: #38bdf8;
+    }
+
+    .vis-graph-svg {
+      width: 100%;
+      max-width: 860px;
+      height: min(58vh, 460px);
+      overflow: visible;
+    }
+
+    .vis-node-circle {
+      fill: rgba(8, 18, 12, 0.92);
+      stroke: rgba(255, 255, 255, 0.28);
+      stroke-width: 3;
+      transition: all 0.2s ease;
+    }
+
+    .vis-node-circle.visiting {
+      fill: #14532d;
+      stroke: #00ff66;
+      filter: drop-shadow(0 0 16px rgba(0, 255, 102, 0.85));
+    }
+
+    .vis-node-circle.visited {
+      fill: #0c4a6e;
+      stroke: #38bdf8;
+    }
+
+    .vis-node-circle.null-node {
+      fill: transparent;
+      stroke: rgba(148, 163, 184, 0.35);
+      stroke-dasharray: 4 3;
+    }
+
+    .vis-node-text {
+      fill: #fff;
+      font-family: var(--font-code);
+      font-size: 16px;
+      font-weight: 700;
+      text-anchor: middle;
+      dominant-baseline: central;
+      pointer-events: none;
+    }
+
+    .vis-edge-line {
+      stroke: rgba(148, 163, 184, 0.45);
+      stroke-width: 2.5;
+    }
+
+    .vis-edge-line.active {
+      stroke: #00ff66;
+      stroke-width: 3;
+      stroke-dasharray: 7 5;
+      animation: dashMove 0.8s linear infinite;
+    }
+
+    .vis-edge-label {
+      fill: #64748b;
+      font-size: 11px;
+      font-weight: 800;
+      font-family: var(--font-main);
+      text-anchor: middle;
+    }
+
+    .vis-null-text {
+      fill: #475569;
+      font-size: 10px;
+      font-family: var(--font-code);
+      text-anchor: middle;
+      dominant-baseline: central;
+    }
+
+    .vis-edge-line {
+      stroke: rgba(255, 255, 255, 0.2);
+      stroke-width: 2;
+    }
+
+    .vis-edge-line.active {
+      stroke: #38bdf8;
+      stroke-dasharray: 6 4;
+      animation: dashMove 0.8s linear infinite;
+    }
+
+    @keyframes dashMove {
+      to { stroke-dashoffset: -10; }
+    }
+
+    /* Execution Trace (Variables Panel) */
+    .vis-trace-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+      max-width: 380px;
+      padding: 16px;
+      background: var(--vis-trace-bg);
+      border: 1px solid var(--border-glass);
+      border-radius: 16px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+    }
+
+    .vis-trace-title {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .vis-variables-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .vis-var-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 12px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-glass);
+      border-radius: 8px;
+    }
+
+    .vis-var-name {
+      font-family: var(--font-code);
+      font-size: 12px;
+      font-weight: 700;
+      color: #38bdf8;
+    }
+
+    .vis-var-val {
+      font-family: var(--font-code);
+      font-size: 12.5px;
+      font-weight: 800;
+      color: var(--orbit-green);
+    }
+
+    /* Call Stack & Recursion Column */
+    .vis-call-stack {
+      position: absolute;
+      right: 16px;
+      top: 16px;
+      bottom: 16px;
+      width: 190px;
+      background: var(--vis-trace-bg);
+      border: 1px solid var(--border-glass);
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column-reverse;
+      gap: 8px;
+      overflow-y: auto;
+      backdrop-filter: blur(8px);
+      z-index: 6;
+    }
+
+    .vis-stack-title {
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+      text-align: center;
+    }
+
+    .vis-stack-frame {
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      color: #e0f2fe;
+      font-family: var(--font-code);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 8px 10px;
+      border-radius: 8px;
+      animation: stackSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      word-break: break-all;
+    }
+
+    @keyframes stackSlideUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Synchronized Live Code Viewer Panel */
+    .vis-code-panel {
+      flex: 1;
+      max-width: 440px;
+      border-left: 1px solid var(--border-glass);
+      background: var(--vis-code-bg);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .vis-code-header {
+      padding: 10px 16px;
+      background: var(--vis-code-header);
+      border-bottom: 1px solid var(--border-glass);
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .vis-code-header i {
+      color: var(--vis-accent);
+    }
+
+    .vis-code-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 0;
+      font-family: var(--font-code);
+      font-size: 12.5px;
+      line-height: 1.6;
+    }
+
+    .vis-code-line {
+      display: flex;
+      align-items: center;
+      padding: 2px 14px;
+      color: var(--text-secondary);
+      transition: background 0.2s ease;
+      position: relative;
+    }
+
+    .vis-code-line .line-num {
+      width: 28px;
+      color: var(--vis-code-num);
+      font-size: 11px;
+      user-select: none;
+      flex-shrink: 0;
+    }
+
+    .vis-code-line .line-text {
+      flex: 1;
+      white-space: pre;
+      overflow-x: hidden;
+      color: var(--vis-code-text);
+    }
+
+    /* Current line highlighted in sync with current step */
+    .vis-code-line.active-line {
+      background: var(--vis-code-active);
+      border-left: 3px solid var(--vis-accent);
+      color: var(--text-primary);
+    }
+
+    .vis-code-line.active-line .line-num {
+      color: var(--vis-accent);
+      font-weight: 800;
+    }
+
+    /* Runtime error highlighted line in muted red (#E57373) */
+    .vis-code-line.error-line {
+      background: rgba(229, 115, 115, 0.28) !important;
+      border-left: 3px solid #E57373 !important;
+      color: #ffebee !important;
+    }
+
+    .vis-code-line.error-line .line-num {
+      color: #E57373 !important;
+      font-weight: 800;
+    }
+
+    /* Branch condition badge next to current line */
+    .line-branch-badge {
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 99px;
+      margin-left: 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      letter-spacing: 0.3px;
+    }
+
+    .line-branch-badge.taken {
+      background: rgba(0, 255, 102, 0.18);
+      color: var(--orbit-green);
+      border: 1px solid rgba(0, 255, 102, 0.4);
+      animation: branchPop 0.2s ease-out;
+    }
+
+    .line-branch-badge.skipped {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-glass);
+      animation: branchFade 0.2s ease-in forwards;
+    }
+
+    @keyframes branchPop {
+      0% { transform: scale(0.85); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes branchFade {
+      0% { opacity: 1; }
+      100% { opacity: 0.5; }
+    }
+
+    /* Live voice caption under the visual */
+    .vis-live-caption {
+      width: min(680px, 100%);
+      flex-shrink: 0;
+      text-align: center;
+      padding: 10px 16px 8px;
+      border-radius: 14px;
+      background: rgba(4, 10, 8, 0.55);
+      border: 1px solid var(--border-glass);
+      backdrop-filter: blur(10px);
+    }
+    .vis-live-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+    }
+    .vis-live-kicker i { color: var(--orbit-green); font-size: 11px; }
+    .vis-live-caption p,
+    .vis-caption-speech {
+      margin: 6px 0 0;
+      font-size: 15px;
+      font-weight: 600;
+      line-height: 1.45;
+      color: var(--text-primary);
+      letter-spacing: -0.15px;
+    }
+    html[data-theme="light"] .vis-live-caption,
+    html.light-mode .vis-live-caption {
+      background: rgba(255, 255, 255, 0.78);
+    }
+
+    /* Playback Controls Footer */
+    .vis-controls-bar {
+      padding: 10px 16px;
+      background: var(--vis-controls-bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      gap: 12px 16px;
+      flex-wrap: wrap;
+      border-top: 1px solid var(--border-glass);
+    }
+
+    .vis-step-progress {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 130px;
+    }
+
+    .vis-step-text {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-secondary);
+    }
+
+    .vis-step-bar-bg {
+      width: 120px;
+      height: 4px;
+      background: var(--vis-chip-bg);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .vis-step-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--orbit-green);
+      transition: width 0.2s ease;
+    }
+
+    .vis-btn-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .vis-ctrl-btn {
+      background: var(--vis-chip-bg);
+      border: 1px solid var(--border-glass);
+      color: var(--text-primary);
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.2s;
+    }
+
+    .vis-ctrl-btn:hover:not(:disabled) {
+      background: var(--orbit-green-dim);
+      color: var(--orbit-green);
+      border-color: var(--orbit-green);
+      transform: translateY(-2px);
+    }
+
+    .vis-ctrl-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .vis-ctrl-btn.play-btn {
+      background: var(--orbit-green);
+      color: var(--vis-play-fg);
+      border-color: var(--orbit-green);
+      width: 40px;
+      height: 40px;
+      font-size: 14px;
+      box-shadow: 0 0 14px var(--orbit-green-glow);
+    }
+
+    .vis-ctrl-btn.play-btn:hover {
+      filter: brightness(1.1);
+      color: var(--vis-play-fg);
+    }
+
+    .vis-speed-picker,
+    .vis-lang-picker {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 4px;
+      background: var(--vis-chip-bg);
+      border: 1px solid var(--border-glass);
+      padding: 4px 6px 4px 10px;
+      border-radius: 12px;
+      max-width: 100%;
+    }
+
+    .vis-speed-label,
+    .vis-lang-label {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      margin-right: 2px;
+    }
+
+    .vis-speed-btn,
+    .vis-lang-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 800;
+      padding: 6px 8px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.18s ease;
+      line-height: 1.2;
+    }
+
+    .vis-speed-btn {
+      font-family: var(--font-code);
+      min-width: 38px;
+    }
+
+    .vis-speed-btn:hover,
+    .vis-lang-btn:hover {
+      color: var(--text-primary);
+      background: var(--orbit-green-dim);
+    }
+
+    .vis-speed-btn.active,
+    .vis-lang-btn.active {
+      background: var(--orbit-green);
+      color: var(--vis-play-fg);
+      box-shadow: 0 0 10px var(--orbit-green-glow);
+    }
+
+    html[data-theme="light"] .vis-speed-btn.active,
+    html.light-mode .vis-speed-btn.active,
+    html[data-theme="light"] .vis-lang-btn.active,
+    html.light-mode .vis-lang-btn.active {
+      color: #fff;
+    }
+
+    /* Friendly Warning / Celebration Banner */
+    .vis-banner {
+      padding: 9px 16px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 10px 20px 0 20px;
+      animation: visFadeIn 0.3s ease;
+    }
+
+    .vis-banner.success {
+      background: rgba(0, 255, 102, 0.12);
+      border: 1px solid var(--orbit-green);
+      color: #e2e8f0;
+    }
+
+    .vis-banner.warning {
+      background: rgba(251, 191, 36, 0.12);
+      border: 1px solid #fbbf24;
+      color: #fef3c7;
+    }
+
+    .vis-banner.error {
+      background: rgba(255, 50, 50, 0.12);
+      border: 1px solid #ff5555;
+      color: #fecaca;
+    }
+    .visualizer-theater {
+      position: fixed !important;
+      inset: 0 !important;
+      display: flex !important;
+      z-index: 1 !important;
+      border: none !important;
+    }
+    .vis-caption-speech {
+      font-size: 16px !important;
+      font-weight: 600 !important;
+      line-height: 1.45 !important;
+      letter-spacing: -0.02em !important;
+    }
+    .vis-array-box {
+      min-width: 58px !important;
+      height: 64px !important;
+      font-size: 20px !important;
+      padding: 0 12px !important;
+    }
+    .vis-step-text {
+      font-size: 15px !important;
+      color: var(--text-primary) !important;
+    }
+    .vis-step-bar-bg {
+      width: 220px !important;
+      height: 6px !important;
+    }
+    .vis-ctrl-btn {
+      width: 44px !important;
+      height: 44px !important;
+      font-size: 16px !important;
+    }
+    .vis-ctrl-btn.play-btn {
+      width: 56px !important;
+      height: 56px !important;
+    }
+    .vis-code-panel {
+      width: 360px;
+      max-width: 38vw;
+      flex: 0 0 360px;
+    }
+    .vis-problem-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      margin-left: 8px;
+    }
+    .vis-stage {
+      padding: 40px 32px !important;
+    }
+    .vis-banner {
+      font-size: 14px !important;
+      padding: 12px 20px !important;
+    }
+    html[data-theme="light"] .vis-node-circle {
+      fill: #ffffff;
+      stroke: #94a3b8;
+    }
+    html[data-theme="light"] .vis-node-text { fill: #0f172a; }
+    html[data-theme="light"] .vis-edge-line { stroke: rgba(15, 23, 42, 0.22); }
+    html[data-theme="light"] .vis-sq-container { background: rgba(255, 255, 255, 0.72); }
+    html[data-theme="light"] .vis-sq-item { color: #0f172a; background: rgba(2, 132, 199, 0.1); }
+    html[data-theme="light"] .vis-stack-frame { color: #0f172a; background: rgba(2, 132, 199, 0.1); }
+    html[data-theme="light"] .vis-var-row { background: rgba(15, 23, 42, 0.04); }
+    html[data-theme="light"] .vis-array-box.is-falsy {
+      color: #64748b;
+      border-color: rgba(15, 23, 42, 0.22);
+    }
+    html[data-theme="light"] .vis-leg i {
+      border-color: rgba(15, 23, 42, 0.18);
+      background: #e2e8f0;
+    }
+    html[data-theme="light"] .vis-banner.success { color: #14532d; }
+    html[data-theme="light"] .vis-banner.warning { color: #854d0e; }
+    html[data-theme="light"] .vis-banner.error { color: #991b1b; }
+  </style>
+</head>
+<body>
+  <audio id="vis-tts-audio" preload="auto" playsinline></audio>
+  <div class="visualizer-theater" id="visualizer-theater">
+    <div class="vis-header">
+      <div class="vis-header-left">
+        <div class="vis-title">
+          <i class="fas fa-wand-magic-sparkles"></i>
+          <span>Story Mode Visualizer</span>
+        </div>
+        <span class="vis-problem-title" id="vis-problem-title"></span>
+        <span class="vis-ds-badge" id="vis-ds-badge">ARRAY</span>
+        <div class="vis-line-chip" id="vis-line-chip">
+          <i class="fas fa-code"></i> Line <span id="vis-line-num">1</span>
+        </div>
+        <div class="vis-loop-chip" id="vis-loop-chip" style="display: none;">
+          <i class="fas fa-repeat"></i> <span id="vis-loop-text">Loop 1 of 5</span>
+        </div>
+      </div>
+      <div class="vis-header-actions">
+        <button type="button" class="vis-theme-btn" id="vis-voice-btn" onpointerdown="unlockVisualizerAudio()" onclick="toggleVisualizerVoice()" title="Mute voice" aria-label="Toggle step voice">
+          <i class="fa-solid fa-volume-high" id="vis-voice-icon"></i>
+        </button>
+        <button type="button" class="vis-theme-btn" id="vis-theme-btn" onclick="toggleVisualizerTheme()" title="Switch to light theme" aria-label="Switch theme">
+          <i class="fa-solid fa-sun" id="vis-theme-icon"></i>
+        </button>
+        <button class="vis-close-btn" onclick="closeVisualizer()" title="Close">
+          <i class="fas fa-times"></i> Close
+        </button>
+      </div>
+    </div>
+
+    <div class="vis-body">
+      <div class="vis-stage" id="vis-stage">
+        <canvas class="vis-canvas-overlay" id="vis-confetti-canvas"></canvas>
+        <div class="vis-array-wrapper" id="vis-array-wrapper">
+          <div class="vis-array-row" id="vis-array-row"></div>
+          <div class="vis-sweep-bar" id="vis-sweep-bar" style="display: none;"></div>
+        </div>
+        <div class="vis-stack-queue-wrapper" id="vis-stack-queue-wrapper" style="display: none;">
+          <div class="vis-sq-container" id="vis-sq-container"></div>
+        </div>
+        <div class="vis-graph-wrapper" id="vis-graph-wrapper" style="display: none;">
+          <div class="vis-graph-stage">
+            <div class="vis-graph-legend">
+              <span class="vis-leg vis-leg-now"><i></i> Current node</span>
+              <span class="vis-leg vis-leg-seen"><i></i> Already visited</span>
+              <span class="vis-leg vis-leg-idle"><i></i> Not visited yet</span>
+            </div>
+            <svg class="vis-graph-svg" id="vis-graph-svg" viewBox="0 0 720 420" preserveAspectRatio="xMidYMid meet"></svg>
+          </div>
+        </div>
+        <div class="vis-trace-wrapper" id="vis-trace-wrapper" style="display: none;">
+          <div class="vis-trace-title"><i class="fas fa-table-list"></i> Variables Live Inspection</div>
+          <div class="vis-variables-grid" id="vis-variables-grid"></div>
+        </div>
+        <div class="vis-call-stack" id="vis-call-stack" style="display: none;">
+          <div class="vis-stack-title"><i class="fas fa-layer-group"></i> Call Stack</div>
+          <div id="vis-stack-frames"></div>
+        </div>
+        <div class="vis-live-caption" id="vis-live-caption">
+          <span class="vis-live-kicker"><i class="fa-solid fa-volume-high"></i> Live explanation</span>
+          <p class="vis-caption-speech" id="vis-caption-text">Crafting the story of your code...</p>
+        </div>
+      </div>
+      <div class="vis-code-panel" id="vis-code-panel">
+        <div class="vis-code-header">
+          <i class="fas fa-terminal"></i> <span>Live Code Execution</span>
+        </div>
+        <div class="vis-code-scroll" id="vis-code-scroll">
+          <div class="vis-code-lines" id="vis-code-lines"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="vis-banner-container"></div>
+
+    <div class="vis-controls-bar">
+      <div class="vis-step-progress">
+        <div class="vis-step-text" id="vis-step-counter">Step 0 of 0</div>
+        <div class="vis-step-bar-bg">
+          <div class="vis-step-bar-fill" id="vis-step-bar-fill"></div>
+        </div>
+      </div>
+      <div class="vis-btn-group">
+        <button type="button" class="vis-ctrl-btn" id="vis-btn-restart" onpointerdown="unlockVisualizerAudio()" onclick="visualizerRestart()" title="Restart"><i class="fas fa-rotate-left"></i></button>
+        <button type="button" class="vis-ctrl-btn" id="vis-btn-back" onpointerdown="unlockVisualizerAudio()" onclick="visualizerStep(-1)" title="Step back"><i class="fas fa-backward-step"></i></button>
+        <button type="button" class="vis-ctrl-btn play-btn" id="vis-btn-play" onpointerdown="unlockVisualizerAudio()" onclick="visualizerTogglePlay()" title="Play" aria-pressed="false">
+          <i class="fas fa-play" id="vis-play-icon"></i>
+        </button>
+        <button type="button" class="vis-ctrl-btn" id="vis-btn-fwd" onpointerdown="unlockVisualizerAudio()" onclick="visualizerStep(1)" title="Step forward"><i class="fas fa-forward-step"></i></button>
+      </div>
+      <div class="vis-speed-picker" role="radiogroup" aria-label="Playback speed">
+        <span class="vis-speed-label">Speed</span>
+        <button type="button" class="vis-speed-btn" data-speed="0.5" onclick="setVisualizerSpeed(0.5)">0.5×</button>
+        <button type="button" class="vis-speed-btn active" data-speed="1" onclick="setVisualizerSpeed(1)">1×</button>
+        <button type="button" class="vis-speed-btn" data-speed="1.5" onclick="setVisualizerSpeed(1.5)">1.5×</button>
+        <button type="button" class="vis-speed-btn" data-speed="2" onclick="setVisualizerSpeed(2)">2×</button>
+        <button type="button" class="vis-speed-btn" data-speed="2.5" onclick="setVisualizerSpeed(2.5)">2.5×</button>
+        <button type="button" class="vis-speed-btn" data-speed="3" onclick="setVisualizerSpeed(3)">3×</button>
+      </div>
+      <div class="vis-lang-picker" role="radiogroup" aria-label="Voice language">
+        <span class="vis-lang-label">Voice</span>
+        <button type="button" class="vis-lang-btn active" data-lang="en" title="English" onclick="setVisualizerVoiceLang('en')">EN</button>
+        <button type="button" class="vis-lang-btn" data-lang="kn" title="Kannada" onclick="setVisualizerVoiceLang('kn')">ಕನ್ನಡ</button>
+        <button type="button" class="vis-lang-btn" data-lang="hi" title="Hindi" onclick="setVisualizerVoiceLang('hi')">हिन्दी</button>
+        <button type="button" class="vis-lang-btn" data-lang="ta" title="Tamil" onclick="setVisualizerVoiceLang('ta')">தமிழ்</button>
+        <button type="button" class="vis-lang-btn" data-lang="te" title="Telugu" onclick="setVisualizerVoiceLang('te')">తెలుగు</button>
+      </div>
+    </div>
+  </div>
+  <script>
+    // =========================================================
+    // ✨ VISUALIZE MY CODE - STORYTELLING ENGINE
+    // =========================================================
+    const SWAP_DURATION_MS = 400;
+    const COMPARE_DURATION_MS = 150;
+    const ASSIGN_SCALE_DURATION_MS = 200;
+    const ASSIGN_FADE_DURATION_MS = 300;
+    const LOOP_POP_MS = 150;
+    const LOOP_SWEEP_MS = 200;
+    const BRANCH_FADE_MS = 200;
+    const CALL_STACK_SLIDE_MS = 250;
+    const NODE_VISIT_DURATION_MS = 200;
+    const STACK_PUSH_MS = 250;
+    const STACK_POP_MS = 200;
+    const SPEED_BASE_MS = 700;
+
+    let visSteps = [];
+    let visCurrentIndex = 0;
+    let visIsPlaying = false;
+    let visPlayTimer = null;
+    let visSpeedMode = 1;
+    let visStepDelay = SPEED_BASE_MS;
+    let visDataStructure = 'array';
+    let visIsCorrect = false;
+    let visRawCode = '';
+    let visVoiceOn = localStorage.getItem('hiero-vis-voice') !== 'off';
+    let visVoiceLang = 'en';
+    let visAudio = null;
+    let visPlayGen = 0;
+    let visSpeakGen = 0;
+    let visVoiceToken = 0;
+    let visSpeakPromise = Promise.resolve();
+    let visAudioCtx = null;
+    let visAudioUnlocked = false;
+    const visTtsCache = new Map();
+    const visTtsInflight = new Map();
+    const VIS_VOICE_LANGS = {
+      en: 'en-IN',
+      kn: 'kn-IN',
+      hi: 'hi-IN',
+      ta: 'ta-IN',
+      te: 'te-IN'
+    };
+
+    const VIS_SILENCE_WAV = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
+
+    function visTtsElement() {
+      return document.getElementById('vis-tts-audio');
+    }
+
+    function unlockVisualizerAudio() {
+      try {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (AC && !visAudioCtx) visAudioCtx = new AC();
+        if (visAudioCtx && visAudioCtx.state === 'suspended') visAudioCtx.resume();
+      } catch (e) {}
+      const el = visTtsElement();
+      if (!el || visAudioUnlocked) return;
+      try {
+        el.src = VIS_SILENCE_WAV;
+        el.muted = false;
+        el.volume = 1;
+        const play = el.play();
+        if (play && play.then) {
+          play.then(() => {
+            el.pause();
+            visAudioUnlocked = true;
+          }).catch(() => {});
+        }
+      } catch (e) {}
+    }
+
+    function stopVisualizerVoice() {
+      visSpeakGen += 1;
+      try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch (e) {}
+      const el = visTtsElement();
+      if (el) {
+        try { el.pause(); } catch (e) {}
+      }
+      if (visAudio) {
+        try { visAudio.stop(); } catch (e) {}
+        try { visAudio.pause(); } catch (e) {}
+        visAudio = null;
+      }
+    }
+
+    function syncVisualizerVoiceLangButtons() {
+      document.querySelectorAll('.vis-lang-btn').forEach((btn) => {
+        const on = btn.getAttribute('data-lang') === visVoiceLang;
+        btn.classList.toggle('active', on);
+        btn.setAttribute('aria-checked', on ? 'true' : 'false');
+        btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+      });
+    }
+
+    function setVisualizerVoiceLang(lang) {
+      unlockVisualizerAudio();
+      const next = VIS_VOICE_LANGS[lang] ? lang : 'en';
+      if (next === visVoiceLang) return;
+      visVoiceLang = next;
+      visTtsCache.clear();
+      visTtsInflight.clear();
+      try { localStorage.setItem('hiero-vis-voice-lang', visVoiceLang); } catch (e) {}
+      syncVisualizerVoiceLangButtons();
+      visVoiceToken += 1;
+      prefetchVisualizerVoiceAhead(visCurrentIndex);
+      if (!visVoiceOn || !visSteps[visCurrentIndex]) return;
+      if (visIsPlaying) {
+        stopVisualizerVoice();
+      } else {
+        visSpeakPromise = speakVisualizerCaption(visSteps[visCurrentIndex].caption, visCurrentIndex);
+      }
+    }
+
+    function applySavedVisualizerVoiceLang() {
+      let saved = 'en';
+      try { saved = localStorage.getItem('hiero-vis-voice-lang') || 'en'; } catch (e) {}
+      visVoiceLang = VIS_VOICE_LANGS[saved] ? saved : 'en';
+      syncVisualizerVoiceLangButtons();
+    }
+
+    function pickBrowserVoice(langCode) {
+      const voices = (window.speechSynthesis && window.speechSynthesis.getVoices()) || [];
+      if (!voices.length) return null;
+      const prefix = String(langCode || 'en').toLowerCase().slice(0, 2);
+      const inLang = voices.filter((v) => String(v.lang || '').toLowerCase().startsWith(prefix));
+      const isFemale = (v) => /female|zira|samantha|veena|heera|swara|sapna|pallavi|shruti|neerja|jenny|aria|google/i.test(v.name)
+        && !/male|ravi|prabhat|kumar|david|mark/i.test(v.name);
+      return inLang.find(isFemale) || inLang.find((v) => /google/i.test(v.name)) || inLang[0] || null;
+    }
+
+    function speakWithBrowser(text, langCode) {
+      return new Promise((resolve) => {
+        if (!window.speechSynthesis) return resolve();
+        try { window.speechSynthesis.cancel(); } catch (e) {}
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = langCode || 'en-IN';
+        utter.rate = visualizerVoiceRate();
+        const voice = pickBrowserVoice(langCode);
+        if (voice) utter.voice = voice;
+        utter.onend = resolve;
+        utter.onerror = resolve;
+        window.speechSynthesis.speak(utter);
+      });
+    }
+
+    function decodeBase64Audio(b64) {
+      const bin = atob(b64);
+      const bytes = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      return bytes.buffer;
+    }
+
+    function syncVisualizerVoiceButton() {
+      const icon = document.getElementById('vis-voice-icon');
+      const btn = document.getElementById('vis-voice-btn');
+      const kicker = document.querySelector('.vis-live-kicker');
+      if (icon) icon.className = visVoiceOn ? 'fa-solid fa-volume-high' : 'fa-solid fa-volume-xmark';
+      if (btn) btn.title = visVoiceOn ? 'Mute voice' : 'Unmute voice';
+      if (kicker) kicker.innerHTML = visVoiceOn
+        ? '<i class="fa-solid fa-volume-high"></i> Live explanation'
+        : '<i class="fa-solid fa-closed-captioning"></i> Step caption';
+    }
+
+    function toggleVisualizerVoice() {
+      unlockVisualizerAudio();
+      visVoiceOn = !visVoiceOn;
+      try { localStorage.setItem('hiero-vis-voice', visVoiceOn ? 'on' : 'off'); } catch (e) {}
+      if (!visVoiceOn) stopVisualizerVoice();
+      syncVisualizerVoiceButton();
+      if (visVoiceOn && visSteps[visCurrentIndex] && !visIsPlaying) {
+        visSpeakPromise = speakVisualizerCaption(visSteps[visCurrentIndex].caption, visCurrentIndex);
+      }
+    }
+
+    function decodeVisualizerAudio(ctx, buf) {
+      const copy = buf.slice(0);
+      if (ctx.decodeAudioData.length === 1) return ctx.decodeAudioData(copy);
+      return new Promise((resolve, reject) => ctx.decodeAudioData(copy, resolve, reject));
+    }
+
+    async function playVisualizerBuffer(buf) {
+      const el = visTtsElement();
+      const url = URL.createObjectURL(new Blob([buf], { type: 'audio/mpeg' }));
+      const done = new Promise((resolve) => {
+        let finished = false;
+        let safetyTimer = null;
+        const finish = () => {
+          if (finished) return;
+          finished = true;
+          if (safetyTimer) clearTimeout(safetyTimer);
+          resolve();
+        };
+        const start = (player) => {
+          player.muted = false;
+          player.volume = 1;
+          const apply = () => applyVisualizerVoiceRate();
+          player.onloadedmetadata = apply;
+          player.oncanplay = apply;
+          apply();
+          const play = player.play();
+          if (play && play.then) play.then(apply).catch(finish);
+          safetyTimer = setTimeout(finish, 20000);
+        };
+        if (el) {
+          el.onended = finish;
+          el.onerror = finish;
+          el.src = url;
+          start(el);
+        } else {
+          visAudio = new Audio(url);
+          visAudio.onended = finish;
+          visAudio.onerror = finish;
+          start(visAudio);
+        }
+      });
+      await done;
+      URL.revokeObjectURL(url);
+    }
+
+    function visualizerVoiceRate() {
+      const rates = { 0.5: 0.8, 1: 1, 1.5: 1.35, 2: 1.7, 2.5: 2, 3: 2.3 };
+      return rates[visSpeedMode] || 1;
+    }
+
+    function applyVisualizerVoiceRate() {
+      const rate = visualizerVoiceRate();
+      const el = visTtsElement();
+      if (el) {
+        try { el.playbackRate = rate; } catch (e) {}
+      }
+      if (visAudio) {
+        try { visAudio.playbackRate = rate; } catch (e) {}
+      }
+    }
+
+    function loadVisualizerVoice(caption) {
+      const cacheKey = visVoiceLang + ':' + caption;
+      if (visTtsCache.has(cacheKey)) return Promise.resolve(visTtsCache.get(cacheKey));
+      if (visTtsInflight.has(cacheKey)) return visTtsInflight.get(cacheKey);
+      const request = fetch('/api/visualize/speak', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: caption, lang: visVoiceLang })
+      }).then(async (res) => {
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.success) return null;
+        const packed = {
+          text: data.text || caption,
+          ttsLang: data.ttsLang || VIS_VOICE_LANGS[visVoiceLang],
+          audio: data.audio || null
+        };
+        visTtsCache.set(cacheKey, packed);
+        if (visTtsCache.size > 40) visTtsCache.delete(visTtsCache.keys().next().value);
+        return packed;
+      }).catch(() => null).finally(() => {
+        visTtsInflight.delete(cacheKey);
+      });
+      visTtsInflight.set(cacheKey, request);
+      return request;
+    }
+
+    function prefetchVisualizerVoice(idx) {
+      if (!visVoiceOn || idx < 0 || idx >= visSteps.length) return;
+      const caption = String((visSteps[idx] && visSteps[idx].caption) || '').replace(/\s+/g, ' ').trim();
+      if (!caption) return;
+      loadVisualizerVoice(caption);
+    }
+
+    function prefetchVisualizerVoiceAhead(fromIdx) {
+      prefetchVisualizerVoice(fromIdx);
+      prefetchVisualizerVoice(fromIdx + 1);
+      prefetchVisualizerVoice(fromIdx + 2);
+    }
+
+    async function speakVisualizerCaption(text, stepIdx) {
+      const caption = String(text || '').replace(/\s+/g, ' ').trim();
+      stopVisualizerVoice();
+      const gen = visSpeakGen;
+      if (!visVoiceOn || !caption) return;
+      try {
+        if (visAudioCtx && visAudioCtx.state === 'suspended') await visAudioCtx.resume();
+        prefetchVisualizerVoiceAhead(stepIdx + 1);
+        const packed = await loadVisualizerVoice(caption);
+        if (!packed || gen !== visSpeakGen || stepIdx !== visCurrentIndex || !visVoiceOn) return;
+        const speechEl = document.getElementById('vis-caption-text');
+        if (speechEl && packed.text) speechEl.innerText = packed.text;
+        if (packed.audio) {
+          await playVisualizerBuffer(decodeBase64Audio(packed.audio));
+        } else {
+          await speakWithBrowser(packed.text, packed.ttsLang);
+        }
+      } catch (e) {}
+    }
+
+    function currentVisualizerTheme() {
+      return document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+    }
+
+    function syncVisualizerThemeButtons() {
+      const light = currentVisualizerTheme() === 'light';
+      const icon = document.getElementById('vis-theme-icon');
+      const btn = document.getElementById('vis-theme-btn');
+      if (icon) {
+        icon.className = light ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
+      }
+      if (btn) {
+        btn.title = light ? 'Switch to dark theme' : 'Switch to light theme';
+        btn.setAttribute('aria-label', btn.title);
+      }
+    }
+
+    function setVisualizerTheme(theme) {
+      const light = theme === 'light';
+      document.documentElement.setAttribute('data-theme', light ? 'light' : 'dark');
+      document.documentElement.classList.toggle('light-mode', light);
+      document.body.classList.toggle('light-mode', light);
+      document.documentElement.style.colorScheme = light ? 'light' : 'dark';
+      try {
+        localStorage.setItem('theme', light ? 'light' : 'dark');
+        localStorage.setItem('hiero-theme', light ? 'light' : 'dark');
+      } catch (e) {}
+      syncVisualizerThemeButtons();
+    }
+
+    function toggleVisualizerTheme() {
+      setVisualizerTheme(currentVisualizerTheme() === 'light' ? 'dark' : 'light');
+    }
+
+    function applySavedVisualizerTheme() {
+      let saved = 'dark';
+      try {
+        saved = localStorage.getItem('theme') || localStorage.getItem('hiero-theme') || 'dark';
+      } catch (e) {}
+      setVisualizerTheme(saved === 'light' ? 'light' : 'dark');
+    }
+
+    function applySavedVisualizerSpeed() {
+      let saved = 1;
+      try { saved = Number(localStorage.getItem('hiero-vis-speed')) || 1; } catch (e) {}
+      setVisualizerSpeed(saved);
+    }
+
+    function escapeHtml(str) {
+      if (str === undefined || str === null) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function populateVisualizerCode(code) {
+      visRawCode = code || '';
+      const linesContainer = document.getElementById('vis-code-lines');
+      if (!linesContainer) return;
+
+      const lines = visRawCode.split('\n');
+      linesContainer.innerHTML = lines.map((line, i) => {
+        const lineNum = i + 1;
+        return `
+          <div class="vis-code-line" id="vis-line-row-${lineNum}" data-line="${lineNum}">
+            <span class="line-num">${lineNum}</span>
+            <span class="line-text">${escapeHtml(line) || '&nbsp;'}</span>
+            <span class="line-branch-badge" id="vis-branch-badge-${lineNum}"></span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function closeVisualizer() {
+      visualizerPause();
+      stopVisualizerVoice();
+      if (window.opener) window.close();
+      else window.history.back();
+    }
+
+    function showVisualizerBanner(type, message) {
+      const c = document.getElementById('vis-banner-container');
+      if (!c) return;
+      const icon = type === 'success' ? 'fa-circle-check' : (type === 'warning' ? 'fa-triangle-exclamation' : 'fa-circle-xmark');
+      c.innerHTML = `
+        <div class="vis-banner ${type}">
+          <i class="fas ${icon}"></i>
+          <span>${message}</span>
+        </div>
+      `;
+    }
+
+    function clearVisualizerBanner() {
+      const c = document.getElementById('vis-banner-container');
+      if (c) c.innerHTML = '';
+    }
+
+    function syncVisualizerTransport() {
+      const n = visSteps.length;
+      const back = document.getElementById('vis-btn-back');
+      const fwd = document.getElementById('vis-btn-fwd');
+      const play = document.getElementById('vis-btn-play');
+      const icon = document.getElementById('vis-play-icon');
+      if (back) back.disabled = n === 0 || visCurrentIndex <= 0;
+      if (fwd) fwd.disabled = n === 0 || visCurrentIndex >= n - 1;
+      if (play) {
+        play.disabled = n === 0;
+        play.setAttribute('aria-pressed', visIsPlaying ? 'true' : 'false');
+        play.title = visIsPlaying ? 'Pause' : (n && visCurrentIndex >= n - 1 ? 'Replay' : 'Play');
+      }
+      if (icon) icon.className = visIsPlaying ? 'fas fa-pause' : 'fas fa-play';
+      document.querySelectorAll('.vis-speed-btn').forEach((btn) => {
+        const on = Number(btn.getAttribute('data-speed')) === visSpeedMode;
+        btn.classList.toggle('active', on);
+        btn.setAttribute('aria-checked', on ? 'true' : 'false');
+        btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+      });
+    }
+
+    function setVisualizerSpeed(raw) {
+      const allowed = [0.5, 1, 1.5, 2, 2.5, 3];
+      let speed = Number(raw);
+      if (!allowed.includes(speed)) {
+        speed = allowed.reduce((best, n) => Math.abs(n - speed) < Math.abs(best - speed) ? n : best, 1);
+      }
+      visSpeedMode = speed;
+      visStepDelay = Math.round(SPEED_BASE_MS / speed);
+      try { localStorage.setItem('hiero-vis-speed', String(speed)); } catch (e) {}
+      applyVisualizerVoiceRate();
+      syncVisualizerTransport();
+    }
+
+    function visualizerTogglePlay() {
+      unlockVisualizerAudio();
+      if (visIsPlaying) {
+        visualizerPause();
+      } else {
+        visualizerPlay();
+      }
+    }
+
+    function visualizerPlay() {
+      unlockVisualizerAudio();
+      if (!visSteps.length) {
+        syncVisualizerTransport();
+        return;
+      }
+      if (visCurrentIndex >= visSteps.length - 1) {
+        visCurrentIndex = 0;
+        renderVisualizerStep(visCurrentIndex, { speak: false });
+      }
+      visIsPlaying = true;
+      const playGen = ++visPlayGen;
+      syncVisualizerTransport();
+
+      clearTimeout(visPlayTimer);
+      visPlayTimer = null;
+      (async function playLoop() {
+        while (visIsPlaying && playGen === visPlayGen) {
+          const token = visVoiceToken;
+          const step = visSteps[visCurrentIndex];
+          visSpeakPromise = visVoiceOn
+            ? speakVisualizerCaption((step && step.caption) || 'Next, this line runs.', visCurrentIndex)
+            : Promise.resolve();
+          if (visVoiceOn) prefetchVisualizerVoiceAhead(visCurrentIndex + 1);
+          await visSpeakPromise;
+          if (!visIsPlaying || playGen !== visPlayGen) return;
+          if (token !== visVoiceToken) continue;
+          if (visCurrentIndex >= visSteps.length - 1) {
+            visualizerPause();
+            if (visIsCorrect) triggerConfettiBurst();
+            return;
+          }
+          await new Promise((resolve) => {
+            const gap = visVoiceOn ? Math.max(16, Math.round(80 / visSpeedMode)) : visStepDelay;
+            visPlayTimer = setTimeout(resolve, gap);
+          });
+          if (!visIsPlaying || playGen !== visPlayGen) return;
+          visCurrentIndex++;
+          renderVisualizerStep(visCurrentIndex, { speak: false });
+        }
+      })();
+    }
+
+    function visualizerPause() {
+      visIsPlaying = false;
+      visPlayGen += 1;
+      clearTimeout(visPlayTimer);
+      visPlayTimer = null;
+      stopVisualizerVoice();
+      syncVisualizerTransport();
+    }
+
+    function visualizerStep(delta) {
+      unlockVisualizerAudio();
+      visualizerPause();
+      const newIdx = visCurrentIndex + delta;
+      if (newIdx >= 0 && newIdx < visSteps.length) {
+        visCurrentIndex = newIdx;
+        renderVisualizerStep(visCurrentIndex);
+      } else {
+        syncVisualizerTransport();
+      }
+    }
+
+    function visualizerRestart() {
+      unlockVisualizerAudio();
+      visualizerPause();
+      visCurrentIndex = 0;
+      renderVisualizerStep(0);
+    }
+
+    function renderVisualizerStep(idx, opts) {
+      if (!visSteps || visSteps.length === 0) return;
+      const speak = !opts || opts.speak !== false;
+      const step = visSteps[idx];
+      if (!step) return;
+      if (!step.state) {
+        step.state = {
+          variables: {},
+          dataStructure: { type: visDataStructure || 'trace', values: [], visited: [] },
+          activeIndices: [],
+          callStack: [],
+          loop: null
+        };
+      }
+
+      // 1. Progress counter and fill
+      const counterEl = document.getElementById('vis-step-counter');
+      if (counterEl) counterEl.innerText = `Step ${idx + 1} of ${visSteps.length}`;
+      const fillEl = document.getElementById('vis-step-bar-fill');
+      if (fillEl) fillEl.style.width = `${Math.round(((idx + 1) / visSteps.length) * 100)}%`;
+      syncVisualizerTransport();
+
+      // 2. Active line indicator chip
+      const lineEl = document.getElementById('vis-line-num');
+      if (lineEl) lineEl.innerText = step.line || 1;
+
+      // 3. Synchronized Live Code Line Highlighting
+      const allCodeRows = document.querySelectorAll('.vis-code-line');
+      allCodeRows.forEach(r => {
+        r.classList.remove('active-line');
+        r.classList.remove('error-line');
+      });
+
+      const codeScroll = document.getElementById('vis-code-scroll');
+      if (idx === 0 && codeScroll) codeScroll.scrollTop = 0;
+      const activeRow = document.getElementById(`vis-line-row-${step.line}`);
+      if (activeRow) {
+        if (step.type === 'error' || (step.state && step.state.runtimeError)) {
+          activeRow.classList.add('error-line');
+        } else {
+          activeRow.classList.add('active-line');
+        }
+        activeRow.scrollIntoView({ block: idx === 0 ? 'center' : 'nearest', behavior: idx === 0 ? 'auto' : 'smooth' });
+      }
+
+      // 4. Conditionals Fork Branch Tag (next to line & in badge)
+      document.querySelectorAll('.line-branch-badge').forEach(b => { b.innerHTML = ''; });
+      if (step.type === 'branch') {
+        const branchBadge = document.getElementById(`vis-branch-badge-${step.line}`);
+        const taken = step.data && step.data.taken !== undefined
+          ? step.data.taken
+          : (step.caption && step.caption.includes('is true'));
+        if (branchBadge) {
+          branchBadge.className = `line-branch-badge ${taken ? 'taken' : 'skipped'}`;
+          branchBadge.innerHTML = taken
+            ? '<i class="fas fa-code-branch"></i> <i class="fas fa-check"></i> True'
+            : '<i class="fas fa-code-branch"></i> False';
+        }
+      }
+
+      // 5. Loop counter chip with pop animation & sweep bar
+      const loopChip = document.getElementById('vis-loop-chip');
+      const loopText = document.getElementById('vis-loop-text');
+      const sweepBar = document.getElementById('vis-sweep-bar');
+
+      if (step.state && step.state.loop) {
+        if (loopChip) {
+          loopChip.style.display = 'flex';
+          loopChip.classList.remove('pop');
+          void loopChip.offsetWidth; // trigger reflow
+          loopChip.classList.add('pop');
+        }
+        if (loopText) {
+          const totalStr = step.state.loop.total ? ` of ${step.state.loop.total}` : '';
+          loopText.innerText = `Loop ${step.state.loop.current}${totalStr}`;
+        }
+        if (sweepBar) {
+          sweepBar.style.display = 'block';
+          sweepBar.style.animation = 'none';
+          void sweepBar.offsetWidth; // trigger reflow
+          sweepBar.style.animation = `sweepLap ${LOOP_SWEEP_MS}ms ease-out forwards`;
+        }
+      } else if (step.type !== 'loop-iter') {
+        if (loopChip && idx === 0) loopChip.style.display = 'none';
+        if (sweepBar) sweepBar.style.display = 'none';
+      }
+
+      // 6. Conversational caption speech bubble (friendly, max ~12 words)
+      const speechEl = document.getElementById('vis-caption-text');
+      if (speechEl) speechEl.innerText = step.caption || 'Executing next step...';
+      visSpeakPromise = speak
+        ? speakVisualizerCaption(step.caption || 'Executing next step.', idx)
+        : Promise.resolve();
+
+      // 7. Recursion & Call Stack Column
+      const callStackEl = document.getElementById('vis-call-stack');
+      const stackFramesEl = document.getElementById('vis-stack-frames');
+      if (step.state && step.state.callStack && step.state.callStack.length > 1) {
+        if (callStackEl) callStackEl.style.display = 'flex';
+        if (stackFramesEl) {
+          stackFramesEl.innerHTML = step.state.callStack.map(f => `
+            <div class="vis-stack-frame"><i class="fas fa-cube" style="margin-right: 4px; color: #38bdf8;"></i> ${escapeHtml(f)}</div>
+          `).join('');
+        }
+      } else if (callStackEl && idx === 0) {
+        callStackEl.style.display = 'none';
+      }
+
+      // 8. Render Data Structure depending on problem type
+      const arrayWrap = document.getElementById('vis-array-wrapper');
+      const sqWrap = document.getElementById('vis-stack-queue-wrapper');
+      const graphWrap = document.getElementById('vis-graph-wrapper');
+      const traceWrap = document.getElementById('vis-trace-wrapper');
+
+      // Hide all by default
+      if (arrayWrap) arrayWrap.style.display = 'none';
+      if (sqWrap) sqWrap.style.display = 'none';
+      if (graphWrap) graphWrap.style.display = 'none';
+      if (traceWrap) traceWrap.style.display = 'none';
+
+      if (visDataStructure === 'array') {
+        if (arrayWrap) arrayWrap.style.display = 'flex';
+        renderArrayStructure(step);
+        if (traceWrap && step.state && step.state.variables && Object.keys(step.state.variables).length) {
+          traceWrap.style.display = 'flex';
+          renderTraceVariables(step);
+        }
+      } else if (visDataStructure === 'stack' || visDataStructure === 'queue') {
+        if (sqWrap) sqWrap.style.display = 'flex';
+        renderStackQueueStructure(step, visDataStructure);
+      } else if (visDataStructure === 'linked-list' || visDataStructure === 'tree' || visDataStructure === 'graph') {
+        if (graphWrap) graphWrap.style.display = 'flex';
+        renderGraphStructure(step, visDataStructure);
+        if (traceWrap) {
+          traceWrap.style.display = 'flex';
+          renderTraceVariables(step);
+        }
+      } else {
+        // Fallback: Execution Trace Only Mode
+        if (traceWrap) traceWrap.style.display = 'flex';
+        renderTraceVariables(step);
+      }
+
+      // 9. Positive Reinforcement on Completion
+      if (idx === visSteps.length - 1 && visSteps.length > 1) {
+        if (visIsCorrect) {
+          triggerConfettiBurst();
+          showVisualizerBanner('success', "Nice work — that's correct! 🎉");
+        } else if (step.state && step.state.runtimeError) {
+          showVisualizerBanner('warning', step.state.runtimeError);
+        }
+      }
+    }
+
+    // --- RENDERER: ARRAYS ---
+    function formatBoxValue(val) {
+      if (val === null || val === undefined) return 'None';
+      if (val === true) return 'True';
+      if (val === false) return 'False';
+      if (Array.isArray(val)) return val.length ? val.map(formatBoxValue).join(', ') : '[]';
+      if (typeof val === 'object') {
+        const keys = Object.keys(val);
+        return keys.length ? keys.map((k) => `${k}:${formatBoxValue(val[k])}`).join(', ') : '{}';
+      }
+      return String(val);
+    }
+
+    function renderArrayStructure(step) {
+      const row = document.getElementById('vis-array-row');
+      if (!row || !step.state || !step.state.dataStructure) return;
+
+      const values = step.state.dataStructure.values || [];
+      const flags = step.state.dataStructure.flags || [];
+      const visited = step.state.dataStructure.visited || [];
+      const activeIdxs = step.state.activeIndices || [];
+
+      row.innerHTML = values.map((val, i) => {
+        const isActive = activeIdxs.includes(i);
+        const seen = visited.includes(i);
+        const truthy = flags[i];
+        let extraBoxClass = '';
+        if (isActive) {
+          if (step.type === 'compare') extraBoxClass = 'is-comparing';
+          else if (step.type === 'assign') extraBoxClass = 'is-assigning';
+        } else if (seen && truthy === true) {
+          extraBoxClass = 'is-truthy';
+        } else if (seen && truthy === false) {
+          extraBoxClass = 'is-falsy';
+        }
+
+        let pointerLabel = '';
+        if (isActive) {
+          const varNames = [];
+          if (step.state.variables) {
+            for (const [k, v] of Object.entries(step.state.variables)) {
+              if (v === i) varNames.push(k);
+            }
+          }
+          pointerLabel = varNames.length > 0 ? `▲ ${varNames.join(', ')}` : '▲';
+        }
+
+        const tag = seen && truthy === true
+          ? '<div class="vis-truth-tag is-truthy">truthy</div>'
+          : seen && truthy === false
+            ? '<div class="vis-truth-tag is-falsy">falsy</div>'
+            : '';
+
+        return `
+          <div class="vis-array-cell" data-index="${i}">
+            <div class="vis-array-box ${extraBoxClass}" id="vis-box-${i}">
+              ${escapeHtml(formatBoxValue(val))}
+            </div>
+            ${tag}
+            <span class="vis-box-index">${i}</span>
+            <div class="vis-pointer-arrow ${isActive ? 'visible' : ''}">
+              <span>${pointerLabel}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Physical arc swap animation (400ms cubic-bezier)
+      if (step.type === 'swap' && activeIdxs.length >= 2) {
+        const i1 = Math.min(activeIdxs[0], activeIdxs[1]);
+        const i2 = Math.max(activeIdxs[0], activeIdxs[1]);
+        const box1 = document.getElementById(`vis-box-${i1}`);
+        const box2 = document.getElementById(`vis-box-${i2}`);
+
+        if (box1 && box2) {
+          const rect1 = box1.getBoundingClientRect();
+          const rect2 = box2.getBoundingClientRect();
+          const dx = Math.abs(rect2.left - rect1.left) || 66;
+
+          box1.style.setProperty('--swap-dx', `${dx}px`);
+          box2.style.setProperty('--swap-dx', `-${dx}px`);
+
+          box1.classList.add('arc-swap-over');
+          box2.classList.add('arc-swap-under');
+        }
+      }
+    }
+
+    // --- RENDERER: STACKS / QUEUES ---
+    function renderStackQueueStructure(step, type) {
+      const container = document.getElementById('vis-sq-container');
+      if (!container || !step.state || !step.state.dataStructure) return;
+
+      const values = step.state.dataStructure.values || [];
+      const isStack = type === 'stack';
+      container.className = `vis-sq-container ${isStack ? 'is-stack' : 'is-queue'}`;
+
+      let itemsHtml = '';
+      if (values.length === 0) {
+        itemsHtml = `<span style="font-size: 12px; color: var(--text-secondary); padding: 12px;">(Empty ${isStack ? 'Stack' : 'Queue'})</span>`;
+      } else {
+        itemsHtml = values.map((val, i) => {
+          const isLatest = i === values.length - 1;
+          const animClass = isLatest && (step.type === 'stack-push' || step.type === 'queue-enqueue') ? 'push-in' : '';
+          return `<div class="vis-sq-item ${animClass}">${escapeHtml(val)}</div>`;
+        }).join('');
+      }
+
+      container.innerHTML = `
+        <div style="font-size: 10px; font-weight: 800; color: #38bdf8; text-transform: uppercase; margin-bottom: 4px;">
+          ${isStack ? '▲ Top of Stack' : '◀ Front ... Back ▶'}
+        </div>
+        ${itemsHtml}
+      `;
+    }
+
+    // --- RENDERER: LINKED LISTS / TREES / GRAPHS ---
+    function isTreeNode(v) {
+      return Boolean(v && typeof v === 'object' && !Array.isArray(v) && ('left' in v || 'right' in v));
+    }
+
+    function treeNodeVal(n) {
+      if (n == null) return '';
+      if (typeof n !== 'object') return n;
+      if (n.val !== undefined && n.val !== null) return n.val;
+      if (n.value !== undefined && n.value !== null) return n.value;
+      if (n.data !== undefined && n.data !== null) return n.data;
+      return '';
+    }
+
+    function findTreeRoot(step) {
+      const ds = step.state && step.state.dataStructure;
+      if (ds && isTreeNode(ds.tree)) return ds.tree;
+      const values = (ds && ds.values) || [];
+      if (values.length && isTreeNode(values[0])) return values[0];
+      const vars = (step.state && step.state.variables) || {};
+      const prefer = ['root', 'node', 'tree', 'head', 'curr', 'current'];
+      for (const key of prefer) {
+        if (isTreeNode(vars[key])) return vars[key];
+      }
+      for (const val of Object.values(vars)) {
+        if (isTreeNode(val)) return val;
+      }
+      return null;
+    }
+
+    function findGraphAdj(step) {
+      const ds = step.state && step.state.dataStructure;
+      if (ds && ds.graph && typeof ds.graph === 'object' && !Array.isArray(ds.graph)) return ds.graph;
+      const vars = (step.state && step.state.variables) || {};
+      const prefer = ['graph', 'adj', 'adj_list', 'adjList'];
+      const isAdj = (v) => v && typeof v === 'object' && !Array.isArray(v) && !isTreeNode(v)
+        && Object.values(v).length > 0 && Object.values(v).every((item) => Array.isArray(item));
+      for (const key of prefer) {
+        if (isAdj(vars[key])) return vars[key];
+      }
+      for (const val of Object.values(vars)) {
+        if (isAdj(val)) return val;
+      }
+      return null;
+    }
+
+    function currentNodeVal(step) {
+      const data = step.data || step.payload || {};
+      if (data.nodeId !== undefined && data.nodeId !== null) return data.nodeId;
+      if (data.value !== undefined && data.value !== null && typeof data.value !== 'object') return data.value;
+      const vars = (step.state && step.state.variables) || {};
+      for (const key of ['root', 'node', 'curr', 'current', 'u', 'v']) {
+        const val = vars[key];
+        if (isTreeNode(val)) return treeNodeVal(val);
+        if (val !== undefined && val !== null && typeof val !== 'object') return val;
+      }
+      return undefined;
+    }
+
+    function collectVisited(idx) {
+      const seen = [];
+      const add = (v) => {
+        if (v === undefined || v === null) return;
+        const s = String(v);
+        if (!seen.includes(s)) seen.push(s);
+      };
+      for (let i = 0; i <= idx; i++) {
+        const s = visSteps[i];
+        if (!s) continue;
+        add(currentNodeVal(s));
+        const vis = s.state && s.state.dataStructure && s.state.dataStructure.visited;
+        if (Array.isArray(vis)) vis.forEach(add);
+      }
+      return seen;
+    }
+
+    function layoutBinaryTree(root) {
+      const nodes = [];
+      const edges = [];
+      function depthOf(n) {
+        if (!isTreeNode(n)) return 0;
+        return 1 + Math.max(depthOf(n.left), depthOf(n.right));
+      }
+      const depth = Math.max(1, Math.min(depthOf(root), 6));
+      const width = Math.max(640, Math.min(1100, (2 ** Math.min(depth, 5)) * 72));
+      const height = Math.max(300, depth * 92 + 50);
+      let nextId = 0;
+      function walk(n, level, xMin, xMax, parentId, side) {
+        const x = (xMin + xMax) / 2;
+        const y = 42 + level * 92;
+        if (!isTreeNode(n)) {
+          if (parentId == null) return;
+          const id = nextId++;
+          nodes.push({ id, val: 'None', x, y, nullNode: true });
+          edges.push({ from: parentId, to: id, side, nullEdge: true });
+          return;
+        }
+        const id = nextId++;
+        nodes.push({ id, val: treeNodeVal(n), x, y, nullNode: false });
+        if (parentId != null) edges.push({ from: parentId, to: id, side });
+        const hasLeft = n.left !== undefined;
+        const hasRight = n.right !== undefined;
+        if (hasLeft) walk(n.left, level + 1, xMin, x, id, 'L');
+        if (hasRight) walk(n.right, level + 1, x, xMax, id, 'R');
+      }
+      walk(root, 0, 36, width - 36, null, null);
+      return { nodes, edges, width, height };
+    }
+
+    function layoutGraph(adj) {
+      const keys = Object.keys(adj || {});
+      const n = Math.max(keys.length, 1);
+      const width = 720;
+      const height = 420;
+      const cx = width / 2;
+      const cy = height / 2;
+      const radius = Math.min(160, 50 + n * 16);
+      const nodes = keys.map((key, i) => {
+        const angle = ((Math.PI * 2 * i) / n) - Math.PI / 2;
+        return { id: key, val: key, x: cx + radius * Math.cos(angle), y: cy + radius * Math.sin(angle) };
+      });
+      const byId = {};
+      nodes.forEach((node) => { byId[String(node.id)] = node; });
+      const edges = [];
+      keys.forEach((key) => {
+        (adj[key] || []).forEach((nb) => {
+          const to = String(nb);
+          if (byId[to]) edges.push({ from: key, to });
+        });
+      });
+      return { nodes, edges, width, height, byId };
+    }
+
+    function renderGraphStructure(step, type) {
+      const svg = document.getElementById('vis-graph-svg');
+      if (!svg) return;
+
+      const visited = collectVisited(typeof visCurrentIndex === 'number' ? visCurrentIndex : 0);
+      const current = currentNodeVal(step);
+      const currentStr = current === undefined || current === null ? null : String(current);
+
+      if (type === 'linked-list') {
+        const values = (step.state && step.state.dataStructure && step.state.dataStructure.values) || [1, 2, 3, 4, 5];
+        const startX = 50;
+        const spacing = 110;
+        const y = 200;
+        const width = Math.max(720, startX * 2 + values.length * spacing);
+        svg.setAttribute('viewBox', `0 0 ${width} 420`);
+        let svgContent = '';
+        values.forEach((v, i) => {
+          const x = startX + i * spacing;
+          const label = typeof v === 'object' ? treeNodeVal(v) : v;
+          const isVisited = visited.includes(String(label));
+          const isCurrent = currentStr !== null && String(label) === currentStr;
+          svgContent += `
+            <circle cx="${x}" cy="${y}" r="28" class="vis-node-circle ${isCurrent ? 'visiting' : (isVisited ? 'visited' : '')}" />
+            <text x="${x}" y="${y}" class="vis-node-text">${escapeHtml(label)}</text>
+          `;
+          if (i < values.length - 1) {
+            const nextX = startX + (i + 1) * spacing - 30;
+            svgContent += `
+              <line x1="${x + 28}" y1="${y}" x2="${nextX}" y2="${y}" class="vis-edge-line ${isCurrent ? 'active' : ''}" />
+              <polygon points="${nextX},${y - 6} ${nextX + 10},${y} ${nextX},${y + 6}" fill="${isCurrent ? '#00ff66' : '#38bdf8'}" />
+            `;
+          }
+        });
+        svg.innerHTML = svgContent;
+        return;
+      }
+
+      if (type === 'graph') {
+        const adj = findGraphAdj(step);
+        if (adj) {
+          const layout = layoutGraph(adj);
+          svg.setAttribute('viewBox', `0 0 ${layout.width} ${layout.height}`);
+          let svgContent = '';
+          layout.edges.forEach((e) => {
+            const a = layout.byId[String(e.from)];
+            const b = layout.byId[String(e.to)];
+            if (!a || !b) return;
+            const active = currentStr !== null && (String(a.val) === currentStr || String(b.val) === currentStr);
+            svgContent += `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" class="vis-edge-line ${active ? 'active' : ''}" />`;
+          });
+          layout.nodes.forEach((n) => {
+            const isVisited = visited.includes(String(n.val));
+            const isCurrent = currentStr !== null && String(n.val) === currentStr;
+            svgContent += `
+              <circle cx="${n.x}" cy="${n.y}" r="26" class="vis-node-circle ${isCurrent ? 'visiting' : (isVisited ? 'visited' : '')}" />
+              <text x="${n.x}" y="${n.y}" class="vis-node-text">${escapeHtml(n.val)}</text>
+            `;
+          });
+          svg.innerHTML = svgContent;
+          return;
+        }
+      }
+
+      const root = findTreeRoot(step);
+      if (root) {
+        const layout = layoutBinaryTree(root);
+        svg.setAttribute('viewBox', `0 0 ${layout.width} ${layout.height}`);
+        const byId = {};
+        layout.nodes.forEach((n) => { byId[n.id] = n; });
+        let svgContent = '';
+        layout.edges.forEach((e) => {
+          const a = byId[e.from];
+          const b = byId[e.to];
+          if (!a || !b) return;
+          const active = currentStr !== null && String(a.val) === currentStr;
+          svgContent += `<line x1="${a.x}" y1="${a.y + 26}" x2="${b.x}" y2="${b.y - 26}" class="vis-edge-line ${active && !e.nullEdge ? 'active' : ''}" />`;
+          if (e.side) {
+            svgContent += `<text x="${(a.x + b.x) / 2}" y="${(a.y + b.y) / 2 - 6}" class="vis-edge-label">${e.side}</text>`;
+          }
+        });
+        layout.nodes.forEach((n) => {
+          if (n.nullNode) {
+            svgContent += `
+              <circle cx="${n.x}" cy="${n.y}" r="16" class="vis-node-circle null-node" />
+              <text x="${n.x}" y="${n.y}" class="vis-null-text">∅</text>
+            `;
+            return;
+          }
+          const isVisited = visited.includes(String(n.val));
+          const isCurrent = currentStr !== null && String(n.val) === currentStr;
+          svgContent += `
+            <circle cx="${n.x}" cy="${n.y}" r="26" class="vis-node-circle ${isCurrent ? 'visiting' : (isVisited ? 'visited' : '')}" />
+            <text x="${n.x}" y="${n.y}" class="vis-node-text">${escapeHtml(n.val)}</text>
+          `;
+        });
+        svg.innerHTML = svgContent;
+        return;
+      }
+
+      const values = (step.state && step.state.dataStructure && step.state.dataStructure.values) || [];
+      svg.setAttribute('viewBox', '0 0 720 420');
+      svg.innerHTML = `<text x="360" y="210" class="vis-edge-label" style="font-size:16px">Waiting for a tree or graph to appear in memory…</text>
+        ${values.length ? `<text x="360" y="240" class="vis-null-text">${escapeHtml(values.join(', '))}</text>` : ''}`;
+    }
+
+    // --- RENDERER: EXECUTION TRACE VARIABLES ---
+    function renderTraceVariables(step) {
+      const grid = document.getElementById('vis-variables-grid');
+      if (!grid) return;
+
+      const vars = (step.state && step.state.variables) || {};
+      const entries = Object.entries(vars).filter(([name]) => !name.startsWith('_'));
+
+      if (entries.length === 0) {
+        grid.innerHTML = '<span style="font-size: 12px; color: var(--text-secondary);">(No variables active yet)</span>';
+        return;
+      }
+
+      grid.innerHTML = entries.map(([name, val]) => {
+        let shown;
+        if (isTreeNode(val)) shown = `Tree(${treeNodeVal(val)})`;
+        else if (val && typeof val === 'object') shown = JSON.stringify(val);
+        else shown = String(val);
+        if (shown.length > 80) shown = shown.slice(0, 77) + '...';
+        return `
+        <div class="vis-var-row">
+          <span class="vis-var-name">${escapeHtml(name)}</span>
+          <span class="vis-var-val">${escapeHtml(shown)}</span>
+        </div>`;
+      }).join('');
+    }
+
+    // Lightweight Confetti Particle Engine (< 30 particles)
+    function triggerConfettiBurst() {
+      const canvas = document.getElementById('vis-confetti-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      canvas.width = canvas.parentElement ? canvas.parentElement.offsetWidth : 600;
+      canvas.height = canvas.parentElement ? canvas.parentElement.offsetHeight : 300;
+
+      const colors = ['#00ff66', '#38bdf8', '#fbbf24', '#f43f5e', '#a855f7'];
+      const particles = [];
+      const PARTICLE_COUNT = 28;
+
+      for (let i = 0; i < PARTICLE_COUNT; i++) {
+        particles.push({
+          x: canvas.width / 2 + (Math.random() - 0.5) * 80,
+          y: canvas.height / 2 + (Math.random() - 0.5) * 30,
+          vx: (Math.random() - 0.5) * 8,
+          vy: -Math.random() * 6 - 3,
+          size: Math.random() * 6 + 4,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          rotation: Math.random() * 360,
+          rotSpeed: (Math.random() - 0.5) * 10,
+          life: 1.0
+        });
+      }
+
+      let animId;
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        let alive = 0;
+
+        for (const p of particles) {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.22; // gravity
+          p.rotation += p.rotSpeed;
+          p.life -= 0.015;
+
+          if (p.life > 0) {
+            alive++;
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate((p.rotation * Math.PI) / 180);
+            ctx.fillStyle = p.color;
+            ctx.globalAlpha = Math.max(0, p.life);
+            ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.65);
+            ctx.restore();
+          }
+        }
+
+        if (alive > 0) {
+          animId = requestAnimationFrame(animate);
+        } else {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          cancelAnimationFrame(animId);
+        }
+      }
+
+      animate();
+    }
+
+    // Keyboard Shortcuts for Theater
+    document.addEventListener('keydown', (e) => {
+      const theater = document.getElementById('visualizer-theater');
+      if (!theater) return;
+
+      if (e.key === 'Escape') {
+        closeVisualizer();
+      } else if (e.key === ' ' || e.code === 'Space') {
+        e.preventDefault();
+        visualizerTogglePlay();
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        visualizerStep(1);
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        visualizerStep(-1);
+      } else if (e.key === 'Home') {
+        e.preventDefault();
+        visualizerRestart();
+      }
+    });
+
+    // Client Fallback if Server Unreachable — walk the student's own lines
+    function runClientFallbackVisualizer(code) {
+      const theater = document.getElementById('visualizer-theater');
+      if (!theater) return;
+      populateVisualizerCode(code);
+      theater.style.display = 'flex';
+      const lines = String(code || '').split('\n');
+      const empty = { dataStructure: { type: 'trace', values: [], visited: [] }, activeIndices: [], variables: {}, callStack: [], loop: null };
+      visSteps = lines.map((line, i) => {
+        const trimmed = line.trim();
+        let caption = 'Looking at this line.';
+        if (/function\s|=>/.test(trimmed)) caption = 'This function is about to run.';
+        else if (/^\s*if\b/.test(trimmed)) caption = 'Checking this condition.';
+        else if (/^\s*(for|while)\b/.test(trimmed)) caption = 'Starting this loop.';
+        else if (/return\b/.test(trimmed)) caption = 'About to return a value.';
+        else if (!trimmed || trimmed.startsWith('//')) caption = 'Skipping a blank or comment line.';
+        return {
+          stepNumber: i,
+          type: /return\b/.test(trimmed) ? 'return' : (/^\s*if\b/.test(trimmed) ? 'branch' : 'assign'),
+          line: i + 1,
+          caption,
+          state: empty
+        };
+      }).filter(s => s.caption !== 'Skipping a blank or comment line.');
+      if (visSteps.length === 0) {
+        visSteps = [{ stepNumber: 0, type: 'call', line: 1, caption: 'Could not reach the story engine. Showing your code only.', state: empty }];
+      }
+      visCurrentIndex = 0;
+      visDataStructure = 'trace';
+      visIsCorrect = false;
+      showVisualizerBanner('warning', 'Story engine is offline — playing a simple line walk instead.');
+      visualizerPause();
+      renderVisualizerStep(0, { speak: false });
+      prefetchVisualizerVoiceAhead(0);
+      visualizerPlay();
+    }
+
+    async function bootVisualizer(payload) {
+      const userCode = (payload && payload.code) || '';
+      const theater = document.getElementById('visualizer-theater');
+      if (theater) theater.style.display = 'flex';
+      populateVisualizerCode(userCode);
+
+      const titleEl = document.getElementById('vis-problem-title');
+      if (titleEl) titleEl.textContent = (payload && payload.problemTitle) || 'Story Visualizer';
+
+      if (!userCode.trim()) {
+        showVisualizerBanner('warning', 'Write or paste some code in the editor first.');
+        const speechEl = document.getElementById('vis-caption-text');
+        if (speechEl) speechEl.innerText = 'I need some code before I can tell the story.';
+        return;
+      }
+
+      const speechEl = document.getElementById('vis-caption-text');
+      if (speechEl) speechEl.innerText = 'Crafting the story of your code...';
+      clearVisualizerBanner();
+
+      try {
+        const response = await fetch('/api/visualize', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            code: userCode,
+            language: (payload && payload.language) || 'javascript',
+            problemTitle: (payload && payload.problemTitle) || '',
+            problemType: (payload && payload.problemType) || '',
+            testCases: (payload && payload.testCases) || []
+          })
+        });
+        const raw = await response.text();
+        let data;
+        try { data = JSON.parse(raw); } catch (_) {
+          throw new Error(raw.slice(0, 120) || 'Visualizer returned a non-JSON response');
+        }
+
+        populateVisualizerCode(userCode);
+
+        if (!data.success && (data.errorType === 'syntax' || !data.steps || !data.steps.length)) {
+          visSteps = [{
+            stepNumber: 0,
+            type: 'error',
+            line: data.line || 1,
+            caption: data.friendlyCaption || data.error || `There's a small typo somewhere — check line ${data.line || 1}.`,
+            state: { variables: {}, dataStructure: { type: 'trace', values: [], visited: [] }, activeIndices: [], callStack: [], loop: null }
+          }];
+          visCurrentIndex = 0;
+          visDataStructure = 'trace';
+          visIsCorrect = false;
+          showVisualizerBanner('error', visSteps[0].caption);
+          visualizerPause();
+          renderVisualizerStep(0);
+          return;
+        }
+
+        if (data.steps && data.steps.length > 0) {
+          visSteps = data.steps;
+          visCurrentIndex = 0;
+          visDataStructure = data.dsType || 'trace';
+          visIsCorrect = Boolean(data.isCorrect);
+          const dsBadge = document.getElementById('vis-ds-badge');
+          if (dsBadge) dsBadge.innerText = String(visDataStructure).replace('-', ' ').toUpperCase();
+          if (data.runtimeError) showVisualizerBanner('warning', data.runtimeError);
+          else if (data.isInfiniteLoop) showVisualizerBanner('warning', "This looks like it might be looping forever — want to double check the loop's condition?");
+          else if (visIsCorrect) showVisualizerBanner('success', "Nice work — that's correct! 🎉");
+          else clearVisualizerBanner();
+          visualizerPause();
+          renderVisualizerStep(0, { speak: false });
+          prefetchVisualizerVoiceAhead(0);
+          visualizerPlay();
+        } else {
+          showVisualizerBanner('warning', 'I could not turn this into steps. Check the function and try again.');
+          if (speechEl) speechEl.innerText = 'Nothing to play yet — the story came back empty.';
+        }
+      } catch (err) {
+        console.warn('Visualizer boot failed:', err);
+        runClientFallbackVisualizer(userCode);
+      }
+    }
+
+    applySavedVisualizerTheme();
+    applySavedVisualizerSpeed();
+    applySavedVisualizerVoiceLang();
+    syncVisualizerVoiceButton();
+    syncVisualizerTransport();
+    if (window.speechSynthesis) {
+      window.speechSynthesis.getVoices();
+      window.speechSynthesis.onvoiceschanged = function () {
+        window.speechSynthesis.getVoices();
+      };
+    }
+    document.addEventListener('pointerdown', unlockVisualizerAudio, true);
+
+    (function start() {
+      let payload = null;
+      try { payload = JSON.parse(localStorage.getItem('hieroVisualizePayload') || sessionStorage.getItem('hieroVisualizePayload') || 'null'); } catch (_) {}
+      const demo = new URLSearchParams(window.location.search).get('demo');
+      if (demo === 'tree') {
+        payload = {
+          code: `class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+def max_depth(root):
+    if root is None:
+        return 0
+    left = max_depth(root.left)
+    right = max_depth(root.right)
+    return 1 + (left if left > right else right)
+
+root = TreeNode(3, TreeNode(9), TreeNode(20, TreeNode(15), TreeNode(7)))
+print(max_depth(root))
+`,
+          language: 'python',
+          problemTitle: 'Max Depth of Binary Tree'
+        };
+      } else if (demo === 'mergesort' || demo === 'merge-sort') {
+        payload = {
+          code: `def merge(left, right):
+    merged = []
+    i = 0
+    j = 0
+    while i < len(left) and j < len(right):
+        if left[i] <= right[j]:
+            merged.append(left[i])
+            i += 1
+        else:
+            merged.append(right[j])
+            j += 1
+    while i < len(left):
+        merged.append(left[i])
+        i += 1
+    while j < len(right):
+        merged.append(right[j])
+        j += 1
+    return merged
+
+def merge_sort(nums):
+    if nums is None:
+        return []
+    if len(nums) <= 1:
+        return list(nums)
+    mid = len(nums) // 2
+    left = merge_sort(nums[:mid])
+    right = merge_sort(nums[mid:])
+    return merge(left, right)
+
+print(merge_sort([38, 27, 43, 3, 9, 82, 10, 19, 50, 1, 62, 14, 7, 91, 4, 25]))
+`,
+          language: 'python',
+          problemTitle: 'Merge Sort a Large Array',
+          testCases: [{
+            case: 1,
+            name: '16-element visualization array',
+            input: '[38, 27, 43, 3, 9, 82, 10, 19, 50, 1, 62, 14, 7, 91, 4, 25]',
+            testCall: 'merge_sort([38, 27, 43, 3, 9, 82, 10, 19, 50, 1, 62, 14, 7, 91, 4, 25])',
+            expectedOutput: '[1, 3, 4, 7, 9, 10, 14, 19, 25, 27, 38, 43, 50, 62, 82, 91]'
+          }]
+        };
+      } else if (demo === 'graph') {
+        payload = {
+          code: `graph = {
+    "A": ["B", "C"],
+    "B": ["A", "D"],
+    "C": ["A", "E"],
+    "D": ["B"],
+    "E": ["C"]
+}
+visited = []
+
+def dfs(node):
+    visited.append(node)
+    for nxt in graph[node]:
+        if nxt not in visited:
+            dfs(nxt)
+
+dfs("A")
+print(visited)
+`,
+          language: 'python',
+          problemTitle: 'DFS on a Graph'
+        };
+      } else if ((!payload || !payload.code) && (demo === 'truthy' || demo === 'evaluate_truthy')) {
+        payload = {
+          code: `def evaluate_truthy(val_list):
+    truthy = sum(1 for x in val_list if bool(x))
+    return {"truthy_count": truthy, "falsy_count": len(val_list) - truthy}`,
+          language: 'python',
+          problemTitle: 'Count Truthy and Falsy Elements',
+          problemType: 'easy',
+          testCases: [{
+            case: 1,
+            name: 'Mixed Values Test',
+            input: "[0, 'Python', [], {}, 42, True]",
+            testCall: "evaluate_truthy([0, 'Python', [], {}, 42, True])",
+            expectedOutput: "{'truthy_count': 3, 'falsy_count': 3}"
+          }]
+        };
+      }
+      if (!payload || !payload.code) {
+        const speechEl = document.getElementById('vis-caption-text');
+        if (speechEl) speechEl.innerText = 'Open this from Visualize My Code on the solve page.';
+        showVisualizerBanner('warning', 'No code was sent. Go back to the editor and click Visualize My Code.');
+        return;
+      }
+      bootVisualizer(payload);
+    })();
+
+  </script>
+</body>
+</html>

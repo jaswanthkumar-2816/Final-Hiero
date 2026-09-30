@@ -5659,8 +5659,21 @@
           setTimeout(() => {
             overlay.remove();
 
-            // Redirect to dedicated Resume Review & Audit page
-            window.location.href = 'resume-review.html';
+            // Show results selection section (Download PDF, Microsoft Word, Live Preview)
+            const resultsSection = document.getElementById('resultsSection');
+            if (resultsSection) {
+              resultsSection.style.display = 'block';
+              resultsSection.scrollIntoView({ behavior: 'smooth' });
+            }
+
+            // Hide main form layout
+            const mainLayout = document.querySelector('.main-layout');
+            const bottomActions = document.querySelector('.bottom-actions');
+            const stepIndicator = document.getElementById('formStepIndicator');
+
+            if (mainLayout) mainLayout.style.display = 'none';
+            if (bottomActions) bottomActions.style.display = 'none';
+            if (stepIndicator) stepIndicator.style.display = 'none';
           }, 500);
         }, 1200);
 

@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hiero Eval | Round</title>
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="theme.css">
+  <script src="theme.js"></script>
+  <style>
+    :root { --primary:#04ab07; --primary-glow:rgba(4,171,7,.35); --font-sans:'Inter',sans-serif; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    html, body { height:100%; }
+    body.eval-page,
+    body.eval-page h1,
+    body.eval-page h2,
+    body.eval-page p,
+    body.eval-page span,
+    body.eval-page a,
+    body.eval-page button {
+      font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif !important;
+      -webkit-font-smoothing:antialiased;
+    }
+    body.eval-page {
+      min-height:100vh;
+      color:#102016;
+      background-color:#eef8f1;
+      background-image:url('hiero-eval-bg.jpg');
+      background-size:cover;
+      background-position:center;
+      background-repeat:no-repeat;
+      background-attachment:fixed;
+      font-size:16px;
+    }
+    body.eval-page::before {
+      content:'';
+      position:fixed;
+      inset:0;
+      z-index:0;
+      pointer-events:none;
+      background:rgba(255,255,255,.28);
+    }
+    html[data-theme="dark"] body.eval-page,
+    body.eval-page:not(.light-mode) { color:#f4faf6; }
+    html[data-theme="dark"] body.eval-page::before,
+    body.eval-page:not(.light-mode)::before { background:rgba(4,10,6,.58); }
+    .wrap { position:relative; z-index:1; max-width:1180px; margin:0 auto; padding:28px 40px 48px; min-height:100vh; display:flex; flex-direction:column; }
+    .nav { display:flex; justify-content:space-between; align-items:center; margin-bottom:22px; gap:12px; }
+    .back, .theme-toggle-btn { color:inherit; text-decoration:none; font-weight:800; font-size:13px; border:1px solid rgba(11,61,28,.16); border-radius:99px; padding:8px 14px; background:rgba(255,255,255,.55); cursor:pointer; }
+    html[data-theme="dark"] .back,
+    html[data-theme="dark"] .theme-toggle-btn,
+    body.eval-page:not(.light-mode) .back,
+    body.eval-page:not(.light-mode) .theme-toggle-btn {
+      color:#fff; border-color:rgba(255,255,255,.16); background:rgba(8,16,10,.45);
+    }
+    .badge { display:inline-flex; gap:8px; align-items:center; color:#047857; font-weight:800; font-size:12px; letter-spacing:.4px; text-transform:uppercase; }
+    html[data-theme="dark"] .badge, body.eval-page:not(.light-mode) .badge { color:#86efac; }
+    h1 { font-size:34px; letter-spacing:-.3px; margin:10px 0 10px; color:#102016; }
+    html[data-theme="dark"] h1, body.eval-page:not(.light-mode) h1 { color:#ffffff; }
+    .sub { color:#24362c; margin-bottom:20px; line-height:1.55; font-size:16px; font-weight:500; }
+    html[data-theme="dark"] .sub, body.eval-page:not(.light-mode) .sub { color:#e2e8f0; }
+    .btn { display:inline-flex; align-items:center; gap:8px; border:0; border-radius:16px; padding:14px 22px; font-weight:800; cursor:pointer; font-size:15px; }
+    .btn-main { background:var(--primary); color:#000; }
+    .btn-ghost { background:rgba(255,255,255,.55); color:#0b3d1c; border:1px solid rgba(11,61,28,.14); }
+    html[data-theme="dark"] .btn-ghost, body.eval-page:not(.light-mode) .btn-ghost { background:rgba(255,255,255,.06); color:#fff; border-color:rgba(255,255,255,.12); }
+    .timer { font-weight:800; color:#047857; }
+    html[data-theme="dark"] .timer, body.eval-page:not(.light-mode) .timer { color:#86efac; }
+    .q-card, .result-box {
+      background:#ffffff;
+      color:#102016;
+      border:1px solid rgba(11,61,28,.1);
+      border-radius:28px;
+      padding:40px 36px;
+      min-height:420px;
+      box-shadow:0 10px 28px rgba(16,80,36,.08);
+    }
+    html[data-theme="dark"] .q-card,
+    html[data-theme="dark"] .result-box,
+    body.eval-page:not(.light-mode) .q-card,
+    body.eval-page:not(.light-mode) .result-box {
+      background:#121a14;
+      color:#f8fafc;
+      border-color:rgba(255,255,255,.1);
+    }
+    #q-text { color:inherit; }
+    .opt { display:block; width:100%; text-align:left; margin:10px 0; padding:16px 18px; border-radius:14px; border:1.5px solid #d7e3da; background:#f7fbf8; color:#102016; cursor:pointer; font-weight:600; font-size:16px; position:relative; z-index:2; pointer-events:auto; }
+    .opt:hover { border-color:#04ab07; }
+    .opt.selected,
+    html[data-theme="dark"] .opt.selected,
+    body.eval-page:not(.light-mode) .opt.selected {
+      border-color:#04ab07 !important;
+      background:#dcfce7 !important;
+      color:#14532d !important;
+      box-shadow:0 0 0 2px rgba(4,171,7,.25);
+    }
+    html[data-theme="dark"] .opt,
+    body.eval-page:not(.light-mode) .opt { background:#1a2420; color:#fff; border-color:rgba(255,255,255,.16); }
+    html[data-theme="dark"] .opt.selected,
+    body.eval-page:not(.light-mode) .opt.selected { background:#14532d !important; color:#ecfdf5 !important; }
+    textarea { width:100%; min-height:320px; background:rgba(255,255,255,.8); color:#0b3d1c; border:1px solid rgba(11,61,28,.12); border-radius:16px; padding:16px; font-family:ui-monospace,monospace; font-size:14px; }
+    html[data-theme="dark"] textarea, body.eval-page:not(.light-mode) textarea { background:#0b0f0b; color:#d1fae5; border-color:rgba(255,255,255,.1); }
+    .result-box { text-align:center; padding:56px 32px; }
+    .result-box.pass { border-color:var(--primary); }
+    .result-box.fail { border-color:#d97706; }
+    .score { font-size:64px; font-weight:800; }
+    #cert-wrap { margin-top:28px; }
+    #cert-wrap .cert-label { font-weight:800; font-size:13px; letter-spacing:.3px; text-transform:uppercase; margin:0 0 12px 6px; opacity:.7; }
+    #cert-canvas { width:100%; max-width:1024px; height:auto; display:block; margin:0 auto; border-radius:8px; background:#fff; }
+    #cert-actions { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:16px; }
+    .hidden { display:none !important; }
+    .consent-card { max-width:720px; margin:40px auto 0; }
+    .consent-card label { display:flex; gap:10px; align-items:flex-start; font-size:14px; line-height:1.5; margin:18px 0; }
+    .proctor-pip {
+      position:fixed; right:20px; top:76px; z-index:20;
+      width:168px; border-radius:16px; overflow:hidden;
+      border:1px solid rgba(4,171,7,.4); background:#000; box-shadow:0 10px 30px rgba(0,0,0,.35);
+    }
+    .proctor-pip video { display:block; width:100%; height:118px; object-fit:cover; transform:scaleX(-1); }
+    .proctor-pip .pip-label { font-size:11px; font-weight:800; padding:6px 8px; color:#86efac; background:rgba(0,0,0,.7); }
+    .proctor-toast {
+      position:fixed; top:20px; left:50%; transform:translateX(-50%);
+      z-index:30; min-width:280px; max-width:520px;
+      background:#111; color:#fff; border:1px solid rgba(251,191,36,.5);
+      border-radius:14px; padding:12px 16px; font-weight:700; font-size:14px;
+      box-shadow:0 10px 30px rgba(0,0,0,.35); display:none;
+    }
+    .proctor-toast.show { display:block; }
+    .proctor-toast.stern { border-color:#ef4444; background:#1a0b0b; }
+    @media (max-width:800px) { .wrap { padding:22px 18px 36px; } h1 { font-size:28px; } .proctor-pip { width:120px; right:12px; bottom:12px; } }
+  </style>
+</head>
+<body class="eval-page">
+  <div class="wrap">
+    <div class="nav">
+      <a class="back" id="back-link" href="eval.html"><i class="fa-solid fa-arrow-left"></i> Back</a>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="timer" id="timer"></div>
+        <button class="theme-toggle-btn" id="theme-switch" onclick="window.toggleTheme()" title="Switch Theme"><i class="fa-solid fa-moon"></i></button>
+      </div>
+    </div>
+
+    <section id="consent-view" class="hidden">
+      <div class="q-card consent-card">
+        <div class="badge">Camera monitoring · consent required</div>
+        <h1 style="font-size:30px;">This eval uses your camera</h1>
+        <p class="sub">Hiero Eval checks that you stay on this page and that a face stays in frame. This is to protect the Verified badge, not to fail you on a glance.</p>
+        <p class="sub">We do <strong>not</strong> upload video. The camera stays on this device. We only store event logs (tab switch, face missing, suspected phone) for 30 days, then they can be deleted.</p>
+        <p class="sub">Warnings come first. A flagged session is marked for review — it is not an automatic fail.</p>
+        <label>
+          <input type="checkbox" id="consent-check">
+          <span>I understand this eval uses my camera to verify I am present and to prevent cheating. By continuing I agree to be monitored for this attempt.</span>
+        </label>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn btn-main" id="consent-start">Agree and start</button>
+          <button class="btn btn-ghost" id="consent-no-cam">Continue without camera</button>
+        </div>
+        <p class="sub" id="consent-error" style="margin-top:12px;"></p>
+      </div>
+    </section>
+
+    <section id="quiz-view" class="hidden">
+      <div class="badge">Quiz · timed · no pause</div>
+      <h1 id="quiz-title">Question</h1>
+      <p class="sub" id="score-hint"></p>
+      <p class="sub" id="quiz-sub"></p>
+      <div class="q-card">
+        <div id="q-text" style="font-size:22px;font-weight:800;margin-bottom:18px;line-height:1.35;"></div>
+        <div id="q-opts"></div>
+        <div style="margin-top:16px;display:flex;justify-content:flex-end;">
+          <button class="btn btn-main" id="next-q">Next</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="code-view" class="hidden">
+      <div class="badge">Coding · single function · hidden tests</div>
+      <h1 id="code-title">Coding question</h1>
+      <p class="sub" id="code-prompt"></p>
+      <textarea id="code-box"></textarea>
+      <div style="margin-top:12px;display:flex;gap:10px;">
+        <button class="btn btn-ghost" id="run-code">Run hidden tests</button>
+        <button class="btn btn-main" id="next-code">Submit this problem</button>
+      </div>
+      <p class="sub" id="code-result" style="margin-top:12px;"></p>
+    </section>
+
+    <section id="result-view" class="hidden">
+      <div class="result-box" id="result-box">
+        <div class="badge" id="result-badge"></div>
+        <div class="score" id="result-score"></div>
+        <h2 id="result-title" style="margin:8px 0 10px;"></h2>
+        <p class="sub" id="result-note"></p>
+        <div id="weak-wrap"></div>
+        <div style="margin-top:22px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+          <button class="btn btn-main hidden" id="add-resume-btn" type="button">Add this skill into your resume</button>
+          <a class="btn btn-main" id="result-cta" href="eval.html">Continue</a>
+          <a class="btn btn-ghost" href="result.html">See resume skills</a>
+        </div>
+      </div>
+      <div id="cert-wrap" class="hidden">
+        <div class="cert-label">Quiz completion certificate</div>
+        <canvas id="cert-canvas" width="2048" height="1448" aria-label="Hiero quiz completion certificate"></canvas>
+        <div id="cert-actions">
+          <button class="btn btn-main" id="download-cert-btn" type="button"><i class="fa-solid fa-download"></i> Download certificate</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="proctor-toast" id="proctor-toast"></div>
+  <div class="proctor-pip hidden" id="proctor-pip">
+    <video id="proctor-video" autoplay muted playsinline></video>
+    <div class="pip-label" id="pip-label">Camera · waiting</div>
+  </div>
+
+  <script src="eval-certificate.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/blazeface@0.1.0/dist/blazeface.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js"></script>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const saved = (() => { try { return JSON.parse(sessionStorage.getItem('hieroEvalRound') || 'null'); } catch (e) { return null; } })();
+    const skill = params.get('skill') || saved?.skill || 'Python';
+    const track = params.get('track') || saved?.track || 'beginner';
+    const userId = localStorage.getItem('userId') || localStorage.getItem('user_id') || saved?.userId || 'guest-user';
+    const landingHref = 'eval.html?skill=' + encodeURIComponent(skill) + '&track=' + encodeURIComponent(track);
+    document.getElementById('back-link').href = landingHref;
+
+    let status = saved?.status || null;
+    let chosenLevel = saved?.chosenLevel || 1;
+    let attempt = saved?.attempt || null;
+    let qIdx = saved?.qIdx || 0;
+    let answers = saved?.answers || [];
+    let codingSubs = saved?.codingSubs || [];
+    let cIdx = saved?.cIdx || 0;
+    let endsAt = saved?.endsAt || 0;
+    let timerId = null;
+    let openingNext = false;
+    let nextRoundTimer = null;
+    let proctorConsented = !!saved?.proctorConsented;
+    let cameraDenied = !!saved?.cameraDenied;
+    let warningCount = saved?.warningCount || 0;
+    let flaggedForReview = !!saved?.flaggedForReview;
+    let faceModel = null;
+    let phoneModel = null;
+    let mediaStream = null;
+    let faceMissingSince = 0;
+    let phoneSince = 0;
+    let hiddenSince = 0;
+    let faceTimer = null;
+    let phoneTimer = null;
+    let toastTimer = null;
+    let lastResult = null;
+    let lastCertificate = null;
+
+    function persist() {
+      try {
+        sessionStorage.setItem('hieroEvalRound', JSON.stringify({
+          skill, track, userId, status, chosenLevel, attempt, qIdx, answers, codingSubs, cIdx, endsAt,
+          proctorConsented, cameraDenied, warningCount, flaggedForReview
+        }));
+      } catch (e) {}
+    }
+
+    function show(id) {
+      ['consent-view','quiz-view','code-view','result-view'].forEach((x) => document.getElementById(x).classList.toggle('hidden', x !== id));
+    }
+
+    function showToast(msg, stern) {
+      const el = document.getElementById('proctor-toast');
+      el.textContent = msg;
+      el.className = 'proctor-toast show' + (stern ? ' stern' : '');
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => el.classList.remove('show'), 4000);
+    }
+
+    function sendProctor(payload) {
+      if (!attempt?.attemptId) return;
+      fetch('/api/eval/heartbeat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ attemptId: attempt.attemptId, ...payload })
+      }).catch(() => {});
+    }
+
+    function registerFlag(type, durationSec, note) {
+      warningCount += 1;
+      persist();
+      sendProctor({
+        event: type,
+        durationSec,
+        note,
+        warningCount,
+        flaggedForReview: warningCount >= 4,
+        consented: true
+      });
+      if (warningCount === 1) {
+        showToast(type === 'tab_switch' ? 'Please stay on this eval page.' : 'Please keep your face in frame.');
+      } else if (warningCount < 4) {
+        showToast('Stay in frame and on this page. This is being logged.', true);
+        flaggedForReview = true;
+      } else {
+        flaggedForReview = true;
+        persist();
+        showToast('Too many flags. This attempt will be submitted for review.', true);
+        setTimeout(() => {
+          if (attempt && !attempt._done) {
+            attempt._endedForProctor = true;
+            submitEval();
+          }
+        }, 800);
+      }
+    }
+
+    function setPip(text) {
+      const el = document.getElementById('pip-label');
+      if (el) el.textContent = text;
+    }
+
+    function withTimeout(promise, ms) {
+      return Promise.race([
+        promise,
+        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), ms))
+      ]);
+    }
+
+    async function startCamera() {
+      const pip = document.getElementById('proctor-pip');
+      const video = document.getElementById('proctor-video');
+      try {
+        mediaStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: 320, height: 240 }, audio: false });
+        video.srcObject = mediaStream;
+        pip.classList.remove('hidden');
+        cameraDenied = false;
+        sendProctor({ consented: true, cameraOn: true });
+        setPip('Camera · on');
+        loadProctorModels(video);
+      } catch (e) {
+        cameraDenied = true;
+        persist();
+        sendProctor({ consented: true, cameraDenied: true, cameraOn: false, event: 'camera_denied' });
+      }
+    }
+
+    async function loadProctorModels(video) {
+      setPip('Camera · on');
+      try {
+        if (window.blazeface) faceModel = await withTimeout(blazeface.load(), 12000);
+        if (faceModel) {
+          if (faceTimer) clearInterval(faceTimer);
+          faceTimer = setInterval(checkFace, 500);
+          setPip('Camera · face check on');
+        }
+      } catch (e) {
+        setPip('Camera · on');
+      }
+      try {
+        if (window.cocoSsd) phoneModel = await withTimeout(cocoSsd.load(), 15000);
+        if (phoneModel) {
+          if (phoneTimer) clearInterval(phoneTimer);
+          phoneTimer = setInterval(checkPhone, 3000);
+        }
+      } catch (e) {}
+    }
+
+    async function checkFace() {
+      const video = document.getElementById('proctor-video');
+      if (!faceModel || !video.videoWidth || attempt?._done) return;
+      try {
+        const faces = await faceModel.estimateFaces(video, false);
+        const present = Array.isArray(faces) && faces.length > 0;
+        if (present) {
+          faceMissingSince = 0;
+          setPip('Camera · face in frame');
+          return;
+        }
+        setPip('Camera · no face');
+        if (!faceMissingSince) faceMissingSince = Date.now();
+        const gone = (Date.now() - faceMissingSince) / 1000;
+        if (gone >= 15) {
+          flaggedForReview = true;
+          sendProctor({ event: 'face_missing', durationSec: gone, flaggedForReview: true, warningCount });
+          faceMissingSince = Date.now();
+          attempt._endedForProctor = true;
+          showToast('Face missing too long. Submitting this attempt for review.', true);
+          submitEval();
+        } else if (gone >= 5 && !checkFace._latched) {
+          checkFace._latched = true;
+          registerFlag('face_missing', gone, 'No face for 5+ seconds');
+          setTimeout(() => { checkFace._latched = false; }, 6000);
+        }
+      } catch (e) {}
+    }
+
+    async function checkPhone() {
+      const video = document.getElementById('proctor-video');
+      if (!phoneModel || !video.videoWidth || attempt?._done) return;
+      try {
+        const hits = await phoneModel.detect(video);
+        const phone = (hits || []).find((h) => h.class === 'cell phone' && h.score >= 0.55);
+        if (!phone) { phoneSince = 0; return; }
+        if (!phoneSince) phoneSince = Date.now();
+        const held = (Date.now() - phoneSince) / 1000;
+        if (held >= 5 && !checkPhone._latched) {
+          checkPhone._latched = true;
+          flaggedForReview = true;
+          registerFlag('phone', held, 'Possible phone in frame');
+          setTimeout(() => { checkPhone._latched = false; }, 8000);
+        }
+      } catch (e) {}
+    }
+
+    function stopProctor() {
+      if (faceTimer) clearInterval(faceTimer);
+      if (phoneTimer) clearInterval(phoneTimer);
+      if (mediaStream) mediaStream.getTracks().forEach((t) => t.stop());
+      mediaStream = null;
+      document.getElementById('proctor-pip').classList.add('hidden');
+    }
+
+    async function beginRound(useCamera) {
+      if (!document.getElementById('consent-check').checked) {
+        document.getElementById('consent-error').textContent = 'Tick the consent box to continue.';
+        return;
+      }
+      if (!attempt || !attempt.quiz || !attempt.quiz.length) {
+        document.getElementById('consent-error').textContent = 'Questions did not load. Go back and start again.';
+        return;
+      }
+      proctorConsented = true;
+      persist();
+      sendProctor({ consented: true, cameraDenied: !useCamera });
+      endsAt = Date.now() + (attempt.timeLimitSec || 300) * 1000;
+      persist();
+      if (timerId) clearInterval(timerId);
+      timerId = setInterval(tick, 1000);
+      tick();
+      show('quiz-view');
+      renderQuiz();
+      if (useCamera) startCamera();
+      else {
+        cameraDenied = true;
+        persist();
+        showToast('Continuing without camera. Tab switches are still logged.');
+      }
+    }
+
+    function tick() {
+      const left = Math.max(0, Math.floor((endsAt - Date.now()) / 1000));
+      const m = Math.floor(left / 60);
+      const s = String(left % 60).padStart(2, '0');
+      document.getElementById('timer').textContent = left ? `${m}:${s} left` : '';
+      if (!left && attempt && !attempt._done) submitEval();
+    }
+
+    function optionList(q) {
+      const raw = q && q.options;
+      if (Array.isArray(raw)) return raw;
+      if (raw && typeof raw === 'object') return Object.values(raw);
+      return [];
+    }
+
+    function selectAnswer(i) {
+      if (!Array.isArray(answers)) answers = [];
+      answers[qIdx] = Number(i);
+      persist();
+      renderQuiz();
+    }
+
+    function renderQuiz() {
+      const q = attempt && attempt.quiz && attempt.quiz[qIdx];
+      if (!q) return;
+      document.getElementById('quiz-title').textContent = `Question ${qIdx + 1} of ${attempt.quiz.length}`;
+      const hint = document.getElementById('score-hint');
+      if (attempt.level === 1) {
+        hint.textContent = 'Round 1: 3 quiz questions, equal marks. You need 3/3 to pass (70%). 2/3 is 67% and fails.';
+      } else if (attempt.level === 2) {
+        hint.textContent = 'Round 2: 5 quiz questions are 60% of the score. 1 coding question is 40%. Pass at 75%.';
+      } else {
+        hint.textContent = 'Round 3: 7 quiz questions are 60% of the score. 3 coding questions are 40%. Pass at 80%.';
+      }
+      document.getElementById('quiz-sub').textContent = q.subTopic ? `Topic · ${q.subTopic}` : '';
+      document.getElementById('q-text').textContent = q.question;
+      const box = document.getElementById('q-opts');
+      box.innerHTML = '';
+      const letters = ['A', 'B', 'C', 'D'];
+      optionList(q).forEach((opt, i) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'opt' + (Number(answers[qIdx]) === i ? ' selected' : '');
+        btn.dataset.index = String(i);
+        const text = typeof opt === 'string' ? opt : (opt && opt.text) || String(opt);
+        btn.textContent = `${letters[i] || i + 1}.  ${text}`;
+        box.appendChild(btn);
+      });
+      document.getElementById('next-q').textContent = qIdx === attempt.quiz.length - 1
+        ? ((attempt.coding || []).length ? 'Continue to coding' : 'Submit eval')
+        : 'Next question';
+    }
+
+    function renderCode() {
+      const c = attempt.coding[cIdx];
+      document.getElementById('code-title').textContent = `Coding ${cIdx + 1} of ${attempt.coding.length}`;
+      document.getElementById('code-prompt').textContent = c.prompt + ' · Function: ' + c.functionName;
+      const existing = codingSubs.find((s) => s.questionId === c.id);
+      document.getElementById('code-box').value = existing?.code || c.starterCode || '';
+      document.getElementById('code-result').textContent = existing ? `Last run: ${existing.passedTests}/${existing.totalTests} tests` : `${c.testCount || 0} hidden tests`;
+      document.getElementById('next-code').textContent = cIdx === attempt.coding.length - 1 ? 'Submit eval' : 'Next coding question';
+    }
+
+    async function startEval() {
+      if (status && status.canStart === false) {
+        alert(status.error || 'Could not start eval right now.');
+        return;
+      }
+      if (nextRoundTimer) { clearTimeout(nextRoundTimer); nextRoundTimer = null; }
+      const res = await fetch('/api/eval/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          skill,
+          level: chosenLevel,
+          challengeUp: chosenLevel > (status?.recommendedLevel || 1)
+        })
+      });
+      const json = await res.json();
+      if (!json.success) { alert(json.error || 'Could not start eval'); return; }
+      attempt = json;
+      answers = Array(json.quiz.length).fill(null);
+      codingSubs = [];
+      qIdx = 0;
+      cIdx = 0;
+      endsAt = Date.now() + json.timeLimitSec * 1000;
+      persist();
+      if (proctorConsented) {
+        if (timerId) clearInterval(timerId);
+        timerId = setInterval(tick, 1000);
+        tick();
+        show('quiz-view');
+        renderQuiz();
+      } else {
+        show('consent-view');
+      }
+    }
+
+    document.getElementById('q-opts').addEventListener('click', (e) => {
+      const btn = e.target.closest('.opt');
+      if (!btn) return;
+      e.preventDefault();
+      selectAnswer(btn.dataset.index);
+    });
+    document.getElementById('next-q').onclick = () => {
+      if (answers[qIdx] == null) { alert('Select an answer first.'); return; }
+      if (qIdx < attempt.quiz.length - 1) { qIdx += 1; persist(); renderQuiz(); }
+      else if (attempt.coding.length) { show('code-view'); renderCode(); }
+      else submitEval();
+    };
+    document.getElementById('run-code').onclick = async () => {
+      const c = attempt.coding[cIdx];
+      const code = document.getElementById('code-box').value;
+      const res = await fetch('/api/eval/run-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ attemptId: attempt.attemptId, questionId: c.id, code })
+      });
+      const json = await res.json();
+      const rec = { questionId: c.id, code, passedTests: json.passedTests || 0, totalTests: json.totalTests || 0 };
+      codingSubs = codingSubs.filter((s) => s.questionId !== c.id).concat([rec]);
+      persist();
+      document.getElementById('code-result').textContent = json.error || `${json.passedTests}/${json.totalTests} hidden tests passed`;
+    };
+    document.getElementById('next-code').onclick = () => {
+      const c = attempt.coding[cIdx];
+      const code = document.getElementById('code-box').value;
+      const rec = codingSubs.find((s) => s.questionId === c.id) || { questionId: c.id, code, passedTests: 0, totalTests: c.testCount || 0 };
+      rec.code = code;
+      codingSubs = codingSubs.filter((s) => s.questionId !== c.id).concat([rec]);
+      persist();
+      if (cIdx < attempt.coding.length - 1) { cIdx += 1; persist(); renderCode(); }
+      else submitEval();
+    };
+
+    async function submitEval() {
+      if (!attempt || attempt._done) return;
+      attempt._done = true;
+      persist();
+      clearInterval(timerId);
+      stopProctor();
+      const resolvedName = (window.HieroEvalCertificate && await HieroEvalCertificate.resolveUserName()) || '';
+      const res = await fetch('/api/eval/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          attemptId: attempt.attemptId,
+          answers,
+          codingSubmissions: codingSubs,
+          flaggedForReview,
+          endedForProctor: !!attempt._endedForProctor,
+          warningCount,
+          fullName: resolvedName,
+          candidateName: resolvedName
+        })
+      });
+      const json = await res.json();
+      show('result-view');
+      const box = document.getElementById('result-box');
+      box.className = 'result-box ' + (json.passed ? 'pass' : 'fail');
+      document.getElementById('result-badge').textContent = json.flaggedForReview
+        ? (json.passed ? `Verified — Level ${json.level} · flagged for review` : 'Unverified · flagged for review')
+        : (json.passed ? `Verified — Level ${json.level}` : 'Unverified · Improve & re-verify');
+      document.getElementById('result-score').textContent = (json.score || 0) + '%';
+      document.getElementById('result-title').textContent = json.passed ? 'This skill is now verified on your profile.' : 'You did not pass this time.';
+      document.getElementById('result-note').textContent = json.resumeNote || '';
+      const weak = json.weakSubTopics || [];
+      document.getElementById('weak-wrap').innerHTML = weak.length
+        ? `<p class="sub">Missed topics: ${weak.join(', ')}</p>`
+        : '';
+      const cta = document.getElementById('result-cta');
+      const addBtn = document.getElementById('add-resume-btn');
+      const nextLevel = json.passed ? (json.nextLevel || json.next?.level) : null;
+      lastResult = json;
+      cta.onclick = null;
+      addBtn.classList.add('hidden');
+      addBtn.disabled = false;
+      addBtn.textContent = 'Add this skill into your resume';
+      cta.className = 'btn btn-main';
+      if (json.passed && nextLevel) {
+        document.getElementById('result-title').textContent = `Level ${json.level} cleared. Download your certificate.`;
+        document.getElementById('result-note').textContent = `Verified — Level ${json.level} is on your profile. You can start Level ${nextLevel} when you are ready.`;
+        cta.removeAttribute('href');
+        cta.textContent = `Start Level ${nextLevel} now`;
+        cta.onclick = (e) => {
+          e.preventDefault();
+          openNextRound(nextLevel);
+        };
+      } else if (!json.passed && json.next?.href) {
+        cta.href = json.next.href;
+        cta.textContent = json.next.label;
+      } else {
+        cta.href = 'result.html';
+        cta.textContent = 'See verified badge';
+        if (json.passed) {
+          addBtn.classList.remove('hidden');
+          cta.className = 'btn btn-ghost';
+        }
+      }
+      if (json.passed) {
+        try { await showCertificate(json); } catch (e) { console.warn('certificate', e); }
+      } else {
+        lastCertificate = null;
+        document.getElementById('cert-wrap').classList.add('hidden');
+      }
+    }
+
+    async function showCertificate(json) {
+      const wrap = document.getElementById('cert-wrap');
+      const canvas = document.getElementById('cert-canvas');
+      if (!wrap || !canvas || !window.HieroEvalCertificate) return;
+      if (!json || !json.passed) {
+        wrap.classList.add('hidden');
+        lastCertificate = null;
+        return;
+      }
+      const fullName = json.candidateName || json.fullName || await HieroEvalCertificate.resolveUserName();
+      if (!fullName) {
+        wrap.classList.add('hidden');
+        lastCertificate = null;
+        return;
+      }
+      try { localStorage.setItem('userName', fullName); } catch (e) {}
+      lastCertificate = {
+        fullName,
+        candidateName: fullName,
+        skill: json.skillName || skill,
+        level: json.level,
+        levelName: json.levelName,
+        levelTagline: json.levelTagline,
+        questionsSolved: json.questionsSolved,
+        questionsTotal: json.questionsTotal,
+        quizCorrect: json.quizCorrect,
+        quizTotal: json.quizTotal,
+        certificateId: json.certificateId,
+        issuedAt: json.issuedAt,
+        score: json.score
+      };
+      try {
+        sessionStorage.setItem('hieroEvalCertificate', JSON.stringify(lastCertificate));
+      } catch (e) {}
+      wrap.classList.remove('hidden');
+      await HieroEvalCertificate.render(canvas, lastCertificate);
+    }
+
+    async function addSkillToResume() {
+      const btn = document.getElementById('add-resume-btn');
+      if (btn.disabled) return;
+      btn.disabled = true;
+      btn.textContent = 'Adding to your resume…';
+      let localResume = {};
+      try { localResume = JSON.parse(localStorage.getItem('resumeData') || '{}'); } catch (e) {}
+      try {
+        const auto = JSON.parse(localStorage.getItem('hiero_resume_autosave') || '{}');
+        if (auto && (auto.personalInfo || auto.technicalSkills || auto.skills)) {
+          localResume = {
+            ...auto,
+            ...localResume,
+            personalInfo: { ...(auto.personalInfo || {}), ...(localResume.personalInfo || {}) },
+            technicalSkills: localResume.technicalSkills || auto.technicalSkills,
+            skills: localResume.skills || auto.skills
+          };
+        }
+      } catch (e) {}
+      try {
+        const res = await fetch('/api/eval/add-to-resume', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId,
+            skill,
+            skillName: skill,
+            skillId: attempt?.skillId,
+            attemptId: attempt?.attemptId,
+            level: lastResult?.level || chosenLevel,
+            score: lastResult?.score || 0,
+            fullName: lastCertificate?.fullName || localStorage.getItem('userName') || '',
+            resumeData: localResume
+          })
+        });
+        const json = await res.json();
+        if (!res.ok || !json.success) throw new Error(json.error || 'Could not add this skill to your resume.');
+        if (json.data) {
+          try {
+            localStorage.setItem('resumeData', JSON.stringify(json.data));
+            const auto = JSON.parse(localStorage.getItem('hiero_resume_autosave') || '{}');
+            localStorage.setItem('hiero_resume_autosave', JSON.stringify({
+              ...auto,
+              ...json.data,
+              _savedAt: new Date().toISOString()
+            }));
+          } catch (e) {}
+        }
+        try {
+          sessionStorage.setItem('hieroEvalCongrats', JSON.stringify({
+            skill: json.skill || skill,
+            level: json.level,
+            score: json.score,
+            badge: json.badge,
+            created: !!json.created,
+            data: json.data,
+            certificate: lastCertificate
+          }));
+        } catch (e) {}
+        location.href = 'eval-congrats.html?skill=' + encodeURIComponent(json.skill || skill) + '&level=' + encodeURIComponent(json.level || '');
+      } catch (err) {
+        btn.disabled = false;
+        btn.textContent = 'Add this skill into your resume';
+        alert(err.message || 'Could not add this skill to your resume.');
+      }
+    }
+
+    async function openNextRound(level) {
+      if (openingNext) return;
+      openingNext = true;
+      if (nextRoundTimer) { clearTimeout(nextRoundTimer); nextRoundTimer = null; }
+      chosenLevel = level;
+      if (status) {
+        status.canStart = true;
+        status.recommendedLevel = Math.max(status.recommendedLevel || 1, level);
+      }
+      try {
+        await startEval();
+      } finally {
+        openingNext = false;
+      }
+    }
+
+    document.addEventListener('visibilitychange', () => {
+      if (!attempt?.attemptId || attempt._done || !proctorConsented) return;
+      if (document.hidden) {
+        hiddenSince = Date.now();
+      } else if (hiddenSince) {
+        const gone = (Date.now() - hiddenSince) / 1000;
+        hiddenSince = 0;
+        if (gone >= 2) {
+          sendProctor({ tabSwitch: true });
+          registerFlag('tab_switch', gone, 'Left the eval tab');
+        }
+      }
+    });
+    window.addEventListener('blur', () => {
+      if (!attempt?.attemptId || attempt._done || !proctorConsented || document.hidden) return;
+      if (!hiddenSince) hiddenSince = Date.now();
+    });
+    window.addEventListener('focus', () => {
+      if (!hiddenSince || !proctorConsented || attempt?._done) return;
+      const gone = (Date.now() - hiddenSince) / 1000;
+      hiddenSince = 0;
+      if (gone >= 2) {
+        sendProctor({ tabSwitch: true });
+        registerFlag('tab_switch', gone, 'Window lost focus');
+      }
+    });
+    document.addEventListener('paste', () => {
+      if (attempt?.attemptId && proctorConsented) {
+        sendProctor({ copyPaste: true, event: 'copy_paste' });
+      }
+    });
+
+    document.getElementById('consent-start').onclick = () => beginRound(true);
+    document.getElementById('consent-no-cam').onclick = () => beginRound(false);
+    document.getElementById('add-resume-btn').onclick = addSkillToResume;
+    document.getElementById('download-cert-btn').onclick = () => {
+      const canvas = document.getElementById('cert-canvas');
+      if (canvas && lastCertificate && window.HieroEvalCertificate) {
+        HieroEvalCertificate.download(canvas, lastCertificate);
+      }
+    };
+
+    (function init() {
+      if (!attempt || !attempt.quiz) {
+        location.replace(landingHref);
+        return;
+      }
+      if (!proctorConsented) {
+        show('consent-view');
+        return;
+      }
+      if (timerId) clearInterval(timerId);
+      timerId = setInterval(tick, 1000);
+      tick();
+      startCamera();
+      if (attempt.coding && attempt.coding.length && qIdx >= attempt.quiz.length) {
+        show('code-view');
+        renderCode();
+      } else {
+        show('quiz-view');
+        renderQuiz();
+      }
+    })();
+  </script>
+</body>
+</html>

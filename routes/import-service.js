@@ -337,78 +337,288 @@ function normalizeParsedLinks(data) {
 }
 
 /**
- * 👑 Perfect Extraction Engine (V16: Multi-AI Integrated)
+ * Post-process AI output so form + templates match the source resume exactly.
+ * - No invented titles/summaries
+ * - Education: university + college, marks as % (not GPA/100)
+ * - Map seminars / resource-person roles into form fields
+ */
+function normalizeExactResumeData(data = {}) {
+    if (!data || typeof data !== 'object') return data;
+    data = JSON.parse(JSON.stringify(data));
+    data.personalInfo = data.personalInfo || {};
+
+    // Prefer real job title over invented "Professional Candidate"
+    const firstJob = Array.isArray(data.experience) && data.experience[0];
+    if (!data.personalInfo.professionalTitle || /professional candidate/i.test(data.personalInfo.professionalTitle)) {
+        if (firstJob && firstJob.jobTitle) {
+            data.personalInfo.professionalTitle = firstJob.jobTitle;
+        }
+    }
+    if (firstJob && /assistant professor/i.test(firstJob.jobTitle || '')) {
+        const skills = String(data.technicalSkills || '');
+        const looksCS = /computer applications|java|python|c\+\+|software engineering|computer networks/i.test(
+            `${firstJob.company || ''} ${skills} ${firstJob.description || ''}`
+        );
+        if (looksCS) {
+            data.personalInfo.professionalTitle = 'Assistant Professor, Computer Applications';
+            if (firstJob.company && !/computer applications/i.test(firstJob.company)) {
+                firstJob.company = `${firstJob.company} — Dept. of Computer Applications`;
+            }
+        }
+    }
+    data.personalInfo.roleTitle = data.personalInfo.professionalTitle || data.personalInfo.roleTitle || '';
+
+    // Strip invented length claims if summary was AI-expanded (keep source objective when short)
+    if (typeof data.summary === 'string') {
+        data.summary = data.summary
+            .replace(/\b\d+\+?\s*years?\b/gi, '')
+            .replace(/\s{2,}/g, ' ')
+            .trim();
+    }
+
+    // Education: build school as "University — College", normalize marks to %
+    if (Array.isArray(data.education)) {
+        data.education = data.education.map((edu) => {
+            const university = (edu.university || '').trim();
+            const college = (edu.college || edu.school || edu.institution || '').trim();
+            let school = college;
+            if (university && college && !college.toLowerCase().includes(university.toLowerCase().slice(0, 12))) {
+                school = `${university} — ${college}`;
+            } else if (university && !college) {
+                school = university;
+            } else if (edu.school) {
+                school = edu.school;
+            }
+
+            let marks = (edu.marks || edu.gpa || edu.percentage || edu.grade || '').toString().trim();
+            if (marks) {
+                marks = marks.replace(/^GPA:\s*/i, '').trim();
+                // "57/100" → "57%"
+                if (/\/\s*100\b/i.test(marks)) {
+                    const m = marks.match(/(\d+(?:\.\d+)?)/);
+                    marks = m ? `${m[1]}%` : marks;
+                } else if (/^\d+(\.\d+)?$/.test(marks) && parseFloat(marks) > 4) {
+                    // Bare percentage number (Indian marksheets), not a 4.0 GPA
+                    marks = `${marks}%`;
+                }
+            }
+
+            return {
+                ...edu,
+                degree: edu.degree || '',
+                university,
+                college: college || edu.college || '',
+                school,
+                institution: school,
+                gradYear: edu.gradYear || edu.year || edu.years || '',
+                gpa: marks,
+                marks
+            };
+        });
+    }
+
+    // Achievements: prefer real achievements array; drop invented fluff phrases
+    const inventPattern = /recognized for successful|industry collaborations|curriculum development/i;
+    if (typeof data.achievements === 'string' && inventPattern.test(data.achievements)) {
+        data.achievements = data.achievements
+            .split(/\n|•/)
+            .map((s) => s.trim())
+            .filter((s) => s && !inventPattern.test(s))
+            .join('\n');
+    }
+
+    // Seminars / conferences → extraCurricular (form field) + customDetails
+    const seminarLines = [];
+    if (Array.isArray(data.seminarsConferences)) {
+        data.seminarsConferences.forEach((s) => {
+            if (typeof s === 'string') seminarLines.push(s);
+            else if (s && (s.title || s.name)) {
+                const place = s.venue || s.place || s.organization || '';
+                seminarLines.push(place ? `${s.title || s.name} — ${place}` : (s.title || s.name));
+            }
+        });
+    }
+    if (seminarLines.length) {
+        const existing = Array.isArray(data.extraCurricular)
+            ? data.extraCurricular
+            : (data.extraCurricular ? String(data.extraCurricular).split('\n') : []);
+        data.extraCurricular = [...existing, ...seminarLines].filter(Boolean);
+        data.customDetails = Array.isArray(data.customDetails) ? data.customDetails : [];
+        if (!data.customDetails.some((c) => /seminar|conference|workshop/i.test(c.heading || ''))) {
+            data.customDetails.push({
+                heading: 'Seminar / Conference / Workshop / Guest Lecture',
+                content: seminarLines.map((l) => `• ${l}`).join('\n')
+            });
+        }
+    }
+
+    // Resource person / jury → achievements
+    if (Array.isArray(data.resourcePersonRoles) && data.resourcePersonRoles.length) {
+        const roleLines = data.resourcePersonRoles.map((r) => {
+            if (typeof r === 'string') return r;
+            const title = r.title || r.role || '';
+            const place = r.venue || r.place || r.organization || '';
+            const year = r.year || r.years || '';
+            return [title, place, year].filter(Boolean).join(' — ');
+        }).filter(Boolean);
+        const ach = typeof data.achievements === 'string' ? data.achievements : '';
+        const merged = [ach, ...roleLines].filter(Boolean).join('\n');
+        data.achievements = merged;
+    }
+
+    // Soft skills / strengths — keep sincerity if present in source skills text
+    if (Array.isArray(data.languages)) {
+        data.languages = data.languages.map((l) => (typeof l === 'string' ? l : (l.name || ''))).filter(Boolean);
+    }
+
+    // Technical skills: subjects taught often land here for faculty CVs
+    if (typeof data.technicalSkills === 'string') {
+        data.technicalSkills = data.technicalSkills.replace(/^Subjects?\s*Taught:\s*/i, '').trim();
+    }
+
+    return data;
+}
+
+/**
+ * 👑 Faithful Extraction Engine (V17) — Groq-first, exact match to source resume
  */
 async function parseResumeText(rawText) {
-    const textToParse = rawText.slice(0, 15000);
-    const systemPrompt = `You are a High-Performance ATS Optimizer and Resume Parser. 
-    Your goal is to extract data AND improve its quality to reach an 85+ ATS score.
+    const textToParse = rawText.slice(0, 24000);
+    const systemPrompt = `You are a FAITHFUL resume parser. Extract ONLY what appears in the resume text. Never invent, never improve, never invent years of experience, never invent achievements, never invent headlines.
 
-    1. EXTRACTION RULES (CRITICAL):
-       - Extract ALL Details: Personal Info, Experience, Education, Projects, Skills, Certifications.
-       - Use "Present" for current roles.
-       - REMOVE PDF headings like "Contact", "Address", "Portfolio", "Website". Do NOT include these literal words inside the extracted values (e.g. if the PDF says "Address\\nBengaluru", extract ONLY "Bengaluru").
-       - Capture full GitHub/LinkedIn/Portfolio links clearly as valid URLs. ALWAYS prepend https:// if missing (e.g. "linkedin.com/in/user" → "https://linkedin.com/in/user", "github.com/user" → "https://github.com/user").
-       - Extract GitHub URL into personalInfo.github separately from LinkedIn.
-       - Extract Professional Title (e.g. "Software Engineer") and Professional Headline if present.
-       - Do NOT prepend made-up job titles (like "RETAIL PROFESSIONAL") to the summary.
+CRITICAL RULES:
+1. Do NOT rewrite the summary/objective. Copy it almost verbatim from OBJECTIVES / Summary / Profile.
+2. Do NOT invent a professional title like "Professional Candidate". Use the real job title (e.g. "Assistant Professor, Computer Applications") if present; otherwise leave professionalTitle as the job title from experience.
+3. Do NOT invent metrics, "15+ years", "curriculum development", "industry collaborations", or "recognized for..." unless those exact words appear.
+4. Education MUST keep BOTH university AND college when both appear. Example: university="Bharathiar University", college="Kongu Arts and Science College".
+5. Marks: if the resume says % MARKS or a percentage, put it in "marks" as "57%" (with % sign). NEVER label as GPA and NEVER convert to "57/100".
+6. Include school-level rows (Higher Secondary, S.S.L.C) when present.
+7. Include EVERY bullet under responsibilities / experience with years intact (e.g. "from 2024 till date", "autonomous", "theory and practical").
+8. Put seminars/conferences/workshops/guest lectures into seminarsConferences (full list).
+9. Put Chief Guest / Jury / Resource Person items into resourcePersonRoles (these are real achievements).
+10. Languages and hobbies go into languages and hobbies.
+11. Soft skills / strengths: include every strength listed (e.g. Sincerity, Integrity, Hardworking, Communication, Presentation).
+12. Return strict JSON only.
 
-    2. OPTIMIZATION RULES:
-       - SUMMARY: If no summary exists, write a professional 2-3 sentence summary based on their experience. Do NOT prepend job titles in all-caps to the summary.
-       - SKILL GROUPING: Convert flat skill lists (e.g. Python, Java, SQL) into grouped technical skills (e.g. "Languages: Python, Java; Databases: SQL").
-       - PROJECTS/EXPERIENCE: Ensure descriptions start with strong action verbs (Built, Led, Developed). If metrics are missing, structure the text so the user can easily add them (e.g. "Optimized X system resulting in [insert %] improvement").
-       - FORMAT: Return a strict JSON object.
-
-    Structure MUST match this exactly:
+JSON shape:
+{
+  "personalInfo": {
+    "fullName": "",
+    "email": "",
+    "phone": "",
+    "address": "",
+    "linkedin": "",
+    "github": "",
+    "website": "",
+    "professionalTitle": "",
+    "professionalHeadline": "",
+    "dateOfBirth": "",
+    "fatherName": "",
+    "nationality": "",
+    "gender": ""
+  },
+  "summary": "",
+  "technicalSkills": "comma-separated subjects/skills exactly as taught or listed",
+  "softSkills": "comma-separated strengths exactly as listed",
+  "experience": [
     {
-      "personalInfo": { "fullName": "", "email": "", "phone": "", "address": "", "linkedin": "https://linkedin.com/in/...", "github": "https://github.com/...", "website": "https://...", "professionalTitle": "Software Engineer", "professionalHeadline": "Passionate developer with 3+ years..." },
-      "summary": "Data Science professional with experience in predictive modeling...",
-      "technicalSkills": "Programming: Python, Java; Web: HTML, CSS; Tools: Git",
-      "softSkills": "Leadership, Communication, Team Management",
-      "experience": [ { "jobTitle": "", "company": "", "startDate": "YYYY-MM", "endDate": "YYYY-MM or Present", "description": "• Led team of 5\\n• Managed SQL Databases" } ],
-      "education": [ { "degree": "B.Sc Computer Science", "school": "University of X", "gradYear": "2023", "gpa": "3.8/4.0" } ],
-      "projects": [ { "name": "", "tech": "Python, Flask", "description": "Built EMS handling 500+ users. Improved efficiency by 20%.", "link": "https://github.com/...", "achievement": "Improved performance by 30%", "duration": "" } ],
-      "certifications": ["AWS Certified Solutions Architect"],
-      "languages": ["English", "Spanish"],
-      "achievements": "Recipient of Dean's List for 4 semesters",
-      "hobbies": "Coding, Chess, Hiking",
-      "extraCurricular": ["Co-Organized Nirmitee 2017", "Attended workshop on Autodesk Revit"],
-      "publications": "Research paper on ML published in JSR 2023",
-      "references": [ { "name": "", "title": "", "company": "", "phone": "", "email": "" } ],
-      "customDetails": [ { "heading": "Publications", "content": "Research paper on ML published in JSR" } ]
-    }`;
+      "jobTitle": "",
+      "company": "",
+      "location": "",
+      "startDate": "",
+      "endDate": "Present",
+      "description": "• bullet 1\\n• bullet 2"
+    }
+  ],
+  "education": [
+    {
+      "degree": "",
+      "university": "",
+      "college": "",
+      "school": "University — College",
+      "gradYear": "2013 or Pursuing",
+      "marks": "57%"
+    }
+  ],
+  "seminarsConferences": ["full item text with venue"],
+  "resourcePersonRoles": ["full item text with venue/year"],
+  "projects": [],
+  "certifications": [],
+  "languages": ["English", "Tamil"],
+  "achievements": "paper presentation and guest lecture lines only if listed as such",
+  "hobbies": "Listening Music, Reading Newspapers",
+  "extraCurricular": [],
+  "publications": "",
+  "customDetails": [
+    { "heading": "Seminar / Conference / Workshop / Guest Lecture", "content": "• ..." }
+  ]
+}`;
 
+    const tryGroq = async (model) => {
+        const { data: response } = await axios.post('https://api.groq.com/openai/v1/chat/completions', {
+            model,
+            messages: [
+                { role: 'system', content: systemPrompt },
+                { role: 'user', content: `Extract this resume EXACTLY. Do not invent anything.\n\n${textToParse}` }
+            ],
+            temperature: 0,
+            response_format: { type: 'json_object' }
+        }, {
+            headers: {
+                Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            timeout: 90000
+        });
+        return JSON.parse(response.choices[0].message.content);
+    };
 
     if (process.env.GROQ_API_KEY) {
-        try {
-            console.log('⚡ Initializing Groq Perfect Extraction...');
-            const { data: response } = await axios.post('https://api.groq.com/openai/v1/chat/completions', {
-                model: 'openai/gpt-oss-120b',
-                messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: `Parse this resume:\n\n${textToParse}` }],
-                temperature: 0.1, response_format: { type: "json_object" }
-            }, { headers: { 'Authorization': `Bearer ${process.env.GROQ_API_KEY}`, 'Content-Type': 'application/json' } });
-            console.log('✅ Groq Extraction Complete.');
-            const parsed = JSON.parse(response.choices[0].message.content);
-            return normalizeParsedLinks(parsed);
-        } catch (err) { console.error('⚠️ Groq failed:', err.message); }
+        const models = [
+            'llama-3.1-8b-instant',
+            'openai/gpt-oss-120b',
+            'mixtral-8x7b-32768'
+        ];
+        for (const model of models) {
+            try {
+                console.log(`⚡ Groq faithful extract via ${model}...`);
+                const parsed = normalizeExactResumeData(normalizeParsedLinks(await tryGroq(model)));
+                console.log('✅ Groq Extraction Complete.');
+                return parsed;
+            } catch (err) {
+                console.error(`⚠️ Groq ${model} failed:`, err.response?.data?.error?.message || err.message);
+            }
+        }
     }
 
     if (process.env.OPENROUTER_API_KEY) {
         try {
-            console.log('🤖 Trying OpenRouter Perfect Extraction...');
+            console.log('🤖 Trying OpenRouter faithful extraction...');
             const { data: response } = await axios.post('https://openrouter.ai/api/v1/chat/completions', {
                 model: 'openai/gpt-4o-mini',
-                messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: `Parse this resume:\n\n${textToParse}` }],
-                temperature: 0.1, response_format: { type: "json_object" }
-            }, { headers: { 'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`, 'Content-Type': 'application/json', 'HTTP-Referer': 'http://localhost:2816' } });
+                messages: [
+                    { role: 'system', content: systemPrompt },
+                    { role: 'user', content: `Extract this resume EXACTLY. Do not invent anything.\n\n${textToParse}` }
+                ],
+                temperature: 0,
+                response_format: { type: 'json_object' }
+            }, {
+                headers: {
+                    Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+                    'Content-Type': 'application/json',
+                    'HTTP-Referer': 'http://localhost:2816'
+                },
+                timeout: 90000
+            });
             console.log('✅ OpenRouter Extraction Complete.');
-            const parsed = JSON.parse(response.choices[0].message.content);
-            return normalizeParsedLinks(parsed);
-        } catch (err) { console.error('⚠️ OpenRouter failed:', err.message); }
+            return normalizeExactResumeData(normalizeParsedLinks(JSON.parse(response.choices[0].message.content)));
+        } catch (err) {
+            console.error('⚠️ OpenRouter failed:', err.message);
+        }
     }
 
     console.warn('📌 All AI Providers failed. Falling back to Rule-Based Parse.');
-    return parseResumeTextRuleBased(rawText);
+    return normalizeExactResumeData(parseResumeTextRuleBased(rawText));
 }
 
 const handleImportRequest = (req, res) => {
@@ -421,22 +631,29 @@ const handleImportRequest = (req, res) => {
             const ext = path.extname(req.file.originalname || '').toLowerCase();
             let text = '';
 
-            if (ext === '.pdf') {
-                text = await extractTextFromPdf(req.file.path);
-            } else if (ext === '.docx' || ext === '.doc') {
-                text = await extractFromDocx(req.file.path);
-            } else if (['.png', '.jpg', '.jpeg', '.webp'].includes(ext) || (req.file.mimetype && req.file.mimetype.startsWith('image/'))) {
-                try {
-                    const { data: { text: ocrText } } = await getTesseract().recognize(req.file.path, 'eng');
-                    text = ocrText;
-                } catch (imgErr) {
-                    throw new Error('Failed to extract text from image: ' + imgErr.message);
-                }
-            } else {
-                try {
+            try {
+                const { parseDocument } = require('../extraction/src/services/documentParser');
+                const parsedDoc = await parseDocument(req.file.path, req.file.originalname);
+                text = parsedDoc.text;
+            } catch (docErr) {
+                console.warn('Advanced documentParser fallback in import-service:', docErr.message);
+                if (ext === '.pdf') {
                     text = await extractTextFromPdf(req.file.path);
-                } catch (pdfErr) {
+                } else if (ext === '.docx' || ext === '.doc') {
                     text = await extractFromDocx(req.file.path);
+                } else if (['.png', '.jpg', '.jpeg', '.webp'].includes(ext) || (req.file.mimetype && req.file.mimetype.startsWith('image/'))) {
+                    try {
+                        const { data: { text: ocrText } } = await getTesseract().recognize(req.file.path, 'eng');
+                        text = ocrText;
+                    } catch (imgErr) {
+                        throw new Error('Failed to extract text from image: ' + imgErr.message);
+                    }
+                } else {
+                    try {
+                        text = await extractTextFromPdf(req.file.path);
+                    } catch (pdfErr) {
+                        text = await extractFromDocx(req.file.path);
+                    }
                 }
             }
 
@@ -447,8 +664,28 @@ const handleImportRequest = (req, res) => {
                 });
             }
 
-            const parsedData = await parseResumeText(text);
-            const qualityAnalysis = analyzeResumeQuality(parsedData, text);
+            // Use new Groq Extraction Engine architecture (Port 4040 engine)
+            let parsedData;
+            let qualityAnalysis;
+            try {
+                const { processResumeExtraction } = require('../extraction/src/controllers/extractController');
+                const extractionResult = await processResumeExtraction(text, req.file.originalname);
+                parsedData = extractionResult.data;
+                qualityAnalysis = extractionResult.atsAnalytics || analyzeResumeQuality(parsedData, text);
+                if (qualityAnalysis) {
+                    const resolvedScore = qualityAnalysis.overallAtsScore ?? qualityAnalysis.overallScore ?? qualityAnalysis.score ?? 75;
+                    qualityAnalysis.overallScore = resolvedScore;
+                    // The frontend analysis popup reads `score`; older scorers
+                    // only returned `overallAtsScore`, which rendered "undefined%".
+                    qualityAnalysis.score = resolvedScore;
+                    if (!Array.isArray(qualityAnalysis.suggestions)) qualityAnalysis.suggestions = [];
+                }
+                console.log('✅ Extracted using new Groq Extraction Engine (120B) with dynamic novel sections.');
+            } catch (newEngineErr) {
+                console.warn('⚠️ New Groq Engine fallback in import-service:', newEngineErr.message);
+                parsedData = await parseResumeText(text);
+                qualityAnalysis = analyzeResumeQuality(parsedData, text);
+            }
 
             if (jd) {
                 const jdKeywords = jd.toLowerCase().split(/\W+/).filter(w => w.length > 4);
@@ -465,7 +702,7 @@ const handleImportRequest = (req, res) => {
                 success: true,
                 data: parsedData,
                 analysis: qualityAnalysis,
-                meta: { parsedWith: 'Hiero-Perfect-Extraction-V16' }
+                meta: { parsedWith: 'Groq-AI-Extraction-Engine-120B' }
             });
         } catch (e) {
             console.error('Import processing error:', e);

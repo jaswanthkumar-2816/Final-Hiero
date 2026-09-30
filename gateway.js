@@ -57,6 +57,7 @@ const allowedOrigins = [
     'http://localhost:2005',
     'http://localhost:5001',
     'http://localhost:5003',
+    'http://localhost:2341',
     'http://localhost:2816',
     'http://127.0.0.1:2004',
     'http://127.0.0.1:2005',
@@ -66,8 +67,10 @@ const allowedOrigins = [
     'http://127.0.0.1:5504',
     'http://127.0.0.1:5001',
     'http://127.0.0.1:5003',
-    'http://127.0.0.1:2816',
+    'http://127.0.0.1:2341',
     'http://localhost:5504',
+    'http://localhost:4040',
+    'http://127.0.0.1:4040',
     'https://85692af7a6b1.ngrok-free.app',
     'https://connect-portal-swart.vercel.app',
     originOf(PUBLIC_URL),
@@ -90,16 +93,13 @@ app.use(passport.initialize());
 // ======================
 if (process.env.MONGODB_URI) {
     console.log('⏳ Connecting to MongoDB...');
-    mongoose.set('bufferCommands', false);
+    mongoose.set('bufferCommands', true);
 
     // Safe debug: Check first few chars and total length (don't log secrets)
     const uri = process.env.MONGODB_URI;
     console.log(`[DB Debug] URI starts with: "${uri.substring(0, 5)}...", Total length: ${uri.length}`);
 
-    mongoose.connect(process.env.MONGODB_URI, {
-        serverSelectionTimeoutMS: 5000,
-        connectTimeoutMS: 5000
-    })
+    mongoose.connect(process.env.MONGODB_URI)
         .then(() => console.log('✅ MongoDB connected successfully'))
         .catch(err => {
             console.error('❌ MongoDB connection error:', err.message);
@@ -161,6 +161,31 @@ app.use('/api/resume', lazyRouter('./routes/import-service'));
 app.use('/api/resume', lazyRouter('./routes/resume'));
 app.use('/', lazyRouter('./routes/import-service'));
 
+// 🚀 Dedicated Groq Resume Extraction Backend on Port 4040
+const { createProxyMiddleware, fixRequestBody } = require('http-proxy-middleware');
+const EXTRACTION_PORT = process.env.EXTRACTION_PORT || 4040;
+const EXTRACTION_URL = process.env.EXTRACTION_URL || `http://localhost:${EXTRACTION_PORT}`;
+
+app.use('/api/extract', createProxyMiddleware({
+    target: EXTRACTION_URL,
+    changeOrigin: true,
+    on: {
+        proxyReq: fixRequestBody,
+        error: (err, req, res) => {
+            console.warn(`[GW Extraction Proxy] Port ${EXTRACTION_PORT} unreachable (${err.message}). Using internal extraction handler fallback...`);
+            try {
+                const localExtractRouter = require('./extraction/src/routes/api');
+                return localExtractRouter(req, res);
+            } catch (fallbackErr) {
+                res.status(502).json({
+                    success: false,
+                    error: `Extraction backend unreachable on port ${EXTRACTION_PORT}.`
+                });
+            }
+        }
+    }
+}));
+
 // Support templates and preview folder sharing
 app.use('/templates/previews', express.static(path.join(__dirname, 'hiero-backend', 'templates', 'previews')));
 app.use('/dashboard/previews', express.static(path.join(__dirname, 'hiero-backend', 'templates', 'previews')));
@@ -175,11 +200,12 @@ app.use('/api/reel', lazyRouter('./routes/reel'));
 app.use('/api/run', lazyRouter('./routes/run'));
 app.use('/api/visualize', lazyRouter('./routes/visualize'));
 app.use('/api/mastery', lazyRouter('./routes/mastery'));
+app.use('/api/eval', lazyRouter('./routes/eval'));
 app.use('/api/learning', lazyRouter('./routes/learning'));
 app.use('/api', lazyRouter('./routes/ai-photo'));
 app.use('/api/payment', lazyRouter('./routes/payment'));
 
-// Support legacy shortened paths
+// HTML portal on :2816. React web app is served separately on :2341.
 app.use('/auth/signup', (req, res) => res.redirect(307, '/signup'));
 app.use('/auth/login', (req, res) => res.redirect(307, '/login'));
 app.use('/auth/verify-email', (req, res) => res.redirect(307, '/verify-email'));
@@ -254,7 +280,31 @@ app.get('/.well-known/assetlinks.json', (req, res) => {
 app.get(['/learn', '/learn.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'learn.html')));
 app.get(['/learn-beginner', '/learn-beginner.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'learn-beginner.html')));
 app.get(['/learn-intermediate', '/learn-intermediate.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'learn-intermediate.html')));
+app.get(['/playlist', '/playlist.html'], (req, res) => {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.sendFile(path.join(resumeBuilderPath, 'playlist.html'));
+});
 app.get(['/quiz', '/quiz.html'], (req, res) => res.sendFile(path.join(resumeBuilderPath, 'quiz.html')));
+app.get(['/eval', '/eval.html'], (req, res) => {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.sendFile(path.join(resumeBuilderPath, 'eval.html'));
+});
+app.get(['/eval-round', '/eval-round.html'], (req, res) => {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.sendFile(path.join(resumeBuilderPath, 'eval-round.html'));
+});
+app.get(['/eval-congrats', '/eval-congrats.html'], (req, res) => {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.sendFile(path.join(resumeBuilderPath, 'eval-congrats.html'));
+});
+app.get(['/started', '/started.html'], (req, res) => {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.sendFile(STARTED_HTML);
+});
+app.get(['/hiero-astra', '/hiero-astra.html'], (req, res) => {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.sendFile(path.join(resumeBuilderPath, 'hiero-astra.html'));
+});
 app.get(['/hiero-explained', '/hiero-explained.html'], (req, res) => {
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     res.sendFile(path.join(resumeBuilderPath, 'hiero-explained.html'));
@@ -272,6 +322,10 @@ app.get(['/adaptive-test', '/adaptive-test.html'], (req, res) => {
     res.sendFile(path.join(resumeBuilderPath, 'adaptive-test.html'));
 });
 app.get(['/solve', '/solve.html'], (req, res) => res.sendFile(path.join(__dirname, 'solve.html')));
+app.get(['/visualize', '/visualize.html'], (req, res) => {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.sendFile(path.join(__dirname, 'visualize.html'));
+});
 app.get(['/solve-beginner', '/solve-beginner.html'], (req, res) => res.sendFile(path.join(__dirname, 'solve-beginner.html')));
 app.get(['/solve-intermediate', '/solve-intermediate.html'], (req, res) => res.sendFile(path.join(__dirname, 'solve-intermediate.html')));
 app.get(['/resume-builder', '/resume-builder.html', '/dashboard/resume-builder'], (req, res) => {
@@ -331,23 +385,25 @@ app.use('/api', lazyRouter('./routes/analysis'));
 app.use('/api/problems', lazyRouter('./routes/problems'));
 app.use('/api/opportunities', lazyRouter('./routes/opportunities'));
 app.use('/api/adaptive', lazyRouter('./routes/adaptive-mastery'));
+app.use('/api/roadmap', lazyRouter('./routes/roadmap'));
 
 // ======================
 // START SERVER
 // ======================
 app.listen(PORT, () => {
     console.log(`
-🚀 Unified Gateway LIVE at http://localhost:${PORT}
-   📁 Landing UI         → Integrated (Port ${PORT})
-   🔐 Auth System        → Integrated (Port ${PORT})
-   ⭐️ Review System       → Integrated (Port ${PORT}) [NEW]
-   🧠 Analysis System     → Integrated (Port ${PORT})
-   
+🚀 HTML portal LIVE at http://localhost:${PORT}
+   📁 HTML pages         → Port ${PORT}
+   🔐 Auth System        → Integrated
+   ⭐️ Review System       → Integrated [NEW]
+   🧠 Analysis System     → Integrated
+
    📊 Integrated Systems:
       - /dashboard        → Serves Static UI
       - /api/resume       → Native Controller
       - /api/analysis     → AI Engine
       - /api/review       → MongoDB Storage
+      - /api/extract      → Port 4040 (Groq Resume Extraction)
 
 `);
 });

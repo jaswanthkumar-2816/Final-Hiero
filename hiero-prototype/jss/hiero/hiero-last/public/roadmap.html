@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HIERO — Dream Job Roadmap</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="theme.css">
+  <style>
+    :root {
+      --bg: #05070b;
+      --card: rgba(13, 18, 28, 0.88);
+      --card-solid: #0d121c;
+      --border: rgba(255,255,255,0.08);
+      --border-strong: rgba(255,255,255,0.14);
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --green: #07e219;
+      --green-dim: rgba(7, 226, 25, 0.12);
+      --blue: #38bdf8;
+      --warn: #f59e0b;
+      --danger: #f87171;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    html, body { width: 100%; max-width: 100%; overflow-x: hidden; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      background-image:
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(7, 226, 25, 0.14), transparent),
+        radial-gradient(circle at 100% 40%, rgba(56, 189, 248, 0.06), transparent 40%),
+        radial-gradient(circle at 0% 80%, rgba(7, 226, 25, 0.05), transparent 35%);
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: radial-gradient(rgba(255,255,255,0.04) 1px, transparent 1px);
+      background-size: 28px 28px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .nav, .wrap { position: relative; z-index: 1; }
+
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1.25rem;
+      padding: 0 2.5rem;
+      height: 96px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(5, 7, 11, 0.92);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      width: 100%;
+    }
+
+    .app-brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      text-decoration: none;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .app-brand img {
+      width: 44px;
+      height: 44px;
+      object-fit: contain;
+    }
+    .app-brand .brand-text {
+      font-family: Outfit, sans-serif;
+      font-weight: 800;
+      font-size: 1.45rem;
+      letter-spacing: 0.02em;
+    }
+    .app-brand .brand-text span { color: var(--green); }
+
+    .nav-menu {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px;
+      border-radius: 100px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.03);
+    }
+    .nav-menu a {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 12px 20px;
+      border-radius: 100px;
+      color: var(--muted);
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.95rem;
+      white-space: nowrap;
+      transition: 0.2s;
+    }
+    .nav-menu a i { font-size: 0.9rem; opacity: 0.85; }
+    .nav-menu a:hover {
+      color: #fff;
+      background: rgba(7, 226, 25, 0.1);
+    }
+    .nav-menu a.active {
+      color: #000;
+      background: var(--green);
+      font-weight: 800;
+      box-shadow: 0 0 18px rgba(7, 226, 25, 0.4);
+    }
+    .nav-menu a.active i { opacity: 1; }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+    .nav-icon-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.03);
+      color: var(--muted);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      text-decoration: none;
+      font-size: 1.05rem;
+      transition: 0.2s;
+    }
+    .nav-icon-btn:hover {
+      color: var(--green);
+      border-color: rgba(7, 226, 25, 0.35);
+      background: rgba(7, 226, 25, 0.08);
+    }
+    .nav-home-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 26px;
+      border-radius: 100px;
+      border: 1px solid rgba(7, 226, 25, 0.3);
+      background: linear-gradient(135deg, #07e219, #00b248);
+      color: #000;
+      font-weight: 800;
+      font-size: 0.95rem;
+      text-decoration: none;
+      box-shadow: 0 0 18px rgba(7, 226, 25, 0.35);
+      transition: 0.2s;
+    }
+    .nav-home-btn:hover { transform: translateY(-1px); filter: brightness(1.06); }
+
+    .wrap {
+      width: 100%;
+      max-width: none;
+      margin: 0;
+      padding: 1.5rem 2rem 4rem;
+      min-height: calc(100vh - 96px);
+    }
+
+    /* —— Bright / light theme —— */
+    body.light-mode {
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --card-solid: #ffffff;
+      --border: rgba(15, 23, 42, 0.1);
+      --border-strong: rgba(15, 23, 42, 0.16);
+      --text: #0f172a;
+      --muted: #64748b;
+      --green: #04ab07;
+      --green-dim: rgba(4, 171, 7, 0.1);
+      --blue: #0284c7;
+      background: #f4f7fb;
+      background-image:
+        radial-gradient(ellipse 70% 45% at 50% -10%, rgba(4, 171, 7, 0.1), transparent),
+        radial-gradient(circle at 100% 30%, rgba(56, 189, 248, 0.08), transparent 40%);
+      color: var(--text);
+    }
+    body.light-mode::before {
+      background-image: radial-gradient(rgba(15, 23, 42, 0.045) 1px, transparent 1px);
+    }
+    body.light-mode .nav {
+      background: rgba(255, 255, 255, 0.94);
+      border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+      box-shadow: 0 8px 28px rgba(15, 23, 42, 0.06);
+    }
+    body.light-mode .app-brand { color: #0f172a; }
+    body.light-mode .nav-menu {
+      background: #f1f5f9;
+      border-color: rgba(15, 23, 42, 0.08);
+    }
+    body.light-mode .nav-menu a { color: #64748b; }
+    body.light-mode .nav-menu a:hover {
+      color: #0f172a;
+      background: rgba(4, 171, 7, 0.12);
+    }
+    body.light-mode .nav-menu a.active {
+      color: #fff;
+      background: #04ab07;
+      box-shadow: 0 6px 18px rgba(4, 171, 7, 0.3);
+    }
+    body.light-mode .nav-icon-btn {
+      background: #f1f5f9;
+      border-color: rgba(15, 23, 42, 0.1);
+      color: #64748b;
+    }
+    body.light-mode .nav-icon-btn:hover {
+      color: #04ab07;
+      border-color: rgba(4, 171, 7, 0.35);
+      background: rgba(4, 171, 7, 0.08);
+    }
+    body.light-mode .hero,
+    body.light-mode .intake,
+    body.light-mode .section {
+      background: #fff;
+      border-color: rgba(15, 23, 42, 0.1);
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+    }
+    body.light-mode .hero {
+      background:
+        linear-gradient(135deg, rgba(4, 171, 7, 0.07), transparent 50%),
+        #fff;
+    }
+    body.light-mode .hero h1,
+    body.light-mode .section-head h2,
+    body.light-mode .phase b,
+    body.light-mode .skill strong,
+    body.light-mode .proj strong,
+    body.light-mode .list-row strong { color: #0f172a; }
+    body.light-mode .intake input,
+    body.light-mode .intake select {
+      background: #f8fafc;
+      border-color: rgba(15, 23, 42, 0.12);
+      color: #0f172a;
+    }
+    body.light-mode .phase,
+    body.light-mode .proj {
+      background: #f8fafc;
+      border-color: rgba(15, 23, 42, 0.1);
+    }
+    body.light-mode .progress-ring-inner {
+      background: #fff;
+      color: #0f172a;
+      box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.06);
+    }
+    body.light-mode .chip {
+      background: #f1f5f9;
+      border-color: rgba(15, 23, 42, 0.1);
+      color: #475569;
+    }
+    body.light-mode .chip.ok {
+      color: #04ab07;
+      background: rgba(4, 171, 7, 0.1);
+      border-color: rgba(4, 171, 7, 0.25);
+    }
+    body.light-mode .chip.blue {
+      color: #0284c7;
+      background: rgba(2, 132, 199, 0.1);
+      border-color: rgba(2, 132, 199, 0.25);
+    }
+    body.light-mode .flow-step {
+      background: #fff;
+      border-color: rgba(15, 23, 42, 0.1);
+      color: #64748b;
+    }
+    body.light-mode .flow-step.done {
+      color: #04ab07;
+      background: rgba(4, 171, 7, 0.08);
+      border-color: rgba(4, 171, 7, 0.25);
+    }
+    body.light-mode .btn.ghost {
+      background: #fff;
+      border-color: rgba(15, 23, 42, 0.12);
+      color: #475569;
+    }
+    body.light-mode .btn.ghost:hover {
+      color: #0f172a;
+      border-color: rgba(15, 23, 42, 0.2);
+      background: #f8fafc;
+    }
+    body.light-mode .skill,
+    body.light-mode .list-row,
+    body.light-mode .section-head,
+    body.light-mode .cta-row {
+      border-color: rgba(15, 23, 42, 0.08);
+    }
+    body.light-mode .bar { background: rgba(15, 23, 42, 0.08); }
+
+    /* Flow steps */
+    .flow-steps {
+      display: none;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+    }
+    .flow-steps.active { display: flex; }
+    .flow-step {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--muted);
+      padding: 0.4rem 0.75rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.02);
+    }
+    .flow-step .n {
+      width: 18px; height: 18px; border-radius: 50%;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 0.65rem; font-weight: 800;
+      background: rgba(255,255,255,0.08); color: var(--muted);
+    }
+    .flow-step.done { color: var(--green); border-color: rgba(7,226,25,0.3); background: var(--green-dim); }
+    .flow-step.done .n { background: var(--green); color: #000; }
+    .flow-step.current { color: var(--blue); border-color: rgba(56,189,248,0.35); }
+    .flow-step.current .n { background: rgba(56,189,248,0.2); color: var(--blue); }
+    .flow-sep { color: var(--muted); opacity: 0.4; font-size: 0.7rem; }
+
+    /* Loading */
+    .loading {
+      text-align: center;
+      padding: 5rem 1.5rem;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .loading i { color: var(--green); margin-right: 0.5rem; }
+    .loading-pulse {
+      width: 48px; height: 48px; margin: 0 auto 1.2rem;
+      border-radius: 50%;
+      border: 3px solid rgba(7,226,25,0.15);
+      border-top-color: var(--green);
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Hero */
+    .hero {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 1.5rem;
+      align-items: end;
+      margin-bottom: 1.5rem;
+      padding: 1.75rem 1.75rem 1.5rem;
+      border-radius: 24px;
+      border: 1px solid var(--border);
+      background:
+        linear-gradient(135deg, rgba(7,226,25,0.08), transparent 45%),
+        var(--card);
+      backdrop-filter: blur(12px);
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      right: -40px; top: -40px;
+      width: 180px; height: 180px;
+      background: radial-gradient(circle, rgba(7,226,25,0.18), transparent 70%);
+      pointer-events: none;
+    }
+    .hero-kicker {
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--green);
+      margin-bottom: 0.55rem;
+    }
+    .hero h1 {
+      font-family: Outfit, sans-serif;
+      font-size: clamp(1.6rem, 3.5vw, 2.15rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 0.5rem;
+    }
+    .hero .sub { color: var(--muted); line-height: 1.55; max-width: 720px; font-size: 0.95rem; }
+    .meta-chips { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-top: 1rem; }
+    .chip {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 0.35rem 0.7rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      background: rgba(0,0,0,0.25);
+    }
+    .chip.ok { color: var(--green); border-color: rgba(7,226,25,0.35); background: var(--green-dim); }
+    .chip.blue { color: var(--blue); border-color: rgba(56,189,248,0.35); background: rgba(56,189,248,0.1); }
+
+    .progress-ring-wrap {
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+    .progress-ring {
+      width: 100px; height: 100px;
+      border-radius: 50%;
+      background: conic-gradient(var(--green) calc(var(--pct) * 1%), rgba(255,255,255,0.06) 0);
+      display: grid; place-items: center;
+      margin: 0 auto 0.5rem;
+    }
+    .progress-ring-inner {
+      width: 76px; height: 76px;
+      border-radius: 50%;
+      background: var(--card-solid);
+      display: grid; place-items: center;
+      font-family: Outfit, sans-serif;
+      font-weight: 800;
+      font-size: 1.15rem;
+    }
+    .progress-label { font-size: 0.7rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+
+    /* Intake */
+    .intake {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.85rem;
+      margin-bottom: 1.5rem;
+      padding: 1.15rem 1.25rem;
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      backdrop-filter: blur(10px);
+    }
+    .intake label {
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 0.4rem;
+    }
+    .intake input, .intake select {
+      width: 100%;
+      background: #0a0f18;
+      border: 1px solid var(--border);
+      color: #fff;
+      border-radius: 10px;
+      padding: 0.65rem 0.8rem;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .intake input:focus, .intake select:focus { border-color: rgba(7,226,25,0.45); }
+    .intake input::placeholder { color: #64748b; }
+
+    .btn {
+      border: none;
+      cursor: pointer;
+      border-radius: 12px;
+      font-weight: 800;
+      padding: 0.72rem 1.1rem;
+      background: var(--green);
+      color: #000;
+      font-size: 0.88rem;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      transition: 0.2s;
+    }
+    .btn:hover { filter: brightness(1.08); transform: translateY(-1px); }
+    .btn.ghost {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+    .btn.ghost:hover { color: #fff; border-color: var(--border-strong); background: rgba(255,255,255,0.04); filter: none; }
+
+    /* Sections */
+    .section {
+      margin-bottom: 1.25rem;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      backdrop-filter: blur(10px);
+      overflow: hidden;
+    }
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 1.1rem 1.35rem 0.85rem;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .section-head h2 {
+      font-family: Outfit, sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+    }
+    .section-head h2 i {
+      width: 28px; height: 28px;
+      border-radius: 8px;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 0.75rem;
+      background: var(--green-dim);
+      color: var(--green);
+    }
+    .section-body { padding: 1.1rem 1.35rem 1.35rem; }
+    .section-hint { font-size: 0.8rem; color: var(--muted); line-height: 1.4; }
+
+    /* Timeline phases */
+    .timeline {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      position: relative;
+    }
+    .phase {
+      position: relative;
+      padding: 1.1rem 1rem 1rem;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,0.28);
+      transition: 0.25s;
+    }
+    .phase:hover {
+      border-color: rgba(7,226,25,0.35);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 28px rgba(0,0,0,0.35);
+    }
+    .phase-num {
+      font-size: 0.65rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--green);
+      margin-bottom: 0.4rem;
+    }
+    .phase b {
+      display: block;
+      font-size: 0.98rem;
+      margin-bottom: 0.35rem;
+      letter-spacing: -0.01em;
+    }
+    .phase .when {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--blue);
+      margin-bottom: 0.55rem;
+    }
+    .phase .goals { font-size: 0.8rem; color: var(--muted); line-height: 1.45; }
+
+    .two {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+      margin-bottom: 1.25rem;
+      width: 100%;
+    }
+
+    .section { width: 100%; }
+    .hero { width: 100%; }
+    .intake { width: 100%; }
+
+    /* Skills */
+    .skill {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.9rem;
+      padding: 0.9rem 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .skill:last-child { border-bottom: none; padding-bottom: 0; }
+    .skill:first-child { padding-top: 0; }
+    .skill strong { font-size: 0.92rem; }
+    .skill-meta { display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0.35rem 0 0.45rem; }
+    .bar {
+      height: 5px;
+      border-radius: 99px;
+      background: rgba(255,255,255,0.06);
+      overflow: hidden;
+      max-width: 180px;
+    }
+    .bar > i {
+      display: block;
+      height: 100%;
+      border-radius: 99px;
+      background: linear-gradient(90deg, var(--green), #5dff6a);
+    }
+
+    .tag {
+      font-size: 0.65rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      padding: 0.2rem 0.5rem;
+      border-radius: 6px;
+    }
+    .must { background: rgba(248,113,113,0.14); color: var(--danger); }
+    .good { background: rgba(56,189,248,0.14); color: var(--blue); }
+    .have { background: var(--green-dim); color: var(--green); }
+    .todo { background: rgba(148,163,184,0.12); color: var(--muted); }
+
+    /* Projects */
+    .proj {
+      padding: 1rem;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,0.22);
+      margin-bottom: 0.75rem;
+      transition: 0.2s;
+    }
+    .proj:last-child { margin-bottom: 0; }
+    .proj:hover { border-color: var(--border-strong); }
+    .proj-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.75rem; margin-bottom: 0.45rem; }
+    .proj strong { font-size: 0.92rem; }
+    .proj p { font-size: 0.8rem; color: var(--muted); line-height: 1.45; margin-top: 0.3rem; }
+    .proj em { color: #cbd5e1; font-style: normal; font-weight: 700; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; }
+
+    .list-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.85rem 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .list-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .list-row:first-child { padding-top: 0; }
+    .muted { color: var(--muted); font-size: 0.82rem; line-height: 1.45; }
+
+    .cta-row {
+      display: flex;
+      gap: 0.55rem;
+      flex-wrap: wrap;
+      margin-top: 1.15rem;
+      padding-top: 1.15rem;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .empty { color: var(--muted); font-size: 0.85rem; padding: 0.5rem 0; }
+
+    @media (max-width: 1100px) {
+      .intake { grid-template-columns: 1fr 1fr; }
+      .nav-menu a span { display: none; }
+      .nav-menu a { padding: 12px 14px; }
+    }
+
+    @media (max-width: 860px) {
+      .wrap { padding-left: 1rem; padding-right: 1rem; }
+      .nav { padding: 0 1rem; height: 80px; }
+      .wrap { min-height: calc(100vh - 80px); }
+      .hero { grid-template-columns: 1fr; }
+      .progress-ring-wrap { justify-self: start; }
+      .intake, .two { grid-template-columns: 1fr; }
+      .nav-menu { display: none; }
+      .app-brand img { width: 38px; height: 38px; }
+      .app-brand .brand-text { font-size: 1.2rem; }
+      .nav-home-btn { padding: 12px 18px; font-size: 0.85rem; }
+    }
+  </style>
+</head>
+<body class="light-mode">
+  <nav class="nav">
+    <a class="app-brand" href="/index.html">
+      <img src="/logo-hiero.png" alt="HIERO">
+      <div class="brand-text">HIERO <span>Roadmap</span></div>
+    </a>
+
+    <div class="nav-menu">
+      <a href="/domain-selection.html?next=roadmap"><i class="fa-solid fa-compass"></i><span>Change role</span></a>
+      <a class="active" href="/roadmap.html"><i class="fa-solid fa-route"></i><span>Roadmap</span></a>
+      <a href="/quiz.html"><i class="fa-solid fa-book-open"></i><span>Learn</span></a>
+      <a href="/companies.html"><i class="fa-solid fa-building"></i><span>Jobs</span></a>
+      <a href="/resume-builder.html"><i class="fa-regular fa-file-lines"></i><span>Resume</span></a>
+    </div>
+
+    <div class="nav-actions">
+      <button type="button" class="nav-icon-btn" id="theme-switch" title="Toggle theme" aria-label="Toggle theme">
+        <i class="fa-solid fa-sun"></i>
+      </button>
+      <a class="nav-home-btn" href="/index.html"><i class="fa-solid fa-house"></i> Home</a>
+    </div>
+  </nav>
+
+  <div class="wrap">
+    <div class="flow-steps" id="flow-chips"></div>
+
+    <div id="loading" class="loading">
+      <div class="loading-pulse"></div>
+      Building your personalized roadmap…
+    </div>
+
+    <div id="board" style="display:none">
+      <header class="hero">
+        <div>
+          <div class="hero-kicker">Dream job path</div>
+          <h1 id="title">Dream job roadmap</h1>
+          <p class="sub" id="tagline">Personalized and updated as you progress.</p>
+          <div class="meta-chips" id="meta-chips"></div>
+        </div>
+        <div class="progress-ring-wrap">
+          <div class="progress-ring" id="progress-ring" style="--pct: 0">
+            <div class="progress-ring-inner" id="progress-pct">0%</div>
+          </div>
+          <div class="progress-label">Roadmap progress</div>
+        </div>
+      </header>
+
+      <div class="intake" id="intake">
+        <div>
+          <label>Current year</label>
+          <select id="in-year">
+            <option value="1">1st year</option>
+            <option value="2">2nd year</option>
+            <option value="3" selected>3rd year</option>
+            <option value="4">4th year</option>
+          </select>
+        </div>
+        <div>
+          <label>Graduation year</label>
+          <input id="in-grad" type="number" value="2027" min="2025" max="2035">
+        </div>
+        <div>
+          <label>Skills you already have</label>
+          <input id="in-skills" placeholder="Python, React, SQL">
+        </div>
+        <div style="display:flex;align-items:flex-end">
+          <button class="btn" type="button" id="regen-btn" style="width:100%">
+            <i class="fa-solid fa-rotate"></i> Update roadmap
+          </button>
+        </div>
+      </div>
+
+      <section class="section">
+        <div class="section-head">
+          <h2><i class="fa-solid fa-route"></i> Timeline</h2>
+          <span class="section-hint">Phased path to your dream role</span>
+        </div>
+        <div class="section-body">
+          <div class="timeline" id="phases"></div>
+        </div>
+      </section>
+
+      <div class="two">
+        <section class="section" style="margin-bottom:0">
+          <div class="section-head">
+            <h2><i class="fa-solid fa-layer-group"></i> Skills</h2>
+            <span class="section-hint">Prioritized for this role</span>
+          </div>
+          <div class="section-body" id="skills"></div>
+        </section>
+        <section class="section" style="margin-bottom:0">
+          <div class="section-head">
+            <h2><i class="fa-solid fa-code"></i> Projects</h2>
+            <span class="section-hint">Build proof for resume</span>
+          </div>
+          <div class="section-body" id="projects"></div>
+        </section>
+      </div>
+
+      <div class="two">
+        <section class="section" style="margin-bottom:0">
+          <div class="section-head">
+            <h2><i class="fa-solid fa-flag-checkered"></i> Milestones</h2>
+          </div>
+          <div class="section-body" id="milestones"></div>
+        </section>
+        <section class="section" style="margin-bottom:0">
+          <div class="section-head">
+            <h2><i class="fa-solid fa-briefcase"></i> Career moves</h2>
+          </div>
+          <div class="section-body" id="career"></div>
+        </section>
+      </div>
+
+      <section class="section">
+        <div class="section-head">
+          <h2><i class="fa-solid fa-user-graduate"></i> Mentorship checkpoints</h2>
+          <span class="section-hint">2–3 structured reviews — not open-ended access</span>
+        </div>
+        <div class="section-body">
+          <div id="mentorship"></div>
+          <div class="cta-row">
+            <a class="btn" href="/resume-builder.html"><i class="fa-solid fa-file-lines"></i> Build resume</a>
+            <a class="btn ghost" href="/mock-interview.html">Practice interview</a>
+            <a class="btn ghost" href="/companies.html">Browse jobs</a>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+<script>
+  const params = new URLSearchParams(location.search);
+  let domain = params.get('domain') || localStorage.getItem('selectedDomain') || 'Technology';
+  let role = params.get('role') || localStorage.getItem('selectedRole') || 'Software Engineer';
+  const fromDream = params.get('from') === 'dream-job' || localStorage.getItem('domainNext') === 'roadmap';
+
+  if (fromDream) {
+    const chips = document.getElementById('flow-chips');
+    if (chips) {
+      chips.classList.add('active');
+      chips.innerHTML =
+        '<span class="flow-step done"><span class="n">1</span> Domain</span>' +
+        '<span class="flow-sep"><i class="fa-solid fa-chevron-right"></i></span>' +
+        '<span class="flow-step done"><span class="n">2</span> ' + String(role).replace(/[&<>"']/g, '') + '</span>' +
+        '<span class="flow-sep"><i class="fa-solid fa-chevron-right"></i></span>' +
+        '<span class="flow-step current"><span class="n">3</span> Your roadmap</span>';
+    }
+  }
+
+  function esc(s) {
+    return String(s || '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  function userId() {
+    try {
+      const u = JSON.parse(localStorage.getItem('user') || '{}');
+      return u.email || u.id || localStorage.getItem('email') || 'guest';
+    } catch (e) { return 'guest'; }
+  }
+
+  function profileFromForm() {
+    const saved = (() => { try { return JSON.parse(localStorage.getItem('hiero_apply_profile') || '{}'); } catch (e) { return {}; } })();
+    const skills = (document.getElementById('in-skills').value || '')
+      .split(',').map((s) => s.trim()).filter(Boolean);
+    return {
+      email: userId(),
+      currentYear: document.getElementById('in-year').value,
+      graduationYear: document.getElementById('in-grad').value,
+      skills: skills.length ? skills : (saved.skills || []),
+      cgpa: saved.cgpa || '',
+      college: saved.college || ''
+    };
+  }
+
+  function calcProgress(rm) {
+    const skills = rm.skills || [];
+    if (!skills.length) return 0;
+    const sum = skills.reduce((a, s) => a + (Number(s.masteryPct) || (s.status === 'have' || s.status === 'done' ? 100 : 0)), 0);
+    return Math.round(sum / skills.length);
+  }
+
+  async function generate() {
+    document.getElementById('loading').style.display = 'block';
+    document.getElementById('board').style.display = 'none';
+    const profile = profileFromForm();
+    const res = await fetch('/api/roadmap/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId: userId(),
+        domain,
+        role,
+        profile,
+        currentYear: profile.currentYear,
+        graduationYear: profile.graduationYear
+      })
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error || 'Failed');
+    localStorage.setItem('hiero_roadmap', JSON.stringify(data.roadmap));
+    render(data.roadmap);
+  }
+
+  function render(rm) {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('board').style.display = 'block';
+    document.getElementById('title').textContent = rm.role + ' roadmap';
+    document.getElementById('tagline').textContent = rm.tagline || 'Personalized and updated as you progress.';
+
+    const pct = calcProgress(rm);
+    document.getElementById('progress-ring').style.setProperty('--pct', pct);
+    document.getElementById('progress-pct').textContent = pct + '%';
+
+    document.getElementById('meta-chips').innerHTML =
+      '<span class="chip blue">' + esc(rm.domain) + '</span>' +
+      '<span class="chip ok">' + esc(rm.gapSummary) + '</span>' +
+      '<span class="chip">Grad ' + esc(rm.baseline && rm.baseline.graduationYear) + '</span>' +
+      (rm.links && rm.links.jobMatchScore != null ? '<span class="chip">Job match ' + esc(rm.links.jobMatchScore) + '%</span>' : '');
+
+    document.getElementById('phases').innerHTML = (rm.phases || []).map((p, i) =>
+      '<div class="phase">' +
+        '<div class="phase-num">Phase ' + (i + 1) + '</div>' +
+        '<b>' + esc(p.name) + '</b>' +
+        '<div class="when">' + esc(p.startMonth) + ' → ' + esc(p.endMonth) + '</div>' +
+        '<p class="goals">' + esc((p.goals || []).join(' · ')) + '</p>' +
+      '</div>'
+    ).join('') || '<p class="empty">No phases yet.</p>';
+
+    document.getElementById('skills').innerHTML = (rm.skills || []).map((s) => {
+      const m = Math.round(s.masteryPct || 0);
+      return '<div class="skill"><div style="flex:1;min-width:0">' +
+        '<strong>' + esc(s.name) + '</strong>' +
+        '<div class="skill-meta">' +
+          '<span class="tag ' + (s.priority === 'must-have' ? 'must' : 'good') + '">' + esc(s.priority) + '</span>' +
+          '<span class="tag ' + (s.status === 'have' || s.status === 'done' ? 'have' : 'todo') + '">' + esc(s.status) + '</span>' +
+        '</div>' +
+        '<div class="muted" style="margin-bottom:0.35rem">Target: ' + esc(s.targetLevel) + ' · ' + m + '%</div>' +
+        '<div class="bar"><i style="width:' + m + '%"></i></div>' +
+      '</div>' +
+      '<a class="btn ghost" style="padding:0.45rem 0.75rem;font-size:0.78rem;flex-shrink:0" href="' +
+      esc((s.resources && s.resources[0] && s.resources[0].href) || '/quiz.html') + '">Learn</a></div>';
+    }).join('') || '<p class="empty">No skills mapped yet.</p>';
+
+    document.getElementById('projects').innerHTML = (rm.projects || []).map((p) =>
+      '<div class="proj">' +
+        '<div class="proj-top"><strong>' + esc(p.title) + '</strong>' +
+        '<span class="tag todo">' + esc(p.difficulty) + '</span></div>' +
+        '<p><em>Proves</em><br>' + esc((p.provesSkills || []).join(', ')) + '</p>' +
+        '<p><em>Resume bullet</em><br>' + esc(p.resumeBullet) + '</p>' +
+        '<p><em>GitHub</em><br>' + esc(p.githubHint) + '</p>' +
+      '</div>'
+    ).join('') || '<p class="empty">No projects mapped yet.</p>';
+
+    document.getElementById('milestones').innerHTML = (rm.milestones || []).map((m) =>
+      '<div class="list-row"><div><strong>' + esc(m.label) + '</strong>' +
+      '<div class="muted">By ' + esc(m.dueBy) + '</div></div>' +
+      '<span class="tag ' + (m.done ? 'have' : 'todo') + '">' + (m.done ? 'done' : 'open') + '</span></div>'
+    ).join('') || '<p class="empty">No milestones yet.</p>';
+
+    document.getElementById('career').innerHTML = (rm.careerMoves || []).map((c) =>
+      '<div class="list-row"><div><strong>' + esc(c.label) + '</strong>' +
+      '<div class="muted">' + esc(c.type) + '</div></div>' +
+      '<span class="tag todo">' + esc(c.status) + '</span></div>'
+    ).join('') || '<p class="empty">No career moves yet.</p>';
+
+    document.getElementById('mentorship').innerHTML = (rm.mentorship || []).map((m) =>
+      '<div class="list-row"><div><strong>' + esc(m.label) + '</strong>' +
+      '<div class="muted">' + esc(m.purpose) + ' review</div></div>' +
+      '<button class="btn ghost" style="padding:0.45rem 0.75rem;font-size:0.78rem" type="button" data-cp="' + esc(m.checkpointId) + '">' +
+      (m.status === 'requested' ? 'Requested' : m.status === 'done' ? 'Done' : 'Request') + '</button></div>'
+    ).join('') || '<p class="empty">No mentorship checkpoints.</p>';
+  }
+
+  document.getElementById('regen-btn').addEventListener('click', () => generate().catch((e) => {
+    document.getElementById('loading').innerHTML = '<div class="loading-pulse"></div>Could not generate: ' + esc(e.message);
+  }));
+
+  document.getElementById('mentorship').addEventListener('click', async (e) => {
+    const btn = e.target.closest('button[data-cp]');
+    if (!btn) return;
+    const stored = JSON.parse(localStorage.getItem('hiero_roadmap') || 'null');
+    if (!stored) return;
+    const res = await fetch('/api/roadmap/' + encodeURIComponent(stored.id) + '/progress', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ checkpointId: btn.dataset.cp, status: 'requested' })
+    });
+    const data = await res.json();
+    if (data.roadmap) {
+      localStorage.setItem('hiero_roadmap', JSON.stringify(data.roadmap));
+      render(data.roadmap);
+    }
+  });
+
+  (async function init() {
+    try {
+      const saved = JSON.parse(localStorage.getItem('hiero_apply_profile') || '{}');
+      if (Array.isArray(saved.skills) && saved.skills.length) {
+        document.getElementById('in-skills').value = saved.skills.join(', ');
+      }
+      if (saved.graduationYear) document.getElementById('in-grad').value = saved.graduationYear;
+      await generate();
+    } catch (e) {
+      document.getElementById('loading').innerHTML = '<div class="loading-pulse"></div>Could not reach roadmap API. Is gateway :2816 running?';
+    }
+  })();
+
+  // Theme toggle — roadmap defaults to bright/light
+  (function setupTheme() {
+    const btn = document.getElementById('theme-switch');
+    const icon = btn && btn.querySelector('i');
+    function apply(theme) {
+      const light = theme === 'light';
+      document.body.classList.toggle('light-mode', light);
+      if (icon) icon.className = light ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+      localStorage.setItem('hiero_roadmap_theme', light ? 'light' : 'dark');
+    }
+    const saved = localStorage.getItem('hiero_roadmap_theme') || 'light';
+    apply(saved);
+    if (btn) btn.addEventListener('click', () => {
+      apply(document.body.classList.contains('light-mode') ? 'dark' : 'light');
+    });
+  })();
+</script>
+</body>
+</html>

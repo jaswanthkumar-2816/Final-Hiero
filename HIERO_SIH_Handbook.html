@@ -203,14 +203,14 @@
     <div class="cover-page">
         <div class="cover-badge">Smart India Hackathon (SIH) 2026 Master Handbook</div>
         <h1 class="cover-title">HIERO</h1>
-        <div class="cover-subtitle">AI-Powered Career Readiness & Smart Resume Ecosystem</div>
+        <div class="cover-subtitle">Academia–Industry Skill Mapping, Internships and Placement · PS 26044</div>
         <p style="color: #cbd5e1; max-width: 600px; font-size: 11pt;">
-            Comprehensive Technical Guide, System Architecture, 6-Member Team Roles, Score Math Formulas, and 15 Master Jury Q&As for SIH Finals.
+            Three portals on one job store: Final Hiero (students :2816), Bridge / Academia (campus :2410), Connect (recruiters :2004). Technical guide, 6-slide SIH format, and jury Q&amp;As.
         </p>
         <div class="cover-meta">
-            <p><strong>Prepared for:</strong> 6-Member SIH Team</p>
+            <p><strong>Prepared for:</strong> 6-Member SIH Team · Team Name Hiero</p>
             <p><strong>Alignment:</strong> Skill India | Digital India | NEP 2020</p>
-            <p><strong>Architecture:</strong> Express Unified Gateway + Groq/OpenRouter AI + MongoDB Atlas + Puppeteer PDF</p>
+            <p><strong>Architecture:</strong> gateway.js :2816 + FastAPI :5050 + Groq + Deepgram + MongoDB / JSON</p>
         </div>
     </div>
 
@@ -233,21 +233,21 @@
     <h1>2. Solution Overview & Pitch Scripts</h1>
 
     <h2>What is HIERO?</h2>
-    <p>HIERO is an end-to-end AI career companion that parses resumes against target job descriptions, calculates a 0-100 fit score, generates localized regional learning roadmaps, builds 22+ ATS-ready resumes, and conducts interactive AI voice mock interviews.</p>
+    <p>HIERO is a three-portal ecosystem for PS 26044: recruiters publish jobs on <strong>Connect (:2004)</strong>, campuses see the same feed on <strong>Bridge / Academia (:2410)</strong>, and students learn, prove skill, and apply on <strong>Final Hiero (:2816)</strong>. Applications live once and appear in the HR inbox. Voice interviews use Deepgram, not the browser Speech API.</p>
 
     <div class="qa-card">
-        <div class="qa-question">⏱️ 30-Second Elevator Pitch</div>
+        <div class="qa-question">30-Second Elevator Pitch</div>
         <div class="qa-answer">
-            "HIERO is an AI-powered career readiness ecosystem built for Indian students. It solves the employability gap by analyzing resume-to-JD fit, generating localized upskilling roadmaps in 5 regional languages (English, Hindi, Telugu, Tamil, Kannada), crafting 22+ ATS-friendly resumes, and conducting interactive AI voice mock interviews."
+            "HIERO is an academia–industry placement loop. Industry posts a role, the campus and the student see the same drive, the student closes the skill gap in regional languages and proves it with a proctored eval, then HR shortlists from one inbox."
         </div>
     </div>
 
     <div class="qa-card">
-        <div class="qa-question">⏱️ 3-Minute SIH Jury Pitch Script</div>
+        <div class="qa-question">3-Minute SIH Jury Pitch Script</div>
         <div class="qa-answer">
-            <strong>Minute 1 (Problem & Pitch):</strong> "Respected Judges, 80%+ of Indian graduates fail initial placement rounds due to skill gaps and ATS rejection. Tier-2/3 students lack mentorship. HIERO bridges this gap."<br><br>
-            <strong>Minute 2 (Live Demonstration):</strong> "We upload a resume + JD. HIERO calculates a 0-100 score, extracts missing skills, and auto-curates YouTube video roadmaps in 5 regional languages. In our Resume Builder, students can auto-fill data, pick from 22 ATS templates, and export high-fidelity PDFs."<br><br>
-            <strong>Minute 3 (AI Voice & Tech Architecture):</strong> "Students practice role-specific interviews with our AI Voice Mock Interviewer. Our unified Express gateway connects Groq Llama-3.3-70B AI, MongoDB Atlas, and Puppeteer PDF rendering."
+            <strong>Minute 1:</strong> PS 26044 asks for academia–industry collaboration on skills, internships, and placement. Spreadsheets split campus and HR. Hiero is three faces on one job store.<br><br>
+            <strong>Minute 2:</strong> Demo Final Hiero — resume vs JD score, Indic roadmap, eval certificate with the candidate name. Demo Bridge :2410 — same job. Demo Connect :2004 — same application in the inbox.<br><br>
+            <strong>Minute 3:</strong> gateway.js owns student APIs. Python :5050 syncs jobs. Groq for JSON scores. Deepgram Nova-3 / Aura-2 for interview audio. Grades never trusted from the client.
         </div>
     </div>
 
@@ -255,6 +255,8 @@
 
     <!-- CHAPTER 3: TECHNICAL ARCHITECTURE -->
     <h1>3. Technical Architecture & Tech Stack</h1>
+
+    <p>Three client portals share one backbone. Students never call Groq or Deepgram from the browser. Eval scores are computed on the server.</p>
 
     <table>
         <thead>
@@ -266,39 +268,44 @@
         </thead>
         <tbody>
             <tr>
-                <td><strong>Frontend</strong></td>
-                <td>HTML5, Vanilla JS (ES6+), Glassmorphism CSS3</td>
-                <td>Ultra-fast page loads, dark-mode neon theme, responsive UI without heavy framework bloat.</td>
+                <td><strong>Final Hiero</strong></td>
+                <td>HTML + JS, React/Vite twin, <code>gateway.js :2816</code></td>
+                <td>Student product: learn, visualize, eval + certificate, resume/JD, Deepgram interview, apply.</td>
             </tr>
             <tr>
-                <td><strong>Server Gateway</strong></td>
-                <td>Node.js & Express.js (<code>gateway.js</code>)</td>
-                <td>Unified Gateway architecture running on Port 2816; routes API requests, serves static files, handles CORS & compression.</td>
+                <td><strong>Bridge / Academia</strong></td>
+                <td>Campus portal <code>:2410</code> (<code>academia_server.js</code>)</td>
+                <td>Placement cell sees the same live job feed and applies into the shared store.</td>
+            </tr>
+            <tr>
+                <td><strong>Connect Portal</strong></td>
+                <td>Recruiter UI <code>:2004</code></td>
+                <td>HR publishes jobs, reads one inbox, shortlists; status via <code>/api/opportunities/applications/status</code>.</td>
             </tr>
             <tr>
                 <td><strong>AI Engine</strong></td>
-                <td>Groq SDK (<code>llama-3.3-70b</code>) & OpenRouter (<code>gpt-4o-mini</code>)</td>
-                <td>Sub-second LLM resume parsing, gap identification, and coding problem generation with fallback rules.</td>
+                <td>Groq (Llama 3.3 / Qwen) + OpenRouter fallback</td>
+                <td>Structured JSON for ATS score, eval items, interview scoring.</td>
             </tr>
             <tr>
-                <td><strong>OCR Engine</strong></td>
-                <td>Tesseract.js</td>
-                <td>Extracts text from scanned/image-based PDF resumes when text content is under 50 chars.</td>
+                <td><strong>Speech</strong></td>
+                <td>Deepgram Nova-3 STT + Aura-2 TTS; Edge-TTS for Indic viz</td>
+                <td>Mock interview voice loop and visualizer narration. Not Web Speech API.</td>
+            </tr>
+            <tr>
+                <td><strong>Jobs engine</strong></td>
+                <td>Python FastAPI <code>:5050</code> + SQLite <code>jobs.db</code> + JSON files</td>
+                <td>Shared opportunity feed used by Bridge and Hiero companies pages.</td>
             </tr>
             <tr>
                 <td><strong>Database</strong></td>
-                <td>MongoDB Atlas & Mongoose ODM</td>
-                <td>Cloud NoSQL database storing user profiles, ratings, interview logs, and tracking data.</td>
+                <td>MongoDB Atlas + JSON fallbacks</td>
+                <td>Users, skills, evals, resumes; jobs/apps remain readable if Mongo is down.</td>
             </tr>
             <tr>
-                <td><strong>PDF Engine</strong></td>
-                <td>Puppeteer & PDFKit</td>
-                <td>Renders 22+ ATS resume templates inside headless Chromium for pixel-perfect PDF export.</td>
-            </tr>
-            <tr>
-                <td><strong>Voice & Audio</strong></td>
-                <td>Web Speech API (STT & TTS)</td>
-                <td>Real-time speech recognition and text-to-speech synthesis for AI mock interviews.</td>
+                <td><strong>PDF / OCR</strong></td>
+                <td>Puppeteer, PDFKit, pdf-parse, mammoth, Tesseract.js</td>
+                <td>Resume import and ATS PDF export.</td>
             </tr>
         </tbody>
     </table>
@@ -386,7 +393,7 @@
     <div class="qa-card">
         <div class="qa-question"><span class="qa-num">Q2</span> How is HIERO different from ChatGPT or generic resume builders?</div>
         <div class="qa-answer">
-            <strong>Answer:</strong> ChatGPT only provides generic text advice without verified resource links or ATS PDF rendering. Generic resume builders only format text without skill gap analysis. HIERO is an end-to-end pipeline: it extracts text from PDFs, calculates a mathematical match score, curates real 5-language YouTube video playlists and LeetCode problem links, and compiles 22 ATS-optimized PDF templates.
+            <strong>Answer:</strong> ChatGPT gives text advice. Generic resume builders only format. Hiero is a placement loop: the same job is on Connect, Bridge, and Final Hiero; the student proves skill with a server-graded eval; HR sees one application row.
         </div>
     </div>
 
@@ -421,7 +428,7 @@
     <div class="qa-card">
         <div class="qa-question"><span class="qa-num">Q7</span> How does the AI Voice Mock Interview system work technically?</div>
         <div class="qa-answer">
-            <strong>Answer:</strong> The frontend uses the browser's native <strong>Web Speech API</strong> for Speech-to-Text (STT) and Text-to-Speech (TTS). Candidate spoken answers are sent to our Express backend, evaluated against job role criteria by Groq AI, and returned with immediate score ratings and constructive feedback.
+            <strong>Answer:</strong> The candidate records audio in the browser. We send it to <strong>Deepgram Nova-3</strong> for STT. The interview engine plus Groq scores the answer and picks a follow-up. <strong>Deepgram Aura-2</strong> speaks the next question. We do not use the browser Web Speech API as the production engine. Visualizer narration uses Edge-TTS for Indic languages.
         </div>
     </div>
 
@@ -435,7 +442,7 @@
     <div class="qa-card">
         <div class="qa-question"><span class="qa-num">Q9</span> Why did you build a Unified Gateway (<code>gateway.js</code>) instead of separate microservices?</div>
         <div class="qa-answer">
-            <strong>Answer:</strong> A single Express Gateway (port 2816) eliminates cross-port CORS issues, reduces server memory footprint, simplifies cloud deployment (Render/Railway), and centralizes authentication and static file serving.
+            <strong>Answer:</strong> Student APIs and pages live on one Express process (<code>gateway.js</code> :2816) so CORS, JWT, and static files stay in one place. That is not the whole product. Bridge :2410 and Connect :2004 are separate faces on the <strong>same job and application store</strong> (Node JSON + Python FastAPI :5050). We did not split every domain into microservices because a SIH deploy cannot operate a fleet.
         </div>
     </div>
 
@@ -470,7 +477,7 @@
     <div class="qa-card">
         <div class="qa-question"><span class="qa-num">Q14</span> How can state government placement cells or universities adopt HIERO?</div>
         <div class="qa-answer">
-            <strong>Answer:</strong> HIERO can be white-labeled and integrated into university placement portals via REST APIs, allowing institutional placement officers to view aggregated skill analytics across entire graduating batches.
+            <strong>Answer:</strong> White-label the <strong>Bridge / Academia portal (:2410)</strong> as the placement-cell surface. It already consumes the live job feed and writes applications HR sees on Connect. Officers see verified eval badges, not only self-declared skills.
         </div>
     </div>
 

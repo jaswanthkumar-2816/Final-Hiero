@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hiero Eval | Skill added to resume</title>
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="theme.css">
+  <script src="theme.js"></script>
+  <style>
+    :root { --primary:#04ab07; --font-sans:'Inter',sans-serif; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    html, body { height:100%; }
+    body.eval-page,
+    body.eval-page h1,
+    body.eval-page h2,
+    body.eval-page h3,
+    body.eval-page p,
+    body.eval-page span,
+    body.eval-page a,
+    body.eval-page button {
+      font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif !important;
+      -webkit-font-smoothing:antialiased;
+    }
+    body.eval-page {
+      min-height:100vh;
+      color:#102016;
+      background-color:#eef8f1;
+      background-image:url('hiero-eval-bg.jpg');
+      background-size:cover;
+      background-position:center;
+      background-repeat:no-repeat;
+      background-attachment:fixed;
+    }
+    body.eval-page::before {
+      content:'';
+      position:fixed;
+      inset:0;
+      z-index:0;
+      pointer-events:none;
+      background:rgba(255,255,255,.32);
+    }
+    html[data-theme="dark"] body.eval-page,
+    body.eval-page:not(.light-mode) { color:#f4faf6; }
+    html[data-theme="dark"] body.eval-page::before,
+    body.eval-page:not(.light-mode)::before { background:rgba(4,10,6,.58); }
+    .wrap { position:relative; z-index:1; max-width:980px; margin:0 auto; padding:28px 24px 64px; }
+    .nav { display:flex; justify-content:space-between; align-items:center; margin-bottom:22px; }
+    .back, .theme-toggle-btn {
+      color:inherit; text-decoration:none; font-weight:800; font-size:13px;
+      border:1px solid rgba(11,61,28,.16); border-radius:99px; padding:8px 14px;
+      background:rgba(255,255,255,.55); cursor:pointer;
+    }
+    html[data-theme="dark"] .back,
+    html[data-theme="dark"] .theme-toggle-btn,
+    body.eval-page:not(.light-mode) .back,
+    body.eval-page:not(.light-mode) .theme-toggle-btn {
+      color:#fff; border-color:rgba(255,255,255,.16); background:rgba(8,16,10,.45);
+    }
+    .hero {
+      text-align:center;
+      background:#ffffff;
+      border:1px solid rgba(16,80,36,.1);
+      border-radius:28px;
+      padding:42px 28px 32px;
+      box-shadow:0 14px 36px rgba(16,80,36,.08);
+      margin-bottom:28px;
+    }
+    html[data-theme="dark"] .hero,
+    body.eval-page:not(.light-mode) .hero {
+      background:#121a14; color:#f8fafc; border-color:rgba(255,255,255,.1);
+    }
+    .badge {
+      display:inline-flex; gap:8px; align-items:center;
+      color:#047857; font-weight:800; font-size:12px;
+      letter-spacing:.4px; text-transform:uppercase;
+    }
+    html[data-theme="dark"] .badge, body.eval-page:not(.light-mode) .badge { color:#86efac; }
+    h1 { font-size:40px; letter-spacing:-.4px; margin:12px 0 8px; }
+    .sub { color:#24362c; line-height:1.6; font-size:16px; font-weight:500; }
+    html[data-theme="dark"] .sub, body.eval-page:not(.light-mode) .sub { color:#dbe7df; }
+    .score { font-size:56px; font-weight:800; color:#047857; margin:8px 0; }
+    html[data-theme="dark"] .score, body.eval-page:not(.light-mode) .score { color:#86efac; }
+    .btns { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:22px; }
+    .btn { display:inline-flex; align-items:center; gap:8px; border:0; border-radius:16px; padding:13px 20px; font-weight:800; cursor:pointer; font-size:14px; text-decoration:none; }
+    .btn-main { background:var(--primary); color:#000; }
+    .btn-ghost { background:rgba(255,255,255,.55); color:#0b3d1c; border:1px solid rgba(11,61,28,.14); }
+    html[data-theme="dark"] .btn-ghost, body.eval-page:not(.light-mode) .btn-ghost {
+      background:rgba(255,255,255,.06); color:#fff; border-color:rgba(255,255,255,.12);
+    }
+    .sheet-wrap { margin-top:8px; }
+    .sheet-label { font-weight:800; font-size:13px; letter-spacing:.3px; text-transform:uppercase; margin:0 0 12px 6px; opacity:.7; }
+    .sheet {
+      background:#fff;
+      color:#111827;
+      border-radius:8px;
+      min-height:720px;
+      padding:48px 52px;
+      box-shadow:0 18px 50px rgba(16,32,20,.16);
+    }
+    .sheet-name { font-size:32px; font-weight:800; letter-spacing:-.4px; color:#111827; }
+    .sheet-title { color:#047857; font-weight:700; margin:4px 0 10px; }
+    .sheet-meta { color:#4b5563; font-size:13px; display:flex; gap:12px; flex-wrap:wrap; }
+    .sheet h3 {
+      margin:26px 0 8px;
+      font-size:13px;
+      letter-spacing:.8px;
+      text-transform:uppercase;
+      color:#047857;
+      border-bottom:1.5px solid #d1fae5;
+      padding-bottom:6px;
+    }
+    .sheet p, .sheet li { font-size:14px; line-height:1.55; color:#1f2937; }
+    .sheet ul { padding-left:18px; }
+    .skill-pills { display:flex; flex-wrap:wrap; gap:8px; }
+    .pill {
+      border:1px solid #d1d5db;
+      border-radius:999px;
+      padding:5px 10px;
+      font-size:12px;
+      font-weight:600;
+      background:#f8fafc;
+    }
+    .pill.verified {
+      background:#dcfce7;
+      border-color:#04ab07;
+      color:#14532d;
+      box-shadow:0 0 0 2px rgba(4,171,7,.12);
+    }
+    .job { margin-bottom:14px; }
+    .job b { display:block; }
+    .job .when { color:#6b7280; font-size:12px; font-weight:600; }
+    .empty { text-align:center; padding:40px 20px; color:#6b7280; }
+    .pdf-frame { width:100%; min-height:920px; border:0; border-radius:8px; background:#fff; display:none; }
+    #cert-wrap { margin:0 0 28px; }
+    #cert-wrap .cert-label { font-weight:800; font-size:13px; letter-spacing:.3px; text-transform:uppercase; margin:0 0 12px 6px; opacity:.7; }
+    #cert-canvas { width:100%; max-width:1024px; height:auto; display:block; margin:0 auto; border-radius:8px; background:#fff; }
+    #cert-actions { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:16px; }
+  </style>
+</head>
+<body class="eval-page">
+  <div class="wrap">
+    <div class="nav">
+      <a class="back" id="back-link" href="eval.html">← Back to eval</a>
+      <button class="theme-toggle-btn" type="button" onclick="toggleTheme && toggleTheme()">Theme</button>
+    </div>
+
+    <section class="hero">
+      <div class="badge" id="hero-badge">Congratulations</div>
+      <h1 id="hero-title">This skill is now on your resume.</h1>
+      <div class="score" id="hero-score"></div>
+      <p class="sub" id="hero-note">We added the verified skill to the resume you uploaded and highlighted it below.</p>
+      <div class="btns">
+        <button class="btn btn-main hidden" id="download-cert-btn" type="button"><i class="fa-solid fa-download"></i> Download certificate</button>
+        <a class="btn btn-main" href="resume-builder.html">Open resume builder</a>
+        <a class="btn btn-ghost" href="result.html">See resume skills</a>
+        <a class="btn btn-ghost" id="eval-again" href="eval.html">Verify another skill</a>
+      </div>
+    </section>
+
+    <section id="cert-wrap" class="hidden">
+      <div class="cert-label">Quiz completion certificate</div>
+      <canvas id="cert-canvas" width="2048" height="1448" aria-label="Hiero quiz completion certificate"></canvas>
+    </section>
+
+    <section class="sheet-wrap">
+      <div class="sheet-label">Your updated resume</div>
+      <iframe class="pdf-frame" id="pdf-frame" title="Resume preview"></iframe>
+      <article class="sheet" id="resume-sheet"></article>
+    </section>
+  </div>
+
+  <script src="eval-certificate.js"></script>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const saved = (() => { try { return JSON.parse(sessionStorage.getItem('hieroEvalCongrats') || 'null'); } catch (e) { return null; } })();
+    const skill = params.get('skill') || saved?.skill || 'this skill';
+    const level = params.get('level') || saved?.level || '';
+    const userId = localStorage.getItem('userId') || localStorage.getItem('user_id') || 'guest-user';
+    document.getElementById('back-link').href = 'eval.html?skill=' + encodeURIComponent(skill);
+    document.getElementById('eval-again').href = 'eval.html';
+
+    function esc(value) {
+      return String(value == null ? '' : value)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function asList(value) {
+      if (!value) return [];
+      if (Array.isArray(value)) return value.map((item) => typeof item === 'string' ? item : (item.name || item.skill || item.label || '')).filter(Boolean);
+      if (typeof value === 'string') return value.split(/,|\n|;/).map((s) => s.trim()).filter(Boolean);
+      if (typeof value === 'object') return Object.values(value).flatMap(asList);
+      return [];
+    }
+
+    function isVerified(text) {
+      return new RegExp(skill.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i').test(String(text || '')) && /verified/i.test(String(text || ''));
+    }
+
+    function renderResume(data) {
+      const info = data.personalInfo || {};
+      const name = info.fullName || data.fullName || localStorage.getItem('userName') || 'Your name';
+      const title = info.professionalTitle || data.professionalTitle || info.headline || '';
+      const bits = [info.email || data.email, info.phone || data.phone, info.linkedin || data.linkedin, info.address].filter(Boolean);
+      const skills = asList(data.technicalSkills || data.skills || data.matchedSkills);
+      const certs = asList(data.certifications || data.professional_certifications);
+      const experience = Array.isArray(data.experience) ? data.experience : [];
+      const education = Array.isArray(data.education) ? data.education : [];
+      const projects = Array.isArray(data.projects) ? data.projects : [];
+      const summary = data.summary || info.summary || '';
+
+      const skillHtml = skills.length
+        ? `<div class="skill-pills">${skills.map((s) => `<span class="pill${isVerified(s) ? ' verified' : ''}">${esc(s)}</span>`).join('')}</div>`
+        : '<p>No skills listed yet.</p>';
+
+      const expHtml = experience.map((job) => {
+        const role = job.jobTitle || job.title || job.role || 'Role';
+        const company = job.company || job.organization || '';
+        const when = [job.startDate, job.endDate].filter(Boolean).join(' – ') || job.duration || job.dates || '';
+        const desc = job.description || (Array.isArray(job.bullets) ? job.bullets.join('\n') : '');
+        return `<div class="job"><b>${esc(role)}${company ? ' · ' + esc(company) : ''}</b>${when ? `<div class="when">${esc(when)}</div>` : ''}${desc ? `<p>${esc(desc).replace(/\n/g, '<br>')}</p>` : ''}</div>`;
+      }).join('');
+
+      const eduHtml = education.map((ed) => {
+        const school = ed.school || ed.institution || ed.college || '';
+        const degree = ed.degree || ed.field || ed.course || '';
+        const year = ed.gradYear || ed.year || ed.endDate || '';
+        return `<div class="job"><b>${esc(degree || school)}</b>${school && degree ? `<div>${esc(school)}</div>` : ''}${year ? `<div class="when">${esc(year)}</div>` : ''}</div>`;
+      }).join('');
+
+      const projHtml = projects.map((p) => {
+        const pname = p.name || p.title || 'Project';
+        const desc = p.description || p.summary || '';
+        return `<div class="job"><b>${esc(pname)}</b>${desc ? `<p>${esc(desc)}</p>` : ''}</div>`;
+      }).join('');
+
+      document.getElementById('resume-sheet').innerHTML = `
+        <div class="sheet-name">${esc(name)}</div>
+        ${title ? `<div class="sheet-title">${esc(title)}</div>` : ''}
+        ${bits.length ? `<div class="sheet-meta">${bits.map(esc).join(' · ')}</div>` : ''}
+        ${summary ? `<h3>Summary</h3><p>${esc(summary)}</p>` : ''}
+        <h3>Skills</h3>
+        ${skillHtml}
+        ${certs.length ? `<h3>Certifications</h3><ul>${certs.map((c) => `<li>${esc(c)}</li>`).join('')}</ul>` : ''}
+        ${expHtml ? `<h3>Experience</h3>${expHtml}` : ''}
+        ${eduHtml ? `<h3>Education</h3>${eduHtml}` : ''}
+        ${projHtml ? `<h3>Projects</h3>${projHtml}` : ''}
+        ${!skills.length && !experience.length && !education.length && !summary ? '<div class="empty">Your saved resume was empty, so we created a starter resume with this verified skill. Open the builder to finish the rest.</div>' : ''}
+      `;
+    }
+
+    async function tryPdf(data) {
+      try {
+        const res = await fetch('/api/resume/preview-resume', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...data, template: data.template || 'classic' })
+        });
+        if (!res.ok) return;
+        const blob = await res.blob();
+        if (!blob || blob.size < 80 || !(blob.type || '').includes('pdf')) return;
+        const frame = document.getElementById('pdf-frame');
+        frame.src = URL.createObjectURL(blob);
+        frame.style.display = 'block';
+        document.getElementById('resume-sheet').style.display = 'none';
+      } catch (e) {}
+    }
+
+    async function boot() {
+      let payload = saved;
+      if (!payload?.data) {
+        try {
+          const local = JSON.parse(localStorage.getItem('resumeData') || '{}');
+          if (local && (local.personalInfo || local.technicalSkills || local.skills)) payload = { ...(payload || {}), data: local, skill, level };
+        } catch (e) {}
+      }
+      if (!payload?.data) {
+        try {
+          const res = await fetch('/api/resume/get-user-resume?userId=' + encodeURIComponent(userId));
+          const json = await res.json();
+          if (json?.data) payload = { ...(payload || {}), data: json.data, skill, level };
+        } catch (e) {}
+      }
+      const data = payload?.data || {};
+      const shownSkill = payload?.skill || skill;
+      const shownLevel = payload?.level || level;
+      const score = payload?.score;
+      document.getElementById('hero-badge').textContent = shownLevel ? `Verified — Level ${shownLevel}` : 'Verified skill';
+      document.getElementById('hero-title').textContent = `Congratulations — ${shownSkill} is on your resume.`;
+      document.getElementById('hero-score').textContent = score != null && score !== '' ? score + '%' : '';
+      document.getElementById('hero-note').textContent = payload?.created
+        ? `We could not find a previously uploaded resume, so we started one and added ${shownSkill} as Hiero Verified.`
+        : `We added ${shownSkill}${shownLevel ? ' (Hiero Verified · Level ' + shownLevel + ')' : ''} to the resume you uploaded.`;
+      renderResume(data);
+      tryPdf(data);
+      await showCertificate(payload, shownLevel, data);
+    }
+
+    async function showCertificate(payload, shownLevel, data) {
+      const wrap = document.getElementById('cert-wrap');
+      const canvas = document.getElementById('cert-canvas');
+      const btn = document.getElementById('download-cert-btn');
+      if (!window.HieroEvalCertificate) return;
+      let cert = payload?.certificate;
+      if (!cert) {
+        try { cert = JSON.parse(sessionStorage.getItem('hieroEvalCertificate') || 'null'); } catch (e) { cert = null; }
+      }
+      const info = data.personalInfo || {};
+      const fullName = cert?.fullName || cert?.candidateName || await HieroEvalCertificate.resolveUserName() || info.fullName || data.fullName || localStorage.getItem('userName');
+      const level = Number(cert?.level || shownLevel || payload?.level || 0);
+      if (!cert || !fullName || !level) return;
+      const meta = HieroEvalCertificate.LEVELS[level] || HieroEvalCertificate.LEVELS[1];
+      const painted = {
+        fullName,
+        skill: cert?.skill || payload?.skill || skill,
+        level,
+        levelName: cert?.levelName || meta.name,
+        levelTagline: cert?.levelTagline || meta.tagline,
+        questionsSolved: cert?.questionsSolved,
+        questionsTotal: cert?.questionsTotal,
+        certificateId: cert?.certificateId,
+        issuedAt: cert?.issuedAt || new Date().toISOString(),
+        score: cert?.score || payload?.score
+      };
+      wrap.classList.remove('hidden');
+      btn.classList.remove('hidden');
+      await HieroEvalCertificate.render(canvas, painted);
+      btn.onclick = () => HieroEvalCertificate.download(canvas, painted);
+    }
+
+    boot();
+  </script>
+</body>
+</html>

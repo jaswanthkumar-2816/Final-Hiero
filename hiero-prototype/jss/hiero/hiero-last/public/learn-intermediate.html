@@ -356,8 +356,20 @@
     /* Grid */
     .content-grid {
       display: block;
-      max-width: 1040px;
-      margin: 0 auto;
+      max-width: none;
+      margin: 0;
+      width: 100%;
+      text-align: left;
+    }
+
+    .media-split {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: stretch;
+    }
+    .media-split .video-section,
+    .media-split .playlist-section {
       width: 100%;
     }
 
@@ -400,6 +412,10 @@
       grid-template-columns: repeat(3, 1fr);
       gap: 24px;
       margin-bottom: 48px;
+    }
+
+    .playlist-section {
+      margin-top: 8px;
     }
 
     @media (max-width: 992px) {
@@ -1862,6 +1878,112 @@
       transform: translateY(-2px) scale(1.02);
       box-shadow: 0 0 35px var(--primary-glow);
     }
+
+    html[data-theme="light"],
+    body.light-mode {
+      --bg-dark: #f8fafc;
+      --bg-card: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --border: rgba(4, 171, 7, 0.22);
+      --glass: #ffffff;
+      --glass-border: rgba(15, 23, 42, 0.12);
+      --primary-glow: rgba(4, 171, 7, 0.16);
+    }
+
+    html[data-theme="light"] body,
+    body.light-mode {
+      background-color: #f8fafc;
+      color: #0f172a;
+    }
+
+    html[data-theme="light"] .selection-flow-card,
+    body.light-mode .selection-flow-card,
+    html[data-theme="light"] .path-stepper-wrap,
+    body.light-mode .path-stepper-wrap,
+    html[data-theme="light"] .friendly-active-panel,
+    body.light-mode .friendly-active-panel {
+      background: #ffffff;
+      border: 1px solid rgba(15, 23, 42, 0.1);
+      box-shadow: 0 14px 36px rgba(15, 23, 42, 0.08);
+    }
+
+    html[data-theme="light"] .step-title-text,
+    body.light-mode .step-title-text,
+    html[data-theme="light"] .path-stepper-title,
+    body.light-mode .path-stepper-title,
+    html[data-theme="light"] .section-header h2,
+    body.light-mode .section-header h2 {
+      color: #0f172a !important;
+      -webkit-text-fill-color: #0f172a !important;
+      background: none !important;
+    }
+
+    html[data-theme="light"] #current-skill-name-highlight,
+    body.light-mode #current-skill-name-highlight {
+      color: #04ab07 !important;
+      -webkit-text-fill-color: #04ab07 !important;
+    }
+
+    html[data-theme="light"] .step-subtitle-text,
+    body.light-mode .step-subtitle-text,
+    html[data-theme="light"] .path-stepper-subtitle,
+    body.light-mode .path-stepper-subtitle {
+      color: #475569 !important;
+    }
+
+    html[data-theme="light"] .step-card,
+    body.light-mode .step-card,
+    html[data-theme="light"] .roadmap-item,
+    body.light-mode .roadmap-item,
+    html[data-theme="light"] .missing-skill-chip,
+    body.light-mode .missing-skill-chip {
+      background: #f8fafc;
+      border: 1px solid rgba(15, 23, 42, 0.1);
+      color: #0f172a;
+    }
+
+    html[data-theme="light"] .orbit-chat-window,
+    html[data-theme="light"] .tutor-card,
+    body.light-mode .orbit-chat-window,
+    body.light-mode .tutor-card {
+      background: #ffffff;
+      box-shadow: 0 20px 50px rgba(15, 23, 42, 0.14);
+    }
+
+    html[data-theme="light"] .orbit-float-launcher,
+    body.light-mode .orbit-float-launcher {
+      background: #ffffff;
+      color: #0f172a;
+      box-shadow: 0 10px 28px rgba(15, 23, 42, 0.12);
+    }
+
+    html[data-theme="light"] .launcher-text,
+    body.light-mode .launcher-text {
+      color: #0f172a;
+    }
+
+    html[data-theme="light"] .nav-header,
+    body.light-mode .nav-header {
+      background: rgba(255, 255, 255, 0.94);
+      border-bottom-color: rgba(15, 23, 42, 0.08);
+    }
+
+    html[data-theme="light"] .app-brand span,
+    body.light-mode .app-brand span {
+      color: #0f172a;
+    }
+
+    html[data-theme="light"] .nav-btn,
+    body.light-mode .nav-btn {
+      color: #475569;
+    }
+
+    html[data-theme="light"] .theme-toggle-btn,
+    body.light-mode .theme-toggle-btn {
+      border-color: rgba(15, 23, 42, 0.12);
+      color: #0f172a;
+    }
   </style>
 </head>
 
@@ -1906,6 +2028,7 @@
       <a href="companies.html" class="nav-btn"><i class="fa-solid fa-building"></i><span>Target Companies</span></a>
       <a href="mock-interview.html" class="nav-btn"><i class="fa-solid fa-microphone"></i><span>Mock Interview</span></a>
       <a href="quiz.html" class="nav-btn active"><i class="fa-solid fa-book-open"></i><span>Learn Skills</span></a>
+      <a href="eval.html" class="nav-btn" id="nav-eval"><i class="fa-solid fa-shield-halved"></i><span>Hiero Eval</span></a>
     </nav>
     <div class="nav-actions">
       <button class="theme-toggle-btn" id="theme-switch" onclick="window.toggleTheme()" title="Switch Theme"><i class="fa-solid fa-moon"></i></button>
@@ -1948,13 +2071,32 @@
 
     <div class="content-grid">
       <div class="main-content">
-        <section class="video-section">
+        <div class="media-split">
+        <section class="video-section" id="tutorial-section">
           <div class="section-header">
             <h2>3 tutorials for the selected gap</h2>
             <span class="count-badge" id="video-count">Finding your clips…</span>
           </div>
           <div class="video-grid" id="video-container">
             <!-- Injected by JS -->
+          </div>
+        </section>
+        <section class="video-section playlist-section" id="playlist-section">
+          <div class="section-header">
+            <h2 id="playlist-heading">3 related playlists for this skill</h2>
+            <span class="count-badge" id="playlist-count">Playlists</span>
+          </div>
+          <div class="video-grid" id="playlist-container"></div>
+        </section>
+        </div>
+        <section class="video-section" id="eval-cta-section" style="margin-top:8px;">
+          <div style="background:linear-gradient(135deg,rgba(251,191,36,0.12),rgba(4,171,7,0.08));border:1.5px solid rgba(251,191,36,0.4);border-radius:22px;padding:22px 24px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;">
+            <div>
+              <div style="font-size:12px;font-weight:800;color:#fbbf24;text-transform:uppercase;letter-spacing:1px;">After you close the gap · Hiero Eval</div>
+              <h3 style="font-size:20px;margin:6px 0 4px;">Ready to verify <span id="eval-skill-label">this skill</span>?</h3>
+              <p style="color:var(--text-muted);font-size:13.5px;margin:0;">Prove the skill on your resume. A fail never removes it — it stays unverified until you pass.</p>
+            </div>
+            <a id="eval-cta-btn" href="eval.html" style="background:linear-gradient(135deg,#fbbf24,#04ab07);color:#000;text-decoration:none;font-weight:800;padding:12px 18px;border-radius:14px;white-space:nowrap;">Verify this skill →</a>
           </div>
         </section>
       </div>
@@ -2461,6 +2603,12 @@
       if (slabel) slabel.innerText = label;
       const cname = document.getElementById('skill-context-name');
       if (cname) cname.innerText = label;
+      const elabel = document.getElementById('eval-skill-label');
+      if (elabel) elabel.innerText = label;
+      const ebtn = document.getElementById('eval-cta-btn');
+      if (ebtn) ebtn.href = `eval.html?skill=${encodeURIComponent(currentSkill)}&track=intermediate`;
+      const enav = document.getElementById('nav-eval');
+      if (enav) enav.href = `eval.html?skill=${encodeURIComponent(currentSkill)}&track=intermediate`;
     }
 
     function goToSolvePage() {
@@ -2608,13 +2756,14 @@
         }
       });
 
-      container.parentElement.insertBefore(mapWrap, container);
+      const videoSection = document.getElementById('tutorial-section') || container.closest('.video-section');
+      const host = videoSection && videoSection.parentElement;
+      if (host) host.insertBefore(mapWrap, videoSection);
+      else container.parentElement.insertBefore(mapWrap, container);
     }
 
     function switchTopic(topic) {
       activeTopic = topic;
-      const state = topic.state !== 'LOCKED' ? (topic.state || 'NOT_STARTED') : 'LOCKED';
-      renderActiveModulePanel(topic, state);
     }
 
     function extractYouTubeId(url) {
@@ -2628,6 +2777,7 @@
     function renderActiveModulePanel(topic, state) {
       const existing = document.getElementById('mastery-active-panel');
       if (existing) existing.remove();
+      return;
 
       const panel = document.createElement('div');
       panel.id = 'mastery-active-panel';
@@ -3092,6 +3242,7 @@
 
         if (!selectedGapTopic) {
           renderVideos([]);
+          renderPlaylists([]);
           return;
         }
 
@@ -3113,6 +3264,9 @@
           const videoData = json.data.videos || {};
           const videoList = videoData[langParam] || videoData['english'] || (Array.isArray(videoData) ? videoData : Object.values(videoData)[0]) || [];
           renderVideos(Array.isArray(videoList) ? videoList : []);
+          const playlistData = json.data.playlists || {};
+          const playlistList = playlistData[langParam] || playlistData['english'] || (Array.isArray(playlistData) ? playlistData : Object.values(playlistData)[0]) || [];
+          renderPlaylists(Array.isArray(playlistList) ? playlistList : []);
           try {
             if (json.data.problems) renderProblems(json.data.problems);
           } catch (probErr) {
@@ -3120,10 +3274,12 @@
           }
         } else {
           renderVideos([]);
+          renderPlaylists([]);
         }
       } catch (err) {
         console.error('Failed to load videos/problems', err);
         renderVideos([]);
+        renderPlaylists([]);
       } finally {
         if (loader) {
           loader.classList.add('hidden');
@@ -3361,6 +3517,65 @@
       });
     }
 
+    function renderPlaylists(playlists) {
+      const container = document.getElementById('playlist-container');
+      const heading = document.getElementById('playlist-heading');
+      const countEl = document.getElementById('playlist-count');
+      if (!container) return;
+      const list = (playlists || []).filter((p) => p && p.playlistId).slice(0, 3);
+      const skillLabel = currentSkill || 'this skill';
+      const topic = selectedGapTopic ? `${skillLabel} · ${selectedGapTopic}` : skillLabel;
+      if (heading) heading.textContent = `3 related playlists for ${topic}`;
+      if (countEl) countEl.textContent = `${list.length} playlists`;
+      if (!list.length) {
+        container.innerHTML = selectedGapTopic
+          ? `<p style="grid-column:1/-1;color:var(--text-muted);padding:8px 0;">No matching playlists found for this skill yet.</p>`
+          : `<p style="grid-column:1/-1;color:var(--text-muted);padding:8px 0;">Click a gap to load 3 related playlists.</p>`;
+        return;
+      }
+      container.innerHTML = '';
+      list.forEach((p, i) => {
+        const card = document.createElement('div');
+        card.className = 'video-card';
+        card.style.animation = `fadeInUp 0.6s ease-out forwards ${i * 0.1}s`;
+        const safeTitle = String(p.title || 'Playlist').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+        const videoId = p.videoId || '';
+        const playlistId = p.playlistId;
+        const countLabel = p.videoCount ? `${p.videoCount} videos` : 'Playlist';
+        const thumb = p.thumbnail || (videoId ? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg` : '');
+        card.innerHTML = `
+          <div class="video-thumb" onclick="openPlaylistPage('${playlistId}','${safeTitle}')">
+            <img src="${thumb}" alt="Playlist thumbnail" loading="lazy">
+            <div class="play-overlay"><div class="play-icon"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div></div>
+            <span class="duration">${countLabel}</span>
+            <div style="position:absolute;top:12px;left:12px;background:rgba(59,130,246,0.95);color:#fff;font-weight:800;font-size:11px;padding:4px 10px;border-radius:100px;text-transform:uppercase;">Playlist ${i + 1}</div>
+          </div>
+          <div class="video-info" style="display:flex;flex-direction:column;gap:10px;">
+            <div style="font-size:12px;font-weight:700;color:#60a5fa;text-transform:uppercase;letter-spacing:0.5px;">Related playlist · ${topic}</div>
+            <div class="video-title" style="cursor:pointer;" onclick="openPlaylistPage('${playlistId}','${safeTitle}')">${p.title || 'Playlist'}</div>
+            <div class="tags" style="display:flex;align-items:center;justify-content:space-between;margin-top:4px;">
+              <span class="tag" style="background:rgba(59,130,246,0.15);color:#60a5fa;border:1px solid rgba(59,130,246,0.35);">${countLabel}</span>
+              <button type="button" onclick="openPlaylistPage('${playlistId}','${safeTitle}')" style="background:linear-gradient(135deg,#3b82f6,#60a5fa);color:#fff;border:none;padding:6px 14px;border-radius:100px;font-weight:800;font-size:11.5px;cursor:pointer;">View all videos →</button>
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    window.openPlaylistPage = function (playlistId, title) {
+      const q = new URLSearchParams({
+        list: playlistId,
+        title: title || '',
+        skill: currentSkill || '',
+        lang: currentLang || 'english',
+        track: 'intermediate'
+      });
+      if (currentCodingLang) q.set('code', currentCodingLang);
+      if (selectedGapTopic) q.set('gap', selectedGapTopic);
+      location.href = `playlist.html?${q.toString()}`;
+    };
+
     // Video Modal Controller
     const vModal = document.getElementById('videoModal');
     const vWrapper = document.getElementById('videoWrapper');
@@ -3373,9 +3588,10 @@
     let stepsShownInEnglish = false;
     let stepsVideoId = '';
 
-    function openVideo(id, title, index = 0, videoDbId = '', startSec = 0, endSec = 0) {
+    function openVideo(id, title, index = 0, videoDbId = '', startSec = 0, endSec = 0, playlistId = '') {
       activeVideoIndex = index;
       const cleanId = extractYouTubeId(id);
+      const listId = String(playlistId || '').trim();
       const listed = (currentModuleList || []).find((v) => extractYouTubeId(v.videoId || v.url) === cleanId);
       if (listed && listed.title) currentVideoTitle = listed.title;
       else if (!startSec && title) currentVideoTitle = title;
@@ -3384,6 +3600,11 @@
       const sameVideo = modalTranscriptVideoId === cleanId && vModal.classList.contains('active');
       currentWatchVideoId = cleanId;
       lastLocateStartSec = start || lastLocateStartSec;
+      const embedId = cleanId || (listId ? 'videoseries' : '');
+      const listParam = listId ? `&list=${encodeURIComponent(listId)}` : '';
+      const ytWatch = listId
+        ? (cleanId ? `https://www.youtube.com/watch?v=${cleanId}&list=${listId}` : `https://www.youtube.com/playlist?list=${listId}`)
+        : `https://www.youtube.com/watch?v=${cleanId}&t=${start}s`;
 
       fetch('/api/learning/video/heartbeat', {
         method: 'POST',
@@ -3399,9 +3620,9 @@
       }).catch(() => {});
 
       vWrapper.innerHTML = `
-        <iframe src="https://www.youtube.com/embed/${cleanId}?autoplay=1&start=${start}${end}&rel=0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        <iframe src="https://www.youtube.com/embed/${embedId}?autoplay=1&start=${start}${end}&rel=0${listParam}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
         <div style="position:absolute; bottom:12px; right:12px; z-index:10;">
-          <a href="https://www.youtube.com/watch?v=${cleanId}&t=${start}s" target="_blank" style="background:rgba(0,0,0,0.85); border:1px solid rgba(255,255,255,0.2); color:#fff; padding:8px 14px; border-radius:10px; font-size:12px; text-decoration:none; font-weight:700; display:flex; align-items:center; gap:6px; backdrop-filter:blur(10px);">
+          <a href="${ytWatch}" target="_blank" style="background:rgba(0,0,0,0.85); border:1px solid rgba(255,255,255,0.2); color:#fff; padding:8px 14px; border-radius:10px; font-size:12px; text-decoration:none; font-weight:700; display:flex; align-items:center; gap:6px; backdrop-filter:blur(10px);">
             Watch on YouTube <i class="fa-solid fa-up-right-from-square"></i>
           </a>
         </div>
@@ -3411,7 +3632,7 @@
       document.body.style.overflow = 'hidden';
       toggleOrbitWidget(true);
       saveLearnSession({ videoId: cleanId, videoTitle: currentVideoTitle, startSec: start, watching: true });
-      if (!sameVideo) loadModalModules(cleanId);
+      if (!sameVideo && cleanId) loadModalModules(cleanId);
     }
     window.openVideo = openVideo;
 
@@ -4116,9 +4337,6 @@
     const originalToggleTheme = window.toggleTheme;
     window.toggleTheme = function () {
       if (typeof originalToggleTheme === 'function') originalToggleTheme();
-      if (masteryPathData && Array.isArray(masteryPathData.topics)) {
-        renderPathMap(masteryPathData.topics);
-      }
     };
 
     document.addEventListener('DOMContentLoaded', init);

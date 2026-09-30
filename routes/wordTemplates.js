@@ -114,14 +114,58 @@ function renderCategorizedSkillsHTML(skillsInput, options = {}) {
     }).join('');
 }
 
+const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+/**
+ * Renders a stored date for display. Form inputs are `<input type="month">`,
+ * so values arrive as `YYYY-MM`; printing that raw gives "2023-03".
+ * Anything that is not `YYYY-MM` (e.g. "Present") is passed through unchanged.
+ */
+function formatResumeDate(value) {
+    if (!value) return '';
+    const str = String(value).trim();
+    const m = str.match(/^(\d{4})-(\d{2})$/);
+    if (!m) return str;
+    const idx = parseInt(m[2], 10) - 1;
+    if (idx < 0 || idx > 11) return str;
+    return `${MONTH_LABELS[idx]} ${m[1]}`;
+}
+
+/** Splits a stored multi-item string into display bullets. */
+function toDisplayItems(value) {
+    if (Array.isArray(value)) return value.map(v => String(v).trim()).filter(Boolean);
+    if (typeof value !== 'string') return [];
+    return value.split(/\n|•|;/).map(v => v.trim()).filter(Boolean);
+}
+
 function normalizeWordData(data) {
     const {
         personalInfo = {},
         summary = '',
     } = data;
 
+    // Prefer explicit professional title over invented defaults
+    if (!personalInfo.roleTitle && personalInfo.professionalTitle) {
+        personalInfo.roleTitle = personalInfo.professionalTitle;
+    }
+
     let experience = data.experience || [];
     let education = data.education || [];
+    // Prefer marks over mislabeled gpa for display downstream
+    if (Array.isArray(education)) {
+        education = education.map((edu) => {
+            let marks = (edu.marks || edu.gpa || '').toString().trim();
+            if (marks && /\/\s*100/i.test(marks)) marks = marks.replace(/\/\s*100/i, '%');
+            if (marks && /^\d+(\.\d+)?$/.test(marks) && parseFloat(marks) > 4) marks = `${marks}%`;
+            const university = edu.university || '';
+            const college = edu.college || '';
+            let school = edu.school || edu.institution || '';
+            if (university && college && !String(school).includes(university)) {
+                school = `${university} — ${college}`;
+            }
+            return { ...edu, school, gpa: marks, marks };
+        });
+    }
     let projects = data.projects || [];
     if (typeof projects === 'string') {
         projects = projects.split('\n').map(p => ({ name: p.trim(), title: p.trim(), description: '' })).filter(p => p.name);
@@ -149,6 +193,33 @@ function normalizeWordData(data) {
     let references = data.references || [];
     let extraCurricular = data.extraCurricular || data.activities || '';
     let additionalInfo = data.additionalInfo || '';
+
+    // Internships: the form captures these separately from full-time experience.
+    let internships = Array.isArray(data.internships) ? data.internships : [];
+    internships = internships
+        .map((i) => ({
+            jobTitle: i.jobTitle || i.role || '',
+            company: i.company || i.organization || '',
+            startDate: i.startDate || i.start || '',
+            endDate: i.endDate || i.end || '',
+            description: i.description || i.desc || ''
+        }))
+        .filter((i) => i.jobTitle || i.company);
+
+    // Novel / extra headings discovered during extraction (Seminars, Patents,
+    // Memberships, ...) plus the single free-form custom section.
+    let customDetails = Array.isArray(data.customDetails) ? data.customDetails : [];
+    customDetails = customDetails
+        .map((c) => ({
+            heading: (c.heading || c.title || '').toString().trim(),
+            content: Array.isArray(c.items)
+                ? c.items.join('\n')
+                : (c.content || '').toString().trim()
+        }))
+        .filter((c) => c.heading && c.content);
+
+    const customSectionTitle = (data.customSectionTitle || '').toString().trim();
+    const customSectionContent = (data.customSectionContent || '').toString().trim();
 
     if (Array.isArray(softSkills)) {
         softSkills = softSkills.join(', ');
@@ -207,7 +278,11 @@ function normalizeWordData(data) {
         extraCurricular,
         additionalInfo,
         publications,
-        references
+        references,
+        internships,
+        customDetails,
+        customSectionTitle,
+        customSectionContent
     };
 }
 
@@ -1743,7 +1818,7 @@ function generateHieroCoolWordHTML(data, config) {
     if (p.website) contactItems.push(p.website);
     const contactStr = contactItems.join('   |   ');
 
-    const roleTitle = p.roleTitle || 'Professional Candidate';
+    const roleTitle = p.roleTitle || p.professionalTitle || '';
 
     // Build experience HTML sequentially
     let experienceHTML = '';
@@ -1762,7 +1837,7 @@ function generateHieroCoolWordHTML(data, config) {
                 <table cellpadding="0" cellspacing="0" border="0" style="width: 100%; margin-bottom: 2pt; font-family: Arial, sans-serif;">
                   <tr>
                     <td class="item-title" style="text-align: left; padding: 0;">${exp.jobTitle || ''}</td>
-                    <td class="item-date" style="text-align: right; width: 150pt; padding: 0;">${exp.startDate || ''} – ${exp.endDate || 'Present'}</td>
+                    <td class="item-date" style="text-align: right; width: 150pt; padding: 0;">${formatResumeDate(exp.startDate)} – ${exp.endDate ? formatResumeDate(exp.endDate) : 'Present'}</td>
                   </tr>
                 </table>
                 <div class="item-company">${exp.company || ''}${exp.location ? ' | ' + exp.location : ''}</div>
@@ -1781,14 +1856,23 @@ function generateHieroCoolWordHTML(data, config) {
             <div class='section-line'>&nbsp;</div>
         `;
         d.education.forEach(edu => {
+            const marksRaw = (edu.marks || edu.gpa || '').toString().trim();
+            let marksLabel = '';
+            if (marksRaw) {
+                const looksPercent = /%|\/\s*100/i.test(marksRaw) || (/^\d+(\.\d+)?$/.test(marksRaw) && parseFloat(marksRaw) > 4);
+                const display = marksRaw.replace(/\/\s*100/i, '%').replace(/^(\d+(?:\.\d+)?)$/, (m) => (parseFloat(m) > 4 ? `${m}%` : m));
+                marksLabel = looksPercent || display.includes('%')
+                    ? ` | Marks: ${display.includes('%') ? display : display + '%'}`
+                    : ` | ${/gpa|cgpa/i.test(marksRaw) ? '' : 'GPA: '}${display}`;
+            }
             educationHTML += `
                 <table cellpadding="0" cellspacing="0" border="0" style="width: 100%; margin-bottom: 2pt; font-family: Arial, sans-serif;">
                   <tr>
-                    <td class="item-title" style="text-align: left; padding: 0;">${edu.school || ''}</td>
+                    <td class="item-title" style="text-align: left; padding: 0;">${edu.school || edu.institution || ''}</td>
                     <td class="item-date" style="text-align: right; width: 150pt; padding: 0;">${edu.gradYear || ''}</td>
                   </tr>
                 </table>
-                <div class="item-company" style="font-weight: normal; font-size: 9.5pt;">${edu.degree || ''} ${edu.gpa ? ' | GPA: ' + edu.gpa : ''}</div>
+                <div class="item-company" style="font-weight: normal; font-size: 9.5pt;">${edu.degree || ''}${marksLabel}</div>
             `;
         });
     }
@@ -1823,13 +1907,151 @@ function generateHieroCoolWordHTML(data, config) {
 
     // Build achievements HTML sequentially
     let achievementsHTML = '';
-    if (d.achievements) {
+    const achText = typeof d.achievements === 'string' ? d.achievements : '';
+    if (achText.trim()) {
+        const achItems = achText.split(/\n|•|;/).map(a => a.trim()).filter(Boolean);
         achievementsHTML = `
             <div class='section-title'>Honors & Achievements</div>
             <div class='section-line'>&nbsp;</div>
             <div class='content'>
-              <ul>${d.achievements.split(';').map(a => `<li>${a.trim()}</li>`).join('')}</ul>
+              <ul>${achItems.map(a => `<li>${a}</li>`).join('')}</ul>
             </div>
+        `;
+    }
+
+    // Seminars / workshops / extra-curricular (often dropped before)
+    let seminarsHTML = '';
+    const extraText = typeof d.extraCurricular === 'string' ? d.extraCurricular : '';
+    if (extraText.trim()) {
+        const items = extraText.split(/\n|•|;/).map(a => a.trim()).filter(Boolean);
+        seminarsHTML = `
+            <div class='section-title'>Seminar / Conference / Workshop</div>
+            <div class='section-line'>&nbsp;</div>
+            <div class='content'>
+              <ul>${items.map(a => `<li>${a}</li>`).join('')}</ul>
+            </div>
+        `;
+    }
+
+    let languagesHTML = '';
+    if (d.languages) {
+        languagesHTML = `
+            <div class='section-title'>Languages</div>
+            <div class='section-line'>&nbsp;</div>
+            <div class='content'>${d.languages}</div>
+        `;
+    }
+    let hobbiesHTML = '';
+    if (d.hobbies) {
+        hobbiesHTML = `
+            <div class='section-title'>Hobbies</div>
+            <div class='section-line'>&nbsp;</div>
+            <div class='content'>${d.hobbies}</div>
+        `;
+    }
+
+    // Internships — captured by the form but previously never rendered.
+    let internshipsHTML = '';
+    if (d.internships.length > 0) {
+        internshipsHTML = `
+            <div class='section-title'>Internships</div>
+            <div class='section-line'>&nbsp;</div>
+        `;
+        d.internships.forEach(intern => {
+            const descLines = intern.description ? intern.description.split('\n').filter(l => l.trim()) : [];
+            const descHTML = descLines.length > 0
+                ? `<ul>${descLines.map(l => `<li>${l.replace(/^[\*\-•]\s*/, '').trim()}</li>`).join('')}</ul>`
+                : '';
+            const dateStr = [formatResumeDate(intern.startDate), intern.endDate ? formatResumeDate(intern.endDate) : '']
+                .filter(Boolean).join(' – ');
+            internshipsHTML += `
+                <table cellpadding="0" cellspacing="0" border="0" style="width: 100%; margin-bottom: 2pt; font-family: Arial, sans-serif;">
+                  <tr>
+                    <td class="item-title" style="text-align: left; padding: 0;">${intern.jobTitle || ''}</td>
+                    <td class="item-date" style="text-align: right; width: 150pt; padding: 0;">${dateStr}</td>
+                  </tr>
+                </table>
+                <div class="item-company">${intern.company || ''}</div>
+                <div class='content'>${descHTML}</div>
+            `;
+        });
+    }
+
+    // Publications — normalized upstream but no template consumed it.
+    let publicationsHTML = '';
+    const pubItems = toDisplayItems(d.publications);
+    if (pubItems.length > 0) {
+        publicationsHTML = `
+            <div class='section-title'>Publications</div>
+            <div class='section-line'>&nbsp;</div>
+            <div class='content'>
+              <ul>${pubItems.map(x => `<li>${x}</li>`).join('')}</ul>
+            </div>
+        `;
+    }
+
+    // Novel headings found during extraction (Patents, Memberships, ...).
+    let customDetailsHTML = '';
+    if (d.customDetails.length > 0) {
+        customDetailsHTML = d.customDetails.map(sec => {
+            const items = toDisplayItems(sec.content);
+            const body = items.length > 1
+                ? `<ul>${items.map(x => `<li>${x}</li>`).join('')}</ul>`
+                : `${items[0] || ''}`;
+            return `
+            <div class='section-title'>${sec.heading}</div>
+            <div class='section-line'>&nbsp;</div>
+            <div class='content'>${body}</div>
+        `;
+        }).join('');
+    }
+
+    // Single free-form custom section from the form.
+    let customSectionHTML = '';
+    if (d.customSectionContent) {
+        const items = toDisplayItems(d.customSectionContent);
+        const body = items.length > 1
+            ? `<ul>${items.map(x => `<li>${x}</li>`).join('')}</ul>`
+            : `${items[0] || ''}`;
+        customSectionHTML = `
+            <div class='section-title'>${d.customSectionTitle || 'Additional Information'}</div>
+            <div class='section-line'>&nbsp;</div>
+            <div class='content'>${body}</div>
+        `;
+    }
+
+    // Free-text overflow bucket from the importer.
+    let additionalInfoHTML = '';
+    if (d.additionalInfo) {
+        const items = toDisplayItems(d.additionalInfo);
+        const body = items.length > 1
+            ? `<ul>${items.map(x => `<li>${x}</li>`).join('')}</ul>`
+            : `${items[0] || ''}`;
+        additionalInfoHTML = `
+            <div class='section-title'>Additional Details</div>
+            <div class='section-line'>&nbsp;</div>
+            <div class='content'>${body}</div>
+        `;
+    }
+
+    // References.
+    let referencesHTML = '';
+    if (Array.isArray(d.references) && d.references.length > 0) {
+        const rows = d.references.map(ref => {
+            const meta = [ref.title, ref.company].filter(Boolean).join(', ');
+            const contact = [ref.phone, ref.email].filter(Boolean).join(' | ');
+            return `
+                <div style="margin-bottom: 5pt;">
+                  <div class="item-title">${ref.name || ''}</div>
+                  ${meta ? `<div class="item-company" style="font-weight: normal;">${meta}</div>` : ''}
+                  ${contact ? `<div class='content' style="margin: 0;">${contact}</div>` : ''}
+                </div>
+            `;
+        }).join('');
+        referencesHTML = `
+            <div class='section-title'>References</div>
+            <div class='section-line'>&nbsp;</div>
+            <div class='content'>${rows}</div>
         `;
     }
 
@@ -1853,21 +2075,22 @@ function generateHieroCoolWordHTML(data, config) {
           <h1 style="font-size: 22pt; font-weight: bold; color: ${BLACK}; text-transform: uppercase; margin: 0 0 3pt 0; letter-spacing: 0.5px; font-family: Arial, sans-serif;">
             ${p.fullName || 'RESUME'}
           </h1>
-          <div style="font-size: 11pt; color: ${PRIMARY}; font-weight: bold; text-transform: uppercase; margin-bottom: 8pt; letter-spacing: 1px;">
+          ${roleTitle ? `<div style="font-size: 11pt; color: ${PRIMARY}; font-weight: bold; text-transform: uppercase; margin-bottom: 8pt; letter-spacing: 1px;">
             ${roleTitle}
-          </div>
+          </div>` : ''}
           <div style="font-size: 9.5pt; color: ${GRAY_TEXT}; font-family: Arial, sans-serif; line-height: 1.4;">
             ${contactStr}
           </div>
         </div>
 
         ${d.summary ? `
-            <div class='section-title'>Professional Summary</div>
+            <div class='section-title'>Objective</div>
             <div class='section-line'>&nbsp;</div>
             <div class='content'>${d.summary}</div>
         ` : ''}
 
         ${experienceHTML}
+        ${internshipsHTML}
         ${educationHTML}
         ${projectsHTML}
 
@@ -1886,7 +2109,15 @@ function generateHieroCoolWordHTML(data, config) {
             <div class='content'>${d.certifications}</div>
         ` : ''}
 
+        ${seminarsHTML}
         ${achievementsHTML}
+        ${publicationsHTML}
+        ${languagesHTML}
+        ${hobbiesHTML}
+        ${customDetailsHTML}
+        ${customSectionHTML}
+        ${additionalInfoHTML}
+        ${referencesHTML}
     </body>
     </html>`;
 }

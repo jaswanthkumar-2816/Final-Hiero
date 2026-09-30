@@ -1,5 +1,45 @@
 [
   {
+    "id": "c-hiero",
+    "name": "Hiero",
+    "logoUrl": "",
+    "location": "Yelhanka",
+    "description": "Verified partner company connecting directly with HIERO AI talent network.",
+    "website": ""
+  },
+  {
+    "id": "c-hr-google-com",
+    "name": "Verified HR Partner",
+    "logoUrl": "",
+    "location": "Remote (India)",
+    "description": "Verified partner company connecting directly with HIERO AI talent network.",
+    "website": ""
+  },
+  {
+    "id": "c-jaswanth-stripe-in",
+    "name": "Stripe Corp",
+    "logoUrl": "",
+    "location": "Hyderabad, India",
+    "description": "Verified partner company connecting directly with HIERO AI talent network.",
+    "website": ""
+  },
+  {
+    "id": "c-ltm",
+    "name": "LTM",
+    "logoUrl": "",
+    "location": "Hyderabad, India (Hybrid)",
+    "description": "Verified partner company connecting directly with HIERO AI talent network.",
+    "website": ""
+  },
+  {
+    "id": "c1",
+    "name": "TechNova",
+    "logoUrl": "",
+    "location": "Bangalore, India (Hybrid)",
+    "description": "Verified partner company connecting directly with HIERO AI talent network.",
+    "website": ""
+  },
+  {
     "id": "c-jas-hiero-in",
     "name": "Hiero Corp",
     "logoUrl": "",

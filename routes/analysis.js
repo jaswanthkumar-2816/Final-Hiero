@@ -1004,6 +1004,41 @@ async function searchYouTubeApi(query, lang, durationPref, limit = 10) {
     }));
 }
 
+async function hydrateYouTubeDurationsBatched(videos) {
+    if (!YOUTUBE_API_KEY || !videos.length) return videos;
+    const ids = [...new Set(videos.map((v) => v.videoId).filter(Boolean))];
+    const byId = {};
+    for (let i = 0; i < ids.length; i += 50) {
+        const chunk = ids.slice(i, i + 50);
+        try {
+            const ytRes = await axios.get('https://www.googleapis.com/youtube/v3/videos', {
+                params: {
+                    part: 'contentDetails,status,snippet',
+                    id: chunk.join(','),
+                    key: YOUTUBE_API_KEY
+                },
+                timeout: 12000
+            });
+            for (const item of ytRes.data.items || []) {
+                const sec = parseDurationToSeconds(item.contentDetails?.duration);
+                byId[item.id] = {
+                    duration: item.contentDetails?.duration || 'PT30M',
+                    durationSec: sec,
+                    defaultAudioLanguage: item.snippet?.defaultAudioLanguage || '',
+                    defaultLanguage: item.snippet?.defaultLanguage || ''
+                };
+            }
+        } catch (e) {
+            console.warn('[YT details batch]', e.message);
+        }
+    }
+    return videos.map((v) => {
+        const extra = byId[v.videoId];
+        if (!extra) return v;
+        return { ...v, ...extra };
+    });
+}
+
 async function hydrateYouTubeDurations(videos) {
     if (!YOUTUBE_API_KEY || !videos.length) return videos;
     const ids = [...new Set(videos.map((v) => v.videoId).filter(Boolean))].slice(0, 20);
@@ -1120,8 +1155,8 @@ async function collectTutorialCandidates(skill, lang, codingLang, track = 'begin
         : beginnerSearchQueries(skill, lang, codingLang);
     const gathered = [];
     for (const query of queries.slice(0, 2)) {
-        if (YOUTUBE_API_KEY) {
-            try {
+    if (YOUTUBE_API_KEY) {
+        try {
                 gathered.push(...await searchYouTubeApi(query, lang, 'long', 10));
             } catch (e) {
                 console.warn('[YT API long]', lang, e.message);
@@ -1364,6 +1399,402 @@ async function fetchVideos(query, score = 20, lang = 'english', track = 'beginne
     const requested = (lang || 'english').toLowerCase();
     const videos = await searchVideosForLanguage(queryClean, score, requested, track, codingLang);
     return { [requested]: videos };
+}
+
+function playlistSearchQueries(skill, lang, codingLang, gapTopic) {
+    const s = skillSearchPhrase(skill, codingLang);
+    const l = (lang || 'english').toLowerCase();
+    const native = YT_LANG_SCRIPTS[l] || '';
+    const focus = gapFocusPhrase(skill, gapTopic);
+    const compact = [s, focus].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
+    if (l === 'english') {
+        return [
+            `${compact} playlist full course`,
+            `${s} complete course playlist`,
+            `${compact} tutorial playlist`
+        ].filter(Boolean);
+    }
+    return [
+        `${compact} playlist full course in ${l}`,
+        `${s} ${native} playlist course`.trim(),
+        `${compact} ${l} tutorial playlist`
+    ].filter(Boolean);
+}
+
+async function searchYouTubePlaylistsApi(query, lang, limit = 10) {
+    if (!YOUTUBE_API_KEY) return [];
+    const l = (lang || 'english').toLowerCase();
+    const langCode = YT_LANG_CODES[l] || 'en';
+            const ytRes = await axios.get('https://www.googleapis.com/youtube/v3/search', {
+                params: {
+                    part: 'snippet',
+            type: 'playlist',
+            maxResults: limit,
+            q: query,
+                    key: YOUTUBE_API_KEY,
+                    order: 'relevance',
+                    relevanceLanguage: langCode,
+            hl: langCode,
+            safeSearch: 'moderate',
+            regionCode: l === 'english' ? 'US' : 'IN'
+                },
+                timeout: 12000
+            });
+    return (ytRes.data.items || []).filter((item) => item.id?.playlistId).map((item) => ({
+        playlistId: item.id.playlistId,
+                    title: item.snippet.title,
+        thumbnail: item.snippet.thumbnails?.high?.url || item.snippet.thumbnails?.medium?.url || '',
+        videoCount: 0,
+        videoId: ''
+                }));
+            }
+
+async function searchYouTubePlaylistsKeyless(query, lang, limit = 8) {
+    const l = (lang || 'english').toLowerCase();
+    const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}&sp=EgIQAw%3D%3D`;
+    const ytRes = await axios.get(url, {
+        timeout: 12000,
+        headers: {
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+            'Accept-Language': YT_ACCEPT_LANG[l] || 'en-US,en;q=0.9'
+        }
+    });
+    const html = typeof ytRes.data === 'string' ? ytRes.data : '';
+    const match = html.match(/var\s+ytInitialData\s*=\s*({[\s\S]+?});/);
+    if (!match) return [];
+    const parsed = JSON.parse(match[1]);
+    const contents = parsed.contents?.twoColumnSearchResultsRenderer?.primaryContents?.sectionListRenderer?.contents || [];
+    const playlists = [];
+    for (const section of contents) {
+        const items = section.itemSectionRenderer?.contents || [];
+        for (const item of items) {
+            const p = item.playlistRenderer;
+            if (!p?.playlistId) continue;
+            const title = p.title?.simpleText || p.title?.runs?.[0]?.text || query;
+            const countRaw = p.videoCount || p.videoCountText?.simpleText || p.videoCountShortText?.simpleText || '';
+            const videoCount = Number(String(countRaw).replace(/[^\d]/g, '')) || 0;
+            const firstVid = p.videos?.[0]?.childVideoRenderer?.videoId
+                || p.navigationEndpoint?.watchEndpoint?.videoId
+                || '';
+            playlists.push({
+                playlistId: p.playlistId,
+                title,
+                thumbnail: p.thumbnails?.[0]?.thumbnails?.slice(-1)[0]?.url
+                    || (firstVid ? `https://i.ytimg.com/vi/${firstVid}/hqdefault.jpg` : ''),
+                videoCount,
+                videoId: firstVid
+            });
+            if (playlists.length >= limit) return playlists;
+        }
+    }
+    return playlists;
+}
+
+async function hydratePlaylistDetails(playlists) {
+    if (!playlists.length) return playlists;
+    const ids = [...new Set(playlists.map((p) => p.playlistId).filter(Boolean))].slice(0, 8);
+    let byId = {};
+    if (YOUTUBE_API_KEY && ids.length) {
+        try {
+            const ytRes = await axios.get('https://www.googleapis.com/youtube/v3/playlists', {
+                params: {
+                    part: 'snippet,contentDetails',
+                    id: ids.join(','),
+                    key: YOUTUBE_API_KEY
+                },
+                timeout: 10000
+            });
+            for (const item of ytRes.data.items || []) {
+                byId[item.id] = {
+                    title: item.snippet?.title || '',
+                    videoCount: Number(item.contentDetails?.itemCount) || 0,
+                    thumbnail: item.snippet?.thumbnails?.high?.url || item.snippet?.thumbnails?.medium?.url || ''
+                };
+            }
+        } catch (e) {
+            console.warn('[YT playlists]', e.message);
+        }
+    }
+    const hydrated = playlists.map((p) => {
+        const extra = byId[p.playlistId] || {};
+        return {
+            ...p,
+            title: extra.title || p.title,
+            videoCount: extra.videoCount || p.videoCount || 0,
+            thumbnail: extra.thumbnail || p.thumbnail || ''
+        };
+    });
+    if (!YOUTUBE_API_KEY) return hydrated;
+    const needFirst = hydrated.filter((p) => !p.videoId).slice(0, 6);
+    await Promise.all(needFirst.map(async (p) => {
+        try {
+            const ytRes = await axios.get('https://www.googleapis.com/youtube/v3/playlistItems', {
+                params: {
+                    part: 'snippet,contentDetails',
+                    playlistId: p.playlistId,
+                    maxResults: 1,
+                    key: YOUTUBE_API_KEY
+                },
+                timeout: 8000
+            });
+            const item = (ytRes.data.items || [])[0];
+            const videoId = item?.contentDetails?.videoId || item?.snippet?.resourceId?.videoId || '';
+            if (videoId) {
+                p.videoId = videoId;
+                if (!p.thumbnail) p.thumbnail = `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
+            }
+        } catch (e) {
+            console.warn('[YT playlistItems]', p.playlistId, e.message);
+        }
+    }));
+    return hydrated;
+}
+
+function pickThreePlaylists(candidates, skill, codingLang, lang) {
+    const seen = new Set();
+    const unique = [];
+    for (const p of candidates || []) {
+        if (!p?.playlistId || seen.has(p.playlistId)) continue;
+        if (/#shorts|youtube shorts|shorts/i.test(p.title || '')) continue;
+        seen.add(p.playlistId);
+        unique.push(p);
+    }
+    return unique.slice().sort((a, b) => {
+        const aSkill = videoMatchesSkill(a, skill, codingLang) ? 1 : 0;
+        const bSkill = videoMatchesSkill(b, skill, codingLang) ? 1 : 0;
+        if (bSkill !== aSkill) return bSkill - aSkill;
+        const aCount = a.videoCount >= 3 && a.videoCount <= 80 ? 1 : 0;
+        const bCount = b.videoCount >= 3 && b.videoCount <= 80 ? 1 : 0;
+        if (bCount !== aCount) return bCount - aCount;
+        const aLang = videoMatchesLang(a, lang) ? 1 : 0;
+        const bLang = videoMatchesLang(b, lang) ? 1 : 0;
+        if (bLang !== aLang) return bLang - aLang;
+        return (b.videoCount || 0) - (a.videoCount || 0);
+    }).slice(0, 3);
+}
+
+function toPlaylistCard(base, lang, idx) {
+    const count = Number(base.videoCount) || 0;
+    return {
+        playlistId: base.playlistId,
+        title: decodeEntities(base.title),
+        videoId: base.videoId || '',
+        videoCount: count,
+        thumbnail: base.thumbnail || (base.videoId ? `https://i.ytimg.com/vi/${base.videoId}/hqdefault.jpg` : ''),
+        url: base.videoId
+            ? `https://www.youtube.com/embed/${base.videoId}?list=${base.playlistId}`
+            : `https://www.youtube.com/embed/videoseries?list=${base.playlistId}`,
+        moduleNumber: idx + 1,
+        moduleTitle: `Playlist ${idx + 1}`,
+        language: languageLabel(lang),
+        isFallback: !!base.isFallback
+    };
+}
+
+async function fetchThreePlaylists(skill, lang, codingLang, gapTopic) {
+    const l = (lang || 'english').toLowerCase();
+    const queries = playlistSearchQueries(skill, l, codingLang, gapTopic);
+    const gathered = [];
+    try {
+        for (const query of queries.slice(0, 2)) {
+            if (YOUTUBE_API_KEY) {
+                try {
+                    gathered.push(...await searchYouTubePlaylistsApi(query, l, 10));
+    } catch (e) {
+                    console.warn('[YT playlist API]', l, e.message);
+                }
+            }
+            if (gathered.length < 6) {
+                try {
+                    gathered.push(...await searchYouTubePlaylistsKeyless(query, l, 8));
+                } catch (e) {
+                    console.warn('[YT playlist scrape]', l, e.message);
+                }
+            }
+            if (gathered.length >= 8) break;
+        }
+        let hydrated = await hydratePlaylistDetails(gathered);
+        let picked = pickThreePlaylists(hydrated, skill, codingLang, l);
+        if (picked.length < 3 && l !== 'english') {
+            const english = pickThreePlaylists(
+                await hydratePlaylistDetails(await searchYouTubePlaylistsApi(playlistSearchQueries(skill, 'english', codingLang, gapTopic)[0], 'english', 10)),
+                skill,
+                codingLang,
+                'english'
+            );
+            for (const p of english) {
+                if (picked.length >= 3) break;
+                if (picked.some((x) => x.playlistId === p.playlistId)) continue;
+                picked.push({ ...p, isFallback: true });
+            }
+        }
+        return picked.slice(0, 3).map((p, idx) => toPlaylistCard(p, p.isFallback ? 'english' : l, idx));
+    } catch (e) {
+        console.warn('[Analysis] playlists failed:', e.message);
+        return [];
+    }
+}
+
+async function fetchPlaylistMeta(playlistId) {
+    if (!YOUTUBE_API_KEY || !playlistId) return null;
+    try {
+        const ytRes = await axios.get('https://www.googleapis.com/youtube/v3/playlists', {
+            params: {
+                part: 'snippet,contentDetails',
+                id: playlistId,
+                key: YOUTUBE_API_KEY
+            },
+            timeout: 10000
+        });
+        const item = (ytRes.data.items || [])[0];
+        if (!item) return null;
+        return {
+            title: decodeEntities(item.snippet?.title || ''),
+            channelTitle: decodeEntities(item.snippet?.channelTitle || ''),
+            videoCount: Number(item.contentDetails?.itemCount) || 0,
+            thumbnail: item.snippet?.thumbnails?.high?.url || item.snippet?.thumbnails?.medium?.url || ''
+        };
+    } catch (e) {
+        console.warn('[YT playlist meta]', e.message);
+        return null;
+    }
+}
+
+async function fetchPlaylistItemsApi(playlistId) {
+    if (!YOUTUBE_API_KEY || !playlistId) return [];
+    const items = [];
+    let pageToken = '';
+    for (let page = 0; page < 8 && items.length < 250; page++) {
+        const ytRes = await axios.get('https://www.googleapis.com/youtube/v3/playlistItems', {
+            params: {
+                part: 'snippet,contentDetails',
+                playlistId,
+                maxResults: 50,
+                pageToken: pageToken || undefined,
+                key: YOUTUBE_API_KEY
+            },
+            timeout: 12000
+        });
+        for (const item of ytRes.data.items || []) {
+            const videoId = item.contentDetails?.videoId || item.snippet?.resourceId?.videoId || '';
+            const title = decodeEntities(item.snippet?.title || '');
+            if (!videoId || /deleted video|private video/i.test(title)) continue;
+            items.push({
+                videoId,
+                title,
+                thumbnail: item.snippet?.thumbnails?.medium?.url
+                    || item.snippet?.thumbnails?.high?.url
+                    || `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
+                position: Number.isFinite(item.snippet?.position) ? item.snippet.position : items.length
+            });
+        }
+        pageToken = ytRes.data.nextPageToken || '';
+        if (!pageToken) break;
+    }
+    return items;
+}
+
+async function fetchPlaylistItemsKeyless(playlistId) {
+    const url = `https://www.youtube.com/playlist?list=${encodeURIComponent(playlistId)}`;
+    const ytRes = await axios.get(url, {
+        timeout: 15000,
+        headers: {
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+            'Accept-Language': 'en-US,en;q=0.9'
+        }
+    });
+    const html = typeof ytRes.data === 'string' ? ytRes.data : '';
+    const match = html.match(/var\s+ytInitialData\s*=\s*({[\s\S]+?});/);
+    if (!match) return { title: '', videos: [] };
+    const parsed = JSON.parse(match[1]);
+    const videos = [];
+    const walk = (node) => {
+        if (!node || videos.length >= 250) return;
+        if (Array.isArray(node)) {
+            node.forEach(walk);
+            return;
+        }
+        if (typeof node !== 'object') return;
+        const row = node.playlistVideoRenderer;
+        if (row?.videoId) {
+            const title = row.title?.runs?.[0]?.text || row.title?.simpleText || '';
+            if (title && !/deleted video|private video/i.test(title)) {
+                videos.push({
+                    videoId: row.videoId,
+                    title: decodeEntities(title),
+                    thumbnail: `https://i.ytimg.com/vi/${row.videoId}/hqdefault.jpg`,
+                    position: videos.length,
+                    durationSec: parseDurationToSeconds(row.lengthText?.simpleText || ''),
+                    durationLabel: row.lengthText?.simpleText || ''
+                });
+            }
+        }
+        Object.values(node).forEach(walk);
+    };
+    walk(parsed);
+    const header = parsed.header?.playlistHeaderRenderer
+        || parsed.header?.pageHeaderRenderer
+        || {};
+    const title = header.title?.simpleText
+        || header.title?.runs?.[0]?.text
+        || parsed.metadata?.playlistMetadataRenderer?.title
+        || '';
+    return { title: decodeEntities(title), videos };
+}
+
+async function fetchAllPlaylistVideos(playlistId) {
+    const id = String(playlistId || '').trim();
+    if (!id) return { title: '', videos: [] };
+    let meta = await fetchPlaylistMeta(id);
+    let videos = [];
+    if (YOUTUBE_API_KEY) {
+        try {
+            videos = await fetchPlaylistItemsApi(id);
+        } catch (e) {
+            console.warn('[YT playlist items]', e.message);
+        }
+    }
+    if (videos.length < 3) {
+        try {
+            const scraped = await fetchPlaylistItemsKeyless(id);
+            if (!meta?.title && scraped.title) meta = { ...(meta || {}), title: scraped.title };
+            if (scraped.videos.length > videos.length) videos = scraped.videos;
+        } catch (e) {
+            console.warn('[YT playlist scrape]', e.message);
+        }
+    }
+    if (videos.length) {
+        const needDur = videos.filter((v) => !v.durationSec);
+        if (needDur.length) {
+            const hydrated = await hydrateYouTubeDurationsBatched(needDur);
+            const byId = {};
+            hydrated.forEach((v) => { byId[v.videoId] = v; });
+            videos = videos.map((v) => {
+                const extra = byId[v.videoId];
+                if (!extra) return v;
+                return { ...v, ...extra };
+            });
+        }
+    }
+    const list = videos.map((v, idx) => {
+        const seconds = v.durationSec || parseDurationToSeconds(v.duration);
+        return {
+            videoId: v.videoId,
+            title: decodeEntities(v.title),
+            thumbnail: v.thumbnail || `https://i.ytimg.com/vi/${v.videoId}/hqdefault.jpg`,
+            durationSec: seconds,
+            durationLabel: v.durationLabel || formatDurationLabel(seconds, v.duration),
+            index: idx + 1
+        };
+    });
+    return {
+        playlistId: id,
+        title: meta?.title || '',
+        channelTitle: meta?.channelTitle || '',
+        videoCount: meta?.videoCount || list.length,
+        thumbnail: meta?.thumbnail || (list[0] && list[0].thumbnail) || '',
+        videos: list
+    };
 }
 
 function prefetchBeginnerVideoModules(videosByLang, lang, skill) {
@@ -1988,6 +2419,15 @@ router.post('/get-videos', async (req, res) => {
             prefetchBeginnerVideoModules(videos, requestedLang, topicLabel);
         }
 
+        let playlists = { [requestedLang]: [] };
+        try {
+            const gapForPlaylists = resolvedTrack === 'intermediate' ? (gaps[0] || '') : '';
+            const playlistList = await fetchThreePlaylists(skill, requestedLang, resolvedCode, gapForPlaylists);
+            playlists = { [requestedLang]: playlistList };
+        } catch (e) {
+            console.warn('[Analysis] playlist fetch skipped:', e.message);
+        }
+
         const problemLabel = gaps.length
             ? `${topicLabel} focusing on ${gaps.slice(0, 2).join(' and ')}`
             : topicLabel;
@@ -1997,10 +2437,34 @@ router.post('/get-videos', async (req, res) => {
             skillProblems = await generateAIProblems(problemLabel);
         }
 
-        res.json({ success: true, data: { videos, problems: skillProblems, weakTopics: gaps } });
+        res.json({ success: true, data: { videos, playlists, problems: skillProblems, weakTopics: gaps } });
     } catch (error) {
         console.error('Error fetching videos:', error);
         res.status(500).json({ success: false, error: 'Failed to fetch videos' });
+    }
+});
+
+router.post('/playlist-videos', async (req, res) => {
+    const playlistId = String(req.body.playlistId || req.body.list || req.query.list || '').trim();
+    if (!playlistId) return res.status(400).json({ success: false, error: 'Missing playlistId' });
+    try {
+        const data = await fetchAllPlaylistVideos(playlistId);
+        res.json({ success: true, data });
+    } catch (error) {
+        console.error('Error fetching playlist videos:', error);
+        res.status(500).json({ success: false, error: 'Failed to fetch playlist videos' });
+    }
+});
+
+router.get('/playlist-videos', async (req, res) => {
+    const playlistId = String(req.query.playlistId || req.query.list || '').trim();
+    if (!playlistId) return res.status(400).json({ success: false, error: 'Missing playlistId' });
+    try {
+        const data = await fetchAllPlaylistVideos(playlistId);
+        res.json({ success: true, data });
+    } catch (error) {
+        console.error('Error fetching playlist videos:', error);
+        res.status(500).json({ success: false, error: 'Failed to fetch playlist videos' });
     }
 });
 
