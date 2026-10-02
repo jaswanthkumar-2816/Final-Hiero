@@ -755,6 +755,165 @@ function isCandidateUnsureOrSkipping(text = '') {
 /**
  * Evaluates current topic coverage state and determines next interview directive
  */
+// ─────────────────────────────────────────────────────────────────────────────
+// 4a. ANSWER SUBSTANCE ANALYSIS
+// A real interviewer reacts to WHAT was said, not how long it was. A fluent
+// answer with no numbers, no named technology and no trade-offs is weak even
+// at 60 words — word count alone scores it as SOLID.
+// ─────────────────────────────────────────────────────────────────────────────
+
+// "cut latency by 40%", "p99 from 800ms to 120ms", "3x throughput", "~2 million rows"
+const METRIC_PATTERN = /\b\d+(?:\.\d+)?\s*(?:%|percent|x\b|ms\b|s\b|sec|seconds?|min|minutes?|hours?|days?|weeks?|months?|k\b|m\b|mm\b|bn?\b|gb|mb|tb|qps|rps|tps|req\/s|users?|rows?|records?|requests?)/i;
+const BARE_NUMBER_PATTERN = /\b\d{2,}\b/;
+
+// Unquantified intensifiers — the tell for a claim with no evidence behind it.
+const VAGUE_INTENSIFIERS = /\b(a lot|lots|much better|way better|significantly|substantially|drastically|dramatically|hugely|massively|greatly|considerably|quite a bit|pretty good|really good|very good|much faster|way faster|a ton|tons|many times)\b/gi;
+
+// Hedging — signals the candidate is not speaking from direct experience.
+const HEDGE_WORDS = /\b(i think|i guess|maybe|probably|sort of|kind of|something like|or something|i'm not sure|not really sure|i believe|possibly|perhaps|i would say)\b/gi;
+
+// Superlatives that demand evidence.
+const STRONG_CLAIMS = /\b(best|optimal|fastest|most efficient|perfect|flawless|never fail(?:s|ed)?|always works?|zero downtime|100%|completely eliminated|solved it entirely|no issues)\b/gi;
+
+// Concrete engineering nouns — presence means the answer has real texture.
+const SPECIFIC_TERMS = /\b(redis|postgres(?:ql)?|mysql|mongo(?:db)?|kafka|rabbitmq|sqs|kinesis|docker|kubernetes|k8s|terraform|nginx|envoy|grpc|graphql|rest|websocket|oauth|jwt|saml|index(?:es|ing)?|shard(?:ing|ed)?|partition(?:ing|ed)?|replica(?:tion|s)?|cache|caching|cdn|queue|worker|cron|batch|idempoten\w*|transaction|acid|cap theorem|consistency|latency|throughput|p9[59]|percentile|circuit breaker|retry|backoff|rate limit\w*|load balanc\w*|autoscal\w*|blue.?green|canary|rollback|migration|schema|orm|n\+1|deadlock|race condition|mutex|semaphore|goroutine|thread pool|connection pool|memory leak|gc\b|profil(?:er|ing)|trace|span|observability|prometheus|grafana|datadog|sentry|ci\/cd|jenkins|github actions|unit test|integration test|mock|stub|tdd)\b/gi;
+
+function countMatches(text, re) {
+    const m = String(text || '').match(re);
+    return m ? m.length : 0;
+}
+
+/**
+ * Classifies the substance of a candidate answer so the directive engine can
+ * react the way a human interviewer would.
+ */
+// Directives that keep the interview on the SAME thread as the previous answer.
+// These all count against the consecutive-probe budget so the candidate is
+// never grilled on one point forever.
+const PROBE_DIRECTIVES = new Set([
+    'FOLLOW_UP_DEEPEN',
+    'FOLLOW_UP_CLARIFY',
+    'CHALLENGE_CLAIM',
+    'PROBE_FOR_SPECIFICS',
+    'PROBE_FOR_OWNERSHIP',
+    'REDIRECT_RAMBLING'
+]);
+
+// Only the ACTIVE directive is sent to the model each turn. Sending all eight
+// added ~1.7k characters to every prompt, which pushed generation into a
+// high-variance latency regime for no benefit — the model only needs this turn.
+/**
+ * Builds a probe directly from the candidate's own answer, with no model call.
+ *
+ * Probing must not depend on a flaky upstream: when generation times out the
+ * old fallback served a generic verified question, which silently discarded
+ * the directive — a candidate who waffled got a textbook question instead of
+ * being pushed. These templates are deterministic and instant.
+ */
+function buildDeterministicProbe(directive, previousAnswer = '') {
+    const text = String(previousAnswer || '').trim();
+
+    // Quote the candidate so the probe sounds like it was listening.
+    const vagueMatch = text.match(/\b(a lot|lots|much better|way better|significantly|substantially|drastically|dramatically|hugely|massively|greatly|considerably|much faster|way faster|pretty good|really good)\b/i);
+    const claimMatch = text.match(/\b(best|optimal|fastest|most efficient|perfect|never fails?|always works?|zero downtime|100%)\b/i);
+    const quoted = (vagueMatch && vagueMatch[0]) || (claimMatch && claimMatch[0]) || null;
+
+    switch (directive) {
+        case 'CHALLENGE_CLAIM':
+            return quoted
+                ? `You said it was "${quoted}" — I need to put a number on that. What was the measurement before, and what did it become after?`
+                : `That sounds like a meaningful improvement. What was the measurement before, and what did it become after?`;
+        case 'PROBE_FOR_SPECIFICS':
+            return `Let's get concrete on that. Which specific part did you change, and what did you use to do it?`;
+        case 'PROBE_FOR_OWNERSHIP':
+            return `I want to understand your part in that. Were you hands-on implementing it, or closer to the design and review side?`;
+        case 'FOLLOW_UP_CLARIFY':
+            return `Could you expand on that with a specific example from your own work?`;
+        case 'REDIRECT_RAMBLING':
+            return `Let me stop you there — in one sentence, what was the actual bottleneck you were solving?`;
+        case 'FOLLOW_UP_DEEPEN':
+            return `Good, that's specific. Now take it further: what breaks first if that system sees ten times the traffic?`;
+        default:
+            return null;
+    }
+}
+
+const DIRECTIVE_PLAYBOOK = {
+    CHALLENGE_CLAIM: '## THIS TURN — CHALLENGE THE CLAIM:\nThey claimed impact with no evidence. Make them back it up with a number or a before/after, quoting their own words. e.g. "You said it improved a lot — what was it before, and what did it become?" Stay on this topic; do NOT move on.',
+    PROBE_FOR_SPECIFICS: '## THIS TURN — PROBE FOR SPECIFICS:\nThe answer named no technology, number or trade-off. Ask for the concrete mechanism. e.g. "Which part specifically? Walk me through what you actually changed." Stay on this topic; do NOT move on.',
+    PROBE_FOR_OWNERSHIP: '## THIS TURN — PROBE OWNERSHIP:\nThey hedged ("I think", "not sure"), so they may not have done this themselves. Find the edge of their real experience without embarrassing them. e.g. "Were you hands-on for that part, or closer to the design side?" Stay on this topic.',
+    FOLLOW_UP_CLARIFY: '## THIS TURN — ASK THEM TO EXPAND:\nThe answer was too short. Ask for a concrete example on the SAME topic.',
+    REDIRECT_RAMBLING: '## THIS TURN — INTERRUPT AND NARROW:\nThey are talking at length without landing a point. Politely cut in and narrow it. e.g. "Let me stop you there — in one sentence, what was the actual bottleneck?"',
+    FOLLOW_UP_DEEPEN: '## THIS TURN — GO DEEPER:\nStrong, specific answer. Reward it by going a level harder on the SAME topic: scale, failure modes, trade-offs. e.g. "Good. Now what breaks when traffic goes 10x?"',
+    TRANSITION_NEXT_SKILL: '## THIS TURN — MOVE ON:\nAcknowledge their answer in a few words, then pivot to an uncovered topic from the JD.',
+    BEHAVIORAL_SCENARIO: '## THIS TURN — BEHAVIOURAL:\nFinal question. Ask a situational question about conflict, failure, ownership or trade-offs.'
+};
+
+function isProbeDirective(directive) {
+    return PROBE_DIRECTIVES.has(String(directive || ''));
+}
+
+function analyzeAnswerSubstance(answerText = '', evaluationScore = null) {
+    const text = String(answerText || '').trim();
+    const words = text.split(/\s+/).filter(Boolean);
+    const wordCount = words.length;
+
+    const hasMetrics = METRIC_PATTERN.test(text) || BARE_NUMBER_PATTERN.test(text);
+    const specificCount = countMatches(text, SPECIFIC_TERMS);
+    const vagueCount = countMatches(text, VAGUE_INTENSIFIERS);
+    const hedgeCount = countMatches(text, HEDGE_WORDS);
+    const claimCount = countMatches(text, STRONG_CLAIMS);
+
+    // Information density: concrete terms per 100 words.
+    const density = wordCount > 0 ? (specificCount / wordCount) * 100 : 0;
+
+    // A claim of impact with nothing to back it.
+    const hasUnsupportedClaim = (claimCount > 0 || vagueCount > 0) && !hasMetrics;
+
+    // Long, low-density and hedge-heavy: the candidate is talking around it.
+    const isRambling = wordCount >= 160 && density < 1.5;
+
+    // Fluent but empty: enough words to pass the old check, nothing concrete in it.
+    const isVague = wordCount >= 10 && specificCount === 0 && !hasMetrics;
+
+    const isTooShort = wordCount < 10;
+
+    // Repeated hedging with little concrete detail: the candidate is describing
+    // something they did not actually do, or cannot recall.
+    const isHedged = hedgeCount >= 2 && specificCount <= 1 && !hasMetrics;
+
+    // Ordered by what a human interviewer would react to first. A bold claim
+    // with no evidence outranks general vagueness — it is the more useful probe.
+    let substance = 'SOLID';
+    if (isTooShort) substance = 'TOO_SHORT';
+    else if (hasUnsupportedClaim) substance = 'UNSUPPORTED_CLAIM';
+    else if (isHedged) substance = 'HEDGED';
+    else if (isVague) substance = 'VAGUE';
+    else if (isRambling) substance = 'RAMBLING';
+    else if (specificCount >= 3 && hasMetrics) substance = 'STRONG';
+
+    // Score overrides substance when the evaluator clearly disagrees.
+    const score = typeof evaluationScore === 'number' ? evaluationScore : null;
+    if (score !== null && score <= 4 && substance === 'SOLID') substance = 'VAGUE';
+    if (score !== null && score >= 9 && substance === 'SOLID' && specificCount >= 2) substance = 'STRONG';
+
+    return {
+        wordCount,
+        hasMetrics,
+        specificCount,
+        vagueCount,
+        hedgeCount,
+        claimCount,
+        density: Math.round(density * 10) / 10,
+        hasUnsupportedClaim,
+        isRambling,
+        isVague,
+        isHedged,
+        isTooShort,
+        substance
+    };
+}
+
 function computeInterviewTopicState(session) {
     const questions = session.questions || [];
     const answers = session.answers || [];
@@ -780,33 +939,82 @@ function computeInterviewTopicState(session) {
 
     // Determine candidate's last answer performance
     const lastAnswer = answers.length > 0 ? answers[answers.length - 1] : null;
-    const lastScore = lastAnswer?.evaluationScore || (lastAnswer?.coaching?.clarityScore || 8);
+    const lastScore = typeof lastAnswer?.evaluationScore === 'number'
+        ? lastAnswer.evaluationScore
+        : (typeof lastAnswer?.coaching?.clarityScore === 'number' ? lastAnswer.coaching.clarityScore : null);
     const lastAnsText = lastAnswer?.candidateAnswer || '';
-    const wordCount = lastAnsText.split(/\s+/).filter(Boolean).length;
     const isUnsure = isCandidateUnsureOrSkipping(lastAnsText);
+
+    // Substance beats length: a fluent answer with no numbers, no named
+    // technology and no trade-offs is weak however many words it runs to.
+    const substanceReport = analyzeAnswerSubstance(lastAnsText, lastScore);
+    const wordCount = substanceReport.wordCount;
 
     let lastTurnQuality = 'SOLID';
     if (isUnsure) {
         lastTurnQuality = 'SKIPPED_OR_UNSURE';
-    } else if (wordCount < 10 || lastScore <= 5) {
-        lastTurnQuality = 'WEAK_OR_INCOMPLETE';
-    } else if (lastScore >= 8.5 && wordCount >= 30) {
+    } else if (substanceReport.substance === 'STRONG') {
         lastTurnQuality = 'STRONG';
+    } else if (['TOO_SHORT', 'VAGUE', 'HEDGED', 'UNSUPPORTED_CLAIM'].includes(substanceReport.substance)) {
+        lastTurnQuality = 'WEAK_OR_INCOMPLETE';
+    } else if (substanceReport.substance === 'RAMBLING') {
+        lastTurnQuality = 'RAMBLING';
     }
 
     const currentTurn = questions.length + 1;
     const totalTurns = session.questionLimit || 5;
 
-    // Determine Interview Action Directive
+    // Rolling performance across the session drives difficulty, so one bad
+    // answer does not derail an otherwise strong candidate (and vice versa).
+    const scored = answers
+        .map(a => (typeof a?.evaluationScore === 'number' ? a.evaluationScore : null))
+        .filter(v => v !== null);
+    const rollingAvg = scored.length
+        ? scored.reduce((sum, v) => sum + v, 0) / scored.length
+        : null;
+
+    let difficultyTarget = 'medium';
+    if (rollingAvg !== null) {
+        if (rollingAvg >= 8) difficultyTarget = 'hard';
+        else if (rollingAvg <= 5) difficultyTarget = 'easy';
+    }
+
+    // How many consecutive probes we have already spent on this thread. Real
+    // interviewers push twice at most, then move on rather than grilling.
+    let consecutiveFollowUps = 0;
+    for (let i = questions.length - 1; i >= 0; i--) {
+        if (questions[i]?.isFollowUp) consecutiveFollowUps++;
+        else break;
+    }
+
+    const isFinalTurn = currentTurn === totalTurns && totalTurns >= 5;
+    const probeBudgetLeft = consecutiveFollowUps < 2;
+    // Always leave room to cover the remaining JD topics before time runs out.
+    const turnsLeft = totalTurns - currentTurn;
+    const mustCoverGround = topicsRemaining.length > 0 && turnsLeft <= topicsRemaining.length;
+
+    // Determine Interview Action Directive.
+    // Probing is NOT capped to the first three questions any more; a real
+    // interviewer follows up whenever an answer invites it, at any point.
     let directive = 'TRANSITION_NEXT_SKILL';
     if (isUnsure) {
         directive = 'TRANSITION_NEXT_SKILL'; // Do NOT interrogate candidate on an unfamiliar topic!
-    } else if (currentTurn === totalTurns && totalTurns >= 5) {
+    } else if (isFinalTurn) {
         directive = 'BEHAVIORAL_SCENARIO';
-    } else if (lastTurnQuality === 'STRONG' && currentTurn <= 3) {
-        directive = 'FOLLOW_UP_DEEPEN';
-    } else if (lastTurnQuality === 'WEAK_OR_INCOMPLETE' && currentTurn <= 3) {
+    } else if (!probeBudgetLeft || mustCoverGround) {
+        directive = 'TRANSITION_NEXT_SKILL';
+    } else if (substanceReport.substance === 'UNSUPPORTED_CLAIM') {
+        directive = 'CHALLENGE_CLAIM';
+    } else if (substanceReport.substance === 'VAGUE') {
+        directive = 'PROBE_FOR_SPECIFICS';
+    } else if (substanceReport.substance === 'TOO_SHORT') {
         directive = 'FOLLOW_UP_CLARIFY';
+    } else if (substanceReport.substance === 'HEDGED') {
+        directive = 'PROBE_FOR_OWNERSHIP';
+    } else if (substanceReport.substance === 'RAMBLING') {
+        directive = 'REDIRECT_RAMBLING';
+    } else if (substanceReport.substance === 'STRONG') {
+        directive = 'FOLLOW_UP_DEEPEN';
     } else {
         directive = 'TRANSITION_NEXT_SKILL';
     }
@@ -818,7 +1026,11 @@ function computeInterviewTopicState(session) {
         lastTurnQuality,
         directive,
         currentTurn,
-        totalTurns
+        totalTurns,
+        substanceReport,
+        difficultyTarget,
+        rollingAvg: rollingAvg === null ? null : Math.round(rollingAvg * 10) / 10,
+        consecutiveFollowUps
     };
 }
 
@@ -897,6 +1109,9 @@ function retrieveAndRankQuestions({
         const primarySkill = (q.skills[0] || '').toLowerCase();
         if (topicState && topicState.topicsRemaining.includes(primarySkill)) {
             score += 60; // Major boost to explore uncovered JD topics
+        } else if (askedSkillSet.has(primarySkill) && topicState && isProbeDirective(topicState.directive)) {
+            // Probing deliberately stays on the skill we just discussed.
+            score += 30;
         } else if (askedSkillSet.has(primarySkill) && topicState && topicState.directive === 'TRANSITION_NEXT_SKILL') {
             score -= 50; // Penalty if transitioning and skill was already tested
         }
@@ -906,6 +1121,12 @@ function retrieveAndRankQuestions({
             score += 80;
         } else if (topicState?.directive === 'FOLLOW_UP_DEEPEN' && (q.difficulty === 'hard' || q.category === 'system_design')) {
             score += 35;
+        } else if (topicState?.directive === 'CHALLENGE_CLAIM' && (q.difficulty === 'hard' || q.category === 'system_design')) {
+            score += 20;
+        } else if ((topicState?.directive === 'PROBE_FOR_SPECIFICS' || topicState?.directive === 'PROBE_FOR_OWNERSHIP') && q.difficulty !== 'easy') {
+            score += 15;
+        } else if (topicState?.directive === 'REDIRECT_RAMBLING' && q.difficulty === 'medium') {
+            score += 15;
         } else if (topicState?.directive === 'FOLLOW_UP_CLARIFY' && q.difficulty === 'medium') {
             score += 35;
         }
@@ -1012,10 +1233,32 @@ async function generateAdaptiveQuestion({
 - Core Engineering Focus: ${blueprintSnapshot?.culture || 'High-throughput scalable systems'}
 `.trim();
 
-    const lastQuestionsAndAnswers = (session.questions || []).map((q, idx) => {
+    // Prompt size is capped so generation time stays flat across the interview.
+    // Replaying every turn in full made the prompt grow each question until the
+    // model could no longer finish inside its budget, and later questions fell
+    // back to canned ones (observed from Q7 onward on a 10-question run).
+    // Recent turns stay verbatim because the interviewer probes against them;
+    // older turns collapse to a one-line topic record, which is all the
+    // anti-repetition rule needs (topicsCovered is also passed separately).
+    const VERBATIM_TURNS = Number(process.env.INTERVIEW_VERBATIM_TURNS || 3);
+    const allTurns = session.questions || [];
+    const recentTurns = allTurns.slice(-VERBATIM_TURNS);
+    const olderTurns = allTurns.slice(0, Math.max(0, allTurns.length - VERBATIM_TURNS));
+
+    const olderSummary = olderTurns.length
+        ? `Earlier in this interview (already covered — do not repeat):\n` +
+          olderTurns.map(q => `- Q${q.index}: ${q.skill || q.category || 'topic'} — "${String(q.questionText || '').substring(0, 90)}..."`).join('\n')
+        : '';
+
+    const recentDetail = recentTurns.map((q) => {
         const matchingAns = session.answers?.find(a => a.questionIndex === q.index);
-        return `Q${q.index}: "${q.questionText}"\nCandidate Answer A${q.index}: "${matchingAns ? matchingAns.candidateAnswer.substring(0, 250) : previousAnswer.substring(0, 250) || 'None'}"`;
+        const ansText = matchingAns
+            ? String(matchingAns.candidateAnswer || '').substring(0, 250)
+            : String(previousAnswer || '').substring(0, 250) || 'None';
+        return `Q${q.index}: "${q.questionText}"\nCandidate Answer A${q.index}: "${ansText}"`;
     }).join('\n\n');
+
+    const lastQuestionsAndAnswers = [olderSummary, recentDetail].filter(Boolean).join('\n\n');
 
     const systemPrompt = `You are HIERO's professional Senior Technical Interviewer at ${companyName}, conducting an authentic, realistic, supportive technical interview for the ${jobRole} position.
 
@@ -1068,8 +1311,19 @@ ${isUnsure ? '⚠️ CANDIDATE UNSURE/SKIPPED PREVIOUS QUESTION: Console them em
 ## TURN DIRECTIVE & TOPIC STATE:
 - Directive: ${topicState.directive}
 - Candidate Last Turn Quality: ${topicState.lastTurnQuality}
+- Answer Substance: ${topicState.substanceReport?.substance || 'UNKNOWN'} (words: ${topicState.substanceReport?.wordCount ?? 0}, concrete terms: ${topicState.substanceReport?.specificCount ?? 0}, has metrics: ${topicState.substanceReport?.hasMetrics ? 'yes' : 'no'})
+- Target Difficulty: ${topicState.difficultyTarget} (rolling score: ${topicState.rollingAvg ?? 'n/a'})
 - Topics Covered So Far: [${topicState.topicsCovered.join(', ') || 'Introduction'}]
 - Remaining Uncovered JD Topics: [${topicState.topicsRemaining.join(', ')}]
+
+${DIRECTIVE_PLAYBOOK[topicState.directive] || DIRECTIVE_PLAYBOOK.TRANSITION_NEXT_SKILL}
+
+## INTERVIEWER STYLE RULES:
+1. Acknowledge what they just said in a short clause before asking (a real interviewer reacts; they do not read from a script).
+2. Never ask two questions in one turn. One question, clearly.
+3. Match ${topicState.difficultyTarget} difficulty: easy = fundamentals, medium = applied, hard = scale/failure/trade-offs.
+4. Do not praise a weak answer. Be warm, but honest and direct.
+5. When probing, reference the candidate's own words so it is obvious you were listening.
 
 ## TOP RETRIEVED CANDIDATE QUESTIONS FROM VERIFIED DATABASE:
 ${topCandidateSummary}
@@ -1086,16 +1340,34 @@ Return ONLY the structured JSON object.`;
     try {
         const groq = getGroqClient();
         if (groq) {
-            const candidateModels = ['qwen/qwen3.8-27b', 'groq/compound-mini', 'openai/gpt-oss-20b', 'openai/gpt-oss-120b'];
+            // Order is measured, not guessed: on the full prompt (history + ranked
+            // candidates + resume + JD) qwen3.8-27b timed out on EVERY turn while
+            // gpt-oss-120b succeeded on every one. Leading with qwen cost a wasted
+            // timeout per question. groq/compound-mini removed: 404 model_not_found.
+            const candidateModels = ['openai/gpt-oss-120b', 'openai/gpt-oss-20b', 'qwen/qwen3.8-27b'];
+
+            // HARD CEILING on the whole generation step. A candidate sitting in
+            // silence is a broken interview, so we never spend longer than this
+            // across all models and retries combined — we fall back to a verified
+            // question instead. Observed worst case before this guard: 80s.
+            const TOTAL_BUDGET_MS = Number(process.env.INTERVIEW_QGEN_BUDGET_MS || 7000);
+            const PER_MODEL_MS = Number(process.env.INTERVIEW_QGEN_MODEL_MS || 4000);
+            const genDeadline = Date.now() + TOTAL_BUDGET_MS;
+
             for (const model of candidateModels) {
+                const msLeft = genDeadline - Date.now();
+                if (msLeft <= 500) {
+                    console.warn(`[INTERVIEW] Question generation budget spent (${TOTAL_BUDGET_MS}ms); using verified fallback.`);
+                    break;
+                }
                 try {
                     const res = await withTimeout(groq.chat.completions.create({
                         model,
                         messages,
                         temperature: 0.45,
-                        max_tokens: 1200,
+                        max_tokens: 2000,
                         response_format: { type: 'json_object' }
-                    }), 4500);
+                    }), Math.min(PER_MODEL_MS, msLeft));
                     const rawContent = res.choices[0]?.message?.content?.trim();
                     if (rawContent) {
                         const parsed = JSON.parse(rawContent);
@@ -1134,8 +1406,8 @@ Return ONLY the structured JSON object.`;
                                     source: parsed.source || 'company_question_bank',
                                     reason: parsed.reason || `Evaluates ${parsed.skill || 'core requirements'} for ${companyName} ${jobRole}`,
                                     answerGuide,
-                                    isFollowUp: parsed.isFollowUp || topicState.directive.startsWith('FOLLOW_UP'),
-                                    followUpToQuestion: parsed.followUpToQuestion || (topicState.directive.startsWith('FOLLOW_UP') ? currentQuestionIndex - 1 : null),
+                                    isFollowUp: parsed.isFollowUp || isProbeDirective(topicState.directive),
+                                    followUpToQuestion: parsed.followUpToQuestion || (isProbeDirective(topicState.directive) ? currentQuestionIndex - 1 : null),
                                     expectedTopics: Array.isArray(parsed.expectedTopics) ? parsed.expectedTopics : ['core principles', 'trade-offs']
                                 };
                             }
@@ -1164,6 +1436,16 @@ Return ONLY the structured JSON object.`;
     const fallbackGuide = fallbackTemplate.expectedTopics && fallbackTemplate.expectedTopics.length > 0
         ? fallbackTemplate.expectedTopics.map(t => `Key consideration: ${t}`)
         : ["Architecture & workflow", "Trade-offs and design decisions", "Production considerations"];
+
+    // A probe directive must survive generation failure — answer the candidate,
+    // not the question bank.
+    if (!isUnsure && isProbeDirective(topicState.directive)) {
+        const probe = buildDeterministicProbe(topicState.directive, previousAnswer);
+        if (probe) {
+            personalizedFallback = probe;
+            console.log(`[INTERVIEW] Deterministic ${topicState.directive} probe for Q${currentQuestionIndex}: "${probe}"`);
+        }
+    }
 
     console.log(`[INTERVIEW] Using verified question fallback for Q${currentQuestionIndex}: "${personalizedFallback}"`);
 
@@ -1246,8 +1528,16 @@ Expected Concepts: ${expectedTopics.join(', ')}`;
     try {
         const groq = getGroqClient();
         if (groq) {
-            const candidateModels = ['qwen/qwen3.8-27b', 'groq/compound-mini', 'openai/gpt-oss-20b'];
+            const candidateModels = ['qwen/qwen3.8-27b', 'openai/gpt-oss-20b'];
+            // Bounded like question generation: scoring must never stall the turn.
+            const EVAL_BUDGET_MS = Number(process.env.INTERVIEW_EVAL_BUDGET_MS || 5000);
+            const evalDeadline = Date.now() + EVAL_BUDGET_MS;
             for (const model of candidateModels) {
+                const msLeft = evalDeadline - Date.now();
+                if (msLeft <= 500) {
+                    console.warn('[INTERVIEW] Answer evaluation budget spent; using heuristic score.');
+                    break;
+                }
                 try {
                     const res = await withTimeout(groq.chat.completions.create({
                         model,
@@ -1258,7 +1548,7 @@ Expected Concepts: ${expectedTopics.join(', ')}`;
                         temperature: 0.3,
                         max_tokens: 600,
                         response_format: { type: 'json_object' }
-                    }), 3500);
+                    }), Math.min(3500, msLeft));
                     const data = JSON.parse(res.choices[0]?.message?.content || '{}');
                     return {
                         improvedPhrase: data.improvedPhrase || candidateAnswer.substring(0, 80),
@@ -1321,7 +1611,9 @@ ${questionsAndAnswers}
     try {
         const groq = getGroqClient();
         if (groq) {
-            const candidateModels = ['qwen/qwen3.8-27b', 'groq/compound-mini', 'openai/gpt-oss-120b'];
+            const candidateModels = ['qwen/qwen3.8-27b', 'openai/gpt-oss-120b'];
+            // Runs once at the end; generous but still capped.
+            const reportDeadline = Date.now() + Number(process.env.INTERVIEW_REPORT_BUDGET_MS || 12000);
             for (const model of candidateModels) {
                 try {
                     const res = await withTimeout(groq.chat.completions.create({
@@ -1333,7 +1625,7 @@ ${questionsAndAnswers}
                         temperature: 0.35,
                         max_tokens: 1500,
                         response_format: { type: 'json_object' }
-                    }), 4500);
+                    }), Math.min(6000, Math.max(1000, reportDeadline - Date.now())));
                     const scorecard = JSON.parse(res.choices[0]?.message?.content || '{}');
                     if (scorecard.overallScore) {
                         return scorecard;
@@ -1376,6 +1668,9 @@ module.exports = {
     calculateSemanticSimilarity,
     isCandidateUnsureOrSkipping,
     computeInterviewTopicState,
+    analyzeAnswerSubstance,
+    isProbeDirective,
+    buildDeterministicProbe,
     retrieveAndRankQuestions,
     generateAdaptiveQuestion,
     evaluateCandidateAnswer,
