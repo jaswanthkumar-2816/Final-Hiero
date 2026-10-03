@@ -297,6 +297,10 @@ router.post('/upload-context', multerUpload.single('resume'), async (req, res) =
 // ROUTE: POST /api/interview/start (or create-session)
 // Initializes the interview session with authoritative configuration & returns Q1 Introduction
 // ─────────────────────────────────────────────
+// Single source of truth for the interviewer's voice. Every path that speaks
+// must use this, otherwise the voice can change between questions.
+const INTERVIEW_VOICE = process.env.DEEPGRAM_TTS_VOICE || 'aura-asteria-en';
+
 router.post('/start', async (req, res) => {
     try {
         const user = authenticateUser(req);
@@ -453,7 +457,7 @@ router.post('/start', async (req, res) => {
         let audioUrl = null;
         try {
             audioUrl = await Promise.race([
-                generateTTSDataUrl(question1.questionText),
+                generateTTSDataUrl(question1.questionText, INTERVIEW_VOICE),
                 new Promise((_, reject) => setTimeout(() => reject(new Error('TTS timeout')), 2200))
             ]);
         } catch (ttsErr) {}
@@ -922,7 +926,7 @@ router.post('/voice-turn', videoUpload.fields([{ name: 'audio', maxCount: 1 }, {
 
         let audioUrl = null;
         try {
-            audioUrl = await generateTTSDataUrl(nextQuestion.questionText);
+            audioUrl = await generateTTSDataUrl(nextQuestion.questionText, INTERVIEW_VOICE);
         } catch (ttsErr) {}
 
         res.json({
@@ -1011,7 +1015,7 @@ router.post('/chat', async (req, res) => {
 
             let audioUrl = null;
             try {
-                audioUrl = await generateTTSDataUrl(nextQ.questionText);
+                audioUrl = await generateTTSDataUrl(nextQ.questionText, INTERVIEW_VOICE);
             } catch (ttsErr) {}
 
             return res.json({
@@ -1390,7 +1394,7 @@ router.post('/tts', async (req, res) => {
         if (!text || text.trim().length === 0) {
             return res.status(400).json({ success: false, error: 'Text parameter is required' });
         }
-        const audioUrl = await generateTTSDataUrl(text, voice || process.env.DEEPGRAM_TTS_VOICE || 'aura-asteria-en');
+        const audioUrl = await generateTTSDataUrl(text, voice || INTERVIEW_VOICE);
         if (!audioUrl) {
             return res.status(500).json({ success: false, error: 'Failed to generate voice audio' });
         }
