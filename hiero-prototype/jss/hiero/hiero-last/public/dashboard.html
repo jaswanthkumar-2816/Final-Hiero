@@ -543,6 +543,23 @@
                 </div>
             </div>
 
+            <!-- Past Mock Interviews — scorecards existed in the database but
+                 nothing in the product ever showed them back to the candidate. -->
+            <div class="card" id="interview-history-section" style="background: linear-gradient(135deg, rgba(7, 226, 25, 0.08), rgba(13, 18, 28, 0.9)); border: 1px solid rgba(7, 226, 25, 0.35); border-radius: 24px; padding: 24px 30px;">
+                <div class="card-header" style="border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                    <div class="card-title" style="font-size: 20px; font-weight: 800; color: #fff;">
+                        <i class="fas fa-microphone-lines" style="color: var(--primary);"></i> Your Mock Interviews
+                    </div>
+                    <a href="/mock-interview" style="color: var(--primary); font-weight: 700; text-decoration: none; font-size: 14px; background: rgba(7,226,25,0.12); padding: 6px 14px; border-radius: 100px; border: 1px solid rgba(7,226,25,0.3);">Start a New Interview →</a>
+                </div>
+
+                <div id="interview-history-summary" style="display: none; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 14px; margin-bottom: 20px;"></div>
+
+                <div id="interview-history-list">
+                    <div style="color: rgba(255,255,255,0.5); font-size: 14px; padding: 8px 0;">Loading your interviews&hellip;</div>
+                </div>
+            </div>
+
             <!-- Candidate Match & Skill Score Card -->
             <div class="card score-summary-card">
                 <div class="card-header">
@@ -834,7 +851,106 @@
     </div>
 
     <script>
+        // ── PAST MOCK INTERVIEWS ────────────────────────────────────────
+        // /api/interview/user/history already existed and is scoped to the
+        // signed-in user; nothing had ever called it, so every scorecard a
+        // candidate earned was invisible to them once they closed the tab.
+        async function loadInterviewHistory() {
+            const list = document.getElementById('interview-history-list');
+            const summary = document.getElementById('interview-history-summary');
+            if (!list) return;
+
+            const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
+            if (!token) {
+                list.innerHTML = '<div style="color:rgba(255,255,255,0.5);font-size:14px;padding:8px 0;">Sign in to see your past interviews.</div>';
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/interview/user/history', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const data = await res.json();
+                const all = (data && data.history) || [];
+
+                // Only sessions the candidate actually finished are worth showing.
+                const done = all.filter(s => s.status === 'COMPLETED' || s.status === 'EXPIRED');
+
+                if (!done.length) {
+                    list.innerHTML =
+                        '<div style="padding:10px 0 4px;">' +
+                        '<div style="color:#fff;font-weight:700;font-size:16px;margin-bottom:6px;">No interviews yet</div>' +
+                        '<div style="color:rgba(255,255,255,0.55);font-size:14px;max-width:46ch;line-height:1.6;">' +
+                        'Finish a mock interview and your score, feedback and recordings will appear here so you can track how you improve.</div></div>';
+                    return;
+                }
+
+                const scoreOf = (s) => {
+                    const sc = s.scorecard || {};
+                    const v = sc.overallScore !== undefined ? sc.overallScore : sc.score;
+                    return (typeof v === 'number') ? v : null;
+                };
+
+                const scored = done.map(scoreOf).filter(v => v !== null);
+                const best = scored.length ? Math.max.apply(null, scored) : null;
+                const avg = scored.length ? (scored.reduce((a, b) => a + b, 0) / scored.length) : null;
+
+                if (summary) {
+                    const tile = (label, value) =>
+                        '<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:14px 16px;">' +
+                        '<div style="font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,0.45);font-weight:700;">' + label + '</div>' +
+                        '<div style="font-size:26px;font-weight:800;color:#fff;margin-top:4px;font-variant-numeric:tabular-nums;">' + value + '</div></div>';
+                    summary.innerHTML =
+                        tile('Interviews', done.length) +
+                        tile('Best score', best === null ? '&mdash;' : best.toFixed(1)) +
+                        tile('Average', avg === null ? '&mdash;' : avg.toFixed(1));
+                    summary.style.display = 'grid';
+                }
+
+                const esc = (t) => String(t == null ? '' : t)
+                    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+                list.innerHTML = done.map(function (s) {
+                    const score = scoreOf(s);
+                    const when = s.completedAt || s.createdAt;
+                    const dateStr = when
+                        ? new Date(when).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })
+                        : '';
+                    const answered = (s.answers || []).length;
+                    const colour = score === null ? 'rgba(255,255,255,0.4)'
+                        : (score >= 7 ? 'var(--primary)' : (score >= 4 ? '#f59e0b' : '#ef4444'));
+                    const expired = s.status === 'EXPIRED';
+
+                    return '<a href="/feedback.html?session=' + encodeURIComponent(s.sessionId) + '" ' +
+                        'style="display:flex;align-items:center;gap:16px;text-decoration:none;padding:14px 16px;margin-bottom:10px;' +
+                        'background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:14px;">' +
+
+                        '<div style="min-width:54px;text-align:center;">' +
+                        '<div style="font-size:22px;font-weight:800;color:' + colour + ';font-variant-numeric:tabular-nums;line-height:1.1;">' +
+                        (score === null ? '&mdash;' : score.toFixed(1)) + '</div>' +
+                        '<div style="font-size:9.5px;color:rgba(255,255,255,0.4);letter-spacing:.06em;">/ 10</div></div>' +
+
+                        '<div style="flex:1;min-width:0;">' +
+                        '<div style="color:#fff;font-weight:700;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' +
+                        esc(s.jobRole || 'Mock interview') +
+                        (s.companyName ? ' <span style="color:rgba(255,255,255,0.45);font-weight:500;">&middot; ' + esc(s.companyName) + '</span>' : '') +
+                        '</div>' +
+                        '<div style="color:rgba(255,255,255,0.5);font-size:12.5px;margin-top:3px;">' +
+                        esc(dateStr) + ' &middot; ' + answered + ' question' + (answered === 1 ? '' : 's') +
+                        (expired ? ' &middot; <span style="color:#f59e0b;">ran out of time</span>' : '') +
+                        '</div></div>' +
+
+                        '<div style="color:var(--primary);font-size:13px;font-weight:700;white-space:nowrap;">View report &rarr;</div>' +
+                        '</a>';
+                }).join('');
+            } catch (err) {
+                list.innerHTML = '<div style="color:#ef4444;font-size:14px;padding:8px 0;">Could not load your interviews. Please refresh.</div>';
+                console.warn('Interview history error:', err);
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
+            loadInterviewHistory();
             initializeDashboard();
         });
 

@@ -1,4 +1,13 @@
 User-agent: *
 Allow: /
 
+# Private surfaces: these need an account, and an interview report URL
+# belongs to a single candidate.
+Disallow: /dashboard
+Disallow: /session
+Disallow: /feedback.html
+Disallow: /Admin
+Disallow: /api/
+Disallow: /uploads/
+
 Sitemap: https://hiero.in/sitemap.xml

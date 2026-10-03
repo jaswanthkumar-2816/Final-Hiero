@@ -3,14 +3,84 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Welcome to Hiero</title>
+  <title>Hiero — AI Mock Interviews &amp; Resume Builder for Job Seekers</title>
+  <meta name="description" content="Practise real technical interviews with an AI that asks follow-up questions, then get a scored report on your answers. Build an ATS-ready resume from your existing one. Free to start." />
+  <link rel="canonical" href="https://hiero.in/" />
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+  <meta name="theme-color" content="#07e219" />
+
+  <!-- Open Graph: what appears when the link is shared on WhatsApp, LinkedIn, Slack -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Hiero" />
+  <meta property="og:url" content="https://hiero.in/" />
+  <meta property="og:title" content="Hiero — AI Mock Interviews &amp; Resume Builder" />
+  <meta property="og:description" content="Practise real technical interviews with an AI that pushes back on vague answers, then get a scored report. Build an ATS-ready resume from your existing one." />
+  <meta property="og:image" content="https://hiero.in/logohiero.png" />
+  <meta property="og:image:alt" content="Hiero" />
+  <meta property="og:locale" content="en_IN" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Hiero — AI Mock Interviews &amp; Resume Builder" />
+  <meta name="twitter:description" content="Practise real technical interviews with an AI that pushes back on vague answers, then get a scored report." />
+  <meta name="twitter:image" content="https://hiero.in/logohiero.png" />
+
+  <!-- Structured data: tells Google the brand, the logo, and the site's sections,
+       which is what produces a proper branded result and sitelinks. -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://hiero.in/#organization",
+        "name": "Hiero",
+        "alternateName": "Hiero Career",
+        "url": "https://hiero.in/",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://hiero.in/logohiero.png"
+        },
+        "description": "Hiero helps job seekers prepare for technical interviews with AI mock interviews and an ATS-ready resume builder."
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://hiero.in/#website",
+        "url": "https://hiero.in/",
+        "name": "Hiero",
+        "publisher": { "@id": "https://hiero.in/#organization" },
+        "inLanguage": "en-IN"
+      },
+      {
+        "@type": "SoftwareApplication",
+        "name": "Hiero",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web",
+        "url": "https://hiero.in/",
+        "description": "AI mock interviews with spoken questions, adaptive follow-ups and a scored feedback report, plus a resume builder that imports your existing resume.",
+        "featureList": [
+          "AI mock interview with voice",
+          "Adaptive follow-up questions",
+          "Scored feedback report",
+          "Resume import and ATS-ready PDF export",
+          "Interview recordings and playback"
+        ],
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "INR"
+        }
+      }
+    ]
+  }
+  </script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/charter-webfont@4/charter.min.css">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body {
       width: 100%;
-      height: 100%;
-      overflow: hidden;
+      min-height: 100%;
+      overflow-x: hidden;
+      overflow-y: auto;
       background: #000;
       color: #fff;
       font-family: Charter, 'Bitstream Charter', Georgia, serif;
@@ -161,6 +231,55 @@
       .welcome-promise span + span::before { margin-right: 14px; }
       .get-started-btn { width: 100%; }
     }
+
+    /* Below-the-fold content. Quiet by design: the splash is still the first
+       impression, this is what search engines and screen readers read. */
+    .seo-copy {
+      position: relative;
+      z-index: 2;
+      background: #000;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      padding: 72px 20px 88px;
+    }
+    .seo-inner {
+      max-width: 680px;
+      margin-inline: auto;
+      font-family: Charter, 'Bitstream Charter', Georgia, serif;
+    }
+    .seo-inner h2 {
+      font-size: clamp(20px, 3.4vw, 26px);
+      font-weight: 500;
+      color: #fff;
+      margin: 0 0 12px;
+      letter-spacing: -0.01em;
+      text-wrap: balance;
+    }
+    .seo-inner h2 + p { margin-bottom: 40px; }
+    .seo-inner p {
+      font-size: 16px;
+      line-height: 1.65;
+      color: rgba(255,255,255,0.68);
+      margin: 0;
+    }
+    .seo-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 14px;
+      margin-top: 8px;
+      padding-top: 28px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    .seo-links a {
+      color: #07e219;
+      text-decoration: none;
+      font-size: 14.5px;
+      border: 1px solid rgba(7,226,25,0.35);
+      border-radius: 100px;
+      padding: 7px 16px;
+    }
+    .seo-links a:hover,
+    .seo-links a:focus-visible { background: rgba(7,226,25,0.12); }
+    @media (max-width: 520px) { .seo-copy { padding: 52px 18px 64px; } }
   </style>
   <script src="lotus_points.js"></script>
 </head>
@@ -180,6 +299,37 @@
     </p>
     <button type="button" class="get-started-btn" onclick="window.location.href='/get-started'">Get Started</button>
   </div>
+
+  <!-- Real content below the fold: the splash alone gave search engines a single
+       headline to index. Visible to everyone, not hidden from crawlers. -->
+  <section class="seo-copy">
+    <div class="seo-inner">
+      <h2>Practise the interview before it counts</h2>
+      <p>
+        Hiero runs a spoken mock interview that adapts to how you answer. When a reply is
+        vague it asks for the numbers behind it; when it is strong it pushes further into
+        trade-offs and failure modes. Questions start approachable and get harder as you go.
+      </p>
+
+      <h2>Know exactly where you lost marks</h2>
+      <p>
+        Every session ends with a scored report: your answers question by question, what was
+        missing from each, and a recording you can replay to hear how you actually sounded.
+      </p>
+
+      <h2>A resume that survives the filter</h2>
+      <p>
+        Upload the resume you already have. Hiero reads it, keeps your real projects, dates and
+        metrics, and rebuilds it into an ATS-ready PDF you can send the same day.
+      </p>
+
+      <nav class="seo-links" aria-label="Main sections">
+        <a href="/mock-interview">Mock interview</a>
+        <a href="/resume-builder.html">Resume builder</a>
+        <a href="/get-started">Get started</a>
+      </nav>
+    </div>
+  </section>
 
   <script src="hiero-astra-engine.js"></script>
 </body>
