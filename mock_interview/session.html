@@ -29,7 +29,7 @@
             'primary-container': '#07e219',
             'primary-hover': '#05be14',
             'accent-emerald': '#50ff45',
-            'accent-cyan': '#00ffcc',
+            'primary': '#00ffcc',
             'danger': '#ef4444',
             'warning': '#f59e0b',
             'info': '#38bdf8',
@@ -1166,7 +1166,7 @@
         </div>
         <div class="space-y-1.5 pt-1 text-slate-400">
           <div class="flex items-start gap-2 text-slate-300">
-            <span class="w-1.5 h-1.5 rounded-full bg-yellow-400 mt-1.5 flex-shrink-0"></span>
+            <span class="w-1.5 h-1.5 rounded-full bg-amber-400 mt-1.5 flex-shrink-0"></span>
             <span id="strike-1-log">Strike 1: Window minimized / full screen exited</span>
           </div>
           <div class="flex items-start gap-2 text-red-300">
@@ -1345,8 +1345,8 @@
               <i class="fa-solid fa-volume-high text-[9px]"></i> <span>Replay</span>
             </button>
             <span class="px-2.5 py-1 rounded-full bg-primary/10 border border-primary/30 font-mono text-[9px] font-bold text-primary uppercase tracking-wider" id="tag-comp">GOOGLE</span>
-            <span class="px-2.5 py-1 rounded-full bg-yellow-500/10 border border-yellow-500/30 font-mono text-[9px] font-bold text-yellow-400 uppercase tracking-wider" id="tag-diff">EASY</span>
-            <span class="px-2.5 py-1 rounded-full bg-blue-500/10 border border-blue-500/30 font-mono text-[9px] font-bold text-blue-400 uppercase tracking-wider" id="tag-type">TECHNICAL</span>
+            <span class="px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 font-mono text-[9px] font-bold text-amber-400 uppercase tracking-wider" id="tag-diff">EASY</span>
+            <span class="px-2.5 py-1 rounded-full bg-slate-500/10 border border-slate-500/30 font-mono text-[9px] font-bold text-slate-400 uppercase tracking-wider" id="tag-type">TECHNICAL</span>
           </div>
         </div>
         <h2 class="font-display text-white" id="ai-out">
@@ -1358,22 +1358,22 @@
       <div id="answer-guide-card" class="w-full max-w-2xl soft-card text-left mb-3 transition-all duration-300">
         <div class="flex items-center justify-between border-b border-white/[0.06] pb-2 mb-1">
           <div class="flex items-center gap-2">
-            <div class="w-6 h-6 rounded-lg bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-xs">
+            <div class="w-6 h-6 rounded-lg bg-primary/15 border border-primary/30 flex items-center justify-center text-primary text-xs">
               <i class="fa-solid fa-lightbulb"></i>
             </div>
-            <span class="font-mono text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Answer guide</span>
+            <span class="font-mono text-[11px] font-bold text-primary uppercase tracking-wider">Answer guide</span>
           </div>
           <span class="font-mono text-[9px] font-semibold px-2 py-0.5 rounded bg-white/5 text-slate-400 border border-white/10">Optional</span>
         </div>
         <div id="answer-guide-items" class="flex flex-wrap gap-1.5 pt-2">
           <span class="px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/[0.08] text-xs font-sans text-slate-300 flex items-center gap-1.5">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Core background & recent experience
+            <span class="w-1.5 h-1.5 rounded-full bg-primary"></span> Core background & recent experience
           </span>
           <span class="px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/[0.08] text-xs font-sans text-slate-300 flex items-center gap-1.5">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Relevant project highlights
+            <span class="w-1.5 h-1.5 rounded-full bg-primary"></span> Relevant project highlights
           </span>
           <span class="px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/[0.08] text-xs font-sans text-slate-300 flex items-center gap-1.5">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Target role alignment
+            <span class="w-1.5 h-1.5 rounded-full bg-primary"></span> Target role alignment
           </span>
         </div>
       </div>
@@ -1393,7 +1393,7 @@
         <!-- Polished / Recommended Phrasing -->
         <div class="space-y-1">
           <div class="text-[10px] font-mono text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
-            <i class="fa-solid fa-sparkles text-yellow-400"></i> Recommended Executive Phrasing:
+            <i class="fa-solid fa-sparkles text-amber-400"></i> Recommended Executive Phrasing:
           </div>
           <p class="text-xs sm:text-sm font-sans font-semibold text-white leading-relaxed bg-white/[0.03] p-2.5 rounded-xl border border-white/[0.06]" id="coach-improved-phrase">
             "I architected the database schema to maintain low latency under high load..."
@@ -1441,9 +1441,9 @@
       <div id="acoustic-telemetry-hud" class="w-full max-w-2xl matrix-glass-card px-4 py-2.5 rounded-xl border border-white/[0.08] mb-3 flex flex-wrap items-center justify-between gap-2 text-left transition-all duration-300">
         <!-- Environment / Disturbance Indicator -->
         <div class="flex items-center gap-2">
-          <div id="noise-indicator-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)]"></div>
+          <div id="noise-indicator-dot" class="w-2.5 h-2.5 rounded-full bg-primary shadow-[0_0_10px_rgba(16,185,129,0.8)]"></div>
           <div class="flex flex-col">
-            <span id="noise-status-badge" class="font-mono text-[10px] font-bold text-emerald-400 tracking-wider uppercase flex items-center gap-1">
+            <span id="noise-status-badge" class="font-mono text-[10px] font-bold text-primary tracking-wider uppercase flex items-center gap-1">
               <i class="fa-solid fa-shield-halved"></i> <span>Acoustic Space: Clean</span>
             </span>
             <span id="noise-subtext" class="text-[9px] text-slate-400 font-sans">Optimal silent space for accurate voice recognition</span>
@@ -1611,25 +1611,25 @@
           </div>
           <div class="telemetry-stat-card">
             <span class="font-mono text-[9px] text-slate-400 uppercase tracking-wider font-bold block mb-1">Sync</span>
-            <div class="font-display font-black text-sm text-accent-cyan" id="hud-sync-val">99%</div>
+            <div class="font-display font-black text-sm text-primary" id="hud-sync-val">99%</div>
             <div class="text-[10px] text-slate-400">Model accuracy</div>
           </div>
           <div class="telemetry-stat-card">
             <span class="font-mono text-[9px] text-slate-400 uppercase tracking-wider font-bold block mb-1">Timer</span>
-            <div class="font-mono font-black text-sm text-yellow-400" id="session-time">05:00</div>
+            <div class="font-mono font-black text-sm text-amber-400" id="session-time">05:00</div>
             <div class="text-[10px] text-slate-400">Remaining</div>
           </div>
         </div>
 
         <div class="soft-card space-y-1.5" id="stress-hud-strip">
           <div class="flex items-center justify-between">
-            <span class="font-mono text-[9px] font-bold text-slate-400 uppercase tracking-widest">Calm score</span>
-            <span class="font-mono text-[10px] font-extrabold text-primary px-2 py-0.5 rounded bg-primary/10 border border-primary/30 uppercase" id="stress-level-label">CALM</span>
+            <span class="font-mono text-[9px] font-bold text-slate-400 uppercase tracking-widest">Delivery</span>
+            <span class="font-mono text-[10px] font-extrabold text-slate-300 px-2 py-0.5 rounded bg-white/5 border border-white/10 uppercase" id="stress-level-label">READY</span>
           </div>
           <div class="w-full h-1.5 rounded-full bg-white/10 overflow-hidden">
-            <div class="h-full rounded-full bg-gradient-to-r from-primary to-accent-cyan w-[30%] transition-all duration-500" id="stress-bar-fill"></div>
+            <div class="h-full rounded-full bg-primary w-[15%] transition-all duration-500" id="stress-bar-fill"></div>
           </div>
-          <p class="text-[10px] text-slate-400">Voice: <strong class="text-white" id="stress-sub-text">Steady</strong></p>
+          <p class="text-[10px] text-slate-400">Delivery: <strong class="text-white" id="stress-sub-text">Listening</strong></p>
         </div>
 
         <div class="soft-card space-y-1.5">
@@ -1640,7 +1640,7 @@
               <span>Keep looking at the camera when you answer.</span>
             </div>
             <div class="flex items-start gap-2">
-              <i class="fa-solid fa-shield text-sky-400 mt-0.5"></i>
+              <i class="fa-solid fa-shield text-slate-400 mt-0.5"></i>
               <span>Stay in this window — tab switches count as strikes.</span>
             </div>
           </div>
@@ -1718,15 +1718,15 @@
         </div>
         <div class="telemetry-stat-card">
           <span class="font-mono text-[9px] text-slate-400 uppercase tracking-wider font-bold block mb-1">Timer</span>
-          <div class="font-mono font-black text-sm text-yellow-400" id="m-session-time">05:00</div>
+          <div class="font-mono font-black text-sm text-amber-400" id="m-session-time">05:00</div>
         </div>
         <div class="telemetry-stat-card">
           <span class="font-mono text-[9px] text-slate-400 uppercase tracking-wider font-bold block mb-1">Integrity</span>
           <div class="font-mono font-black text-sm text-red-400" id="m-warn-count">0 / 3</div>
         </div>
         <div class="telemetry-stat-card">
-          <span class="font-mono text-[9px] text-slate-400 uppercase tracking-wider font-bold block mb-1">Calm</span>
-          <div class="font-mono font-black text-sm text-primary" id="m-stress-level-label">CALM</div>
+          <span class="font-mono text-[9px] text-slate-400 uppercase tracking-wider font-bold block mb-1">Delivery</span>
+          <div class="font-mono font-black text-sm text-slate-300" id="m-stress-level-label">READY</div>
         </div>
       </div>
       <p class="text-[12px] text-slate-400 leading-relaxed">Stay in this window. Tab switches and leaving the page count toward integrity strikes.</p>
@@ -2155,11 +2155,11 @@
       if (warnCountEl) warnCountEl.textContent = `${Math.min(proctorViolations, 3)} / 3`;
       
       const pip = document.getElementById(`pip-${Math.min(proctorViolations, 3)}`);
-      if (pip) pip.className = 'h-1.5 flex-1 rounded-full bg-yellow-500 shadow-[0_0_8px_rgba(234,179,8,0.8)]';
+      if (pip) pip.className = 'h-1.5 flex-1 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(234,179,8,0.8)]';
 
       const hintEl = document.getElementById('mic-troubleshoot-hint');
       if (hintEl && !isProcessingTurn) {
-        hintEl.className = 'flex items-center gap-1.5 text-yellow-400 font-bold';
+        hintEl.className = 'flex items-center gap-1.5 text-amber-400 font-bold';
         hintEl.innerHTML = '<i class="fa-solid fa-eye text-xs"></i><span>Please remain in full screen for best practice experience</span>';
         setTimeout(() => {
           if (hintEl && !isUserMuted) {
@@ -2307,7 +2307,7 @@
         // 1. Question Cutoff Threshold (At 4:30 for 5m, 9:30 for 10m, 14:30 for 15m -> 30s remaining)
         if (durationSeconds <= 30 && !isWrapupTriggered) {
           if (display) {
-            display.className = 'font-mono font-black text-sm text-yellow-400 animate-pulse';
+            display.className = 'font-mono font-black text-sm text-amber-400 animate-pulse';
           }
           const hintEl = document.getElementById('mic-troubleshoot-hint');
           if (hintEl) {
@@ -2326,7 +2326,7 @@
         }
 
         if (durationSeconds < 60 && display) {
-          display.className = 'font-mono font-black text-sm text-yellow-400 animate-pulse';
+          display.className = 'font-mono font-black text-sm text-amber-400 animate-pulse';
         }
       }, 1000);
     }
@@ -3050,7 +3050,7 @@
       isProcessingTurn = true;
       const hintEl = document.getElementById('mic-troubleshoot-hint');
       if (hintEl) {
-        hintEl.className = 'flex items-center gap-1.5 text-yellow-400 font-bold';
+        hintEl.className = 'flex items-center gap-1.5 text-amber-400 font-bold';
         hintEl.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles fa-spin text-xs"></i><span>Understood! AI analyzing & replying...</span>';
       }
 
@@ -3097,10 +3097,10 @@
         }
         if (subtext) subtext.textContent = 'Minor background ambient sound detected.';
       } else {
-        if (dot) dot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)]';
+        if (dot) dot.className = 'w-2.5 h-2.5 rounded-full bg-primary shadow-[0_0_10px_rgba(16,185,129,0.8)]';
         if (badge) {
-          badge.className = 'font-mono text-[10px] font-bold text-emerald-400 tracking-wider uppercase flex items-center gap-1';
-          badge.innerHTML = '<i class="fa-solid fa-shield-halved text-emerald-400"></i> <span>ACOUSTIC SPACE: CLEAN</span>';
+          badge.className = 'font-mono text-[10px] font-bold text-primary tracking-wider uppercase flex items-center gap-1';
+          badge.innerHTML = '<i class="fa-solid fa-shield-halved text-primary"></i> <span>ACOUSTIC SPACE: CLEAN</span>';
         }
         if (subtext) subtext.textContent = 'Optimal silent space for accurate voice recognition';
       }
@@ -3361,7 +3361,7 @@
     window.restartMicrophoneEngine = async function() {
       const hintEl = document.getElementById('mic-troubleshoot-hint');
       if (hintEl) {
-        hintEl.className = 'flex items-center gap-1.5 text-yellow-400';
+        hintEl.className = 'flex items-center gap-1.5 text-amber-400';
         hintEl.innerHTML = '<i class="fa-solid fa-rotate fa-spin"></i><span>Reconnecting microphone stream across all devices...</span>';
       }
       try {
@@ -3406,7 +3406,7 @@
       if (!text && mediaRecorder && mediaRecorder.state === 'recording' && recordedAudioChunks.length > 0) {
         const hintEl = document.getElementById('mic-troubleshoot-hint');
         if (hintEl) {
-          hintEl.className = 'flex items-center gap-1.5 text-yellow-400 font-bold';
+          hintEl.className = 'flex items-center gap-1.5 text-amber-400 font-bold';
           hintEl.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles fa-spin text-xs"></i><span>Finalizing voice transcription...</span>';
         }
         try {
@@ -3639,7 +3639,7 @@
       if (guideContainer && Array.isArray(qObj.answerGuide) && qObj.answerGuide.length > 0) {
         guideContainer.innerHTML = qObj.answerGuide.map(item => `
           <span class="px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/[0.08] text-xs font-sans text-slate-300 flex items-center gap-1.5 shadow-sm">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0"></span>
+            <span class="w-1.5 h-1.5 rounded-full bg-primary shrink-0"></span>
             <span>${escapeHtml(item)}</span>
           </span>
         `).join('');
@@ -3804,8 +3804,10 @@
         // Render Live Grammar & Speech Coaching in left transcript
         if (data.coaching) {
           renderCoachingFeedback(data.coaching, candidateSpokenText);
+          if (window.recordDeliverySpeech) window.recordDeliverySpeech(candidateSpokenText);
           appendTranscriptMessage('user', candidateSpokenText, data.coaching);
         } else {
+          if (window.recordDeliverySpeech) window.recordDeliverySpeech(candidateSpokenText);
           appendTranscriptMessage('user', candidateSpokenText);
         }
 
@@ -4066,12 +4068,21 @@
 
           if (!faceFound) {
             missesSinceLastStrike++;
-            bstat.textContent = 'Face Off-Center';
-            bstat.className = 'absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded bg-yellow-500/80 font-mono text-[9px] text-white font-bold z-20';
+            bstat.textContent = 'Face Not Visible';
+            bstat.className = 'absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded bg-amber-500/80 font-mono text-[9px] text-white font-bold z-20';
+            // ~4 consecutive misses at 1.4s = ~5.6s away from camera.
+            if (missesSinceLastStrike >= 4) {
+              missesSinceLastStrike = 0;
+              issueStrike('FACE_ABSENT', 'You must stay visible on camera');
+            }
           } else if (predictions.length > 1) {
             consecutiveMultiFaceCount++;
             bstat.textContent = 'Multiple Faces';
-            bstat.className = 'absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded bg-yellow-600 font-mono text-[9px] text-white font-bold z-20 animate-pulse';
+            bstat.className = 'absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded bg-amber-600 font-mono text-[9px] text-white font-bold z-20 animate-pulse';
+            if (consecutiveMultiFaceCount >= 3) {
+              consecutiveMultiFaceCount = 0;
+              issueStrike('MULTIPLE_FACES', 'Another person is visible on camera');
+            }
           } else {
             consecutiveMultiFaceCount = 0;
             missesSinceLastStrike = 0;
@@ -4083,11 +4094,15 @@
               if (!comp.isMatch) {
                 consecutiveMismatchCount++;
                 bstat.textContent = `Tracking (${Math.round(comp.score * 100)}%)`;
-                bstat.className = 'absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded bg-yellow-600/80 font-mono text-[9px] text-white font-bold z-20';
+                bstat.className = 'absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded bg-amber-600/80 font-mono text-[9px] text-white font-bold z-20';
+                if (consecutiveMismatchCount >= 4) {
+                  consecutiveMismatchCount = 0;
+                  issueStrike('IDENTITY_MISMATCH', 'Face does not match the enrolled candidate');
+                }
               } else {
                 consecutiveMismatchCount = 0;
                 bstat.textContent = `ID Verified (${Math.round((1 - comp.score) * 100)}%)`;
-                bstat.className = 'absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded bg-green-600/80 font-mono text-[9px] text-white font-bold z-20';
+                bstat.className = 'absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded bg-primary/80 font-mono text-[9px] text-white font-bold z-20';
               }
             } else {
               bstat.textContent = 'Active Hud Sync';
@@ -4096,13 +4111,17 @@
           }
         }
 
-        // Phone object detection
+        // Banned-device detection. Previously this only drew a red box and had
+        // no consequence, so a phone on camera did nothing at all.
         if (cocoModel) {
           try {
             const objects = await cocoModel.detect(vid);
-            const phoneDetected = objects.find(obj => obj.class === 'cell phone' || obj.class === 'phone');
-            if (phoneDetected) {
-              drawPhoneBox(phoneDetected);
+            const banned = objects.find(obj =>
+              BANNED_OBJECTS[obj.class] && obj.score >= OBJECT_CONFIDENCE
+            );
+            if (banned) {
+              drawPhoneBox(banned);
+              issueStrike('BANNED_DEVICE', BANNED_OBJECTS[banned.class]);
             }
           } catch (cocoErr) {}
         }
@@ -4167,17 +4186,83 @@
       });
     }
 
-    function issueStrike(type) {
-      if (window.lastStrikeTime && (Date.now() - window.lastStrikeTime < 4000)) return;
+    // ── PROCTORING ENFORCEMENT ────────────────────────────────────────────
+    // issueStrike() previously had no callers: the HUD showed "0 / 3" but no
+    // violation could ever register, and a detected phone only drew a box.
+    const MAX_STRIKES = 3;
+    const STRIKE_COOLDOWN_MS = 6000;   // one lapse must not burn every strike
+    window.strikeLog = [];
+
+    function issueStrike(type, detail) {
+      if (interviewTerminated) return;
+      if (window.lastStrikeTime && (Date.now() - window.lastStrikeTime < STRIKE_COOLDOWN_MS)) return;
       window.lastStrikeTime = Date.now();
-      
+
       strikes++;
-      document.getElementById('warn-count').textContent = `${Math.min(strikes, 3)} / 3`;
+      const shown = Math.min(strikes, MAX_STRIKES);
+      window.strikeLog.push({ n: strikes, type, detail: detail || '', at: new Date().toISOString() });
+
+      const warnEl = document.getElementById('warn-count');
+      if (warnEl) warnEl.textContent = `${shown} / ${MAX_STRIKES}`;
       syncMobileSessionHud();
-      
-      const pip = document.getElementById(`pip-${Math.min(strikes, 3)}`);
-      if (pip) pip.className = 'h-1.5 flex-1 rounded-full bg-yellow-500 shadow-[0_0_8px_rgba(234,179,8,0.8)]';
+
+      const pip = document.getElementById(`pip-${shown}`);
+      if (pip) pip.className = 'h-1.5 flex-1 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(234,179,8,0.8)]';
+
+      const remaining = MAX_STRIKES - strikes;
+      if (remaining > 0) {
+        showProctorSecurityWarning(`${detail || type} — warning ${strikes} of ${MAX_STRIKES}. ${remaining} remaining.`);
+      }
+
+      console.warn(`[PROCTOR] Strike ${strikes}/${MAX_STRIKES}: ${type} ${detail || ''}`);
+
+      if (strikes >= MAX_STRIKES) terminateForIntegrity(type, detail);
     }
+
+    function terminateForIntegrity(type, detail) {
+      if (interviewTerminated) return;
+      interviewTerminated = true;
+
+      try { if (window.speechSynthesis) window.speechSynthesis.cancel(); } catch (e) {}
+      try { if (currentAIAudio) currentAIAudio.pause(); } catch (e) {}
+      try { if (continuousPhraseRecorder && continuousPhraseRecorder.state === 'recording') continuousPhraseRecorder.stop(); } catch (e) {}
+
+      const modal = document.getElementById('proctor-terminated-modal');
+      if (modal) {
+        const l1 = document.getElementById('strike-1-log');
+        const l2 = document.getElementById('strike-2-log');
+        if (l1 && window.strikeLog[0]) l1.textContent = `Strike 1: ${window.strikeLog[0].detail || window.strikeLog[0].type}`;
+        if (l2 && window.strikeLog[1]) l2.textContent = `Strike 2: ${window.strikeLog[1].detail || window.strikeLog[1].type}`;
+        modal.style.display = 'flex';
+      }
+
+      // Record the termination reason server-side so the report reflects it.
+      try {
+        fetch('/api/interview/telemetry', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sessionId: window.sessionId || null,
+            event: 'INTEGRITY_TERMINATION',
+            reason: type,
+            detail: detail || '',
+            strikes: window.strikeLog
+          })
+        }).catch(() => {});
+      } catch (e) {}
+    }
+
+    // Objects that must not be visible during a proctored interview.
+    const BANNED_OBJECTS = {
+      'cell phone': 'Phone detected on camera',
+      'laptop': 'Second screen detected on camera',
+      'tv': 'Screen detected on camera',
+      'remote': 'Handheld device detected on camera',
+      'book': 'Book or notes detected on camera',
+      'keyboard': 'External keyboard detected on camera',
+      'tablet': 'Tablet detected on camera'
+    };
+    const OBJECT_CONFIDENCE = 0.55;
 
     let isQuestionGenerating = false;
     async function generateQuestion() {
@@ -4309,6 +4394,7 @@
         isSpeaking = false;
         currentInterviewState = InterviewState.WAITING_FOR_USER;
         if (orb) orb.classList.remove('speaking-pulse');
+        if (window.resetDeliveryStats) window.resetDeliveryStats();
         const aiStatus = document.getElementById('ai-engine-status');
         if (aiStatus) aiStatus.textContent = 'Your turn — speak your answer';
         
@@ -4508,31 +4594,101 @@
       alert("Observer link copied! Interview delegates can monitor the telemetry feed.");
     }
 
-    // Stress tracking simulation
-    setInterval(() => {
-      if (isSpeaking) return;
-      const pitch = Math.random();
-      const stressLabel = document.getElementById('stress-level-label');
-      const stressSub = document.getElementById('stress-sub-text');
-      const stressBar = document.getElementById('stress-bar-fill');
-      
-      if (pitch > 0.82) {
-        if (stressLabel) {
-          stressLabel.textContent = "MODERATE";
-          stressLabel.className = "font-mono text-[10px] font-extrabold text-yellow-400 px-2 py-0.5 rounded bg-yellow-500/10 border border-yellow-500/30 uppercase";
-        }
-        if (stressSub) stressSub.textContent = "Slightly Elevated";
-        if (stressBar) stressBar.style.width = "65%";
-      } else {
-        if (stressLabel) {
-          stressLabel.textContent = "CALM";
-          stressLabel.className = "font-mono text-[10px] font-extrabold text-primary px-2 py-0.5 rounded bg-primary/10 border border-primary/30 uppercase";
-        }
-        if (stressSub) stressSub.textContent = "Steady";
-        if (stressBar) stressBar.style.width = "30%";
+    // ── DELIVERY / COMPOSURE METER ────────────────────────────────────────
+    // This previously displayed Math.random() every 4 seconds under the label
+    // "Calm score", i.e. a fabricated reading shown to the candidate as fact.
+    // It now reports measurable delivery signals only. We do NOT claim to
+    // detect emotional state from voice — that is not reliable — we report
+    // speaking pace, filler-word rate and hesitation, which are observable.
+    window.deliveryStats = { fillers: 0, words: 0, startedAt: null, hesitationMs: null };
+
+    const FILLER_RE = /\b(um+|uh+|er+|ah+|hmm+|like|you know|i mean|basically|actually|sort of|kind of)\b/gi;
+
+    function updateDeliveryMeter() {
+      const label = document.getElementById('stress-level-label');
+      const sub = document.getElementById('stress-sub-text');
+      const bar = document.getElementById('stress-bar-fill');
+      const st = window.deliveryStats;
+      if (!label || !sub || !bar) return;
+
+      // Not enough speech yet to say anything honest about delivery.
+      if (!st.startedAt || st.words < 12) {
+        label.textContent = 'READY';
+        label.className = 'font-mono text-[10px] font-extrabold text-slate-300 px-2 py-0.5 rounded bg-white/5 border border-white/10 uppercase';
+        sub.textContent = 'Listening';
+        bar.style.width = '15%';
+        syncMobileSessionHud();
+        return;
       }
+
+      const elapsedMin = Math.max((Date.now() - st.startedAt) / 60000, 0.05);
+      const wpm = st.words / elapsedMin;
+      const fillerPer100 = (st.fillers / Math.max(st.words, 1)) * 100;
+
+      // Composure penalties from observable delivery only. Filler rate is the
+      // strongest signal, so it scales rather than capping at a flat penalty.
+      let score = 100;
+
+      // Pace: natural interview speech is roughly 110-150 wpm.
+      if (wpm > 200) score -= 40;
+      else if (wpm > 170) score -= 25;
+      else if (wpm > 150) score -= 10;
+      else if (wpm < 70) score -= 20;
+      else if (wpm < 95) score -= 10;
+
+      // Fillers: scales at ~4 points per filler-per-100-words over a floor of 2.
+      if (fillerPer100 > 2) score -= Math.min(45, (fillerPer100 - 2) * 4);
+
+      // Hesitation before starting to answer.
+      if (st.hesitationMs > 8000) score -= 20;
+      else if (st.hesitationMs > 5000) score -= 12;
+      else if (st.hesitationMs > 3000) score -= 6;
+
+      score = Math.max(5, Math.min(100, Math.round(score)));
+
+      let text, cls, detail;
+      if (score >= 75) {
+        text = 'STEADY';
+        cls = 'text-primary bg-primary/10 border-primary/30';
+        detail = `${Math.round(wpm)} wpm · clear`;
+      } else if (score >= 50) {
+        text = 'VARIABLE';
+        cls = 'text-amber-400 bg-amber-500/10 border-amber-500/30';
+        detail = fillerPer100 > 3 ? `${Math.round(wpm)} wpm · ${st.fillers} fillers` : `${Math.round(wpm)} wpm`;
+      } else {
+        text = 'RUSHED';
+        cls = 'text-amber-400 bg-amber-500/10 border-amber-500/30';
+        detail = `${Math.round(wpm)} wpm · ${st.fillers} fillers`;
+      }
+
+      label.textContent = text;
+      label.className = `font-mono text-[10px] font-extrabold px-2 py-0.5 rounded border uppercase ${cls}`;
+      sub.textContent = detail;
+      bar.style.width = `${score}%`;
       syncMobileSessionHud();
-    }, 4000);
+    }
+
+    /** Feed recognised speech into the delivery meter. */
+    window.recordDeliverySpeech = function (text) {
+      const st = window.deliveryStats;
+      if (!text) return;
+      if (!st.startedAt) {
+        st.startedAt = Date.now();
+        if (window.__turnOfferedAt) st.hesitationMs = st.startedAt - window.__turnOfferedAt;
+      }
+      st.words += String(text).split(/\s+/).filter(Boolean).length;
+      st.fillers += (String(text).match(FILLER_RE) || []).length;
+      updateDeliveryMeter();
+    };
+
+    /** Reset at the start of each new answer. */
+    window.resetDeliveryStats = function () {
+      window.deliveryStats = { fillers: 0, words: 0, startedAt: null, hesitationMs: null };
+      window.__turnOfferedAt = Date.now();
+      updateDeliveryMeter();
+    };
+
+    setInterval(() => { if (!isSpeaking) updateDeliveryMeter(); }, 3000);
 
     // ─────────────────────────────────────────────
     // PROCTORING & ANTI-CHEATING SECURITY ENGINE
@@ -4558,6 +4714,10 @@
     function triggerTabSwitchViolation() {
       if (interviewTerminated || isEndingSession) return;
       tabSwitchViolations++;
+
+      // Leaving the window counts toward the same strike budget as a device or
+      // a missing face, so "full strict" means one shared budget of 3.
+      issueStrike('TAB_SWITCH', 'You left the interview window');
       
       const countEl = document.getElementById('tab-violation-count-text');
       if (countEl) countEl.textContent = `Violation #${tabSwitchViolations}`;
