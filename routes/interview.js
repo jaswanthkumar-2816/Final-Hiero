@@ -232,6 +232,10 @@ Requirements:
 // ROUTE: GET /api/interview/companies
 // Returns verified company blueprints and metadata
 // ─────────────────────────────────────────────
+router.get('/voices', (req, res) => {
+    res.json({ success: true, defaultVoice: INTERVIEW_VOICE, voices: VOICE_CATALOGUE });
+});
+
 router.get('/companies', (req, res) => {
     const list = Object.values(COMPANY_BLUEPRINTS).map(b => ({
         id: b.id,
@@ -302,6 +306,29 @@ router.post('/upload-context', multerUpload.single('resume'), async (req, res) =
 // Single source of truth for the interviewer's voice. Every path that speaks
 // must use this, otherwise the voice can change between questions.
 const INTERVIEW_VOICE = process.env.DEEPGRAM_TTS_VOICE || 'aura-asteria-en';
+
+// Selectable interviewer voices (Deepgram Aura). Exposed via
+// GET /api/interview/voices and chosen per session at /start.
+const VOICE_CATALOGUE = [
+    { id: 'aura-asteria-en',  name: 'Asteria',  gender: 'female', accent: 'US', description: 'Warm and clear — the default' },
+    { id: 'aura-luna-en',     name: 'Luna',     gender: 'female', accent: 'US', description: 'Soft and calm' },
+    { id: 'aura-stella-en',   name: 'Stella',   gender: 'female', accent: 'US', description: 'Bright and friendly' },
+    { id: 'aura-athena-en',   name: 'Athena',   gender: 'female', accent: 'UK', description: 'Formal British' },
+    { id: 'aura-hera-en',     name: 'Hera',     gender: 'female', accent: 'US', description: 'Mature and measured' },
+    { id: 'aura-orion-en',    name: 'Orion',    gender: 'male',   accent: 'US', description: 'Even and professional' },
+    { id: 'aura-arcas-en',    name: 'Arcas',    gender: 'male',   accent: 'US', description: 'Natural and conversational' },
+    { id: 'aura-perseus-en',  name: 'Perseus',  gender: 'male',   accent: 'US', description: 'Direct and confident' },
+    { id: 'aura-angus-en',    name: 'Angus',    gender: 'male',   accent: 'IE', description: 'Irish' },
+    { id: 'aura-helios-en',   name: 'Helios',   gender: 'male',   accent: 'UK', description: 'British' },
+    { id: 'aura-zeus-en',     name: 'Zeus',     gender: 'male',   accent: 'US', description: 'Deep and authoritative' }
+];
+const VALID_VOICE_IDS = new Set(VOICE_CATALOGUE.map(v => v.id));
+
+/** The voice for a session: its own choice if valid, otherwise the default. */
+function voiceFor(session) {
+    const v = session && session.voiceId;
+    return (v && VALID_VOICE_IDS.has(v)) ? v : INTERVIEW_VOICE;
+}
 
 router.post('/start', async (req, res) => {
     try {
@@ -449,6 +476,7 @@ router.post('/start', async (req, res) => {
             timerStarted: false,
             timerStartedAt: null,
             status: 'INTRODUCTION',
+            voiceId: (req.body && VALID_VOICE_IDS.has(req.body.voiceId)) ? req.body.voiceId : INTERVIEW_VOICE,
             createdAt: new Date()
         };
 
@@ -456,13 +484,23 @@ router.post('/start', async (req, res) => {
 
         console.log(`[INTERVIEW] Session created: ${sessionId} | Duration: ${duration}m (${durationSeconds}s) | Limit: ${questionLimit} Qs | Status: INTRODUCTION`);
 
+        // The greeting and the first question are spoken as one utterance, so
+        // the audio must cover BOTH. Previously only question1 was synthesised
+        // while the client spoke greeting+question, and a 2.2s cap meant a
+        // longer intro silently produced null — the client then fell back to
+        // the browser voice for the intro and switched to the Deepgram voice
+        // from question 2 onward, which is the voice change candidates heard.
+        const introSpokenText = `Hello ${resumeSnapshot.fullName || 'Candidate'}, welcome to your interview for the ${jobRole} position at ${companyName}. Take a deep breath and make yourself comfortable. ${question1.questionText}`;
+
         let audioUrl = null;
         try {
             audioUrl = await Promise.race([
-                generateTTSDataUrl(question1.questionText, INTERVIEW_VOICE),
-                new Promise((_, reject) => setTimeout(() => reject(new Error('TTS timeout')), 2200))
+                generateTTSDataUrl(introSpokenText, session.voiceId || INTERVIEW_VOICE),
+                new Promise((_, reject) => setTimeout(() => reject(new Error('TTS timeout')), 8000))
             ]);
-        } catch (ttsErr) {}
+        } catch (ttsErr) {
+            console.warn('[INTERVIEW] Intro TTS failed; client will retry server TTS:', ttsErr.message);
+        }
 
         res.json({
             success: true,
@@ -476,7 +514,7 @@ router.post('/start', async (req, res) => {
             timerStarted: false,
             timerStartedAt: null,
             audio_url: audioUrl,
-            reply: `Hello ${resumeSnapshot.fullName || 'Candidate'}, welcome to your interview for the ${jobRole} position at ${companyName}. Take a deep breath and make yourself comfortable. ${question1.questionText}`,
+            reply: introSpokenText,
             question: question1,
             session: {
                 sessionId,
@@ -572,7 +610,7 @@ router.post('/answer', async (req, res) => {
 
                 let clarifyAudio = null;
                 try {
-                    clarifyAudio = await generateTTSDataUrl(rephrased, INTERVIEW_VOICE);
+                    clarifyAudio = await generateTTSDataUrl(rephrased, voiceFor(session));
                 } catch (ttsErr) {
                     console.warn('[INTERVIEW] Clarify TTS failed:', ttsErr.message);
                 }
@@ -714,6 +752,18 @@ router.post('/answer', async (req, res) => {
 
         await saveSessionToStore(session);
 
+        // Speak the next question in the SAME voice as the intro. This route
+        // returned no audio at all, so only /start and /voice-turn produced
+        // Deepgram speech — every question in the text path fell back to the
+        // browser voice, which is why the interviewer's voice changed after
+        // the greeting.
+        let audioUrl = null;
+        try {
+            audioUrl = await generateTTSDataUrl(nextQuestion.questionText, voiceFor(session));
+        } catch (ttsErr) {
+            console.error('[INTERVIEW] Question TTS FAILED (client will use browser voice):', ttsErr.message);
+        }
+
         res.json({
             success: true,
             isComplete: false,
@@ -727,6 +777,8 @@ router.post('/answer', async (req, res) => {
             question: nextQuestion,
             nextQuestion: nextQuestion,
             reply: nextQuestion.questionText,
+            audio_url: audioUrl,
+            voiceId: voiceFor(session),
             answerStatus,
             coaching
         });
@@ -824,7 +876,7 @@ router.post('/voice-turn', videoUpload.fields([{ name: 'audio', maxCount: 1 }, {
 
                 let clarifyAudio = null;
                 try {
-                    clarifyAudio = await generateTTSDataUrl(rephrased, INTERVIEW_VOICE);
+                    clarifyAudio = await generateTTSDataUrl(rephrased, voiceFor(session));
                 } catch (ttsErr) {
                     console.warn('[INTERVIEW] Clarify TTS failed:', ttsErr.message);
                 }
@@ -1008,8 +1060,10 @@ router.post('/voice-turn', videoUpload.fields([{ name: 'audio', maxCount: 1 }, {
 
         let audioUrl = null;
         try {
-            audioUrl = await generateTTSDataUrl(nextQuestion.questionText, INTERVIEW_VOICE);
-        } catch (ttsErr) {}
+            audioUrl = await generateTTSDataUrl(nextQuestion.questionText, voiceFor(session));
+        } catch (ttsErr) {
+            console.error('[INTERVIEW] Voice-turn TTS FAILED (client will use browser voice):', ttsErr.message);
+        }
 
         res.json({
             success: true,
@@ -1097,8 +1151,10 @@ router.post('/chat', async (req, res) => {
 
             let audioUrl = null;
             try {
-                audioUrl = await generateTTSDataUrl(nextQ.questionText, INTERVIEW_VOICE);
-            } catch (ttsErr) {}
+                audioUrl = await generateTTSDataUrl(nextQ.questionText, voiceFor(session));
+            } catch (ttsErr) {
+                console.error('[INTERVIEW] Question TTS FAILED (client will use browser voice):', ttsErr.message);
+            }
 
             return res.json({
                 success: true,

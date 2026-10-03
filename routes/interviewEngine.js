@@ -1024,11 +1024,32 @@ function computeInterviewTopicState(session) {
         ? scored.reduce((sum, v) => sum + v, 0) / scored.length
         : null;
 
-    let difficultyTarget = 'medium';
+    // ── DIFFICULTY RAMP ───────────────────────────────────────────────────
+    // A real interview opens gently so the candidate settles, then builds.
+    // Difficulty was driven only by rolling score, so question 2 could be hard
+    // and rattle someone before they had found their feet.
+    //
+    // Baseline follows position in the interview as a fraction of total turns:
+    //   first third   -> easy    (warm up, build confidence)
+    //   middle third  -> medium
+    //   final third   -> hard    (stretch, where differentiation happens)
+    // Performance then shifts that baseline by at most one step, so a strong
+    // candidate is stretched sooner and a struggling one is not buried.
+    const LADDER = ['easy', 'medium', 'hard'];
+    const progress = totalTurns > 0 ? (currentTurn - 1) / totalTurns : 0;
+
+    let rung = progress < 0.34 ? 0 : (progress < 0.67 ? 1 : 2);
+
     if (rollingAvg !== null) {
-        if (rollingAvg >= 8) difficultyTarget = 'hard';
-        else if (rollingAvg <= 5) difficultyTarget = 'easy';
+        if (rollingAvg >= 8) rung += 1;        // handling it well: push harder
+        else if (rollingAvg <= 4.5) rung -= 1; // struggling: ease off
     }
+
+    // The opening question is always approachable, whatever the score says.
+    if (currentTurn <= 2) rung = Math.min(rung, 0);
+
+    rung = Math.max(0, Math.min(LADDER.length - 1, rung));
+    const difficultyTarget = LADDER[rung];
 
     // How many consecutive probes we have already spent on this thread. Real
     // interviewers push twice at most, then move on rather than grilling.
