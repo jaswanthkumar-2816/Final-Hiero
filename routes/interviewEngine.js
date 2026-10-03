@@ -715,6 +715,57 @@ function calculateSemanticSimilarity(textA = '', textB = '') {
 // ─────────────────────────────────────────────────────────────────────────────
 // 3.1 CANDIDATE UNSURE / SKIP DETECTION HELPER
 // ─────────────────────────────────────────────────────────────────────────────
+/**
+ * Classifies what the candidate actually did this turn.
+ *
+ * Previously only "unsure / skip" was recognised, so anything else was
+ * treated as an answer. A candidate saying "sorry, can you explain that more
+ * simply?" had their request scored as a weak answer and the interviewer
+ * moved on — the opposite of what a real interviewer does.
+ */
+const CLARIFY_PATTERNS = [
+    /\b(can|could|would) you (please )?(repeat|say that again|rephrase|reword|simplify|explain|clarify|elaborate)\b/i,
+    /\b(repeat|rephrase|reword|simplify) (the|that|this) (question|one)\b/i,
+    /\bexplain (it|that|the question)?\s*(again|more|better|simpler|simply|in simple)\b/i,
+    /\bin (simple|simpler|plain|easier) (terms|words|english)\b/i,
+    /\b(what|sorry,? what) do you mean\b/i,
+    /\b(i )?(didn'?t|did not|couldn'?t|could not) (quite )?(catch|hear|understand|get) (that|you|the question)\b/i,
+    /\bcome again\b/i,
+    /\bsay (that )?again\b/i,
+    /\b(give|can i get|could i get) (me )?(an |a )?(example|hint)\b/i,
+    /\bnot sure (what|which) you('| a)?re asking\b/i,
+    /\bwhat exactly are you asking\b/i,
+    /\bcan you be more specific\b/i
+];
+
+const REPEAT_ONLY = /\b(repeat|say that again|come again|(didn'?t|did not|couldn'?t|could not) (quite )?(catch|hear))\b/i;
+const SIMPLIFY = /\b(simpl|plain|easier|basic|layman)\w*\b/i;
+const EXAMPLE = /\b(example|hint|for instance)\b/i;
+
+/**
+ * @returns {{intent: 'CLARIFY'|'UNSURE_SKIP'|'ANSWER', mode?: 'REPEAT'|'SIMPLIFY'|'EXAMPLE'}}
+ */
+function detectCandidateIntent(text = '') {
+    const raw = String(text || '').trim();
+    if (!raw) return { intent: 'ANSWER' };
+
+    const isClarify = CLARIFY_PATTERNS.some(p => p.test(raw));
+
+    // A long turn that merely contains "for example" is an answer, not a
+    // request for one. Clarification requests are short.
+    const wordCount = raw.split(/\s+/).filter(Boolean).length;
+    if (isClarify && wordCount <= 25) {
+        let mode = 'REPEAT';
+        if (SIMPLIFY.test(raw)) mode = 'SIMPLIFY';
+        else if (EXAMPLE.test(raw)) mode = 'EXAMPLE';
+        else if (!REPEAT_ONLY.test(raw)) mode = 'SIMPLIFY';
+        return { intent: 'CLARIFY', mode };
+    }
+
+    if (isCandidateUnsureOrSkipping(raw)) return { intent: 'UNSURE_SKIP' };
+    return { intent: 'ANSWER' };
+}
+
 function isCandidateUnsureOrSkipping(text = '') {
     if (!text || typeof text !== 'string') return false;
     const lower = text.toLowerCase().trim();
@@ -1162,6 +1213,56 @@ function retrieveAndRankQuestions({
  * Uses LLM to adapt and personalize the top-ranked candidate question
  * with the candidate's actual projects, job description, and previous answer context.
  */
+/**
+ * Rephrases the question already on the table. Used when the candidate asks
+ * for a repeat, a simpler wording, or an example — this must NOT consume a
+ * turn or score anything, because no answer was given.
+ */
+async function rephraseCurrentQuestion({ questionText, mode = 'SIMPLIFY', jobRole = 'the role' }) {
+    const styles = {
+        REPEAT:   'Repeat the question clearly and naturally. You may shorten it slightly, but keep the same meaning and difficulty.',
+        SIMPLIFY: 'Rewrite the question in plainer language. Shorter sentences, no jargon unless essential, same technical substance and same difficulty. Do NOT make it an easier question.',
+        EXAMPLE:  'Restate the question and add one short concrete example of the KIND of answer expected, without answering it yourself.'
+    };
+
+    const fallbacks = {
+        REPEAT:   `Of course — ${questionText}`,
+        SIMPLIFY: `No problem, let me put that more simply. ${questionText}`,
+        EXAMPLE:  `Sure. ${questionText} For instance, walk me through what you actually built and why you chose that approach.`
+    };
+
+    try {
+        const groq = getGroqClient();
+        if (!groq) return fallbacks[mode] || fallbacks.SIMPLIFY;
+
+        const res = await withTimeout(groq.chat.completions.create({
+            model: 'openai/gpt-oss-120b',
+            messages: [
+                {
+                    role: 'system',
+                    content: `You are a technical interviewer for ${jobRole}. The candidate asked you to clarify the question. ${styles[mode] || styles.SIMPLIFY}
+
+Rules:
+- Open with a brief, warm acknowledgement (e.g. "Of course," / "Sure,").
+- Ask exactly ONE question.
+- Do NOT answer it, and do NOT change what is being assessed.
+- Return JSON: {"question": "<the rephrased question>"}`
+                },
+                { role: 'user', content: `Original question: "${questionText}"` }
+            ],
+            temperature: 0.4,
+            max_tokens: 400,
+            response_format: { type: 'json_object' }
+        }), 5000);
+
+        const parsed = JSON.parse(res.choices[0]?.message?.content || '{}');
+        if (parsed.question && parsed.question.trim().length > 10) return parsed.question.trim();
+    } catch (err) {
+        console.warn('[INTERVIEW] Rephrase fell back to template:', err.message);
+    }
+    return fallbacks[mode] || fallbacks.SIMPLIFY;
+}
+
 async function generateAdaptiveQuestion({
     session,
     previousAnswer = '',
@@ -1667,6 +1768,8 @@ module.exports = {
     extractSkillTokens,
     calculateSemanticSimilarity,
     isCandidateUnsureOrSkipping,
+    detectCandidateIntent,
+    rephraseCurrentQuestion,
     computeInterviewTopicState,
     analyzeAnswerSubstance,
     isProbeDirective,

@@ -19,6 +19,8 @@ const {
     computeInterviewTopicState,
     retrieveAndRankQuestions,
     generateAdaptiveQuestion,
+    detectCandidateIntent,
+    rephraseCurrentQuestion,
     evaluateCandidateAnswer,
     generateSessionScorecard
 } = require('./interviewEngine');
@@ -555,6 +557,46 @@ router.post('/answer', async (req, res) => {
             });
         }
 
+        // ── CLARIFICATION REQUEST ────────────────────────────────────────
+        // "Can you explain that more simply?" is not an answer. It was scored
+        // as a weak one and the interview moved on; a real interviewer
+        // rephrases and waits. Consumes no turn and scores nothing.
+        {
+            const intent = detectCandidateIntent(candidateAnswerClean);
+            if (intent.intent === 'CLARIFY' && currentQObj) {
+                const rephrased = await rephraseCurrentQuestion({
+                    questionText: currentQObj.questionText,
+                    mode: intent.mode,
+                    jobRole: session.jobRole
+                });
+
+                let clarifyAudio = null;
+                try {
+                    clarifyAudio = await generateTTSDataUrl(rephrased, INTERVIEW_VOICE);
+                } catch (ttsErr) {
+                    console.warn('[INTERVIEW] Clarify TTS failed:', ttsErr.message);
+                }
+
+                console.log(`[INTERVIEW] Clarification (${intent.mode}) on Q${currentQIndex} — turn not consumed.`);
+
+                return res.json({
+                    success: true,
+                    answerStatus: 'CLARIFICATION',
+                    isRetry: true,
+                    isComplete: false,
+                    clarification: true,
+                    clarificationMode: intent.mode,
+                    reply: rephrased,
+                    question: { ...currentQObj, questionText: rephrased },
+                    audio_url: clarifyAudio,
+                    currentQuestionIndex: currentQIndex,
+                    questionLimit: session.questionLimit,
+                    remainingSeconds: typeof remainingSeconds !== 'undefined' ? remainingSeconds : undefined,
+                    timerStarted: session.timerStarted
+                });
+            }
+        }
+
         // Classify candidate answer status
         let answerStatus = 'ANSWERED';
         let technicalAccuracy = 'evaluated';
@@ -766,6 +808,46 @@ router.post('/voice-turn', videoUpload.fields([{ name: 'audio', maxCount: 1 }, {
         const user = authenticateUser(req);
         const currentQIndex = session.currentQuestionIndex || 1;
         const currentQObj = session.questions.find(q => q.index === currentQIndex) || session.questions[session.questions.length - 1];
+
+        // ── CLARIFICATION REQUEST ────────────────────────────────────────
+        // "Can you explain that more simply?" is not an answer. It was scored
+        // as a weak one and the interview moved on; a real interviewer
+        // rephrases and waits. Consumes no turn and scores nothing.
+        {
+            const intent = detectCandidateIntent(candidateClean);
+            if (intent.intent === 'CLARIFY' && currentQObj) {
+                const rephrased = await rephraseCurrentQuestion({
+                    questionText: currentQObj.questionText,
+                    mode: intent.mode,
+                    jobRole: session.jobRole
+                });
+
+                let clarifyAudio = null;
+                try {
+                    clarifyAudio = await generateTTSDataUrl(rephrased, INTERVIEW_VOICE);
+                } catch (ttsErr) {
+                    console.warn('[INTERVIEW] Clarify TTS failed:', ttsErr.message);
+                }
+
+                console.log(`[INTERVIEW] Clarification (${intent.mode}) on Q${currentQIndex} — turn not consumed.`);
+
+                return res.json({
+                    success: true,
+                    answerStatus: 'CLARIFICATION',
+                    isRetry: true,
+                    isComplete: false,
+                    clarification: true,
+                    clarificationMode: intent.mode,
+                    reply: rephrased,
+                    question: { ...currentQObj, questionText: rephrased },
+                    audio_url: clarifyAudio,
+                    currentQuestionIndex: currentQIndex,
+                    questionLimit: session.questionLimit,
+                    remainingSeconds: typeof remainingSeconds !== 'undefined' ? remainingSeconds : undefined,
+                    timerStarted: session.timerStarted
+                });
+            }
+        }
 
         // Classify candidate answer status
         let answerStatus = 'ANSWERED';
