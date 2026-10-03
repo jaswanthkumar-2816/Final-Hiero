@@ -1451,18 +1451,39 @@
     document.addEventListener('DOMContentLoaded', async () => {
       let evalData = null;
 
+      // The session being viewed is whatever the URL asks for. Resolve it
+      // FIRST so cached data can be checked against it.
+      const urlParams = new URLSearchParams(window.location.search);
+      const querySessionId = urlParams.get('session') || sessionStorage.getItem('mockSessionId');
+
+      // Cached reports are only usable if they belong to THIS session.
+      // `hiero_last_feedback` lives in localStorage and persists across
+      // interviews, so without this check opening session B's report while
+      // A's was cached could render A's scores under B's heading.
       try {
-        const rawFeedback = sessionStorage.getItem('hiero_interview_feedback') || sessionStorage.getItem('mockResult') || localStorage.getItem('hiero_last_feedback');
-        if (rawFeedback) {
-          evalData = JSON.parse(rawFeedback);
+        const candidates = [
+          sessionStorage.getItem('hiero_interview_feedback'),
+          sessionStorage.getItem('mockResult'),
+          localStorage.getItem('hiero_last_feedback')
+        ];
+        for (const raw of candidates) {
+          if (!raw) continue;
+          let parsed;
+          try { parsed = JSON.parse(raw); } catch (_) { continue; }
+          if (!parsed) continue;
+          const cachedId = parsed.sessionId || parsed.session_id || null;
+          if (querySessionId && cachedId && cachedId !== querySessionId) {
+            console.warn('[FEEDBACK] Ignoring cached report from a different session:', cachedId);
+            continue;
+          }
+          evalData = parsed;
+          break;
         }
       } catch (e) {
         console.warn('Local session feedback parse warning:', e);
       }
 
-      // Check URL query param for session ID
-      const urlParams = new URLSearchParams(window.location.search);
-      const querySessionId = urlParams.get('session') || (evalData && evalData.sessionId) || sessionStorage.getItem('mockSessionId');
+      let serverLoadOk = false;
 
       if (querySessionId) {
         try {
@@ -1470,11 +1491,22 @@
           if (res.ok) {
             const serverData = await res.json();
             if (serverData && serverData.success) {
-              evalData = { ...evalData, ...serverData };
+              // Server is authoritative; it overwrites anything cached.
+              evalData = { ...(evalData || {}), ...serverData };
+              serverLoadOk = true;
             }
           }
         } catch (e) {
           console.warn('Backend feedback fetch warning:', e);
+        }
+
+        // Nothing trustworthy to show: say so rather than rendering an empty
+        // or stale report as though it were this candidate's result.
+        if (!serverLoadOk && !evalData) {
+          const banner = document.createElement('div');
+          banner.style.cssText = 'margin:24px auto;max-width:900px;padding:16px 20px;border-radius:12px;background:#fef3c7;border:1px solid #f59e0b;color:#92400e;font-size:14px;';
+          banner.textContent = 'This interview report could not be loaded. The session may still be processing, or the link may have expired.';
+          document.body.prepend(banner);
         }
 
         // Fetch recordings manifest if available

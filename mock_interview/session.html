@@ -4571,9 +4571,18 @@
         
         const data = await response.json();
         
-        sessionStorage.setItem('mockResult', JSON.stringify(data));
-        sessionStorage.setItem('hiero_interview_feedback', JSON.stringify(data));
-        localStorage.setItem('hiero_last_feedback', JSON.stringify(data));
+        // Stamp the session id onto the cached report. The feedback page
+        // checks it before trusting cached data, otherwise a previous
+        // interview's results could render under this session's heading.
+        const stamped = Object.assign({}, data, {
+          sessionId: window.sessionId || data.sessionId || null,
+          cachedAt: new Date().toISOString()
+        });
+
+        sessionStorage.setItem('mockSessionId', window.sessionId || '');
+        sessionStorage.setItem('mockResult', JSON.stringify(stamped));
+        sessionStorage.setItem('hiero_interview_feedback', JSON.stringify(stamped));
+        localStorage.setItem('hiero_last_feedback', JSON.stringify(stamped));
         localStorage.setItem('hiero_target_role', enrichedContext.roleTitle || 'Software Engineer');
         localStorage.setItem('hiero_company', enrichedContext.company || 'Technology Team');
       } catch (e) {
