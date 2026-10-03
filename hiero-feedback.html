@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Share your experience of the Hiero mock interview and resume builder. Three minutes.">
+<link rel="icon" href="/favicon.ico">
+<title>Hiero Feedback</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+
+<style>
+  html { color-scheme: light dark; }
+  img { max-width: 100%; }
+  [hidden] { display: none !important; }
+  /* Layout: a single measured column — an assessment sheet, not a landing page.
+     Sections are numbered because the form genuinely is a sequence. */
+  :root {
+    --paper:      #f7f7f5;
+    --surface:    #ffffff;
+    --ink:        #1a1d1a;
+    --ink-soft:   #585e58;
+    --ink-faint:  #8b918b;
+    --rule:       #e0e2de;
+    --accent:     #0f6156;
+    --accent-dim: #d6e6e2;
+    --warn:       #9a5b00;
+    --crit:       #a32c1e;
+
+    --display: "Newsreader", Georgia, "Times New Roman", serif;
+    --body:    "Public Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --mono:    "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:      #14160f;
+      --surface:    #1c1f18;
+      --ink:        #eceee7;
+      --ink-soft:   #a8aea3;
+      --ink-faint:  #767c72;
+      --rule:       #2e3229;
+      --accent:     #6fc4b2;
+      --accent-dim: #22352f;
+      --warn:       #d9a441;
+      --crit:       #e08173;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper:      #14160f;
+    --surface:    #1c1f18;
+    --ink:        #eceee7;
+    --ink-soft:   #a8aea3;
+    --ink-faint:  #767c72;
+    --rule:       #2e3229;
+    --accent:     #6fc4b2;
+    --accent-dim: #22352f;
+    --warn:       #d9a441;
+    --crit:       #e08173;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 16px;
+    line-height: 1.55;
+    margin: 0;
+    padding-inline: 20px;
+    padding-block: 0;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 680px; margin-inline: auto; padding-block: 44px 72px; }
+
+  /* ---- masthead ---- */
+  .masthead { border-bottom: 2px solid var(--ink); padding-bottom: 14px; margin-bottom: 8px; }
+  .kicker {
+    font-family: var(--mono); font-size: 11px; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--accent); margin: 0 0 8px;
+  }
+  h1 {
+    font-family: var(--display); font-weight: 500; font-size: clamp(30px, 6vw, 42px);
+    line-height: 1.08; margin: 0; letter-spacing: -.012em; text-wrap: balance;
+  }
+  .standfirst {
+    color: var(--ink-soft); font-size: 15.5px; margin: 14px 0 0; max-width: 56ch;
+  }
+
+  /* ---- tabs ---- */
+  .tabs { display: flex; gap: 2px; margin: 26px 0 0; border-bottom: 1px solid var(--rule); }
+  .tab {
+    appearance: none; background: none; border: 0; border-bottom: 2px solid transparent;
+    font-family: var(--body); font-size: 13px; font-weight: 600; color: var(--ink-faint);
+    padding: 10px 14px; cursor: pointer; margin-bottom: -1px;
+  }
+  .tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+  .tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
+
+  /* ---- form ---- */
+  .section { margin-top: 38px; }
+  .section-head { display: flex; align-items: baseline; gap: 11px; margin-bottom: 4px; }
+  .section-num {
+    font-family: var(--mono); font-size: 11px; color: var(--accent);
+    border: 1px solid var(--accent-dim); background: var(--accent-dim);
+    padding: 2px 7px; border-radius: 2px; flex-shrink: 0;
+  }
+  .section h2 {
+    font-family: var(--display); font-weight: 500; font-size: 22px;
+    margin: 0; letter-spacing: -.008em;
+  }
+  .section-note { color: var(--ink-faint); font-size: 13.5px; margin: 2px 0 0 44px; }
+
+  .q { margin-top: 24px; }
+  .q > label.qtext, .qtext {
+    display: block; font-weight: 600; font-size: 15px; margin-bottom: 9px; color: var(--ink);
+  }
+  .qtext .opt { font-weight: 400; color: var(--ink-faint); font-size: 13px; }
+
+  input[type="text"], textarea, select {
+    width: 100%; font-family: var(--body); font-size: 15px; color: var(--ink);
+    background: var(--surface); border: 1px solid var(--rule); border-radius: 3px;
+    padding: 10px 12px; line-height: 1.5;
+  }
+  textarea { min-height: 84px; resize: vertical; }
+  input[type="text"]:focus, textarea:focus, select:focus {
+    outline: 2px solid var(--accent); outline-offset: -1px; border-color: var(--accent);
+  }
+
+  /* scale */
+  .scale { display: flex; gap: 6px; flex-wrap: wrap; }
+  .scale label {
+    flex: 1 1 0; min-width: 52px; text-align: center; cursor: pointer;
+    border: 1px solid var(--rule); background: var(--surface); border-radius: 3px;
+    padding: 9px 4px; font-family: var(--mono); font-size: 14px; color: var(--ink-soft);
+    transition: background .12s, border-color .12s, color .12s;
+  }
+  .scale input { position: absolute; opacity: 0; pointer-events: none; }
+  .scale input:checked + span { color: var(--surface); }
+  .scale label:has(input:checked) {
+    background: var(--accent); border-color: var(--accent); color: #fff;
+  }
+  .scale label:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .scale-ends {
+    display: flex; justify-content: space-between; margin-top: 6px;
+    font-size: 12px; color: var(--ink-faint);
+  }
+
+  /* choices */
+  .choices { display: flex; flex-direction: column; gap: 7px; }
+  .choice {
+    display: flex; align-items: flex-start; gap: 10px; cursor: pointer;
+    border: 1px solid var(--rule); background: var(--surface); border-radius: 3px;
+    padding: 10px 12px; font-size: 14.5px; color: var(--ink);
+  }
+  .choice:has(input:checked) { border-color: var(--accent); background: var(--accent-dim); }
+  .choice:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .choice input { margin: 3px 0 0; accent-color: var(--accent); flex-shrink: 0; }
+
+  /* submit */
+  .actions { margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--rule); display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+  .btn {
+    font-family: var(--body); font-weight: 600; font-size: 14.5px;
+    background: var(--accent); color: #fff; border: 1px solid var(--accent);
+    padding: 11px 22px; border-radius: 3px; cursor: pointer;
+  }
+  .btn[disabled] { opacity: .5; cursor: default; }
+  .btn:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+  .btn-quiet { background: none; color: var(--ink-soft); border-color: var(--rule); }
+  .status { font-size: 13.5px; color: var(--ink-soft); }
+  .status.err { color: var(--crit); }
+  .status.ok { color: var(--accent); }
+
+  /* ---- dashboard ---- */
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(132px, 1fr)); gap: 12px; margin-top: 28px; }
+  .tile { background: var(--surface); border: 1px solid var(--rule); border-radius: 3px; padding: 14px 15px; min-width: 0; }
+  .tile .k { font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-faint); }
+  .tile .v { font-family: var(--display); font-size: 30px; font-weight: 500; line-height: 1.1; margin-top: 6px; font-variant-numeric: tabular-nums; }
+  .tile .sub { font-size: 12px; color: var(--ink-faint); margin-top: 3px; }
+
+  .panel { background: var(--surface); border: 1px solid var(--rule); border-radius: 3px; padding: 18px 20px; margin-top: 20px; }
+  .panel h3 {
+    font-family: var(--body); font-size: 12px; letter-spacing: .09em; text-transform: uppercase;
+    color: var(--ink-faint); margin: 0 0 14px; font-weight: 600;
+  }
+
+  .bar-row { display: grid; grid-template-columns: 150px 1fr 38px; gap: 10px; align-items: center; margin-bottom: 8px; font-size: 13.5px; }
+  .bar-row .lab { color: var(--ink-soft); min-width: 0; overflow-wrap: anywhere; }
+  .bar-track { height: 9px; background: var(--rule); border-radius: 2px; overflow: hidden; }
+  .bar-fill { height: 100%; background: var(--accent); border-radius: 2px; }
+  .bar-fill.warn { background: var(--warn); }
+  .bar-fill.crit { background: var(--crit); }
+  .bar-row .n { font-family: var(--mono); font-size: 12.5px; color: var(--ink-faint); text-align: right; font-variant-numeric: tabular-nums; }
+
+  .quote { border-left: 2px solid var(--accent); padding: 2px 0 2px 14px; margin: 0 0 16px; }
+  .quote p { margin: 0; font-size: 14.5px; }
+  .quote cite { display: block; font-style: normal; font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint); margin-top: 6px; }
+
+  .empty { text-align: left; padding: 30px 0 10px; }
+  .empty p { color: var(--ink-soft); margin: 0 0 8px; max-width: 52ch; }
+  .empty .big { font-family: var(--display); font-size: 20px; color: var(--ink); }
+
+  .note { font-size: 12.5px; color: var(--ink-faint); margin-top: 26px; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+  @media (max-width: 460px) {
+    .bar-row { grid-template-columns: 1fr; gap: 3px; }
+    .bar-row .n { text-align: left; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+</head>
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="kicker">Hiero · Product feedback</p>
+    <h1>Help us improve Hiero</h1>
+  </header>
+  <p class="standfirst">Thank you for using Hiero. Your answers go directly to the team and shape what we build next. It takes about three minutes, and candid feedback is the most useful kind.</p>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" id="tab-form" aria-selected="true" aria-controls="view-form">Share feedback</button>
+    <button class="tab" role="tab" id="tab-dash" aria-selected="false" aria-controls="view-dash" hidden>Responses</button>
+  </div>
+
+  <!-- ====================== FORM ====================== -->
+  <div id="view-form" role="tabpanel" aria-labelledby="tab-form">
+    <form id="fb">
+
+      <section class="section">
+        <div class="section-head"><span class="section-num">01</span><h2>About you</h2></div>
+        <div class="q">
+          <label class="qtext" for="q_name">Your name <span class="opt">— optional</span></label>
+          <input type="text" id="q_name" name="name" autocomplete="name" placeholder="Optional">
+        </div>
+        <div class="q">
+          <label class="qtext" for="q_email">Your email <span class="opt">&mdash; optional, to receive a copy of your responses</span></label>
+          <input type="email" id="q_email" name="email" autocomplete="email" placeholder="you@example.com">
+        </div>
+        <div class="q">
+          <span class="qtext">What did you try?</span>
+          <div class="choices">
+            <label class="choice"><input type="radio" name="tried" value="Mock interview" required><span>The mock interview</span></label>
+            <label class="choice"><input type="radio" name="tried" value="Resume builder"><span>The resume builder</span></label>
+            <label class="choice"><input type="radio" name="tried" value="Both"><span>Both</span></label>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head"><span class="section-num">02</span><h2>The mock interview</h2></div>
+        <p class="section-note">If you did not use the mock interview, continue to the next section.</p>
+
+        <div class="q">
+          <span class="qtext">Did it feel like a real interview?</span>
+          <div class="choices">
+            <label class="choice"><input type="radio" name="feltReal" value="Yes, genuinely"><span>Yes, genuinely</span></label>
+            <label class="choice"><input type="radio" name="feltReal" value="Close, something was off"><span>Close, but something was off</span></label>
+            <label class="choice"><input type="radio" name="feltReal" value="No, felt like a chatbot"><span>No, it felt like a chatbot</span></label>
+          </div>
+        </div>
+
+        <div class="q">
+          <label class="qtext" for="q_off">If something was off, what was it?</label>
+          <textarea id="q_off" name="whatWasOff" placeholder="What made it feel less realistic?"></textarea>
+        </div>
+
+        <div class="q">
+          <span class="qtext">The interviewer&rsquo;s voice</span>
+          <div class="choices">
+            <label class="choice"><input type="radio" name="voice" value="Clear and consistent"><span>Clear, and the same voice throughout</span></label>
+            <label class="choice"><input type="radio" name="voice" value="Changed partway"><span>It changed partway through</span></label>
+            <label class="choice"><input type="radio" name="voice" value="Hard to hear"><span>Hard to hear or unnatural</span></label>
+            <label class="choice"><input type="radio" name="voice" value="No voice at all"><span>No audio at all</span></label>
+          </div>
+        </div>
+
+        <div class="q">
+          <span class="qtext">When your answer was vague, did it push you for specifics?</span>
+          <div class="scale" role="radiogroup" aria-label="Follow-up quality, 1 to 5">
+            <label><input type="radio" name="followUps" value="1"><span>1</span></label>
+            <label><input type="radio" name="followUps" value="2"><span>2</span></label>
+            <label><input type="radio" name="followUps" value="3"><span>3</span></label>
+            <label><input type="radio" name="followUps" value="4"><span>4</span></label>
+            <label><input type="radio" name="followUps" value="5"><span>5</span></label>
+          </div>
+          <div class="scale-ends"><span>Moved on</span><span>Asked for detail</span></div>
+        </div>
+
+        <div class="q">
+          <span class="qtext">Difficulty — easy at the start, harder later?</span>
+          <div class="choices">
+            <label class="choice"><input type="radio" name="difficulty" value="Felt right"><span>Felt about right</span></label>
+            <label class="choice"><input type="radio" name="difficulty" value="Too hard too early"><span>Too hard, too early</span></label>
+            <label class="choice"><input type="radio" name="difficulty" value="Too easy throughout"><span>Too easy throughout</span></label>
+            <label class="choice"><input type="radio" name="difficulty" value="Did not notice"><span>Did not notice a change</span></label>
+          </div>
+        </div>
+
+        <div class="q">
+          <span class="qtext">Did you have to wait awkwardly between questions?</span>
+          <div class="choices">
+            <label class="choice"><input type="radio" name="pauses" value="No, felt natural"><span>No, it flowed</span></label>
+            <label class="choice"><input type="radio" name="pauses" value="Noticeable but tolerable"><span>Noticeable, but tolerable</span></label>
+            <label class="choice"><input type="radio" name="pauses" value="Long silences"><span>Long silences between questions</span></label>
+          </div>
+        </div>
+
+        <div class="q">
+          <label class="qtext" for="q_broke">Did you encounter any technical problems?</label>
+          <textarea id="q_broke" name="broke" placeholder="Camera, microphone, a button that did nothing, a blank screen — what were you doing when it happened?"></textarea>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head"><span class="section-num">03</span><h2>Your results report</h2></div>
+        <div class="q">
+          <span class="qtext">Was the score and feedback accurate?</span>
+          <div class="scale" role="radiogroup" aria-label="Report accuracy, 1 to 5">
+            <label><input type="radio" name="reportFair" value="1"><span>1</span></label>
+            <label><input type="radio" name="reportFair" value="2"><span>2</span></label>
+            <label><input type="radio" name="reportFair" value="3"><span>3</span></label>
+            <label><input type="radio" name="reportFair" value="4"><span>4</span></label>
+            <label><input type="radio" name="reportFair" value="5"><span>5</span></label>
+          </div>
+          <div class="scale-ends"><span>Not accurate</span><span>Very accurate</span></div>
+        </div>
+        <div class="q">
+          <span class="qtext">Were you able to replay your recorded answers?</span>
+          <div class="choices">
+            <label class="choice"><input type="radio" name="playback" value="Yes"><span>Yes</span></label>
+            <label class="choice"><input type="radio" name="playback" value="No"><span>No, they did not play</span></label>
+            <label class="choice"><input type="radio" name="playback" value="Did not try"><span>Did not try</span></label>
+          </div>
+        </div>
+        <div class="q">
+          <label class="qtext" for="q_report">What would have made the report more useful?</label>
+          <textarea id="q_report" name="reportWish" placeholder="What would you have liked it to tell you?"></textarea>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head"><span class="section-num">04</span><h2>The resume builder</h2></div>
+        <p class="section-note">If you did not use the resume builder, continue to the next section.</p>
+        <div class="q">
+          <span class="qtext">Did it read your existing resume correctly?</span>
+          <div class="scale" role="radiogroup" aria-label="Extraction accuracy, 1 to 5">
+            <label><input type="radio" name="extract" value="1"><span>1</span></label>
+            <label><input type="radio" name="extract" value="2"><span>2</span></label>
+            <label><input type="radio" name="extract" value="3"><span>3</span></label>
+            <label><input type="radio" name="extract" value="4"><span>4</span></label>
+            <label><input type="radio" name="extract" value="5"><span>5</span></label>
+          </div>
+          <div class="scale-ends"><span>Missed a lot</span><span>Captured it all</span></div>
+        </div>
+        <div class="q">
+          <label class="qtext" for="q_missed">What did it get wrong or leave out?</label>
+          <textarea id="q_missed" name="extractMissed" placeholder="Dates, projects, skills, or sections that were missing"></textarea>
+        </div>
+        <div class="q">
+          <span class="qtext">Was the generated PDF ready to send to an employer?</span>
+          <div class="choices">
+            <label class="choice"><input type="radio" name="pdfReady" value="Yes, would send it"><span>Yes, as it was</span></label>
+            <label class="choice"><input type="radio" name="pdfReady" value="Needed edits"><span>After minor edits</span></label>
+            <label class="choice"><input type="radio" name="pdfReady" value="No"><span>No</span></label>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head"><span class="section-num">05</span><h2>Overall</h2></div>
+        <div class="q">
+          <span class="qtext">Would you use Hiero before a real interview?</span>
+          <div class="choices">
+            <label class="choice"><input type="radio" name="wouldUse" value="Yes" required><span>Yes</span></label>
+            <label class="choice"><input type="radio" name="wouldUse" value="Maybe"><span>Maybe</span></label>
+            <label class="choice"><input type="radio" name="wouldUse" value="No"><span>No</span></label>
+          </div>
+        </div>
+        <div class="q">
+          <span class="qtext">How likely are you to recommend Hiero to someone job hunting?</span>
+          <div class="scale" role="radiogroup" aria-label="Recommendation, 1 to 5">
+            <label><input type="radio" name="recommend" value="1"><span>1</span></label>
+            <label><input type="radio" name="recommend" value="2"><span>2</span></label>
+            <label><input type="radio" name="recommend" value="3"><span>3</span></label>
+            <label><input type="radio" name="recommend" value="4"><span>4</span></label>
+            <label><input type="radio" name="recommend" value="5"><span>5</span></label>
+          </div>
+          <div class="scale-ends"><span>Not likely</span><span>Very likely</span></div>
+        </div>
+        <div class="q">
+          <label class="qtext" for="q_fix">The one thing we should improve first</label>
+          <textarea id="q_fix" name="fixFirst" required placeholder="If we change only one thing based on your feedback, what should it be?"></textarea>
+        </div>
+        <div class="q">
+          <label class="qtext" for="q_else">Anything else <span class="opt">— optional</span></label>
+          <textarea id="q_else" name="anythingElse" placeholder=""></textarea>
+        </div>
+      </section>
+
+      <div class="actions">
+        <button type="submit" class="btn" id="submitBtn">Submit feedback</button>
+        <span class="status" id="formStatus" role="status"></span>
+      </div>
+      <p class="note" id="signinNote" hidden></p>
+    </form>
+  </div>
+
+  <!-- ====================== DASHBOARD ====================== -->
+  <div id="view-dash" role="tabpanel" aria-labelledby="tab-dash" hidden>
+    <div id="dashBody">
+      <div class="empty">
+        <p class="big">No responses yet.</p>
+        <p>Responses appear here as they arrive, with averages, a breakdown of each question, and every written comment in full.</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var $ = function (id) { return document.getElementById(id); };
+  function esc(s) {
+    return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  var SCALES = [
+    { key: "followUps",  label: "Follow-up quality" },
+    { key: "reportFair", label: "Report fairness" },
+    { key: "extract",    label: "Resume extraction" },
+    { key: "recommend",  label: "Would recommend" }
+  ];
+  var CHOICES = [
+    { key: "tried",      label: "What they tried" },
+    { key: "feltReal",   label: "Felt like a real interview" },
+    { key: "voice",      label: "The voice" },
+    { key: "difficulty", label: "Difficulty" },
+    { key: "pauses",     label: "Waiting between questions" },
+    { key: "playback",   label: "Recording playback" },
+    { key: "pdfReady",   label: "PDF good enough to send" },
+    { key: "wouldUse",   label: "Would use again" }
+  ];
+  var TEXTS = [
+    { key: "whatWasOff",    label: "What felt off" },
+    { key: "broke",         label: "What broke" },
+    { key: "reportWish",    label: "Wanted from the report" },
+    { key: "extractMissed", label: "Resume got wrong" },
+    { key: "fixFirst",      label: "Fix this first" },
+    { key: "anythingElse",  label: "Anything else" }
+  ];
+  var BAD = {
+    "No, felt like a chatbot": 1, "Changed partway": 1, "Hard to hear": 1,
+    "No voice at all": 1, "Long silences": 1, "Too hard too early": 1, "No": 1
+  };
+  var MEH = {
+    "Close, something was off": 1, "Noticeable but tolerable": 1,
+    "Too easy throughout": 1, "Needed edits": 1, "Maybe": 1, "Did not notice": 1
+  };
+
+  function show(which) {
+    var isForm = which === "form";
+    $("view-form").hidden = !isForm;
+    $("view-dash").hidden = isForm;
+    $("tab-form").setAttribute("aria-selected", String(isForm));
+    $("tab-dash").setAttribute("aria-selected", String(!isForm));
+  }
+  $("tab-form").addEventListener("click", function () { show("form"); });
+  $("tab-dash").addEventListener("click", function () { show("dash"); loadResults(); });
+
+  // ---- submit (open to anyone; no account needed) ----
+  $("fb").addEventListener("submit", async function (e) {
+    e.preventDefault();
+    var st = $("formStatus"), btn = $("submitBtn");
+    st.className = "status";
+
+    var fd = new FormData(e.target);
+    var payload = {};
+    fd.forEach(function (v, k) {
+      v = String(v).trim();
+      if (v) payload[k] = v;
+    });
+
+    if (!payload.fixFirst) {
+      st.className = "status err";
+      st.textContent = "Please fill in the one thing to fix first.";
+      $("q_fix").focus();
+      return;
+    }
+
+    btn.disabled = true;
+    st.textContent = "Sending\u2026";
+    try {
+      var res = await fetch("/api/tester-feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      var data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error || "Something went wrong.");
+
+      st.className = "status ok";
+      st.textContent = data.message || "Thank you \u2014 this is genuinely useful.";
+      e.target.reset();
+      btn.textContent = "Sent";
+      setTimeout(function () { btn.textContent = "Submit feedback"; }, 4000);
+    } catch (err) {
+      st.className = "status err";
+      st.textContent = err.message || "Could not send. Please try again.";
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  // ---- results (admin only) ----
+  function barBlock(title, counts) {
+    var keys = Object.keys(counts || {});
+    if (!keys.length) return "";
+    var total = keys.reduce(function (s, k) { return s + counts[k]; }, 0);
+    keys.sort(function (a, b) { return counts[b] - counts[a]; });
+    var html = '<div class="panel"><h3>' + esc(title) + "</h3>";
+    keys.forEach(function (k) {
+      var n = counts[k];
+      var pct = total ? Math.round((n / total) * 100) : 0;
+      var cls = BAD[k] ? " crit" : (MEH[k] ? " warn" : "");
+      html += '<div class="bar-row"><span class="lab">' + esc(k) + "</span>" +
+              '<span class="bar-track"><span class="bar-fill' + cls + '" style="width:' + pct + '%"></span></span>' +
+              '<span class="n">' + n + "</span></div>";
+    });
+    return html + "</div>";
+  }
+
+  async function loadResults() {
+    var el = $("dashBody");
+    var token = localStorage.getItem("token") || localStorage.getItem("jwtToken");
+
+    if (!token) {
+      el.innerHTML = '<div class="empty"><p class="big">Sign in as an admin.</p>' +
+        '<p>Responses are visible to the Hiero admin account only. ' +
+        '<a href="/login.html" style="color:var(--accent)">Go to the login page</a>, then reopen this tab.</p></div>';
+      return;
+    }
+
+    el.innerHTML = '<div class="empty"><p>Loading responses\u2026</p></div>';
+
+    try {
+      var res = await fetch("/api/tester-feedback", {
+        headers: { "Authorization": "Bearer " + token }
+      });
+      var data = await res.json();
+
+      if (res.status === 401 || res.status === 403) {
+        el.innerHTML = '<div class="empty"><p class="big">Admin access required.</p>' +
+          "<p>" + esc(data.error || "This account cannot view responses.") + "</p></div>";
+        return;
+      }
+      if (!data.success) throw new Error(data.error || "Could not load responses.");
+
+      var rows = data.responses || [];
+      if (!rows.length) {
+        el.innerHTML = '<div class="empty"><p class="big">No responses yet.</p>' +
+          "<p>Responses appear here as they arrive, with averages, a breakdown of each question, and every written comment in full.</p></div>";
+        return;
+      }
+
+      var html = '<div class="tiles">';
+      html += '<div class="tile"><div class="k">Responses</div><div class="v">' + rows.length + "</div></div>";
+      SCALES.forEach(function (s) {
+        var a = data.averages ? data.averages[s.key] : null;
+        html += '<div class="tile"><div class="k">' + esc(s.label) + "</div>" +
+                '<div class="v">' + (a == null ? "\u2014" : a.toFixed(1)) + "</div>" +
+                '<div class="sub">' + (a == null ? "no answers" : "out of 5") + "</div></div>";
+      });
+      html += "</div>";
+
+      CHOICES.forEach(function (c) {
+        html += barBlock(c.label, (data.tallies || {})[c.key]);
+      });
+
+      TEXTS.forEach(function (t) {
+        var items = rows.filter(function (r) { return r[t.key]; });
+        if (!items.length) return;
+        html += '<div class="panel"><h3>' + esc(t.label) + " \u00b7 " + items.length + "</h3>";
+        items.forEach(function (r) {
+          html += '<blockquote class="quote"><p>' + esc(r[t.key]) + "</p>" +
+                  "<cite>" + esc(r.name || "Anonymous") + "</cite></blockquote>";
+        });
+        html += "</div>";
+      });
+
+      el.innerHTML = html;
+    } catch (err) {
+      el.innerHTML = '<div class="empty"><p class="big">Could not load responses.</p>' +
+        "<p>" + esc(err.message) + "</p></div>";
+    }
+  }
+
+  // Prefill name and email from an existing Hiero login, so a signed-in user
+  // does not retype what we already know. Anonymous visitors just see blanks.
+  try {
+    var stored = localStorage.getItem("user");
+    if (stored) {
+      var u = JSON.parse(stored);
+      if (u) {
+        if (u.email && !$("q_email").value) $("q_email").value = u.email;
+        var nm = u.name || u.username || u.fullName;
+        if (nm && !$("q_name").value) $("q_name").value = nm;
+      }
+    }
+  } catch (e) { /* no stored profile; fields stay empty */ }
+
+  // The results tab is always present here; access is enforced by the server.
+  $("tab-dash").hidden = false;
+})();
+</script>
+
+</body>
+</html>

@@ -196,6 +196,9 @@ app.use('/api/projects', lazyRouter('./routes/projects'));
 app.use('/api/scoring', lazyRouter('./routes/scoring'));
 app.use('/api/chat', lazyRouter('./routes/chat'));
 app.use('/api/interview', lazyRouter('./routes/interview'));
+// Tester feedback: POST is open on purpose (testers must not need an account);
+// GET is admin-only and enforced inside the router.
+app.use('/api/tester-feedback', lazyRouter('./routes/testerFeedback'));
 app.use('/api/reel', lazyRouter('./routes/reel'));
 app.use('/api/run', lazyRouter('./routes/run'));
 app.use('/api/visualize', lazyRouter('./routes/visualize'));
@@ -353,6 +356,9 @@ app.get(['/template-verifier', '/template-verifier.html'], (req, res) => res.sen
 // /feedback.html is the MOCK INTERVIEW evaluation report (reads ?session=),
 // linked from mock-interview.html and session.html. Leave it as-is.
 app.get(['/feedback', '/feedback.html'], (req, res) => res.sendFile(path.join(__dirname, 'feedback.html')));
+// /hiero-feedback is the TESTER feedback form + results. Distinct from both
+// /feedback.html (mock interview report) and /share-feedback (star rating).
+app.get(['/hiero-feedback', '/hiero-feedback.html'], (req, res) => res.sendFile(path.join(__dirname, 'hiero-feedback.html')));
 // /share-feedback is the STAR RATING page (reads ?email=&name=&rating=),
 // linked from the feedback request email. Previously the email pointed at
 // /feedback.html, which served the interview report and ignored its params.
