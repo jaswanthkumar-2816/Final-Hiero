@@ -1776,6 +1776,18 @@
           <span id="modal-rec-timer" style="font-family: 'IBM Plex Mono', monospace; font-size: 0.82rem; font-weight: 700; color: #fff; min-width: 40px; text-align: right;">0:00</span>
         </div>
 
+        <!-- Live input level: shows the mic is genuinely hearing the candidate,
+             rather than only that time is passing. -->
+        <div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 12px 18px; margin-bottom: 20px;">
+          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+            <i class="fas fa-wave-square" style="color: var(--muted); font-size: 0.8rem;"></i>
+            <div style="flex: 1; height: 6px; background: rgba(255,255,255,0.08); border-radius: 3px; overflow: hidden;">
+              <div id="modal-level-fill" style="width: 0%; height: 100%; background: var(--g); border-radius: 3px; transition: width 0.08s linear;"></div>
+            </div>
+          </div>
+          <p id="modal-voice-hint" style="font-size: 0.72rem; color: var(--muted); margin: 0;">Press Start, then read the sentence aloud</p>
+        </div>
+
         <!-- Confirmation Checkbox -->
         <div style="display: flex; align-items: flex-start; gap: 10px; margin-bottom: 24px;">
           <input type="checkbox" id="modal-confirm-checkbox" onchange="validateModalNextButton()" style="margin-top: 3px; accent-color: var(--g); width: 16px; height: 16px; cursor: pointer;">
@@ -4183,17 +4195,93 @@ Key Requirements:
       }
     }
 
+    // Live input analysis. The previous check only timed 4 seconds, so silence,
+    // a muted mic or no voice at all passed "Voice Verification" every time.
+    let modalAudioCtx = null, modalAnalyser = null, modalLevelRAF = null;
+    window.modalVoiceDetectedMs = 0;
+    window.modalPeakLevel = 0;
+
+    const VOICE_LEVEL_THRESHOLD = 0.035;   // RMS above ambient room noise
+    const VOICE_REQUIRED_MS = 1500;        // sustained speech needed to pass
+
+    function startModalLevelMeter(stream) {
+      try {
+        modalAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const src = modalAudioCtx.createMediaStreamSource(stream);
+        modalAnalyser = modalAudioCtx.createAnalyser();
+        modalAnalyser.fftSize = 1024;
+        modalAnalyser.smoothingTimeConstant = 0.3;
+        src.connect(modalAnalyser);
+
+        const buf = new Float32Array(modalAnalyser.fftSize);
+        let lastTick = performance.now();
+
+        const tick = () => {
+          if (!modalAnalyser) return;
+          modalAnalyser.getFloatTimeDomainData(buf);
+
+          let sum = 0;
+          for (let i = 0; i < buf.length; i++) sum += buf[i] * buf[i];
+          const rms = Math.sqrt(sum / buf.length);
+
+          const now = performance.now();
+          const dt = now - lastTick;
+          lastTick = now;
+
+          if (rms > VOICE_LEVEL_THRESHOLD) window.modalVoiceDetectedMs += dt;
+          if (rms > window.modalPeakLevel) window.modalPeakLevel = rms;
+
+          // Live feedback so the candidate can see the mic is actually hearing.
+          const lvl = document.getElementById('modal-level-fill');
+          if (lvl) lvl.style.width = `${Math.min(100, Math.round((rms / 0.25) * 100))}%`;
+
+          const hint = document.getElementById('modal-voice-hint');
+          if (hint) {
+            if (window.modalVoiceDetectedMs >= VOICE_REQUIRED_MS) {
+              hint.textContent = 'Voice detected clearly';
+              hint.style.color = 'var(--g)';
+            } else if (rms > VOICE_LEVEL_THRESHOLD) {
+              hint.textContent = 'Hearing you…';
+              hint.style.color = 'var(--muted)';
+            } else {
+              hint.textContent = 'No voice detected — please read the sentence aloud';
+              hint.style.color = '#f59e0b';
+            }
+          }
+
+          validateModalNextButton();
+          modalLevelRAF = requestAnimationFrame(tick);
+        };
+        tick();
+      } catch (e) {
+        console.warn('Level meter unavailable:', e);
+      }
+    }
+
+    function stopModalLevelMeter() {
+      if (modalLevelRAF) cancelAnimationFrame(modalLevelRAF);
+      modalLevelRAF = null;
+      modalAnalyser = null;
+      if (modalAudioCtx) { try { modalAudioCtx.close(); } catch (e) {} modalAudioCtx = null; }
+    }
+
     async function startModalAudioRecording() {
       try {
         const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
         modalAudioChunks = [];
+        window.modalVoiceDetectedMs = 0;
+        window.modalPeakLevel = 0;
         modalMediaRecorder = new MediaRecorder(audioStream);
         modalMediaRecorder.ondataavailable = (e) => {
           if (e.data.size > 0) modalAudioChunks.push(e.data);
         };
 
+        startModalLevelMeter(audioStream);
+
         modalMediaRecorder.onstop = () => {
           window.audioRecordedDuration = modalRecordSeconds;
+          stopModalLevelMeter();
+          try { audioStream.getTracks().forEach(t => t.stop()); } catch (e) {}
           validateModalNextButton();
         };
 
@@ -4261,10 +4349,12 @@ Key Requirements:
     function validateModalNextButton() {
       const checkbox = document.getElementById('modal-confirm-checkbox');
       const nextBtn = document.getElementById('modal-btn-next');
-      const isDurationValid = window.audioRecordedDuration >= 4;
+      const isDurationValid = (window.audioRecordedDuration >= 4) || (modalIsRecording && modalRecordSeconds >= 4);
+      // Real speech must have been heard, not merely 4 seconds of wall clock.
+      const isVoiceHeard = window.modalVoiceDetectedMs >= VOICE_REQUIRED_MS;
       const isChecked = checkbox && checkbox.checked;
 
-      if (isDurationValid && isChecked) {
+      if (isDurationValid && isVoiceHeard && isChecked) {
         if (nextBtn) {
           nextBtn.disabled = false;
           nextBtn.style.opacity = '1';
