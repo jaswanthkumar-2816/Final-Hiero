@@ -823,8 +823,8 @@ function mergeUsers(mongoUsers, localUsers, loginStats = new Map()) {
 async function fetchRazorpayPayments() {
     let payments = [];
     try {
-        const KEY_ID = process.env.RAZORPAY_KEY_ID || 'rzp_live_T1Sny5T0rJRQuw';
-        const KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || '6cFpqePtEeyOBcfRftetu9Zm';
+        const KEY_ID = process.env.RAZORPAY_KEY_ID;
+        const KEY_SECRET = process.env.RAZORPAY_KEY_SECRET;
         const auth = Buffer.from(`${KEY_ID}:${KEY_SECRET}`).toString('base64');
         const rpRes = await axios.get('https://api.razorpay.com/v1/payments?count=100', {
             headers: { 'Authorization': `Basic ${auth}` },

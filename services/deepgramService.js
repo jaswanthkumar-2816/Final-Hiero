@@ -13,7 +13,7 @@ try {
 
 dotenv.config();
 
-const DEEPGRAM_API_KEY = process.env.DEEPGRAM_API_KEY || '488a277e12f99d90145228e679c769bcd0458ee4';
+const DEEPGRAM_API_KEY = process.env.DEEPGRAM_API_KEY;
 
 /**
  * Transcribe Audio Buffer using Deepgram Nova-3

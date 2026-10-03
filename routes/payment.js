@@ -10,8 +10,8 @@ const router = express.Router();
 
 // Initialize Razorpay SDK instance
 const razorpay = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID || 'rzp_live_T1Sny5T0rJRQuw',
-    key_secret: process.env.RAZORPAY_KEY_SECRET || '6cFpqePtEeyOBcfRftetu9Zm'
+    key_id: process.env.RAZORPAY_KEY_ID,
+    key_secret: process.env.RAZORPAY_KEY_SECRET
 });
 
 const PLAN_PRICES = {
@@ -58,7 +58,7 @@ router.post('/create-order', async (req, res) => {
             order_id: order.id,
             amount: order.amount,
             currency: order.currency,
-            key_id: process.env.RAZORPAY_KEY_ID || 'rzp_live_T1Sny5T0rJRQuw'
+            key_id: process.env.RAZORPAY_KEY_ID
         });
     } catch (err) {
         console.error('❌ Razorpay order creation failed:', err.message);
@@ -85,7 +85,7 @@ router.post('/verify-payment', authenticateToken, async (req, res) => {
         // Validate the cryptographic signature
         const isMockBypass = razorpay_payment_id === 'pay_mock_test_mode' || razorpay_payment_id.startsWith('mock_');
         if (!isMockBypass) {
-            const secret = process.env.RAZORPAY_KEY_SECRET || '6cFpqePtEeyOBcfRftetu9Zm';
+            const secret = process.env.RAZORPAY_KEY_SECRET;
             const generated_signature = crypto
                 .createHmac('sha256', secret)
                 .update(razorpay_order_id + "|" + razorpay_payment_id)
