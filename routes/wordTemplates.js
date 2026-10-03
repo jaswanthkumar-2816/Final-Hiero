@@ -149,8 +149,31 @@ function normalizeWordData(data) {
         personalInfo.roleTitle = personalInfo.professionalTitle;
     }
 
-    let experience = data.experience || [];
-    let education = data.education || [];
+    // Dates are formatted ONCE here rather than in each template. Form inputs
+    // are <input type="month">, so values arrive as "2023-03" and 19 of the 21
+    // templates printed that raw. formatResumeDate is idempotent — an already
+    // formatted value ("Mar 2023") or free text passes through untouched — so
+    // templates that already format their own dates are unaffected.
+    let experience = (data.experience || []).map((e) => {
+        if (!e || typeof e !== 'object') return e;
+        return {
+            ...e,
+            startDate: formatResumeDate(e.startDate),
+            endDate: formatResumeDate(e.endDate),
+            // Keep the raw values for anything that needs to sort or compare.
+            startDateRaw: e.startDate,
+            endDateRaw: e.endDate
+        };
+    });
+
+    let education = (data.education || []).map((e) => {
+        if (!e || typeof e !== 'object') return e;
+        return {
+            ...e,
+            startDate: formatResumeDate(e.startDate),
+            endDate: formatResumeDate(e.endDate)
+        };
+    });
     // Prefer marks over mislabeled gpa for display downstream
     if (Array.isArray(education)) {
         education = education.map((edu) => {
@@ -200,8 +223,8 @@ function normalizeWordData(data) {
         .map((i) => ({
             jobTitle: i.jobTitle || i.role || '',
             company: i.company || i.organization || '',
-            startDate: i.startDate || i.start || '',
-            endDate: i.endDate || i.end || '',
+            startDate: formatResumeDate(i.startDate || i.start || ''),
+            endDate: formatResumeDate(i.endDate || i.end || ''),
             description: i.description || i.desc || ''
         }))
         .filter((i) => i.jobTitle || i.company);
