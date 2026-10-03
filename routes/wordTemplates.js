@@ -622,15 +622,15 @@ const TEMPLATE_CONFIGS = {
     'hiero-vertex': { type: 'top-down', font: 'Arial', headerAlign: 'center', headerBorder: false, colors: { primary: '#333333', secondary: '#666666', text: '#333333', background: '#E0E2E5' } },
 
     // Left Sidebar Templates
-    'hiero-monethon': { type: 'sidebar', sidebarPosition: 'left', font: 'Georgia', colors: { sidebarBg: '#1F2A36', sidebarText: '#ffffff', sidebarAccent: '#F2B66D', primary: '#1F2A36', secondary: '#F2B66D', text: '#222222', background: '#ffffff' } },
-    'hiero-essence': { type: 'sidebar', sidebarPosition: 'left', font: 'Arial', colors: { sidebarBg: '#1e1e1e', sidebarText: '#ffffff', sidebarAccent: '#f5a623', primary: '#ffffff', secondary: '#aaaaaa', text: '#ffffff', background: '#121212' } },
+    'hiero-monethon': { type: 'sidebar', sidebarPosition: 'left', font: 'Georgia', colors: { sidebarBg: '#f1f4f7', sidebarText: '#1F2A36', sidebarAccent: '#F2B66D', primary: '#1F2A36', secondary: '#F2B66D', text: '#222222', background: '#ffffff' } },
+    'hiero-essence': { type: 'sidebar', sidebarPosition: 'left', font: 'Arial', colors: { sidebarBg: '#f4f4f4', sidebarText: '#1e1e1e', sidebarAccent: '#f5a623', primary: '#ffffff', secondary: '#aaaaaa', text: '#ffffff', background: '#121212' } },
     'hiero-timeline': { type: 'sidebar', sidebarPosition: 'left', font: 'Arial', colors: { sidebarBg: '#f3f4f6', sidebarText: '#222222', sidebarAccent: '#777777', primary: '#222222', secondary: '#777777', text: '#333333', background: '#ffffff' } },
-    'hiero-prestige': { type: 'sidebar', sidebarPosition: 'left', font: 'Arial', colors: { sidebarBg: '#0f172a', sidebarText: '#ffffff', sidebarAccent: '#c8a74e', primary: '#0f172a', secondary: '#475569', text: '#0f172a', background: '#f8fafc' } },
+    'hiero-prestige': { type: 'sidebar', sidebarPosition: 'left', font: 'Arial', colors: { sidebarBg: '#f1f5f9', sidebarText: '#0f172a', sidebarAccent: '#c8a74e', primary: '#0f172a', secondary: '#475569', text: '#0f172a', background: '#f8fafc' } },
     'hiero-royal': { type: 'sidebar', sidebarPosition: 'left', font: 'Georgia', colors: { sidebarBg: '#BFAF9A', sidebarText: '#1a1a1a', sidebarAccent: '#1a1a1a', primary: '#1a1a1a', secondary: '#3a3a3a', text: '#3a3a3a', background: '#EDE8D9' } },
     'hiero-cool': { type: 'top-down', font: 'Arial', colors: { primary: '#1e3a8a', secondary: '#374151', text: '#374151', background: '#FFFFFF' } },
-    'hiero-nova': { type: 'sidebar', sidebarPosition: 'left', font: 'Times New Roman', colors: { sidebarBg: '#1a1a1a', sidebarText: '#ffffff', sidebarAccent: '#f4b400', primary: '#1a1a1a', secondary: '#777777', text: '#1a1a1a', background: '#ffffff' } },
+    'hiero-nova': { type: 'sidebar', sidebarPosition: 'left', font: 'Times New Roman', colors: { sidebarBg: '#f4f4f4', sidebarText: '#1a1a1a', sidebarAccent: '#f4b400', primary: '#1a1a1a', secondary: '#777777', text: '#1a1a1a', background: '#ffffff' } },
     'hiero-retail': { type: 'sidebar', sidebarPosition: 'left', font: 'Helvetica', colors: { sidebarBg: '#ffffff', sidebarText: '#1e3a8a', sidebarAccent: '#3b82f6', primary: '#1e3a8a', secondary: '#3b82f6', text: '#1f2937', background: '#ffffff' } },
-    'hiero-elite': { type: 'sidebar', sidebarPosition: 'left', font: 'Times New Roman', colors: { sidebarBg: '#1a202c', sidebarText: '#ffffff', sidebarAccent: '#d69e2e', primary: '#1a202c', secondary: '#d69e2e', text: '#2d3748', background: '#ffffff' } },
+    'hiero-elite': { type: 'sidebar', sidebarPosition: 'left', font: 'Times New Roman', colors: { sidebarBg: '#f2f4f7', sidebarText: '#1a202c', sidebarAccent: '#d69e2e', primary: '#1a202c', secondary: '#d69e2e', text: '#2d3748', background: '#ffffff' } },
 
     // Right Sidebar Templates
     'template4': { type: 'top-down', font: 'Times New Roman', headerAlign: 'center', headerBorder: true, colors: { primary: '#000000', secondary: '#333333', text: '#222222', background: '#FFFFFF', accent: '#000000' } },
@@ -639,7 +639,7 @@ const TEMPLATE_CONFIGS = {
     'hiero-signature': { type: 'sidebar', sidebarPosition: 'right', font: 'Times New Roman', colors: { sidebarBg: '#f7f7f7', sidebarText: '#000000', sidebarAccent: '#f37021', primary: '#000000', secondary: '#555555', text: '#333333', background: '#ffffff' } },
 
     // Fully Custom Handcoded Templates
-    'hiero-urban': { type: 'sidebar', sidebarPosition: 'left', colors: { sidebarBg: '#1E293B', sidebarText: '#ffffff', sidebarAccent: '#0284C7', primary: '#0284C7', secondary: '#475569', text: '#0F172A', background: '#F8FAFC' } },
+    'hiero-urban': { type: 'sidebar', sidebarPosition: 'left', colors: { sidebarBg: '#f1f5f9', sidebarText: '#1E293B', sidebarAccent: '#0284C7', primary: '#0284C7', secondary: '#475569', text: '#0F172A', background: '#F8FAFC' } },
     'hiero-vision': { type: 'sidebar', sidebarPosition: 'left', colors: { sidebarBg: '#c96f5a', sidebarText: '#ffffff', sidebarAccent: '#fed7aa', primary: '#5a2d24', secondary: '#c96f5a', text: '#222222', background: '#ffffff' } }
 };
 
@@ -1590,7 +1590,7 @@ function generateHieroSignatureWordHTML(data, config) {
               <table cellpadding="0" cellspacing="0" border="0" style="width: 100%; margin-bottom: 20pt;">
                 <tr>
                   <td>
-                    <div style="background-color: #1a1a1a; padding: 40pt 10pt; text-align: center; border-radius: 2px;">
+                    <div style="background-color: #f4f4f4; padding: 40pt 10pt; text-align: center; border-radius: 2px; border: 1pt solid #e2e2e2;">
                       <div style="font-size: 26pt; font-weight: bold; color: ${WHITE}; font-family: Helvetica, sans-serif;">
                         ${initials}
                       </div>
@@ -1633,7 +1633,7 @@ function generateHieroSignatureWordHTML(data, config) {
                           <div style="color: #AAAAAA; font-size: 8pt; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4pt;">
                             ${skill}
                           </div>
-                          <table cellpadding="0" cellspacing="0" border="0" style="width: 100%; background-color: #222222; height: 4px;">
+                          <table cellpadding="0" cellspacing="0" border="0" style="width: 100%; background-color: #1a1a1a; height: 2px;">
                             <tr>
                               <td style="width: 85%; background-color: ${ACCENT}; height: 4px; font-size: 0px;">&nbsp;</td>
                               <td style="width: 15%; background-color: transparent; height: 4px; font-size: 0px;">&nbsp;</td>
@@ -2969,7 +2969,7 @@ function generateHieroPrestigeWordHTML(data) {
     <tr>
       <td style="width:32%;background:${SIDE};padding:22pt 15pt;">
         <!-- Avatar initials circle -->
-        <div style="width:70pt;height:70pt;border-radius:50%;background:#334155;border:2pt solid rgba(255,255,255,0.15);margin:0 auto 12pt;font-size:22pt;font-weight:bold;color:${WHITE};text-align:center;line-height:70pt;">${initials}</div>
+        <div style="width:70pt;height:70pt;border-radius:50%;background:#e2e8f0;border:2pt solid #cbd5e1;margin:0 auto 12pt;font-size:22pt;font-weight:bold;color:${WHITE};text-align:center;line-height:70pt;">${initials}</div>
         <div style="font-size:15pt;font-weight:bold;color:${WHITE};text-transform:uppercase;text-align:center;line-height:1.2;margin-bottom:3pt;">${name}</div>
         ${role?`<div style="font-size:8.5pt;color:${ACCENT};text-transform:uppercase;letter-spacing:1px;text-align:center;margin-bottom:14pt;">${role}</div>`:'<div style="margin-bottom:14pt;"></div>'}
         ${contacts.length?sSec('Information',contacts.map(c=>`<div style="font-size:8pt;color:rgba(255,255,255,0.75);margin-bottom:5pt;word-break:break-all;">${c}</div>`).join('')):''}
@@ -3525,7 +3525,7 @@ function generateHieroEssenceWordHTML(data) {
   <!-- Gold top accent bar -->
   <div style="background:${GOLD};height:4pt;width:100%;"></div>
   <!-- Header -->
-  <div style="background:#121212;padding:16pt 22pt;">
+  <div style="background:#f4f4f4;padding:16pt 22pt;border-bottom:1pt solid #e2e2e2;">
     <div style="font-size:26pt;font-weight:bold;color:${WHITE};letter-spacing:2px;">${name}</div>
     ${roleTitle ? `<div style="font-size:10pt;color:${GOLD};font-weight:bold;text-transform:uppercase;letter-spacing:1px;margin-top:3pt;">${roleTitle}</div>` : ''}
     <div style="font-size:8.5pt;color:${LIGHT_TEXT};margin-top:5pt;">${contactItems.join('  •  ')}</div>
@@ -3533,7 +3533,7 @@ function generateHieroEssenceWordHTML(data) {
   <!-- Body -->
   <table style="width:100%;">
     <tr>
-      <td style="width:35%;padding:16pt 14pt;background:#1a1a1a;border-right:1pt solid #333;">
+      <td style="width:35%;padding:16pt 14pt;background:#f4f4f4;border-right:1pt solid #e2e2e2;">
         ${skillsArr.length > 0 ? sideSection('Skills', skillsArr.map(s => `<div style="font-size:8.5pt;color:${LIGHT_TEXT};margin-bottom:3pt;">• ${s}</div>`).join('')) : ''}
         ${d.education.length > 0 ? sideSection('Education', d.education.map(edu => `
           <div style="margin-bottom:8pt;">
@@ -4414,10 +4414,74 @@ function generateHieroRetailWordHTML(data) {
 </div></body></html>`;
 }
 
+/**
+ * Lightens dark panels in generated resume HTML.
+ *
+ * A resume is printed and read by recruiters; large dark areas waste ink,
+ * photocopy badly and read as a slide rather than a document. Most generators
+ * hardcode their own colours instead of reading TEMPLATE_CONFIGS, so this runs
+ * on the finished HTML — one place that covers all 21 templates.
+ *
+ * Only BACKGROUNDS are lightened. Dark text, thin rules and borders are left
+ * alone: those are lines and type, not panels, and a resume needs them dark.
+ * Any text that was white on a lightened panel is darkened to match, so
+ * nothing becomes invisible.
+ */
+function lightenDarkPanels(html) {
+    if (!html || typeof html !== 'string') return html;
+
+    const luminance = (hex) => {
+        const n = parseInt(hex.slice(1), 16);
+        const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+        return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    };
+
+    // Collect the dark backgrounds this document actually uses.
+    const darkSet = new Set();
+    for (const m of html.matchAll(/background(?:-color)?\s*:\s*(#[0-9a-fA-F]{6})/g)) {
+        if (luminance(m[1]) < 90) darkSet.add(m[1]);
+    }
+    if (!darkSet.size) return html;
+
+    let out = html;
+
+    darkSet.forEach((hex) => {
+        // Keep the hue, raise the lightness: a tinted panel still reads as the
+        // template's colour without being a block of ink.
+        const n = parseInt(hex.slice(1), 16);
+        const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+        const lift = (c) => Math.round(c + (255 - c) * 0.93);
+        const light = '#' + [lift(r), lift(g), lift(b)]
+            .map(v => v.toString(16).padStart(2, '0')).join('');
+
+        const esc = hex.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        // Backgrounds only — never a `color:`, `border` or `stroke` using the
+        // same value, which must stay dark to remain readable.
+        out = out.replace(
+            new RegExp('(background(?:-color)?\\s*:\\s*)' + esc, 'gi'),
+            '$1' + light
+        );
+        out = out.replace(
+            new RegExp('(background\\s*:\\s*linear-gradient\\([^)]*?)' + esc, 'gi'),
+            '$1' + light
+        );
+    });
+
+    // White text only makes sense on a dark panel; on the lightened versions it
+    // would vanish. Darken it to the document's ink colour.
+    // The negative lookbehind matters: a bare /color:/ also matches the tail of
+    // "background-color:", which would turn every WHITE background dark.
+    out = out.replace(/(?<![-a-zA-Z])color\s*:\s*#(?:fff|ffffff)\b/gi, 'color: #1a1d1a');
+    out = out.replace(/(?<![-a-zA-Z])color\s*:\s*white\b/gi, 'color: #1a1d1a');
+    out = out.replace(/(?<![-a-zA-Z])color\s*:\s*rgba\(\s*255\s*,\s*255\s*,\s*255\s*,\s*[\d.]+\s*\)/gi, 'color: #4a4f4a');
+
+    return out;
+}
+
 function makeOverflowAdaptive(html) {
     if (!html || typeof html !== 'string') return html;
 
-    let out = html;
+    let out = lightenDarkPanels(html);
 
     // 1) Allow page containers to expand beyond one page.
     out = out.replace(/overflow\s*:\s*hidden\s*;/gi, 'overflow: visible;');
