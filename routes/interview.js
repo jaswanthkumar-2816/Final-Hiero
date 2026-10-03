@@ -1,4 +1,5 @@
 const express = require('express');
+const crypto = require('crypto');
 const router = express.Router();
 const axios = require('axios');
 const multer = require('multer');
@@ -417,7 +418,12 @@ router.post('/start', async (req, res) => {
             resumeSnapshot.summary = userResume.summary || '';
         }
 
-        const sessionId = clientSessionId || ('hiero-sess-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7));
+        // Session ids address a candidate's report and their interview videos, so
+        // they must not be guessable. The old form was a timestamp plus five
+        // base36 characters, which is enumerable by anyone who knows roughly
+        // when an interview happened. A client-supplied id is no longer trusted
+        // for a NEW session either — it let a caller choose their own id.
+        const sessionId = 'hiero-sess-' + crypto.randomBytes(18).toString('base64url');
 
         // QUESTION 1 MUST ALWAYS BE THE INTRODUCTION
         const question1 = {
@@ -1240,11 +1246,40 @@ router.get('/session/:sessionId', async (req, res) => {
 // ROUTE: GET /api/interview/feedback/:sessionId & /:sessionId/feedback
 // Returns complete evaluation scorecard, Q&A transcripts, coaching, and recording media
 // ─────────────────────────────────────────────────────────────────────────────
+/**
+ * True when this request may read this session's report and recordings.
+ * A report carries the candidate's name, score and face; it is not public.
+ */
+function mayAccessSession(req, session) {
+    if (!session) return false;
+    let caller = null;
+    try { caller = authenticateUser(req); } catch (e) { caller = null; }
+    if (!caller || !caller.userId) return false;
+
+    const ADMINS = [process.env.ADMIN_EMAIL, 'jaswanthkumarmuthoju@gmail.com', 'admin@hiero.com'].filter(Boolean);
+    if (caller.email && ADMINS.includes(caller.email)) return true;
+
+    // Legacy sessions created before ownership was recorded.
+    if (!session.userId) return false;
+
+    return String(session.userId) === String(caller.userId);
+}
+
 async function handleGetInterviewFeedback(req, res) {
     try {
         const { sessionId } = req.params;
         const cleanSessionId = (sessionId || '').replace(/[^a-zA-Z0-9_-]/g, '');
         const session = await getSessionFromStore(cleanSessionId);
+
+        // A report was readable by anyone who had or guessed the id — it
+        // returned the candidate's name, score and recording URLs with no
+        // authentication at all.
+        if (session && !mayAccessSession(req, session)) {
+            return res.status(403).json({
+                success: false,
+                error: 'This interview report belongs to another candidate.'
+            });
+        }
 
         // Fetch manifest recordings if available on disk
         const manifestPath = path.join(__dirname, '..', 'uploads', 'recordings', cleanSessionId, 'manifest.json');
@@ -1579,7 +1614,8 @@ router.post('/recordings/upload', videoUpload.single('video'), async (req, res) 
 
         fs.writeFileSync(filePath, audioOrVideoFile.buffer);
 
-        const relativeUrl = `/uploads/recordings/${sessionId}/${filename}`;
+        // Authenticated path — the static /uploads mount has been removed.
+        const relativeUrl = `/api/interview/recording-file/${sessionId}/${filename}`;
 
         const manifestPath = path.join(targetDir, 'manifest.json');
         let manifest = { sessionId, updatedAt: new Date().toISOString(), recordings: [] };
@@ -1673,6 +1709,40 @@ router.post('/recordings/upload', videoUpload.single('video'), async (req, res) 
 // ─────────────────────────────────────────────────────────────────────────────
 // ROUTE: GET /api/interview/recordings/:sessionId
 // ─────────────────────────────────────────────────────────────────────────────
+// Streams one recording file, but only to its owner. The files used to be
+// served by express.static('/uploads'), so anyone with a URL — handed out
+// freely by the unauthenticated report — could download a candidate's video.
+router.get('/recording-file/:sessionId/:filename', async (req, res) => {
+    try {
+        const sessionId = (req.params.sessionId || '').replace(/[^a-zA-Z0-9_-]/g, '');
+        const filename = (req.params.filename || '').replace(/[^a-zA-Z0-9_.-]/g, '');
+        if (!sessionId || !filename || filename.includes('..')) {
+            return res.status(400).json({ success: false, error: 'Invalid request' });
+        }
+
+        const session = await getSessionFromStore(sessionId);
+        if (!mayAccessSession(req, session)) {
+            return res.status(403).json({ success: false, error: 'Not your recording.' });
+        }
+
+        const dir = path.join(__dirname, '..', 'uploads', 'recordings', sessionId);
+        const filePath = path.join(dir, filename);
+        // Defence in depth: the resolved path must stay inside the session dir.
+        if (!path.resolve(filePath).startsWith(path.resolve(dir))) {
+            return res.status(400).json({ success: false, error: 'Invalid path' });
+        }
+        if (!fs.existsSync(filePath)) {
+            return res.status(404).json({ success: false, error: 'Recording not found' });
+        }
+
+        res.setHeader('Cache-Control', 'private, no-store');
+        return res.sendFile(filePath);
+    } catch (err) {
+        console.error('[INTERVIEW] recording-file error:', err.message);
+        return res.status(500).json({ success: false, error: 'Could not read recording' });
+    }
+});
+
 router.get('/recordings/:sessionId', (req, res) => {
     try {
         const sessionId = req.params.sessionId.replace(/[^a-zA-Z0-9_-]/g, '');

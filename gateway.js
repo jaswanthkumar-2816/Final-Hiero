@@ -371,8 +371,39 @@ app.get(['/ai-photo-formalizer', '/ai-photo-formalizer.html'], (req, res) => res
 // ======================
 // STATIC FILES
 // ======================
-app.use(express.static(__dirname, { index: false }));           // ← root SVGs (microsoft.svg, google.svg etc.)
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// The root static mount below serves the whole project directory so that root
+// SVGs resolve. That also exposed anything else sitting there over plain HTTP:
+// users.json (26 records, password field included), login_tracking.json,
+// data/*.json and uploads/ (candidates' interview videos). Block those first —
+// Express matches middleware in order, so this must stay ABOVE the mount.
+const BLOCKED_STATIC = [
+    /^\/uploads(\/|$)/i,          // interview recordings: use /api/interview/recording-file
+    /^\/users\.json$/i,
+    /^\/login[_-]?tracking\.json$/i,
+    /^\/data(\/|$)/i,
+    /^\/models(\/|$)/i,
+    /^\/routes(\/|$)/i,
+    /^\/services(\/|$)/i,
+    /^\/node_modules(\/|$)/i,
+    /^\/package(-lock)?\.json$/i,
+    /\.(env|log|db|sqlite3?|pem|key|bak)$/i,
+    /^\/\./                       // dotfiles and dot-directories
+];
+app.use((req, res, next) => {
+    let p;
+    try { p = decodeURIComponent(req.path || ''); } catch (e) { p = req.path || ''; }
+    if (BLOCKED_STATIC.some(re => re.test(p))) {
+        return res.status(404).json({ error: 'Not found' });
+    }
+    next();
+});
+
+app.use(express.static(__dirname, { index: false, dotfiles: 'deny' }));  // ← root SVGs (microsoft.svg, google.svg etc.)
+// NOT served statically: /uploads holds interview recordings — video of
+// candidates' faces. They are streamed by GET /api/interview/recording-file,
+// which checks ownership first. Serving this directory openly let anyone with
+// (or guessing) a URL download someone else's interview.
+// app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(express.static(landingDirPath, { index: false }));
 app.use(express.static(resumeBuilderPath, { index: false }));
 app.use('/public', express.static(resumeBuilderPath));

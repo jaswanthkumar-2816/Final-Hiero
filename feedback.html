@@ -1487,7 +1487,18 @@
 
       if (querySessionId) {
         try {
-          const res = await fetch(`/api/interview/feedback/${encodeURIComponent(querySessionId)}`);
+          // The report is now owner-only, so the viewer's token must be sent.
+          const authToken = localStorage.getItem('token') || localStorage.getItem('jwtToken');
+          const res = await fetch(`/api/interview/feedback/${encodeURIComponent(querySessionId)}`, {
+            headers: authToken ? { 'Authorization': `Bearer ${authToken}` } : {}
+          });
+          if (res.status === 403) {
+            const banner = document.createElement('div');
+            banner.style.cssText = 'margin:24px auto;max-width:900px;padding:16px 20px;border-radius:12px;background:#fee2e2;border:1px solid #ef4444;color:#991b1b;font-size:14px;';
+            banner.textContent = 'This interview report belongs to another account. Sign in with the account that took the interview.';
+            document.body.prepend(banner);
+            return;
+          }
           if (res.ok) {
             const serverData = await res.json();
             if (serverData && serverData.success) {
@@ -1511,7 +1522,10 @@
 
         // Fetch recordings manifest if available
         try {
-          const recRes = await fetch(`/api/interview/recordings/${encodeURIComponent(querySessionId)}`);
+          const recTok = localStorage.getItem('token') || localStorage.getItem('jwtToken');
+          const recRes = await fetch(`/api/interview/recordings/${encodeURIComponent(querySessionId)}`, {
+            headers: recTok ? { 'Authorization': `Bearer ${recTok}` } : {}
+          });
           if (recRes.ok) {
             const recData = await recRes.json();
             if (recData && recData.recordings && recData.recordings.length > 0) {
