@@ -1371,24 +1371,50 @@
       }
       if (!targetUrl) {
         const qIdx = parseInt(qNumStr, 10);
-        targetUrl = sessionRecordingsMap[`Q${qIdx}`] ||
-                    sessionRecordingsMap[`INTRO`] && qIdx === 0 ? sessionRecordingsMap[`INTRO`] : null ||
-                    sessionStorage.getItem(`hiero_rec_Q${qIdx}`) ||
-                    sessionStorage.getItem(`hiero_backend_rec_Q${qIdx}`);
+        // NOTE: `?:` binds looser than `||`, so the previous one-liner parsed as
+        // `(hasQ || isIntro) ? INTRO : fallbacks` — meaning that whenever a
+        // recording for this question DID exist it returned the (undefined)
+        // INTRO entry, so a recorded answer could never play.
+        targetUrl = sessionRecordingsMap[`Q${qIdx}`]
+                 || (qIdx === 0 ? sessionRecordingsMap[`INTRO`] : null)
+                 || sessionStorage.getItem(`hiero_rec_Q${qIdx}`)
+                 || sessionStorage.getItem(`hiero_backend_rec_Q${qIdx}`)
+                 || null;
       }
 
       // ── VIDEO PLAYER ──
+      const thumb = document.getElementById('videoThumbnail');
+
       if (targetUrl) {
         if (actualVideo) {
           actualVideo.src = targetUrl;
           actualVideo.style.display = 'block';
+          // The stock placeholder image sat on top of the real recording.
+          if (thumb) thumb.style.display = 'none';
           if (overlay) overlay.style.display = 'none';
+
+          // MediaRecorder .webm files carry no duration header, so the player
+          // reports Infinity/NaN and shows 0:00. Seek to the end once to force
+          // the browser to compute it, then return to the start.
+          actualVideo.addEventListener('loadedmetadata', function fixDuration() {
+            actualVideo.removeEventListener('loadedmetadata', fixDuration);
+            if (actualVideo.duration === Infinity || isNaN(actualVideo.duration)) {
+              const onSeek = () => {
+                actualVideo.removeEventListener('timeupdate', onSeek);
+                actualVideo.currentTime = 0;
+              };
+              actualVideo.addEventListener('timeupdate', onSeek);
+              actualVideo.currentTime = 1e101;
+            }
+          });
+
           if (autoPlay) actualVideo.play().catch(e => console.warn('Autoplay notice:', e));
         }
       } else {
         if (actualVideo) { actualVideo.src = ''; actualVideo.style.display = 'none'; }
+        if (thumb) thumb.style.display = '';
         if (overlay) overlay.style.display = 'flex';
-        if (overlayText) overlayText.textContent = `Play Q${qNumStr} Recording`;
+        if (overlayText) overlayText.textContent = `No recording for Q${qNumStr}`;
       }
 
       // ── AUDIO PLAYER ──

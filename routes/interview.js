@@ -1543,7 +1543,10 @@ router.post('/recordings/upload', videoUpload.single('video'), async (req, res) 
             url: relativeUrl,
             filename,
             sizeBytes: audioOrVideoFile.buffer.length,
-            mimetype: audioOrVideoFile.mimetype || 'video/webm',
+            // The browser uploads MediaRecorder blobs with a generic type
+            // (often text/plain), which made the manifest describe .webm
+            // videos as text. Derive it from the extension we actually wrote.
+            mimetype: ext === '.mp4' ? 'video/mp4' : (ext === '.ogg' ? 'video/ogg' : 'video/webm'),
             uploadedAt: new Date().toISOString()
         };
 
