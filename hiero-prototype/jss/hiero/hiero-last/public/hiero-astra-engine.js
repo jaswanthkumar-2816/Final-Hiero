@@ -42,6 +42,7 @@
       cx: window.innerWidth / 2,
       cy: window.innerHeight / 2,
       scale: 1,
+      sparkleScale: 1,
       
       currentMode: 'swirl',
       morphProgress: 0.0,
@@ -592,15 +593,44 @@
       STATE.w = window.innerWidth;
       STATE.h = window.innerHeight;
       STATE.cx = STATE.w / 2;
-      STATE.cy = STATE.h * 0.32;
+      // On a phone the headline block eats the bottom third, so the lotus sits
+      // lower than on a desktop to centre it in the space it actually has
+      // rather than leaving a band of empty black under the reflection.
+      STATE.cy = STATE.h * (STATE.h > STATE.w ? 0.355 : 0.32);
 
       canvas.width = Math.floor(STATE.w * STATE.dpr);
       canvas.height = Math.floor(STATE.h * STATE.dpr);
       ctx.setTransform(STATE.dpr, 0, 0, STATE.dpr, 0, 0);
 
-      // Compact, elegant scale (Smaller as requested)
+      // The lotus is sized against whichever dimension actually constrains it:
+      // the width on a phone held upright, the shorter side anywhere else. The
+      // old minDim/880 formula took the width on a portrait phone and the
+      // height on a desktop, so the same expression meant two different things
+      // and the lotus came out about a third of its intended size on mobile.
       const minDim = Math.min(STATE.w, STATE.h);
-      STATE.scale = clamp(minDim / 880, 0.72, 1.12);
+      const portrait = STATE.h > STATE.w;
+      // Portrait is bounded by both edges: the width, and the height left over
+      // once the headline block has taken the bottom third. The height term
+      // only bites on short screens (a 360x640 Android), where sizing off the
+      // width alone ran the reflection into the headline.
+      // Landscape gets the same treatment against the headline block, which is
+      // roughly 250px tall there. On a full desktop this never bites (1080px of
+      // height allows a larger lotus than the width rule asks for), so big
+      // screens look exactly as before; it only rescues short laptop windows.
+      const targetRadius = portrait
+        ? Math.min(STATE.w * 0.46, STATE.h * 0.21)
+        : Math.max(110, Math.min(minDim * 0.425, STATE.h * 0.68 - 250));
+      STATE.scale = clamp(targetRadius / (minDim * 0.38), 0.72, 1.30);
+
+      // Sparkle sprites are drawn at a fixed pixel size, so a smaller lotus
+      // packs them tighter and additive blending burns the petals out to flat
+      // white. Scale them with the lotus, against the desktop radius they were
+      // tuned at, so a phone gets the same picture rather than a brighter one.
+      // Not a straight ratio: a phone's lotus is physically small, so sparkles
+      // scaled strictly in proportion thin out into faint specks. The gentle
+      // curve keeps them a shade fatter than proportional on small screens --
+      // bright enough to read as petals -- while leaving desktop untouched.
+      STATE.sparkleScale = clamp(Math.pow(logoRadius() / 460, 0.72), 0.44, 1);
 
       bloomCanvas.width = Math.max(160, Math.floor(STATE.w / 4));
       bloomCanvas.height = Math.max(120, Math.floor(STATE.h / 4));
@@ -838,7 +868,7 @@
         const spriteKey = spriteKeyFor(s.colorType);
         const sprite = STATE.sprites[spriteKey];
         const orangeBoost = s.colorType === 'orange' ? 1.18 : 1;
-        const renderSize = s.size * 23.04 * p.scale * (0.88 + p.depthNorm * 0.08) * orangeBoost;
+        const renderSize = s.size * 23.04 * p.scale * STATE.sparkleScale * (0.88 + p.depthNorm * 0.08) * orangeBoost;
 
         ctx.globalAlpha = s.colorType === 'white' ? p.alpha : clamp(p.alpha * 1.18, 0, 0.92);
         ctx.drawImage(sprite, p.x - renderSize / 2, p.y - renderSize / 2, renderSize, renderSize);
@@ -849,7 +879,7 @@
             ? STATE.sprites.emeraldFlare
             : STATE.sprites.forestFlare;
 
-          const flareSize = 48 * p.scale * s.flareScale * (0.8 + p.depthNorm * 0.3);
+          const flareSize = 48 * p.scale * STATE.sparkleScale * s.flareScale * (0.8 + p.depthNorm * 0.3);
           ctx.globalAlpha = clamp(p.alpha * 0.66, 0, 1);
           ctx.drawImage(flareSprite, p.x - flareSize / 2, p.y - flareSize / 2, flareSize, flareSize);
         }

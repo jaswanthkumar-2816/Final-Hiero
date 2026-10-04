@@ -234,55 +234,6 @@
       .welcome-promise span + span::before { margin-right: 14px; }
       .get-started-btn { width: 100%; }
     }
-
-    /* Below-the-fold content. Quiet by design: the splash is still the first
-       impression, this is what search engines and screen readers read. */
-    .seo-copy {
-      position: relative;
-      z-index: 2;
-      background: #000;
-      border-top: 1px solid rgba(255,255,255,0.08);
-      padding: 72px 20px 88px;
-    }
-    .seo-inner {
-      max-width: 680px;
-      margin-inline: auto;
-      font-family: Charter, 'Bitstream Charter', Georgia, serif;
-    }
-    .seo-inner h2 {
-      font-size: clamp(20px, 3.4vw, 26px);
-      font-weight: 500;
-      color: #fff;
-      margin: 0 0 12px;
-      letter-spacing: -0.01em;
-      text-wrap: balance;
-    }
-    .seo-inner h2 + p { margin-bottom: 40px; }
-    .seo-inner p {
-      font-size: 16px;
-      line-height: 1.65;
-      color: rgba(255,255,255,0.68);
-      margin: 0;
-    }
-    .seo-links {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px 14px;
-      margin-top: 8px;
-      padding-top: 28px;
-      border-top: 1px solid rgba(255,255,255,0.08);
-    }
-    .seo-links a {
-      color: #07e219;
-      text-decoration: none;
-      font-size: 14.5px;
-      border: 1px solid rgba(7,226,25,0.35);
-      border-radius: 100px;
-      padding: 7px 16px;
-    }
-    .seo-links a:hover,
-    .seo-links a:focus-visible { background: rgba(7,226,25,0.12); }
-    @media (max-width: 520px) { .seo-copy { padding: 52px 18px 64px; } }
   </style>
   <script src="lotus_points.js"></script>
 </head>
@@ -302,37 +253,6 @@
     </p>
     <button type="button" class="get-started-btn" onclick="window.location.href='/get-started'">Get Started</button>
   </div>
-
-  <!-- Real content below the fold: the splash alone gave search engines a single
-       headline to index. Visible to everyone, not hidden from crawlers. -->
-  <section class="seo-copy">
-    <div class="seo-inner">
-      <h2>Practise the interview before it counts</h2>
-      <p>
-        Hiero runs a spoken mock interview that adapts to how you answer. When a reply is
-        vague it asks for the numbers behind it; when it is strong it pushes further into
-        trade-offs and failure modes. Questions start approachable and get harder as you go.
-      </p>
-
-      <h2>Know exactly where you lost marks</h2>
-      <p>
-        Every session ends with a scored report: your answers question by question, what was
-        missing from each, and a recording you can replay to hear how you actually sounded.
-      </p>
-
-      <h2>A resume that survives the filter</h2>
-      <p>
-        Upload the resume you already have. Hiero reads it, keeps your real projects, dates and
-        metrics, and rebuilds it into an ATS-ready PDF you can send the same day.
-      </p>
-
-      <nav class="seo-links" aria-label="Main sections">
-        <a href="/mock-interview">Mock interview</a>
-        <a href="/resume-builder.html">Resume builder</a>
-        <a href="/get-started">Get started</a>
-      </nav>
-    </div>
-  </section>
 
   <script src="hiero-astra-engine.js"></script>
 </body>
