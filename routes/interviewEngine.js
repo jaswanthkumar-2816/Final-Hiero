@@ -1540,8 +1540,15 @@ Return ONLY the structured JSON object.`;
             // silence is a broken interview, so we never spend longer than this
             // across all models and retries combined — we fall back to a verified
             // question instead. Observed worst case before this guard: 80s.
-            const TOTAL_BUDGET_MS = Number(process.env.INTERVIEW_QGEN_BUDGET_MS || 7000);
-            const PER_MODEL_MS = Number(process.env.INTERVIEW_QGEN_MODEL_MS || 4000);
+            // Measured on real sessions: a successful generation takes 2.0-6.4s
+            // against a ~7k character prompt. A 4s per-model cap was killing
+            // requests that would have succeeded, so every question in a long
+            // interview fell back to a canned template — the candidate got the
+            // same probe reworded instead of a real question. The budget now
+            // covers the observed range, and the hard ceiling still prevents
+            // the 80s hang this guard was added for.
+            const TOTAL_BUDGET_MS = Number(process.env.INTERVIEW_QGEN_BUDGET_MS || 14000);
+            const PER_MODEL_MS = Number(process.env.INTERVIEW_QGEN_MODEL_MS || 8000);
             const genDeadline = Date.now() + TOTAL_BUDGET_MS;
 
             for (const model of candidateModels) {

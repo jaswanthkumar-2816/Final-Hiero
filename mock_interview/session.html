@@ -4409,7 +4409,10 @@
           headers,
           body: JSON.stringify({
             sessionId: window.sessionId,
-            context: window.userContext
+            context: window.userContext,
+            // Chosen on the setup page; the server validates it and falls back
+            // to the default if it is missing or unknown.
+            voiceId: localStorage.getItem('hiero_voice_id') || undefined
           })
         });
 

@@ -1301,7 +1301,26 @@
                 onclick="setDuration(15)">
                 <i class="far fa-clock" style="margin-right:6px;"></i> 15 Minutes
               </button>
+  
+
+
+          <!-- Interviewer voice. The backend has supported a per-session voice
+               since /api/interview/voices; there was no way to choose one. -->
+          <div style="margin-top:26px;">
+            <p style="font-size:0.85rem;color:var(--muted);margin-bottom:12px;font-weight:600;letter-spacing:0.5px;">
+              INTERVIEWER VOICE</p>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+              <select id="voice-select"
+                style="background:rgba(255,255,255,0.02);border:1px solid var(--border);padding:12px 16px;border-radius:12px;color:#fff;font-size:0.9rem;min-width:230px;cursor:pointer;">
+                <option value="">Loading voices&hellip;</option>
+              </select>
+              <button type="button" id="voice-preview-btn" onclick="previewVoice()"
+                style="background:rgba(9,192,6,0.12);border:1px solid rgba(9,192,6,0.4);padding:12px 20px;border-radius:12px;color:var(--g);font-size:0.85rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;">
+                <i class="fas fa-play"></i> <span id="voice-preview-label">Hear it</span>
+              </button>
             </div>
+            <p id="voice-hint" style="font-size:0.78rem;color:var(--muted);margin-top:8px;">Pick the voice that will interview you.</p>
+          </div>
           </div>
 
           <!-- CTA -->
@@ -3610,6 +3629,73 @@ Key Requirements:
       btn.innerHTML = oldText;
       goTo(2);
     }
+
+    // ── INTERVIEWER VOICE ───────────────────────────────────────────────
+    // /api/interview/voices has existed since per-session voices were added;
+    // nothing in the UI ever called it, so everyone got the default.
+    let voicePreviewAudio = null;
+
+    async function loadVoices() {
+      const sel = document.getElementById('voice-select');
+      if (!sel) return;
+      try {
+        const res = await fetch('/api/interview/voices');
+        const data = await res.json();
+        if (!data.success || !Array.isArray(data.voices)) throw new Error('no voices');
+
+        const saved = localStorage.getItem('hiero_voice_id') || data.defaultVoice;
+        sel.innerHTML = data.voices.map(v =>
+          `<option value="${v.id}"${v.id === saved ? ' selected' : ''}>` +
+          `${v.name} — ${v.gender === 'female' ? 'Female' : 'Male'}, ${v.accent} · ${v.description}` +
+          `</option>`
+        ).join('');
+
+        window.selectedVoiceId = sel.value;
+        sel.addEventListener('change', () => {
+          window.selectedVoiceId = sel.value;
+          localStorage.setItem('hiero_voice_id', sel.value);
+          const hint = document.getElementById('voice-hint');
+          if (hint) hint.textContent = 'Press "Hear it" to preview this voice.';
+        });
+      } catch (e) {
+        sel.innerHTML = '<option value="">Default voice</option>';
+        console.warn('Voice list unavailable:', e);
+      }
+    }
+
+    async function previewVoice() {
+      const sel = document.getElementById('voice-select');
+      const label = document.getElementById('voice-preview-label');
+      const hint = document.getElementById('voice-hint');
+      if (!sel || !sel.value) return;
+
+      if (voicePreviewAudio) { try { voicePreviewAudio.pause(); } catch (e) {} }
+      if (label) label.textContent = 'Loading…';
+
+      try {
+        const res = await fetch('/api/interview/tts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            text: 'Hello, thanks for joining. Tell me a little about your recent work.',
+            voice: sel.value
+          })
+        });
+        const data = await res.json();
+        if (!data.success || !data.audio_url) throw new Error(data.error || 'no audio');
+
+        voicePreviewAudio = new Audio(data.audio_url);
+        voicePreviewAudio.onended = () => { if (label) label.textContent = 'Hear it'; };
+        await voicePreviewAudio.play();
+        if (label) label.textContent = 'Playing…';
+        if (hint) hint.textContent = 'This is the voice that will interview you.';
+      } catch (e) {
+        if (label) label.textContent = 'Hear it';
+        if (hint) hint.textContent = 'Could not play a preview. The interview will still use this voice.';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadVoices);
 
     function setDuration(mins) {
       interviewDuration = mins;
