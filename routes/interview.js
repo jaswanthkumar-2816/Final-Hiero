@@ -308,6 +308,32 @@ router.post('/upload-context', multerUpload.single('resume'), async (req, res) =
 // must use this, otherwise the voice can change between questions.
 const INTERVIEW_VOICE = process.env.DEEPGRAM_TTS_VOICE || 'aura-asteria-en';
 
+/**
+ * Speaks text, retrying once on a transient failure.
+ *
+ * Deepgram occasionally drops the connection mid-request ("socket hang up").
+ * A single failure left that one question silent while every other question
+ * spoke, which reads as the voice cutting out at random. One retry turns a
+ * blip into a short delay instead of a missing voice.
+ */
+async function speak(text, voice) {
+    for (let attempt = 1; attempt <= 2; attempt++) {
+        try {
+            const url = await generateTTSDataUrl(text, voice);
+            if (url) return url;
+            throw new Error('empty audio');
+        } catch (err) {
+            if (attempt === 2) {
+                console.error(`[INTERVIEW] TTS failed after retry (${err.message}) — this question will be silent.`);
+                return null;
+            }
+            console.warn(`[INTERVIEW] TTS attempt ${attempt} failed (${err.message}); retrying.`);
+            await new Promise(r => setTimeout(r, 350));
+        }
+    }
+    return null;
+}
+
 // Selectable interviewer voices (Deepgram Aura). Exposed via
 // GET /api/interview/voices and chosen per session at /start.
 const VOICE_CATALOGUE = [
@@ -501,7 +527,7 @@ router.post('/start', async (req, res) => {
         let audioUrl = null;
         try {
             audioUrl = await Promise.race([
-                generateTTSDataUrl(introSpokenText, session.voiceId || INTERVIEW_VOICE),
+                speak(introSpokenText, session.voiceId || INTERVIEW_VOICE),
                 new Promise((_, reject) => setTimeout(() => reject(new Error('TTS timeout')), 8000))
             ]);
         } catch (ttsErr) {
@@ -616,7 +642,7 @@ router.post('/answer', async (req, res) => {
 
                 let clarifyAudio = null;
                 try {
-                    clarifyAudio = await generateTTSDataUrl(rephrased, voiceFor(session));
+                    clarifyAudio = await speak(rephrased, voiceFor(session));
                 } catch (ttsErr) {
                     console.warn('[INTERVIEW] Clarify TTS failed:', ttsErr.message);
                 }
@@ -765,7 +791,7 @@ router.post('/answer', async (req, res) => {
         // the greeting.
         let audioUrl = null;
         try {
-            audioUrl = await generateTTSDataUrl(nextQuestion.questionText, voiceFor(session));
+            audioUrl = await speak(nextQuestion.questionText, voiceFor(session));
         } catch (ttsErr) {
             console.error('[INTERVIEW] Question TTS FAILED (client will use browser voice):', ttsErr.message);
         }
@@ -882,7 +908,7 @@ router.post('/voice-turn', videoUpload.fields([{ name: 'audio', maxCount: 1 }, {
 
                 let clarifyAudio = null;
                 try {
-                    clarifyAudio = await generateTTSDataUrl(rephrased, voiceFor(session));
+                    clarifyAudio = await speak(rephrased, voiceFor(session));
                 } catch (ttsErr) {
                     console.warn('[INTERVIEW] Clarify TTS failed:', ttsErr.message);
                 }
@@ -1066,7 +1092,7 @@ router.post('/voice-turn', videoUpload.fields([{ name: 'audio', maxCount: 1 }, {
 
         let audioUrl = null;
         try {
-            audioUrl = await generateTTSDataUrl(nextQuestion.questionText, voiceFor(session));
+            audioUrl = await speak(nextQuestion.questionText, voiceFor(session));
         } catch (ttsErr) {
             console.error('[INTERVIEW] Voice-turn TTS FAILED (client will use browser voice):', ttsErr.message);
         }
@@ -1157,7 +1183,7 @@ router.post('/chat', async (req, res) => {
 
             let audioUrl = null;
             try {
-                audioUrl = await generateTTSDataUrl(nextQ.questionText, voiceFor(session));
+                audioUrl = await speak(nextQ.questionText, voiceFor(session));
             } catch (ttsErr) {
                 console.error('[INTERVIEW] Question TTS FAILED (client will use browser voice):', ttsErr.message);
             }

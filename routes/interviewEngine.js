@@ -861,6 +861,22 @@ const PROBE_DIRECTIVES = new Set([
  * the directive — a candidate who waffled got a textbook question instead of
  * being pushed. These templates are deterministic and instant.
  */
+/** Picks deterministically from options, so the same answer never yields two
+ *  different probes, but different answers vary the wording. */
+function pick(options, seed) {
+    let h = 0;
+    const str = String(seed || '');
+    for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
+    return options[h % options.length];
+}
+
+/** The most concrete technical noun in the answer, to anchor a probe to it. */
+function keyNoun(text) {
+    const m = String(text || '').match(SPECIFIC_TERMS);
+    if (!m || !m.length) return null;
+    return m[0].toLowerCase();
+}
+
 function buildDeterministicProbe(directive, previousAnswer = '') {
     const text = String(previousAnswer || '').trim();
 
@@ -872,18 +888,64 @@ function buildDeterministicProbe(directive, previousAnswer = '') {
     switch (directive) {
         case 'CHALLENGE_CLAIM':
             return quoted
-                ? `You said it was "${quoted}" — I need to put a number on that. What was the measurement before, and what did it become after?`
-                : `That sounds like a meaningful improvement. What was the measurement before, and what did it become after?`;
-        case 'PROBE_FOR_SPECIFICS':
-            return `Let's get concrete on that. Which specific part did you change, and what did you use to do it?`;
+                ? pick([
+                    `You said it was "${quoted}" — I need a number on that. What was it before, and what did it become?`,
+                    `"${quoted}" is doing a lot of work there. Give me the before and after.`,
+                    `Put a figure on "${quoted}" for me — what moved, and by how much?`
+                  ], text)
+                : pick([
+                    `That sounds like a meaningful improvement. What was it before, and what did it become?`,
+                    `How did you know it worked? What did you measure?`,
+                    `Give me the number behind that — before and after.`
+                  ], text);
+        case 'PROBE_FOR_SPECIFICS': {
+            const topic = keyNoun(text);
+            return topic
+                ? pick([
+                    `Let's get concrete on the ${topic} part. What exactly did you change?`,
+                    `Walk me through the ${topic} implementation — what did you actually build?`,
+                    `How did you set up the ${topic} side of that, specifically?`
+                  ], text)
+                : pick([
+                    `Let's get concrete. Which part did you change, and what did you use?`,
+                    `What did that look like in practice — what did you actually build?`,
+                    `Take me into the detail. What was the mechanism?`
+                  ], text);
+        }
         case 'PROBE_FOR_OWNERSHIP':
-            return `I want to understand your part in that. Were you hands-on implementing it, or closer to the design and review side?`;
-        case 'FOLLOW_UP_CLARIFY':
-            return `Could you expand on that with a specific example from your own work?`;
+            return pick([
+                `I want to understand your part in that. Were you hands-on, or closer to the design side?`,
+                `Was that your work, or were you reviewing someone else's?`,
+                `How much of that did you write yourself?`
+              ], text);
+        case 'FOLLOW_UP_CLARIFY': {
+            // Vary the wording and anchor it to what they actually said. The
+            // same sentence twice in one interview reads as a broken script.
+            const topic = keyNoun(text);
+            const options = topic
+                ? [
+                    `Say more about the ${topic} part — what did you actually do there?`,
+                    `Take me through the ${topic} side of that in a bit more detail.`,
+                    `That's a start. Walk me through how the ${topic} piece worked.`
+                  ]
+                : [
+                    `Could you expand on that with a specific example from your own work?`,
+                    `Give me a bit more — what did that look like day to day?`,
+                    `Take me a level deeper on that one.`
+                  ];
+            return pick(options, text);
+        }
         case 'REDIRECT_RAMBLING':
             return `Let me stop you there — in one sentence, what was the actual bottleneck you were solving?`;
-        case 'FOLLOW_UP_DEEPEN':
-            return `Good, that's specific. Now take it further: what breaks first if that system sees ten times the traffic?`;
+        case 'FOLLOW_UP_DEEPEN': {
+            const topic = keyNoun(text);
+            return pick([
+                `Good, that's specific. What breaks first if that sees ten times the traffic?`,
+                topic ? `Solid. Where does ${topic} fall over under real load?`
+                      : `Solid. Where does that design fall over under real load?`,
+                `Right. What's the failure mode you'd worry about there?`
+              ], text);
+        }
         default:
             return null;
     }
@@ -927,7 +989,12 @@ function analyzeAnswerSubstance(answerText = '', evaluationScore = null) {
     // Fluent but empty: enough words to pass the old check, nothing concrete in it.
     const isVague = wordCount >= 10 && specificCount === 0 && !hasMetrics;
 
-    const isTooShort = wordCount < 10;
+    // A short answer is only weak if it is also empty of content. Spoken
+    // technical answers are dense: "Blue-green deploys behind nginx with p99
+    // rollback" is 8 words and complete. Judging on length alone flagged real
+    // answers as too short and fired a generic clarify probe at them.
+    const isTooShort = wordCount < 10 && specificCount === 0 && !hasMetrics;
+    const isTerse = wordCount < 5;   // "Yeah." / "Redis." — genuinely nothing to assess
 
     // Repeated hedging with little concrete detail: the candidate is describing
     // something they did not actually do, or cannot recall.
@@ -936,7 +1003,7 @@ function analyzeAnswerSubstance(answerText = '', evaluationScore = null) {
     // Ordered by what a human interviewer would react to first. A bold claim
     // with no evidence outranks general vagueness — it is the more useful probe.
     let substance = 'SOLID';
-    if (isTooShort) substance = 'TOO_SHORT';
+    if (isTerse || isTooShort) substance = 'TOO_SHORT';
     else if (hasUnsupportedClaim) substance = 'UNSUPPORTED_CLAIM';
     else if (isHedged) substance = 'HEDGED';
     else if (isVague) substance = 'VAGUE';
@@ -961,6 +1028,7 @@ function analyzeAnswerSubstance(answerText = '', evaluationScore = null) {
         isVague,
         isHedged,
         isTooShort,
+        isTerse,
         substance
     };
 }
