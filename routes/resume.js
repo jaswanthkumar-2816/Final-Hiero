@@ -436,11 +436,25 @@ router.post('/download-resume', async (req, res) => {
 			// Preferred render path (matches HTML template output)
 			pdfBuffer = await generatePuppeteerPDF(data, templateId);
 			res.setHeader('X-Render-Engine', 'puppeteer');
+			res.setHeader('X-Template-Applied', 'true');
 		} catch (puppeteerErr) {
 			// Cloud/runtime fallback: still return PDF instead of 500.
-			console.error('Download Puppeteer failed, falling back to PDFKit:', puppeteerErr.message || puppeteerErr);
+			// This fallback is NOT equivalent — PDFKit draws a generic layout and
+			// ignores the HTML templates entirely, so the user gets a PDF that
+			// looks nothing like the template they chose. It was silent, which is
+			// why templates could look right locally and wrong in production for
+			// a long time. Make it unmissable in the logs.
+			console.error('='.repeat(72));
+			console.error('[RESUME] PUPPETEER UNAVAILABLE — falling back to PDFKit.');
+			console.error('[RESUME] The chosen template WILL NOT be applied. Reason:', puppeteerErr.message || puppeteerErr);
+			console.error('[RESUME] Fix: ensure Chrome is installed on this host');
+			console.error('[RESUME]      (npx puppeteer browsers install chrome) or set');
+			console.error('[RESUME]      PUPPETEER_EXECUTABLE_PATH to an existing browser.');
+			console.error('='.repeat(72));
 			pdfBuffer = await generatePDFKitBuffer(data, templateId);
 			res.setHeader('X-Render-Engine', 'pdfkit');
+			res.setHeader('X-Template-Applied', 'false');
+			res.setHeader('X-Render-Warning', 'Chrome unavailable; template not applied');
 		}
 		res.setHeader('Content-Type', 'application/pdf');
 		res.setHeader('Content-Disposition', `attachment; filename="${resumeFileName(data, 'pdf')}"`);
