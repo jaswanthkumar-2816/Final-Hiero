@@ -25,6 +25,14 @@ const {
     evaluateCandidateAnswer,
     generateSessionScorecard
 } = require('./interviewEngine');
+const {
+    buildPanel,
+    memberForQuestion,
+    panelIntroLine,
+    openerFor,
+    publicMember,
+    publicPanel
+} = require('./interviewPanel');
 
 // ─────────────────────────────────────────────
 // Multer Configuration (Memory storage)
@@ -351,10 +359,74 @@ const VOICE_CATALOGUE = [
 ];
 const VALID_VOICE_IDS = new Set(VOICE_CATALOGUE.map(v => v.id));
 
-/** The voice for a session: its own choice if valid, otherwise the default. */
-function voiceFor(session) {
+/**
+ * The voice for a given moment in a session.
+ *
+ * On a panel session the voice belongs to whoever owns the question, so a
+ * follow-up or a rephrasing stays with the member who asked — you are never
+ * handed to someone else mid-thought. Sessions started before the panel
+ * existed, and any session with the panel disabled, keep their single voice.
+ */
+function voiceFor(session, question) {
+    const panel = session && session.panel;
+    if (panel && panel.length) {
+        const qIndex = session.currentQuestionIndex || 1;
+        const q = question || (session.questions || [])[qIndex - 1];
+
+        // Whoever asked it owns it. Recorded at ask time, so a rephrasing or a
+        // replay can never come back in a different voice than the question.
+        if (q && q.askedBy) {
+            const owner = panel.find(m => m.id === q.askedBy);
+            if (owner && owner.voiceId) return owner.voiceId;
+        }
+
+        const member = memberForQuestion(panel, q, qIndex, {
+            seen: session.speakersSeen || [],
+            questionLimit: session.questionLimit
+        });
+        if (member && member.voiceId) return member.voiceId;
+    }
     const v = session && session.voiceId;
     return (v && VALID_VOICE_IDS.has(v)) ? v : INTERVIEW_VOICE;
+}
+
+/**
+ * Works out who asks `question`, what they say before it, and in which voice.
+ *
+ * Mutates the session's speaker bookkeeping (who spoke last, who has already
+ * introduced themselves), so it must be called BEFORE the session is saved.
+ */
+function speakAs(session, question, questionIndex) {
+    const panel = session && session.panel;
+    if (!panel || !panel.length) {
+        return {
+            member: null,
+            voice: voiceFor(session, question),
+            spokenText: (question && question.questionText) || ''
+        };
+    }
+
+    const member = memberForQuestion(panel, question, questionIndex, {
+        seen: session.speakersSeen || [],
+        questionLimit: session.questionLimit
+    });
+    const previous = session.lastSpeakerId
+        ? panel.find(m => m.id === session.lastSpeakerId)
+        : null;
+    const seen = new Set(session.speakersSeen || []);
+
+    const opener = openerFor({ member, previousMember: previous, seenIds: seen, questionIndex });
+
+    seen.add(member.id);
+    session.speakersSeen = Array.from(seen);
+    session.lastSpeakerId = member.id;
+    if (question) question.askedBy = member.id;
+
+    return {
+        member,
+        voice: member.voiceId,
+        spokenText: opener + ((question && question.questionText) || '')
+    };
 }
 
 router.post('/start', async (req, res) => {
@@ -509,10 +581,13 @@ router.post('/start', async (req, res) => {
             timerStartedAt: null,
             status: 'INTRODUCTION',
             voiceId: (req.body && VALID_VOICE_IDS.has(req.body.voiceId)) ? req.body.voiceId : INTERVIEW_VOICE,
+            // Three interviewers, one per question, routed by the question's
+            // category. Opt out with panel:false for the old single-voice run.
+            panel: (req.body && req.body.panel === false) ? [] : buildPanel(questionLimit),
+            lastSpeakerId: '',
+            speakersSeen: [],
             createdAt: new Date()
         };
-
-        await saveSessionToStore(session);
 
         console.log(`[INTERVIEW] Session created: ${sessionId} | Duration: ${duration}m (${durationSeconds}s) | Limit: ${questionLimit} Qs | Status: INTRODUCTION`);
 
@@ -522,13 +597,28 @@ router.post('/start', async (req, res) => {
         // longer intro silently produced null — the client then fell back to
         // the browser voice for the intro and switched to the Deepgram voice
         // from question 2 onward, which is the voice change candidates heard.
-        const introSpokenText = `Hello ${resumeSnapshot.fullName || 'Candidate'}, welcome to your interview for the ${jobRole} position at ${companyName}. Take a deep breath and make yourself comfortable. ${question1.questionText}`;
+        // On a panel session the greeting names everyone in the room. This is
+        // what makes a later voice change read as the panel working rather than
+        // as a glitch, which is how an unannounced change was read before.
+        let introSpokenText;
+        let introTurn = null;
+        if (session.panel && session.panel.length) {
+            introTurn = speakAs(session, question1, 1);
+            introSpokenText = panelIntroLine(
+                session.panel, resumeSnapshot.fullName, jobRole, companyName
+            ) + `So, to start — ${question1.questionText}`;
+        } else {
+            introSpokenText = `Hello ${resumeSnapshot.fullName || 'Candidate'}, welcome to your interview for the ${jobRole} position at ${companyName}. Take a deep breath and make yourself comfortable. ${question1.questionText}`;
+        }
+
+        // Saved after speakAs, which records who is speaking first.
+        await saveSessionToStore(session);
 
         let audioUrl = null;
         try {
             audioUrl = await Promise.race([
-                speak(introSpokenText, session.voiceId || INTERVIEW_VOICE),
-                new Promise((_, reject) => setTimeout(() => reject(new Error('TTS timeout')), 8000))
+                speak(introSpokenText, introTurn ? introTurn.voice : (session.voiceId || INTERVIEW_VOICE)),
+                new Promise((_, reject) => setTimeout(() => reject(new Error('TTS timeout')), 20000))
             ]);
         } catch (ttsErr) {
             console.warn('[INTERVIEW] Intro TTS failed; client will retry server TTS:', ttsErr.message);
@@ -548,6 +638,9 @@ router.post('/start', async (req, res) => {
             audio_url: audioUrl,
             reply: introSpokenText,
             question: question1,
+            panel: publicPanel(session.panel),
+            interviewer: introTurn ? publicMember(introTurn.member) : null,
+            voiceId: introTurn ? introTurn.voice : (session.voiceId || INTERVIEW_VOICE),
             session: {
                 sessionId,
                 companyName,
@@ -642,7 +735,7 @@ router.post('/answer', async (req, res) => {
 
                 let clarifyAudio = null;
                 try {
-                    clarifyAudio = await speak(rephrased, voiceFor(session));
+                    clarifyAudio = await speak(rephrased, voiceFor(session, currentQObj));
                 } catch (ttsErr) {
                     console.warn('[INTERVIEW] Clarify TTS failed:', ttsErr.message);
                 }
@@ -659,6 +752,10 @@ router.post('/answer', async (req, res) => {
                     reply: rephrased,
                     question: { ...currentQObj, questionText: rephrased },
                     audio_url: clarifyAudio,
+                    voiceId: voiceFor(session, currentQObj),
+                    interviewer: publicMember(
+                        (session.panel || []).find(m => m.id === session.lastSpeakerId) || null
+                    ),
                     currentQuestionIndex: currentQIndex,
                     questionLimit: session.questionLimit,
                     remainingSeconds: typeof remainingSeconds !== 'undefined' ? remainingSeconds : undefined,
@@ -782,16 +879,20 @@ router.post('/answer', async (req, res) => {
             );
         }
 
+        // Who asks this one, and what they say before it. Runs before the save
+        // because it records the speaker on the session.
+        const turn = speakAs(session, nextQuestion, session.currentQuestionIndex);
+
         await saveSessionToStore(session);
 
-        // Speak the next question in the SAME voice as the intro. This route
-        // returned no audio at all, so only /start and /voice-turn produced
-        // Deepgram speech — every question in the text path fell back to the
-        // browser voice, which is why the interviewer's voice changed after
-        // the greeting.
+        // Speak the next question in its owner's voice. This route returned no
+        // audio at all once, so only /start and /voice-turn produced Deepgram
+        // speech — every question in the text path fell back to the browser
+        // voice, which is why the interviewer's voice changed after the
+        // greeting.
         let audioUrl = null;
         try {
-            audioUrl = await speak(nextQuestion.questionText, voiceFor(session));
+            audioUrl = await speak(turn.spokenText, turn.voice);
         } catch (ttsErr) {
             console.error('[INTERVIEW] Question TTS FAILED (client will use browser voice):', ttsErr.message);
         }
@@ -808,9 +909,11 @@ router.post('/answer', async (req, res) => {
             timerStartedAt: session.timerStartedAt,
             question: nextQuestion,
             nextQuestion: nextQuestion,
-            reply: nextQuestion.questionText,
+            reply: turn.spokenText,
             audio_url: audioUrl,
-            voiceId: voiceFor(session),
+            voiceId: turn.voice,
+            interviewer: publicMember(turn.member),
+            panel: publicPanel(session.panel),
             answerStatus,
             coaching
         });
@@ -908,7 +1011,7 @@ router.post('/voice-turn', videoUpload.fields([{ name: 'audio', maxCount: 1 }, {
 
                 let clarifyAudio = null;
                 try {
-                    clarifyAudio = await speak(rephrased, voiceFor(session));
+                    clarifyAudio = await speak(rephrased, voiceFor(session, currentQObj));
                 } catch (ttsErr) {
                     console.warn('[INTERVIEW] Clarify TTS failed:', ttsErr.message);
                 }
@@ -925,6 +1028,10 @@ router.post('/voice-turn', videoUpload.fields([{ name: 'audio', maxCount: 1 }, {
                     reply: rephrased,
                     question: { ...currentQObj, questionText: rephrased },
                     audio_url: clarifyAudio,
+                    voiceId: voiceFor(session, currentQObj),
+                    interviewer: publicMember(
+                        (session.panel || []).find(m => m.id === session.lastSpeakerId) || null
+                    ),
                     currentQuestionIndex: currentQIndex,
                     questionLimit: session.questionLimit,
                     remainingSeconds: typeof remainingSeconds !== 'undefined' ? remainingSeconds : undefined,
@@ -1088,11 +1195,13 @@ router.post('/voice-turn', videoUpload.fields([{ name: 'audio', maxCount: 1 }, {
         });
 
         session.questions.push(nextQuestion);
+
+        const turn = speakAs(session, nextQuestion, session.currentQuestionIndex);
         await saveSessionToStore(session);
 
         let audioUrl = null;
         try {
-            audioUrl = await speak(nextQuestion.questionText, voiceFor(session));
+            audioUrl = await speak(turn.spokenText, turn.voice);
         } catch (ttsErr) {
             console.error('[INTERVIEW] Voice-turn TTS FAILED (client will use browser voice):', ttsErr.message);
         }
@@ -1107,7 +1216,10 @@ router.post('/voice-turn', videoUpload.fields([{ name: 'audio', maxCount: 1 }, {
             timerStartedAt: session.timerStartedAt,
             audio_url: audioUrl,
             question: nextQuestion,
-            reply: nextQuestion.questionText,
+            reply: turn.spokenText,
+            voiceId: turn.voice,
+            interviewer: publicMember(turn.member),
+            panel: publicPanel(session.panel),
             coaching
         });
 
@@ -1179,20 +1291,24 @@ router.post('/chat', async (req, res) => {
                     s => s.toLowerCase() !== skillLower
                 );
             }
+            const chatTurn = speakAs(session, nextQ, session.currentQuestionIndex);
             await saveSessionToStore(session);
 
             let audioUrl = null;
             try {
-                audioUrl = await speak(nextQ.questionText, voiceFor(session));
+                audioUrl = await speak(chatTurn.spokenText, chatTurn.voice);
             } catch (ttsErr) {
                 console.error('[INTERVIEW] Question TTS FAILED (client will use browser voice):', ttsErr.message);
             }
 
             return res.json({
                 success: true,
-                reply: nextQ.questionText,
+                reply: chatTurn.spokenText,
                 audio_url: audioUrl,
-                question: nextQ
+                question: nextQ,
+                voiceId: chatTurn.voice,
+                interviewer: publicMember(chatTurn.member),
+                panel: publicPanel(session.panel)
             });
         }
 

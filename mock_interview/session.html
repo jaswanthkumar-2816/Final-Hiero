@@ -595,6 +595,146 @@
       to { transform: rotate(0deg); }
     }
 
+
+
+
+
+    /* Answer time limit. Shown only in the final 15s -- a clock running for the
+       whole answer makes people rush ones that were going fine. */
+    .answer-clock {
+      display: none; align-items: center; margin-left: 8px;
+      padding: 2px 9px; border-radius: 999px;
+      background: rgba(251,191,36,.14); border: 1px solid rgba(251,191,36,.42);
+      color: #fcd34d; font-family: ui-monospace, monospace;
+      font-size: 10px; font-weight: 700; letter-spacing: .06em;
+    }
+    .answer-clock.is-urgent {
+      background: rgba(248,113,113,.16); border-color: rgba(248,113,113,.5);
+      color: #fca5a5; animation: clockBlink 1s steps(2, start) infinite;
+    }
+    @keyframes clockBlink { 50% { opacity: .45; } }
+    @media (prefers-reduced-motion: reduce) { .answer-clock.is-urgent { animation: none; } }
+
+    /* ── Interview panel: 9:16 gallery ───────────────────────────────────
+       Laid out like a video call rather than a row of profile pictures: the
+       person speaking is the large tile, the other two sit beside them smaller
+       and desaturated. The dimming carries as much weight as the highlight --
+       it is what makes a voice change read as "Karan is speaking now" instead
+       of as the audio glitching.
+
+       The jaw is driven by the real amplitude envelope of the TTS audio rather
+       than a canned animation, so pauses in the speech show as it settling.
+       True lip-sync would need a talking-head service: 10-40s of generation per
+       question on top of the existing wait, and a per-minute cost on every
+       interview. Not usable live. */
+    .panel-strip { width: 100%; max-width: 640px; margin: 4px auto 14px; text-align: center; }
+    .panel-members {
+      display: flex; justify-content: center; align-items: center;
+      gap: clamp(8px, 2.2vw, 14px);
+    }
+
+    .panel-member {
+      --speak: 0;
+      --tile-w: clamp(62px, 17vw, 78px);
+      --photo-zoom: 1.16;
+      position: relative; flex: 0 0 auto;
+      width: var(--tile-w); aspect-ratio: 9 / 16;
+      border-radius: 14px; overflow: hidden; cursor: default;
+      border: 1px solid rgba(255,255,255,.12);
+      background: #0e1511;
+      opacity: .5; filter: grayscale(.78) brightness(.72);
+      transition: width .5s cubic-bezier(.4,0,.2,1), opacity .45s ease,
+                  filter .45s ease, border-color .45s ease, box-shadow .45s ease;
+    }
+    .panel-member.is-active {
+      --tile-w: clamp(104px, 29vw, 132px);
+      opacity: 1; filter: none;
+      border-color: rgba(50,193,74,.75);
+      box-shadow:
+        0 0 0 calc(2px + var(--speak) * 3px) rgba(50,193,74,calc(.16 + var(--speak) * .2)),
+        0 10px 32px rgba(0,0,0,.45);
+    }
+
+    .panel-face { position: absolute; inset: 0; overflow: hidden; }
+    .panel-face img {
+      width: 100%; height: 100%; object-fit: cover; object-position: center 18%;
+      display: block;
+      /* Framed closer than the source: at tile size the full portrait leaves
+         the face too small to read. Lifts slightly on stressed syllables. */
+      transform: scale(var(--photo-zoom)) translateY(calc(var(--speak) * -1.4px));
+      will-change: transform;
+    }
+
+    /* Jaw.
+       A FULL-SIZE copy of the photo in a clipped wrapper, not a short box with
+       its own background: a short box with `background-size: cover` scales the
+       image to fit that box rather than the tile, so it never lines up with the
+       face underneath and leaves a seam across the chin. Clipping the wrapper
+       and transforming the inner image keeps them identical at rest. Kept small
+       -- past about 5% it stops reading as speech and starts reading as wrong. */
+    .panel-jaw {
+      position: absolute; inset: 0;
+      clip-path: inset(46% 0 0 0);
+      opacity: 0; transition: opacity .3s ease; pointer-events: none;
+    }
+    .panel-jaw img {
+      width: 100%; height: 100%; object-fit: cover; object-position: center 18%;
+      transform-origin: center 46%;
+      transform: scale(var(--photo-zoom)) scaleY(calc(1 + var(--speak) * .05));
+      will-change: transform;
+    }
+    .panel-member.is-speaking .panel-jaw { opacity: 1; }
+
+    /* Name plate, bottom-left, the way a call client does it. */
+    .panel-plate {
+      position: absolute; left: 0; right: 0; bottom: 0; padding: 16px 7px 6px;
+      background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,.85) 58%);
+      text-align: left; pointer-events: none;
+    }
+    .panel-name {
+      font-family: ui-monospace, monospace; font-size: 10px; font-weight: 700;
+      color: #fff; line-height: 1.15;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .panel-role {
+      font-size: 8px; color: rgba(255,255,255,.68); line-height: 1.25; margin-top: 1px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .panel-member:not(.is-active) .panel-role { display: none; }
+
+    /* Live bars in the corner of whoever is talking. */
+    .panel-wave {
+      position: absolute; top: 7px; right: 7px;
+      display: flex; align-items: flex-end; gap: 1.5px; height: 11px;
+      opacity: 0; transition: opacity .3s ease;
+    }
+    .panel-member.is-speaking .panel-wave { opacity: 1; }
+    .panel-wave i {
+      display: block; width: 2px; border-radius: 1px; background: #32c14a;
+      height: calc(2px + var(--speak) * var(--h, 8px));
+      transition: height .08s linear;
+      box-shadow: 0 0 5px rgba(50,193,74,.7);
+    }
+
+    .panel-nowspeaking {
+      margin-top: 10px; min-height: 14px;
+      font-family: ui-monospace, monospace; font-size: 10px; font-weight: 700;
+      letter-spacing: .1em; text-transform: uppercase; color: #64748b;
+    }
+    .panel-nowspeaking b { color: var(--g, #32c14a); font-weight: 700; }
+
+    [data-theme="light"] .panel-member { background: #e2e8f0; border-color: rgba(0,0,0,.12); }
+
+    @media (max-width: 420px) {
+      .panel-member { --tile-w: 58px; }
+      .panel-member.is-active { --tile-w: 92px; }
+      .panel-members { gap: 7px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .panel-member, .panel-wave i { transition: none; }
+      .panel-face img, .panel-jaw img { transform: scale(var(--photo-zoom)) !important; }
+    }
+
     .speaking-pulse {
       animation: orbSpeaking 1.3s ease-in-out infinite alternate;
     }
@@ -1377,7 +1517,7 @@
     </aside>
 
     <!-- CENTER: question + answer -->
-    <section class="col-span-12 lg:col-span-6 flex flex-col items-center justify-start p-4 sm:p-7 overflow-y-auto relative gap-1">
+    <section id="interview-stage" class="col-span-12 lg:col-span-6 flex flex-col items-center justify-start p-4 sm:p-7 overflow-y-auto relative gap-1">
       
       <div class="w-full max-w-2xl flex items-center justify-between mb-3 mt-1">
         <div class="flex items-center gap-2 font-mono text-xs font-bold text-slate-300 uppercase tracking-[0.14em]">
@@ -1392,17 +1532,17 @@
         </div>
       </div>
 
-      <div class="relative my-2 sm:my-3 flex items-center justify-center">
-        <div class="ai-orb-rings"></div>
-        <div class="ai-orb-rings-outer"></div>
-        <div class="ai-orb-core cursor-pointer group" id="voice-orb" onclick="toggleMic()" title="Click to Toggle Microphone">
-          <i class="fa-solid fa-microphone text-primary text-xl group-hover:scale-110 transition-transform"></i>
-        </div>
+      <!-- The panel. Hidden until /start reports one, so a single-voice
+           session (or an older one resumed) is unaffected. -->
+      <div id="panel-strip" class="panel-strip" hidden>
+        <div class="panel-members" id="panel-members"></div>
+        <div class="panel-nowspeaking" id="panel-nowspeaking"></div>
       </div>
 
       <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.12] text-[11px] font-mono font-bold text-slate-200 uppercase tracking-[0.12em] mb-4 shadow-sm backdrop-blur-md">
         <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
         <span id="ai-engine-status">Interviewer ready</span>
+        <span id="answer-clock" class="answer-clock" style="display:none"></span>
       </div>
 
       <div class="w-full max-w-2xl question-hero p-5 sm:p-7 space-y-4 mb-4 text-left">
@@ -2447,6 +2587,7 @@
 
       const thankYouMsg = `Thank you so much for attending this mock interview today, ${candidateName}. You did a commendable job explaining your engineering decisions, structured problem solving, and technical trade-offs for the ${roleTitle} position with ${company}. All interview questions are now concluded, and our AI chamber is compiling your comprehensive performance scorecard and detailed feedback report. Thank you again for your time, and best of luck with your career journey!`;
 
+      scrollStageToTop();
       const whisperEl = document.getElementById('whisper-box');
       if (whisperEl) whisperEl.textContent = 'Interview completed. Compiling executive feedback scorecard...';
       const aiOutEl = document.getElementById('ai-out');
@@ -2464,8 +2605,35 @@
       const submitBtn = document.getElementById('manual-submit-btn');
       if (submitBtn) submitBtn.disabled = true;
 
-      // Speak thank you message via Neural TTS / Web Speech
-      sayAI(thankYouMsg);
+      // Speak the closing remarks.
+      //
+      // This used to call sayAI with no audio URL, which dropped it onto the
+      // browser's Web Speech fallback -- the same unreliable path that made
+      // earlier questions go silent or change voice. Synthesise it server-side
+      // instead, in the voice of whoever closes: the manager on a panel
+      // session, the session's own voice otherwise.
+      (async () => {
+        const panel = window.__panel || [];
+        const closer = panel.find(m => m.id === 'people') || panel[panel.length - 1] || null;
+        if (closer) setActiveSpeaker(closer);
+
+        let closingAudio = null;
+        try {
+          const res = await fetch('/api/interview/tts', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              text: thankYouMsg,
+              voice: closer ? closer.voiceId : (localStorage.getItem('hiero_interviewer') || undefined)
+            })
+          });
+          const data = await res.json();
+          if (data && data.success && data.audio_url) closingAudio = data.audio_url;
+        } catch (e) {
+          console.warn('[WRAPUP] Closing TTS failed; falling back to browser voice:', e);
+        }
+        sayAI(thankYouMsg, closingAudio);
+      })();
 
       // Schedule seamless transition to feedback report (completing between 4:30 - 4:50 / 9:30 - 9:50 / 14:30 - 14:50)
       const wrapupRemainingMs = Math.max(5000, Math.min(18000, (durationSeconds - 10) * 1000));
@@ -3520,6 +3688,7 @@
     };
 
     window.handleManualResponseSubmit = async function() {
+      clearAnswerClock();
       if (autoSubmitTimer) clearTimeout(autoSubmitTimer);
       const inputEl = document.getElementById('candidate-response-input');
       let text = inputEl ? inputEl.value.trim() : '';
@@ -3846,6 +4015,12 @@
         recordedAudioBlob = new Blob(currentQuestionChunks, { type: 'video/webm' });
       }
 
+      // Clear the captured chunks now that they are in the blob. They were only
+      // reset inside startTurnAudioCapture(), which returns early when a
+      // recorder is already running — so a turn could otherwise be submitted
+      // with the previous answer's audio appended to it.
+      turnAudioChunks = [];
+
       previousTurnFinalText = "";
       candidateSpeechAccumulated = "";
       candidateSpeechInterim = "";
@@ -3900,6 +4075,29 @@
             })
           });
           data = await response.json();
+        }
+
+        // A clarification is NOT a failed turn. The server rephrases the
+        // question on the table and sends it back with isRetry set, so the
+        // branch below treated it as "I didn't catch that": the rephrased
+        // question was never spoken and the same question stayed on screen,
+        // then another path spoke it in the browser voice. Handle it first.
+        if (data.clarification && data.answerStatus === 'CLARIFICATION') {
+          applyPanelFrom(data);   // same member rephrasing their own question
+          scrollStageToTop();
+          const rephrased = (data.question && data.question.questionText) || data.reply || '';
+          if (rephrased) {
+            currentQuestion = { ...currentQuestion, questionText: rephrased };
+            renderCurrentQuestion(currentQuestion);
+            appendTranscriptMessage('ai', rephrased);
+            history.push({ role: 'assistant', content: rephrased });
+          }
+          answerSubmitted = false;
+          isGeneratingNextQuestion = false;
+          currentInterviewState = InterviewState.PREPARING_TTS;
+          // Same voice as the rest of the interview — the server supplies it.
+          sayAI(rephrased, data.audio_url);
+          return;
         }
 
         // Handle server retry request (e.g. empty audio)
@@ -3966,6 +4164,11 @@
           answerGuide: nextQ.answerGuide || (nextQ.expectedTopics ? nextQ.expectedTopics.map(t => `Key consideration: ${t}`) : ["Core mechanism", "Trade-offs", "Production practices"]),
           candidateAnswer: ""
         };
+
+        // Light the member who owns this question before it is spoken, so the
+        // face and the voice change together rather than one lagging.
+        applyPanelFrom(data);
+        scrollStageToTop();
 
         // Render next question to UI
         renderCurrentQuestion(currentQuestion);
@@ -4410,13 +4613,34 @@
           body: JSON.stringify({
             sessionId: window.sessionId,
             context: window.userContext,
-            // Chosen on the setup page; the server validates it and falls back
-            // to the default if it is missing or unknown.
-            voiceId: localStorage.getItem('hiero_voice_id') || undefined
+            // Chosen on the setup page. 'panel' (the default) means the
+            // three-interviewer panel; any other value means a single
+            // interviewer in that voice, so the panel is switched off.
+            panel: (localStorage.getItem('hiero_interviewer') || 'panel') === 'panel',
+            voiceId: (() => {
+              const v = localStorage.getItem('hiero_interviewer');
+              return (!v || v === 'panel') ? undefined : v;
+            })()
           })
         });
 
         const data = await response.json();
+
+        // The server issues the authoritative session id — it no longer accepts
+        // a client-supplied one, because a guessable id exposed other
+        // candidates' reports and recordings. Adopt it here, or every later
+        // call (/answer, /voice-turn, recordings, the report link) would point
+        // at a session the server does not have.
+        if (data.sessionId && data.sessionId !== window.sessionId) {
+          console.log('[SESSION] Adopting server session id:', data.sessionId);
+          window.sessionId = data.sessionId;
+          try { sessionStorage.setItem('mockSessionId', data.sessionId); } catch (e) {}
+        }
+
+        // Render the panel before the greeting plays, so the candidate sees who
+        // is in the room while being introduced to them.
+        applyPanelFrom(data);
+
         const serverQ = data.question || {};
 
         currentQuestion = {
@@ -4484,7 +4708,239 @@
     let activeSpeechToken = 0;
 
     // Text to Speech Engine (Deepgram Aura-2 with Web Speech API fallback)
+
+
+
+    /**
+     * Returns the interview column to the top.
+     *
+     * The centre column scrolls independently of the page. After a long answer
+     * the candidate was left part-way down it, so when the next question
+     * arrived the panel and the question itself were above the fold and
+     * nothing brought them back.
+     */
+    function scrollStageToTop(smooth = true) {
+      const behavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        ? 'auto' : (smooth ? 'smooth' : 'auto');
+      const stage = document.getElementById('interview-stage');
+      if (stage && stage.scrollTop > 0) {
+        try { stage.scrollTo({ top: 0, behavior }); } catch (e) { stage.scrollTop = 0; }
+      }
+      // On phones the whole document scrolls instead of the column.
+      if (window.innerWidth < 1024 && window.scrollY > 0) {
+        try { window.scrollTo({ top: 0, behavior }); } catch (e) { window.scrollTo(0, 0); }
+      }
+    }
+
+    // ── Answer time limit ────────────────────────────────────────────────
+    // Auto-submit only fired after a settled pause, so a candidate who kept
+    // talking was never stopped: real answers ran 40-55s and produced 20-35MB
+    // recordings, which then failed transcription and came back as
+    // NO_RESPONSE -- leaving the same question on screen to be answered again.
+    // A real interviewer caps the answer and says so, which is what this does.
+    window.ANSWER_LIMIT_MS = Number(window.ANSWER_LIMIT_MS || 45000);
+    let answerClockTimer = null;
+    let answerClockStarted = 0;
+
+    function clearAnswerClock() {
+      if (answerClockTimer) { clearInterval(answerClockTimer); answerClockTimer = null; }
+      answerClockStarted = 0;
+      const el = document.getElementById('answer-clock');
+      if (el) el.style.display = 'none';
+    }
+
+    function startAnswerClock() {
+      clearAnswerClock();
+      if (interviewTerminated || isEndingSession) return;
+      answerClockStarted = Date.now();
+
+      answerClockTimer = setInterval(() => {
+        if (currentInterviewState !== InterviewState.WAITING_FOR_USER || isSpeaking) return;
+
+        const elapsed = Date.now() - answerClockStarted;
+        const left = Math.ceil((window.ANSWER_LIMIT_MS - elapsed) / 1000);
+        const el = document.getElementById('answer-clock');
+
+        // Only surfaced in the last 15s; a clock running the whole time makes
+        // people rush answers that were going fine.
+        if (el) {
+          if (left <= 15 && left > 0) {
+            el.style.display = 'inline-flex';
+            el.textContent = left <= 5 ? `Wrap up — ${left}s` : `${left}s left`;
+            el.className = 'answer-clock' + (left <= 5 ? ' is-urgent' : '');
+          } else {
+            el.style.display = 'none';
+          }
+        }
+
+        if (elapsed >= window.ANSWER_LIMIT_MS && !window.__autoSubmitting) {
+          window.__autoSubmitting = true;
+          clearAnswerClock();
+
+          const hintEl = document.getElementById('mic-troubleshoot-hint');
+          if (hintEl) {
+            hintEl.className = 'flex items-center gap-1.5 text-amber-400 font-bold';
+            hintEl.innerHTML = '<i class="fa-solid fa-clock text-xs"></i>'
+              + '<span>That is time on this one — taking what you have so far.</span>';
+          }
+          const aiStatus = document.getElementById('ai-engine-status');
+          if (aiStatus) aiStatus.textContent = 'Time — submitting your answer';
+
+          Promise.resolve(window.handleManualResponseSubmit())
+            .catch(e => console.warn('Time-limit submit notice:', e))
+            .finally(() => { window.__autoSubmitting = false; });
+        }
+      }, 500);
+    }
+
+
+    // ── Making the avatar look like it is speaking ───────────────────────
+    // Driven by the real amplitude envelope of the TTS audio rather than a
+    // canned animation, so pauses in the speech show as the jaw settling.
+    let speechCtx = null, speechAnalyser = null, speechRAF = null, speechSourceFor = null;
+
+    function setSpeakLevel(v) {
+      const el = document.querySelector('.panel-member.is-active');
+      if (el) el.style.setProperty('--speak', v.toFixed(3));
+    }
+
+    function attachSpeechAnalyser(audioEl) {
+      if (!audioEl) return;
+      try {
+        if (!speechCtx) speechCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (speechCtx.state === 'suspended') speechCtx.resume().catch(function () {});
+
+        // createMediaElementSource can only be called once per element, and it
+        // reroutes the audio -- so the graph must also reach the speakers or
+        // the interviewer goes silent.
+        if (speechSourceFor === audioEl) return;
+        const src = speechCtx.createMediaElementSource(audioEl);
+        speechAnalyser = speechCtx.createAnalyser();
+        speechAnalyser.fftSize = 256;
+        speechAnalyser.smoothingTimeConstant = 0.55;
+        src.connect(speechAnalyser);
+        speechAnalyser.connect(speechCtx.destination);
+        speechSourceFor = audioEl;
+
+        const buf = new Uint8Array(speechAnalyser.fftSize);
+        let smoothed = 0;
+
+        const tick = function () {
+          if (!speechAnalyser || audioEl.paused || audioEl.ended) {
+            setSpeakLevel(0);
+            speechRAF = null;
+            return;
+          }
+          speechAnalyser.getByteTimeDomainData(buf);
+          let sum = 0;
+          for (let i = 0; i < buf.length; i++) {
+            const d = (buf[i] - 128) / 128;
+            sum += d * d;
+          }
+          const level = Math.min(1, Math.sqrt(sum / buf.length) * 4.2);
+          // Asymmetric smoothing: open fast, close gently, the way a jaw
+          // actually moves. Symmetric smoothing just pulses.
+          smoothed = level > smoothed
+            ? smoothed + (level - smoothed) * 0.55
+            : smoothed + (level - smoothed) * 0.18;
+          setSpeakLevel(smoothed);
+          speechRAF = requestAnimationFrame(tick);
+        };
+        if (speechRAF) cancelAnimationFrame(speechRAF);
+        speechRAF = requestAnimationFrame(tick);
+      } catch (e) {
+        // The analyser is decoration; it must never break playback.
+        console.warn('[AVATAR] Speech analyser unavailable:', e && e.message);
+      }
+    }
+
+    function stopSpeechAnalyser() {
+      if (speechRAF) { cancelAnimationFrame(speechRAF); speechRAF = null; }
+      setSpeakLevel(0);
+    }
+
+    // ── Interview panel ──────────────────────────────────────────────────
+    // Three interviewers, one per question, routed server-side by the
+    // question's category. The client only reflects what the server says: it
+    // never decides who is speaking, so the face and the voice cannot drift
+    // apart.
+    window.__panel = [];
+    window.__activeSpeakerId = null;
+
+    function renderPanel(panel) {
+      const strip = document.getElementById('panel-strip');
+      const host = document.getElementById('panel-members');
+      if (!strip || !host) return;
+
+      if (!Array.isArray(panel) || !panel.length) {
+        strip.hidden = true;           // single-voice session: nothing to show
+        return;
+      }
+      if (JSON.stringify(panel) === JSON.stringify(window.__panel)) return;
+      window.__panel = panel;
+
+      host.innerHTML = panel.map(m => `
+        <div class="panel-member" data-member="${m.id}" title="${(m.fullName || m.name || '')} — ${(m.role || '')}">
+          <div class="panel-face">
+            <img src="${m.photo}" alt="${m.fullName || m.name || 'Interviewer'}"
+                 onerror="this.style.display='none'">
+            <div class="panel-jaw"><img src="${m.photo}" alt="" aria-hidden="true"></div>
+          </div>
+          <div class="panel-wave" aria-hidden="true">
+            <i style="--h:5px"></i><i style="--h:9px"></i><i style="--h:13px"></i><i style="--h:7px"></i>
+          </div>
+          <div class="panel-plate">
+            <div class="panel-name">${m.fullName || m.name || ''}</div>
+            <div class="panel-role">${m.role || ''}</div>
+          </div>
+        </div>`).join('');
+
+      strip.hidden = false;
+      if (window.__activeSpeakerId) setActiveSpeaker({ id: window.__activeSpeakerId });
+    }
+
+    /** Lights the member who owns the current question. */
+    function setActiveSpeaker(interviewer) {
+      if (!interviewer || !interviewer.id) return;
+      window.__activeSpeakerId = interviewer.id;
+
+      // Held for the speech layer: a retry that does not name the voice comes
+      // back in the server default, and a browser fallback that does not know
+      // the speaker's gender picks whatever the machine offers -- which is how
+      // a female interviewer ended up sounding male on the warm-up question.
+      const full = (window.__panel || []).find(x => x.id === interviewer.id) || interviewer;
+      window.__speakerVoiceId = full.voiceId || null;
+      window.__speakerGender = full.gender || null;
+      window.__hieroFallbackVoice = null;   // re-pick for the new speaker
+
+      document.querySelectorAll('.panel-member').forEach(el => {
+        el.classList.toggle('is-active', el.dataset.member === interviewer.id);
+      });
+
+      const label = document.getElementById('panel-nowspeaking');
+      const m = (window.__panel || []).find(x => x.id === interviewer.id) || interviewer;
+      if (label && m) {
+        label.innerHTML = `<b>${(m.fullName || m.name || '')}</b> &middot; ${m.role || ''}`;
+      }
+    }
+
+    /** The pulse ring follows actual audio playback, not just whose turn it is. */
+    function setPanelSpeaking(on) {
+      const id = window.__activeSpeakerId;
+      document.querySelectorAll('.panel-member').forEach(el => {
+        el.classList.toggle('is-speaking', Boolean(on) && el.dataset.member === id);
+      });
+    }
+
+    /** Pulls panel + interviewer out of any server response that carries them. */
+    function applyPanelFrom(data) {
+      if (!data) return;
+      if (Array.isArray(data.panel) && data.panel.length) renderPanel(data.panel);
+      if (data.interviewer && data.interviewer.id) setActiveSpeaker(data.interviewer);
+    }
+
     async function sayAI(text, audioUrl = null) {
+      window.__lastSpokenText = text;
       if (!text && !audioUrl) return;
       const thisToken = ++activeSpeechToken;
       currentInterviewState = isWarmupPhase ? InterviewState.ASKING : InterviewState.SPEAKING;
@@ -4513,9 +4969,12 @@
       const aiStatus = document.getElementById('ai-engine-status');
       if (aiStatus) aiStatus.textContent = 'Interviewer speaking';
       setMicUi('speaking');
+      setPanelSpeaking(true);
 
       const onPlaybackEnd = () => {
         if (thisToken !== activeSpeechToken) return;
+        stopSpeechAnalyser();
+        setPanelSpeaking(false);
         isSpeaking = false;
         currentInterviewState = InterviewState.WAITING_FOR_USER;
         if (orb) orb.classList.remove('speaking-pulse');
@@ -4525,7 +4984,8 @@
         window.__autoSubmitting = false;
         const aiStatus = document.getElementById('ai-engine-status');
         if (aiStatus) aiStatus.textContent = 'Your turn — speak your answer';
-        
+        startAnswerClock();
+
         // 350ms acoustic grace buffer to avoid capturing audio echoes
         setTimeout(() => {
           if (!isSpeaking && !interviewTerminated) {
@@ -4546,7 +5006,10 @@
             const ttsRes = await fetch('/api/interview/tts', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ text })
+              body: JSON.stringify({
+                text,
+                voice: window.__speakerVoiceId || undefined
+              })
             });
             const ttsData = await ttsRes.json();
             if (thisToken !== activeSpeechToken) return;
@@ -4566,6 +5029,7 @@
       if (targetAudioUrl) {
         try {
           currentAIAudio = new Audio(targetAudioUrl);
+          currentAIAudio.addEventListener('play', function () { attachSpeechAnalyser(currentAIAudio); }, { once: true });
           currentAIAudio.onended = onPlaybackEnd;
           currentAIAudio.onerror = () => {
             if (thisToken !== activeSpeechToken) return;
@@ -4604,14 +5068,28 @@
       // different order as voices load, so re-picking per utterance could
       // change the interviewer's voice between questions.
       if (!window.__hieroFallbackVoice) {
-        const voices = synth.getVoices();
-        if (voices && voices.length > 0) {
-          window.__hieroFallbackVoice = voices.find(v => v.name === 'Samantha')
-            || voices.find(v => v.name.includes('Google') && v.lang.startsWith('en-US'))
-            || voices.find(v => v.name.includes('Natural') && v.lang.startsWith('en'))
-            || voices.find(v => v.lang === 'en-US')
-            || voices.find(v => v.lang && v.lang.startsWith('en'))
-            || null;
+        const voices = synth.getVoices() || [];
+        const en = voices.filter(v => v.lang && v.lang.toLowerCase().startsWith('en'));
+
+        // Match the panel member who is actually speaking. Falling back to
+        // whatever the machine lists first meant a female interviewer could be
+        // read out in a male voice, which reads as the wrong person talking.
+        const FEMALE = ['samantha','karen','moira','tessa','fiona','victoria','zira','aria','jenny','google uk english female','google us english'];
+        const MALE   = ['daniel','alex','fred','oliver','rishi','david','guy','ryan','google uk english male'];
+        const wanted = (window.__speakerGender === 'male') ? MALE : FEMALE;
+        const avoid  = (window.__speakerGender === 'male') ? FEMALE : MALE;
+
+        const byName = (list) => en.find(v => list.some(n => v.name.toLowerCase().includes(n)));
+
+        window.__hieroFallbackVoice =
+             byName(wanted)
+          || en.find(v => !avoid.some(n => v.name.toLowerCase().includes(n)) && v.lang.startsWith('en-US'))
+          || en.find(v => !avoid.some(n => v.name.toLowerCase().includes(n)))
+          || en[0] || null;
+
+        if (window.__hieroFallbackVoice) {
+          console.warn('[VOICE] Deepgram unavailable; using browser voice:',
+            window.__hieroFallbackVoice.name, 'for', window.__speakerGender || 'unknown', 'speaker');
         }
       }
       if (window.__hieroFallbackVoice) utterance.voice = window.__hieroFallbackVoice;
@@ -4628,12 +5106,14 @@
     }
 
     window.replayCurrentQuestion = function() {
-      if (currentSpeechText) {
-        if (liveAudioCtx && liveAudioCtx.state === 'suspended') {
-          liveAudioCtx.resume();
-        }
-        sayAI(currentSpeechText);
+      if (!currentSpeechText) return;
+      if (liveAudioCtx && liveAudioCtx.state === 'suspended') {
+        liveAudioCtx.resume();
       }
+      // Pass the cached Deepgram audio for this question. Calling sayAI with no
+      // URL made Replay fall straight through to the browser voice, so the same
+      // question came back in a different voice from the one interviewing you.
+      sayAI(currentSpeechText, (currentSpeechText === window.__lastSpokenText) ? currentAudioUrl : null);
     };
 
     function skipQuestion() {

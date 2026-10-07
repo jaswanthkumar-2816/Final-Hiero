@@ -12,6 +12,7 @@ const questionSchema = new mongoose.Schema({
     isFollowUp: { type: Boolean, default: false },
     followUpToQuestion: { type: Number, default: null },
     expectedTopics: { type: [String], default: [] },
+    askedBy: { type: String, default: '' },       // panel member id
     askedAt: { type: Date, default: Date.now }
 }, { _id: false });
 
@@ -74,6 +75,25 @@ const interviewSessionSchema = new mongoose.Schema({
         topicsRemaining: { type: [String], default: [] },
         skillsEvaluated: { type: [String], default: [] }
     },
+    // Panel interview: three interviewers, one per question, routed by the
+    // question's category. Stored on the session so names, photos and voices
+    // survive a restart and a reload mid-interview.
+    panel: {
+        type: [{
+            id: { type: String, default: '' },
+            name: { type: String, default: '' },
+            fullName: { type: String, default: '' },
+            role: { type: String, default: '' },
+            domain: { type: String, default: '' },
+            photo: { type: String, default: '' },
+            voiceId: { type: String, default: '' },
+            owns: { type: [String], default: [] }
+        }],
+        default: []
+    },
+    lastSpeakerId: { type: String, default: '' },
+    speakersSeen: { type: [String], default: [] },
+
     currentQuestionIndex: { type: Number, default: 1 },
     questions: { type: [questionSchema], default: [] },
     answers: { type: [answerSchema], default: [] },

@@ -5,7 +5,18 @@
   <meta charset="UTF-8">
   <title>Hiero Mock Interview</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Syne:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap"
+  
+  <!-- App icons. Without these the browser has nothing to use when the site is
+       added to a dock or home screen, and falls back to a screenshot of the page. -->
+  <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192x192.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="apple-mobile-web-app-title" content="Hiero" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Syne:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.10.0/dist/tf.min.js"></script>
@@ -162,6 +173,59 @@
       color: #0f172a;
     }
 
+    /* ─── PHONE ─────────────────────────────────────────────────────────
+       The smallest breakpoint on this page was 680px, so phones got the
+       desktop layout: the nav alone measured 477px in a 390px viewport and
+       content ran off the right edge. These rules keep everything inside
+       the screen and stack the two columns. */
+    @media (max-width: 560px) {
+      html, body { overflow-x: hidden; max-width: 100%; }
+
+      /* Nothing may be wider than the screen. */
+      nav, .nav-normal, .hero, .hero-grid, .panel, .card { max-width: 100% !important; }
+      nav { flex-wrap: wrap; gap: 8px; padding-inline: 14px !important; }
+      .nav-normal { width: 100% !important; min-width: 0 !important; }
+
+      /* The hero is an inline-styled grid with a fixed first column (407px)
+         and 48px side padding — wider than a phone on its own. It carries no
+         class, so it has to be targeted structurally. */
+      .stage > div[style*="grid"],
+      .hero-grid, .split, .two-col {
+        display: block !important;
+        grid-template-columns: 1fr !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        gap: 0 !important;
+      }
+      .stage > div[style*="grid"] > * { max-width: 100% !important; }
+
+      /* The decorative orb column adds height without information on a phone. */
+      .stage > div[style*="grid"] > div:last-child:not(:only-child) { display: none !important; }
+
+      /* Headline that fits a phone. */
+      h1 { font-size: clamp(2rem, 11vw, 2.8rem) !important; line-height: 1.08 !important; }
+
+      /* Cards and boxes: full width, tighter padding. */
+      .card, .panel, .feature-card, .role-box {
+        width: 100% !important; min-width: 0 !important;
+        padding-inline: 16px !important;
+      }
+
+      /* Duration buttons stack rather than squeeze. */
+      #dur-5, #dur-10, #dur-15 {
+        flex: 1 1 100% !important;
+        padding: 13px 10px !important;
+      }
+
+      /* Toast must not sit off-screen. */
+      #warn-toast { left: 12px !important; right: 12px !important; width: auto !important; max-width: calc(100% - 24px) !important; }
+
+      /* Audio-check modal on a small screen. */
+      #voice-verify-modal > div { padding: 20px 16px !important; border-radius: 18px !important; }
+      #voice-select { flex: 1 1 100% !important; }
+      #voice-preview-btn { flex: 1 1 100% !important; justify-content: center; }
+    }
+
     @media (max-width: 680px) {
       .back-to-company-btn {
         top: 52px;
@@ -282,8 +346,10 @@
     /* MAIN */
     .main {
       width: 100%;
-      max-width: 1100px;
-      padding: 80px 20px 40px;
+      /* Was 1100px, which left roughly 450px empty on each side of a wide
+         screen while the content sat squeezed in the middle. */
+      max-width: 1560px;
+      padding: 80px 32px 40px;
       z-index: 1
     }
 
@@ -301,6 +367,10 @@
         grid-template-columns: 1fr !important;
       }
     }
+
+    /* The hero column is wider now; cap running text so lines stay scannable
+       (roughly 70 characters) instead of stretching the full column. */
+    .stage > div[style*="grid"] > div:first-child > p { max-width: 62ch; }
 
     /* STAGES */
     .stage {
@@ -1199,7 +1269,7 @@
     <!-- ── S1: WELCOME ── -->
     <section id="s-welcome" class="stage active" style="padding:0; max-width:100%; align-items:stretch;">
       <div
-        style="display:grid; grid-template-columns:1fr 1fr; min-height:calc(100vh - 72px); width:100%; max-width:1280px; margin:0 auto; padding:60px 48px; gap:60px; align-items:center;">
+        style="display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); min-height:calc(100vh - 72px); width:100%; max-width:1560px; margin:0 auto; padding:60px 48px; gap:72px; align-items:center;">
 
         <!-- LEFT: HERO CONTENT -->
         <div style="display:flex; flex-direction:column; gap:32px;">
@@ -1285,42 +1355,23 @@
           <div style="margin-bottom: 24px;">
             <p style="font-size:0.85rem;color:var(--muted);margin-bottom:12px;font-weight:600;letter-spacing:0.5px;">
               SELECT DURATION</p>
-            <div style="display:flex; gap: 12px; flex-wrap: wrap;">
+            <div style="display:flex; gap: 10px;">
               <button id="dur-5" class="btn"
-                style="background:rgba(9, 192, 6, 0.15); border:1px solid var(--g); padding: 12px 24px; border-radius: 12px; color:#fff; font-weight:700;"
+                style="flex:1 1 0; min-width:0; white-space:nowrap; text-align:center; background:rgba(9, 192, 6, 0.15); border:1px solid var(--g); padding: 12px 10px; border-radius: 12px; color:#fff; font-weight:700;"
                 onclick="setDuration(5)">
                 <i class="far fa-clock" style="margin-right:6px;"></i> 5 Minutes
               </button>
               <button id="dur-10" class="btn"
-                style="background:rgba(255,255,255,0.02); border:1px solid var(--border); padding: 12px 24px; border-radius: 12px; color:var(--muted); font-weight:600;"
+                style="flex:1 1 0; min-width:0; white-space:nowrap; text-align:center; background:rgba(255,255,255,0.02); border:1px solid var(--border); padding: 12px 10px; border-radius: 12px; color:var(--muted); font-weight:600;"
                 onclick="setDuration(10)">
                 <i class="far fa-clock" style="margin-right:6px;"></i> 10 Minutes
               </button>
               <button id="dur-15" class="btn"
-                style="background:rgba(255,255,255,0.02); border:1px solid var(--border); padding: 12px 24px; border-radius: 12px; color:var(--muted); font-weight:600;"
+                style="flex:1 1 0; min-width:0; white-space:nowrap; text-align:center; background:rgba(255,255,255,0.02); border:1px solid var(--border); padding: 12px 10px; border-radius: 12px; color:var(--muted); font-weight:600;"
                 onclick="setDuration(15)">
                 <i class="far fa-clock" style="margin-right:6px;"></i> 15 Minutes
               </button>
-  
-
-
-          <!-- Interviewer voice. The backend has supported a per-session voice
-               since /api/interview/voices; there was no way to choose one. -->
-          <div style="margin-top:26px;">
-            <p style="font-size:0.85rem;color:var(--muted);margin-bottom:12px;font-weight:600;letter-spacing:0.5px;">
-              INTERVIEWER VOICE</p>
-            <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
-              <select id="voice-select"
-                style="background:rgba(255,255,255,0.02);border:1px solid var(--border);padding:12px 16px;border-radius:12px;color:#fff;font-size:0.9rem;min-width:230px;cursor:pointer;">
-                <option value="">Loading voices&hellip;</option>
-              </select>
-              <button type="button" id="voice-preview-btn" onclick="previewVoice()"
-                style="background:rgba(9,192,6,0.12);border:1px solid rgba(9,192,6,0.4);padding:12px 20px;border-radius:12px;color:var(--g);font-size:0.85rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;">
-                <i class="fas fa-play"></i> <span id="voice-preview-label">Hear it</span>
-              </button>
             </div>
-            <p id="voice-hint" style="font-size:0.78rem;color:var(--muted);margin-top:8px;">Pick the voice that will interview you.</p>
-          </div>
           </div>
 
           <!-- CTA -->
@@ -1333,7 +1384,7 @@
         </div>
 
         <!-- RIGHT: ANIMATED ORB + FLOATING BADGES -->
-        <div style="display:flex;align-items:center;justify-content:center;position:relative;min-height:460px;">
+        <div style="display:flex;align-items:center;justify-content:center;position:relative;min-height:460px;overflow:hidden;">
           <!-- Glow ring 1 -->
           <div
             style="position:absolute;width:340px;height:340px;border-radius:50%;border:1px dashed rgba(9,192,6,0.15);animation:spin 20s linear infinite;">
@@ -1805,6 +1856,24 @@
             </div>
           </div>
           <p id="modal-voice-hint" style="font-size: 0.72rem; color: var(--muted); margin: 0;">Press Start, then read the sentence aloud</p>
+        </div>
+
+        <!-- Interviewer voice. Kept beside the microphone check so every audio
+             decision is made in one place, rather than on the page behind. -->
+        <div style="border-top:1px solid rgba(255,255,255,0.08); padding-top:18px; margin-bottom:20px;">
+          <p style="font-size:0.72rem;color:var(--muted);margin:0 0 10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;">
+            Who interviews you</p>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <select id="voice-select"
+              style="flex:1 1 220px;min-width:0;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1);padding:11px 13px;border-radius:12px;color:#fff;font-size:0.85rem;cursor:pointer;">
+              <option value="">Loading voices&hellip;</option>
+            </select>
+            <button type="button" id="voice-preview-btn" onclick="previewVoice()"
+              style="flex:0 0 auto;white-space:nowrap;background:rgba(9,192,6,0.12);border:1px solid rgba(9,192,6,0.4);padding:11px 16px;border-radius:12px;color:var(--g);font-size:0.82rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:7px;">
+              <i class="fas fa-play"></i> <span id="voice-preview-label">Hear it</span>
+            </button>
+          </div>
+          <p id="voice-hint" style="font-size:0.72rem;color:var(--muted);margin:9px 0 0;">This is the voice that will interview you.</p>
         </div>
 
         <!-- Confirmation Checkbox -->
@@ -3643,19 +3712,50 @@ Key Requirements:
         const data = await res.json();
         if (!data.success || !Array.isArray(data.voices)) throw new Error('no voices');
 
-        const saved = localStorage.getItem('hiero_voice_id') || data.defaultVoice;
-        sel.innerHTML = data.voices.map(v =>
-          `<option value="${v.id}"${v.id === saved ? ' selected' : ''}>` +
-          `${v.name} — ${v.gender === 'female' ? 'Female' : 'Male'}, ${v.accent} · ${v.description}` +
-          `</option>`
-        ).join('');
+        // A panel session overrides any single voice chosen here, so offering
+        // only voices made the control a lie: you could pick Zeus and be
+        // interviewed by three other people. The panel is now an option in its
+        // own right, and picking a named voice means "one interviewer".
+        // A NEW key on purpose. `hiero_voice_id` already holds a voice for
+        // anyone who used the picker before the panel existed, and reading
+        // that would silently switch the panel off for every existing user --
+        // which is exactly what happened on the first test run.
+        const saved = localStorage.getItem('hiero_interviewer') || 'panel';
+        sel.innerHTML =
+          `<option value="panel"${saved === 'panel' ? ' selected' : ''}>` +
+          `Panel — three interviewers, one per topic (recommended)</option>` +
+          data.voices.map(v =>
+            `<option value="${v.id}"${v.id === saved ? ' selected' : ''}>` +
+            `Single interviewer — ${v.name}, ${v.gender === 'female' ? 'female' : 'male'}, ${v.accent}` +
+            `</option>`
+          ).join('');
 
+        // Persist immediately, not only on change. The value was previously
+        // written to storage only when the dropdown was touched, so anyone who
+        // accepted the default sent nothing to /start and the session fell back
+        // to the server default rather than what the page was showing.
         window.selectedVoiceId = sel.value;
+        try { localStorage.setItem('hiero_interviewer', sel.value); } catch (e) {}
+
+        const syncHint = () => {
+          const hint = document.getElementById('voice-hint');
+          const btn = document.getElementById('voice-preview-btn');
+          const isPanel = sel.value === 'panel';
+          // Nothing to preview for a panel: there are three voices, and which
+          // one you hear depends on the question.
+          if (btn) { btn.style.display = isPanel ? 'none' : 'flex'; }
+          if (hint) {
+            hint.textContent = isPanel
+              ? 'Ananya takes the fundamentals, Rohan the design depth, Karan the team questions. They hand over to each other as the topic changes.'
+              : 'One interviewer for the whole session. Press "Hear it" to preview.';
+          }
+        };
+        syncHint();
+
         sel.addEventListener('change', () => {
           window.selectedVoiceId = sel.value;
-          localStorage.setItem('hiero_voice_id', sel.value);
-          const hint = document.getElementById('voice-hint');
-          if (hint) hint.textContent = 'Press "Hear it" to preview this voice.';
+          localStorage.setItem('hiero_interviewer', sel.value);
+          syncHint();
         });
       } catch (e) {
         sel.innerHTML = '<option value="">Default voice</option>';
