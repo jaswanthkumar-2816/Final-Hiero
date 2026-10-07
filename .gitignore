@@ -53,3 +53,13 @@ node_modules
 
 # login-tracking backups contain user emails/IPs — never publish
 backups/
+
+# App icons and interview panel photos. `*.png` above excluded these, so the
+# icon set and the panel portraits were never reaching the repository -- the
+# server would 404 on them in production while working fine locally.
+!icons/
+!icons/*.png
+!apple-touch-icon.png
+!mock_interview/panel/
+!mock_interview/panel/*.png
+!mock_interview/panel/*.webp
