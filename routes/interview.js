@@ -23,7 +23,8 @@ const {
     detectCandidateIntent,
     rephraseCurrentQuestion,
     evaluateCandidateAnswer,
-    generateSessionScorecard
+    generateSessionScorecard,
+    generateModelAnswers
 } = require('./interviewEngine');
 const {
     buildPanel,
@@ -275,6 +276,90 @@ router.get('/builtin-jds/:key', (req, res) => {
     const jd = BUILTIN_JD[req.params.key];
     if (!jd) return res.status(404).json({ success: false, error: 'JD not found' });
     res.json({ success: true, jd });
+});
+
+// ─────────────────────────────────────────────
+// ROUTE: POST /api/interview/custom-jd
+//
+// A candidate's own job description, pasted from wherever they found it
+// (LinkedIn, Naukri, Indeed, a careers page, an email) or uploaded as a file.
+// Until now the only options were the handful of built-in company roles, so
+// anyone preparing for a specific advert had to pick the nearest match and
+// practise against the wrong requirements.
+//
+// Accepts either `text` in the body or a `jd` file (PDF, DOCX or plain text).
+// Returns the fields the setup page needs to display and store a target role.
+// ─────────────────────────────────────────────
+router.post('/custom-jd', multerUpload.single('jd'), async (req, res) => {
+    try {
+        let text = String((req.body && req.body.text) || '').trim();
+
+        if (!text && req.file) {
+            const name = (req.file.originalname || '').toLowerCase();
+            try {
+                if (name.endsWith('.pdf')) {
+                    const pdfParse = require('pdf-parse');
+                    text = ((await pdfParse(req.file.buffer)).text || '').trim();
+                } else if (name.endsWith('.docx')) {
+                    const mammoth = require('mammoth');
+                    text = ((await mammoth.extractRawText({ buffer: req.file.buffer })).value || '').trim();
+                } else {
+                    text = req.file.buffer.toString('utf8').trim();
+                }
+            } catch (parseErr) {
+                console.warn('[INTERVIEW] custom-jd parse failed:', parseErr.message);
+                return res.status(422).json({
+                    success: false,
+                    error: 'Could not read that file. Try pasting the text instead.'
+                });
+            }
+        }
+
+        // Job adverts carry a lot of boilerplate; collapse the whitespace so
+        // the length check measures content rather than blank lines.
+        text = text.replace(/\r/g, '').replace(/[ \t]+/g, ' ').replace(/\n{3,}/g, '\n\n').trim();
+
+        if (text.length < 60) {
+            return res.status(400).json({
+                success: false,
+                error: 'That looks too short to be a job description. Paste the full advert, including the responsibilities and requirements.'
+            });
+        }
+        if (text.length > 20000) text = text.slice(0, 20000);
+
+        // Title and company are a convenience, not a requirement: the
+        // interview is driven by the description itself, so a failed guess
+        // costs nothing and the candidate can correct it.
+        const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+        let title = '';
+        let company = '';
+
+        for (const line of lines.slice(0, 12)) {
+            if (!title && /\b(engineer|developer|analyst|scientist|designer|manager|architect|intern|consultant|administrator|specialist|lead)\b/i.test(line) && line.length <= 90) {
+                title = line.replace(/^(job title|role|position)\s*[:\-]\s*/i, '').trim();
+            }
+            if (!company) {
+                const m = line.match(/^(?:company|organisation|organization|employer)\s*[:\-]\s*(.+)$/i)
+                       || line.match(/\bat\s+([A-Z][\w&.\- ]{2,40})$/);
+                if (m) company = m[1].trim();
+            }
+        }
+
+        const skills = extractSkillTokens(text) || [];
+
+        return res.json({
+            success: true,
+            title: title || 'Target Role',
+            company: company || '',
+            description: text,
+            skills: skills.slice(0, 25),
+            charCount: text.length,
+            source: req.file ? (req.file.originalname || 'uploaded file') : 'pasted text'
+        });
+    } catch (err) {
+        console.error('[INTERVIEW] /custom-jd error:', err);
+        return res.status(500).json({ success: false, error: 'Could not process that job description.' });
+    }
 });
 
 // ─────────────────────────────────────────────
@@ -1486,6 +1571,48 @@ async function handleGetInterviewFeedback(req, res) {
         const probScore = scorecard.problemSolvingScore || 8.8;
         const alignScore = scorecard.resumeAlignmentScore || 8.6;
 
+        // Model answers for anything the candidate could not answer.
+        //
+        // Being told only that you scored 2/10 on Kafka teaches you nothing;
+        // the moment someone says "I am not familiar with that" is exactly
+        // when they want to know what the answer was. Cached on the session so
+        // a reloaded report does not pay for them again.
+        const unanswered = [];
+        (session.questions || []).forEach((q, idx) => {
+            const a = session.answers?.find(x => x.questionIndex === q.index) || session.answers?.[idx];
+            const text = String(a?.candidateAnswer || a?.transcript || '').trim();
+            const status = String(a?.answerStatus || '').toUpperCase();
+
+            const gaveUp = !a
+                || !text
+                || status === 'UNKNOWN'
+                || status === 'NO_RESPONSE'
+                || status === 'SKIPPED'
+                || isCandidateUnsureOrSkipping(text)
+                || text.split(/\s+/).filter(Boolean).length < 6;
+
+            // The warm-up is "tell me about yourself" -- there is no model
+            // answer for someone else's background.
+            if (gaveUp && String(q.category || '') !== 'introduction') {
+                unanswered.push({ index: q.index, questionText: q.questionText });
+            }
+        });
+
+        let modelAnswers = session.modelAnswers || {};
+        const missing = unanswered.filter(u => !modelAnswers[String(u.index)]);
+        if (missing.length) {
+            try {
+                const fresh = await generateModelAnswers(session, missing);
+                if (Object.keys(fresh).length) {
+                    modelAnswers = { ...modelAnswers, ...fresh };
+                    session.modelAnswers = modelAnswers;
+                    await saveSessionToStore(session);
+                }
+            } catch (e) {
+                console.warn('[INTERVIEW] model answers skipped:', e.message);
+            }
+        }
+
         // Build question-by-question review items
         const questionsList = (session.questions || []).map((q, idx) => {
             const ans = session.answers?.find(a => a.questionIndex === q.index) || session.answers?.[idx];
@@ -1505,7 +1632,10 @@ async function handleGetInterviewFeedback(req, res) {
                 score: ans?.evaluationScore || ans?.coaching?.clarityScore || 8.5,
                 videoUrl: recUrl,
                 audioUrl: recUrl,
-                duration: ans?.durationSec || matchedRec?.duration || 30
+                duration: ans?.durationSec || matchedRec?.duration || 30,
+                // Present only where the candidate could not answer.
+                modelAnswer: modelAnswers[String(q.index)] || null,
+                wasUnanswered: Boolean(modelAnswers[String(q.index)])
             };
         });
 

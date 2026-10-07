@@ -1858,6 +1858,72 @@ ${questionsAndAnswers}
     };
 }
 
+/**
+ * Model answers for the questions a candidate could not answer.
+ *
+ * A mock interview that only scores you is worth less than one that teaches
+ * you: "not familiar with Kafka" is exactly the moment a candidate wants to
+ * know what the answer was. Generated only for questions that were skipped,
+ * refused or left effectively blank -- answered questions keep the normal
+ * coaching feedback instead.
+ *
+ * Returns a map of questionIndex -> answer text. Failures are silent: the
+ * report is still useful without these.
+ */
+async function generateModelAnswers(session, unansweredQuestions) {
+    if (!Array.isArray(unansweredQuestions) || !unansweredQuestions.length) return {};
+
+    const groq = getGroqClient();
+    if (!groq) return {};
+
+    const role = (session && session.jobRole) || 'Software Engineer';
+    const company = (session && session.companyName) || 'the company';
+
+    // Batched into one request: a 15-minute interview can leave half a dozen
+    // unanswered, and six sequential calls would make the report crawl.
+    const list = unansweredQuestions.slice(0, 8).map(
+        (q, i) => `${i + 1}. [index ${q.index}] ${q.questionText}`
+    ).join('\n');
+
+    try {
+        const res = await withTimeout(groq.chat.completions.create({
+            model: 'openai/gpt-oss-120b',
+            messages: [
+                {
+                    role: 'system',
+                    content: `You are a senior engineer writing model answers for a candidate who could not answer these ${role} interview questions at ${company}.
+
+For each question write the answer a strong candidate would have given.
+
+Rules:
+- 60-110 words each. Concrete and specific, not a definition from a textbook.
+- Lead with the direct answer, then the reasoning or a trade-off.
+- Name real technologies, numbers or failure modes where they belong.
+- Plain prose. No markdown, no bullet points, no preamble.
+- Write to the candidate as "you" only if giving guidance; otherwise just answer.
+
+Return JSON: {"answers": [{"index": <the index number given>, "answer": "<text>"}]}`
+                },
+                { role: 'user', content: `Questions:\n${list}` }
+            ],
+            temperature: 0.4,
+            max_tokens: 1800,
+            response_format: { type: 'json_object' }
+        }), 25000);
+
+        const parsed = JSON.parse(res.choices?.[0]?.message?.content || '{}');
+        const out = {};
+        for (const a of (parsed.answers || [])) {
+            if (a && a.index != null && a.answer) out[String(a.index)] = String(a.answer).trim();
+        }
+        console.log(`[INTERVIEW] Model answers generated for ${Object.keys(out).length}/${unansweredQuestions.length} unanswered question(s).`);
+        return out;
+    } catch (err) {
+        console.warn('[INTERVIEW] Model answer generation failed:', err.message);
+        return {};
+    }
+}
+
 module.exports = {
     COMPANY_BLUEPRINTS,
     VERIFIED_QUESTION_BANK,
@@ -1873,5 +1939,6 @@ module.exports = {
     retrieveAndRankQuestions,
     generateAdaptiveQuestion,
     evaluateCandidateAnswer,
-    generateSessionScorecard
+    generateSessionScorecard,
+    generateModelAnswers
 };

@@ -91,6 +91,9 @@ const interviewSessionSchema = new mongoose.Schema({
         }],
         default: []
     },
+    // Model answers for questions the candidate could not answer, keyed by
+    // question index. Cached so reloading the report does not regenerate them.
+    modelAnswers: { type: mongoose.Schema.Types.Mixed, default: {} },
     lastSpeakerId: { type: String, default: '' },
     speakersSeen: { type: [String], default: [] },
 

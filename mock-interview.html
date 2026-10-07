@@ -2588,6 +2588,37 @@
             <div id="modal-role-tech-container" style="display:none; flex-wrap:wrap; gap:6px; align-items:center;"></div>
           </div>
 
+          <!-- Your own job description. The built-in company roles only cover a
+               handful of employers, so anyone preparing for a specific advert
+               had to pick the nearest match and practise against the wrong
+               requirements. -->
+          <div style="padding:14px 16px; border-radius:14px; background:rgba(255,255,255,0.03); border:1px dashed rgba(9,192,6,0.4);">
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px;">
+              <label style="font-size:0.72rem;font-weight:800;color:var(--g);letter-spacing:0.8px;margin:0;text-transform:uppercase;">
+                <i class="fas fa-paste" style="font-size:0.7rem;"></i> Use your own job description
+              </label>
+              <span style="font-size:0.66rem;color:var(--text-subtle);">LinkedIn, Naukri, Indeed, email&hellip;</span>
+            </div>
+
+            <textarea id="custom-jd-text" rows="4" placeholder="Paste the full job advert here — responsibilities, requirements, everything. The more you paste, the closer the questions will be to the real interview."
+              style="width:100%;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1);padding:10px 12px;border-radius:10px;color:#fff;font-size:0.8rem;line-height:1.5;resize:vertical;font-family:inherit;"></textarea>
+
+            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:9px;">
+              <button type="button" id="custom-jd-apply" onclick="applyCustomJd()"
+                style="background:rgba(9,192,6,0.14);border:1px solid rgba(9,192,6,0.45);padding:8px 15px;border-radius:10px;color:var(--g);font-size:0.78rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">
+                <i class="fas fa-wand-magic-sparkles" style="font-size:0.72rem;"></i> Use this job description
+              </button>
+
+              <label for="custom-jd-file"
+                style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.14);padding:8px 14px;border-radius:10px;color:#cbd5e1;font-size:0.78rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;">
+                <i class="fas fa-paperclip" style="font-size:0.72rem;"></i> <span id="custom-jd-file-label">Or upload a file</span>
+              </label>
+              <input type="file" id="custom-jd-file" accept=".pdf,.docx,.txt,.md" style="display:none" onchange="applyCustomJd(this.files[0])">
+            </div>
+
+            <p id="custom-jd-status" style="font-size:0.72rem;color:var(--muted);margin:9px 0 0;display:none;"></p>
+          </div>
+
           <!-- Top Companies Roles Pills -->
           <div>
             <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
@@ -3698,6 +3729,95 @@ Key Requirements:
       btn.innerHTML = oldText;
       goTo(2);
     }
+
+    // ── Candidate's own job description ──────────────────────────────────
+    // Sent to the server, which extracts the text (PDF/DOCX/plain) and pulls
+    // out a title and skills, then routed through the same
+    // updateRoleDisplayCards path as a built-in role so the rest of the flow
+    // treats it identically.
+    async function applyCustomJd(file) {
+      const statusEl = document.getElementById('custom-jd-status');
+      const btn = document.getElementById('custom-jd-apply');
+      const textEl = document.getElementById('custom-jd-text');
+      const pasted = (textEl && textEl.value || '').trim();
+
+      const say = (msg, colour) => {
+        if (!statusEl) return;
+        statusEl.style.display = 'block';
+        statusEl.style.color = colour || 'var(--muted)';
+        statusEl.textContent = msg;
+      };
+
+      if (!file && pasted.length < 60) {
+        say('Paste the job description first — at least a few lines of it.', '#fbbf24');
+        if (textEl) textEl.focus();
+        return;
+      }
+
+      if (btn) { btn.disabled = true; btn.style.opacity = '.6'; }
+      say(file ? 'Reading the file…' : 'Reading the job description…');
+
+      try {
+        let res;
+        if (file) {
+          const fd = new FormData();
+          fd.append('jd', file);
+          res = await fetch('/api/interview/custom-jd', { method: 'POST', body: fd });
+        } else {
+          res = await fetch('/api/interview/custom-jd', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: pasted })
+          });
+        }
+
+        const data = await res.json();
+        if (!data.success) {
+          say(data.error || 'Could not read that job description.', '#f87171');
+          return;
+        }
+
+        if (file && textEl) textEl.value = data.description;
+
+        // Deselect the built-in company cards: this is now the target role.
+        document.querySelectorAll('.comp-role-card').forEach(c => c.classList.remove('active'));
+
+        updateRoleDisplayCards({
+          company: data.company || 'Your target role',
+          title: data.title,
+          desc: data.description,
+          level: '',
+          comp: '',
+          tech: (data.skills || []).join(', ')
+        });
+
+        // Carried into /start as the job description the questions are built
+        // from, the same way an analysed role is.
+        window.userContext = window.userContext || {};
+        window.userContext.jdText = data.description;
+        window.userContext.jobTitle = data.title;
+        if (data.company) window.userContext.company = data.company;
+        try {
+          sessionStorage.setItem('hiero_custom_jd', JSON.stringify({
+            title: data.title, company: data.company, desc: data.description, skills: data.skills
+          }));
+        } catch (e) {}
+
+        const skillNote = (data.skills && data.skills.length)
+          ? ` Picked out ${data.skills.length} skills to question you on.`
+          : '';
+        say(`Using "${data.title}"${data.company ? ' at ' + data.company : ''}.${skillNote}`, 'var(--g)');
+
+        const lbl = document.getElementById('custom-jd-file-label');
+        if (file && lbl) lbl.textContent = file.name.length > 22 ? file.name.slice(0, 20) + '…' : file.name;
+      } catch (err) {
+        console.warn('[JD] custom job description failed:', err);
+        say('Something went wrong reading that. Try pasting the text instead.', '#f87171');
+      } finally {
+        if (btn) { btn.disabled = false; btn.style.opacity = '1'; }
+      }
+    }
+    window.applyCustomJd = applyCustomJd;
 
     // ── INTERVIEWER VOICE ───────────────────────────────────────────────
     // /api/interview/voices has existed since per-session voices were added;
