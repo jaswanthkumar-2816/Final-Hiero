@@ -4,7 +4,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hiero | Mock Interview Feedback & Evaluation Report</title>
+  
+  <!-- App icons. Without these the browser has nothing to use when the site is
+       added to a dock or home screen, and falls back to a screenshot of the page. -->
+  <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192x192.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="apple-mobile-web-app-title" content="Hiero" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<title>Hiero | Mock Interview Feedback & Evaluation Report</title>
   
   <!-- Premium Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1342,7 +1353,7 @@
     }
 
     // Switch Studio Player (video + audio) to a specific question recording
-    function selectQuestionRecording(qNumStr, videoUrl = null, autoPlay = false) {
+    async function selectQuestionRecording(qNumStr, videoUrl = null, autoPlay = false) {
       currentActiveQuestion = qNumStr;
 
       // Update ALL pill states (video pills + audio pills)
@@ -1387,7 +1398,7 @@
 
       if (targetUrl) {
         if (actualVideo) {
-          actualVideo.src = targetUrl;
+          actualVideo.src = (await authedMediaUrl(targetUrl)) || '';
           actualVideo.style.display = 'block';
           // The stock placeholder image sat on top of the real recording.
           if (thumb) thumb.style.display = 'none';
@@ -1427,7 +1438,7 @@
       if (audioTrackLabel) audioTrackLabel.textContent = 'Audio Track';
 
       if (targetUrl && actualAudio) {
-        actualAudio.src = targetUrl;
+        actualAudio.src = (await authedMediaUrl(targetUrl)) || '';
         actualAudio.style.display = 'block';
         if (audioFallback) audioFallback.style.display = 'none';
         if (audioNoMsg) audioNoMsg.style.display = 'none';
@@ -1529,11 +1540,17 @@
           if (recRes.ok) {
             const recData = await recRes.json();
             if (recData && recData.recordings && recData.recordings.length > 0) {
-              const latestRec = recData.recordings[recData.recordings.length - 1];
-              if (latestRec && latestRec.url) {
+              // Hand the whole manifest to the renderer. Only the last clip was
+              // used before and the list was never stored, so every
+              // per-question pill resolved to nothing.
+              if (evalData) evalData.recordings = recData.recordings;
+
+              const first = recData.recordings[0];
+              if (first && first.url) {
                 const videoEl = document.getElementById('actualVideo');
-                if (videoEl) {
-                  videoEl.src = latestRec.url;
+                const blobUrl = await authedMediaUrl(first.url);
+                if (videoEl && blobUrl) {
+                  videoEl.src = blobUrl;
                   videoEl.style.display = 'block';
                   const overlay = document.querySelector('.video-play-overlay');
                   if (overlay) overlay.style.display = 'none';
@@ -1550,6 +1567,37 @@
         renderInterviewFeedback(evalData);
       }
     });
+
+
+    // ── Playing an authenticated recording ───────────────────────────────
+    // /api/interview/recording-file/... checks the Bearer token, because an
+    // unauthenticated route there exposed other candidates' interview videos.
+    // A <video src="..."> cannot send an Authorization header, so the browser
+    // asked for the file anonymously and got 403 -- which is why no recording
+    // ever played on this page. Fetch it properly, then hand the element a
+    // blob URL instead.
+    const __mediaBlobCache = new Map();
+
+    async function authedMediaUrl(url) {
+      if (!url) return null;
+      if (!url.startsWith('/api/')) return url;        // already playable
+      if (__mediaBlobCache.has(url)) return __mediaBlobCache.get(url);
+
+      const tok = localStorage.getItem('token') || localStorage.getItem('jwtToken');
+      try {
+        const res = await fetch(url, { headers: tok ? { 'Authorization': `Bearer ${tok}` } : {} });
+        if (!res.ok) {
+          console.warn('[RECORDING] fetch failed', res.status, url);
+          return null;
+        }
+        const blobUrl = URL.createObjectURL(await res.blob());
+        __mediaBlobCache.set(url, blobUrl);
+        return blobUrl;
+      } catch (e) {
+        console.warn('[RECORDING] fetch error', e);
+        return null;
+      }
+    }
 
     // Video Controls
     let isVideoPlaying = false;
