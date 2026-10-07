@@ -63,3 +63,11 @@ backups/
 !mock_interview/panel/
 !mock_interview/panel/*.png
 !mock_interview/panel/*.webp
+
+# Runtime state, not source. transcript-cache.json alone is 71 MB and is
+# rewritten constantly; committing each revision is what made .git larger than
+# the project. These are all regenerated or live in MongoDB.
+data/transcript-cache.json
+data/video-modules-cache.json
+hiero-backend/python_services/jobs.db
+login_tracking.json

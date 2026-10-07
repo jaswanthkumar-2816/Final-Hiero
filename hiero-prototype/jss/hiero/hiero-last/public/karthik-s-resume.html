@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KARTHIK.S — HIERO Cool Resume</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0b0b0b;
+      --sidebar: #151515;
+      --accent: #10b981;
+      --accent-soft: #34d399;
+      --text: #f9fafb;
+      --dim: #94a3b8;
+      --line: rgba(255,255,255,0.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #1a1a1a;
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      line-height: 1.45;
+    }
+    .toolbar {
+      position: sticky; top: 0; z-index: 20;
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 12px; flex-wrap: wrap;
+      padding: 12px 20px;
+      background: rgba(11,11,11,0.92);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(12px);
+    }
+    .toolbar .brand {
+      font-family: Outfit, sans-serif; font-weight: 800; letter-spacing: 0.04em;
+    }
+    .toolbar .brand span { color: var(--accent); }
+    .toolbar .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .toolbar a, .toolbar button {
+      border: 1px solid rgba(16,185,129,0.35);
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #04140d;
+      font-weight: 800;
+      font-size: 13px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .toolbar a.ghost, .toolbar button.ghost {
+      background: transparent;
+      color: var(--dim);
+      border-color: var(--line);
+    }
+
+    .sheet {
+      width: 210mm;
+      min-height: 297mm;
+      margin: 24px auto;
+      background: var(--bg);
+      display: grid;
+      grid-template-columns: 68mm 1fr;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.55);
+      overflow: hidden;
+    }
+    .sidebar {
+      background: var(--sidebar);
+      padding: 28px 20px 32px;
+      border-right: 1px solid var(--line);
+    }
+    .avatar {
+      width: 112px; height: 112px; margin: 0 auto 22px;
+      border-radius: 18px;
+      background: linear-gradient(145deg, #10b981, #064e3b);
+      display: grid; place-items: center;
+      font-family: Outfit, sans-serif;
+      font-size: 36px; font-weight: 800; color: #04140d;
+      box-shadow: 0 0 0 3px rgba(16,185,129,0.25);
+    }
+    .side-title {
+      font-size: 11px; font-weight: 800; letter-spacing: 0.14em;
+      color: var(--accent); margin: 22px 0 8px;
+    }
+    .side-title::after {
+      content: ''; display: block; width: 28px; height: 2px;
+      background: var(--accent); margin-top: 6px;
+    }
+    .side-item {
+      font-size: 11.5px; color: var(--text); margin-bottom: 10px;
+      word-break: break-word;
+    }
+    .side-item b {
+      display: block; color: var(--accent-soft); font-size: 10px;
+      letter-spacing: 0.04em; margin-bottom: 2px; font-weight: 700;
+    }
+    .chip-list { display: flex; flex-wrap: wrap; gap: 6px; }
+    .chip {
+      font-size: 10.5px; font-weight: 600;
+      padding: 5px 9px; border-radius: 999px;
+      background: rgba(16,185,129,0.12);
+      color: var(--accent-soft);
+      border: 1px solid rgba(16,185,129,0.25);
+    }
+    .bar-row { margin-bottom: 10px; }
+    .bar-row span { font-size: 11px; display: block; margin-bottom: 4px; }
+    .bar {
+      height: 3px; background: #222; border-radius: 99px; overflow: hidden;
+    }
+    .bar i { display: block; height: 100%; background: var(--accent); }
+
+    .main { padding: 30px 28px 36px; }
+    .name {
+      font-family: Outfit, sans-serif;
+      font-size: 34px; font-weight: 800; letter-spacing: -0.02em;
+      line-height: 1.05; margin-bottom: 6px;
+    }
+    .role {
+      color: var(--accent); font-weight: 800; font-size: 13px;
+      letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 14px;
+    }
+    .summary {
+      color: var(--dim); font-size: 12px; line-height: 1.55;
+      margin-bottom: 22px; text-align: justify;
+    }
+    .section { margin-bottom: 18px; }
+    .section h2 {
+      font-size: 12.5px; font-weight: 800; letter-spacing: 0.12em;
+      text-transform: uppercase; margin-bottom: 10px;
+    }
+    .section h2::after {
+      content: ''; display: block; width: 36px; height: 3px;
+      background: var(--accent); margin-top: 6px; border-radius: 2px;
+    }
+    .edu-table {
+      width: 100%; border-collapse: collapse; font-size: 10.5px;
+    }
+    .edu-table th {
+      text-align: left; color: var(--accent-soft); font-size: 9.5px;
+      letter-spacing: 0.06em; padding: 0 6px 6px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .edu-table td {
+      padding: 7px 6px 7px 0; vertical-align: top;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      color: var(--text);
+    }
+    .edu-table td.muted { color: var(--dim); }
+    .job-head {
+      display: flex; justify-content: space-between; gap: 10px;
+      align-items: baseline; margin-bottom: 4px;
+    }
+    .job-head strong { font-size: 12.5px; }
+    .job-head .when {
+      color: var(--accent-soft); font-size: 10.5px; font-weight: 700;
+      white-space: nowrap;
+    }
+    .job-sub { color: var(--dim); font-size: 11px; margin-bottom: 8px; }
+    ul.bullets { list-style: none; padding: 0; }
+    ul.bullets li {
+      position: relative; padding-left: 14px;
+      font-size: 11.2px; color: #e5e7eb; margin-bottom: 5px;
+      line-height: 1.4;
+    }
+    ul.bullets li::before {
+      content: ''; position: absolute; left: 0; top: 6px;
+      width: 5px; height: 5px; border-radius: 50%; background: var(--accent);
+    }
+    .two-col {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px;
+      font-size: 11px;
+    }
+    .two-col .k { color: var(--dim); font-size: 10px; font-weight: 700; }
+    .decl {
+      margin-top: 8px; font-size: 11px; color: var(--dim);
+      border-top: 1px solid var(--line); padding-top: 12px;
+    }
+    .sign {
+      margin-top: 18px; display: flex; justify-content: space-between;
+      font-size: 11px; color: var(--text);
+    }
+    .page-break { page-break-before: always; break-before: page; }
+
+    @media print {
+      body { background: #fff; }
+      .toolbar { display: none !important; }
+      .sheet {
+        margin: 0; box-shadow: none; width: 100%;
+        min-height: 100vh;
+      }
+      @page { size: A4; margin: 0; }
+    }
+    @media (max-width: 820px) {
+      .sheet { width: 100%; grid-template-columns: 1fr; margin: 0; }
+      .sidebar { border-right: none; border-bottom: 1px solid var(--line); }
+    }
+  </style>
+</head>
+<body>
+  <div class="toolbar">
+    <div class="brand">HIERO <span>Cool</span> · Resume</div>
+    <div class="actions">
+      <a class="ghost" href="/index.html">Home</a>
+      <a class="ghost" href="/resume-builder.html">Resume Builder</a>
+      <button type="button" onclick="window.print()">Download / Print PDF</button>
+    </div>
+  </div>
+
+  <!-- PAGE 1 -->
+  <article class="sheet" id="page1">
+    <aside class="sidebar">
+      <div class="avatar">KS</div>
+
+      <div class="side-title">Contact</div>
+      <div class="side-item"><b>Email</b>skarthik.mca2005@gmail.com</div>
+      <div class="side-item"><b>Mobile</b>9500360004</div>
+      <div class="side-item"><b>Address</b>10, Vairam Street, Municipal Colony, Erode — 638004, Tamil Nadu</div>
+
+      <div class="side-title">Subjects Taught</div>
+      <div class="chip-list">
+        <span class="chip">C</span>
+        <span class="chip">C++</span>
+        <span class="chip">Java</span>
+        <span class="chip">Python</span>
+        <span class="chip">Visual Basic</span>
+        <span class="chip">Software Engineering</span>
+        <span class="chip">Computer Networks</span>
+      </div>
+
+      <div class="side-title">Strengths</div>
+      <div class="bar-row"><span>Communication</span><div class="bar"><i style="width:92%"></i></div></div>
+      <div class="bar-row"><span>Presentation</span><div class="bar"><i style="width:90%"></i></div></div>
+      <div class="bar-row"><span>Sincerity &amp; Integrity</span><div class="bar"><i style="width:95%"></i></div></div>
+      <div class="bar-row"><span>Hardworking</span><div class="bar"><i style="width:93%"></i></div></div>
+      <div class="bar-row"><span>Willingness to Learn</span><div class="bar"><i style="width:94%"></i></div></div>
+
+      <div class="side-title">Languages</div>
+      <div class="chip-list">
+        <span class="chip">English</span>
+        <span class="chip">Tamil</span>
+        <span class="chip">Telugu</span>
+      </div>
+
+      <div class="side-title">Hobbies</div>
+      <div class="side-item">Listening to music</div>
+      <div class="side-item">Reading newspapers</div>
+    </aside>
+
+    <main class="main">
+      <h1 class="name">KARTHIK.S</h1>
+      <div class="role">Assistant Professor · Computer Applications</div>
+      <p class="summary">
+        To get a teaching career in an institution that entails initiative, innovation and responsibility
+        where I can feel the spirit of enhancing my knowledge and grow along with the institution.
+      </p>
+
+      <section class="section">
+        <h2>Academic Qualifications</h2>
+        <table class="edu-table">
+          <thead>
+            <tr>
+              <th>Degree</th>
+              <th>University / College</th>
+              <th>Year</th>
+              <th>%</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Ph.D.</strong></td>
+              <td class="muted">Bharathiar University<br>Nandha Arts &amp; Science College</td>
+              <td>Pursuing</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td><strong>M.Phil.</strong></td>
+              <td class="muted">Bharathiar University<br>Kongu Arts and Science College</td>
+              <td>2013</td>
+              <td>57%</td>
+            </tr>
+            <tr>
+              <td><strong>M.C.A</strong></td>
+              <td class="muted">Anna University<br>Mahendra Engineering College</td>
+              <td>2008</td>
+              <td>72%</td>
+            </tr>
+            <tr>
+              <td><strong>B.C.A</strong></td>
+              <td class="muted">Bharathiar University<br>Kongu Arts and Science College</td>
+              <td>2005</td>
+              <td>56%</td>
+            </tr>
+            <tr>
+              <td><strong>Higher Secondary</strong></td>
+              <td class="muted">Matriculation<br>Bharathi Vidya Bhavan Matriculation Hr.Sec.School</td>
+              <td>2002</td>
+              <td>83.25%</td>
+            </tr>
+            <tr>
+              <td><strong>S.S.L.C</strong></td>
+              <td class="muted">Matriculation<br>Bharathi Vidya Bhavan Matriculation Hr.Sec.School</td>
+              <td>2000</td>
+              <td>79%</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="section">
+        <h2>Teaching Experience</h2>
+        <div class="job-head">
+          <strong>Assistant Professor</strong>
+          <span class="when">June 2008 — Present</span>
+        </div>
+        <div class="job-sub">Department of Computer Applications · Nandha Arts and Science College, Erode</div>
+        <ul class="bullets">
+          <li>Teaching undergraduate and postgraduate Computer Applications courses with focus on programming and systems.</li>
+          <li>Subjects: C, C++, Java, Python, Visual Basic, Software Engineering, Computer Networks.</li>
+        </ul>
+      </section>
+
+      <section class="section">
+        <h2>Major Responsibilities</h2>
+        <ul class="bullets">
+          <li>Deputy Controller of Examinations from 2024 till date at Nandha Arts &amp; Science College (Autonomous).</li>
+          <li>Event Coordinator from 2010 — Technical Symposium, Conference, Seminars, Workshops, Guest Lectures.</li>
+          <li>BoS member at Nandha Arts &amp; Science College since 2024.</li>
+          <li>Industrial Visit Coordinator from 2008 till date.</li>
+          <li>Social media promoter for Nandha Arts &amp; Science College since 2020 till date.</li>
+          <li>ERP management coordinator from 2013 till date.</li>
+          <li>Admission Coordinator from 2008 till date.</li>
+          <li>External Examiner in autonomous institutions — question paper setting, theory &amp; practical valuation.</li>
+        </ul>
+      </section>
+    </main>
+  </article>
+
+  <!-- PAGE 2 -->
+  <article class="sheet page-break" id="page2">
+    <aside class="sidebar">
+      <div class="side-title" style="margin-top:0">Personal Details</div>
+      <div class="two-col" style="grid-template-columns:1fr; gap:10px">
+        <div><div class="k">Name</div>KARTHIK.S</div>
+        <div><div class="k">Father’s Name</div>SELVAM.G</div>
+        <div><div class="k">Date of Birth</div>13th March 1984</div>
+        <div><div class="k">Sex</div>Male</div>
+        <div><div class="k">Nationality</div>Indian (Hindu)</div>
+        <div><div class="k">Languages</div>English, Tamil, Telugu</div>
+      </div>
+
+      <div class="side-title">Institution</div>
+      <div class="side-item">Nandha Arts and Science College, Erode</div>
+      <div class="side-item">Department of Computer Applications</div>
+    </aside>
+
+    <main class="main">
+      <section class="section">
+        <h2>Seminar / Conference / Workshop / Guest Lecture</h2>
+        <ul class="bullets">
+          <li>Attended Workshop on “2D, WEB, VFX” at Animation Camp, Erode.</li>
+          <li>Participated in National Conference on “Innovative Trends in Information Technology” at Sri Vasavi College, Erode.</li>
+          <li>Participated in National Level Workshop on “Big Data Analytics” at Kongu Arts and Science College, Erode.</li>
+          <li>Presented a paper on “Integrating Multimedia in the K-12 Classroom” at Nandha Arts and Science College, Erode.</li>
+          <li>Participated in National Level Conference on “Smart Approaches in Computer Paradigms” at Navarasam Arts &amp; Science College for Women, Arachalur.</li>
+          <li>Participated in Orientation Program on Spoken Tutorial, IIT Bombay, held at Bharathiar University, Coimbatore.</li>
+          <li>Guest Lecture on “Visual Basic IDE” at Sri Vasavi College, Erode.</li>
+        </ul>
+      </section>
+
+      <section class="section">
+        <h2>Chief Guest / Jury / Resource Person</h2>
+        <ul class="bullets">
+          <li>Resource Person for 12th students — basics of Computer Science (2016–2017) at Govt. Hr. Sec. School, Avinashi.</li>
+          <li>Judge in GATES’2016 (Intra-Department Meet), Department of Computer Science, Nandha Arts and Science College, Erode.</li>
+        </ul>
+      </section>
+
+      <section class="section">
+        <h2>Declaration</h2>
+        <p class="decl">
+          I hereby declare that the information provided above is true to the best of my knowledge and belief.
+        </p>
+        <div class="sign">
+          <div>
+            <div style="color:var(--dim);font-size:10px;margin-bottom:4px">Date</div>
+            <strong>24.07.18</strong>
+            <div style="margin-top:10px;color:var(--dim);font-size:10px">Place</div>
+            <strong>Erode</strong>
+          </div>
+          <div style="text-align:right">
+            <div style="color:var(--dim);font-size:10px;margin-bottom:28px">Signature</div>
+            <strong>(KARTHIK.S)</strong>
+          </div>
+        </div>
+      </section>
+    </main>
+  </article>
+</body>
+</html>
