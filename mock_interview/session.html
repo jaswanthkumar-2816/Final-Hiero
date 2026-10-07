@@ -1306,9 +1306,37 @@
 
     @media (max-width: 768px) {
       .nav-header { padding: 10px 14px !important; }
+
+      /* On a phone the page scrolls as a document rather than behaving like a
+         fixed-height desktop shell. The shell pinned everything to the
+         viewport height with overflow hidden, so anything taller than the
+         screen -- which is most of it once the system text size is raised --
+         was simply unreachable. Nothing clips here; the page just gets taller. */
+      html, body {
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+        height: auto !important;
+        min-height: 100% !important;
+        -webkit-text-size-adjust: 100%;
+      }
       .session-stage {
-        padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px)) !important;
-        height: calc(100dvh - 58px) !important;
+        display: block !important;
+        height: auto !important;
+        min-height: 0 !important;
+        overflow: visible !important;
+        padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)) !important;
+      }
+      /* The three panes each scrolled inside themselves, which on a phone
+         means a scroll area inside a scroll area. Let them size to content. */
+      .session-stage > * {
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+      }
+      #interview-stage { overflow: visible !important; }
+      #transcript-chat-list {
+        max-height: none !important;
+        overflow: visible !important;
       }
       .mobile-dock { display: grid; }
       .mobile-cam-chip { display: block; }

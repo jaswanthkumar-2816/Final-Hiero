@@ -331,11 +331,19 @@ router.post('/custom-jd', multerUpload.single('jd'), async (req, res) => {
         // interview is driven by the description itself, so a failed guess
         // costs nothing and the candidate can correct it.
         const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+        const ROLE_WORDS = 'engineer|developer|analyst|scientist|designer|manager|architect|intern|consultant|administrator|specialist|lead';
         let title = '';
         let company = '';
 
+        // Pass one: a line of its own, which is how most adverts are laid out.
         for (const line of lines.slice(0, 12)) {
-            if (!title && /\b(engineer|developer|analyst|scientist|designer|manager|architect|intern|consultant|administrator|specialist|lead)\b/i.test(line) && line.length <= 90) {
+            // A heading, not a sentence: short, few words, no terminal
+            // punctuation. Without this a one-line advert such as "The Data
+            // Scientist role at Razorpay needs SQL..." became the title whole.
+            const looksLikeHeading = line.length <= 70
+                && line.split(/\s+/).length <= 8
+                && !/[.!?]$/.test(line);
+            if (!title && looksLikeHeading && new RegExp(`\\b(${ROLE_WORDS})\\b`, 'i').test(line)) {
                 title = line.replace(/^(job title|role|position)\s*[:\-]\s*/i, '').trim();
             }
             if (!company) {
@@ -343,6 +351,25 @@ router.post('/custom-jd', multerUpload.single('jd'), async (req, res) => {
                        || line.match(/\bat\s+([A-Z][\w&.\- ]{2,40})$/);
                 if (m) company = m[1].trim();
             }
+        }
+
+        // Pass two: people routinely paste the whole advert as one unbroken
+        // paragraph, where every line test fails and the role was reported as
+        // the generic "Target Role". Look for the title phrase itself rather
+        // than relying on the formatting.
+        const head = text.slice(0, 400);
+        if (!title) {
+            const m = head.match(new RegExp(`\\b((?:[A-Z][\\w+#.]*[ \\-]){0,3}(?:${ROLE_WORDS}))\\b`, 'i'));
+            // The case-insensitive flag makes [A-Z] match lowercase too, so
+            // "looking for a Machine Learning Engineer" kept the article.
+            if (m) title = m[1].trim().replace(/\s+/g, ' ').replace(/^(?:a|an|the)\s+/i, '');
+        }
+        if (!company) {
+            // No dots inside the name, so a sentence boundary ends the match:
+            // "at Swiggy. Build scalable..." gave "Swiggy. Build" otherwise.
+            const m = head.match(/\b(?:at|with|for|join)\s+([A-Z][A-Za-z0-9&\-]*(?:\s+[A-Z][A-Za-z0-9&\-]*){0,2})/);
+            // "at Google" is a company; "at scale" and "for Engineers" are not.
+            if (m && !new RegExp(`^(?:${ROLE_WORDS})$`, 'i').test(m[1])) company = m[1].trim();
         }
 
         const skills = extractSkillTokens(text) || [];

@@ -695,6 +695,16 @@
       justify-content: center;
       align-items: center;
       flex-direction: column;
+      /* Scrollable, and centred only while it fits. A fixed overlay with
+         justify-content:center puts any overflow above the top edge where it
+         cannot be reached -- the proceed button included. */
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      padding: 20px 0;
+    }
+    @media (max-width: 960px) {
+      #s-sensors { justify-content: flex-start; }
     }
 
     .sensor-row {
