@@ -433,6 +433,18 @@ app.use('/api/roadmap', lazyRouter('./routes/roadmap'));
 // ======================
 // START SERVER
 // ======================
+// Say plainly at boot which integrations are missing. A missing Deepgram key
+// does not crash anything -- the interview simply runs mute -- so without this
+// it is only discovered by a candidate hearing silence.
+for (const [key, what] of [
+    ['DEEPGRAM_API_KEY', 'interviewer voice and speech-to-text'],
+    ['GROQ_API_KEY', 'question generation and scoring'],
+    ['MONGODB_URI', 'session and user storage'],
+    ['JWT_SECRET', 'authentication']
+]) {
+    if (!process.env[key]) console.error(`[STARTUP] ${key} is NOT set — ${what} will not work.`);
+}
+
 app.listen(PORT, () => {
     console.log(`
 🚀 HTML portal LIVE at http://localhost:${PORT}

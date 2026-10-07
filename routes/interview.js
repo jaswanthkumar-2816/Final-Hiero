@@ -1839,14 +1839,40 @@ router.post('/tts', async (req, res) => {
         if (!text || text.trim().length === 0) {
             return res.status(400).json({ success: false, error: 'Text parameter is required' });
         }
-        const audioUrl = await generateTTSDataUrl(text, voice || INTERVIEW_VOICE);
-        if (!audioUrl) {
-            return res.status(500).json({ success: false, error: 'Failed to generate voice audio' });
+
+        // Report WHY synthesis failed. generateTTSDataUrl swallows the real
+        // error and returns null, so every failure surfaced as "Failed to
+        // generate voice audio" -- which looked identical whether the key was
+        // missing, the key was rejected, or Deepgram was briefly down. On the
+        // live server that hid a missing DEEPGRAM_API_KEY behind a message
+        // that gave no way to tell.
+        if (!process.env.DEEPGRAM_API_KEY) {
+            console.error('[Interview] /tts: DEEPGRAM_API_KEY is not set in this environment — the interviewer has no voice.');
+            return res.status(503).json({
+                success: false,
+                error: 'Voice synthesis is not configured on this server.',
+                reason: 'DEEPGRAM_API_KEY_MISSING'
+            });
         }
-        return res.json({
-            success: true,
-            audio_url: audioUrl
-        });
+
+        try {
+            const buffer = await dgTTS(text, voice || INTERVIEW_VOICE);
+            return res.json({
+                success: true,
+                audio_url: `data:audio/mp3;base64,${buffer.toString('base64')}`
+            });
+        } catch (ttsErr) {
+            const status = ttsErr.response && ttsErr.response.status;
+            console.error(`[Interview] /tts upstream failure (${status || 'no status'}):`, ttsErr.message);
+            return res.status(502).json({
+                success: false,
+                error: status === 401 || status === 403
+                    ? 'Voice synthesis rejected the server credentials.'
+                    : 'Voice synthesis is temporarily unavailable.',
+                reason: status === 401 || status === 403 ? 'DEEPGRAM_KEY_REJECTED' : 'DEEPGRAM_UPSTREAM_ERROR',
+                status: status || null
+            });
+        }
     } catch (err) {
         console.error('[Interview] /tts error:', err.message);
         return res.status(500).json({ success: false, error: err.message });
