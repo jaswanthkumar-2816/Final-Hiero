@@ -381,9 +381,54 @@
     }
 
     @media (max-width: 960px) {
+      /* Every one of these is a desktop shell with at least one fixed-width
+         column -- 480px, 400px, 340px, 320px -- so the row stays its full
+         width no matter how narrow the screen gets. Between 600px and ~990px
+         the setup pages scrolled sideways because of it, which is what a
+         phone in desktop mode and most tablets land in. Listed explicitly
+         rather than matched by attribute so the hero stage, which is laid out
+         deliberately, is left alone. */
       #s-identity .identity-3col,
-      #s-sensors .permissions-2col {
+      #s-sensors .permissions-2col,
+      .session-grid,
+      #s-session .layout,
+      #s-audit > div[style*="grid"],
+      #s-identity > div[style*="grid"],
+      #s-sensors > div[style*="grid"] {
         grid-template-columns: 1fr !important;
+        gap: 20px !important;
+      }
+      /* Grid items default to min-width:auto and refuse to shrink below their
+         content, so the fixed 480px middle column kept the whole row ~990px
+         wide. Everything from 600px to 986px scrolled sideways because of it. */
+      #s-identity .identity-3col > *,
+      #s-sensors .permissions-2col > *,
+      .session-grid > *,
+      #s-session .layout > *,
+      #s-audit > div[style*="grid"] > *,
+      #s-identity > div[style*="grid"] > *,
+      #s-sensors > div[style*="grid"] > * {
+        min-width: 0 !important;
+        max-width: 100% !important;
+      }
+      /* The session console is a fixed 200px/1fr/320px desktop shell with a
+         fixed row track. Stacked, the rows must size to their content. */
+      #s-session .layout {
+        grid-template-rows: auto !important;
+        height: auto !important;
+      }
+      /* Its action bar is a nowrap flex row with the buttons pushed right by
+         margin-left:auto, so they ran past the edge rather than wrapping. */
+      #s-session .action-bar {
+        flex-wrap: wrap !important;
+        height: auto !important;
+        padding: 12px 16px !important;
+        row-gap: 10px !important;
+      }
+      #s-session .bar-right {
+        margin-left: 0 !important;
+        flex-wrap: wrap !important;
+        width: 100% !important;
       }
     }
 
@@ -1472,7 +1517,7 @@
       </div>
 
       <!-- 3-Column Layout -->
-      <div style="display: grid; grid-template-columns: 1fr 480px 1fr; gap: 32px; width: 100%; max-width: 1200px; margin: 36px auto 40px; align-items: start;">
+      <div class="identity-3col" style="display: grid; grid-template-columns: 1fr 480px 1fr; gap: 32px; width: 100%; max-width: 1200px; margin: 36px auto 40px; align-items: start;">
 
         <!-- LEFT COLUMN: Why we capture -->
         <div style="background: linear-gradient(145deg, rgba(255,255,255,0.035), rgba(255,255,255,0.015)); border: 1px solid rgba(255,255,255,0.07); border-radius: 24px; padding: 28px 24px; backdrop-filter: blur(24px);">
