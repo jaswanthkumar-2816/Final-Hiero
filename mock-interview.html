@@ -178,6 +178,14 @@
        desktop layout: the nav alone measured 477px in a 390px viewport and
        content ran off the right edge. These rules keep everything inside
        the screen and stack the two columns. */
+
+    /* Live input level in the audio check. */
+    .lvl-bar {
+      display:block; width:6px; height:6px; border-radius:3px;
+      background:rgba(255,255,255,.18); transition:height .08s linear, background .25s ease;
+    }
+    .lvl-bar.hot { background:var(--g); box-shadow:0 0 9px rgba(9,192,6,.6); }
+
     @media (max-width: 560px) {
       html, body { overflow-x: hidden; max-width: 100%; }
 
@@ -1867,103 +1875,60 @@
     </section>
 
     <!-- ── VOICE VERIFICATION MODAL (SCREENSHOT 1) ── -->
-    <div id="voice-verify-modal" style="position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(16px); z-index: 30000; display: none; align-items: center; justify-content: center; padding: 20px;">
-      <div style="background: #0d120e; border: 1px solid rgba(9,192,6,0.3); border-radius: 24px; width: 100%; max-width: 580px; padding: 32px; box-shadow: 0 25px 80px rgba(0,0,0,0.9), 0 0 40px rgba(9,192,6,0.15); position: relative; animation: stageIn 0.3s ease-out;">
-        
-        <!-- Modal Header -->
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
-          <h2 style="font-size: 1.25rem; font-weight: 800; color: #fff; margin: 0; letter-spacing: -0.3px;">Audio Check &amp; Voice Verification</h2>
-          <button onclick="closeVoiceVerifyModal()" style="background: transparent; border: none; color: var(--muted); font-size: 1.1rem; cursor: pointer; padding: 4px;">
-            <i class="fas fa-times"></i>
-          </button>
-        </div>
+    <div id="voice-verify-modal" style="position: fixed; inset: 0; z-index: 30000; display: none;
+         align-items: center; justify-content: center; padding: 24px; overflow-y: auto;
+         background:
+           radial-gradient(ellipse 90% 60% at 50% 20%, rgba(9,192,6,.10), transparent 62%),
+           radial-gradient(ellipse 70% 50% at 50% 100%, rgba(9,192,6,.06), transparent 60%),
+           #050705;">
+      <!-- Just the interviewer. She asks, the page listens on its own, and as
+           soon as it hears a real voice it moves to the interview. No start
+           button, no script to read, no confirmation box: every one of those
+           was a step between the candidate and the thing they came to do. -->
+      <div style="width: 100%; max-width: min(560px, 92vw); text-align: center; position: relative;">
 
-        <!-- Description -->
-        <p style="font-size: 0.8rem; color: var(--muted); line-height: 1.5; margin-bottom: 20px;">
-          Click on <strong>Start</strong> and read the sentence below to test your microphone and complete voice verification. This step ensures that your audio is working correctly and that your responses can be recorded clearly during the assessment.
-        </p>
-
-        <!-- Sentence Box -->
-        <div style="background: rgba(9,192,6,0.04); border: 1px solid rgba(9,192,6,0.25); border-radius: 14px; padding: 18px 20px; margin-bottom: 16px; position: relative;">
-          <p style="font-size: 0.88rem; font-weight: 700; color: #fff; line-height: 1.6; margin: 0;">
-            "Hi, I am here to complete this assessment. I understand that my voice is being recorded for verification purposes. I confirm that I am taking this test honestly and without any assistance."
-          </p>
-        </div>
-
-        <p style="font-size: 0.72rem; color: var(--muted); margin: 0 0 16px; font-weight: 600;">
-          <i class="fas fa-info-circle" style="color: var(--g); margin-right: 4px;"></i> Record your response for min 4 sec.
-        </p>
-
-        <!-- Microphone Selector Dropdown -->
-        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.09); border-radius: 12px; padding: 10px 14px; margin-bottom: 16px; display: flex; align-items: center; gap: 10px;">
-          <i class="fas fa-microphone" style="color: var(--g); font-size: 0.85rem;"></i>
-          <select id="modal-mic-select" style="background: transparent; border: none; color: #fff; font-size: 0.8rem; font-weight: 600; width: 100%; outline: none; cursor: pointer;">
-            <option value="default" style="background: #0d120e; color: #fff;">Microphone Array (Default Audio Device)</option>
-          </select>
-        </div>
-
-        <!-- Recording Control & Visualizer Bar -->
-        <div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 14px 18px; margin-bottom: 20px; display: flex; align-items: center; gap: 14px;">
-          
-          <!-- Start / Stop Button -->
-          <button id="modal-rec-btn" onclick="toggleModalAudioRecording()" style="background: #ef4444; color: #fff; border: none; border-radius: 50px; padding: 8px 18px; font-size: 0.78rem; font-weight: 800; display: flex; align-items: center; gap: 8px; cursor: pointer; transition: all 0.2s ease;">
-            <span id="modal-rec-dot" style="width: 8px; height: 8px; border-radius: 50%; background: #fff;"></span>
-            <span id="modal-rec-label">Start</span>
-          </button>
-
-          <!-- Progress Bar / Timeline -->
-          <div style="flex: 1; height: 8px; background: rgba(255,255,255,0.08); border-radius: 4px; overflow: hidden; position: relative;">
-            <div id="modal-rec-progress" style="width: 0%; height: 100%; background: linear-gradient(90deg, #09c006, #00ffcc); border-radius: 4px; transition: width 0.1s linear;"></div>
-          </div>
-
-          <!-- Time Display -->
-          <span id="modal-rec-timer" style="font-family: 'IBM Plex Mono', monospace; font-size: 0.82rem; font-weight: 700; color: #fff; min-width: 40px; text-align: right;">0:00</span>
-        </div>
-
-        <!-- Live input level: shows the mic is genuinely hearing the candidate,
-             rather than only that time is passing. -->
-        <div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 12px 18px; margin-bottom: 20px;">
-          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
-            <i class="fas fa-wave-square" style="color: var(--muted); font-size: 0.8rem;"></i>
-            <div style="flex: 1; height: 6px; background: rgba(255,255,255,0.08); border-radius: 3px; overflow: hidden;">
-              <div id="modal-level-fill" style="width: 0%; height: 100%; background: var(--g); border-radius: 3px; transition: width 0.08s linear;"></div>
-            </div>
-          </div>
-          <p id="modal-voice-hint" style="font-size: 0.72rem; color: var(--muted); margin: 0;">Press Start, then read the sentence aloud</p>
-        </div>
-
-        <!-- Interviewer voice. Kept beside the microphone check so every audio
-             decision is made in one place, rather than on the page behind. -->
-        <div style="border-top:1px solid rgba(255,255,255,0.08); padding-top:18px; margin-bottom:20px;">
-          <p style="font-size:0.72rem;color:var(--muted);margin:0 0 10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;">
-            Who interviews you</p>
-          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-            <select id="voice-select"
-              style="flex:1 1 220px;min-width:0;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1);padding:11px 13px;border-radius:12px;color:#fff;font-size:0.85rem;cursor:pointer;">
-              <option value="">Loading voices&hellip;</option>
-            </select>
-            <button type="button" id="voice-preview-btn" onclick="previewVoice()"
-              style="flex:0 0 auto;white-space:nowrap;background:rgba(9,192,6,0.12);border:1px solid rgba(9,192,6,0.4);padding:11px 16px;border-radius:12px;color:var(--g);font-size:0.82rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:7px;">
-              <i class="fas fa-play"></i> <span id="voice-preview-label">Hear it</span>
-            </button>
-          </div>
-          <p id="voice-hint" style="font-size:0.72rem;color:var(--muted);margin:9px 0 0;">This is the voice that will interview you.</p>
-        </div>
-
-        <!-- Confirmation Checkbox -->
-        <div style="display: flex; align-items: flex-start; gap: 10px; margin-bottom: 24px;">
-          <input type="checkbox" id="modal-confirm-checkbox" onchange="validateModalNextButton()" style="margin-top: 3px; accent-color: var(--g); width: 16px; height: 16px; cursor: pointer;">
-          <label for="modal-confirm-checkbox" style="font-size: 0.75rem; color: var(--muted); line-height: 1.45; cursor: pointer;">
-            I confirm that my voice is clearly audible and my microphone is working properly. I understand that audio will be required during this assessment.
-          </label>
-        </div>
-
-        <!-- Action Next Button -->
-        <button id="modal-btn-next" onclick="completeVoiceVerification()" disabled
-          style="width: 100%; padding: 14px; border-radius: 12px; border: none; font-size: 0.88rem; font-weight: 800; letter-spacing: 1px; cursor: not-allowed; opacity: 0.5; background: rgba(255,255,255,0.08); color: var(--muted); transition: all 0.2s ease;">
-          Next
+        <button onclick="closeVoiceVerifyModal()" aria-label="Close"
+          style="position:fixed; top:22px; right:24px; background:rgba(255,255,255,.06);
+                 border:1px solid rgba(255,255,255,.12); color:#9fb0a4; width:34px; height:34px;
+                 border-radius:50%; cursor:pointer; font-size:.9rem; z-index:2;">
+          <i class="fas fa-times"></i>
         </button>
 
+        <div style="width: min(300px, 62vw); aspect-ratio: 9/16; margin: 0 auto 26px; border-radius: 26px;
+                    overflow: hidden; border: 2px solid rgba(9,192,6,.55); background: #0a0f0b;
+                    box-shadow: 0 24px 70px rgba(0,0,0,.7), 0 0 36px rgba(9,192,6,.18); position: relative;">
+          <video id="ananya-intro-video" playsinline preload="auto"
+                 poster="/mock_interview/panel/ananya-916.webp"
+                 style="width:100%; height:100%; object-fit:cover; object-position:center 18%; display:block;">
+            <source src="/mock_interview/panel/ananya-greeting.mp4" type="video/mp4">
+          </video>
+          <div style="position:absolute; left:0; right:0; bottom:0; padding:16px 10px 8px; text-align:left;
+                      background:linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,.88) 62%);">
+            <div style="font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:700; color:#fff;">Ananya Rao</div>
+            <div style="font-size:9px; color:rgba(255,255,255,.65);">Senior Software Engineer</div>
+          </div>
+        </div>
+
+        <p id="audio-check-status" style="font-size:clamp(1.15rem,3.6vw,1.5rem); font-weight:800; color:#fff; margin:0 0 9px; line-height:1.35; letter-spacing:-.01em; min-height:1.35em;">
+          Connecting&hellip;
+        </p>
+        <p id="audio-check-sub" style="font-size:clamp(.85rem,2.4vw,.95rem); color:var(--muted); margin:0 0 26px; line-height:1.55; min-height:1.4em;">
+          &nbsp;
+        </p>
+
+        <!-- Live input level. The only control on screen, and it is not a
+             control -- it is feedback that the microphone is alive. -->
+        <div style="display:flex; align-items:flex-end; justify-content:center; gap:6px; height:60px; margin-bottom:20px;">
+          <span class="lvl-bar"></span><span class="lvl-bar"></span><span class="lvl-bar"></span>
+          <span class="lvl-bar"></span><span class="lvl-bar"></span><span class="lvl-bar"></span>
+          <span class="lvl-bar"></span><span class="lvl-bar"></span><span class="lvl-bar"></span>
+        </div>
+
+        <button type="button" id="audio-check-retry" onclick="startAudioCheckListening()"
+          style="display:none; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.16);
+                 padding:9px 18px; border-radius:10px; color:#cbd5e1; font-size:.78rem; font-weight:700; cursor:pointer;">
+          <i class="fas fa-rotate-right" style="font-size:.7rem"></i> Try again
+        </button>
       </div>
     </div>
 
@@ -4553,15 +4518,190 @@ Key Requirements:
       }
     }
 
+    // ── Ananya's audio-check greeting ────────────────────────────────────
+    // Plays on opening the modal. Browsers block autoplay with sound until
+    // the page has been interacted with, so a failed play is expected rather
+    // than an error -- the button is there for exactly that case.
+    function playAnanyaIntro() {
+      const v = document.getElementById('ananya-intro-video');
+      const label = document.getElementById('ananya-play-label');
+      if (!v) return;
+      try {
+        v.currentTime = 0;
+        v.muted = false;
+        const pr = v.play();
+        if (pr && pr.catch) {
+          pr.then(() => { if (label) label.textContent = 'Playing…'; })
+            .catch(() => { if (label) label.textContent = 'Hear Ananya'; });
+        }
+      } catch (e) { /* the poster still shows her */ }
+      v.onended = () => { if (label) label.textContent = 'Play again'; };
+    }
+
+    // ── Automatic audio check ────────────────────────────────────────────
+    // Ananya asks, the page listens, and the moment it hears a real voice it
+    // moves on. The old flow needed a Start press, four seconds of a scripted
+    // sentence, a tick box and a Next click -- four actions to prove a
+    // microphone works, which the microphone can prove by itself.
+    let acStream = null, acCtx = null, acAnalyser = null, acRAF = null;
+    let acVoiceMs = 0, acLastTick = 0, acDone = false, acNudgeAt = 0;
+
+    const AC_VOICE_NEEDED_MS = 1200;   // sustained speech, not a cough
+    const AC_RMS_FLOOR       = 0.022;  // above room tone
+
+    // She speaks the outcome rather than only displaying it. Pre-rendered in
+    // her interview voice (aura-asteria-en) so the audio check and the
+    // interview are unmistakably the same person, and so there is no
+    // synthesis wait at the moment it needs to play.
+    let acClip = null;
+    function acSpeak(file, onDone) {
+      try { if (acClip) { acClip.pause(); acClip = null; } } catch (e) {}
+      try {
+        acClip = new Audio('/mock_interview/panel/' + file);
+        acClip.onended = () => { if (onDone) onDone(); };
+        acClip.onerror = () => { if (onDone) onDone(); };
+        const pr = acClip.play();
+        if (pr && pr.catch) pr.catch(() => { if (onDone) onDone(); });
+      } catch (e) { if (onDone) onDone(); }
+    }
+
+    function acSay(main, sub) {
+      const a = document.getElementById('audio-check-status');
+      const b = document.getElementById('audio-check-sub');
+      if (a && main !== null) a.textContent = main;
+      if (b && sub  !== null) b.innerHTML = sub || '&nbsp;';
+    }
+
+    function acBars(level) {
+      const bars = document.querySelectorAll('.lvl-bar');
+      bars.forEach((b, i) => {
+        // Centre bars react most, so it reads as a voice rather than a meter.
+        const weight = 1 - Math.abs(i - (bars.length - 1) / 2) / bars.length;
+        const h = 6 + Math.min(1, level * 3.2) * 50 * (0.45 + weight);
+        b.style.height = h.toFixed(0) + 'px';
+        b.classList.toggle('hot', level > AC_RMS_FLOOR);
+      });
+    }
+
+    function stopAudioCheckListening() {
+      if (acRAF) { cancelAnimationFrame(acRAF); acRAF = null; }
+      if (acStream) { acStream.getTracks().forEach(t => t.stop()); acStream = null; }
+      if (acCtx) { try { acCtx.close(); } catch (e) {} acCtx = null; }
+      acAnalyser = null;
+    }
+
+    async function startAudioCheckListening() {
+      const retry = document.getElementById('audio-check-retry');
+      if (retry) retry.style.display = 'none';
+      acVoiceMs = 0; acDone = false; acLastTick = performance.now();
+      window.__acNudged = false;
+      acNudgeAt = performance.now() + 9000;
+
+      acSay('Listening…', 'Say anything — your name is enough.');
+
+      try {
+        acStream = await navigator.mediaDevices.getUserMedia({
+          audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
+        });
+      } catch (err) {
+        acSay('I cannot reach your microphone',
+              'Allow microphone access in your browser, then try again.');
+        if (retry) retry.style.display = 'inline-flex';
+        return;
+      }
+
+      acCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (acCtx.state === 'suspended') { try { await acCtx.resume(); } catch (e) {} }
+      acAnalyser = acCtx.createAnalyser();
+      acAnalyser.fftSize = 1024;
+      acCtx.createMediaStreamSource(acStream).connect(acAnalyser);
+
+      const buf = new Uint8Array(acAnalyser.fftSize);
+      const tick = () => {
+        if (!acAnalyser || acDone) return;
+        acAnalyser.getByteTimeDomainData(buf);
+        let sum = 0;
+        for (let i = 0; i < buf.length; i++) { const d = (buf[i] - 128) / 128; sum += d * d; }
+        const rms = Math.sqrt(sum / buf.length);
+        acBars(rms);
+
+        const now = performance.now();
+        const dt = now - acLastTick; acLastTick = now;
+
+        if (rms > AC_RMS_FLOOR) {
+          acVoiceMs += dt;
+          if (acVoiceMs > 300) acSay('I can hear you', 'Keep going for a moment…');
+          if (acVoiceMs >= AC_VOICE_NEEDED_MS) { acPass(); return; }
+        } else {
+          // Decay rather than reset: natural pauses between words should not
+          // throw away progress.
+          acVoiceMs = Math.max(0, acVoiceMs - dt * 0.6);
+          if (now > acNudgeAt) {
+            acSay('I still cannot hear you',
+                  'Check your microphone is not muted, then speak again.');
+            // Spoken only the first time; repeating it would nag.
+            if (!window.__acNudged) { window.__acNudged = true; acSpeak('ananya-cannot-hear.mp3'); }
+            acNudgeAt = now + 12000;
+          }
+        }
+        acRAF = requestAnimationFrame(tick);
+      };
+      acRAF = requestAnimationFrame(tick);
+    }
+
+    function acPass() {
+      if (acDone) return;
+      acDone = true;
+      stopAudioCheckListening();
+      document.querySelectorAll('.lvl-bar').forEach(b => { b.style.height = '6px'; b.classList.add('hot'); });
+      acSay('You are audible', 'Taking you into the interview…');
+
+      // Everything downstream still expects these, so the stripped-back flow
+      // satisfies the same contract the old form did.
+      window.audioRecordedDuration = 5;
+      window.modalVoiceDetectedMs = 9999;
+
+      // Advance when she has finished speaking rather than on a fixed timer,
+      // so the candidate is never cut off mid-sentence. The timeout is only a
+      // guard against the clip failing to load.
+      let moved = false;
+      const go = () => { if (!moved) { moved = true; completeVoiceVerification(); } };
+      acSpeak('ananya-audible.mp3', () => setTimeout(go, 250));
+      setTimeout(go, 6000);
+    }
+
     function openVoiceVerifyModal() {
       const m = document.getElementById('voice-verify-modal');
       if (m) m.style.display = 'flex';
-      populateAudioDevices();
+      acSay('Connecting\u2026', '&nbsp;');
+
+      const v = document.getElementById('ananya-intro-video');
+      if (v) {
+        // Listening begins when she stops talking, so the microphone never
+        // picks up her own voice and passes the candidate by mistake.
+        v.onended = () => startAudioCheckListening();
+        v.onerror = () => startAudioCheckListening();
+        setTimeout(() => {
+          try {
+            v.currentTime = 0; v.muted = false;
+            const pr = v.play();
+            if (pr && pr.catch) pr.catch(() => startAudioCheckListening());
+          } catch (e) { startAudioCheckListening(); }
+        }, 250);
+        // Safety net: if the clip never fires `ended`, listen anyway.
+        setTimeout(() => { if (!acAnalyser && !acDone) startAudioCheckListening(); }, 13000);
+      } else {
+        startAudioCheckListening();
+      }
     }
 
     function closeVoiceVerifyModal() {
       const m = document.getElementById('voice-verify-modal');
       if (m) m.style.display = 'none';
+      const v = document.getElementById('ananya-intro-video');
+      if (v) { try { v.pause(); v.currentTime = 0; } catch (e) {} }
+      stopAudioCheckListening();
+      try { if (acClip) { acClip.pause(); acClip = null; } } catch (e) {}
       if (modalIsRecording) {
         stopModalAudioRecording();
       }

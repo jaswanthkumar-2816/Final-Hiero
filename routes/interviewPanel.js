@@ -18,9 +18,11 @@
  * and need audio stitching for no real gain.
  */
 
-// Voices are Deepgram Aura-2, which the account has (102 models) though the
-// app's picker still lists only the 11 older Aura-1 ones. Aura-2 costs about
-// 0.8s more per utterance and sounds markedly better. The three are kept
+// Voices are Deepgram Aura-1. Aura-2 sounds better in isolation but
+// synthesises 6-8x slower on a real question -- measured at 3.2-3.8s against
+// 0.4-0.6s for the same text -- and that silence lands on top of question
+// generation. Three seconds of nothing before every question reads as the
+// product being broken, which is worth more than the quality difference. The three are kept
 // maximally distinguishable — two American, one British, mixed gender — because
 // over a laptop speaker similar voices defeat the whole purpose.
 //
@@ -37,7 +39,7 @@ const PANEL = [
         domain: 'the fundamentals and the coding side',
         photo: '/mock_interview/panel/ananya-916.webp',
         gender: 'female',
-        voiceId: 'aura-2-asteria-en',       // American, clear/confident/knowledgeable
+        voiceId: 'aura-asteria-en',       // American, warm and clear
         owns: ['technical', 'problem_solving', 'coding', 'dsa'],
         prefersDifficulty: ['warm-up', 'easy']
     },
@@ -49,7 +51,7 @@ const PANEL = [
         domain: 'architecture and how things hold up at scale',
         photo: '/mock_interview/panel/rohan-916.webp',
         gender: 'male',
-        voiceId: 'aura-2-saturn-en',        // American, baritone/knowledgeable/confident
+        voiceId: 'aura-zeus-en',        // American, deep and authoritative
         // Also claims the meatier technical questions. Routing on category
         // alone starved the architect of turns -- the bank is 25 technical to
         // 5 design -- and banding him on 'hard' did not help either, because
@@ -68,7 +70,7 @@ const PANEL = [
         domain: 'how you work with a team',
         photo: '/mock_interview/panel/karan-916.webp',
         gender: 'male',
-        voiceId: 'aura-2-draco-en',         // British, warm/approachable — distinct from Rohan
+        voiceId: 'aura-helios-en',         // British, warm/approachable — distinct from Rohan
         owns: ['behavioral', 'behavioural', 'culture', 'leadership', 'ownership']
     }
 ];

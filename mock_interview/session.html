@@ -627,7 +627,7 @@
        True lip-sync would need a talking-head service: 10-40s of generation per
        question on top of the existing wait, and a per-minute cost on every
        interview. Not usable live. */
-    .panel-strip { width: 100%; max-width: 640px; margin: 4px auto 14px; text-align: center; }
+    .panel-strip { width: 100%; max-width: 720px; margin: 6px auto 12px; text-align: center; }
     .panel-members {
       display: flex; justify-content: center; align-items: center;
       gap: clamp(8px, 2.2vw, 14px);
@@ -635,7 +635,7 @@
 
     .panel-member {
       --speak: 0;
-      --tile-w: clamp(62px, 17vw, 78px);
+      --tile-w: clamp(62px, 17vw, 132px);
       --photo-zoom: 1.16;
       position: relative; flex: 0 0 auto;
       width: var(--tile-w); aspect-ratio: 9 / 16;
@@ -647,7 +647,7 @@
                   filter .45s ease, border-color .45s ease, box-shadow .45s ease;
     }
     .panel-member.is-active {
-      --tile-w: clamp(104px, 29vw, 132px);
+      --tile-w: clamp(104px, 29vw, 248px);
       opacity: 1; filter: none;
       border-color: rgba(50,193,74,.75);
       box-shadow:
@@ -685,19 +685,33 @@
     }
     .panel-member.is-speaking .panel-jaw { opacity: 1; }
 
+
+    /* Avatar video. Cross-faded rather than switched, so the change between
+       listening and talking is not a visible jump cut. */
+    .panel-vid {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      object-fit: cover; object-position: center 18%;
+      transform: scale(var(--photo-zoom));
+      transition: opacity .28s ease;
+    }
+    .panel-vid-idle  { opacity: 1; }
+    .panel-vid-speak { opacity: 0; }
+    .panel-member.is-speaking .panel-vid-idle  { opacity: 0; }
+    .panel-member.is-speaking .panel-vid-speak { opacity: 1; }
+
     /* Name plate, bottom-left, the way a call client does it. */
     .panel-plate {
-      position: absolute; left: 0; right: 0; bottom: 0; padding: 16px 7px 6px;
+      position: absolute; left: 0; right: 0; bottom: 0; padding: 12px 6px 4px;
       background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,.85) 58%);
       text-align: left; pointer-events: none;
     }
     .panel-name {
-      font-family: ui-monospace, monospace; font-size: 10px; font-weight: 700;
+      font-family: ui-monospace, monospace; font-size: 9.5px; font-weight: 700;
       color: #fff; line-height: 1.15;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
     .panel-role {
-      font-size: 8px; color: rgba(255,255,255,.68); line-height: 1.25; margin-top: 1px;
+      font-size: 7.5px; color: rgba(255,255,255,.6); line-height: 1.25; margin-top: 0;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
     .panel-member:not(.is-active) .panel-role { display: none; }
@@ -717,8 +731,8 @@
     }
 
     .panel-nowspeaking {
-      margin-top: 10px; min-height: 14px;
-      font-family: ui-monospace, monospace; font-size: 10px; font-weight: 700;
+      margin-top: 6px; min-height: 12px;
+      font-family: ui-monospace, monospace; font-size: 8.5px; font-weight: 700;
       letter-spacing: .1em; text-transform: uppercase; color: #64748b;
     }
     .panel-nowspeaking b { color: var(--g, #32c14a); font-weight: 700; }
@@ -1510,70 +1524,36 @@
   <main class="relative z-10 flex-1 grid grid-cols-1 md:grid-cols-12 gap-0 w-full overflow-hidden session-stage" style="height: calc(100vh - 64px);">
 
     <!-- LEFT: transcript -->
-    <aside id="transcript-rail" class="hidden lg:flex lg:col-span-3 flex-col h-full border-r border-white/[0.08] panel-rail overflow-hidden">
-      <div class="px-4 py-3.5 border-b border-white/[0.08] flex items-center justify-between flex-shrink-0 bg-white/[0.02]">
-        <div class="flex items-center gap-2.5">
-          <span class="w-2.5 h-2.5 rounded-full bg-primary shadow-[0_0_8px_#3fb950]"></span>
-          <span class="rail-heading text-white">Live Transcript</span>
-        </div>
-        <div class="flex items-center gap-2">
-          <button onclick="window.toggleAutoScroll()" id="auto-scroll-btn" class="px-3 py-1 rounded-lg bg-primary/15 border border-primary/30 text-[11px] font-mono font-bold text-primary hover:bg-primary/25 transition-all cursor-pointer shadow-sm" title="Toggle Auto-Scroll">
-            <i class="fa-solid fa-angles-down text-[10px]"></i> Auto
-          </button>
-          <span class="text-[11px] text-slate-300 font-mono font-bold px-2.5 py-1 rounded-lg bg-white/[0.06] border border-white/10" id="transcript-count-badge">0 turns</span>
-        </div>
-      </div>
-
-      <div class="flex-1 p-4 space-y-3 overflow-y-auto custom-scrollbar scroll-smooth" id="transcript-chat-list" style="max-height: calc(100vh - 120px);">
-        <div class="text-center py-12 px-5 text-slate-400 text-xs font-sans space-y-2.5">
-          <div class="w-12 h-12 rounded-2xl bg-primary/15 border border-primary/30 text-primary flex items-center justify-center mx-auto mb-3 text-base shadow-[0_0_20px_rgba(7,226,25,0.15)]">
-            <i class="fa-solid fa-comments"></i>
-          </div>
-          <p class="font-bold text-white text-sm font-sans">Conversation starts here</p>
-          <p class="text-[12.5px] text-slate-300 leading-relaxed max-w-xs mx-auto">AI questions, spoken responses, and real-time delivery tips appear here live.</p>
-        </div>
-      </div>
-
-      <div class="px-3.5 py-2.5 border-t border-white/[0.08] flex items-center justify-between text-[11px] font-mono font-semibold text-slate-300 bg-white/[0.02]">
-        <span class="flex items-center gap-2 text-primary font-bold">
-          <i class="fa-solid fa-bolt text-[10px] animate-pulse"></i> Live sync active
-        </span>
-        <button onclick="const el = document.getElementById('transcript-chat-list'); if (el) el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });" class="hover:text-white transition-colors cursor-pointer text-slate-400 hover:text-white">
-          Latest ↓
-        </button>
-      </div>
-    </aside>
 
     <!-- CENTER: question + answer -->
-    <section id="interview-stage" class="col-span-12 lg:col-span-6 flex flex-col items-center justify-start p-4 sm:p-7 overflow-y-auto relative gap-1">
-      
-      <div class="w-full max-w-2xl flex items-center justify-between mb-3 mt-1">
-        <div class="flex items-center gap-2 font-mono text-xs font-bold text-slate-300 uppercase tracking-[0.14em]">
-          <span class="text-primary font-black text-sm">Q</span>
-          <span id="q-number-current" class="text-white text-base font-black">1</span>
-          <span class="text-slate-500 font-bold">/</span>
-          <span id="q-number-total" class="text-slate-300 text-sm font-bold">4</span>
+    <!-- LEFT: answer guide -->
+      <aside id="answer-guide-card" class="col-span-12 lg:col-span-4 flex flex-col h-full border-r border-white/[0.08] panel-rail overflow-y-auto p-4 text-left transition-all duration-300">
+        <div class="flex items-center justify-between border-b border-white/[0.08] pb-1.5 mb-1.5">
+          <div class="flex items-center gap-1.5">
+            <i class="fa-solid fa-lightbulb text-primary text-[10px]"></i>
+            <span class="font-mono text-[10px] font-bold text-primary uppercase tracking-wider">How to answer</span>
+          </div>
+          <span class="font-mono text-[9px] font-bold px-2 py-0.5 rounded-full bg-white/10 text-slate-400 border border-white/10">tips</span>
         </div>
-        <div class="flex items-center gap-2 font-mono text-[11px] text-primary font-bold tracking-wider px-3 py-1 rounded-full bg-primary/10 border border-primary/25 shadow-sm">
-          <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-          <span id="q-category-hud">CORE TECHNICAL</span>
+        <div id="answer-guide-items" class="flex flex-wrap gap-2 pt-1">
+          <span class="px-2 py-1 rounded-md bg-white/[0.04] border border-white/10 text-[11px] font-sans text-slate-300 flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-primary shrink-0"></span>
+            <span>Core background & recent experience</span>
+          </span>
+          <span class="px-2 py-1 rounded-md bg-white/[0.04] border border-white/10 text-[11px] font-sans text-slate-300 flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-primary shrink-0"></span>
+            <span>Relevant project highlights</span>
+          </span>
+          <span class="px-2 py-1 rounded-md bg-white/[0.04] border border-white/10 text-[11px] font-sans text-slate-300 flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-primary shrink-0"></span>
+            <span>Target role alignment</span>
+          </span>
         </div>
-      </div>
 
-      <!-- The panel. Hidden until /start reports one, so a single-voice
-           session (or an older one resumed) is unaffected. -->
-      <div id="panel-strip" class="panel-strip" hidden>
-        <div class="panel-members" id="panel-members"></div>
-        <div class="panel-nowspeaking" id="panel-nowspeaking"></div>
-      </div>
-
-      <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.12] text-[11px] font-mono font-bold text-slate-200 uppercase tracking-[0.12em] mb-4 shadow-sm backdrop-blur-md">
-        <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-        <span id="ai-engine-status">Interviewer ready</span>
-        <span id="answer-clock" class="answer-clock" style="display:none"></span>
-      </div>
-
-      <div class="w-full max-w-2xl question-hero p-5 sm:p-7 space-y-4 mb-4 text-left">
+        <!-- Question and answer live with the guide: the candidate reads how
+             to answer, the question, and types, without their eye leaving the
+             column. The centre is then just the panel and the transcript. -->
+      <div class="w-full question-hero p-4 space-y-3 mb-3 text-left">
         <div class="flex flex-wrap items-center justify-between gap-2.5 border-b border-white/[0.08] pb-3.5">
           <span class="font-mono text-[11px] font-extrabold uppercase tracking-[0.14em] text-slate-300 flex items-center gap-2" id="q-type-label">
             <i class="fa-solid fa-code text-primary text-xs"></i> <span>Technical question</span>
@@ -1592,154 +1572,7 @@
         </h2>
       </div>
 
-      <!-- Dedicated Answer Guide Card (Consider Mentioning / Reference Only) -->
-      <div id="answer-guide-card" class="w-full max-w-2xl soft-card text-left mb-3.5 transition-all duration-300">
-        <div class="flex items-center justify-between border-b border-white/[0.08] pb-2 mb-2">
-          <div class="flex items-center gap-2">
-            <div class="w-6 h-6 rounded-lg bg-primary/20 border border-primary/35 flex items-center justify-center text-primary text-xs">
-              <i class="fa-solid fa-lightbulb"></i>
-            </div>
-            <span class="font-mono text-[11px] font-bold text-primary uppercase tracking-wider">Answer guide</span>
-          </div>
-          <span class="font-mono text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-white/10 text-slate-300 border border-white/15">Optional tips</span>
-        </div>
-        <div id="answer-guide-items" class="flex flex-wrap gap-2 pt-1">
-          <span class="px-3 py-1.5 rounded-lg bg-white/[0.05] border border-white/10 text-xs font-sans font-medium text-slate-200 flex items-center gap-2 shadow-sm">
-            <span class="w-1.5 h-1.5 rounded-full bg-primary shrink-0"></span>
-            <span>Core background & recent experience</span>
-          </span>
-          <span class="px-3 py-1.5 rounded-lg bg-white/[0.05] border border-white/10 text-xs font-sans font-medium text-slate-200 flex items-center gap-2 shadow-sm">
-            <span class="w-1.5 h-1.5 rounded-full bg-primary shrink-0"></span>
-            <span>Relevant project highlights</span>
-          </span>
-          <span class="px-3 py-1.5 rounded-lg bg-white/[0.05] border border-white/10 text-xs font-sans font-medium text-slate-200 flex items-center gap-2 shadow-sm">
-            <span class="w-1.5 h-1.5 rounded-full bg-primary shrink-0"></span>
-            <span>Target role alignment</span>
-          </span>
-        </div>
-      </div>
-
-      <!-- Real-Time Speech, Grammar & Phrasing Coach Widget -->
-      <div id="grammar-coach-card" class="w-full max-w-2xl matrix-glass-card p-4 rounded-2xl border border-primary/30 space-y-2.5 text-left mb-4 transition-all duration-300 shadow-[0_0_25px_rgba(7,226,25,0.08)]" style="display: none;">
-        <div class="flex items-center justify-between border-b border-white/[0.08] pb-2">
-          <div class="flex items-center gap-2">
-            <div class="w-6 h-6 rounded-lg bg-primary/20 border border-primary/40 flex items-center justify-center text-primary text-xs">
-              <i class="fa-solid fa-wand-magic-sparkles"></i>
-            </div>
-            <span class="font-mono text-[11px] font-bold text-primary uppercase tracking-wider">AI Speech &amp; Grammar Coach</span>
-          </div>
-          <span class="font-mono text-[10px] font-bold px-2 py-0.5 rounded bg-primary/15 text-primary border border-primary/30" id="coach-score-badge">9/10 Delivery</span>
-        </div>
-
-        <!-- Polished / Recommended Phrasing -->
-        <div class="space-y-1">
-          <div class="text-[10px] font-mono text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
-            <i class="fa-solid fa-sparkles text-amber-400"></i> Recommended Executive Phrasing:
-          </div>
-          <p class="text-xs sm:text-sm font-sans font-semibold text-white leading-relaxed bg-white/[0.03] p-2.5 rounded-xl border border-white/[0.06]" id="coach-improved-phrase">
-            "I architected the database schema to maintain low latency under high load..."
-          </p>
-        </div>
-
-        <!-- Constructive Grammar / Structure Tip -->
-        <div class="flex items-start gap-2 text-[11px] font-sans text-slate-300 bg-primary/[0.04] p-2 rounded-xl border border-primary/20">
-          <i class="fa-solid fa-lightbulb text-primary text-xs mt-0.5 flex-shrink-0"></i>
-          <span id="coach-grammar-tip">Use direct impact metrics and active verbs to elevate interview confidence.</span>
-        </div>
-      </div>
-
-      <!-- Audio Equalizer & Interactive Mic Widget -->
-      <div class="flex items-center justify-center gap-4 mb-3">
-        
-        <!-- Left Soundwave Bars -->
-        <div class="hidden sm:flex items-center gap-1 h-8" id="audio-visualizer">
-          <div class="eq-bar" style="animation-delay: 0s;"></div>
-          <div class="eq-bar" style="animation-delay: 0.15s;"></div>
-          <div class="eq-bar" style="animation-delay: 0.3s;"></div>
-          <div class="eq-bar" style="animation-delay: 0.1s;"></div>
-          <div class="eq-bar" style="animation-delay: 0.25s;"></div>
-        </div>
-
-        <!-- Clickable Microphone Access & Status Pill -->
-        <button id="main-mic-pill" onclick="window.toggleMic()" class="mic-off focus-ring px-5 py-2.5 rounded-full text-white font-sans font-bold text-xs flex items-center gap-3 hover:scale-[1.03] transition-all cursor-pointer group" aria-pressed="false" aria-label="Toggle microphone">
-          <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs transition-all" id="mic-btn">
-            <i class="fa-solid fa-microphone-slash"></i>
-          </div>
-          <span class="font-mono text-[11px] tracking-wider uppercase font-bold" id="mic-status-text">Turn on mic</span>
-        </button>
-
-        <!-- Right Soundwave Bars -->
-        <div class="hidden sm:flex items-center gap-1 h-8 scale-x-[-1]">
-          <div class="eq-bar" style="animation-delay: 0.1s;"></div>
-          <div class="eq-bar" style="animation-delay: 0.25s;"></div>
-          <div class="eq-bar" style="animation-delay: 0s;"></div>
-          <div class="eq-bar" style="animation-delay: 0.2s;"></div>
-          <div class="eq-bar" style="animation-delay: 0.15s;"></div>
-        </div>
-      </div>
-
-      <!-- Acoustic Disturbance & Language Recognition Telemetry Banner -->
-      <div id="acoustic-telemetry-hud" class="w-full max-w-2xl matrix-glass-card px-4 py-2.5 rounded-xl border border-white/[0.1] mb-3 flex flex-wrap items-center justify-between gap-2.5 text-left transition-all duration-300">
-        <!-- Environment / Disturbance Indicator -->
-        <div class="flex items-center gap-2.5">
-          <div id="noise-indicator-dot" class="w-2.5 h-2.5 rounded-full bg-primary shadow-[0_0_10px_rgba(7,226,25,0.9)] animate-pulse"></div>
-          <div class="flex flex-col">
-            <span id="noise-status-badge" class="font-mono text-[11px] font-bold text-primary tracking-wider uppercase flex items-center gap-1.5">
-              <i class="fa-solid fa-shield-halved"></i> <span>Acoustic Space: Clean</span>
-            </span>
-            <span id="noise-subtext" class="text-[10px] text-slate-300 font-sans">Optimal silent space for accurate voice recognition</span>
-          </div>
-        </div>
-
-        <!-- Language & Dialect Telemetry -->
-        <div class="flex items-center gap-2 bg-black/50 px-3 py-1.5 rounded-lg border border-white/[0.1]">
-          <i class="fa-solid fa-globe text-primary text-xs"></i>
-          <span class="font-mono text-[10px] text-slate-200 font-bold" id="hud-detected-lang">Detected: English (India / en-IN)</span>
-        </div>
-      </div>
-
-      <!-- Prominent Disturbance Alert Banner (Appears when high outside noise is detected) -->
-      <div id="disturbance-alert-banner" class="w-full max-w-2xl bg-gradient-to-r from-red-950/90 via-amber-950/90 to-red-950/90 border-2 border-red-500/80 rounded-2xl p-3.5 mb-3 flex items-center justify-between gap-3 shadow-[0_0_30px_rgba(239,68,68,0.35)] transition-all animate-pulse" style="display: none;">
-        <div class="flex items-center gap-3 text-left">
-          <div class="w-9 h-9 rounded-xl bg-red-500/20 border border-red-500/40 text-red-400 flex items-center justify-center text-sm shrink-0">
-            <i class="fa-solid fa-volume-xmark"></i>
-          </div>
-          <div>
-            <div class="text-xs font-bold text-red-300 font-sans flex items-center gap-1.5">
-              <span>OUTSIDE NOISE / DISTURBANCE DETECTED</span>
-              <span class="px-1.5 py-0.2 rounded bg-red-500/30 text-red-200 text-[8px] font-mono font-bold">WARNING</span>
-            </div>
-            <p class="text-[11px] text-slate-200 font-sans mt-0.5">
-              High background disturbance detected. Please <strong>move to a silent space</strong> so outside noise is not captured as your answer.
-            </p>
-          </div>
-        </div>
-        <button onclick="window.dismissDisturbanceBanner()" class="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-slate-300 text-xs font-mono transition-all shrink-0 cursor-pointer">
-          Dismiss
-        </button>
-      </div>
-
-      <!-- Prominent Question Action Alert: Turn On Mic Popup -->
-      <div id="mic-prompt-popup" class="w-full max-w-2xl bg-gradient-to-r from-[#0d2a14]/95 via-[#06180b]/95 to-[#0d2a14]/95 border-2 border-primary rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-[0_0_35px_rgba(7,226,25,0.35)] transition-all animate-bounce-subtle" style="display: none;">
-        <div class="flex items-center gap-3.5 text-left w-full sm:w-auto">
-          <div class="w-11 h-11 rounded-full bg-primary/20 border border-primary text-primary flex items-center justify-center text-lg shrink-0 shadow-[0_0_18px_rgba(7,226,25,0.45)] animate-pulse">
-            <i class="fa-solid fa-microphone"></i>
-          </div>
-          <div>
-            <div class="text-xs sm:text-sm font-bold text-white font-sans flex items-center gap-2">
-              <span>Interviewer is ready for your answer</span>
-              <span class="px-2 py-0.5 rounded bg-primary text-[#050805] text-[10px] font-mono font-black tracking-wider">ACTION REQUIRED</span>
-            </div>
-            <p class="text-[12px] text-slate-200 font-sans mt-0.5">Turn on your microphone to speak your response clearly to the AI.</p>
-          </div>
-        </div>
-        <button onclick="window.enableAndStartSpeaking()" class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-primary hover:bg-[#3fb950] text-[#050805] font-sans font-black text-xs flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(7,226,25,0.5)] hover:scale-105 transition-all cursor-pointer shrink-0">
-          <i class="fa-solid fa-microphone"></i>
-          <span>TURN ON MIC</span>
-        </button>
-      </div>
-
-      <div class="w-full max-w-2xl answer-station p-4 sm:p-5 text-left space-y-3.5">
+      <div class="w-full answer-station p-3.5 text-left space-y-3.5">
         <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/[0.08] pb-3">
           <div class="flex items-center gap-2.5">
             <span class="w-2.5 h-2.5 rounded-full bg-primary shadow-[0_0_10px_#3fb950] animate-pulse" id="mic-live-dot"></span>
@@ -1802,6 +1635,203 @@
           </div>
         </div>
       </div>
+
+        <!-- The rest of the answering UI follows the answer box rather than
+             sitting in the centre: everything the candidate acts on is now in
+             one column, and it fills the space that was left empty below. -->
+      <div class="flex items-center justify-center gap-4 mb-3">
+        
+        <!-- Left Soundwave Bars -->
+        <div class="hidden sm:flex items-center gap-1 h-8" id="audio-visualizer">
+          <div class="eq-bar" style="animation-delay: 0s;"></div>
+          <div class="eq-bar" style="animation-delay: 0.15s;"></div>
+          <div class="eq-bar" style="animation-delay: 0.3s;"></div>
+          <div class="eq-bar" style="animation-delay: 0.1s;"></div>
+          <div class="eq-bar" style="animation-delay: 0.25s;"></div>
+        </div>
+
+        <!-- Clickable Microphone Access & Status Pill -->
+        <button id="main-mic-pill" onclick="window.toggleMic()" class="mic-off focus-ring px-5 py-2.5 rounded-full text-white font-sans font-bold text-xs flex items-center gap-3 hover:scale-[1.03] transition-all cursor-pointer group" aria-pressed="false" aria-label="Toggle microphone">
+          <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs transition-all" id="mic-btn">
+            <i class="fa-solid fa-microphone-slash"></i>
+          </div>
+          <span class="font-mono text-[11px] tracking-wider uppercase font-bold" id="mic-status-text">Turn on mic</span>
+        </button>
+
+        <!-- Right Soundwave Bars -->
+        <div class="hidden sm:flex items-center gap-1 h-8 scale-x-[-1]">
+          <div class="eq-bar" style="animation-delay: 0.1s;"></div>
+          <div class="eq-bar" style="animation-delay: 0.25s;"></div>
+          <div class="eq-bar" style="animation-delay: 0s;"></div>
+          <div class="eq-bar" style="animation-delay: 0.2s;"></div>
+          <div class="eq-bar" style="animation-delay: 0.15s;"></div>
+        </div>
+      </div>
+
+      <div id="mic-prompt-popup" class="w-full bg-gradient-to-r from-[#0d2a14]/95 via-[#06180b]/95 to-[#0d2a14]/95 border-2 border-primary rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-[0_0_35px_rgba(7,226,25,0.35)] transition-all animate-bounce-subtle" style="display: none;">
+        <div class="flex items-center gap-3.5 text-left w-full sm:w-auto">
+          <div class="w-11 h-11 rounded-full bg-primary/20 border border-primary text-primary flex items-center justify-center text-lg shrink-0 shadow-[0_0_18px_rgba(7,226,25,0.45)] animate-pulse">
+            <i class="fa-solid fa-microphone"></i>
+          </div>
+          <div>
+            <div class="text-xs sm:text-sm font-bold text-white font-sans flex items-center gap-2">
+              <span>Interviewer is ready for your answer</span>
+              <span class="px-2 py-0.5 rounded bg-primary text-[#050805] text-[10px] font-mono font-black tracking-wider">ACTION REQUIRED</span>
+            </div>
+            <p class="text-[12px] text-slate-200 font-sans mt-0.5">Turn on your microphone to speak your response clearly to the AI.</p>
+          </div>
+        </div>
+        <button onclick="window.enableAndStartSpeaking()" class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-primary hover:bg-[#3fb950] text-[#050805] font-sans font-black text-xs flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(7,226,25,0.5)] hover:scale-105 transition-all cursor-pointer shrink-0">
+          <i class="fa-solid fa-microphone"></i>
+          <span>TURN ON MIC</span>
+        </button>
+      </div>
+
+      <div id="acoustic-telemetry-hud" class="w-full matrix-glass-card px-4 py-2.5 rounded-xl border border-white/[0.1] mb-3 flex flex-wrap items-center justify-between gap-2.5 text-left transition-all duration-300">
+        <!-- Environment / Disturbance Indicator -->
+        <div class="flex items-center gap-2.5">
+          <div id="noise-indicator-dot" class="w-2.5 h-2.5 rounded-full bg-primary shadow-[0_0_10px_rgba(7,226,25,0.9)] animate-pulse"></div>
+          <div class="flex flex-col">
+            <span id="noise-status-badge" class="font-mono text-[11px] font-bold text-primary tracking-wider uppercase flex items-center gap-1.5">
+              <i class="fa-solid fa-shield-halved"></i> <span>Acoustic Space: Clean</span>
+            </span>
+            <span id="noise-subtext" class="text-[10px] text-slate-300 font-sans">Optimal silent space for accurate voice recognition</span>
+          </div>
+        </div>
+
+        <!-- Language & Dialect Telemetry -->
+        <div class="flex items-center gap-2 bg-black/50 px-3 py-1.5 rounded-lg border border-white/[0.1]">
+          <i class="fa-solid fa-globe text-primary text-xs"></i>
+          <span class="font-mono text-[10px] text-slate-200 font-bold" id="hud-detected-lang">Detected: English (India / en-IN)</span>
+        </div>
+      </div>
+
+      <div id="disturbance-alert-banner" class="w-full bg-gradient-to-r from-red-950/90 via-amber-950/90 to-red-950/90 border-2 border-red-500/80 rounded-2xl p-3.5 mb-3 flex items-center justify-between gap-3 shadow-[0_0_30px_rgba(239,68,68,0.35)] transition-all animate-pulse" style="display: none;">
+        <div class="flex items-center gap-3 text-left">
+          <div class="w-9 h-9 rounded-xl bg-red-500/20 border border-red-500/40 text-red-400 flex items-center justify-center text-sm shrink-0">
+            <i class="fa-solid fa-volume-xmark"></i>
+          </div>
+          <div>
+            <div class="text-xs font-bold text-red-300 font-sans flex items-center gap-1.5">
+              <span>OUTSIDE NOISE / DISTURBANCE DETECTED</span>
+              <span class="px-1.5 py-0.2 rounded bg-red-500/30 text-red-200 text-[8px] font-mono font-bold">WARNING</span>
+            </div>
+            <p class="text-[11px] text-slate-200 font-sans mt-0.5">
+              High background disturbance detected. Please <strong>move to a silent space</strong> so outside noise is not captured as your answer.
+            </p>
+          </div>
+        </div>
+        <button onclick="window.dismissDisturbanceBanner()" class="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-slate-300 text-xs font-mono transition-all shrink-0 cursor-pointer">
+          Dismiss
+        </button>
+      </div>
+
+      <div id="grammar-coach-card" class="w-full matrix-glass-card p-4 rounded-2xl border border-primary/30 space-y-2.5 text-left mb-4 transition-all duration-300 shadow-[0_0_25px_rgba(7,226,25,0.08)]" style="display: none;">
+        <div class="flex items-center justify-between border-b border-white/[0.08] pb-2">
+          <div class="flex items-center gap-2">
+            <div class="w-6 h-6 rounded-lg bg-primary/20 border border-primary/40 flex items-center justify-center text-primary text-xs">
+              <i class="fa-solid fa-wand-magic-sparkles"></i>
+            </div>
+            <span class="font-mono text-[11px] font-bold text-primary uppercase tracking-wider">AI Speech &amp; Grammar Coach</span>
+          </div>
+          <span class="font-mono text-[10px] font-bold px-2 py-0.5 rounded bg-primary/15 text-primary border border-primary/30" id="coach-score-badge">9/10 Delivery</span>
+        </div>
+
+        <!-- Polished / Recommended Phrasing -->
+        <div class="space-y-1">
+          <div class="text-[10px] font-mono text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+            <i class="fa-solid fa-sparkles text-amber-400"></i> Recommended Executive Phrasing:
+          </div>
+          <p class="text-xs sm:text-sm font-sans font-semibold text-white leading-relaxed bg-white/[0.03] p-2.5 rounded-xl border border-white/[0.06]" id="coach-improved-phrase">
+            "I architected the database schema to maintain low latency under high load..."
+          </p>
+        </div>
+
+        <!-- Constructive Grammar / Structure Tip -->
+        <div class="flex items-start gap-2 text-[11px] font-sans text-slate-300 bg-primary/[0.04] p-2 rounded-xl border border-primary/20">
+          <i class="fa-solid fa-lightbulb text-primary text-xs mt-0.5 flex-shrink-0"></i>
+          <span id="coach-grammar-tip">Use direct impact metrics and active verbs to elevate interview confidence.</span>
+        </div>
+      </div>
+      </aside>
+
+    <section id="interview-stage" class="col-span-12 lg:col-span-5 flex flex-col items-center justify-start p-4 sm:p-6 overflow-y-auto relative gap-1">
+      
+      <div class="w-full max-w-2xl flex items-center justify-between mb-3 mt-1">
+        <div class="flex items-center gap-2 font-mono text-xs font-bold text-slate-300 uppercase tracking-[0.14em]">
+          <span class="text-primary font-black text-sm">Q</span>
+          <span id="q-number-current" class="text-white text-base font-black">1</span>
+          <span class="text-slate-500 font-bold">/</span>
+          <span id="q-number-total" class="text-slate-300 text-sm font-bold">4</span>
+        </div>
+        <div class="flex items-center gap-2 font-mono text-[11px] text-primary font-bold tracking-wider px-3 py-1 rounded-full bg-primary/10 border border-primary/25 shadow-sm">
+          <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+          <span id="q-category-hud">CORE TECHNICAL</span>
+        </div>
+      </div>
+
+      <!-- The panel. Hidden until /start reports one, so a single-voice
+           session (or an older one resumed) is unaffected. -->
+      <div id="panel-strip" class="panel-strip" hidden>
+        <div class="panel-members" id="panel-members"></div>
+        <div class="panel-nowspeaking" id="panel-nowspeaking"></div>
+      </div>
+
+      <!-- Transcript sits with the panel: the avatar and what was said are
+           one thing, so they read better together than split across columns. -->
+    <div id="transcript-rail" class="w-full max-w-2xl flex flex-col rounded-2xl border border-white/[0.08] panel-rail overflow-hidden mb-4">
+      <div class="px-4 py-3.5 border-b border-white/[0.08] flex items-center justify-between flex-shrink-0 bg-white/[0.02]">
+        <div class="flex items-center gap-2.5">
+          <span class="w-2.5 h-2.5 rounded-full bg-primary shadow-[0_0_8px_#3fb950]"></span>
+          <span class="rail-heading text-white">Live Transcript</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="window.toggleAutoScroll()" id="auto-scroll-btn" class="px-3 py-1 rounded-lg bg-primary/15 border border-primary/30 text-[11px] font-mono font-bold text-primary hover:bg-primary/25 transition-all cursor-pointer shadow-sm" title="Toggle Auto-Scroll">
+            <i class="fa-solid fa-angles-down text-[10px]"></i> Auto
+          </button>
+          <span class="text-[11px] text-slate-300 font-mono font-bold px-2.5 py-1 rounded-lg bg-white/[0.06] border border-white/10" id="transcript-count-badge">0 turns</span>
+        </div>
+      </div>
+
+      <div class="flex-1 p-4 space-y-3 overflow-y-auto custom-scrollbar scroll-smooth" id="transcript-chat-list" style="max-height: 150px; min-height: 96px;">
+        <div class="text-center py-12 px-5 text-slate-400 text-xs font-sans space-y-2.5">
+          <div class="w-12 h-12 rounded-2xl bg-primary/15 border border-primary/30 text-primary flex items-center justify-center mx-auto mb-3 text-base shadow-[0_0_20px_rgba(7,226,25,0.15)]">
+            <i class="fa-solid fa-comments"></i>
+          </div>
+          <p class="font-bold text-white text-sm font-sans">Conversation starts here</p>
+          <p class="text-[12.5px] text-slate-300 leading-relaxed max-w-xs mx-auto">AI questions, spoken responses, and real-time delivery tips appear here live.</p>
+        </div>
+      </div>
+
+      <div class="px-3.5 py-2.5 border-t border-white/[0.08] flex items-center justify-between text-[11px] font-mono font-semibold text-slate-300 bg-white/[0.02]">
+        <span class="flex items-center gap-2 text-primary font-bold">
+          <i class="fa-solid fa-bolt text-[10px] animate-pulse"></i> Live sync active
+        </span>
+        <button onclick="const el = document.getElementById('transcript-chat-list'); if (el) el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });" class="hover:text-white transition-colors cursor-pointer text-slate-400 hover:text-white">
+          Latest ↓
+        </button>
+      </div>
+    </div>
+
+      <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.12] text-[11px] font-mono font-bold text-slate-200 uppercase tracking-[0.12em] mb-4 shadow-sm backdrop-blur-md">
+        <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+        <span id="ai-engine-status">Interviewer ready</span>
+        <span id="answer-clock" class="answer-clock" style="display:none"></span>
+      </div>
+
+
+      <!-- Dedicated Answer Guide Card (Consider Mentioning / Reference Only) -->
+
+      <!-- Real-Time Speech, Grammar & Phrasing Coach Widget -->
+
+      <!-- Audio Equalizer & Interactive Mic Widget -->
+
+      <!-- Acoustic Disturbance & Language Recognition Telemetry Banner -->
+
+      <!-- Prominent Disturbance Alert Banner (Appears when high outside noise is detected) -->
+
+      <!-- Prominent Question Action Alert: Turn On Mic Popup -->
+
 
     </section>
 
@@ -3957,7 +3987,7 @@
       const guideContainer = document.getElementById('answer-guide-items');
       if (guideContainer && Array.isArray(qObj.answerGuide) && qObj.answerGuide.length > 0) {
         guideContainer.innerHTML = qObj.answerGuide.map(item => `
-          <span class="px-3 py-1.5 rounded-lg bg-white/[0.05] border border-white/10 text-xs font-sans font-medium text-slate-200 flex items-center gap-2 shadow-sm">
+          <span class="px-2 py-1 rounded-md bg-white/[0.04] border border-white/10 text-[11px] font-sans text-slate-300 flex items-center gap-1.5">
             <span class="w-1.5 h-1.5 rounded-full bg-primary shrink-0"></span>
             <span>${escapeHtml(item)}</span>
           </span>
@@ -4895,6 +4925,43 @@
     window.__panel = [];
     window.__activeSpeakerId = null;
 
+    /**
+     * The face inside a panel tile.
+     *
+     * A still photo gets the jaw treatment -- a clipped copy of itself opened
+     * by the audio envelope. If the member supplies video instead, that is
+     * used directly and the jaw is dropped: a real moving face does not need
+     * faking, and layering the two would fight each other.
+     *
+     * Two clips are supported per member. `video` plays while they are
+     * speaking and `idleVideo` while they are listening; give only one and it
+     * plays throughout. Anything ending .mp4, .webm or .mov counts as video.
+     */
+    function isVideoSrc(src) {
+      return typeof src === 'string' && /\.(mp4|webm|mov|m4v)(\?|$)/i.test(src);
+    }
+
+    function renderFace(m) {
+      const speak = m.video || (isVideoSrc(m.photo) ? m.photo : null);
+      const idle  = m.idleVideo || null;
+
+      if (!speak && !idle) {
+        // Still photograph: keep the jaw overlay.
+        return `
+            <img src="${m.photo}" alt="${m.fullName || m.name || 'Interviewer'}"
+                 onerror="this.style.display='none'">
+            <div class="panel-jaw"><img src="${m.photo}" alt="" aria-hidden="true"></div>`;
+      }
+
+      // muted + playsinline are required or mobile browsers refuse to autoplay.
+      const vid = (src, cls) => src ? `
+            <video class="${cls}" src="${src}" autoplay muted loop playsinline
+                   preload="auto" poster="${isVideoSrc(m.photo) ? '' : (m.photo || '')}"></video>` : '';
+
+      return vid(idle || speak, 'panel-vid panel-vid-idle')
+           + (speak && idle ? vid(speak, 'panel-vid panel-vid-speak') : '');
+    }
+
     function renderPanel(panel) {
       const strip = document.getElementById('panel-strip');
       const host = document.getElementById('panel-members');
@@ -4910,9 +4977,7 @@
       host.innerHTML = panel.map(m => `
         <div class="panel-member" data-member="${m.id}" title="${(m.fullName || m.name || '')} — ${(m.role || '')}">
           <div class="panel-face">
-            <img src="${m.photo}" alt="${m.fullName || m.name || 'Interviewer'}"
-                 onerror="this.style.display='none'">
-            <div class="panel-jaw"><img src="${m.photo}" alt="" aria-hidden="true"></div>
+            ${renderFace(m)}
           </div>
           <div class="panel-wave" aria-hidden="true">
             <i style="--h:5px"></i><i style="--h:9px"></i><i style="--h:13px"></i><i style="--h:7px"></i>
