@@ -19,23 +19,26 @@ const ESC = (v) => String(v == null ? '' : v)
 /** Renders the answers a tester actually gave — blank fields are left out. */
 function answersTable(rec) {
     const rows = [
-        ['What they tried', rec.tried],
-        ['Felt like a real interview', rec.feltReal],
-        ['What felt off', rec.whatWasOff],
-        ['The voice', rec.voice],
-        ['Follow-up quality', rec.followUps ? rec.followUps + ' / 5' : ''],
-        ['Difficulty', rec.difficulty],
-        ['Waiting between questions', rec.pauses],
-        ['What broke', rec.broke],
-        ['Report fairness', rec.reportFair ? rec.reportFair + ' / 5' : ''],
-        ['Recording playback', rec.playback],
-        ['Wanted from the report', rec.reportWish],
-        ['Resume extraction', rec.extract ? rec.extract + ' / 5' : ''],
-        ['Resume got wrong', rec.extractMissed],
-        ['PDF good enough to send', rec.pdfReady],
-        ['Would use again', rec.wouldUse],
-        ['Would recommend', rec.recommend ? rec.recommend + ' / 5' : ''],
-        ['Fix this first', rec.fixFirst],
+        ['Status', rec.status],
+        ['Specialisation', rec.specialisation],
+        ['Target role', rec.targetRole],
+        ['Confidence in CV, before', rec.confidenceBefore ? rec.confidenceBefore + ' / 5' : ''],
+        ['Clarity on missing skills, before', rec.clarityBefore ? rec.clarityBefore + ' / 5' : ''],
+        ['Biggest problem', rec.biggestProblem],
+        ['Ease of use', rec.easeOfUse ? rec.easeOfUse + ' / 5' : ''],
+        ['Resume builder', rec.resumeBuilder ? rec.resumeBuilder + ' / 5' : ''],
+        ['CV vs job description accuracy', rec.jdAccuracy ? rec.jdAccuracy + ' / 5' : ''],
+        ['Skill gap usefulness', rec.skillGapUseful ? rec.skillGapUseful + ' / 5' : ''],
+        ['Learning relevance', rec.learningRelevant ? rec.learningRelevant + ' / 5' : ''],
+        ['Interview questions relevant', rec.interviewRelevant ? rec.interviewRelevant + ' / 5' : ''],
+        ['Felt like a real interview', rec.interviewRealism ? rec.interviewRealism + ' / 5' : ''],
+        ['Report usefulness', rec.reportUseful ? rec.reportUseful + ' / 5' : ''],
+        ['Confidence in CV, after', rec.confidenceAfter ? rec.confidenceAfter + ' / 5' : ''],
+        ['Saved time', rec.savedTime],
+        ['Would use again', rec.wouldUseAgain],
+        ['Would recommend', rec.recommend != null ? rec.recommend + ' / 10' : ''],
+        ['Most useful feature', rec.mostUseful],
+        ['Fix this first', rec.improveFirst],
         ['Anything else', rec.anythingElse]
     ].filter(([, v]) => v);
 
@@ -178,6 +181,12 @@ const toNum = (v) => {
     return Number.isFinite(n) && n >= 1 && n <= 5 ? n : null;
 };
 const toStr = (v, max = 4000) => String(v == null ? '' : v).trim().slice(0, max);
+// Recommendation is a 0-10 net promoter score, so 0 is a real answer and must
+// not be discarded the way the 1-5 helper would discard it.
+const toNps = (v) => {
+    const n = parseInt(v, 10);
+    return Number.isFinite(n) && n >= 0 && n <= 10 ? n : null;
+};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // POST /api/tester-feedback — open on purpose. Testers must not need an account.
@@ -186,34 +195,41 @@ router.post('/', async (req, res) => {
     try {
         const b = req.body || {};
 
-        const fixFirst = toStr(b.fixFirst);
-        if (!fixFirst) {
+        const improveFirst = toStr(b.improveFirst || b.fixFirst);
+        if (!improveFirst) {
             return res.status(400).json({
                 success: false,
-                error: 'Please tell us the one thing to fix first — it is the most useful answer on the form.'
+                error: 'Please tell us the one thing we should improve first — it is the most useful answer on the form.'
             });
         }
 
         const record = {
             name: toStr(b.name, 120),
             email: toStr(b.email, 200),
-            tried: toStr(b.tried, 80),
-            feltReal: toStr(b.feltReal, 80),
-            whatWasOff: toStr(b.whatWasOff),
-            voice: toStr(b.voice, 80),
-            followUps: toNum(b.followUps),
-            difficulty: toStr(b.difficulty, 80),
-            pauses: toStr(b.pauses, 80),
-            broke: toStr(b.broke),
-            reportFair: toNum(b.reportFair),
-            playback: toStr(b.playback, 80),
-            reportWish: toStr(b.reportWish),
-            extract: toNum(b.extract),
-            extractMissed: toStr(b.extractMissed),
-            pdfReady: toStr(b.pdfReady, 80),
-            wouldUse: toStr(b.wouldUse, 80),
-            recommend: toNum(b.recommend),
-            fixFirst,
+            status: toStr(b.status, 80),
+            specialisation: toStr(b.specialisation, 80),
+            targetRole: toStr(b.targetRole, 120),
+
+            confidenceBefore: toNum(b.confidenceBefore),
+            clarityBefore: toNum(b.clarityBefore),
+            biggestProblem: toStr(b.biggestProblem, 120),
+
+            easeOfUse: toNum(b.easeOfUse),
+            resumeBuilder: toNum(b.resumeBuilder),
+            jdAccuracy: toNum(b.jdAccuracy),
+            skillGapUseful: toNum(b.skillGapUseful),
+            learningRelevant: toNum(b.learningRelevant),
+            interviewRelevant: toNum(b.interviewRelevant),
+            interviewRealism: toNum(b.interviewRealism),
+            reportUseful: toNum(b.reportUseful),
+
+            confidenceAfter: toNum(b.confidenceAfter),
+            savedTime: toStr(b.savedTime, 80),
+            wouldUseAgain: toStr(b.wouldUseAgain, 80),
+            recommend: toNps(b.recommend),
+            mostUseful: toStr(b.mostUseful, 80),
+
+            improveFirst,
             anythingElse: toStr(b.anythingElse),
             userAgent: toStr(req.headers['user-agent'] || '', 500),
             submittedAt: new Date()
@@ -277,7 +293,7 @@ router.get('/', requireAdmin, async (req, res) => {
 
         const nums = (key) => rows
             .map(r => r[key])
-            .filter(v => typeof v === 'number' && v >= 1 && v <= 5);
+            .filter(v => typeof v === 'number' && !Number.isNaN(v));
 
         const average = (key) => {
             const vals = nums(key);
@@ -291,24 +307,68 @@ router.get('/', requireAdmin, async (req, res) => {
             return acc;
         }, {});
 
+        // Share of testers who scored a question 4 or 5. "82% found it useful"
+        // reads far better in a pitch than "average 4.2", and is the same data.
+        const positive = (key) => {
+            const vals = nums(key);
+            if (!vals.length) return null;
+            return Math.round((vals.filter(v => v >= 4).length / vals.length) * 100);
+        };
+
+        // Net promoter: promoters (9-10) minus detractors (0-6), as a
+        // percentage of all respondents. Runs -100 to +100.
+        const npsScores = nums('recommend');
+        const nps = npsScores.length
+            ? Math.round(
+                ((npsScores.filter(v => v >= 9).length - npsScores.filter(v => v <= 6).length)
+                  / npsScores.length) * 100)
+            : null;
+
+        // The headline. Only testers who answered BOTH count, or the delta
+        // would compare two different groups of people.
+        const paired = rows.filter(r =>
+            typeof r.confidenceBefore === 'number' && typeof r.confidenceAfter === 'number');
+        const confidenceShift = paired.length ? {
+            before: Math.round((paired.reduce((s, r) => s + r.confidenceBefore, 0) / paired.length) * 10) / 10,
+            after:  Math.round((paired.reduce((s, r) => s + r.confidenceAfter, 0) / paired.length) * 10) / 10,
+            improved: Math.round((paired.filter(r => r.confidenceAfter > r.confidenceBefore).length / paired.length) * 100),
+            n: paired.length
+        } : null;
+
         return res.json({
             success: true,
             total: rows.length,
+            // The five numbers worth quoting, pre-computed so the dashboard and
+            // any report agree rather than each deriving its own.
+            headline: {
+                usability:        { avg: average('easeOfUse'),         positivePct: positive('easeOfUse') },
+                jdAccuracy:       { avg: average('jdAccuracy'),        positivePct: positive('jdAccuracy') },
+                skillGap:         { avg: average('skillGapUseful'),    positivePct: positive('skillGapUseful') },
+                mockInterview:    { avg: average('interviewRelevant'), positivePct: positive('interviewRelevant') },
+                nps
+            },
+            confidenceShift,
             averages: {
-                followUps: average('followUps'),
-                reportFair: average('reportFair'),
-                extract: average('extract'),
+                easeOfUse: average('easeOfUse'),
+                resumeBuilder: average('resumeBuilder'),
+                jdAccuracy: average('jdAccuracy'),
+                skillGapUseful: average('skillGapUseful'),
+                learningRelevant: average('learningRelevant'),
+                interviewRelevant: average('interviewRelevant'),
+                interviewRealism: average('interviewRealism'),
+                reportUseful: average('reportUseful'),
+                confidenceBefore: average('confidenceBefore'),
+                confidenceAfter: average('confidenceAfter'),
                 recommend: average('recommend')
             },
             tallies: {
-                tried: tally('tried'),
-                feltReal: tally('feltReal'),
-                voice: tally('voice'),
-                difficulty: tally('difficulty'),
-                pauses: tally('pauses'),
-                playback: tally('playback'),
-                pdfReady: tally('pdfReady'),
-                wouldUse: tally('wouldUse')
+                status: tally('status'),
+                specialisation: tally('specialisation'),
+                targetRole: tally('targetRole'),
+                biggestProblem: tally('biggestProblem'),
+                savedTime: tally('savedTime'),
+                wouldUseAgain: tally('wouldUseAgain'),
+                mostUseful: tally('mostUseful')
             },
             responses: rows
         });

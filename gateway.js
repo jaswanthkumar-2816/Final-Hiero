@@ -358,7 +358,11 @@ app.get(['/template-verifier', '/template-verifier.html'], (req, res) => res.sen
 app.get(['/feedback', '/feedback.html'], (req, res) => res.sendFile(path.join(__dirname, 'feedback.html')));
 // /hiero-feedback is the TESTER feedback form + results. Distinct from both
 // /feedback.html (mock interview report) and /share-feedback (star rating).
-app.get(['/hiero-feedback', '/hiero-feedback.html'], (req, res) => res.sendFile(path.join(__dirname, 'hiero-feedback.html')));
+// /review is the short, shareable form: this is the URL that gets pasted into
+// a WhatsApp message and typed by hand. /feedback was the obvious choice but
+// it is already the mock interview report, declared above -- Express matches
+// in order, so a second /feedback route here would simply never fire.
+app.get(['/review', '/hiero-feedback', '/hiero-feedback.html'], (req, res) => res.sendFile(path.join(__dirname, 'hiero-feedback.html')));
 // /share-feedback is the STAR RATING page (reads ?email=&name=&rating=),
 // linked from the feedback request email. Previously the email pointed at
 // /feedback.html, which served the interview report and ignored its params.
