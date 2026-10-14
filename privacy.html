@@ -74,8 +74,8 @@
               <td>To include them in resumes you generate, and to tailor feedback</td>
             </tr>
             <tr>
-              <td><strong>Mock interview content</strong><br>Your spoken answers, converted to text, and the questions asked, scores and written feedback for each session</td>
-              <td>To conduct the interview, score your answers, and show you your report and progress over time</td>
+              <td><strong>Mock interview content</strong><br>A video and audio recording of the session, your answers converted to text, and the questions asked, scores and written feedback for each session. See section 3</td>
+              <td>To conduct the interview, score your answers, and let you play the session back and track progress over time</td>
             </tr>
             <tr>
               <td><strong>Learning activity</strong><br>Skills tracked, quiz and problem attempts, roadmap and video progress</td>
@@ -102,14 +102,29 @@
     </section>
 
     <section>
-      <h2><span class="num">03</span>Mock interviews: what happens to your voice</h2>
-      <p>This section matters more than the rest, so we are being specific.</p>
-      <p>When you take a mock interview, your microphone audio is sent to our speech-recognition provider and converted into text, in order to understand and score your answer. <strong>We store the text of your answers</strong> &mdash; the transcript &mdash; so that we can generate your report and let you review past sessions.</p>
+      <h2><span class="num">03</span>Mock interviews: your camera, microphone and recordings</h2>
+      <p>This section matters more than the rest, so we are being specific about it.</p>
+
+      <h3>What is captured</h3>
+      <p>A full mock interview uses both your <strong>camera and microphone</strong>. A practice session uses the microphone only, and the screen tells you which one you are starting before it begins.</p>
+
+      <h3>What is stored</h3>
+      <ul>
+        <li><strong>A video recording of the session</strong>, saved on our server so you can play the interview back.</li>
+        <li><strong>An audio recording of each answer</strong>, saved alongside it.</li>
+        <li><strong>A transcript</strong> of what you said, together with the questions, your scores and the written report.</li>
+      </ul>
+      <p>Only you can access your recordings. They are not served publicly: each request is checked against your account first, and a recording cannot be reached by guessing a link.</p>
+
+      <h3>How long they last</h3>
+      <p>Recordings are stored on the server that runs Hiero, and that storage is not permanent &mdash; recordings are <strong>deleted whenever Hiero is updated or restarted</strong>, which happens regularly. Treat a recording as temporary: if you want to keep one, download it. Your transcript, scores and report are stored separately and are not affected.</p>
       <div class="note">
-        <p><strong>Confirm before publishing:</strong> state plainly whether raw audio is also retained, and for how long. If audio files are kept anywhere on the server, say so here. If audio is processed and immediately discarded once transcribed, say <em>that</em> &mdash; it is a much stronger position, and it is worth changing the code to make it true.</p>
+        <p><strong>Keep this honest as the code changes.</strong> This paragraph is true because <code>uploads/recordings/</code> sits on an ephemeral filesystem with no persistent disk. The moment a disk is mounted or storage moves to S3, recordings start surviving and this paragraph becomes false &mdash; replace it with a real retention period and a deletion routine at the same time, not afterwards.</p>
       </div>
-      <p>You can delete any interview session, including its transcript, from your account at any time, or ask us to delete all of them (section 7).</p>
-      <p>We do not use your interview audio or transcripts to train our own models, and we do not share them with employers unless you apply to an opportunity and choose to share your results.</p>
+
+      <h3>Your choices</h3>
+      <p>You can delete any interview session and its recordings at any time, or ask us to delete all of them (section 7). We do not use your recordings or transcripts to train our own models, and we never share them with an employer unless you apply to an opportunity and choose to share your results.</p>
+      <p>If you would rather not be recorded, do not start a mock interview &mdash; the rest of Hiero works without it.</p>
     </section>
 
     <section>
@@ -124,7 +139,7 @@
           <tbody>
             <tr><td><strong>Deepgram</strong><br>Speech recognition and voice</td><td>Your mock-interview audio, to convert into text</td><td>United States</td></tr>
             <tr><td><strong>OpenRouter</strong><br>AI model routing</td><td>Resume text, job descriptions and interview answers, to generate feedback and scores</td><td>United States</td></tr>
-            <tr><td><strong>Groq</strong><br>AI inference</td><td>Resume text and interview answers, to generate feedback and scores</td><td>United States</td></tr>
+            <tr><td><strong>Groq</strong><br>Speech recognition and AI inference</td><td><strong>Your interview audio</strong>, to convert into text; and resume text, job descriptions and interview answers, to generate feedback and scores</td><td>United States</td></tr>
             <tr><td><strong>Google</strong><br>Sign-in, email delivery, video data</td><td>Your email address for sign-in and for service emails we send you</td><td>United States / global</td></tr>
             <tr><td><strong>Razorpay</strong><br>Payments</td><td>Your name, email and payment details, entered directly on their checkout</td><td>India</td></tr>
             <tr><td><span class="fill">HOSTING_PROVIDER</span><br>Hosting and database</td><td>All data described above, as stored</td><td><span class="fill">REGION</span></td></tr>
@@ -134,6 +149,7 @@
 
       <h3>Transfers outside India</h3>
       <p>As the table shows, several of these providers operate outside India, so your data is transferred abroad for processing. The DPDP Act permits such transfers except to countries the Government of India has restricted. We transfer only what each provider needs to perform its function.</p>
+      <p><strong>Your interview video is not sent to any of them.</strong> Audio leaves our server to be transcribed, by Groq and by Deepgram. Video is only ever stored on our own server, as described in section 3.</p>
       <div class="note">
         <p><strong>Fill in before publishing:</strong> <span class="fill">HOSTING_PROVIDER</span> and <span class="fill">REGION</span>. Also remove any provider in this table that you stop using &mdash; naming a processor you no longer use is as much a problem as omitting one you do.</p>
       </div>
