@@ -2586,6 +2586,7 @@
       if (confirm('Are you sure you want to logout?')) {
         // Clear authentication
         localStorage.removeItem('token');
+        localStorage.removeItem('jwtToken');
         localStorage.removeItem('user');
 
         // Clear any resume builder data

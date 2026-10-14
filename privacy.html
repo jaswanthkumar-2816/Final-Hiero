@@ -7,14 +7,17 @@
 <meta name="description" content="How Hiero collects, uses and protects your personal data, including resumes and mock-interview transcripts.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
 <link rel="stylesheet" href="legal.css">
 </head>
 <body>
 
-<header class="top">
-  <div class="wrap">
-    <a class="brand" href="/">hier<span>o</span></a>
+<header class="top" id="top">
+  <div class="top-in">
+    <a class="brand" href="/">
+      <img src="/hiero-mark.png" alt="" width="34" height="24" decoding="async">
+      <span class="brand-name">Hiero</span>
+    </a>
     <nav>
       <a href="privacy.html" aria-current="page">Privacy</a>
       <a href="terms.html">Terms</a>
@@ -23,32 +26,51 @@
   </div>
 </header>
 
-<div class="wrap">
+<div class="shell">
 
-  <div class="head">
+  <aside class="rail">
+    <h2>On this page</h2>
+    <details open>
+      <summary>On this page</summary>
+      <ol>
+        <li><a href="#who-we-are">Who we are</a></li>
+        <li><a href="#what-we-collect-and-why">What we collect, and why</a></li>
+        <li><a href="#mock-interviews-your-camera-microphone-a">Mock interviews: your camera, microphone and recordings</a></li>
+        <li><a href="#who-else-processes-your-data">Who else processes your data</a></li>
+        <li><a href="#payments">Payments</a></li>
+        <li><a href="#how-long-we-keep-it">How long we keep it</a></li>
+        <li><a href="#your-rights">Your rights</a></li>
+        <li><a href="#how-we-protect-it">How we protect it</a></li>
+        <li><a href="#age">Age</a></li>
+        <li><a href="#cookies-and-local-storage">Cookies and local storage</a></li>
+        <li><a href="#changes-to-this-policy">Changes to this policy</a></li>
+        <li><a href="#grievance-officer">Grievance Officer</a></li>
+      </ol>
+    </details>
+  </aside>
+
+  <main class="doc">
+
     <p class="eyebrow">Legal</p>
     <h1>Privacy Policy</h1>
-    <p class="updated">Last updated: 14 October 2026</p>
+    <p class="meta">Last updated: 14 October 2026</p>
 
-    <div class="lede">
+    <div class="intro">
       <p>Hiero helps you improve your resume and practise interviews. To do that we handle things that are personal to you: your CV, your profile links, and what you say during a mock interview.</p>
       <p>This page explains exactly what we collect, who else sees it, and how to get it deleted. If something here is unclear, email us and we will answer in plain language.</p>
     </div>
-  </div>
 
-  <main>
-
-    <section>
-      <h2><span class="num">01</span>Who we are</h2>
+      <section id="who-we-are">
+        <h2><span class="n">01</span>Who we are<a class="anchor" href="#who-we-are" aria-label="Link to this section">#</a></h2>
       <div class="note">
         <p><strong>Fill in before publishing:</strong> <span class="fill">LEGAL_ENTITY_NAME</span>, <span class="fill">REGISTERED_ADDRESS</span>, <span class="fill">CONTACT_EMAIL</span>. Until Hiero is incorporated, name the individual operator and a real postal address &mdash; an unnamed operator is itself a compliance gap.</p>
       </div>
       <p>Hiero (&ldquo;Hiero&rdquo;, &ldquo;we&rdquo;, &ldquo;us&rdquo;) operates the website at <strong>hiero.in</strong>. Hiero is operated by <span class="fill">LEGAL_ENTITY_NAME</span>, at <span class="fill">REGISTERED_ADDRESS</span>, India.</p>
       <p>For the purposes of the Digital Personal Data Protection Act, 2023 (&ldquo;DPDP Act&rdquo;), we are the <strong>Data Fiduciary</strong> for the personal data described below, and you are the <strong>Data Principal</strong>.</p>
-    </section>
+      </section>
 
-    <section>
-      <h2><span class="num">02</span>What we collect, and why</h2>
+      <section id="what-we-collect-and-why">
+        <h2><span class="n">02</span>What we collect, and why<a class="anchor" href="#what-we-collect-and-why" aria-label="Link to this section">#</a></h2>
       <p>We collect only what the product needs to work. Each purpose below is the reason we are permitted to process that data.</p>
 
       <div class="tbl-scroll">
@@ -99,10 +121,10 @@
 
       <p>We do <strong>not</strong> collect your card, UPI or bank details. Payments, where you make one, are handled entirely by Razorpay on their own systems &mdash; see section 5.</p>
       <p>We do not sell your personal data, and we do not use it to serve you third-party advertising.</p>
-    </section>
+      </section>
 
-    <section>
-      <h2><span class="num">03</span>Mock interviews: your camera, microphone and recordings</h2>
+      <section id="mock-interviews-your-camera-microphone-a">
+        <h2><span class="n">03</span>Mock interviews: your camera, microphone and recordings<a class="anchor" href="#mock-interviews-your-camera-microphone-a" aria-label="Link to this section">#</a></h2>
       <p>This section matters more than the rest, so we are being specific about it.</p>
 
       <h3>What is captured</h3>
@@ -125,10 +147,10 @@
       <h3>Your choices</h3>
       <p>You can delete any interview session and its recordings at any time, or ask us to delete all of them (section 7). We do not use your recordings or transcripts to train our own models, and we never share them with an employer unless you apply to an opportunity and choose to share your results.</p>
       <p>If you would rather not be recorded, do not start a mock interview &mdash; the rest of Hiero works without it.</p>
-    </section>
+      </section>
 
-    <section>
-      <h2><span class="num">04</span>Who else processes your data</h2>
+      <section id="who-else-processes-your-data">
+        <h2><span class="n">04</span>Who else processes your data<a class="anchor" href="#who-else-processes-your-data" aria-label="Link to this section">#</a></h2>
       <p>Hiero is built on specialist services. To give you AI feedback we must send relevant parts of your content to them. They act as our processors: they handle the data to deliver their service to us, not for their own purposes.</p>
 
       <div class="tbl-scroll">
@@ -153,16 +175,16 @@
       <div class="note">
         <p><strong>Fill in before publishing:</strong> <span class="fill">HOSTING_PROVIDER</span> and <span class="fill">REGION</span>. Also remove any provider in this table that you stop using &mdash; naming a processor you no longer use is as much a problem as omitting one you do.</p>
       </div>
-    </section>
+      </section>
 
-    <section>
-      <h2><span class="num">05</span>Payments</h2>
+      <section id="payments">
+        <h2><span class="n">05</span>Payments<a class="anchor" href="#payments" aria-label="Link to this section">#</a></h2>
       <p>Paid plans are processed by <strong>Razorpay Software Private Limited</strong>. You enter your card, UPI or bank details on Razorpay's own checkout. Those details never reach Hiero's servers and we never store them.</p>
       <p>We keep only a record of which plan you bought, when, and whether the payment succeeded, which we need for your account and for tax and accounting records.</p>
-    </section>
+      </section>
 
-    <section>
-      <h2><span class="num">06</span>How long we keep it</h2>
+      <section id="how-long-we-keep-it">
+        <h2><span class="n">06</span>How long we keep it<a class="anchor" href="#how-long-we-keep-it" aria-label="Link to this section">#</a></h2>
       <ul>
         <li><strong>While your account is open</strong> &mdash; we keep your account details, resumes, interview transcripts and learning progress, so that the product works and your history is there when you return.</li>
         <li><strong>Sign-in records</strong> &mdash; kept for <span class="fill">RETENTION_PERIOD</span> for security purposes, then deleted.</li>
@@ -172,10 +194,10 @@
       <div class="note">
         <p><strong>Fill in before publishing:</strong> pick real numbers you can actually honour &mdash; a policy that promises a 7-day deletion you do not perform is worse than one that honestly says 30. Common choices: sign-in records 12 months, deletion 30 days, backups 30 days.</p>
       </div>
-    </section>
+      </section>
 
-    <section>
-      <h2><span class="num">07</span>Your rights</h2>
+      <section id="your-rights">
+        <h2><span class="n">07</span>Your rights<a class="anchor" href="#your-rights" aria-label="Link to this section">#</a></h2>
       <p>Under the DPDP Act you have the right to:</p>
       <ul>
         <li><strong>Know and access</strong> what personal data of yours we hold and who we have shared it with.</li>
@@ -186,10 +208,10 @@
         <li><strong>Complain</strong> to us, and then to the Data Protection Board of India if we do not resolve it.</li>
       </ul>
       <p>To exercise any of these, email <span class="fill">CONTACT_EMAIL</span> from the address on your account. We will respond within <strong>30 days</strong>. We may need to verify who you are first &mdash; that protects you, not us.</p>
-    </section>
+      </section>
 
-    <section>
-      <h2><span class="num">08</span>How we protect it</h2>
+      <section id="how-we-protect-it">
+        <h2><span class="n">08</span>How we protect it<a class="anchor" href="#how-we-protect-it" aria-label="Link to this section">#</a></h2>
       <ul>
         <li>Passwords are stored only as bcrypt hashes, never in a readable form.</li>
         <li>Traffic to hiero.in is encrypted in transit over HTTPS.</li>
@@ -197,25 +219,25 @@
         <li>Our API keys and credentials are held in server configuration, not in our published source code.</li>
       </ul>
       <p>No service can promise perfect security. If a breach occurs that is likely to affect you, we will inform you and the Data Protection Board of India as the DPDP Act requires.</p>
-    </section>
+      </section>
 
-    <section>
-      <h2><span class="num">09</span>Age</h2>
+      <section id="age">
+        <h2><span class="n">09</span>Age<a class="anchor" href="#age" aria-label="Link to this section">#</a></h2>
       <p>Hiero is intended for users aged <strong>18 and over</strong>. We do not knowingly collect personal data from children. If you believe a child has created an account, contact us and we will delete it.</p>
-    </section>
+      </section>
 
-    <section>
-      <h2><span class="num">10</span>Cookies and local storage</h2>
+      <section id="cookies-and-local-storage">
+        <h2><span class="n">10</span>Cookies and local storage<a class="anchor" href="#cookies-and-local-storage" aria-label="Link to this section">#</a></h2>
       <p>We use browser storage for things the product cannot work without: keeping you signed in, remembering your session, and saving drafts of resumes you are working on. We do not use third-party advertising or cross-site tracking cookies.</p>
-    </section>
+      </section>
 
-    <section>
-      <h2><span class="num">11</span>Changes to this policy</h2>
+      <section id="changes-to-this-policy">
+        <h2><span class="n">11</span>Changes to this policy<a class="anchor" href="#changes-to-this-policy" aria-label="Link to this section">#</a></h2>
       <p>If we change how we handle your data, we will update this page and change the date at the top. For a significant change &mdash; a new purpose, or a new category of data &mdash; we will tell you by email before it takes effect.</p>
-    </section>
+      </section>
 
-    <section>
-      <h2><span class="num">12</span>Grievance Officer</h2>
+      <section id="grievance-officer">
+        <h2><span class="n">12</span>Grievance Officer<a class="anchor" href="#grievance-officer" aria-label="Link to this section">#</a></h2>
       <p>As required by the Information Technology (Intermediary Guidelines and Digital Media Ethics Code) Rules, 2021, you can reach our Grievance Officer directly:</p>
       <div class="card">
         <dl>
@@ -229,15 +251,62 @@
       <div class="note">
         <p><strong>Fill in before publishing:</strong> this must be a named human with a working email that someone actually reads. A generic <em>support@</em> alias with nobody behind it does not satisfy the rule, and the 24-hour acknowledgement is a real obligation.</p>
       </div>
-    </section>
+      </section>
+
+    <footer>
+      <p>Hiero &middot; <a href="terms.html">Terms of Service</a></p>
+      <a class="to-top" href="#top">Back to top &uarr;</a>
+    </footer>
 
   </main>
 
-  <footer>
-    <p>Hiero &mdash; <a href="terms.html">Terms of Service</a> &middot; <a href="/">Back to Hiero</a></p>
-  </footer>
-
 </div>
+
+  <script>
+  // Highlight the section being read in the contents rail.
+  (function () {
+    var links = [].slice.call(document.querySelectorAll('.rail a[href^="#"]'));
+    if (!links.length || !('IntersectionObserver' in window)) return;
+    var byId = {};
+    links.forEach(function (a) { byId[a.getAttribute('href').slice(1)] = a; });
+    var seen = {};
+
+    function paint() {
+      var current = null;
+      for (var i = 0; i < links.length; i++) {
+        var id = links[i].getAttribute('href').slice(1);
+        if (seen[id]) { current = id; break; }
+      }
+      links.forEach(function (a) {
+        var on = a.getAttribute('href').slice(1) === current;
+        if (on) a.setAttribute('aria-current', 'true');
+        else a.removeAttribute('aria-current');
+      });
+    }
+
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) { seen[e.target.id] = e.isIntersecting; });
+      paint();
+    }, { rootMargin: '-64px 0px -62% 0px' });
+
+    Object.keys(byId).forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) io.observe(el);
+    });
+
+    // On a phone the rail is a disclosure. It ships open so the list is there
+    // with CSS alone and on a wide screen, but a sixteen-item list would push
+    // the title off a phone screen -- so close it once, narrow, on load.
+    var d = document.querySelector('.rail details');
+    var narrow = window.matchMedia('(max-width:900px)');
+    if (d) {
+      if (narrow.matches) d.open = false;
+      links.forEach(function (a) {
+        a.addEventListener('click', function () { if (narrow.matches) d.open = false; });
+      });
+    }
+  })();
+  </script>
 
 </body>
 </html>

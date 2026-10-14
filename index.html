@@ -1094,12 +1094,14 @@
         const payload = JSON.parse(atob(token.split('.')[1]));
         if (payload.exp && Date.now() > payload.exp * 1000) {
           localStorage.removeItem('token');
+          localStorage.removeItem('jwtToken');
           localStorage.removeItem('user');
           window.location.href = '/login';
           return;
         }
       } catch (e) {
         localStorage.removeItem('token');
+        localStorage.removeItem('jwtToken');
         localStorage.removeItem('user');
         window.location.href = '/login';
         return;
@@ -1142,6 +1144,7 @@
       } catch (error) {
         console.error('Error fetching user data:', error);
         localStorage.removeItem('token');
+        localStorage.removeItem('jwtToken');
         localStorage.removeItem('user');
         window.location.href = '/login';
       }
@@ -1368,6 +1371,7 @@
 
     function handleLogout() {
       localStorage.removeItem('token');
+      localStorage.removeItem('jwtToken');
       localStorage.removeItem('user');
       window.location.href = '/login';
     }
@@ -1633,6 +1637,7 @@
           } finally {
             // Clear local storage and redirect
             localStorage.removeItem('token');
+            localStorage.removeItem('jwtToken');
             localStorage.removeItem('user');
             window.location.href = '/login';
           }

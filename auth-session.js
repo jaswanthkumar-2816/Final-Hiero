@@ -38,9 +38,39 @@
         return null;
     }
 
+    function clear() {
+        try {
+            for (var i = 0; i < KEYS.length; i++) localStorage.removeItem(KEYS[i]);
+            localStorage.removeItem('user');
+        } catch (e) { /* storage unavailable */ }
+    }
+
+    // Reads the expiry out of the JWT payload. This decides whether to bother
+    // sending a request, nothing more -- the server still verifies every token,
+    // so a forged payload gains nothing here.
+    function expired(token) {
+        try {
+            var part = token.split('.')[1];
+            if (!part) return false;
+            var json = atob(part.replace(/-/g, '+').replace(/_/g, '/'));
+            var exp = JSON.parse(json).exp;
+            return typeof exp === 'number' && exp * 1000 <= Date.now();
+        } catch (e) {
+            return false;   // unreadable: let the server be the judge
+        }
+    }
+
     // One source of truth, so a page that wrote only one key does not leave the
     // other stale and pointing at a previous account.
-    store(read());
+    //
+    // Logging out used to clear 'token' and leave 'jwtToken' behind, and pages
+    // read `token || jwtToken`, so the dead session came back, got rejected,
+    // and bounced the user to the login page again. Copying one key to the
+    // other would have reintroduced exactly that, so an expired token clears
+    // the session here instead of being propagated.
+    var current = read();
+    if (current && expired(current)) clear();
+    else store(current);
 
     var nativeFetch = window.fetch;
     if (typeof nativeFetch === 'function') {
@@ -69,5 +99,5 @@
         };
     }
 
-    window.HieroSession = { get: read, set: store };
+    window.HieroSession = { get: read, set: store, clear: clear, expired: expired };
 })();
