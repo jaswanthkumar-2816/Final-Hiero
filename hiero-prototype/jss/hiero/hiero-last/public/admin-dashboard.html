@@ -321,6 +321,7 @@
       }
     }
   </style>
+<script src="/auth-session.js"></script>
 </head>
 
 <body>
@@ -485,6 +486,7 @@
         if (payload.exp && Date.now() > payload.exp * 1000) {
           showError('Session expired. Please login again.');
           localStorage.removeItem('token');
+          localStorage.removeItem('jwtToken');
           localStorage.removeItem('user');
           setTimeout(() => {
             window.location.href = '/login';

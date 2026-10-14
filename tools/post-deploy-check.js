@@ -57,6 +57,42 @@ async function main() {
         record(false, 'auth-session.js is served', e.message);
     }
 
+    // 2b — the pages must actually REFERENCE it. Serving the file proves
+    // nothing: the repo has several copies of each page and only the ones
+    // under hiero-prototype/.../public are served, so a fix applied to the
+    // wrong copy deploys cleanly and changes nothing a user sees.
+    for (const p of ['/', '/index.html', '/dashboard.html']) {
+        try {
+            const { status, res } = await get(p);
+            const body = status === 200 ? await res.text() : '';
+            const refs = body.includes('auth-session.js');
+            record(status === 200 && refs, `${p} loads auth-session.js`,
+                status !== 200 ? `got ${status}`
+                               : refs ? null
+                                      : 'page served but does NOT reference it — the session fix is inert here');
+        } catch (e) {
+            record(false, `${p} loads auth-session.js`, e.message);
+        }
+    }
+
+    // 2c — logout must not leave jwtToken behind, or every later page revives
+    // the dead session and bounces the user back to the login screen.
+    try {
+        const { status, res } = await get('/logout.html');
+        if (status === 200) {
+            const body = await res.text();
+            const t = (body.match(/removeItem\(['"]token['"]\)/g) || []).length;
+            const j = (body.match(/removeItem\(['"]jwtToken['"]\)/g) || []).length;
+            record(t === 0 || t === j, 'logout clears both token keys',
+                t === j ? `${t} cleared, both keys` :
+                `clears token x${t} but jwtToken x${j} — logging out leaves a dead token that bounces users to login`);
+        } else {
+            record(null, 'logout clears both token keys', `/logout.html returned ${status}`);
+        }
+    } catch (e) {
+        record(null, 'logout clears both token keys', e.message);
+    }
+
     // 3 — the policy pages
     for (const p of ['/privacy.html', '/terms.html', '/legal.css', '/hiero-mark.png']) {
         try {
