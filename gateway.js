@@ -126,19 +126,45 @@ app.use('/dashboard', express.static(landingDirPath));
 app.use('/public/dashboard', express.static(resumeBuilderPath)); // Fix for nested paths
 
 // Profile endpoint (Integrated)
-app.get('/api/me', authObj.authenticateToken, (req, res) => {
-    const user = authObj.users.find(u => u.id === req.user.id);
+// Resolve the signed-in user from a token. Tokens are signed with { userId },
+// so reading req.user.id yields undefined and every lookup 404s -- which the
+// dashboard treats as "logged out". The in-memory array is also only a cache,
+// so fall through to MongoDB before giving up.
+async function resolveUser(req) {
+    const uid = req.user.userId || req.user.id;
+    let user = authObj.users.find(u => String(u.id) === String(uid));
+    if (user) return user;
+    if (!req.user.email) return null;
+    try {
+        const User = require('./models/User');
+        const dbUser = await User.findOne({ email: req.user.email });
+        if (!dbUser) return null;
+        user = { id: uid, name: dbUser.username || req.user.name || '',
+                 email: dbUser.email, picture: dbUser.picture || null };
+        authObj.users.push(user);
+        return user;
+    } catch (e) {
+        console.warn('[GW] user lookup failed:', e.message);
+        return null;
+    }
+}
+
+// Same two bugs as routes/auth.js /me: the token carries userId (not id), and
+// the users array is in-memory so it empties on restart. Delegate rather than
+// keep a second copy of the logic that can drift.
+app.get('/api/me', authObj.authenticateToken, async (req, res) => {
+    const user = await resolveUser(req);
     if (!user) return res.status(404).json({ error: 'User not found' });
-    res.json({ id: user.id, name: user.name, email: user.email, picture: user.picture });
+    res.json({ id: user.id, name: user.name, email: user.email, picture: user.picture || null });
 });
 
 // Legacy API (for frontend compat)
-app.get('/dashboard', authObj.authenticateToken, (req, res, next) => {
+app.get('/dashboard', authObj.authenticateToken, async (req, res, next) => {
     // If request accepts JSON, handle as API. If not, it's probably a navigation (allow static to take over)
     if (req.accepts('json')) {
-        const user = authObj.users.find(u => u.id === req.user.id);
+        const user = await resolveUser(req);
         if (!user) return res.status(404).json({ error: 'User not found' });
-        return res.json({ id: user.id, name: user.name, email: user.email, picture: user.picture });
+        return res.json({ id: user.id, name: user.name, email: user.email, picture: user.picture || null });
     }
     next();
 });
@@ -196,6 +222,7 @@ app.use('/api/projects', lazyRouter('./routes/projects'));
 app.use('/api/scoring', lazyRouter('./routes/scoring'));
 app.use('/api/chat', lazyRouter('./routes/chat'));
 app.use('/api/interview', lazyRouter('./routes/interview'));
+app.use('/api/practice', lazyRouter('./routes/interviewPractice'));
 // Tester feedback: POST is open on purpose (testers must not need an account);
 // GET is admin-only and enforced inside the router.
 app.use('/api/tester-feedback', lazyRouter('./routes/testerFeedback'));

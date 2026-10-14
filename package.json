@@ -4,7 +4,7 @@
   "description": "Unified Hiero server consolidating gateway, auth, and backend services",
   "main": "gateway.js",
   "scripts": {
-    "start": "PORT=2816 node gateway.js",
+    "start": "node gateway.js",
     "connect": "PORT=2004 node connect_server.js",
     "bridge": "PORT=2410 node academia_server.js",
     "build": "npx puppeteer browsers install chrome || echo 'Chrome install skipped; PDF rendering will fall back to PDFKit'",

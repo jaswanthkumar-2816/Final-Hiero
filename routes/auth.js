@@ -281,6 +281,19 @@ passport.deserializeUser((id, done) => {
 const JWT_SECRET = process.env.JWT_SECRET || 'hiero_jwt_super_secret_key_2026';
 
 // JWT middleware
+// A token lasts 7 days. Without renewal that logged everyone out once a week,
+// mid-session and with no warning, because nothing ever re-issued it. So once a
+// token is past the halfway mark of its life we mint a fresh one and hand it
+// back on X-Refreshed-Token; auth-session.js picks it up and stores it. An
+// active user therefore stays signed in indefinitely, while a token that goes
+// unused for 7 days still expires on its own.
+const TOKEN_TTL = '7d';
+
+function issueToken(payload) {
+    const { userId, name, email } = payload;
+    return jwt.sign({ userId, name, email }, JWT_SECRET, { expiresIn: TOKEN_TTL });
+}
+
 const authenticateToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.slice(7) : (authHeader || req.query.token);
@@ -289,6 +302,19 @@ const authenticateToken = (req, res, next) => {
     jwt.verify(token, JWT_SECRET, (err, decoded) => {
         if (err) return res.status(403).json({ error: 'Invalid or expired token' });
         req.user = decoded;
+
+        // Past half-life? Issue a replacement. Failure here must never break the
+        // request -- the current token is still valid, so the user reads on.
+        try {
+            const { iat, exp } = decoded;
+            if (iat && exp && (Date.now() / 1000 - iat) > (exp - iat) / 2) {
+                res.setHeader('X-Refreshed-Token', issueToken(decoded));
+                res.setHeader('Access-Control-Expose-Headers', 'X-Refreshed-Token');
+            }
+        } catch (e) {
+            console.warn('[AUTH] Could not refresh token:', e.message);
+        }
+
         next();
     });
 };
@@ -477,10 +503,40 @@ router.get('/auth/github/callback', passport.authenticate('github', { session: f
 });
 
 // User info
-router.get('/me', authenticateToken, (req, res) => {
-    const user = users.find(u => u.id === req.user.id);
+router.get('/me', authenticateToken, async (req, res) => {
+    // Two bugs lived here and together they logged everyone out constantly:
+    //
+    //   1. The token is signed with { userId }, but this read req.user.id --
+    //      always undefined -- so users.find() never matched and /me returned
+    //      404 even for a token issued seconds earlier.
+    //   2. `users` is an in-memory array (see `let users = []`), so every
+    //      server restart empties it while tokens stay valid for 7 days.
+    //
+    // Signup already writes to MongoDB, so the database is the durable source
+    // of truth; the array is only a cache in front of it.
+    const uid = req.user.userId || req.user.id;
+    let user = users.find(u => String(u.id) === String(uid));
+
+    if (!user && req.user.email) {
+        try {
+            const User = require('../models/User');
+            const dbUser = await User.findOne({ email: req.user.email });
+            if (dbUser) {
+                user = {
+                    id: uid,
+                    name: dbUser.username || req.user.name || '',
+                    email: dbUser.email,
+                    picture: dbUser.picture || null
+                };
+                users.push(user);          // repopulate the cache after a restart
+            }
+        } catch (e) {
+            console.warn('[AUTH] /me database lookup failed:', e.message);
+        }
+    }
+
     if (!user) return res.status(404).json({ error: 'User not found' });
-    res.json({ id: user.id, name: user.name, email: user.email });
+    res.json({ id: user.id, name: user.name, email: user.email, picture: user.picture || null });
 });
 
 // ======================
