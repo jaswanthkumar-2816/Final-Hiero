@@ -1,0 +1,861 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Practice — Hiero</title>
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+<style>
+:root{
+  --g:#09c006; --g-dark:#079604;
+  --g10:rgba(9,192,6,.10); --g25:rgba(9,192,6,.25); --g40:rgba(9,192,6,.40);
+  --bg:#060608; --surface:rgba(255,255,255,.04); --surface2:rgba(255,255,255,.055);
+  --border:rgba(255,255,255,.08); --border-g:rgba(9,192,6,.20);
+  --text:#f0f4f8; --muted:#64748b; --dim:#94a3b8; --red:#ef4444; --amber:#fbbf24;
+  --r-xl:28px; --r-lg:18px; --r-md:12px;
+}
+[data-theme="light"]{
+  --bg:#F4F6F9; --surface:#fff; --surface2:#F7F9FC;
+  --border:rgba(0,0,0,.1); --border-g:rgba(9,120,6,.3);
+  --text:#0F172A; --muted:#64748B; --dim:#475569;
+  --g:#0A7A05; --g10:rgba(9,160,6,.08); --g25:rgba(9,160,6,.2); --amber:#A9630A;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',-apple-system,sans-serif;
+  min-height:100vh;-webkit-font-smoothing:antialiased;line-height:1.55}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(900px 560px at 12% -8%, var(--g10), transparent 62%),
+             radial-gradient(760px 520px at 100% 104%, var(--g10), transparent 60%)}
+.wrap{position:relative;z-index:1;max-width:860px;margin:0 auto;padding:26px 22px 90px}
+
+/* nav */
+nav{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:30px}
+.brand{display:flex;align-items:center;gap:11px;font-weight:800;letter-spacing:.2em;font-size:.86rem}
+.brand img{height:26px;width:auto}
+.btn-ghost{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:8px;
+  font-size:.79rem;font-weight:700;color:var(--muted);border:1px solid var(--border);
+  padding:9px 15px;border-radius:999px;transition:.2s}
+.btn-ghost:hover{color:var(--text);border-color:var(--border-g);background:var(--surface)}
+
+/* progress rail */
+.rail{display:flex;align-items:center;gap:8px;margin-bottom:32px}
+.rail i{flex:1;height:4px;border-radius:999px;background:var(--border);transition:background .4s}
+.rail i.on{background:linear-gradient(90deg,var(--g),#5ee07a)}
+
+/* generic */
+.step{display:none;animation:in .42s cubic-bezier(.16,1,.3,1) both}
+.step.on{display:block}
+@keyframes in{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.kicker{display:inline-flex;align-items:center;gap:8px;font-size:.68rem;font-weight:800;
+  letter-spacing:.17em;text-transform:uppercase;color:var(--g);background:var(--g10);
+  border:1px solid var(--border-g);padding:7px 14px;border-radius:999px;margin-bottom:16px}
+h1{font-size:clamp(1.6rem,3.6vw,2.25rem);font-weight:800;letter-spacing:-.02em;margin-bottom:11px}
+h2{font-size:1.12rem;font-weight:800;letter-spacing:-.01em;margin-bottom:6px}
+.lede{color:var(--muted);font-size:.97rem;max-width:620px;margin-bottom:28px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:22px}
+.btn{all:unset;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:10px;
+  background:var(--g);color:#04210a;font-weight:800;font-size:.92rem;padding:15px 28px;
+  border-radius:var(--r-md);transition:.2s}
+[data-theme="light"] .btn{color:#fff}
+.btn:hover{background:var(--g-dark);transform:translateY(-1px)}
+.btn[disabled]{opacity:.45;cursor:not-allowed;transform:none}
+.btn.sec{background:var(--surface);color:var(--text);border:1px solid var(--border)}
+.btn.sec:hover{background:var(--surface2);border-color:var(--border-g)}
+
+/* 1 — upload */
+.drop{border:2px dashed var(--border);border-radius:var(--r-xl);padding:52px 28px;text-align:center;
+  transition:.25s;cursor:pointer;background:var(--surface)}
+.drop:hover,.drop.hot{border-color:var(--g);background:var(--g10)}
+.drop i.big{font-size:2.1rem;color:var(--g);margin-bottom:14px;display:block}
+.drop b{display:block;font-size:1.02rem;margin-bottom:6px}
+.drop span{color:var(--muted);font-size:.85rem}
+
+.alt{margin-top:18px;text-align:center}
+.alt-toggle{all:unset;cursor:pointer;font-size:.86rem;font-weight:700;color:var(--muted);
+  border-bottom:1px dashed var(--border);padding-bottom:2px}
+.alt-toggle:hover{color:var(--g);border-color:var(--border-g)}
+#alt-box{margin-top:16px;text-align:left}
+#alt-text{width:100%;background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r-md);padding:15px 16px;color:var(--text);font-family:inherit;
+  font-size:.92rem;line-height:1.6;resize:vertical}
+#alt-text:focus{outline:none;border-color:var(--border-g)}
+
+/* 2 — sections */
+.sec-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(248px,1fr));gap:14px}
+.sec-card{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;gap:9px;
+  padding:19px 20px;border-radius:var(--r-lg);background:var(--surface);
+  border:1px solid var(--border);transition:.22s cubic-bezier(.16,1,.3,1)}
+.sec-card:hover,.sec-card:focus-visible{transform:translateY(-3px);border-color:var(--border-g);
+  background:var(--surface2);box-shadow:0 14px 34px rgba(0,0,0,.3)}
+[data-theme="light"] .sec-card{box-shadow:0 1px 2px rgba(15,23,42,.04)}
+[data-theme="light"] .sec-card:hover{box-shadow:0 14px 32px rgba(15,23,42,.10)}
+.sec-card:focus-visible{outline:2px solid var(--g);outline-offset:3px}
+.sec-top{display:flex;align-items:center;gap:11px}
+.sec-ico{width:36px;height:36px;border-radius:11px;background:var(--g10);border:1px solid var(--border-g);
+  display:flex;align-items:center;justify-content:center;color:var(--g);font-size:.85rem;flex-shrink:0}
+.sec-name{font-weight:800;font-size:1rem}
+.sec-intent{color:var(--muted);font-size:.82rem;line-height:1.5}
+.sec-meta{display:flex;align-items:center;gap:8px;font-size:.71rem;color:var(--dim);
+  font-weight:700;letter-spacing:.04em;margin-top:2px}
+.pill-done{color:var(--g);background:var(--g10);border:1px solid var(--border-g);
+  padding:3px 9px;border-radius:999px;font-size:.64rem;letter-spacing:.1em}
+
+/* 3 — brief */
+.q-list{display:flex;flex-direction:column;gap:11px;margin:22px 0 28px}
+.q-row{display:flex;gap:14px;padding:17px 19px;border-radius:var(--r-md);
+  background:var(--surface);border:1px solid var(--border)}
+.q-n{width:25px;height:25px;border-radius:50%;background:var(--g10);border:1px solid var(--border-g);
+  color:var(--g);font-size:.73rem;font-weight:800;display:flex;align-items:center;
+  justify-content:center;flex-shrink:0;margin-top:1px}
+.q-txt{font-size:.94rem;font-weight:600;line-height:1.5}
+.q-why{color:var(--muted);font-size:.79rem;margin-top:5px;font-weight:500}
+.reassure{display:flex;gap:11px;align-items:flex-start;padding:15px 18px;border-radius:var(--r-md);
+  background:var(--g10);border:1px solid var(--border-g);font-size:.86rem;color:var(--text);margin-bottom:26px}
+.reassure i{color:var(--g);margin-top:3px}
+
+/* 4 — practice */
+.pq{font-size:clamp(1.12rem,2.5vw,1.42rem);font-weight:700;line-height:1.45;margin-bottom:8px}
+/* One control, not four. The old version was an 84px circle plus a separate
+   timer, level meter and hint line all describing the same state; the button
+   now carries its own label, clock and level so there is one thing to look at. */
+.rec-btn{all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:center;
+  justify-content:center;gap:13px;width:100%;padding:18px 22px;border-radius:14px;
+  background:var(--g);color:#04210a;font-weight:800;font-size:.95rem;transition:background .2s,transform .12s}
+[data-theme="light"] .rec-btn{color:#fff}
+.rec-btn:hover{background:var(--g-dark)}
+.rec-btn:active{transform:scale(.99)}
+.rec-btn.on{background:var(--red);color:#fff}
+.rec-btn.busy{background:var(--surface2);color:var(--muted);cursor:default;
+  border:1px solid var(--border)}
+.rec-btn .t{font-variant-numeric:tabular-nums;opacity:.82;font-weight:700}
+.lvl{display:flex;align-items:center;gap:3px;height:17px}
+.lvl i{width:3px;border-radius:9px;background:currentColor;height:20%;opacity:.75;
+  transition:height .09s}
+
+/* compare — first try vs second try vs the model, each playable */
+.cmp{display:flex;flex-direction:column;gap:10px;margin-top:4px}
+.take{display:flex;gap:13px;padding:14px 15px;border-radius:var(--r-md);
+  background:var(--surface);border:1px solid var(--border)}
+.take.best{border-color:var(--border-g);background:var(--g10)}
+.take.model{border-color:var(--border-g)}
+.play{all:unset;cursor:pointer;width:38px;height:38px;border-radius:50%;flex-shrink:0;
+  background:var(--g);color:#04210a;display:flex;align-items:center;justify-content:center;
+  font-size:.82rem;transition:.18s}
+[data-theme="light"] .play{color:#fff}
+.play:hover{transform:scale(1.07)}
+.play.playing{background:var(--red);color:#fff}
+.take-main{flex:1;min-width:0}
+.take-h{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-bottom:5px}
+.take-h b{font-size:.88rem;font-weight:800}
+.take-h span{font-family:var(--mono,inherit);font-size:.72rem;color:var(--muted);font-weight:700}
+.take-t{font-size:.85rem;line-height:1.6;color:var(--dim)}
+.cover{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px}
+.cv{font-size:.72rem;font-weight:700;padding:5px 11px;border-radius:999px;
+  border:1px solid var(--border);color:var(--muted)}
+.cv.hit{color:var(--g);background:var(--g10);border-color:var(--border-g)}
+.cmp-sum{font-size:.88rem;color:var(--dim);margin:14px 0 2px;line-height:1.6}
+
+.said{border-left:3px solid var(--g);padding:14px 17px;background:var(--surface);
+  border-radius:0 var(--r-md) var(--r-md) 0;font-size:.93rem;line-height:1.6;margin-bottom:14px}
+.metrics{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+.metric{flex:1;min-width:104px;padding:13px 15px;border-radius:var(--r-md);
+  background:var(--surface);border:1px solid var(--border)}
+.metric b{display:block;font-size:1.3rem;font-weight:800;line-height:1.1}
+.metric span{font-size:.7rem;color:var(--muted);font-weight:700;letter-spacing:.07em;text-transform:uppercase}
+.metric.ok b{color:var(--g)} .metric.warn b{color:var(--amber)}
+
+.model{border:1px solid var(--border-g);background:var(--g10);border-radius:var(--r-lg);
+  padding:21px;margin-top:6px}
+.model-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:13px}
+.model-head b{font-size:.95rem}
+.speak{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:8px;font-size:.78rem;
+  font-weight:800;color:var(--g);border:1px solid var(--border-g);padding:8px 14px;border-radius:999px}
+.speak:hover{background:var(--g10)}
+.model-text{font-size:1rem;line-height:1.75}
+.model-text .w{transition:background .15s,color .15s;border-radius:3px;padding:0 1px}
+.model-text .w.lit{background:var(--g);color:#04210a;font-weight:600}
+[data-theme="light"] .model-text .w.lit{color:#fff}
+.beats{display:flex;flex-direction:column;gap:7px;margin-top:15px;padding-top:15px;border-top:1px solid var(--border)}
+.beats div{display:flex;gap:9px;font-size:.84rem;color:var(--dim)}
+.beats i{color:var(--g);font-size:.62rem;margin-top:6px}
+.tips{margin-top:13px;font-size:.84rem;color:var(--muted)}
+.tips div{display:flex;gap:9px;margin-top:6px}
+.tips i{color:var(--amber);margin-top:4px;font-size:.68rem}
+
+.row{display:flex;gap:11px;flex-wrap:wrap;margin-top:22px}
+.err{padding:13px 16px;border-radius:var(--r-md);background:rgba(239,68,68,.09);
+  border:1px solid rgba(239,68,68,.3);color:#fca5a5;font-size:.86rem;margin-top:14px}
+[data-theme="light"] .err{color:#b91c1c}
+.spin{display:inline-block;width:15px;height:15px;border:2px solid var(--border);
+  border-top-color:var(--g);border-radius:50%;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.load{display:flex;align-items:center;gap:11px;color:var(--muted);font-size:.9rem;padding:22px 0}
+
+/* coach — a 9:16 stage, centred, so it reads as a video call rather than a
+   form with an icon. The source clip is 720x1280, so the ratio is native and
+   object-fit never has to crop her face. */
+.stage916{width:min(300px,74vw);aspect-ratio:9/16;margin:0 auto 14px;position:relative;
+  border-radius:26px;overflow:hidden;background:#e8f1ec;border:1px solid var(--border);
+  box-shadow:0 22px 60px rgba(0,0,0,.42);transition:border-color .25s,box-shadow .25s}
+[data-theme="light"] .stage916{box-shadow:0 18px 48px rgba(15,23,42,.16)}
+.stage916 video{width:100%;height:100%;object-fit:cover;display:block}
+.stage916.sp{border-color:var(--g);box-shadow:0 0 0 2px var(--g25),0 22px 60px rgba(0,0,0,.46)}
+.stage916.li{border-color:var(--red);box-shadow:0 0 0 2px rgba(239,68,68,.3),0 22px 60px rgba(0,0,0,.46)}
+.s916-top{position:absolute;top:13px;left:13px;right:13px;display:flex;align-items:center;
+  justify-content:space-between;gap:8px;z-index:2}
+.s916-pill{display:inline-flex;align-items:center;gap:7px;font-size:.68rem;font-weight:800;
+  letter-spacing:.06em;color:#fff;background:rgba(10,16,13,.62);backdrop-filter:blur(10px);
+  padding:7px 12px;border-radius:999px;white-space:nowrap}
+.s916-pill i{font-size:.52rem;color:var(--g)}
+.stage916.li .s916-pill i{color:#ff6b6b;animation:blink 1s steps(2) infinite}
+@keyframes blink{50%{opacity:.25}}
+.s916-bot{position:absolute;left:0;right:0;bottom:0;padding:34px 15px 14px;z-index:2;
+  background:linear-gradient(180deg,transparent,rgba(8,12,10,.82));
+  display:flex;align-items:flex-end;justify-content:space-between;gap:10px}
+.s916-name{color:#fff;font-weight:800;font-size:.92rem;line-height:1.2}
+.s916-role{color:rgba(255,255,255,.72);font-size:.7rem;margin-top:2px}
+.s916-replay{all:unset;cursor:pointer;font-size:.68rem;font-weight:800;color:#fff;
+  background:rgba(255,255,255,.16);backdrop-filter:blur(10px);padding:8px 12px;
+  border-radius:999px;white-space:nowrap}
+.s916-replay:hover{background:rgba(255,255,255,.26)}
+.coach-state{text-align:center;font-size:.84rem;color:var(--muted);margin-bottom:24px;font-weight:600}
+
+/* the resume text being practised stays on screen */
+.ref{border:1px solid var(--border);border-radius:var(--r-lg);background:var(--surface);
+  margin-bottom:18px;overflow:hidden}
+.ref summary{cursor:pointer;list-style:none;padding:15px 18px;display:flex;align-items:center;
+  gap:11px;font-weight:700;font-size:.9rem}
+.ref summary::-webkit-details-marker{display:none}
+.ref summary i.chev{margin-left:auto;color:var(--muted);font-size:.75rem;transition:transform .2s}
+.ref[open] summary i.chev{transform:rotate(180deg)}
+.ref-body{padding:0 18px 17px;font-size:.88rem;color:var(--dim);line-height:1.75;
+  white-space:pre-wrap;border-top:1px solid var(--border);padding-top:14px;margin-top:2px}
+
+/* question stack — the connected roadmap from project.html: numbered nodes
+   joined by a vertical line, so progress through the section reads as a path */
+.qs{display:flex;flex-direction:column;gap:16px}
+.qstep{display:flex;gap:16px;position:relative}
+.qstep:not(:last-child)::after{content:'';position:absolute;left:15px;top:38px;bottom:-16px;
+  width:2px;background:linear-gradient(180deg,var(--g),transparent);opacity:.22}
+.qs-node{width:32px;height:32px;border-radius:50%;background:var(--bg);border:2px solid var(--border);
+  display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;
+  color:var(--muted);z-index:1;flex-shrink:0;transition:.22s}
+.qstep.active .qs-node{border-color:var(--g);color:var(--g);box-shadow:0 0 15px rgba(9,192,6,.22)}
+.qstep.done .qs-node{border-color:var(--g);background:var(--g);color:#04210a}
+[data-theme="light"] .qstep.done .qs-node{color:#fff}
+.qs-content{flex:1;min-width:0;padding-bottom:4px}
+.qs-q{font-size:.94rem;font-weight:600;line-height:1.5;cursor:pointer}
+.qstep.active .qs-q{font-size:1.1rem;font-weight:700;line-height:1.45}
+.qstep.todo .qs-q{color:var(--muted)}
+.qs-why{color:var(--muted);font-size:.79rem;margin-top:5px;font-weight:500}
+.qs-panel{margin-top:14px;padding:16px 18px;border:1px solid var(--border-g);
+  border-radius:var(--r-lg);background:var(--surface)}
+.qs-tag{display:inline-flex;align-items:center;gap:6px;font-size:.63rem;font-weight:800;
+  letter-spacing:.1em;color:var(--g);background:var(--g10);border:1px solid var(--border-g);
+  padding:4px 9px;border-radius:999px;margin-top:8px}
+@media(max-width:600px){ .wrap{padding:18px 16px 70px} .sec-grid{grid-template-columns:1fr} }
+</style>
+    <script src="/auth-session.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <div class="brand"><img src="/logo-hiero.png" alt=""><span>HIERO</span></div>
+    <button class="btn-ghost" id="exit"><i class="fas fa-arrow-left"></i> Mock interview</button>
+  </nav>
+  <div class="rail"><i id="r1"></i><i id="r2"></i><i id="r3"></i><i id="r4"></i></div>
+
+  <!-- 1 UPLOAD -->
+  <section class="step on" id="st-upload">
+    <span class="kicker"><i class="fas fa-seedling"></i> Practice mode</span>
+    <h1>Let's start with your resume.</h1>
+    <p class="lede">We'll break it into sections so you can practise one at a time.
+      Nothing here is recorded against you — no camera, no timer, no score.</p>
+    <div class="drop" id="drop">
+      <i class="fas fa-file-arrow-up big"></i>
+      <b>Drop your resume here</b>
+      <span>PDF &middot; or click to choose a file</span>
+    </div>
+    <!-- Deliberately OUTSIDE .drop. As a child, file.click() bubbled back into
+         the drop zone's own click handler and re-entered it, and Chrome
+         suppresses the re-entrant dialog -- so the picker never opened. -->
+    <input type="file" id="file" accept="application/pdf,.pdf" hidden>
+
+    <div class="alt">
+      <button class="alt-toggle" id="alt-toggle">Can't upload? Paste your resume text instead</button>
+      <div id="alt-box" style="display:none">
+        <textarea id="alt-text" rows="9" placeholder="Paste everything from your resume here — headings included, so we can split it into sections."></textarea>
+        <button class="btn" id="alt-go" style="margin-top:12px"><i class="fas fa-arrow-right"></i> Use this text</button>
+      </div>
+    </div>
+    <div id="up-state"></div>
+  </section>
+
+  <!-- 2 SECTIONS -->
+  <section class="step" id="st-sections">
+    <span class="kicker"><i class="fas fa-layer-group"></i> Step 1 of 3</span>
+    <h1>Which part do you want to practise?</h1>
+    <p class="lede">Pick one. You'll do four questions on it — that's about five minutes.</p>
+    <div class="sec-grid" id="sec-grid"></div>
+  </section>
+
+  <!-- 3 PRACTICE — section reference, every question, one open at a time -->
+  <section class="step" id="st-practice">
+    <div class="stage916" id="cav">
+      <video id="av" src="/mock_interview/panel/ananya-greeting.mp4"
+             poster="/mock_interview/panel/ananya-916.webp"
+             muted loop playsinline preload="auto"></video>
+      <div class="s916-top">
+        <span class="s916-pill" id="spill"><i class="fas fa-circle"></i><span>Ready</span></span>
+      </div>
+      <div class="s916-bot">
+        <div><div class="s916-name">Ananya</div><div class="s916-role">Your practice coach</div></div>
+        <button class="s916-replay" id="replayq"><i class="fas fa-volume-high"></i> Again</button>
+      </div>
+    </div>
+    <div class="coach-state" id="cstate">Your practice coach</div>
+
+    <span class="kicker" id="p-kicker"><i class="fas fa-layer-group"></i> Practice</span>
+    <h1 id="p-title">Your experience</h1>
+    <p class="lede" id="p-sub">Work through these one at a time. No score, no timer — redo any of them.</p>
+
+    <details class="ref" id="ref">
+      <summary><i class="fas fa-file-lines" style="color:var(--g)"></i>
+        <span id="ref-title">What's on your resume</span><i class="fas fa-chevron-down chev"></i></summary>
+      <div class="ref-body" id="ref-body"></div>
+    </details>
+
+    <div class="qs" id="qs"></div>
+
+    <div class="row">
+      <button class="btn sec" id="back-sections"><i class="fas fa-arrow-left"></i> Choose another section</button>
+    </div>
+    <div id="p-err"></div>
+  </section>
+
+  <!-- 5 DONE -->
+  <section class="step" id="st-done">
+    <span class="kicker"><i class="fas fa-circle-check"></i> Section complete</span>
+    <h1 id="done-title">Nice — that's one section done.</h1>
+    <p class="lede" id="done-sub"></p>
+    <div class="row">
+      <button class="btn" id="done-next"><i class="fas fa-layer-group"></i> Practise another section</button>
+      <button class="btn sec" id="done-real"><i class="fas fa-bolt"></i> I'm ready for the real interview</button>
+    </div>
+  </section>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const api = (p, o) => fetch(p, o).then(async r => {
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok || j.success === false) throw new Error(j.error || `Request failed (${r.status})`);
+  return j;
+});
+
+const S = { text:'', sections:[], section:null, questions:[], qi:0, done:new Set(), answers:{}, takes:{}, secs:0 };
+
+function step(id, rail){
+  document.querySelectorAll('.step').forEach(e => e.classList.remove('on'));
+  $('#st-' + id).classList.add('on');
+  for (let i=1;i<=4;i++) $('#r'+i).classList.toggle('on', i <= rail);
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+// ── 1. upload ───────────────────────────────────────────────────────────────
+const drop = $('#drop'), file = $('#file');
+drop.addEventListener('click', () => file.click());
+['dragenter','dragover'].forEach(e => drop.addEventListener(e, ev => { ev.preventDefault(); drop.classList.add('hot'); }));
+['dragleave','drop'].forEach(e => drop.addEventListener(e, ev => { ev.preventDefault(); drop.classList.remove('hot'); }));
+drop.addEventListener('drop', ev => { const f = ev.dataTransfer.files[0]; if (f) handleFile(f); });
+file.onchange = () => { if (file.files[0]) handleFile(file.files[0]); file.value = ''; };
+
+// paste fallback — upload is the first gate in the whole feature, so it must
+// never be the thing that stops someone using it
+$('#alt-toggle').onclick = () => {
+  const b = $('#alt-box');
+  b.style.display = b.style.display === 'none' ? '' : 'none';
+  if (b.style.display === '') $('#alt-text').focus();
+};
+$('#alt-go').onclick = () => {
+  const t = $('#alt-text').value.trim();
+  if (t.length < 80) {
+    $('#up-state').innerHTML = '<div class="err">That looks too short — paste the whole resume, headings and all.</div>';
+    return;
+  }
+  loadSections(t);
+};
+
+async function handleFile(f){
+  const isPdf = /\.pdf$/i.test(f.name) || f.type === 'application/pdf';
+  if (!isPdf) {
+    // pdf-parse on the server only reads PDFs; say so plainly instead of
+    // letting it fail downstream with "no readable text".
+    $('#up-state').innerHTML = '<div class="err">That\'s a <b>' +
+      esc((f.name.split('.').pop() || 'file').toUpperCase()) + '</b> file — we can only read PDFs right now. ' +
+      'Save it as PDF, or paste the text in using the link above.</div>';
+    return;
+  }
+  if (f.size > 10 * 1024 * 1024) {
+    $('#up-state').innerHTML = '<div class="err">That file is over 10&nbsp;MB. Try saving a smaller PDF.</div>';
+    return;
+  }
+  $('#up-state').innerHTML = '<div class="load"><span class="spin"></span> Reading ' + esc(f.name) + '…</div>';
+  try {
+    const fd = new FormData(); fd.append('resume', f);
+    const up = await api('/api/interview/upload-context', { method:'POST', body:fd });
+    const text = (up.text || '').trim();
+    if (text.length < 80) throw new Error("We couldn't find readable text in that PDF. If it's a scan or an image, paste the text in instead.");
+    loadSections(text);
+  } catch (e) {
+    $('#up-state').innerHTML = '<div class="err">' + esc(e.message) + '</div>';
+  }
+}
+
+async function loadSections(text){
+  S.text = text;
+  $('#up-state').innerHTML = '<div class="load"><span class="spin"></span> Finding the sections…</div>';
+  try {
+    const sec = await api('/api/practice/sections', {
+      method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ text })
+    });
+    S.sections = sec.sections || [];
+    if (!S.sections.length) throw new Error('We could not find any sections in that resume.');
+    renderSections();
+    $('#up-state').innerHTML = '';
+    step('sections', 1);
+  } catch (e) {
+    $('#up-state').innerHTML = '<div class="err">' + esc(e.message) + '</div>';
+  }
+}
+
+// ── 2. sections ─────────────────────────────────────────────────────────────
+const ICON = { summary:'fa-user', experience:'fa-briefcase', projects:'fa-code', skills:'fa-wrench',
+  education:'fa-graduation-cap', internships:'fa-seedling', certifications:'fa-certificate',
+  achievements:'fa-trophy', publications:'fa-file-lines', activities:'fa-people-group', references:'fa-comments' };
+
+function renderSections(){
+  $('#sec-grid').innerHTML = S.sections.map((s,i) => `
+    <button class="sec-card" data-i="${i}">
+      <span class="sec-top">
+        <span class="sec-ico"><i class="fas ${ICON[s.kind] || 'fa-file-lines'}"></i></span>
+        <span class="sec-name">${esc(s.title)}</span>
+      </span>
+      <span class="sec-intent">Practise how to ${esc(s.intent)}.</span>
+      <span class="sec-meta">
+        <span>${s.lines.length} line${s.lines.length===1?'':'s'} on your resume</span>
+        ${S.done.has(s.id) ? '<span class="pill-done">PRACTISED</span>' : ''}
+      </span>
+    </button>`).join('');
+  $('#sec-grid').querySelectorAll('.sec-card').forEach(b =>
+    b.onclick = () => pickSection(S.sections[+b.dataset.i]));
+}
+
+async function pickSection(sec){
+  S.section = sec; S.qi = 0; S.answers = {};
+  $('#p-title').textContent = 'Your ' + sec.title.toLowerCase();
+  $('#p-sub').textContent = 'Practise how to ' + sec.intent + '. One question at a time — no score, no timer.';
+  $('#ref-title').textContent = "What's on your resume";
+  $('#ref-body').textContent = sec.content;
+  $('#qs').innerHTML = '<div class="load"><span class="spin"></span> Ananya is reading your resume…</div>';
+  $('#p-err').innerHTML = '';
+  step('practice', 2);
+  coach('idle', 'Reading your resume…');
+  try {
+    const r = await api('/api/practice/questions', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ section:{ title:sec.title, content:sec.content } })
+    });
+    S.questions = r.questions;
+    renderQs();
+    openQ(0);
+  } catch (e) {
+    $('#qs').innerHTML = '<div class="err">' + esc(e.message) + '</div>';
+    coach('idle', 'Something went wrong');
+  }
+}
+$('#back-sections').onclick = () => { stopAll(); step('sections', 1); };
+
+// every question on screen; the active one expands in place
+function renderQs(){
+  $('#qs').innerHTML = S.questions.map((q,i) => {
+    const done = !!S.answers[i], active = i === S.qi;
+    return `<div class="qstep ${active?'active':done?'done':'todo'}" data-i="${i}">
+      <div class="qs-node">${done && !active ? '<i class="fas fa-check"></i>' : q.n}</div>
+      <div class="qs-content">
+        <div class="qs-q" data-jump="${i}">${esc(q.q)}</div>
+        ${active && q.why ? `<div class="qs-why">${esc(q.why)}</div>` : ''}
+        ${done && !active ? `<span class="qs-tag"><i class="fas fa-check"></i> practised</span>` : ''}
+        ${active ? '<div class="qs-panel" id="panel"></div>' : ''}
+      </div></div>`;
+  }).join('');
+  $('#qs').querySelectorAll('[data-jump]').forEach(el =>
+    el.onclick = () => { const i = +el.dataset.jump; if (i !== S.qi) openQ(i); });
+}
+
+function openQ(i){
+  stopAll();
+  S.qi = i;
+  renderQs();
+  showRecorder();
+  const q = S.questions[i];
+  $('.qstep.active')?.scrollIntoView({ behavior:'smooth', block:'center' });
+  sayQuestion(q.q);
+}
+
+function showRecorder(){
+  const p = $('#panel'); if (!p) return;
+  p.innerHTML = `
+    <button class="rec-btn" id="mic">
+      <i class="fas fa-microphone"></i>
+      <span id="mlabel">Tap to answer out loud</span>
+      <span class="t" id="timer" style="display:none">0:00</span>
+      <span class="lvl" id="bars" style="display:none"></span>
+    </button>
+    <div class="row" style="justify-content:center;margin-top:11px">
+      <button class="btn sec" id="skip-speak"><i class="fas fa-forward"></i> Show me how to answer</button>
+    </div>`;
+  $('#bars').innerHTML = Array.from({length:12}, () => '<i></i>').join('');
+  $('#mic').onclick = () => rec && rec.state === 'recording' ? stopRec() : startRec();
+  $('#skip-speak').onclick = () => showModel('');
+}
+// ── 4. done ─────────────────────────────────────────────────────────────────
+
+// ── coach ───────────────────────────────────────────────────────────────────
+// Muted on purpose: the clip's own audio is a fixed greeting, the words come
+// from TTS. Video runs only while she speaks, so her going still is the cue
+// that it is the candidate's turn.
+const av = $('#av'), cav = $('#cav');
+av.addEventListener('loadeddata', () => { try { av.currentTime = 0.12; } catch(e){} }, { once:true });
+let qAudio = null, audio = null;
+let rec = null, chunks = [], t0 = 0, tick = null, actx = null, raf = null;
+
+const PILL = { speaking:'Speaking', listening:'Listening', idle:'Ready' };
+function coach(state, label){
+  cav.classList.toggle('sp', state === 'speaking');
+  cav.classList.toggle('li', state === 'listening');
+  $('#spill').querySelector('span').textContent = PILL[state] || 'Ready';
+  $('#cstate').textContent = label;
+  if (state === 'speaking') av.play().catch(()=>{}); else av.pause();
+}
+function stopAll(){
+  if (qAudio) { qAudio.pause(); qAudio = null; }
+  if (audio)  { audio.pause();  audio = null; }
+  if (rec && rec.state === 'recording') { try { rec.stop(); } catch(e){} }
+  clearInterval(tick); cancelAnimationFrame(raf);
+  if (actx) { actx.close().catch(()=>{}); actx = null; }
+  coach('idle', 'Ready when you are');
+}
+async function sayQuestion(text){
+  coach('speaking', 'Asking you a question…');
+  try {
+    const r = await api('/api/interview/tts', {
+      method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ text })
+    });
+    if (qAudio) qAudio.pause();
+    qAudio = new Audio(r.audio_url);
+    qAudio.onended = () => coach('idle', 'Your turn — tap the mic');
+    await qAudio.play();
+  } catch (e) {
+    // No voice key, or autoplay blocked. The question is on screen regardless,
+    // so this degrades to a reading exercise instead of failing.
+    coach('idle', 'Read the question, then tap the mic');
+  }
+}
+$('#replayq').onclick = () => { const q = S.questions[S.qi]; if (q) sayQuestion(q.q); };
+
+// ── recording ───────────────────────────────────────────────────────────────
+async function startRec(){
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio:true });
+    rec = new MediaRecorder(stream); chunks = [];
+    rec.ondataavailable = e => e.data.size && chunks.push(e.data);
+    rec.onstop = () => { stream.getTracks().forEach(t => t.stop()); submitAnswer(); };
+    if (qAudio) { qAudio.pause(); qAudio = null; }
+    coach('listening', 'Listening — take your time');
+    rec.start(); t0 = Date.now();
+    $('#mic').classList.add('on');
+    $('#mic').querySelector('i').className = 'fas fa-stop';
+    $('#mlabel').textContent = 'Stop';
+    $('#timer').style.display = ''; $('#bars').style.display = '';
+    tick = setInterval(() => {
+      const n = Math.floor((Date.now()-t0)/1000);
+      $('#timer').textContent = `${Math.floor(n/60)}:${String(n%60).padStart(2,'0')}`;
+    }, 250);
+    actx = new (window.AudioContext||window.webkitAudioContext)();
+    const an = actx.createAnalyser(); an.fftSize = 64;
+    actx.createMediaStreamSource(stream).connect(an);
+    const buf = new Uint8Array(an.frequencyBinCount), bars = [...$('#bars').children];
+    (function draw(){
+      an.getByteFrequencyData(buf);
+      bars.forEach((b,i) => b.style.height = Math.max(20, (buf[i%buf.length]/255)*100) + '%');
+      raf = requestAnimationFrame(draw);
+    })();
+  } catch (e) {
+    $('#p-err').innerHTML = '<div class="err">We could not reach your microphone. Check the browser permission, or use “Show me how to answer”.</div>';
+    coach('idle', 'Microphone unavailable');
+  }
+}
+function stopRec(){
+  S.secs = Math.max(1, Math.round((Date.now()-t0)/1000));
+  clearInterval(tick); cancelAnimationFrame(raf);
+  if (actx) { actx.close().catch(()=>{}); actx = null; }
+  if (rec && rec.state === 'recording') rec.stop();
+  $('#timer').style.display = 'none'; $('#bars').style.display = 'none';
+  $('#mic').classList.remove('on'); $('#mic').classList.add('busy');
+  $('#mic').querySelector('i').className = 'fas fa-circle-notch fa-spin';
+  $('#mlabel').textContent = 'Transcribing…';
+  coach('idle', 'Let me look at that…');
+}
+
+async function submitAnswer(){
+  try {
+    // Keep the blob. The whole point of the second take is hearing yourself
+    // back against the first, so discarding it after transcription loses the
+    // comparison this exercise is built on.
+    const blob = new Blob(chunks, { type:'audio/webm' });
+    const fd = new FormData();
+    fd.append('audio', blob, 'answer.webm');
+    const r = await api('/api/interview/transcribe', { method:'POST', body:fd });
+    const said = (r.text || '').trim();
+    if (!said) {
+      $('#mic').classList.remove('busy');
+      $('#mic').querySelector('i').className = 'fas fa-microphone';
+      $('#mlabel').textContent = 'Did not catch that — try again';
+      coach('idle', 'I could not hear that');
+      return;
+    }
+    S.answers[S.qi] = said;
+    const t = S.takes[S.qi] || (S.takes[S.qi] = { takes: [], model: null });
+    const words = said.split(/\s+/).filter(Boolean).length;
+    t.takes.push({
+      text: said, url: URL.createObjectURL(blob), secs: S.secs, words,
+      wpm: Math.round(words / (S.secs / 60))
+    });
+
+    if (t.takes.length === 1) {
+      const k = t.takes[0];
+      const paceOK = k.wpm >= 110 && k.wpm <= 165, lenOK = k.words >= 45 && k.words <= 170;
+      $('#panel').innerHTML = `
+        <h2>What you said</h2>
+        <div class="said">${esc(said)}</div>
+        <div class="metrics">
+          <div class="metric ${paceOK?'ok':'warn'}"><b>${k.wpm}</b><span>words / min</span></div>
+          <div class="metric ${lenOK?'ok':'warn'}"><b>${k.words}</b><span>words</span></div>
+          <div class="metric"><b>${fmt(k.secs)}</b><span>length</span></div>
+        </div>
+        <p class="lede" style="margin-bottom:0;font-size:.88rem">${
+          k.words < 45 ? 'That was short — interviewers read brevity as “no detail to give”. Aim for 60–120 words.'
+          : k.words > 170 ? 'That ran long. Interviewers stop listening after about 90 seconds.'
+          : k.wpm > 165 ? 'You spoke quickly, which usually reads as nerves.'
+          : k.wpm < 110 ? 'A slightly brisker pace will sound more confident.'
+          : 'Good length and pace.'}</p>`;
+      showModel(said);
+    } else {
+      renderCompare();
+    }
+  } catch (e) {
+    $('#p-err').innerHTML = '<div class="err">' + esc(e.message) + '</div>';
+    coach('idle', 'Something went wrong');
+  }
+}
+const fmt = n => `${Math.floor(n/60)}:${String(n%60).padStart(2,'0')}`;
+
+// Distinctive terms from the model answer: the numbers, tools and proper nouns
+// that carry the substance. Checking coverage locally keeps the comparison
+// instant and honest -- it reports what they actually said, not a model's
+// opinion of it.
+const STOP = new Set(('the a an and or but so i we it to of in on for with that this my our at as was were is are be been had has have about from they them then than there here just really very much more most some any can could would should will'
+  ).split(' '));
+function keyTerms(text, source){
+  // A key point is a fact, not a long word. Earlier this scored on length
+  // alone and surfaced "clicking" and "automatically" as key points. Now a
+  // term counts only if it is a number, or it also appears on their resume --
+  // i.e. it is one of their own facts the answer was supposed to carry.
+  const src = (source || '').toLowerCase();
+  const seen = new Set(), nums = [], facts = [];
+  for (const raw of text.split(/[\s,.;:!?"'()]+/)) {
+    const w = raw.replace(/[^\w.+#%-]/g, '').trim();
+    if (!w) continue;
+    const low = w.toLowerCase();
+    if (seen.has(low) || STOP.has(low)) continue;
+    if (/^\d|\d%$|^\d+$/.test(w) || /\d/.test(w)) { seen.add(low); nums.push(w); continue; }
+    if (low.length < 4) continue;
+    if (/ly$/.test(low)) continue;                       // adverbs carry no fact
+    if (/ing$/.test(low) && w[0] !== w[0].toUpperCase()) continue;
+    const proper = /^[A-Z][a-zA-Z.+#]{2,}$/.test(w);
+    if (!proper && !src.includes(low)) continue;         // must be one of their own words
+    seen.add(low); facts.push(w);
+  }
+  return [...nums, ...facts].slice(0, 6);
+}
+
+let player = null;
+function playClip(url, btn, rate){
+  if (player) { player.pause(); document.querySelectorAll('.play.playing')
+    .forEach(b => { b.classList.remove('playing'); b.querySelector('i').className='fas fa-play'; }); }
+  if (btn.classList.contains('playing')) { player = null; return; }
+  player = new Audio(url);
+  player.playbackRate = rate || 1;
+  btn.classList.add('playing'); btn.querySelector('i').className = 'fas fa-pause';
+  player.onended = () => { btn.classList.remove('playing');
+    btn.querySelector('i').className = 'fas fa-play'; player = null; };
+  player.play().catch(()=>{});
+}
+
+function renderCompare(){
+  const t = S.takes[S.qi];
+  const first = t.takes[0], last = t.takes[t.takes.length - 1];
+  const terms = t.model ? keyTerms(t.model.answer, S.section && S.section.content) : [];
+  const hit = txt => terms.filter(k => txt.toLowerCase().includes(k.toLowerCase()));
+  const h1 = hit(first.text).length, h2 = hit(last.text).length;
+  const better = h2 > h1 || (Math.abs(last.wpm-137) < Math.abs(first.wpm-137));
+
+  $('#panel').innerHTML = `
+    <h2>Listen back and compare</h2>
+    <div class="cmp">
+      <div class="take">
+        <button class="play" data-src="${first.url}"><i class="fas fa-play"></i></button>
+        <div class="take-main">
+          <div class="take-h"><b>Your first try</b><span>${first.wpm} wpm · ${first.words} words · ${fmt(first.secs)}</span></div>
+          <div class="take-t">${esc(first.text)}</div>
+        </div></div>
+      <div class="take ${better?'best':''}">
+        <button class="play" data-src="${last.url}"><i class="fas fa-play"></i></button>
+        <div class="take-main">
+          <div class="take-h"><b>Your second try</b><span>${last.wpm} wpm · ${last.words} words · ${fmt(last.secs)}</span></div>
+          <div class="take-t">${esc(last.text)}</div>
+        </div></div>
+      ${t.model ? `<div class="take model">
+        <button class="play" data-src="${t.model.url||''}" data-rate="0.75"><i class="fas fa-play"></i></button>
+        <div class="take-main">
+          <div class="take-h"><b>How to answer it</b><span>played at 0.75×</span></div>
+          <div class="take-t">${esc(t.model.answer)}</div>
+        </div></div>` : ''}
+    </div>
+    ${terms.length ? `<div class="cmp-sum">Key points you covered this time — <b>${h2} of ${terms.length}</b>${h2>h1?` (up from ${h1})`:''}:</div>
+      <div class="cover">${terms.map(k => `<span class="cv ${hit(last.text).includes(k)?'hit':''}">${esc(k)}</span>`).join('')}</div>` : ''}
+    <div class="row">
+      <button class="btn sec" id="again2"><i class="fas fa-rotate-right"></i> Go again</button>
+      <button class="btn" id="next3">${S.qi+1 >= S.questions.length ? 'Finish section' : 'Next question'} <i class="fas fa-arrow-right"></i></button>
+    </div>`;
+  $('#panel').querySelectorAll('.play').forEach(b => {
+    if (!b.dataset.src) { b.disabled = true; b.style.opacity = .4; return; }
+    b.onclick = () => playClip(b.dataset.src, b, +b.dataset.rate || 1);
+  });
+  $('#again2').onclick = () => { showRecorder(); coach('idle','Go again when ready'); };
+  $('#next3').onclick  = () => S.qi+1 >= S.questions.length ? finish() : openQ(S.qi+1);
+  coach('idle', better ? 'Better — you can hear the difference' : 'Listen to both and go again');
+}
+
+// ── model answer ────────────────────────────────────────────────────────────
+async function showModel(attempt){
+  const panel = $('#panel'); if (!panel) return;
+  coach('idle', 'Writing you a model answer…');
+  panel.insertAdjacentHTML('beforeend',
+    '<div id="mwrap"><div class="load"><span class="spin"></span> Writing a model answer from your resume…</div></div>');
+  const last = S.qi + 1 >= S.questions.length;
+  try {
+    const q = S.questions[S.qi];
+    const r = await api('/api/practice/model-answer', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ question:q.q, attempt,
+        section:{ title:S.section.title, content:S.section.content } })
+    });
+    const t = S.takes[S.qi] || (S.takes[S.qi] = { takes: [], model: null });
+    t.model = { answer: r.answer, url: null };
+    const words = r.answer.split(/\s+/);
+    $('#mwrap').innerHTML = `
+      <div class="model">
+        <div class="model-head">
+          <b><i class="fas fa-comment-dots" style="color:var(--g);margin-right:7px"></i>How you could say it</b>
+          <button class="speak" id="speak"><i class="fas fa-volume-high"></i> Play slowly</button>
+        </div>
+        <div class="model-text" id="mtext">${words.map((w,i)=>`<span class="w" data-i="${i}">${esc(w)}</span>`).join(' ')}</div>
+        ${r.structure?.length ? `<div class="beats">${r.structure.map(b=>`<div><i class="fas fa-circle"></i><span>${esc(b)}</span></div>`).join('')}</div>` : ''}
+        ${r.tips?.length ? `<div class="tips">${r.tips.map(t=>`<div><i class="fas fa-lightbulb"></i><span>${esc(t)}</span></div>`).join('')}</div>` : ''}
+      </div>
+      <div class="row">
+        <button class="btn" id="sayit"><i class="fas fa-microphone"></i> Now say it yourself</button>
+        <button class="btn sec" id="next">${last ? 'Finish section' : 'Skip to next'} <i class="fas fa-arrow-right"></i></button>
+      </div>
+      <p class="lede" style="margin-top:12px;font-size:.8rem">Say it in your own words — don't read it back
+        word for word, that falls apart on the first follow-up. You'll hear both takes side by side after.</p>`;
+    $('#speak').onclick = () => speak(r.answer, words.length);
+    $('#sayit').onclick = () => {
+      showRecorder();
+      $('#mlabel').textContent = 'Tap, then say it your way';
+      coach('idle', 'Your turn — say it back in your own words');
+    };
+    $('#next').onclick  = () => last ? finish() : openQ(S.qi + 1);
+    coach('idle', last ? 'Last one — then we are done' : 'Listen, then try it again');
+  } catch (e) {
+    $('#mwrap').innerHTML = '<div class="err">' + esc(e.message) + '</div>'
+      + `<div class="row"><button class="btn sec" id="next2">${last ? 'Finish section' : 'Skip to next'}</button></div>`;
+    $('#next2').onclick = () => last ? finish() : openQ(S.qi + 1);
+  }
+}
+
+// 0.75x — slow enough to copy the shape of the sentence, not so slow it slurs.
+async function speak(text, wordCount){
+  const btn = $('#speak');
+  btn.innerHTML = '<span class="spin"></span> Loading';
+  try {
+    if (audio) { audio.pause(); audio = null; }
+    const r = await api('/api/interview/tts', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ text, speed: 0.75 })
+    });
+    const tk = S.takes[S.qi];
+    if (tk && tk.model) tk.model.url = r.audio_url;
+    audio = new Audio(r.audio_url);
+    const spans = [...document.querySelectorAll('#mtext .w')];
+    audio.onplay = () => { btn.innerHTML = '<i class="fas fa-pause"></i> Pause';
+      coach('speaking', 'Showing you how to answer'); };
+    audio.ontimeupdate = () => {
+      if (!audio.duration) return;
+      const upto = Math.floor((audio.currentTime / audio.duration) * wordCount);
+      spans.forEach((sp,i) => sp.classList.toggle('lit', i <= upto));
+    };
+    audio.onended = () => { btn.innerHTML = '<i class="fas fa-rotate-left"></i> Play again';
+      spans.forEach(sp => sp.classList.remove('lit')); coach('idle', 'Now try it in your own words'); };
+    btn.onclick = () => { if (audio.paused) audio.play();
+      else { audio.pause(); coach('idle', 'Paused');
+        btn.innerHTML = '<i class="fas fa-volume-high"></i> Resume'; } };
+    await audio.play();
+  } catch (e) {
+    btn.innerHTML = '<i class="fas fa-volume-xmark"></i> Voice unavailable';
+    btn.disabled = true;
+  }
+}
+
+// ── 4. done ─────────────────────────────────────────────────────────────────
+function finish(){
+  stopAll();
+  Object.values(S.takes).forEach(t => t.takes.forEach(k => URL.revokeObjectURL(k.url)));
+  S.done.add(S.section.id);
+  const left = S.sections.filter(s => !S.done.has(s.id));
+  $('#done-title').textContent = `That's your ${S.section.title.toLowerCase()} rehearsed.`;
+  $('#done-sub').textContent = left.length
+    ? `You've practised ${S.done.size} of ${S.sections.length} sections. ${left[0].title} is usually the next one people get asked about.`
+    : `You've been through every section on your resume. That's the whole thing rehearsed out loud.`;
+  $('#done-next').style.display = left.length ? '' : 'none';
+  renderSections();
+  step('done', 4);
+}
+$('#done-next').onclick = () => step('sections', 1);
+$('#done-real').onclick = () => location.href = '/mock-interview';
+$('#exit').onclick = () => location.href = '/mock-interview';
+
+// follow whatever theme the rest of the app is on
+try {
+  const t = localStorage.getItem('hieroTheme') || localStorage.getItem('theme');
+  if (t === 'light') document.documentElement.setAttribute('data-theme','light');
+} catch {}
+</script>
+</body></html>
