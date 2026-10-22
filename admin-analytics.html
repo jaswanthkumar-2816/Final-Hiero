@@ -3,7 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hiero · Command Center</title>
+  
+  <!-- Hiero theme base: one source for colour and type, served by routes/theme.js.
+       Must stay first and must NOT be deferred, or dark-mode users see a white
+       flash before the engine resolves their choice. -->
+  <link rel="stylesheet" href="/theme/hiero.css">
+  <script src="/theme/hiero.js"></script>
+<title>Hiero · Command Center</title>
   <link rel="icon" href="/logohiero.png">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -751,8 +757,8 @@ function toggleTheme() {
   const html = document.documentElement;
   const isDark = html.getAttribute('data-theme') === 'dark';
   const next = isDark ? 'light' : 'dark';
-  html.setAttribute('data-theme', next);
-  localStorage.setItem('hiero_admin_theme', next);
+  if (!(window.Hiero && window.Hiero.theme)) html.setAttribute('data-theme', next);
+  localStorage.setItem('hiero.theme', next);
   const icon = document.getElementById('theme-icon');
   if (icon) { icon.className = next === 'dark' ? 'fas fa-sun' : 'fas fa-moon'; }
 }
@@ -760,7 +766,7 @@ function toggleTheme() {
 // Apply saved theme immediately on load
 (function() {
   const saved = localStorage.getItem('hiero_admin_theme') || 'light';
-  document.documentElement.setAttribute('data-theme', saved);
+  if (!(window.Hiero && window.Hiero.theme)) document.documentElement.setAttribute('data-theme', saved);
   const icon = document.getElementById('theme-icon');
   if (icon) { icon.className = saved === 'dark' ? 'fas fa-sun' : 'fas fa-moon'; }
 })();

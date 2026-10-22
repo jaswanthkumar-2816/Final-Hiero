@@ -5,7 +5,13 @@
   <meta charset="UTF-8">
   <title>Hiero Mock Interview</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Syne:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap"
+  
+  <!-- Hiero theme base: one source for colour and type, served by routes/theme.js.
+       Must stay first and must NOT be deferred, or dark-mode users see a white
+       flash before the engine resolves their choice. -->
+  <link rel="stylesheet" href="/theme/hiero.css">
+  <script src="/theme/hiero.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Syne:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.10.0/dist/tf.min.js"></script>
@@ -1147,7 +1153,7 @@
       <div style="display:flex; align-items:center; gap:12px;">
         <a href="/index.html" class="logo" style="text-decoration:none">
           <img src="/logo-hiero.png" alt="Hiero" style="height:28px">
-          <span style="font-weight: 700; font-size: 15px; letter-spacing: 3px; color: #fff">HIERO</span>
+          <span style="font-weight: 700; font-size: 15px; letter-spacing: 3px; color: var(--text-main)">HIERO</span>
         </a>
         <button class="theme-btn" id="theme-btn" onclick="toggleTheme()" title="Toggle light / dark mode">
           <i class="fas fa-moon" id="theme-icon"></i>
@@ -3496,15 +3502,15 @@ Key Requirements:
       const html = document.documentElement;
       const current = html.getAttribute('data-theme');
       const next = current === 'light' ? 'dark' : 'light';
-      html.setAttribute('data-theme', next);
-      localStorage.setItem('hiero_theme', next);
+      if (!(window.Hiero && window.Hiero.theme)) html.setAttribute('data-theme', next);
+      localStorage.setItem('hiero.theme', next);
       document.getElementById('theme-icon').className = next === 'light' ? 'fas fa-sun' : 'fas fa-moon';
     }
 
     // Restore saved theme on load
     (function () {
       const saved = localStorage.getItem('hiero_theme') || 'dark';
-      document.documentElement.setAttribute('data-theme', saved);
+      if (!(window.Hiero && window.Hiero.theme)) document.documentElement.setAttribute('data-theme', saved);
       const icon = document.getElementById('theme-icon');
       if (icon) icon.className = saved === 'light' ? 'fas fa-sun' : 'fas fa-moon';
     })();

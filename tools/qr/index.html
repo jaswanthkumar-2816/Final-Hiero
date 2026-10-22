@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QR Generator</title>
+<style>
+:root{
+  --bg:#f6f9f7; --card:#fff; --line:#e3ebe6; --ink:#101814; --dim:#667a6f;
+  --g:#0ca03a; --g-ink:#07772a; --g-soft:#e9f8ee; --g-line:#bfe6cb;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0e1311; --card:#161d1a; --line:#263430; --ink:#eaf3ee; --dim:#8fa69b;
+    --g:#2fc455; --g-ink:#7fe09b; --g-soft:#15271c; --g-line:#2c4836;
+  }
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);min-height:100vh;padding:36px 20px 70px;
+  font:15px/1.55 ui-sans-serif,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:900px;margin:0 auto}
+h1{font-size:1.65rem;letter-spacing:-.02em;margin-bottom:5px}
+.sub{color:var(--dim);font-size:.93rem;margin-bottom:26px}
+.grid{display:grid;grid-template-columns:1fr 320px;gap:22px;align-items:start}
+@media (max-width:760px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px}
+label{display:block;font-size:.78rem;font-weight:700;letter-spacing:.04em;
+  text-transform:uppercase;color:var(--dim);margin-bottom:7px}
+textarea,input[type=text],select{width:100%;background:transparent;color:var(--ink);
+  border:1px solid var(--line);border-radius:10px;padding:11px 13px;font:inherit;font-size:.94rem}
+textarea{resize:vertical;min-height:96px}
+textarea:focus,input:focus,select:focus{outline:none;border-color:var(--g)}
+.row{display:flex;gap:12px;flex-wrap:wrap;margin-top:15px}
+.row>div{flex:1;min-width:120px}
+input[type=color]{width:100%;height:40px;padding:3px;border:1px solid var(--line);
+  border-radius:10px;background:transparent;cursor:pointer}
+.chips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}
+.chip{all:unset;cursor:pointer;font-size:.78rem;font-weight:700;padding:7px 13px;
+  border-radius:999px;border:1px solid var(--line);color:var(--dim)}
+.chip:hover,.chip.on{color:var(--g-ink);background:var(--g-soft);border-color:var(--g-line)}
+#stage{display:flex;align-items:center;justify-content:center;background:var(--card);
+  border:1px solid var(--line);border-radius:16px;padding:20px;min-height:300px}
+/* The canvas keeps a high-res backing store for export; its on-screen size is
+   set explicitly in JS. CSS alone does not work here: a canvas is a replaced
+   element, so height:auto resolves to its intrinsic attribute height (1024)
+   and aspect-ratio loses -- it rendered 278x1024. */
+#stage canvas{border-radius:8px;display:block;
+  /* A 1024px code shown at ~280px gets bilinear-smoothed, and fuzzy module
+     edges are exactly what stops a phone locking on. Keep them hard. */
+  image-rendering:pixelated;image-rendering:-moz-crisp-edges;image-rendering:crisp-edges}
+.btn{all:unset;cursor:pointer;display:block;text-align:center;background:var(--g);color:#fff;
+  font-weight:700;font-size:.92rem;padding:12px;border-radius:10px;margin-top:10px}
+.btn:hover{filter:brightness(1.08)}
+.btn.sec{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.meta{font-size:.78rem;color:var(--dim);margin-top:12px;text-align:center;line-height:1.7}
+.verdict{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:11px;
+  padding:10px;border-radius:10px;font-size:.84rem;font-weight:700}
+.verdict.ok{color:var(--g-ink);background:var(--g-soft);border:1px solid var(--g-line)}
+.verdict.bad{color:#b3261e;background:#fdeceb;border:1px solid #f5c3bf}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .verdict.bad{
+  color:#ff9d93;background:#2c1512;border-color:#5a2721}}
+.warn{font-size:.82rem;color:#b26a00;background:#fdf3e2;border:1px solid #f0d9a8;
+  padding:10px 13px;border-radius:10px;margin-top:13px}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .warn{
+  color:#f0c070;background:#2a2008;border-color:#4a3a12}}
+.hint{font-size:.78rem;color:var(--dim);margin-top:6px}
+/* Scan mode: pure white, maximum size, nothing else on screen. Phone cameras
+   want a big high-contrast target, not a thumbnail in a dark UI. */
+#scan{position:fixed;inset:0;background:#fff;z-index:99;display:none;
+  align-items:center;justify-content:center;flex-direction:column;gap:18px;cursor:zoom-out}
+#scan.on{display:flex}
+#scan canvas{image-rendering:pixelated;width:min(86vw,86vh);height:min(86vw,86vh);
+  border-radius:4px}
+#scan p{color:#555;font-size:.9rem;font-family:inherit}
+.lanbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:18px;
+  padding:11px 14px;background:var(--card);border:1px solid var(--line);border-radius:12px}
+.lanbar>span:first-child{font-size:.76rem;font-weight:700;letter-spacing:.04em;
+  text-transform:uppercase;color:var(--dim)}
+.lanbar input{flex:0 1 210px;font-size:.88rem;padding:7px 10px}
+.lanhint{font-size:.76rem;color:var(--dim)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>QR Generator</h1>
+  <p class="sub">Runs entirely on this machine — nothing is uploaded, works with Wi-Fi off.</p>
+
+  <div class="chips" id="presets">
+    <button class="chip on" data-v="https://hiero.in">hiero.in</button>
+    <button class="chip" data-v="https://hiero.in/mock-interview">Mock interview</button>
+    <button class="chip" data-v="__LAN__">Open Hiero on my phone</button>
+    <button class="chip" data-v="WIFI:T:WPA;S:NETWORK_NAME;P:PASSWORD;;">Wi-Fi</button>
+    <button class="chip" data-v="mailto:hello@hiero.in">Email</button>
+  </div>
+
+  <div class="lanbar">
+    <span>Phone address</span>
+    <input type="text" id="lan" spellcheck="false">
+    <span class="lanhint">your Mac's Wi-Fi address &mdash; changes when you switch network</span>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <label for="text">Content</label>
+      <textarea id="text" spellcheck="false">https://hiero.in</textarea>
+      <div class="hint" id="count"></div>
+
+      <div class="row">
+        <div>
+          <label for="ec">Error correction</label>
+          <select id="ec">
+            <option value="L">L — 7% (smallest)</option>
+            <option value="M" selected>M — 15% (default)</option>
+            <option value="Q">Q — 25%</option>
+            <option value="H">H — 30% (use with a logo)</option>
+          </select>
+        </div>
+        <div>
+          <label for="size">Size (px)</label>
+          <input type="text" id="size" value="1024" inputmode="numeric">
+        </div>
+        <div>
+          <label for="margin">Quiet zone</label>
+          <input type="text" id="margin" value="2" inputmode="numeric">
+        </div>
+      </div>
+
+      <div class="row">
+        <div><label for="fg">Dots</label><input type="color" id="fg" value="#101814"></div>
+        <div><label for="bg">Background</label><input type="color" id="bg" value="#ffffff"></div>
+        <div><label for="logo">Logo in centre</label>
+          <input type="file" id="logo" accept="image/*" style="font-size:.8rem">
+        </div>
+      </div>
+      <div id="warn"></div>
+    </div>
+
+    <div>
+      <div id="stage"><canvas id="cv"></canvas></div>
+      <button class="btn" id="dlPng">Download PNG</button>
+      <button class="btn sec" id="dlSvg">Download SVG</button>
+      <button class="btn" id="big">Show big to scan</button>
+      <button class="btn sec" id="copy">Copy image</button>
+      <div class="verdict" id="verdict"></div>
+      <div class="meta" id="meta"></div>
+    </div>
+  </div>
+</div>
+
+<div id="scan"><canvas id="bigcv"></canvas><p id="scantxt"></p></div>
+
+<script src="qrcode.bundle.js"></script>
+<script src="jsqr.bundle.js"></script>
+<script>
+const $ = s => document.querySelector(s);
+
+// A QR pointing at localhost is useless on a phone -- "localhost" there means
+// the phone itself, not this Mac. It has to be the LAN address. A page cannot
+// read its own LAN IP, so this is remembered and editable; it changes when you
+// join a different network.
+const LAN_KEY = 'qrLanHost';
+const DEFAULT_LAN = '192.168.29.232:2816';   // this Mac, at the time of writing
+function lanHost(){
+  try { return localStorage.getItem(LAN_KEY) || DEFAULT_LAN; } catch { return DEFAULT_LAN; }
+}
+function lanUrl(){ return 'http://' + lanHost(); }
+const cv = $('#cv');
+let logoImg = null;
+let LOGO_FRAC = 0.16;
+
+// Printed small, a dark-on-light code with decent contrast is what scanners
+// expect. Inverted (light dots on dark) fails on a lot of older readers, so
+// warn rather than silently produce something that won't scan.
+function luma(hex){
+  const n = parseInt(hex.slice(1), 16);
+  return (0.299*(n>>16 & 255) + 0.587*(n>>8 & 255) + 0.114*(n & 255)) / 255;
+}
+
+// Read our own output back with a real decoder. Heuristics about logo size
+// and contrast are guesses; actually decoding the pixels is not.
+function verify(expected){
+  const v = $('#verdict');
+  if (typeof jsQRlib === 'undefined') { v.className = 'verdict'; v.textContent = ''; return; }
+  const jsQR = jsQRlib.default || jsQRlib;
+  const n = 400;
+  const t = document.createElement('canvas'); t.width = t.height = n;
+  const tx = t.getContext('2d');
+  tx.imageSmoothingEnabled = false;
+  tx.drawImage(cv, 0, 0, n, n);
+  let res = null;
+  try { res = jsQR(tx.getImageData(0, 0, n, n).data, n, n); } catch {}
+  if (res && res.data === expected) {
+    v.className = 'verdict ok';
+    v.innerHTML = '&#10003; Checked &mdash; this scans correctly';
+  } else {
+    v.className = 'verdict bad';
+    v.innerHTML = logoImg
+      ? '&#10007; This will not scan. The logo is covering too much &mdash; try a smaller one, or one with a light background.'
+      : '&#10007; This will not scan. Raise the contrast, or widen the quiet zone.';
+  }
+}
+
+function fitCanvas(){
+  const stage = $('#stage');
+  const avail = Math.max(120, stage.clientWidth - 40);
+  const d = Math.min(420, avail);
+  cv.style.width = d + 'px';
+  cv.style.height = d + 'px';          // QR is always square
+}
+addEventListener('resize', fitCanvas);
+
+async function render(){
+  const text = $('#text').value;
+  $('#count').textContent = text.length + ' characters';
+  if (!text) { cv.width = cv.height = 0; $('#meta').textContent = ''; return; }
+
+  const size = Math.min(4096, Math.max(128, parseInt($('#size').value) || 1024));
+  const margin = Math.min(16, Math.max(0, parseInt($('#margin').value) || 0));
+  let ec = $('#ec').value;
+  if (logoImg && ec !== 'H') { ec = 'H'; $('#ec').value = 'H'; }   // forced, not suggested
+  const fg = $('#fg').value, bg = $('#bg').value;
+
+  if (typeof QRCode === 'undefined') {
+    // Blaming the content here would be wrong and would send you hunting in the
+    // wrong place. The usual cause is index.html being moved away from the bundle.
+    $('#warn').innerHTML = '<div class="warn">qrcode.bundle.js did not load. ' +
+      'Keep index.html and qrcode.bundle.js together in the same folder.</div>';
+    $('#meta').textContent = '';
+    return;
+  }
+  try {
+    await QRCode.toCanvas(cv, text, {
+      width: size, margin, errorCorrectionLevel: ec,
+      color: { dark: fg, light: bg }
+    });
+  } catch (e) {
+    const over = /too (long|big)|code length|data too/i.test(e.message || '');
+    $('#meta').textContent = over
+      ? 'Too much content for one QR code — shorten it, or drop the error correction to L.'
+      : 'Could not draw that: ' + (e.message || e);
+    return;
+  }
+
+  if (logoImg) {
+    const ctx = cv.getContext('2d');
+    // 16%, not 21%. Logos with a dark background (logo-hiero.png is green on
+    // black) merge into the surrounding modules and the decoder loses the grid,
+    // so the plate around it has to be generous and the logo has to be small.
+    const box = Math.round(cv.width * LOGO_FRAC);
+    const pad = Math.round(box * 0.16);
+    const cx = cv.width / 2;
+    ctx.fillStyle = bg;
+    ctx.fillRect(cx - box/2 - pad, cx - box/2 - pad, box + pad*2, box + pad*2);
+    // contain, so a wide logo is not stretched into the data area
+    const ar = logoImg.naturalWidth / logoImg.naturalHeight || 1;
+    const w = ar >= 1 ? box : box * ar, h = ar >= 1 ? box / ar : box;
+    ctx.drawImage(logoImg, cx - w/2, cx - h/2, w, h);
+  }
+
+  const warns = [];
+  if (luma(fg) > luma(bg)) warns.push('Your dots are lighter than the background. Many scanners only read dark-on-light — swap the colours.');
+  else if (Math.abs(luma(fg) - luma(bg)) < 0.45) warns.push('Low contrast between dots and background. Scanning will be unreliable.');
+  if (margin < 2) warns.push('A quiet zone under 2 can fail when the code sits against other content.');
+  $('#warn').innerHTML = warns.map(w => `<div class="warn">${w}</div>`).join('');
+
+  fitCanvas();
+  $('#meta').innerHTML = `${cv.width}&times;${cv.height}px &middot; level ${ec}`;
+  verify(text);
+}
+
+['text','ec','size','margin','fg','bg'].forEach(id =>
+  $('#' + id).addEventListener('input', render));
+
+$('#logo').addEventListener('change', e => {
+  const f = e.target.files[0];
+  if (!f) { logoImg = null; render(); return; }
+  const r = new FileReader();
+  r.onload = () => { const i = new Image(); i.onload = () => { logoImg = i; render(); }; i.src = r.result; };
+  r.readAsDataURL(f);
+});
+
+$('#presets').addEventListener('click', e => {
+  const b = e.target.closest('.chip'); if (!b) return;
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('on'));
+  b.classList.add('on');
+  let v = b.dataset.v;
+  if (v === '__LAN__') v = lanUrl();
+  $('#text').value = v;
+  render();
+});
+
+function save(blob, name){
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = name;
+  a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+const slug = () => ($('#text').value.replace(/^https?:\/\//,'').replace(/[^a-z0-9]+/gi,'-')
+  .replace(/^-|-$/g,'').slice(0,40) || 'qr');
+
+$('#dlPng').onclick = () => cv.toBlob(b => save(b, slug() + '.png'), 'image/png');
+
+$('#dlSvg').onclick = async () => {
+  // SVG from the library, not traced from the canvas, so it stays vector —
+  // which is what you want for print and for dropping into a design tool.
+  const svg = await QRCode.toString($('#text').value, {
+    type: 'svg', margin: Math.max(0, parseInt($('#margin').value) || 0),
+    errorCorrectionLevel: $('#ec').value,
+    color: { dark: $('#fg').value, light: $('#bg').value }
+  });
+  save(new Blob([svg], { type:'image/svg+xml' }), slug() + '.svg');
+};
+
+$('#copy').onclick = () => cv.toBlob(async b => {
+  try {
+    await navigator.clipboard.write([new ClipboardItem({ 'image/png': b })]);
+    $('#copy').textContent = 'Copied';
+    setTimeout(() => $('#copy').textContent = 'Copy image', 1400);
+  } catch {
+    $('#copy').textContent = 'Copy blocked — use Download';
+    setTimeout(() => $('#copy').textContent = 'Copy image', 2200);
+  }
+}, 'image/png');
+
+// scan mode renders its own copy at display resolution, so nothing is
+// downscaled and every module lands on a whole pixel
+$('#big').onclick = async () => {
+  const side = Math.round(Math.min(innerWidth, innerHeight) * 0.86);
+  const bc = $('#bigcv');
+  await QRCode.toCanvas(bc, $('#text').value, {
+    width: side, margin: Math.max(2, parseInt($('#margin').value) || 2),
+    errorCorrectionLevel: $('#ec').value,
+    color: { dark: '#000000', light: '#ffffff' }   // max contrast for the camera
+  });
+  $('#scantxt').textContent = $('#text').value.slice(0, 70);
+  $('#scan').classList.add('on');
+};
+$('#scan').onclick = () => $('#scan').classList.remove('on');
+addEventListener('keydown', e => { if (e.key === 'Escape') $('#scan').classList.remove('on'); });
+
+$('#lan').value = lanHost();
+$('#lan').addEventListener('input', () => {
+  const v = $('#lan').value.trim();
+  try { localStorage.setItem(LAN_KEY, v); } catch {}
+  if (document.querySelector('.chip.on')?.dataset.v === '__LAN__') {
+    $('#text').value = lanUrl();
+    render();
+  }
+});
+
+render();
+</script>
+</body></html>

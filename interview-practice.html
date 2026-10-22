@@ -3,6 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Hiero theme base: one source for colour and type, served by routes/theme.js.
+       Must stay first and must NOT be deferred, or dark-mode users see a white
+       flash before the engine resolves their choice. -->
+  <link rel="stylesheet" href="/theme/hiero.css">
+  <script src="/theme/hiero.js"></script>
 <title>Practice — Hiero</title>
 <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -855,7 +860,7 @@ $('#exit').onclick = () => location.href = '/mock-interview';
 // follow whatever theme the rest of the app is on
 try {
   const t = localStorage.getItem('hieroTheme') || localStorage.getItem('theme');
-  if (t === 'light') document.documentElement.setAttribute('data-theme','light');
+  if (t === 'light') if (!(window.Hiero && window.Hiero.theme)) document.documentElement.setAttribute('data-theme','light');
 } catch {}
 </script>
 </body></html>

@@ -260,10 +260,17 @@ function saveLocalUsers(users) {
     }
 }
 
-// Middleware to verify JWT token
+// Middleware to verify JWT token or admin PIN
 const authenticateToken = (req, res, next) => {
+    const pinHeader = req.headers['x-admin-pin'] || (req.query && req.query.pin);
+    const expectedPin = process.env.ADMIN_PIN || '2816';
+    if (pinHeader && String(pinHeader).trim() === String(expectedPin).trim()) {
+        req.user = { email: process.env.ADMIN_EMAIL || 'jaswanthkumarmuthoju@gmail.com', role: 'admin' };
+        return next();
+    }
+
     const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
+    const token = (authHeader && authHeader.split(' ')[1]) || req.headers['x-admin-token'];
 
     if (!token) {
         return res.status(401).json({ error: 'Access token required' });
@@ -969,8 +976,32 @@ router.get('/admin/dashboard', authenticateToken, requireAdmin, async (req, res)
     }
 });
 
+// 🔑 POST /admin/pin-auth - Authenticate admin with security PIN
+router.post(['/admin/pin-auth', '/api/admin/pin-auth'], (req, res) => {
+    try {
+        const { pin } = req.body || {};
+        const expectedPin = process.env.ADMIN_PIN || '2816';
+        if (!pin || String(pin).trim() !== String(expectedPin).trim()) {
+            return res.status(401).json({ success: false, error: 'Invalid security PIN' });
+        }
+        const adminEmail = process.env.ADMIN_EMAIL || 'jaswanthkumarmuthoju@gmail.com';
+        const token = jwt.sign(
+            { email: adminEmail, role: 'admin' },
+            process.env.JWT_SECRET || 'hiero_jwt_super_secret_key_2026',
+            { expiresIn: '7d' }
+        );
+        return res.json({
+            success: true,
+            token,
+            user: { email: adminEmail, name: 'Admin', role: 'admin' }
+        });
+    } catch (err) {
+        return res.status(500).json({ success: false, error: 'Authentication failed' });
+    }
+});
+
 // 🔍 GET /api/admin/check - Integrated Admin Check
-router.get('/api/admin/check', authenticateToken, async (req, res) => {
+router.get(['/api/admin/check', '/admin/check'], authenticateToken, async (req, res) => {
     try {
         const userEmail = req.user.email;
         const ADMIN_EMAILS = [

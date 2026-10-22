@@ -3,7 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Story Visualizer | Hiero</title>
+  
+  <!-- Hiero theme base: one source for colour and type, served by routes/theme.js.
+       Must stay first and must NOT be deferred, or dark-mode users see a white
+       flash before the engine resolves their choice. -->
+  <link rel="stylesheet" href="/theme/hiero.css">
+  <script src="/theme/hiero.js"></script>
+<title>Story Visualizer | Hiero</title>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script>
@@ -11,7 +17,7 @@
       try {
         var t = localStorage.getItem('theme') || localStorage.getItem('hiero-theme') || 'dark';
         var light = t === 'light';
-        document.documentElement.setAttribute('data-theme', light ? 'light' : 'dark');
+        if (!(window.Hiero && window.Hiero.theme)) document.documentElement.setAttribute('data-theme', light ? 'light' : 'dark');
         document.documentElement.classList.toggle('light-mode', light);
         document.documentElement.style.colorScheme = light ? 'light' : 'dark';
       } catch (e) {}
@@ -1633,7 +1639,7 @@
 
     function setVisualizerTheme(theme) {
       const light = theme === 'light';
-      document.documentElement.setAttribute('data-theme', light ? 'light' : 'dark');
+      if (!(window.Hiero && window.Hiero.theme)) document.documentElement.setAttribute('data-theme', light ? 'light' : 'dark');
       document.documentElement.classList.toggle('light-mode', light);
       document.body.classList.toggle('light-mode', light);
       document.documentElement.style.colorScheme = light ? 'light' : 'dark';

@@ -1020,8 +1020,8 @@
       const doc = document.documentElement;
       const current = doc.getAttribute('data-theme');
       const target = current === 'light' ? 'dark' : 'light';
-      doc.setAttribute('data-theme', target);
-      localStorage.setItem('hiero-theme', target);
+      if (!(window.Hiero && window.Hiero.theme)) doc.setAttribute('data-theme', target);
+      localStorage.setItem('hiero.theme', target);
       updateThemeUI(target);
     };
 
@@ -1036,7 +1036,7 @@
     }
 
     const savedTheme = localStorage.getItem('hiero-theme') || 'dark';
-    document.documentElement.setAttribute('data-theme', savedTheme);
+    if (!(window.Hiero && window.Hiero.theme)) document.documentElement.setAttribute('data-theme', savedTheme);
     updateThemeUI(savedTheme);
 
     // --- UTILITIES ---

@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hiero Theme — Base</title>
+
+<!-- This is the pattern every page should copy. Stylesheet first, engine
+     second, both before anything else, and the script is NOT deferred. -->
+<link rel="stylesheet" href="/theme/hiero.css">
+<script src="/theme/hiero.js"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap">
+
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: var(--font-body); margin: 0; background: var(--bg-sunken); }
+  .wrap { max-width: 980px; margin-inline: auto; padding: 36px 20px 72px; }
+
+  h1 { font-family: var(--font-display); font-size: clamp(26px,4vw,36px);
+       font-weight: 600; margin: 0 0 6px; color: var(--text-main); }
+  .lede { color: var(--text-muted); margin: 0 0 26px; max-width: 62ch; line-height: 1.6; }
+
+  h2 { font-family: var(--font-display); font-size: 17px; font-weight: 600;
+       margin: 32px 0 12px; color: var(--text-main);
+       border-bottom: 1px solid var(--card-border); padding-bottom: 7px; }
+
+  /* Three-way switch ---------------------------------------------------- */
+  .switch { display: inline-flex; gap: 3px; padding: 3px; border-radius: 999px;
+            background: var(--surface-2); border: 1px solid var(--card-border); }
+  .switch button {
+    font: 600 12.5px/1 var(--font-body); color: var(--text-muted);
+    background: transparent; border: 0; cursor: pointer;
+    padding: 9px 17px; border-radius: 999px; display: flex; align-items: center; gap: 6px;
+  }
+  .switch button[aria-pressed="true"] {
+    background: var(--primary); color: var(--text-inverse);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .state { margin: 14px 0 0; font-family: var(--font-mono); font-size: 12px;
+           color: var(--text-muted); }
+  .state b { color: var(--primary-ink); }
+
+  /* Swatches ------------------------------------------------------------ */
+  .grid { display: grid; gap: 10px;
+          grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); }
+  .sw { border: 1px solid var(--card-border); border-radius: 10px;
+        overflow: hidden; background: var(--surface); }
+  .sw .chip { height: 52px; }
+  .sw .label { padding: 8px 10px; }
+  .sw code { font-family: var(--font-mono); font-size: 10.5px; color: var(--text-main);
+             display: block; }
+  .sw .val { font-family: var(--font-mono); font-size: 9.5px; color: var(--text-subtle);
+             margin-top: 2px; display: block; }
+
+  /* Components ---------------------------------------------------------- */
+  .card { background: var(--surface); border: 1px solid var(--card-border);
+          border-radius: 12px; padding: 18px 20px; box-shadow: var(--shadow-sm); }
+  .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .btn { font: 700 13px/1 var(--font-body); padding: 11px 20px; border-radius: 9px;
+         cursor: pointer; border: 1px solid transparent; }
+  .btn-primary { background: var(--primary); color: var(--text-inverse); }
+  .btn-primary:hover { background: var(--primary-strong); }
+  .btn-ghost { background: transparent; color: var(--text-main); border-color: var(--border-strong); }
+  .btn-ghost:hover { background: var(--card-hover-bg); }
+  a { color: var(--primary-ink); }
+
+  .pill { display: inline-flex; align-items: center; gap: 5px; padding: 4px 11px;
+          border-radius: 999px; font: 700 10.5px/1 var(--font-mono);
+          text-transform: uppercase; letter-spacing: .06em; }
+  .pill-ok   { background: var(--primary-soft); color: var(--success); }
+  .pill-warn { background: rgba(154,100,0,.12); color: var(--warning); }
+  .pill-bad  { background: rgba(179,38,30,.12); color: var(--danger); }
+
+  input, select, textarea {
+    font: 400 13px/1.4 var(--font-body); padding: 10px 12px; width: 100%;
+    color: var(--text-main); background: var(--bg-pure);
+    border: 1px solid var(--card-border); border-radius: 8px;
+  }
+  .muted { color: var(--text-muted); } .subtle { color: var(--text-subtle); }
+
+  .note { border-left: 3px solid var(--primary); background: var(--primary-soft);
+          padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 14px 0;
+          color: var(--text-main); font-size: 13.5px; line-height: 1.6; }
+  pre { background: var(--surface-2); border: 1px solid var(--card-border);
+        border-radius: 8px; padding: 14px; overflow-x: auto;
+        font-family: var(--font-mono); font-size: 12px; color: var(--text-main); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Hiero theme base</h1>
+  <p class="lede">Every colour and typeface Hiero uses, in one place. Change a value in <code>routes/theme.js</code> and this page shows you the result in both themes.
+     If something looks wrong here, it is wrong everywhere.</p>
+
+  <div class="switch" role="group" aria-label="Theme">
+    <button id="m-light"  onclick="Hiero.theme.set('light')"  aria-pressed="false">Light</button>
+    <button id="m-dark"   onclick="Hiero.theme.set('dark')"   aria-pressed="false">Dark</button>
+    <button id="m-system" onclick="Hiero.theme.set('system')" aria-pressed="false">System</button>
+  </div>
+  <p class="state">choice <b id="s-mode">—</b> &nbsp;·&nbsp; showing <b id="s-res">—</b>
+     &nbsp;·&nbsp; your OS prefers <b id="s-os">—</b></p>
+
+  <div class="note" id="sys-note" hidden>
+     On <strong>System</strong>, change your OS appearance now — this page follows it
+     without a reload.
+  </div>
+
+  <h2>Add it to a page</h2>
+  <pre>&lt;link rel="stylesheet" href="/theme/hiero.css"&gt;
+&lt;script src="/theme/hiero.js"&gt;&lt;/script&gt;</pre>
+  <p class="muted" style="font-size:13px;margin:0">First thing in <code>&lt;head&gt;</code>, before any
+     other stylesheet or <code>&lt;style&gt;</code>. No <code>defer</code> — it must run before the
+     first paint or dark-mode users get a white flash.</p>
+
+  <h2>Brand</h2>
+  <div class="grid" id="g-brand"></div>
+
+  <h2>Surfaces</h2>
+  <div class="grid" id="g-surface"></div>
+
+  <h2>Text</h2>
+  <div class="grid" id="g-text"></div>
+
+  <h2>Status</h2>
+  <div class="grid" id="g-status"></div>
+
+  <h2>In use</h2>
+  <div class="card">
+    <div class="row" style="margin-bottom:16px">
+      <button class="btn btn-primary">Primary action</button>
+      <button class="btn btn-ghost">Secondary</button>
+      <span class="pill pill-ok">Ready</span>
+      <span class="pill pill-warn">Partial</span>
+      <span class="pill pill-bad">Failed</span>
+    </div>
+    <p style="margin:0 0 6px;color:var(--text-main)">Body text sits on
+       <code>--text-main</code>, with <a href="#">links in --primary-ink</a>.</p>
+    <p class="muted" style="margin:0 0 4px;font-size:13.5px">Supporting copy uses --text-muted.</p>
+    <p class="subtle" style="margin:0 0 16px;font-size:12.5px">Captions and metadata use --text-subtle.</p>
+    <input placeholder="Form fields inherit the theme too">
+  </div>
+
+  <h2>Contrast</h2>
+  <div class="card" id="contrast"></div>
+
+</div>
+
+<script>
+  var TOKENS = {
+    'g-brand':   ['--primary','--primary-strong','--primary-ink','--primary-soft','--primary-ring'],
+    'g-surface': ['--bg-pure','--bg-sunken','--surface','--surface-2','--nav-bg',
+                  '--card-bg','--card-border','--border-soft','--border-strong'],
+    'g-text':    ['--text-main','--text-muted','--text-subtle','--text-inverse','--icon-color'],
+    'g-status':  ['--success','--warning','--danger','--info']
+  };
+
+  function paint() {
+    var cs = getComputedStyle(document.documentElement);
+    Object.keys(TOKENS).forEach(function (id) {
+      document.getElementById(id).innerHTML = TOKENS[id].map(function (t) {
+        var v = cs.getPropertyValue(t).trim();
+        return '<div class="sw">' +
+                 '<div class="chip" style="background:' + v + '"></div>' +
+                 '<div class="label"><code>' + t + '</code><span class="val">' + v + '</span></div>' +
+               '</div>';
+      }).join('');
+    });
+    paintContrast(cs);
+  }
+
+  /* Contrast is the one thing a palette gets wrong silently: the brand green
+     is unreadable as text on white, which is exactly why --primary-ink exists.
+     Checking it here means a future colour change cannot quietly break it. */
+  function lum(c) {
+    var m = c.match(/\d+(\.\d+)?/g); if (!m) return 0;
+    var p = m.slice(0, 3).map(function (n) {
+      n = n / 255; return n <= .03928 ? n / 12.92 : Math.pow((n + .055) / 1.055, 2.4);
+    });
+    return .2126 * p[0] + .7152 * p[1] + .0722 * p[2];
+  }
+  function ratio(a, b) {
+    var l1 = lum(a), l2 = lum(b);
+    return ((Math.max(l1, l2) + .05) / (Math.min(l1, l2) + .05));
+  }
+  function toRgb(v) {
+    var d = document.createElement('div');
+    d.style.color = v; document.body.appendChild(d);
+    var c = getComputedStyle(d).color; d.remove(); return c;
+  }
+  function paintContrast(cs) {
+    var bg = toRgb(cs.getPropertyValue('--bg-pure').trim());
+    var pairs = [
+      ['--text-main',   'Body text'],
+      ['--text-muted',  'Supporting text'],
+      ['--text-subtle', 'Captions'],
+      ['--primary-ink', 'Links / green text'],
+      ['--primary',     'Brand green AS TEXT']
+    ];
+    document.getElementById('contrast').innerHTML = pairs.map(function (p) {
+      var r = ratio(toRgb(cs.getPropertyValue(p[0]).trim()), bg);
+      var ok = r >= 4.5, big = r >= 3;
+      var cls = ok ? 'pill-ok' : (big ? 'pill-warn' : 'pill-bad');
+      var txt = ok ? 'PASS' : (big ? 'LARGE ONLY' : 'FAIL');
+      return '<div class="row" style="justify-content:space-between;padding:7px 0;' +
+             'border-bottom:1px solid var(--border-soft)">' +
+               '<span style="font-size:13.5px">' + p[1] +
+                 ' <code class="subtle" style="font-size:11px">' + p[0] + '</code></span>' +
+               '<span class="row" style="gap:9px"><code class="muted" style="font-size:11.5px">' +
+                 r.toFixed(2) + ':1</code><span class="pill ' + cls + '">' + txt + '</span></span>' +
+             '</div>';
+    }).join('') +
+    '<p class="subtle" style="font-size:12px;margin:12px 0 0">Against --bg-pure. ' +
+    '4.5:1 is the readable threshold for normal text. The brand green is expected ' +
+    'to fail here — that is the whole reason --primary-ink exists.</p>';
+  }
+
+  function sync() {
+    var mode = Hiero.theme.get(), res = Hiero.theme.resolved();
+    ['light','dark','system'].forEach(function (m) {
+      document.getElementById('m-' + m).setAttribute('aria-pressed', String(m === mode));
+    });
+    document.getElementById('s-mode').textContent = mode;
+    document.getElementById('s-res').textContent  = res;
+    document.getElementById('s-os').textContent   =
+      matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.getElementById('sys-note').hidden = (mode !== 'system');
+    paint();
+  }
+
+  document.addEventListener('hiero:themechange', sync);
+  sync();
+</script>
+</body>
+</html>

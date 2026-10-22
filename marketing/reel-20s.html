@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<title>Hiero — 20s Reel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+:root{
+  --sans:'Plus Jakarta Sans',-apple-system,sans-serif;
+  --serif:'Fraunces',Georgia,serif;
+  --mono:'JetBrains Mono',Menlo,monospace;
+  --bg:#ffffff; --line:#e3ebe6; --ink:#101814; --dim:#667a6f;
+  --g:#0ca03a; --gink:#07772a; --gsoft:#e9f8ee; --gline:#bfe6cb;
+  --amb:#d98a00; --ambsoft:#fdf3e2; --ambline:#f0d9a8;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#20241f;display:flex;align-items:center;justify-content:center;min-height:100vh}
+.stage{width:1080px;height:1920px;position:relative;overflow:hidden;background:var(--bg);
+  font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased;flex:0 0 auto}
+.amb1,.amb2{position:absolute;border-radius:50%;pointer-events:none}
+.amb1{width:1500px;height:1100px;left:-260px;top:-380px;
+  background:radial-gradient(closest-side,rgba(12,160,58,.10),transparent 70%)}
+.amb2{width:1300px;height:1000px;right:-320px;bottom:-300px;
+  background:radial-gradient(closest-side,rgba(12,160,58,.07),transparent 70%)}
+.grain{position:absolute;inset:-50%;pointer-events:none;opacity:.035;z-index:95;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/></filter><rect width='160' height='160' filter='url(%23n)'/></svg>")}
+
+.shot{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;padding:146px 56px 152px;opacity:0;zoom:1.2;will-change:opacity}
+
+.kick{font-family:var(--mono);font-size:25px;letter-spacing:.3em;text-transform:uppercase;
+  color:var(--gink);background:var(--gsoft);border:1px solid var(--gline);
+  padding:14px 28px;border-radius:999px;display:inline-block}
+.kick.amb{color:#9a6200;background:var(--ambsoft);border-color:var(--ambline)}
+.h1{font-family:var(--serif);font-weight:600;font-size:100px;line-height:1.05;
+  letter-spacing:-.03em;text-align:center;font-variation-settings:'opsz' 144}
+.h2{font-family:var(--serif);font-weight:600;font-size:72px;line-height:1.1;
+  letter-spacing:-.025em;text-align:center;font-variation-settings:'opsz' 120}
+.lbl{font-family:var(--mono);font-size:26px;letter-spacing:.3em;text-transform:uppercase;color:var(--dim)}
+.sub{font-size:36px;color:var(--dim);text-align:center;line-height:1.45;max-width:780px}
+.num{font-family:var(--serif);font-weight:700;font-variation-settings:'opsz' 144;
+  letter-spacing:-.012em;line-height:.9;font-size:300px}
+.g{color:var(--g)} .a{color:var(--amb)}
+.row{display:flex;align-items:center;gap:22px}
+.card{background:#fff;border:1px solid var(--line);border-radius:28px;
+  box-shadow:0 2px 6px rgba(16,24,20,.05),0 40px 90px rgba(16,24,20,.10)}
+.chip{font-weight:700;font-size:38px;padding:22px 38px;border-radius:999px;
+  border:1px solid var(--gline);background:var(--gsoft);color:var(--gink);white-space:nowrap}
+.chip.amb{border-color:var(--ambline);background:var(--ambsoft);color:#9a6200}
+
+@keyframes rise{from{opacity:0;transform:translateY(42px)}to{opacity:1;transform:none}}
+@keyframes riseS{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+@keyframes pop{0%{opacity:0;transform:scale(.78)}64%{opacity:1;transform:scale(1.04)}100%{opacity:1;transform:scale(1)}}
+@keyframes popIn{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:scale(1)}}
+@keyframes wipeR{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+@keyframes blurIn{from{opacity:0;filter:blur(22px);transform:scale(1.08)}
+                  to{opacity:1;filter:blur(0);transform:scale(1)}}
+@keyframes pushIn{from{transform:scale(1)}to{transform:scale(1.05)}}
+@keyframes scan{from{transform:translateY(-240px)}to{transform:translateY(var(--sh,820px))}}
+@keyframes dash{to{stroke-dashoffset:0}}
+@keyframes wave{0%{transform:scaleY(.16)}100%{transform:scaleY(1)}}
+@keyframes pulseR{0%{transform:scale(1);opacity:.5}100%{transform:scale(1.45);opacity:0}}
+@keyframes flash{0%{opacity:.85}100%{opacity:0}}
+.stage *{animation-fill-mode:both!important}
+.E{animation-timing-function:cubic-bezier(.16,1,.3,1)!important}
+.LIN{animation-timing-function:linear!important}
+
+/* real résumé, rendered from the product's own PDF templates */
+.doc{position:relative;border-radius:18px;overflow:hidden;background:#fff;
+  border:1px solid var(--line);box-shadow:0 3px 8px rgba(16,24,20,.06),0 46px 100px rgba(16,24,20,.14)}
+.doc img{display:block;width:100%;height:auto}
+.scanline{position:absolute;left:0;right:0;top:0;height:240px;pointer-events:none;
+  background:linear-gradient(180deg,rgba(12,160,58,0) 0%,rgba(12,160,58,.09) 70%,
+    rgba(12,160,58,.38) 96%,rgba(12,160,58,.8) 100%)}
+.mark{position:absolute;display:flex;align-items:center;gap:13px;font-family:var(--mono);
+  font-size:27px;letter-spacing:.04em;color:#9a6200;background:#fffaf0;
+  border:1px solid var(--ambline);padding:16px 26px;border-radius:999px;white-space:nowrap;
+  box-shadow:0 14px 34px rgba(217,138,0,.22)}
+.mark i{width:11px;height:11px;border-radius:50%;background:var(--amb);display:block;flex:0 0 auto}
+.mark.ok{color:var(--gink);background:#f3fcf6;border-color:var(--gline);
+  box-shadow:0 14px 34px rgba(12,160,58,.2)}
+.mark.ok i{background:var(--g)}
+
+.ring{position:relative;width:500px;height:500px}
+.ring svg{transform:rotate(-90deg)}
+.ring .mid{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+
+/* real interviewer footage */
+.cam{position:relative;width:620px;border-radius:26px;overflow:hidden;background:#eef4f0;
+  box-shadow:0 3px 8px rgba(16,24,20,.06),0 46px 100px rgba(16,24,20,.16)}
+.cam img{display:block;width:100%;height:auto;position:absolute;inset:0;opacity:0}
+.cam img.on{opacity:1;position:relative}
+.camtag{position:absolute;left:22px;bottom:22px;z-index:3;font-family:var(--mono);
+  font-size:21px;letter-spacing:.14em;color:#fff;background:rgba(16,24,20,.55);
+  padding:10px 18px;border-radius:999px;backdrop-filter:blur(6px)}
+.wf{display:flex;align-items:center;gap:10px;height:96px}
+.wf i{width:12px;border-radius:999px;background:var(--g);height:100%;display:block;transform-origin:center}
+.rec{display:flex;align-items:center;gap:12px;font-family:var(--mono);font-size:24px;
+  color:#b4232a;letter-spacing:.14em}
+.rec b{width:16px;height:16px;border-radius:50%;background:#d7343c;display:block}
+
+.frame{position:absolute;inset:0;pointer-events:none;z-index:80}
+.fr-top{position:absolute;top:58px;left:66px;display:flex;align-items:center;gap:16px}
+.fr-top img{height:46px;width:auto;display:block}
+.fr-top span{font-family:var(--serif);font-weight:600;font-size:32px;letter-spacing:.22em;
+  color:var(--ink);font-variation-settings:'opsz' 90}
+.fr-bot{position:absolute;left:66px;right:66px;bottom:62px;height:7px;
+  background:#e9efeb;border-radius:9px;overflow:hidden}
+.fr-bot i{display:block;height:100%;width:0;border-radius:9px;
+  background:linear-gradient(90deg,var(--g),#5ec97e)}
+</style></head>
+<body>
+<div class="stage" id="stage">
+  <div class="amb1"></div><div class="amb2"></div>
+
+  <!-- 1 · 0.0–2.5 — their own headline -->
+  <div class="shot" data-in="0" data-out="2.5">
+    <img src="assets/logo-lotus.png" class="E" style="width:300px;animation:popIn .6s .05s">
+    <div class="h1 E" style="animation:blurIn .6s .45s;margin-top:50px">
+      Stop guessing what<br>recruiters want.</div>
+    <div class="row E" style="animation:rise .5s 1.1s;margin-top:48px;gap:18px">
+      <div class="lbl">Know your gaps</div><div class="g" style="font-size:26px">·</div>
+      <div class="lbl">Close them</div><div class="g" style="font-size:26px">·</div>
+      <div class="lbl g">Get hired</div>
+    </div>
+  </div>
+
+  <!-- 2 · 2.5–4.5 -->
+  <div class="shot" data-in="2.5" data-out="4.5">
+    <div class="E" style="animation:pop .5s 2.55s;text-align:center">
+      <div class="num" data-c0="0" data-c1="94" data-t0="2.56" data-t1="3.25">0</div>
+      <div class="lbl" style="margin-top:28px">Applications sent</div>
+    </div>
+    <div class="E" style="animation:pop .5s 3.35s;text-align:center;margin-top:76px">
+      <div class="num a" style="font-size:216px" data-c0="0" data-c1="2" data-t0="3.36" data-t1="3.7">0</div>
+      <div class="lbl" style="margin-top:22px">Replies</div>
+    </div>
+  </div>
+
+  <!-- 3 · 4.5–8.0 — the real résumé, scanned -->
+  <div class="shot" data-in="4.5" data-out="8.0">
+    <div class="kick E" style="animation:riseS .4s 4.54s;margin-bottom:40px">What the filter sees</div>
+    <div class="doc E" style="width:100%;--sh:1120px;animation:blurIn .55s 4.6s,pushIn 3.4s 4.6s">
+      <img src="assets/resume-before.png" alt="">
+      <div class="scanline LIN" style="animation:scan 1.4s 4.9s"></div>
+      <div class="mark E" style="top:20.5%;left:24px;animation:pop .34s 6.3s">
+        <i></i>Summary says nothing</div>
+      <div class="mark E" style="top:44%;right:24px;animation:pop .34s 6.7s">
+        <i></i>No measurable impact</div>
+      <div class="mark E" style="top:66%;left:24px;animation:pop .34s 7.1s">
+        <i></i>Missing 4 key skills</div>
+    </div>
+  </div>
+
+  <!-- 4 · 8.0–10.0 -->
+  <div class="shot" data-in="8.0" data-out="10.0">
+    <div class="ring E" style="animation:popIn .5s 8.04s">
+      <svg width="500" height="500">
+        <circle cx="250" cy="250" r="212" fill="none" stroke="#edf3ef" stroke-width="32"/>
+        <circle cx="250" cy="250" r="212" fill="none" stroke="var(--amb)" stroke-width="32"
+          stroke-linecap="round" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100"
+          data-ring="42" data-rfrom="100" data-rt0="8.15" data-rdur="1.0"/>
+      </svg>
+      <div class="mid">
+        <div class="num a" style="font-size:230px" data-c0="0" data-c1="42" data-t0="8.15" data-t1="9.15">0</div>
+        <div class="lbl" style="margin-top:12px">Resume score</div>
+      </div>
+    </div>
+    <div class="h2 E" style="animation:rise .5s 9.0s;margin-top:60px">
+      Now you know<br><span class="g">exactly why</span>.</div>
+  </div>
+
+  <!-- 5 · 10.0–11.5 -->
+  <div class="shot" data-in="10.0" data-out="11.5">
+    <div class="kick amb E" style="animation:riseS .34s 10.02s;margin-bottom:54px">Gaps found</div>
+    <div style="display:flex;flex-wrap:wrap;gap:24px;justify-content:center;max-width:860px">
+      <div class="chip amb E" style="animation:pop .32s 10.08s">React</div>
+      <div class="chip amb E" style="animation:pop .32s 10.22s">SQL</div>
+      <div class="chip amb E" style="animation:pop .32s 10.36s">Docker</div>
+      <div class="chip amb E" style="animation:pop .32s 10.50s">System Design</div>
+    </div>
+    <div class="h2 E" style="animation:rise .44s 10.72s;margin-top:70px">Named. Not guessed.</div>
+  </div>
+
+  <!-- 6 · 11.5–13.5 — the rebuilt résumé -->
+  <div class="shot" data-in="11.5" data-out="13.5">
+    <div class="kick E" style="animation:riseS .36s 11.54s;margin-bottom:38px">Rebuilt with Hiero</div>
+    <div class="doc E" style="width:100%;animation:blurIn .55s 11.6s,pushIn 2.0s 11.6s">
+      <img src="assets/resume-after.png" alt="">
+      <div class="mark ok E" style="top:30%;right:24px;animation:pop .32s 12.2s">
+        <i></i>Metrics added</div>
+      <div class="mark ok E" style="top:58%;left:24px;animation:pop .32s 12.55s">
+        <i></i>ATS parse 96%</div>
+    </div>
+  </div>
+
+  <!-- 7 · 13.5–16.5 — real AI interviewer footage + the product's real question -->
+  <div class="shot" data-in="13.5" data-out="16.5">
+    <div class="row E" style="animation:riseS .36s 13.54s;margin-bottom:30px;gap:24px">
+      <div class="kick">AI Engine Active · Listening</div>
+      <div class="rec"><b></b>00:<span data-c0="0" data-c1="12" data-t0="13.5" data-t1="16.5"
+        data-fmt="pad2">00</span></div>
+    </div>
+    <div class="cam E" id="cam" style="animation:blurIn .5s 13.58s">
+      <div class="camtag">Ananya · AI Interviewer</div>
+    </div>
+    <div class="lbl E" style="animation:riseS .4s 13.9s;margin-top:34px;align-self:flex-start">
+      Question 1 of 4 · Behavioral</div>
+    <div class="h2 E" style="animation:rise .5s 14.05s;margin-top:20px;text-align:left;
+      font-size:52px;align-self:flex-start;line-height:1.22">
+      “Can you walk me through how you<br>reduced manual testing time by 30%<br>using Python automation scripts?”</div>
+    <div class="wf" style="margin-top:36px">
+      <i class="LIN" style="animation:wave .42s 13.6s infinite alternate"></i>
+      <i class="LIN" style="animation:wave .38s 13.66s infinite alternate"></i>
+      <i class="LIN" style="animation:wave .46s 13.72s infinite alternate"></i>
+      <i class="LIN" style="animation:wave .34s 13.78s infinite alternate"></i>
+      <i class="LIN" style="animation:wave .50s 13.84s infinite alternate"></i>
+      <i class="LIN" style="animation:wave .40s 13.90s infinite alternate"></i>
+      <i class="LIN" style="animation:wave .44s 13.96s infinite alternate"></i>
+      <i class="LIN" style="animation:wave .36s 14.02s infinite alternate"></i>
+      <i class="LIN" style="animation:wave .48s 14.08s infinite alternate"></i>
+      <i class="LIN" style="animation:wave .42s 14.14s infinite alternate"></i>
+      <i class="LIN" style="animation:wave .38s 14.20s infinite alternate"></i>
+      <i class="LIN" style="animation:wave .46s 14.26s infinite alternate"></i>
+      <i class="LIN" style="animation:wave .34s 14.32s infinite alternate"></i>
+      <i class="LIN" style="animation:wave .50s 14.38s infinite alternate"></i>
+      <i class="LIN" style="animation:wave .40s 14.44s infinite alternate"></i>
+    </div>
+  </div>
+
+  <!-- 8 · 16.5–18.0 — the payoff, under the riser -->
+  <div class="shot" data-in="16.5" data-out="18.0">
+    <div class="ring E" style="animation:popIn .4s 16.52s">
+      <svg width="500" height="500">
+        <circle cx="250" cy="250" r="212" fill="none" stroke="#edf3ef" stroke-width="32"/>
+        <circle cx="250" cy="250" r="212" fill="none" stroke="var(--g)" stroke-width="32"
+          stroke-linecap="round" pathLength="100" stroke-dasharray="100" stroke-dashoffset="58"
+          data-ring="91" data-rfrom="58" data-rt0="16.56" data-rdur="1.05"/>
+      </svg>
+      <div class="mid">
+        <div class="num g" style="font-size:230px" data-c0="42" data-c1="91" data-t0="16.56" data-t1="17.6">42</div>
+        <div class="lbl" style="margin-top:12px">Resume score</div>
+      </div>
+    </div>
+    <div class="h1 E" style="animation:rise .46s 17.3s;margin-top:60px">Interview ready.</div>
+  </div>
+
+  <!-- 9 · 18.0–20.0 — the real logo -->
+  <div class="shot" data-in="18.0" data-out="20.01">
+    <div class="LIN" style="position:absolute;inset:0;background:#fff;animation:flash .32s 18.0s"></div>
+    <img src="assets/logo-lockup.png" class="E" style="width:470px;animation:popIn .7s 18.12s">
+    <div class="h2 E" style="animation:rise .5s 18.62s;margin-top:46px;font-size:50px;
+      font-weight:400;color:var(--dim)">Know your gaps. Close them. Get hired.</div>
+    <div class="E" style="animation:riseS .46s 18.95s;margin-top:54px">
+      <div class="kick" style="font-size:34px;padding:22px 46px">hiero.in</div></div>
+  </div>
+
+  <div class="frame" id="frame">
+    <div class="fr-top"><img src="assets/logo-lotus.png" alt=""><span>HIERO</span></div>
+    <div class="fr-bot"><i id="prog"></i></div>
+  </div>
+  <div class="grain"></div>
+</div>
+
+<script>
+const shots    = [...document.querySelectorAll('.shot')];
+const counters = [...document.querySelectorAll('[data-c0]')];
+const rings    = [...document.querySelectorAll('[data-ring]')];
+
+// Real interviewer footage, pre-decoded as a frame sequence. Swapping src during
+// capture would race the screenshot, so every frame is in the DOM up front and
+// we only toggle which one is visible.
+const CAM_T0 = 13.5, CAM_N = 93, CAM_FPS = 30;
+const cam = document.getElementById('cam');
+const camFrames = [];
+for (let i = 1; i <= CAM_N; i++) {
+  const im = new Image();
+  im.src = 'assets/ananya/' + String(i).padStart(4, '0') + '.jpg';
+  if (i === 1) im.className = 'on';
+  cam.appendChild(im);
+  camFrames.push(im);
+}
+
+function seek(t){
+  document.getAnimations().forEach(a => { try { a.pause(); a.currentTime = t*1000; } catch(e){} });
+
+  rings.forEach(r => {
+    const from = +r.dataset.rfrom, to = 100 - (+r.dataset.ring);
+    let p = Math.max(0, Math.min(1, (t - (+r.dataset.rt0)) / (+r.dataset.rdur)));
+    p = 1 - Math.pow(1 - p, 3);
+    r.style.strokeDashoffset = from + (to - from) * p;
+  });
+
+  counters.forEach(el => {
+    const c0=+el.dataset.c0, c1=+el.dataset.c1, t0=+el.dataset.t0, t1=+el.dataset.t1;
+    let p = Math.max(0, Math.min(1, (t - t0) / (t1 - t0)));
+    if (el.dataset.ease !== 'lin') p = 1 - Math.pow(1 - p, 3);
+    const v = c0 + (c1 - c0) * p;
+    el.textContent = el.dataset.fmt === 'pad2'
+      ? String(Math.floor(v)).padStart(2, '0')
+      : Math.round(v).toLocaleString('en-US');
+  });
+
+  const fi = Math.max(0, Math.min(CAM_N - 1, Math.round((t - CAM_T0) * CAM_FPS)));
+  camFrames.forEach((im, i) => im.className = (i === fi ? 'on' : ''));
+
+  document.getElementById('frame').style.opacity = t < 17.95 ? 1 : 0;
+  document.getElementById('prog').style.width = Math.min(1, t/20)*100 + '%';
+  shots.forEach(s => { s.style.opacity = (t >= +s.dataset.in && t < +s.dataset.out) ? 1 : 0; });
+}
+window.seek = seek;
+
+// don't start capturing until fonts AND every bitmap are actually decoded
+window.READY = Promise.all([
+  document.fonts.ready,
+  ...[...document.images].map(im => im.decode ? im.decode().catch(()=>{})
+      : (im.complete ? Promise.resolve() : new Promise(r => { im.onload = im.onerror = r; })))
+]).then(() => { seek(0); return true; });
+</script>
+</body></html>

@@ -222,6 +222,11 @@ app.use('/api/projects', lazyRouter('./routes/projects'));
 app.use('/api/scoring', lazyRouter('./routes/scoring'));
 app.use('/api/chat', lazyRouter('./routes/chat'));
 app.use('/api/interview', lazyRouter('./routes/interview'));
+
+// Theme base: the single source of Hiero's colour and type. Mounted here,
+// well above the static middleware, so nothing in a public/ directory can
+// shadow it the way duplicate copies of theme.js used to.
+app.use('/theme', lazyRouter('./routes/theme'));
 app.use('/api/practice', lazyRouter('./routes/interviewPractice'));
 // Tester feedback: POST is open on purpose (testers must not need an account);
 // GET is admin-only and enforced inside the router.

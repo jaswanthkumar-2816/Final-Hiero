@@ -3,7 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hiero - Authentication</title>
+  
+  <!-- Hiero theme base: one source for colour and type, served by routes/theme.js.
+       Must stay first and must NOT be deferred, or dark-mode users see a white
+       flash before the engine resolves their choice. -->
+  <link rel="stylesheet" href="/theme/hiero.css">
+  <script src="/theme/hiero.js"></script>
+<title>Hiero - Authentication</title>
   <link rel="stylesheet" href="styles.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <script src="/auth-session.js"></script>

@@ -5,7 +5,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <!-- App icons. Without these the browser has nothing to use when the site is
+  
+  <!-- Hiero theme base: one source for colour and type, served by routes/theme.js.
+       Must stay first and must NOT be deferred, or dark-mode users see a white
+       flash before the engine resolves their choice. -->
+  <link rel="stylesheet" href="/theme/hiero.css">
+  <script src="/theme/hiero.js"></script>
+<!-- App icons. Without these the browser has nothing to use when the site is
        added to a dock or home screen, and falls back to a screenshot of the page. -->
   <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png" />
   <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png" />
@@ -197,7 +203,7 @@
       width: 28px;
       height: 28px;
       background: rgba(7, 226, 25, 0.15);
-      color: #07e219;
+      color: var(--primary);
       border: 1px solid rgba(7, 226, 25, 0.3);
       border-radius: 50%;
       display: flex;
@@ -851,7 +857,7 @@
             </div>
 
             <div style="background: var(--card-inner); border-radius: 12px; padding: 16px; border: 1px solid var(--border);">
-              <div style="font-size: 12px; font-weight: 800; color: #f59e0b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+              <div style="font-size: 12px; font-weight: 800; color: var(--warning); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
                 <i class="fa-solid fa-arrow-trend-up"></i> Actionable Growth Areas
               </div>
               <ul id="actionableGrowthList" style="font-size: 13px; color: var(--text-main); line-height: 1.6; padding-left: 18px;">

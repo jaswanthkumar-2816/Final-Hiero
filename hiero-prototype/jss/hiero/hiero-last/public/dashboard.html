@@ -3,7 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hiero Command Center</title>
+    
+  <!-- Hiero theme base: one source for colour and type, served by routes/theme.js.
+       Must stay first and must NOT be deferred, or dark-mode users see a white
+       flash before the engine resolves their choice. -->
+  <link rel="stylesheet" href="/theme/hiero.css">
+  <script src="/theme/hiero.js"></script>
+<title>Hiero Command Center</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="theme.css">
@@ -863,7 +869,7 @@
 
             const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
             if (!token) {
-                list.innerHTML = '<div style="color:rgba(255,255,255,0.5);font-size:14px;padding:8px 0;">Sign in to see your past interviews.</div>';
+                list.innerHTML = '<div style="color:var(--text-muted);font-size:14px;padding:8px 0;">Sign in to see your past interviews.</div>';
                 return;
             }
 
@@ -880,8 +886,8 @@
                 if (!done.length) {
                     list.innerHTML =
                         '<div style="padding:10px 0 4px;">' +
-                        '<div style="color:#fff;font-weight:700;font-size:16px;margin-bottom:6px;">No interviews yet</div>' +
-                        '<div style="color:rgba(255,255,255,0.55);font-size:14px;max-width:46ch;line-height:1.6;">' +
+                        '<div style="color:var(--text-main);font-weight:700;font-size:16px;margin-bottom:6px;">No interviews yet</div>' +
+                        '<div style="color:var(--text-muted);font-size:14px;max-width:46ch;line-height:1.6;">' +
                         'Finish a mock interview and your score, feedback and recordings will appear here so you can track how you improve.</div></div>';
                     return;
                 }
@@ -898,9 +904,9 @@
 
                 if (summary) {
                     const tile = (label, value) =>
-                        '<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:14px 16px;">' +
-                        '<div style="font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,0.45);font-weight:700;">' + label + '</div>' +
-                        '<div style="font-size:26px;font-weight:800;color:#fff;margin-top:4px;font-variant-numeric:tabular-nums;">' + value + '</div></div>';
+                        '<div style="background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;padding:14px 16px;">' +
+                        '<div style="font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-subtle);font-weight:700;">' + label + '</div>' +
+                        '<div style="font-size:26px;font-weight:800;color:var(--text-main);margin-top:4px;font-variant-numeric:tabular-nums;">' + value + '</div></div>';
                     summary.innerHTML =
                         tile('Interviews', done.length) +
                         tile('Best score', best === null ? '&mdash;' : best.toFixed(1)) +
@@ -918,25 +924,25 @@
                         ? new Date(when).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })
                         : '';
                     const answered = (s.answers || []).length;
-                    const colour = score === null ? 'rgba(255,255,255,0.4)'
+                    const colour = score === null ? 'var(--text-subtle)'
                         : (score >= 7 ? 'var(--primary)' : (score >= 4 ? '#f59e0b' : '#ef4444'));
                     const expired = s.status === 'EXPIRED';
 
                     return '<a href="/feedback.html?session=' + encodeURIComponent(s.sessionId) + '" ' +
                         'style="display:flex;align-items:center;gap:16px;text-decoration:none;padding:14px 16px;margin-bottom:10px;' +
-                        'background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:14px;">' +
+                        'background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;">' +
 
                         '<div style="min-width:54px;text-align:center;">' +
                         '<div style="font-size:22px;font-weight:800;color:' + colour + ';font-variant-numeric:tabular-nums;line-height:1.1;">' +
                         (score === null ? '&mdash;' : score.toFixed(1)) + '</div>' +
-                        '<div style="font-size:9.5px;color:rgba(255,255,255,0.4);letter-spacing:.06em;">/ 10</div></div>' +
+                        '<div style="font-size:9.5px;color:var(--text-subtle);letter-spacing:.06em;">/ 10</div></div>' +
 
                         '<div style="flex:1;min-width:0;">' +
-                        '<div style="color:#fff;font-weight:700;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' +
+                        '<div style="color:var(--text-main);font-weight:700;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' +
                         esc(s.jobRole || 'Mock interview') +
-                        (s.companyName ? ' <span style="color:rgba(255,255,255,0.45);font-weight:500;">&middot; ' + esc(s.companyName) + '</span>' : '') +
+                        (s.companyName ? ' <span style="color:var(--text-subtle);font-weight:500;">&middot; ' + esc(s.companyName) + '</span>' : '') +
                         '</div>' +
-                        '<div style="color:rgba(255,255,255,0.5);font-size:12.5px;margin-top:3px;">' +
+                        '<div style="color:var(--text-muted);font-size:12.5px;margin-top:3px;">' +
                         esc(dateStr) + ' &middot; ' + answered + ' question' + (answered === 1 ? '' : 's') +
                         (expired ? ' &middot; <span style="color:#f59e0b;">ran out of time</span>' : '') +
                         '</div></div>' +

@@ -1,38 +1,20 @@
-// --- Unified Hiero Theme & Profile Engine ---
-
-function toggleTheme() {
-    const body = document.body;
-    const html = document.documentElement;
-    const isLight = body.classList.toggle('light-mode');
-    
-    // Sync both methods (class and data-attribute)
-    if (isLight) {
-        html.setAttribute('data-theme', 'light');
-        localStorage.setItem('theme', 'light');
-        localStorage.setItem('hiero-theme', 'light');
-    } else {
-        html.setAttribute('data-theme', 'dark');
-        localStorage.setItem('theme', 'dark');
-        localStorage.setItem('hiero-theme', 'dark');
-    }
-
-    updateThemeIcons(isLight);
-}
-
-function updateThemeIcons(isLight) {
-    const icons = document.querySelectorAll('.theme-toggle i, .theme-toggle-btn i, #theme-switch i');
-    icons.forEach(icon => {
-        if (isLight) {
-            icon.classList.remove('fa-sun');
-            icon.classList.add('fa-moon');
-            icon.style.color = '#333';
-        } else {
-            icon.classList.remove('fa-moon');
-            icon.classList.add('fa-sun');
-            icon.style.color = 'white';
-        }
-    });
-}
+// --- Hiero: global profile sync ---------------------------------------------
+//
+// THEMING HAS MOVED. It now lives in one place, served by the backend:
+//
+//     <link rel="stylesheet" href="/theme/hiero.css">
+//     <script src="/theme/hiero.js"></script>
+//
+// This file used to carry its own copy of the theme logic, writing the keys
+// 'theme' and 'hiero-theme' and toggling body.light-mode itself. Other pages
+// used three further keys and two other mechanisms, so a choice made on one
+// page was invisible to the next. All of that is gone from here; what remains
+// is the profile sync, which was never theming and is still needed.
+//
+// toggleTheme() is kept as a shim because a dozen pages call it from inline
+// onclick attributes. It delegates to the shared engine when that engine is
+// present, and falls back to the old behaviour on any page that has not been
+// connected yet -- so this file is safe during the migration either way.
 
 function updateGlobalUserProfile() {
     const savedUser = localStorage.getItem('user');
@@ -104,43 +86,46 @@ function updateGlobalUserProfile() {
     }
 }
 
-function initTheme() {
-    const savedTheme = localStorage.getItem('theme') || localStorage.getItem('hiero-theme') || 'dark';
-    const isLight = savedTheme === 'light';
-    
-    const body = document.body;
-    const html = document.documentElement;
+function toggleTheme() {
+    if (window.Hiero && window.Hiero.theme) return window.Hiero.theme.cycle();
 
-    if (isLight) {
-        body.classList.add('light-mode');
-        html.setAttribute('data-theme', 'light');
-    } else {
-        body.classList.remove('light-mode');
-        html.setAttribute('data-theme', 'dark');
-    }
-
-    updateThemeIcons(isLight);
-    updateGlobalUserProfile();
+    // Fallback for a page that has not yet loaded /theme/hiero.js.
+    var isLight = document.body.classList.toggle('light-mode');
+    document.documentElement.setAttribute('data-theme', isLight ? 'light' : 'dark');
+    try { localStorage.setItem('hiero.theme', isLight ? 'light' : 'dark'); } catch (e) {}
+    return isLight ? 'light' : 'dark';
 }
 
-// Global Font & Logo Consistency
-document.addEventListener('DOMContentLoaded', () => {
-    initTheme();
-    
-    // Inject global font if not present
-    if (!document.getElementById('hiero-global-font')) {
-        const style = document.createElement('style');
-        style.id = 'hiero-global-font';
-        style.textContent = `
-            body, h1, h2, h3, h4, h5, h6, p, span, a, button, input, textarea { 
-                font-family: 'Inter', -apple-system, sans-serif !important; 
-            }
-            .user-avatar-nav img, .user-avatar img, .user-avatar-small img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
-        `;
+document.addEventListener('DOMContentLoaded', function () {
+    updateGlobalUserProfile();
+
+    // Only applied where the shared engine is absent; once a page loads
+    // /theme/hiero.js this is a no-op, because that engine has already set the
+    // attribute and the body class before first paint.
+    if (!(window.Hiero && window.Hiero.theme)) {
+        var saved = 'system';
+        try { saved = localStorage.getItem('hiero.theme') || localStorage.getItem('theme') || 'system'; } catch (e) {}
+        var dark = saved === 'dark' ||
+            (saved === 'system' && window.matchMedia &&
+             window.matchMedia('(prefers-color-scheme: dark)').matches);
+        document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+        document.body.classList.toggle('light-mode', !dark);
+    }
+
+    // The global Inter override that used to live here has been removed. It
+    // set font-family with !important on every element across a dozen pages,
+    // which beat the brand typefaces the theme serves (Fraunces for headings,
+    // Plus Jakarta Sans for body). The avatar sizing it also carried is kept,
+    // because that is layout, not type.
+    if (!document.getElementById('hiero-avatar-fix')) {
+        var style = document.createElement('style');
+        style.id = 'hiero-avatar-fix';
+        style.textContent =
+            ".user-avatar-nav img, .user-avatar img, .user-avatar-small img {" +
+            " width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }";
         document.head.appendChild(style);
     }
 });
 
-window.addEventListener('pageshow', initTheme);
 window.addEventListener('load', updateGlobalUserProfile);
 window.toggleTheme = toggleTheme;

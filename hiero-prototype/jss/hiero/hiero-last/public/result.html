@@ -3,7 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hiero | Analysis Summary</title>
+  
+  <!-- Hiero theme base: one source for colour and type, served by routes/theme.js.
+       Must stay first and must NOT be deferred, or dark-mode users see a white
+       flash before the engine resolves their choice. -->
+  <link rel="stylesheet" href="/theme/hiero.css">
+  <script src="/theme/hiero.js"></script>
+<title>Hiero | Analysis Summary</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -1006,8 +1012,8 @@
       const doc = document.documentElement;
       const current = doc.getAttribute('data-theme');
       const target = current === 'light' ? 'dark' : 'light';
-      doc.setAttribute('data-theme', target);
-      localStorage.setItem('hiero-theme', target);
+      if (!(window.Hiero && window.Hiero.theme)) doc.setAttribute('data-theme', target);
+      localStorage.setItem('hiero.theme', target);
       updateThemeUI(target);
     };
 
@@ -1022,7 +1028,7 @@
 
     // Initialize Theme
     const savedTheme = localStorage.getItem('hiero-theme') || 'dark';
-    document.documentElement.setAttribute('data-theme', savedTheme);
+    if (!(window.Hiero && window.Hiero.theme)) document.documentElement.setAttribute('data-theme', savedTheme);
     updateThemeUI(savedTheme);
 
     // --- DATA RENDERING ---

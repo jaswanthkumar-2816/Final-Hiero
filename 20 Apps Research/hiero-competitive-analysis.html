@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Hiero — Competitive Gap Analysis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --green:#0B7A4B; --green-d:#075C38; --green-l:#E8F5EE; --green-xl:#F4FBF7;
+    --ink:#11201A; --body:#3C4A43; --mute:#7A8A82; --line:#DCE7E1; --amber:#B4690E; --amber-l:#FDF6EC;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  @page{ size:A4 landscape; margin:0; }
+  html,body{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  body{ font-family:'Plus Jakarta Sans',-apple-system,'Segoe UI',sans-serif; color:var(--body); background:#fff; font-size:11px; line-height:1.52; }
+  h1,h2,h3,.ff{ font-family:'Fraunces','Iowan Old Style',Georgia,serif; color:var(--ink); font-weight:600; }
+
+  .page{ width:297mm; height:210mm; padding:13mm 14mm 11mm; page-break-after:always; position:relative; display:flex; flex-direction:column; overflow:hidden; }
+  .page:last-child{ page-break-after:auto; }
+
+  .hdr{ display:flex; justify-content:space-between; align-items:flex-end; border-bottom:2.5px solid var(--green); padding-bottom:6px; margin-bottom:11px; flex:none; }
+  .hdr h2{ font-size:22px; letter-spacing:-.3px; }
+  .hdr .sub{ font-size:9.8px; color:var(--mute); margin-top:2px; }
+  .tag{ font-size:8.8px; font-weight:700; color:var(--green); letter-spacing:1.4px; text-transform:uppercase; }
+  .pg{ position:absolute; bottom:6mm; right:14mm; font-size:8px; color:var(--mute); letter-spacing:.4px; }
+  .foot{ position:absolute; bottom:6mm; left:14mm; font-size:8px; color:var(--mute); }
+
+  /* ---------- COVER ---------- */
+  .cover{ justify-content:center; background:linear-gradient(145deg,#fff 0%,var(--green-xl) 55%,var(--green-l) 100%); }
+  .cover .mark{ font-family:'Fraunces',serif; font-size:60px; font-weight:700; color:var(--green); letter-spacing:-2px; line-height:1; }
+  .cover .dot{ color:var(--ink); }
+  .cover h1{ font-size:44px; line-height:1.08; letter-spacing:-1.1px; margin:16px 0 10px; max-width:70%; }
+  .cover .lede{ font-size:13px; max-width:56%; color:var(--body); line-height:1.62; }
+  .rule{ width:62px; height:4px; background:var(--green); border-radius:2px; margin:22px 0; }
+  .stats{ display:flex; gap:11px; margin-top:26px; }
+  .stat{ background:#fff; border:1px solid var(--line); border-left:3px solid var(--green); border-radius:7px; padding:11px 15px; min-width:118px; box-shadow:0 1px 3px rgba(11,122,75,.05); }
+  .stat b{ font-family:'Fraunces',serif; font-size:29px; color:var(--green); display:block; line-height:1; }
+  .stat span{ font-size:9px; color:var(--mute); text-transform:uppercase; letter-spacing:.7px; display:block; margin-top:5px; }
+  .meta{ position:absolute; bottom:12mm; left:14mm; font-size:8.4px; color:var(--mute); }
+
+  /* ---------- TABLE ---------- */
+  table{ width:100%; border-collapse:collapse; table-layout:fixed; }
+  thead th{ background:var(--green); color:#fff; font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:.85px; padding:9px 11px; text-align:left; }
+  thead th:first-child{ border-radius:5px 0 0 0; } thead th:last-child{ border-radius:0 5px 0 0; }
+  tbody td{ padding:9px 11px; border-bottom:1px solid var(--line); vertical-align:top; font-size:10.2px; line-height:1.5; }
+  tbody tr:nth-child(even){ background:var(--green-xl); }
+  .plat{ font-family:'Fraunces',serif; font-weight:600; color:var(--ink); font-size:12px; }
+  .cat{ display:block; font-family:'Plus Jakarta Sans',sans-serif; font-size:8.4px; color:var(--mute); text-transform:uppercase; letter-spacing:.5px; margin-top:2px; font-weight:600; }
+  .lack li{ list-style:none; padding-left:11px; position:relative; margin-bottom:3.5px; }
+  .lack li::before{ content:'×'; position:absolute; left:0; color:#C2453B; font-weight:700; }
+  .have li{ list-style:none; padding-left:11px; position:relative; margin-bottom:3.5px; }
+  .have li::before{ content:'✓'; position:absolute; left:0; color:var(--green); font-weight:700; }
+  .have{ color:var(--green-d); }
+
+  /* ---------- THEMES ---------- */
+  .themes{ display:flex; flex-direction:column; gap:8px; }
+  .th{ display:flex; align-items:stretch; border:1px solid var(--line); border-radius:7px; overflow:hidden; }
+  .th .score{ background:var(--green); color:#fff; font-family:'Fraunces',serif; font-size:19px; font-weight:700; display:flex; align-items:center; justify-content:center; width:72px; flex:none; }
+  .th.sec .score{ background:#8FB3A2; }
+  .th .body{ padding:9px 13px; flex:1; }
+  .th .body h3{ font-size:13px; margin-bottom:2px; }
+  .th .body p{ font-size:10px; color:var(--body); }
+  .th .ans{ width:30%; flex:none; background:var(--green-xl); border-left:1px solid var(--line); padding:9px 13px; font-size:10px; color:var(--green-d); display:flex; align-items:center; }
+  .th .ans b{ font-weight:700; }
+
+  /* ---------- COLUMNS ---------- */
+  .cols{ display:flex; gap:11px; flex:1; }
+  .col{ flex:1; }
+  .card{ border:1px solid var(--line); border-radius:8px; padding:12px 14px; margin-bottom:10px; }
+  .card.g{ background:var(--green-xl); border-color:#C9E4D6; }
+  .card h3{ font-size:13.5px; margin-bottom:5px; display:flex; align-items:center; gap:6px; }
+  .card ul{ padding-left:13px; }
+  .card li{ font-size:10.2px; margin-bottom:4px; line-height:1.45; }
+  .pill{ display:inline-block; background:var(--green); color:#fff; font-size:7.8px; font-weight:700; padding:2px 6px; border-radius:9px; letter-spacing:.6px; text-transform:uppercase; vertical-align:middle; }
+  .pill.a{ background:var(--amber); }
+
+  /* ---------- PRIORITY ---------- */
+  .prio{ display:flex; gap:9px; margin-bottom:11px; border:1px solid var(--line); border-radius:8px; overflow:hidden; }
+  .prio .n{ background:var(--ink); color:#fff; font-family:'Fraunces',serif; font-size:20px; width:46px; flex:none; display:flex; align-items:center; justify-content:center; }
+  .prio.p1 .n{ background:#C2453B; } .prio.p2 .n{ background:var(--amber); } .prio.p3 .n{ background:var(--green); }
+  .prio .c{ padding:11px 14px; flex:1; }
+  .prio h3{ font-size:13.5px; margin-bottom:2px; }
+  .prio p{ font-size:10.2px; line-height:1.52; }
+  .prio .why{ color:var(--mute); font-size:9.4px; margin-top:3px; font-style:italic; }
+
+  .callout{ background:var(--green); color:#fff; border-radius:8px; padding:15px 18px; margin-top:auto; }
+  .callout h3{ color:#fff; font-size:15px; margin-bottom:4px; }
+  .callout p{ font-size:10.8px; line-height:1.55; opacity:.95; }
+  .note{ background:var(--amber-l); border-left:3px solid var(--amber); border-radius:0 6px 6px 0; padding:10px 13px; font-size:9.8px; color:#6B4408; }
+</style>
+</head>
+<body>
+
+<!-- ============ COVER ============ -->
+<section class="page cover">
+  <div class="mark">hiero<span class="dot">.</span></div>
+  <h1>Where every platform<br>leaves the user stranded</h1>
+  <div class="rule"></div>
+  <p class="lede">A gap analysis of the learning, practice and hiring platforms Indian freshers actually use — what each one fails to do, what Hiero already does about it, and the three things Hiero still has to build.</p>
+  <div class="stats">
+    <div class="stat"><b>18</b><span>Platforms in scope</span></div>
+    <div class="stat"><b>9</b><span>Analysed in depth</span></div>
+    <div class="stat"><b>8/9</b><span>Offer no proof of skill</span></div>
+    <div class="stat"><b>7/9</b><span>No role gap analysis</span></div>
+    <div class="stat"><b>5/9</b><span>Never respond to your work</span></div>
+  </div>
+  <div class="meta">Competitive research · 20 October 2026 · Internal working document</div>
+</section>
+
+<!-- ============ TABLE 1 ============ -->
+<section class="page">
+  <div class="hdr">
+    <div><span class="tag">Platform comparison · 1 of 2</span><h2>What they don't have — and what Hiero does</h2></div>
+    <div class="sub">Learning &amp; interview platforms</div>
+  </div>
+  <table>
+    <colgroup><col style="width:13%"><col style="width:45%"><col style="width:42%"></colgroup>
+    <thead><tr><th>Platform</th><th>What they don't have</th><th>What Hiero has</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="plat">Coursera</span><span class="cat">MOOC · ₹14k/yr</span></td>
+        <td><ul class="lack">
+          <li>No direct connection to jobs — the output is a PDF</li>
+          <li>No clarity on what to pick from thousands of overlapping courses</li>
+          <li>Assessments pass without competence; certificate certifies attendance</li>
+          <li>Nowhere to get unstuck; forums effectively dead</li>
+          <li>Search returns six-week programmes, not answers</li>
+          <li>No visible "last updated" — 2016 code still being taught</li>
+        </ul></td>
+        <td><ul class="have">
+          <li>AI roadmap generated from the user's actual goal</li>
+          <li>Adaptive skill-graph diagnostic that prescribes, not browses</li>
+          <li>Ask-anything Q&amp;A over the learning material</li>
+          <li>Curated problem sets per skill with solution evaluation</li>
+          <li>Python execution + step-through visual tracing to unstick learners</li>
+        </ul></td>
+      </tr>
+      <tr>
+        <td><span class="plat">Remasto</span><span class="cat">AI mock interview · $29/mo</span></td>
+        <td><ul class="lack">
+          <li>No proctoring — phone or second person goes undetected</li>
+          <li>No separate fresher track</li>
+          <li>Interviews built from your résumé, not the job description</li>
+          <li>Feedback names the weakness, never the fix</li>
+          <li>No learning path after the analysis</li>
+          <li>USD pricing, no India tier</li>
+        </ul></td>
+        <td><ul class="have">
+          <li><b>Neural Proctoring</b> — camera identity check, multi-strike termination</li>
+          <li><b>Beginner rehearsal mode</b> — see questions first, model answers, say it aloud</li>
+          <li><b>Custom JD upload</b> + built-in company JDs drive the questions</li>
+          <li>Diagnostic → teach → <b>retest</b> loop after the interview</li>
+          <li>Razorpay / INR pricing built in</li>
+        </ul></td>
+      </tr>
+      <tr>
+        <td><span class="plat">Internshala</span><span class="cat">Internships · ₹1.3k courses</span></td>
+        <td><ul class="lack">
+          <li>No replies after applying; company stance is "we're only a portal"</li>
+          <li>No visibility into how your résumé matches the role</li>
+          <li>No strict mock interview or real certification</li>
+          <li>Remedy for any gap is a 4–8 week course</li>
+          <li>Static CV that never absorbs new skills</li>
+          <li>Owns learning <i>and</i> hiring — and never connects them</li>
+        </ul></td>
+        <td><ul class="have">
+          <li>Opportunities board with <b>application status tracking</b></li>
+          <li>JD-driven graded interview with scored feedback</li>
+          <li>Résumé builder with live sections, templates, PDF/Word export</li>
+          <li>Same-day remedy: diagnostic and retest, not a six-week block</li>
+          <li>Learning and interview sit in one loop by design</li>
+        </ul></td>
+      </tr>
+      <tr>
+        <td><span class="plat">LinkedIn</span><span class="cat">Network · freemium</span></td>
+        <td><ul class="lack">
+          <li>Verifies identity and employer — never competence</li>
+          <li><b>Retiring Skill Assessments;</b> hirers want evidence of applied skill</li>
+          <li>Interview Prep is a question bank, not an interview</li>
+          <li>Matching is paywalled keyword comparison, never "here's what to fix"</li>
+          <li>Ranks by network, so freshers are invisible regardless of ability</li>
+        </ul></td>
+        <td><ul class="have">
+          <li>Voice AI interview with scoring — conversational, not a bank</li>
+          <li>Skill-graph diagnostic that names the missing capability</li>
+          <li>Roadmap answering "what do I learn next" explicitly</li>
+          <li>Built fresher-first; no network required to be seen</li>
+        </ul></td>
+      </tr>
+      <tr>
+        <td><span class="plat">interviewing.io</span><span class="cat">Live mocks · ₹15k–28k/session</span></td>
+        <td><ul class="lack">
+          <li>₹15,000–28,000 for one session — unreachable for this market</li>
+          <li>Must schedule; no demo, no practice at 11pm</li>
+          <li>Per-rep pricing fights how practice actually works</li>
+          <li>Human-supply constrained — structurally cannot scale down</li>
+          <li>Senior software engineers only; no freshers, no other roles</li>
+        </ul></td>
+        <td><ul class="have">
+          <li>Instant start — no booking, no slot, no waiting</li>
+          <li>Unlimited repetition at India-market pricing</li>
+          <li>AI interviewer scales to any volume at near-zero marginal cost</li>
+          <li>Fresher track as a first-class path</li>
+        </ul></td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="foot">Hiero · Competitive gap analysis</span><span class="pg">2</span>
+</section>
+
+<!-- ============ TABLE 2 ============ -->
+<section class="page">
+  <div class="hdr">
+    <div><span class="tag">Platform comparison · 2 of 2</span><h2>What they don't have — and what Hiero does</h2></div>
+    <div class="sub">Practice, campus &amp; résumé platforms</div>
+  </div>
+  <table>
+    <colgroup><col style="width:13%"><col style="width:45%"><col style="width:42%"></colgroup>
+    <thead><tr><th>Platform</th><th>What they don't have</th><th>What Hiero has</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="plat">HackerRank</span><span class="cat">Screening gate · free to use</span></td>
+        <td><ul class="lack">
+          <li>Puzzles, not the job — strong scores, weak engineers</li>
+          <li>Auto-grader marks functionally correct code wrong</li>
+          <li>Own docs: certification implies no endorsement for hiring</li>
+          <li>Rejected into silence, often after passing every test case</li>
+          <li>Employers pay, so candidate experience is an afterthought</li>
+          <li>Fails you without ever teaching you</li>
+        </ul></td>
+        <td><ul class="have">
+          <li>Diagnostic → teach → retest, so failure produces a next step</li>
+          <li>Code execution with <b>visual Python tracing</b> — see why it broke</li>
+          <li>Problems mapped to skills, not a difficulty-tagged ocean</li>
+          <li>Candidate is the customer; feedback is the product</li>
+        </ul></td>
+      </tr>
+      <tr>
+        <td><span class="plat">Unstop</span><span class="cat">Campus competitions · free</span></td>
+        <td><ul class="lack">
+          <li>Participation certificate that cannot be failed signals nothing</li>
+          <li>Winner-takes-all — 99% get silence and a PDF</li>
+          <li>An aggregator, not a builder: discovery isn't capability</li>
+          <li>No preparation layer between "this exists" and "compete now"</li>
+          <li>Nothing accumulates across events</li>
+        </ul></td>
+        <td><ul class="have">
+          <li>The preparation layer itself — practice before the event</li>
+          <li>Adaptive mastery with scored progression and tiers</li>
+          <li>Model answers and rehearsal for anyone who isn't ready yet</li>
+          <li>Progress that accumulates in one place</li>
+        </ul></td>
+      </tr>
+      <tr>
+        <td><span class="plat">Udemy</span><span class="cat">Course market · ₹400–700</span></td>
+        <td><ul class="lack">
+          <li>Certificate awarded for <i>watching</i>, not doing — no assessment gate</li>
+          <li>No vetting; quality is a lottery between identical-looking courses</li>
+          <li>Outdated content instructors don't fix despite complaints</li>
+          <li>No guidance or feedback from anyone, ever</li>
+          <li>Permanent fake discounting trains distrust</li>
+          <li>Zero connection to employment — transaction ends with the video</li>
+        </ul></td>
+        <td><ul class="have">
+          <li>Graded evaluation — problems and interviews you can fail</li>
+          <li>One curated path per role instead of ten thousand options</li>
+          <li>Q&amp;A that answers; quizzes that gate progression</li>
+          <li>Opportunities board and apply flow at the end of the loop</li>
+        </ul></td>
+      </tr>
+      <tr>
+        <td><span class="plat">CV Sync</span><span class="cat">JD matching · open source</span></td>
+        <td><ul class="lack">
+          <li>A normal user can't even get in — repo, not a product</li>
+          <li>Matches the <i>document</i> to the JD, not the <i>person</i> to the role</li>
+          <li>Its advice ends in keyword stuffing and a failed interview</li>
+          <li>Fragile browser scraping of two job sites</li>
+          <li>One-shot tips; no loop, nothing to return to</li>
+        </ul></td>
+        <td><ul class="have">
+          <li>Hosted product with auth, payments and a real onboarding</li>
+          <li>JD + résumé feed an actual interview, not a reword suggestion</li>
+          <li>Matches capability, because it measures capability</li>
+          <li>A loop that brings the user back: practice, score, improve</li>
+        </ul></td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="note" style="margin-top:9px;"><b>Still to analyse (9 of 18):</b> Great Learning · CodeChef · W3Schools · LeetCode · GeeksforGeeks · Skill India Digital Hub · IBM SkillBuild · ResumeSpice · Skillshare. Great Learning is the priority — it sells job outcomes explicitly and charges real money for them.</div>
+  <span class="foot">Hiero · Competitive gap analysis</span><span class="pg">3</span>
+</section>
+
+<!-- ============ THEMES ============ -->
+<section class="page">
+  <div class="hdr">
+    <div><span class="tag">The pattern</span><h2>Gaps that repeat across every platform</h2></div>
+    <div class="sub">A gap in one product is a bug. A gap in eight is a market.</div>
+  </div>
+  <div class="themes">
+    <div class="th"><div class="score">8/9</div><div class="body"><h3>No verifiable proof of competence</h3><p>Coursera certifies attendance. Udemy certifies watching. HackerRank's own docs disclaim any hiring endorsement. Unstop hands everyone a participation PDF. LinkedIn is retiring Skill Assessments because hirers want evidence of <i>applied</i> skill.</p></div><div class="ans"><span><b>Hiero's answer:</b> an assessment you can fail and can't fake, producing a record an employer can check.</span></div></div>
+    <div class="th"><div class="score">7/9</div><div class="body"><h3>No gap analysis against the target role</h3><p>Nobody tells you the distance between who you are and the job you want. CV Sync is the only attempt — and it compares two text files, because the résumé is the only artifact it has.</p></div><div class="ans"><span><b>Hiero's answer:</b> JD in, capability measured, missing pieces named.</span></div></div>
+    <div class="th"><div class="score">5/9</div><div class="body"><h3>Nobody answers, nobody corrects your work</h3><p>Content is delivered, scores are issued, and no one ever responds to what you actually did. Udemy has no instructors answering, HackerRank returns "wrong answer", Coursera's forums are dead.</p></div><div class="ans"><span><b>Hiero's answer:</b> feedback is the product; content is the commodity.</span></div></div>
+    <div class="th"><div class="score">5/9</div><div class="body"><h3>Diagnosis without remedy — the loop never closes</h3><p>You're told you're weak at system design and left there. Internshala's remedy is a six-week course; Remasto's is nothing at all.</p></div><div class="ans"><span><b>Hiero's answer:</b> ask → score → <b>teach</b> → re-test, same day.</span></div></div>
+    <div class="th"><div class="score">5/9</div><div class="body"><h3>No real path from learning to a job</h3><p>Internshala owns both a training business and a job board, and completing a training changes nothing about your standing in their own funnel.</p></div><div class="ans"><span><b>Hiero's answer:</b> the connection is the product, not a cross-sell.</span></div></div>
+    <div class="th sec"><div class="score">3/9</div><div class="body"><h3>Candidates ghosted after being assessed</h3><p>Pass every HackerRank test case and hear nothing for months. Apply on Internshala into silence. The assessment is a one-way mirror.</p></div><div class="ans"><span><b>Hiero's answer:</b> an honest outcome every time, even when automated.</span></div></div>
+    <div class="th sec"><div class="score">3/9</div><div class="body"><h3>Freshers structurally underserved</h3><p>Remasto has no fresher track, LinkedIn ranks by a network they don't have, interviewing.io serves senior engineers chasing FAANG.</p></div><div class="ans"><span><b>Hiero's answer:</b> fresher track as a first-class path, already shipped.</span></div></div>
+    <div class="th sec"><div class="score">3/9</div><div class="body"><h3>Priced out of the Indian market</h3><p>₹14,000/yr, $29/mo, ₹28,000 per session. <b>Udemy is the exception at ₹400–700 — and the reason price cannot be our wedge.</b></p></div><div class="ans"><span><b>Hiero's answer:</b> INR-native pricing on outcomes, never per rep.</span></div></div>
+  </div>
+  <span class="foot">Hiero · Competitive gap analysis</span><span class="pg">4</span>
+</section>
+
+<!-- ============ HIERO HAS ============ -->
+<section class="page">
+  <div class="hdr">
+    <div><span class="tag">Current state</span><h2>What Hiero already has</h2></div>
+    <div class="sub">Verified against the codebase, 20 Oct 2026</div>
+  </div>
+  <div class="cols">
+    <div class="col">
+      <div class="card g"><h3>Interview engine <span class="pill">core</span></h3><ul>
+        <li><b>Custom JD upload</b> and built-in company job descriptions drive the questions</li>
+        <li>Résumé and context upload feeding the session</li>
+        <li>Voice interview with selectable TTS voices</li>
+        <li><b>Neural Proctoring</b> — camera identity verification, continuous monitoring, multi-strike session termination</li>
+        <li>Graded answers with scored feedback</li>
+      </ul></div>
+      <div class="card g"><h3>Beginner track <span class="pill">shipped</span></h3><ul>
+        <li>Rehearsal room: pick one résumé section, see the questions before answering</li>
+        <li>Model answers to learn the shape of a good response</li>
+        <li>Explicitly separate from the graded interview</li>
+      </ul></div>
+      <div class="card"><h3>Jobs &amp; profile</h3><ul>
+        <li>Opportunities board with apply flow and <b>application status tracking</b></li>
+        <li>Résumé builder — sections, templates, PDF and Word export</li>
+        <li>Company pages and apply-to-company flow</li>
+      </ul></div>
+    </div>
+    <div class="col">
+      <div class="card g"><h3>Adaptive mastery loop <span class="pill">differentiator</span></h3><ul>
+        <li>Skill-graph knowledge base per domain</li>
+        <li>Generated diagnostic, evaluated automatically</li>
+        <li><b>Retest</b> endpoint — the loop actually closes</li>
+        <li>Knowledge state updated per learner</li>
+        <li>Video chapter and transcript matching to the exact gap</li>
+      </ul></div>
+      <div class="card"><h3>Learning &amp; practice</h3><ul>
+        <li>AI-generated roadmap from the user's goal</li>
+        <li>Curated problem sets per skill with solution evaluation</li>
+        <li>Quizzes gating progression; tiers from score</li>
+        <li>Ask-anything Q&amp;A over content</li>
+        <li>Code execution, plus <b>step-through Python visual tracing</b></li>
+        <li>Project workspace pulling from GitHub, YouTube and docs</li>
+      </ul></div>
+      <div class="card"><h3>Platform</h3><ul>
+        <li>Razorpay payments — INR native</li>
+        <li>Language packs and localised skill names</li>
+        <li>Scoring and progress stats; admin analytics and feedback pipeline</li>
+      </ul></div>
+    </div>
+  </div>
+  <div class="callout">
+    <h3>The honest summary</h3>
+    <p>Hiero already closes four of the five repeating market gaps — gap analysis against a real JD, feedback that responds to your work, a loop that teaches and re-tests, and a path from learning into opportunities. It does so with proctoring that the nearest AI competitor lacks entirely. <b>The one gap it does not yet close is the biggest one: 8 of 9 platforms produce no verifiable proof of competence, and neither does Hiero.</b></p>
+  </div>
+  <span class="foot">Hiero · Competitive gap analysis</span><span class="pg">5</span>
+</section>
+
+<!-- ============ IMPROVE ============ -->
+<section class="page">
+  <div class="hdr">
+    <div><span class="tag">Where to go next</span><h2>Where Hiero needs to improve</h2></div>
+    <div class="sub">Ordered by how much market gap each one closes</div>
+  </div>
+  <div class="prio p1"><div class="n">1</div><div class="c">
+    <h3>Ship a verifiable, shareable record of competence</h3>
+    <p>Points, tiers and scores exist but stay inside the product. Nothing leaves Hiero that an employer can open, check and trust. This is the single largest hole in the entire market — eight of nine platforms fail it, and LinkedIn is publicly retiring its attempt because hirers want evidence of applied skill.</p>
+    <p class="why">Hiero already generates the raw material: proctored sessions, graded answers, evaluated solutions. The missing piece is turning that into a credential with a public verification link.</p>
+  </div></div>
+  <div class="prio p2"><div class="n">2</div><div class="c">
+    <h3>Build the employer side that consumes the proof</h3>
+    <p>A credential with no one reading it is another participation certificate. The opportunities board tracks applications, but there is no recruiter-facing product that treats a Hiero record as a hiring signal.</p>
+    <p class="why">Internshala's failure is the warning: they own learning and hiring and still never connected them.</p>
+  </div></div>
+  <div class="prio p2"><div class="n">3</div><div class="c">
+    <h3>Put the record where recruiters already look</h3>
+    <p>LinkedIn is the default identity layer for work and is vacating skill verification. The verified Hiero record should sit on the LinkedIn profile rather than waiting to be visited.</p>
+    <p class="why">Posture: "Hiero proves what LinkedIn can only claim."</p>
+  </div></div>
+  <div class="prio p3"><div class="n">4</div><div class="c">
+    <h3>Open the post-rejection channel</h3>
+    <p>Millions of freshers fail HackerRank screens and Unstop competitions into total silence every year. "Here is what that test measured, here is where you actually failed, here is the fix" reaches people at maximum motivation. This is an acquisition channel, not a feature.</p>
+  </div></div>
+  <div class="prio p3"><div class="n">5</div><div class="c">
+    <h3>Consolidate the codebase and mark content freshness</h3>
+    <p>The repository carries several parallel copies of the served app, so fixes must be applied repeatedly and risk landing in only one. Dozens of test pages sit at the project root. Separately, no track shows a "last verified" date — the staleness failure seen in both Coursera and Udemy.</p>
+    <p class="why">Operational, not strategic — but it taxes every change on this list.</p>
+  </div></div>
+  <div class="note" style="margin-top:4px;"><b>Open verification items:</b> confirm the LinkedIn Skill Assessments shutdown directly (highest-value unverified claim) · confirm whether platform #5 was interviewing.io or Intervue.io · confirm CV Sync's identity · validate pricing against Udemy's ₹400–700 floor before any pricing decision.</div>
+  <span class="foot">Hiero · Competitive gap analysis</span><span class="pg">6</span>
+</section>
+
+</body></html>

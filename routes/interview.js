@@ -1862,7 +1862,7 @@ router.post('/transcribe', multerUpload.single('audio'), async (req, res) => {
 // ─────────────────────────────────────────────────────────────────────────────
 router.post('/tts', async (req, res) => {
     try {
-        const { text, voice } = req.body;
+        const { text, voice, speed } = req.body;
         if (!text || text.trim().length === 0) {
             return res.status(400).json({ success: false, error: 'Text parameter is required' });
         }
@@ -1883,7 +1883,10 @@ router.post('/tts', async (req, res) => {
         }
 
         try {
-            const buffer = await dgTTS(text, voice || INTERVIEW_VOICE);
+            // speed is passed through for the beginner practice mode, which plays
+            // the model answer slowly. deepgramService clamps it to 0.7-1.5.
+            const buffer = await dgTTS(text, voice || INTERVIEW_VOICE,
+                Number.isFinite(Number(speed)) ? { speed: Number(speed) } : {});
             return res.json({
                 success: true,
                 audio_url: `data:audio/mp3;base64,${buffer.toString('base64')}`

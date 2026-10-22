@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<title>Hiero — review poster</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+:root{
+  --sans:'Plus Jakarta Sans',sans-serif; --serif:'Fraunces',Georgia,serif;
+  --mono:'JetBrains Mono',monospace;
+  --ink:#0e1512; --dim:#64786d; --line:#e4ece7;
+  --g:#0ca03a; --gink:#07772a; --gsoft:#eaf8ef; --gline:#bfe6cb;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#232824;display:flex;flex-direction:column;align-items:center;gap:44px;padding:44px}
+.sheet{background:#fff;color:var(--ink);font-family:var(--sans);position:relative;
+  overflow:hidden;flex:0 0 auto;-webkit-font-smoothing:antialiased}
+
+/* a soft green field behind the top third, so the page has a shape rather
+   than being text floating on white */
+.wash{position:absolute;left:50%;transform:translateX(-50%);border-radius:50%;
+  background:radial-gradient(closest-side,rgba(12,160,58,.16),rgba(12,160,58,.04) 58%,transparent 72%)}
+.leaf{position:absolute;opacity:.05;filter:grayscale(1) brightness(0)}
+.in{position:relative;z-index:2;height:100%;width:100%;display:flex;flex-direction:column;
+  align-items:center;text-align:center}
+
+.brand{display:flex;align-items:center;justify-content:center;gap:14px}
+.brand img{display:block}
+.brand span{font-family:var(--serif);font-weight:600;letter-spacing:.3em;text-indent:.3em}
+.rule{height:3px;border-radius:9px;background:linear-gradient(90deg,transparent,var(--g),transparent)}
+h1{font-family:var(--serif);font-weight:600;line-height:1;letter-spacing:-.035em;
+  font-variation-settings:'opsz' 144}
+h1 em{font-style:normal;color:var(--g)}
+.lede{color:var(--dim);line-height:1.5}
+.lede b{color:var(--ink);font-weight:700}
+.pts{display:flex;flex-direction:column}
+.pts div{display:flex;align-items:center;gap:16px;font-weight:600;text-align:left}
+.pts i{border-radius:50%;background:var(--gsoft);border:1.5px solid var(--gline);color:var(--gink);
+  font-style:normal;font-family:var(--mono);font-weight:700;
+  display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.scanlbl{font-family:var(--mono);font-weight:700;letter-spacing:.26em;color:var(--gink);
+  text-transform:uppercase}
+.qrcard{background:#fff;border-radius:34px;position:relative;
+  box-shadow:0 2px 4px rgba(14,21,18,.05),0 26px 60px rgba(14,21,18,.13)}
+.qrcard:before{content:'';position:absolute;inset:-3px;border-radius:37px;z-index:-1;
+  background:linear-gradient(145deg,var(--g),#7fd99a 45%,var(--gline))}
+.qrcard img{display:block;image-rendering:crisp-edges}
+.foot{color:var(--dim)}
+
+/* ── 1080x1350 · the one you send on WhatsApp ───────────────────────────── */
+#share{width:1080px;height:1350px;padding:66px 76px 58px}
+#share .wash{width:1180px;height:860px;top:-330px}
+#share .leaf{width:420px;right:-120px;bottom:-90px}
+#share .brand img{width:62px} #share .brand span{font-size:30px}
+#share .rule{width:120px;margin:30px 0 34px}
+#share h1{font-size:104px;margin-bottom:28px}
+#share .lede{font-size:33px;max-width:770px;margin-bottom:40px}
+#share .pts{gap:16px;margin-bottom:44px}
+#share .pts div{font-size:29px} #share .pts i{width:36px;height:36px;font-size:16px}
+#share .scanlbl{font-size:20px;margin-bottom:18px}
+#share .qrcard{padding:22px} #share .qrcard img{width:330px;height:330px;image-rendering:auto}
+#share .foot{font-size:24px;margin-top:26px}
+
+/* ── A4 at 150dpi · print and pin up ────────────────────────────────────── */
+#a4{width:1240px;height:1754px;padding:104px 96px 84px}
+#a4 .wash{width:1400px;height:1020px;top:-390px}
+#a4 .leaf{width:500px;right:-140px;bottom:-110px}
+#a4 .brand img{width:74px} #a4 .brand span{font-size:36px}
+#a4 .rule{width:146px;margin:38px 0 44px}
+#a4 h1{font-size:124px;margin-bottom:34px}
+#a4 .lede{font-size:39px;max-width:900px;margin-bottom:54px}
+#a4 .pts{gap:20px;margin-bottom:58px}
+#a4 .pts div{font-size:34px} #a4 .pts i{width:44px;height:44px;font-size:19px}
+#a4 .scanlbl{font-size:24px;margin-bottom:22px}
+#a4 .qrcard{padding:26px} #a4 .qrcard img{width:420px;height:420px;image-rendering:auto}
+#a4 .foot{font-size:29px;margin-top:32px}
+</style></head>
+<body>
+
+<div class="sheet" id="share">
+  <div class="wash"></div>
+  <img class="leaf" src="../assets/logo-lotus.png" alt="">
+  <div class="in">
+    <div class="brand"><img src="../assets/logo-lotus.png" alt=""><span>HIERO</span></div>
+    <div class="rule"></div>
+    <h1>Tell me what<br>you <em>really</em> think.</h1>
+    <p class="lede">I built something that fixes your CV and lets you practise
+      interviews. I'd rather hear <b>what's wrong with it</b> than hear it's nice.</p>
+    <div class="pts">
+      <div><i>1</i>Takes about three minutes</div>
+      <div><i>2</i>No sign-up, no login</div>
+      <div><i>3</i>Be blunt — that's the useful part</div>
+    </div>
+    <div class="scanlbl">Scan this</div>
+    <div class="qrcard"><img src="../assets/qr-hiero-logo.png" alt=""></div>
+    <div class="foot">Point your camera at the square.</div>
+  </div>
+</div>
+
+<div class="sheet" id="a4">
+  <div class="wash"></div>
+  <img class="leaf" src="../assets/logo-lotus.png" alt="">
+  <div class="in">
+    <div class="brand"><img src="../assets/logo-lotus.png" alt=""><span>HIERO</span></div>
+    <div class="rule"></div>
+    <h1>Tell me what<br>you <em>really</em> think.</h1>
+    <p class="lede">I built something that fixes your CV and lets you practise
+      interviews. I'd rather hear <b>what's wrong with it</b> than hear it's nice.</p>
+    <div class="pts">
+      <div><i>1</i>Takes about three minutes</div>
+      <div><i>2</i>No sign-up, no login</div>
+      <div><i>3</i>Be blunt — that's the useful part</div>
+    </div>
+    <div class="scanlbl">Scan this</div>
+    <div class="qrcard"><img src="../assets/qr-hiero-logo.png" alt=""></div>
+    <div class="foot">Point your camera at the square.</div>
+  </div>
+</div>
+
+</body></html>

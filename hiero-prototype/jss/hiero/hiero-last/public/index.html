@@ -4,7 +4,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hiero Dashboard</title>
+  
+  <!-- Hiero theme base: one source for colour and type, served by routes/theme.js.
+       Must stay first and must NOT be deferred, or dark-mode users see a white
+       flash before the engine resolves their choice. -->
+  <link rel="stylesheet" href="/theme/hiero.css">
+  <script src="/theme/hiero.js"></script>
+<title>Hiero Dashboard</title>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="theme.css">
@@ -597,8 +603,6 @@
       </div>
 
       <div class="nav-actions" style="display: flex; align-items: center; gap: 15px;">
-        <a href="/Admin/dashboard.html" id="adminLink" style="display: none; color: #ff3b30; font-weight: 700; text-decoration: none; font-size: 13px; border: 1px solid #ff3b30; padding: 8px 16px; border-radius: 20px; transition: all 0.2s; background: rgba(255, 59, 48, 0.1);" onmouseover="this.style.background='rgba(255, 59, 48, 0.2)'" onmouseout="this.style.background='rgba(255, 59, 48, 0.1)'">Admin Dashboard</a>
-
         <a href="dashboard.html" class="dashboard-nav-btn" aria-label="Open dashboard" style="display: flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #07e219, #00b248); color: #000; font-weight: 800; font-size: 13.5px; text-decoration: none; padding: 9px 20px; border-radius: 100px; box-shadow: 0 0 16px rgba(7, 226, 25, 0.35); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">
           <i class="fa-solid fa-gauge-high"></i><span class="dashboard-nav-label">Dashboard</span>
         </a>
@@ -865,7 +869,10 @@
         if (response.ok) {
           const data = await response.json();
           if (data.isAdmin) {
-            document.getElementById('adminLink').style.display = 'block';
+            // Admin link removed from the nav; the page remains reachable
+            // at /Admin/dashboard.html for anyone who needs it.
+            var al = document.getElementById('adminLink');
+            if (al) al.style.display = 'block';
           }
         }
       } catch (error) {

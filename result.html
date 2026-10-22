@@ -4,7 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <!-- App icons. Without these the browser has nothing to use when the site is
+  
+  <!-- Hiero theme base: one source for colour and type, served by routes/theme.js.
+       Must stay first and must NOT be deferred, or dark-mode users see a white
+       flash before the engine resolves their choice. -->
+  <link rel="stylesheet" href="/theme/hiero.css">
+  <script src="/theme/hiero.js"></script>
+<!-- App icons. Without these the browser has nothing to use when the site is
        added to a dock or home screen, and falls back to a screenshot of the page. -->
   <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png" />
   <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png" />
@@ -1017,8 +1023,8 @@
       const doc = document.documentElement;
       const current = doc.getAttribute('data-theme');
       const target = current === 'light' ? 'dark' : 'light';
-      doc.setAttribute('data-theme', target);
-      localStorage.setItem('hiero-theme', target);
+      if (!(window.Hiero && window.Hiero.theme)) doc.setAttribute('data-theme', target);
+      localStorage.setItem('hiero.theme', target);
       updateThemeUI(target);
     };
 
@@ -1033,7 +1039,7 @@
 
     // Initialize Theme
     const savedTheme = localStorage.getItem('hiero-theme') || 'dark';
-    document.documentElement.setAttribute('data-theme', savedTheme);
+    if (!(window.Hiero && window.Hiero.theme)) document.documentElement.setAttribute('data-theme', savedTheme);
     updateThemeUI(savedTheme);
 
     // --- DATA RENDERING ---
