@@ -5,7 +5,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   
-  <!-- Hiero theme base: one source for colour and type, served by routes/theme.js.
+  
+  <script>
+  // Signed-in visitors should not be shown the "Welcome / Get Started" splash:
+  // typing hiero.in while logged in looked like the account had been forgotten.
+  // Runs before the splash paints, so there is no flash of the wrong page.
+  // ?stay=1 bypasses it, so the landing page is still reachable on purpose.
+  (function () {
+    try {
+      if (location.search.indexOf('stay=1') !== -1) return;
+      var t = localStorage.getItem('token') || localStorage.getItem('jwtToken');
+      if (!t) return;
+      // Only redirect on a token that is actually still valid; an expired one
+      // should fall through to the splash rather than bounce to a page that
+      // will just send them back to login.
+      var payload = JSON.parse(atob(t.split('.')[1]));
+      if (payload && payload.exp && Date.now() > payload.exp * 1000) return;
+      location.replace('/index.html');
+    } catch (e) { /* unreadable token: show the splash */ }
+  })();
+  </script>
+<!-- Hiero theme base: one source for colour and type, served by routes/theme.js.
        Must stay first and must NOT be deferred, or dark-mode users see a white
        flash before the engine resolves their choice. -->
   <link rel="stylesheet" href="/theme/hiero.css">
