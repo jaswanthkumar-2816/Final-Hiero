@@ -67,33 +67,41 @@ function authenticateUser(req) {
                 return {
                     userId: decoded.userId || decoded.id || decoded.email || 'authenticated_user',
                     name: decoded.name || 'Candidate',
-                    email: decoded.email || ''
+                    email: decoded.email || '',
+                    isGuest: false
                 };
             }
         } catch (e) {
-            // Check fallback for demo/guest tokens
-            try {
-                const base64Payload = token.split('.')[1];
-                if (base64Payload) {
-                    const parsed = JSON.parse(Buffer.from(base64Payload, 'base64').toString('utf8'));
-                    if (parsed && (parsed.userId || parsed.id || parsed.email)) {
-                        return {
-                            userId: parsed.userId || parsed.id || parsed.email,
-                            name: parsed.name || 'Candidate',
-                            email: parsed.email || ''
-                        };
-                    }
-                }
-            } catch (err2) {}
+            // A token that fails verification is not a token. There used to be
+            // a fallback here that base64-decoded the payload and trusted it
+            // when jwt.verify threw -- which meant anyone could read any
+            // account's interviews by forging {userId: <theirs>} with a
+            // garbage signature, no signing secret required. Verified and
+            // tested: it returned 20 real sessions. Removed.
         }
     }
 
-    // Default demo fallback if no token
+    // No usable token. Guests can still practise, but they are NOT a user and
+    // must never be handed stored data -- see requireUser below.
     return {
         userId: 'demo_user_hiero',
         name: 'Candidate',
-        email: 'demo@hiero.ai'
+        email: '',
+        isGuest: true
     };
+}
+
+/**
+ * For routes that read or write somebody's stored data.
+ * Returns the user, or null after having already sent a 401.
+ */
+function requireUser(req, res) {
+    const user = authenticateUser(req);
+    if (user.isGuest) {
+        res.status(401).json({ success: false, error: 'Sign in to view this.' });
+        return null;
+    }
+    return user;
 }
 
 // ─────────────────────────────────────────────
@@ -1783,7 +1791,11 @@ router.post('/:sessionId/recording', videoUpload.single('video'), async (req, re
 // ─────────────────────────────────────────────────────────────────────────────
 router.get('/user/history', async (req, res) => {
     try {
-        const user = authenticateUser(req);
+        // Reads stored interviews, so a real signed-in user is required. This
+        // was open to anyone: with no token at all it served every anonymous
+        // session, and with a forged one it served any account's.
+        const user = requireUser(req, res);
+        if (!user) return;
         let list = [];
 
         if (mongoose.connection.readyState === 1) {
