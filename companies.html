@@ -3381,7 +3381,7 @@
         // ==========================================
         function getFilteredCompanies() {
           const customHRList = loadCustomHRCompanies();
-          const allCompanies = [...COMPANIES_DATA, ...customHRList];
+          const allCompanies = [...COMPANIES_DATA.map(c => ({ ...c, isTarget: true })), ...customHRList];
 
           return allCompanies.map(company => {
             // Filter roles inside company
@@ -3474,7 +3474,7 @@
                   <div style="font-family: var(--font-display); font-size: 0.95rem; font-weight: 800; color: var(--text-main); line-height: 1.1;">
                     ${rolesCount} <span style="font-size: 0.76rem; font-weight: 600; color: var(--text-muted);">${rolesCount === 1 ? 'Role' : 'Roles'}</span>
                   </div>
-                  <div style="font-size: 0.62rem; text-transform: uppercase; font-weight: 700; color: var(--text-subtle); letter-spacing: 0.4px;">Available</div>
+                  <div style="font-size: 0.62rem; text-transform: uppercase; font-weight: 700; color: var(--text-subtle); letter-spacing: 0.4px;">${company.isTarget ? 'Practice Target' : 'Hiring'}</div>
                 </div>
               </div>
 
@@ -3632,7 +3632,7 @@
         // ==========================================
         function openCompanyDetail(companyId, shouldPushState = true) {
           const customHRList = loadCustomHRCompanies();
-          const allCompanies = [...COMPANIES_DATA, ...customHRList];
+          const allCompanies = [...COMPANIES_DATA.map(c => ({ ...c, isTarget: true })), ...customHRList];
           const company = allCompanies.find(c => c.id === companyId);
           if (!company) return;
 
@@ -3676,10 +3676,19 @@
                   <div style="display: flex; flex-wrap: wrap; gap: 8px;">${techPills}</div>
                 </div>` : ''}
 
+                ${company.isTarget ? `
+                <div style="margin-top: 16px; padding: 11px 14px; background: var(--surface-2); border: 1px dashed var(--border-color); border-radius: 10px;">
+                  <p style="margin: 0; font-size: 0.82rem; color: var(--text-muted);">
+                    <strong style="color: var(--text-primary);">Practice target.</strong>
+                    ${company.name} has not posted this role on Hiero. It is here so you can prepare for this kind of role — apply on ${company.name}'s own careers site.
+                  </p>
+                </div>` : ''}
+
                 <div style="margin-top: 20px; display: flex; gap: 12px; flex-wrap: wrap;">
+                  ${company.isTarget ? '' : `
                   <button class="card-primary-cta" onclick="applyToCompany('${company.name}', this)" style="flex: 1; justify-content: center; min-width: 200px;">
                     Apply for ${role.title} →
-                  </button>
+                  </button>`}
                   <a href="mock-interview.html?company=${encodeURIComponent(company.name)}&role=${encodeURIComponent(role.title)}&desc=${encodeURIComponent(role.description || '')}&level=${encodeURIComponent(role.level || '')}&comp=${encodeURIComponent(role.comp || '')}&tech=${encodeURIComponent((role.techStack || []).join(','))}" onclick="startPracticeMockInterview(${JSON.stringify(company.name)}, ${JSON.stringify(role.title)}, ${JSON.stringify(role.description || '')}, ${JSON.stringify(role.level || '')}, ${JSON.stringify(role.comp || '')}, ${JSON.stringify(role.techStack || [])}); return false;" class="card-secondary-btn" style="text-decoration: none;">
                     Practice Mock Interview
                   </a>
@@ -3756,7 +3765,7 @@
 
                   <div class="profile-metric-item">
                     <div class="metric-value" style="color: var(--primary-accent);">${roles.length} ${roles.length === 1 ? 'Position' : 'Positions'}</div>
-                    <div class="metric-label">Available Roles</div>
+                    <div class="metric-label">${company.isTarget ? 'Target Roles' : 'Open Roles'}</div>
                   </div>
 
                   <div class="profile-metric-item">
@@ -3769,7 +3778,7 @@
               <!-- Available Roles & Salary Section (Clean: No decorative heading icons) -->
               <div class="company-roles-container">
                 <div class="roles-section-header">
-                  <h3 class="profile-section-heading" style="margin: 0;">Available Roles & Salary (${roles.length})</h3>
+                  <h3 class="profile-section-heading" style="margin: 0;">${company.isTarget ? 'Roles to Prepare For' : 'Open Roles & Salary'} (${roles.length})</h3>
                 </div>
                 <div class="roles-cards-list">
                   ${rolesHtml}
