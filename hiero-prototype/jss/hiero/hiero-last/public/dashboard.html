@@ -783,74 +783,10 @@
                 <p class="modal-subtitle">Companies accepting applications based on your verified <strong><span id="modal-user-score" style="color: var(--primary);">--%</span> Match Score</strong>:</p>
                 
                 <div class="company-list">
-                    <div class="company-card">
-                        <div class="comp-info">
-                            <div class="comp-logo"><i class="fab fa-amazon"></i></div>
-                            <div>
-                                <h4>Amazon</h4>
-                                <p>Software Development Engineer (SDE-1)</p>
-                            </div>
-                        </div>
-                        <div class="comp-match">
-                            <span class="match-pct" id="comp-match-amazon">88% Fit</span>
-                            <button class="comp-apply-btn" onclick="applyToCompany('Amazon', this)"><i class="fas fa-paper-plane"></i> Apply</button>
-                        </div>
-                    </div>
-
-                    <div class="company-card">
-                        <div class="comp-info">
-                            <div class="comp-logo"><i class="fas fa-cube"></i></div>
-                            <div>
-                                <h4>TCS (Tata Consultancy Services)</h4>
-                                <p>System Engineer / Digital Developer</p>
-                            </div>
-                        </div>
-                        <div class="comp-match">
-                            <span class="match-pct" id="comp-match-tcs">94% Fit</span>
-                            <button class="comp-apply-btn" onclick="applyToCompany('TCS', this)"><i class="fas fa-paper-plane"></i> Apply</button>
-                        </div>
-                    </div>
-
-                    <div class="company-card">
-                        <div class="comp-info">
-                            <div class="comp-logo"><i class="fas fa-laptop-code"></i></div>
-                            <div>
-                                <h4>Infosys</h4>
-                                <p>Specialist Programmer / Senior Developer</p>
-                            </div>
-                        </div>
-                        <div class="comp-match">
-                            <span class="match-pct" id="comp-match-infosys">91% Fit</span>
-                            <button class="comp-apply-btn" onclick="applyToCompany('Infosys', this)"><i class="fas fa-paper-plane"></i> Apply</button>
-                        </div>
-                    </div>
-
-                    <div class="company-card">
-                        <div class="comp-info">
-                            <div class="comp-logo"><i class="fas fa-network-wired"></i></div>
-                            <div>
-                                <h4>Wipro Technologies</h4>
-                                <p>Project Engineer / Application Developer</p>
-                            </div>
-                        </div>
-                        <div class="comp-match">
-                            <span class="match-pct" id="comp-match-wipro">86% Fit</span>
-                            <button class="comp-apply-btn" onclick="applyToCompany('Wipro', this)"><i class="fas fa-paper-plane"></i> Apply</button>
-                        </div>
-                    </div>
-
-                    <div class="company-card">
-                        <div class="comp-info">
-                            <div class="comp-logo"><i class="fas fa-wallet"></i></div>
-                            <div>
-                                <h4>Paytm / Fintech Services</h4>
-                                <p>Full Stack Engineer</p>
-                            </div>
-                        </div>
-                        <div class="comp-match">
-                            <span class="match-pct" id="comp-match-paytm">82% Fit</span>
-                            <button class="comp-apply-btn" onclick="applyToCompany('Paytm', this)"><i class="fas fa-paper-plane"></i> Apply</button>
-                        </div>
+                    <div style="background: rgba(255,255,255,0.03); border: 1px dashed rgba(255,255,255,0.15); border-radius: 14px; padding: 26px; text-align: center;">
+                        <p style="margin: 0 0 6px; font-size: 15px; font-weight: 700; color: #fff;">No partner roles open right now</p>
+                        <p style="margin: 0 0 14px; font-size: 13px; color: var(--text-muted);">When a company posts a role on Hiero, it will show up here with your match score.</p>
+                        <a href="companies.html" style="display: inline-block; background: var(--primary); color: #0b0b0b; padding: 9px 18px; border-radius: 100px; font-size: 13px; font-weight: 800; text-decoration: none;">Browse all roles</a>
                     </div>
                 </div>
             </div>
@@ -985,20 +921,22 @@
             } catch(e) {}
 
             if (!appliedNames || appliedNames.length === 0) {
-                appliedNames = ['Amazon India', 'Paytm / One97 Communications', 'TCS (Tata Consultancy Services)'];
+                container.innerHTML = `
+                    <div style="grid-column: 1 / -1; background: rgba(255,255,255,0.03); border: 1px dashed rgba(255,255,255,0.15); border-radius: 16px; padding: 28px; text-align: center;">
+                        <p style="margin: 0 0 6px; font-size: 15px; font-weight: 700; color: #fff;">You haven't applied to any companies yet</p>
+                        <p style="margin: 0 0 14px; font-size: 13px; color: var(--text-muted);">Applications you send through Hiero will appear here.</p>
+                        <a href="companies.html" style="display: inline-block; background: var(--primary); color: #0b0b0b; padding: 9px 18px; border-radius: 100px; font-size: 13px; font-weight: 800; text-decoration: none;">Browse open roles</a>
+                    </div>`;
+                return;
             }
 
             container.innerHTML = appliedNames.map(comp => `
                 <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(7, 226, 25, 0.25); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 10px; transition: 0.3s;" onmouseover="this.style.borderColor='#07e219'" onmouseout="this.style.borderColor='rgba(7, 226, 25, 0.25)'">
                     <div style="display: flex; align-items: center; justify-content: space-between;">
                         <h4 style="margin: 0; font-size: 16px; font-weight: 800; color: #fff;">${comp}</h4>
-                        <span style="background: rgba(7, 226, 25, 0.15); border: 1px solid rgba(7, 226, 25, 0.4); color: #07e219; padding: 3px 10px; border-radius: 100px; font-size: 11px; font-weight: 700;">✓ Applied & Confirmed</span>
+                        <span style="background: rgba(7, 226, 25, 0.15); border: 1px solid rgba(7, 226, 25, 0.4); color: #07e219; padding: 3px 10px; border-radius: 100px; font-size: 11px; font-weight: 700;">✓ Applied</span>
                     </div>
-                    <p style="margin: 0; font-size: 13px; color: var(--text-muted);">Target Role: Software Development Engineer • Hiero Match: 88%</p>
-                    <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 4px;">
-                        <span style="font-size: 11px; color: #64748b;">Ref #HIO-2026-CONFIRMED</span>
-                        <a href="job_success.html?company=${encodeURIComponent(comp)}&role=Senior%20Development%20Engineer&score=88%25" style="color: #07e219; font-size: 12px; font-weight: 700; text-decoration: none;">View Receipt →</a>
-                    </div>
+                    <p style="margin: 0; font-size: 13px; color: var(--text-muted);">Application sent through Hiero</p>
                 </div>
             `).join('');
         }
@@ -1341,12 +1279,10 @@
         }
 
         function applyToCompany(companyName, btn) {
-            btn.innerHTML = `<i class="fas fa-check-circle"></i> Applied!`;
-            btn.classList.add('applied');
-            btn.disabled = true;
-            setTimeout(() => {
-                window.location.href = `job_success.html?company=${encodeURIComponent(companyName)}&role=${encodeURIComponent('Senior Software Engineer')}&score=85%25`;
-            }, 450);
+            // Real applications are submitted from the role page, which posts to
+            // /api/opportunities/apply. Never show a confirmation for an application
+            // that was not actually sent.
+            window.location.href = `companies.html?company=${encodeURIComponent(companyName)}`;
         }
 
         function logout() {
