@@ -99,6 +99,16 @@ router.post('/request', async (req, res) => {
 
     try {
         const existingAccount = await RecruiterAccount.findOne({ email });
+
+        // A removed company still has its account, disabled, so that its job
+        // posts and applicants keep an owner. That used to mean the address
+        // could never ask again: the form said "thanks", created nothing, and
+        // the sign-in it was asking for stayed switched off. A dead end with
+        // a cheerful message on it.
+        //
+        // A disabled account is therefore treated as no account at all here.
+        // Approving the new request switches the old one back on.
+        const blockedByAccount = Boolean(existingAccount) && existingAccount.status === 'active';
         const existing = await AccessRequest.findOne({ email, status: 'pending' });
 
         // Only a genuinely new row is worth an email. Someone resubmitting
@@ -113,7 +123,7 @@ router.post('/request', async (req, res) => {
             if (body.phone) existing.phone = String(body.phone).trim();
             if (body.industry) existing.industry = String(body.industry).trim();
             await existing.save();
-        } else if (!existingAccount) {
+        } else if (!blockedByAccount) {
             waiting = await AccessRequest.create({
                 companyName,
                 email,
