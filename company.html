@@ -2414,6 +2414,33 @@
           </div>
 
           <div class="modal-body" style="padding: 0; display: flex; flex-direction: column; gap: 12px;">
+            <!-- Who is applying. The recruiter inbox is only as useful as what
+                 is collected here, so name, email and phone are required even
+                 when the applicant has no HIERO account. -->
+            <div id="apply-contact-fields" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+              <div style="grid-column: 1 / -1;">
+                <label for="apply-field-name" style="display:block; font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--text-muted); margin-bottom:4px;">Full name *</label>
+                <input id="apply-field-name" type="text" autocomplete="name" placeholder="Your full name"
+                  style="width:100%; box-sizing:border-box; padding:9px 11px; border-radius:10px; border:1.5px solid var(--border-color); background:var(--surface-2); color:var(--text-main); font-size:13px;">
+              </div>
+              <div>
+                <label for="apply-field-email" style="display:block; font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--text-muted); margin-bottom:4px;">Email *</label>
+                <input id="apply-field-email" type="email" autocomplete="email" placeholder="you@example.com"
+                  style="width:100%; box-sizing:border-box; padding:9px 11px; border-radius:10px; border:1.5px solid var(--border-color); background:var(--surface-2); color:var(--text-main); font-size:13px;">
+              </div>
+              <div>
+                <label for="apply-field-phone" style="display:block; font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--text-muted); margin-bottom:4px;">Phone *</label>
+                <input id="apply-field-phone" type="tel" autocomplete="tel" placeholder="10-digit mobile"
+                  style="width:100%; box-sizing:border-box; padding:9px 11px; border-radius:10px; border:1.5px solid var(--border-color); background:var(--surface-2); color:var(--text-main); font-size:13px;">
+              </div>
+              <div style="grid-column: 1 / -1;">
+                <label for="apply-field-skills" style="display:block; font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--text-muted); margin-bottom:4px;">Key skills / experience</label>
+                <input id="apply-field-skills" type="text" placeholder="Comma separated — the match score is scored against the job's required skills"
+                  style="width:100%; box-sizing:border-box; padding:9px 11px; border-radius:10px; border:1.5px solid var(--border-color); background:var(--surface-2); color:var(--text-main); font-size:13px;">
+              </div>
+            </div>
+            <div id="apply-form-error" style="display:none; font-size:12px; font-weight:600; color:#ff6b6b; background:rgba(255,107,107,.08); border:1px solid rgba(255,107,107,.3); border-radius:10px; padding:8px 11px;"></div>
+
             <!-- Option 1: Existing Active Resume -->
             <div class="resume-option-card active" id="opt-card-saved" onclick="selectResumeOption('saved')" style="border: 1.5px solid var(--primary-accent); background: rgba(7, 226, 25, 0.08); border-radius: 16px; padding: 14px 16px; display: flex; gap: 12px; align-items: flex-start; cursor: pointer;">
               <input type="radio" name="resumeChoiceOption" id="radio-resume-saved" value="saved" checked style="accent-color: var(--primary-accent); margin-top: 3px;">
@@ -3264,25 +3291,28 @@
         let liveBackendComps = [];
 
         async function fetchLiveBackendOpportunities() {
-          try {
-            let res;
+          // Same origin first. The old order asked localhost:5050 before the
+          // gateway, which answers 404 here when another project owns that
+          // port -- res.ok was false, the gateway was never tried, and jobs
+          // posted from Connect simply never appeared. It also breaks over a
+          // tunnel, where localhost is the visitor's own machine.
+          const sources = ['/api/opportunities', 'http://localhost:5050/api/opportunities'];
+          for (const url of sources) {
             try {
-              res = await fetch('http://localhost:5050/api/opportunities');
-            } catch(e) {
-              res = await fetch('/api/opportunities');
-            }
-            if (res && res.ok) {
+              const res = await fetch(url);
+              if (!res || !res.ok) continue;
               const data = await res.json();
-              if (data.success) {
-                liveBackendOpps = data.opportunities || [];
-                liveBackendComps = data.companies || [];
-                renderCompaniesGrid();
-                renderRoleMatrix();
-              }
+              if (!data || !data.success) continue;
+              liveBackendOpps = data.opportunities || [];
+              liveBackendComps = data.companies || [];
+              renderCompaniesGrid();
+              renderRoleMatrix();
+              return;
+            } catch (e) {
+              // Try the next source.
             }
-          } catch(e) {
-            console.warn('Backend API opportunity sync fallback to localStorage:', e);
           }
+          console.warn('Backend API opportunity sync fallback to localStorage');
         }
 
         // Helper to load custom HR opportunities created in Connect-Portal
@@ -3346,7 +3376,7 @@
                 domain: opp.domain || 'all',
                 level: opp.employmentType || (opp.type === 'internship' ? 'Internship' : 'Full-time'),
                 comp: opp.salary || 'Competitive',
-                matchScore: 92,
+                matchScore: null,
                 location: opp.location || 'India',
                 techStack: opp.requiredSkills?.map(s => s.name || s) || ['Python', 'React', 'TypeScript', 'SQL'],
                 description: opp.description || 'Verified opportunity published via Connect-Portal.',
@@ -3521,8 +3551,8 @@
           </div>
 
           <div>
-            <div style="font-family: var(--font-display); font-size: 1.05rem; font-weight: 800; color: var(--c-green);">${role.matchScore}%</div>
-            <div style="font-size: 0.65rem; color: var(--text-subtle); font-weight: 700; text-transform: uppercase;">Match Fit</div>
+            <div style="font-family: var(--font-display); font-size: 1.05rem; font-weight: 800; color: var(--c-green);">${role.matchScore ? role.matchScore + '%' : '—'}</div>
+            <div style="font-size: 0.65rem; color: var(--text-subtle); font-weight: 700; text-transform: uppercase;">${role.matchScore ? 'Match Fit' : 'Not scored'}</div>
           </div>
 
           <div style="display: flex; gap: 8px;">
@@ -3647,8 +3677,8 @@
                     </div>
                   </div>
                   <div class="role-match-score-badge">
-                    <span class="match-percent-val match-high">${role.matchScore}%</span>
-                    <span class="match-sublabel">Match Fit</span>
+                    <span class="match-percent-val match-high">${role.matchScore ? role.matchScore + '%' : '—'}</span>
+                    <span class="match-sublabel">${role.matchScore ? 'Match Fit' : 'Not scored'}</span>
                   </div>
                 </div>
 
@@ -3665,7 +3695,7 @@
                 </div>` : ''}
 
                 <div style="margin-top: 20px; display: flex; gap: 12px; flex-wrap: wrap;">
-                  <button class="card-primary-cta" onclick="applyToCompany('${company.name}', this)" style="flex: 1; justify-content: center; min-width: 200px;">
+                  <button class="card-primary-cta" onclick="applyToCompany('${jsAttr(company.name)}', this, '${jsAttr(role.id)}', '${jsAttr(role.title)}')" style="flex: 1; justify-content: center; min-width: 200px;">
                     Apply for ${role.title} →
                   </button>
                   <a href="mock-interview.html?company=${encodeURIComponent(company.name)}&role=${encodeURIComponent(role.title)}&desc=${encodeURIComponent(role.description || '')}&level=${encodeURIComponent(role.level || '')}&comp=${encodeURIComponent(role.comp || '')}&tech=${encodeURIComponent((role.techStack || []).join(','))}" onclick="startPracticeMockInterview(${JSON.stringify(company.name)}, ${JSON.stringify(role.title)}, ${JSON.stringify(role.description || '')}, ${JSON.stringify(role.level || '')}, ${JSON.stringify(role.comp || '')}, ${JSON.stringify(role.techStack || [])}); return false;" class="card-secondary-btn" style="text-decoration: none;">
@@ -3948,37 +3978,73 @@
         let selectedResumeChoice = 'saved';
         let newlyUploadedResumeFile = null;
 
-        function applyToCompany(companyName, btn, oppId) {
+        // Values go into an inline onclick inside a double-quoted HTML
+        // attribute, so they have to survive two parsers: the HTML attribute
+        // and the JavaScript string inside it. A raw quote in a company or
+        // role name ends the attribute early and kills the whole script.
+        function jsAttr(value) {
+          return String(value === null || value === undefined ? '' : value)
+            .replace(/&/g, '&amp;')
+            .replace(/\\/g, '\\\\')
+            .replace(/'/g, "\\'")
+            .replace(/"/g, '&quot;')
+            .replace(/</g, '&lt;');
+        }
+
+        function applyToCompany(companyName, btn, oppId, roleTitle) {
           const customOpps = JSON.parse(localStorage.getItem('hc_custom_opportunities') || '[]');
-          const targetOpp = customOpps.find(o => o.companyName === companyName || o.id === oppId) || customOpps[0];
+          // Live posts come from the gateway, not localStorage, so look there
+          // too -- otherwise an application carries no opportunity id and the
+          // company inbox cannot tell which role it was for.
+          const pool = [...(liveBackendOpps || []), ...customOpps];
+          const targetOpp = pool.find(o => o && (o.id === oppId))
+            || pool.find(o => o && o.companyName === companyName)
+            || null;
 
           pendingApplyState = {
             companyName: companyName,
             btn: btn,
-            oppId: oppId,
+            oppId: oppId || (targetOpp ? targetOpp.id : ''),
+            roleTitle: roleTitle || (targetOpp ? targetOpp.title : ''),
             targetOpp: targetOpp
           };
 
           const compElem = document.getElementById('apply-modal-comp-name');
           const roleElem = document.getElementById('apply-modal-job-title');
           if (compElem) compElem.innerText = companyName;
-          if (roleElem) roleElem.innerText = targetOpp ? targetOpp.title : 'Software Engineer';
+          if (roleElem) roleElem.innerText = pendingApplyState.roleTitle || 'this role';
 
-          const userStr = localStorage.getItem('user');
-          let resumeName = 'Jaswanth_Kumar_Resume_AI_Engineer.pdf';
-          if (userStr) {
-            try {
-              const u = JSON.parse(userStr);
-              if (u.name) resumeName = u.name.replace(/\s+/g, '_') + '_Resume_2026.pdf';
-            } catch(e) {}
-          }
+          // Prefill from the signed-in HIERO account when there is one. A
+          // walk-in applicant has none, which is the whole point of the
+          // fields being here.
+          let user = {};
+          try { user = JSON.parse(localStorage.getItem('user') || '{}'); } catch (e) {}
+          const nameField = document.getElementById('apply-field-name');
+          const emailField = document.getElementById('apply-field-email');
+          const phoneField = document.getElementById('apply-field-phone');
+          if (nameField && !nameField.value) nameField.value = user.name || '';
+          if (emailField && !emailField.value) emailField.value = user.email || '';
+          if (phoneField && !phoneField.value) phoneField.value = user.phone || '';
+
+          const hasAccount = Boolean(localStorage.getItem('token') || localStorage.getItem('jwtToken'));
           const savedNameElem = document.getElementById('modal-saved-resume-name');
-          if (savedNameElem) savedNameElem.innerText = resumeName;
-
-          selectResumeOption('saved');
+          if (savedNameElem) {
+            savedNameElem.innerText = hasAccount
+              ? ((user.name ? user.name.replace(/\s+/g, '_') : 'HIERO') + '_Resume.pdf')
+              : 'Sign in to HIERO to use a saved resume';
+          }
+          setApplyError('');
+          selectResumeOption(hasAccount ? 'saved' : 'new');
 
           const modal = document.getElementById('apply-resume-modal');
           if (modal) modal.classList.add('active');
+        }
+
+        function setApplyError(message) {
+          const box = document.getElementById('apply-form-error');
+          if (!box) return;
+          box.innerText = message || '';
+          box.style.display = message ? 'block' : 'none';
         }
 
         function selectResumeOption(choice) {
@@ -4032,75 +4098,90 @@
 
         async function confirmApplicationSubmission() {
           if (!pendingApplyState) return;
-          const { companyName, btn, oppId, targetOpp } = pendingApplyState;
+          const { companyName, btn, oppId, roleTitle, targetOpp } = pendingApplyState;
+
+          const fullName = (document.getElementById('apply-field-name')?.value || '').trim();
+          const email = (document.getElementById('apply-field-email')?.value || '').trim().toLowerCase();
+          const phone = (document.getElementById('apply-field-phone')?.value || '').trim();
+          const skills = (document.getElementById('apply-field-skills')?.value || '').trim();
+
+          if (!fullName) return setApplyError('Enter your full name.');
+          if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return setApplyError('Enter a valid email address — the company replies to it.');
+          if (phone.replace(/\D/g, '').length < 8) return setApplyError('Enter a phone number the company can reach you on.');
+
+          const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
+          let resumeFile = (selectedResumeChoice === 'new') ? newlyUploadedResumeFile : null;
+
+          if (!resumeFile && selectedResumeChoice === 'saved') {
+            if (!token) {
+              return setApplyError('Sign in to use your saved HIERO resume, or upload a PDF.');
+            }
+            // Render the saved HIERO resume to a real PDF and send that file.
+            // The old flow sent only a filename, so the recruiter received a
+            // link to a resume that did not exist anywhere.
+            try {
+              const dataRes = await fetch('/api/resume/get-user-resume', { headers: { 'Authorization': `Bearer ${token}` } });
+              const dataJson = dataRes.ok ? await dataRes.json() : null;
+              if (!dataJson || !dataJson.success || !dataJson.data) throw new Error('no saved resume');
+              const pdfRes = await fetch('/api/resume/download-resume', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify(dataJson.data)
+              });
+              if (!pdfRes.ok) throw new Error('render failed');
+              const blob = await pdfRes.blob();
+              resumeFile = new File([blob], `${fullName.replace(/\s+/g, '_')}_HIERO_Resume.pdf`, { type: 'application/pdf' });
+            } catch (e) {
+              return setApplyError('Could not build your saved HIERO resume. Upload a PDF instead.');
+            }
+          }
+
+          if (!resumeFile) return setApplyError('Attach your resume (PDF or DOCX) to apply.');
 
           const submitBtn = document.getElementById('confirm-submit-apply-btn');
           if (submitBtn) {
             submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Submitting...`;
             submitBtn.disabled = true;
           }
+          setApplyError('');
 
-          const finalResumeName = (selectedResumeChoice === 'new' && newlyUploadedResumeFile)
-            ? newlyUploadedResumeFile.name
-            : (document.getElementById('modal-saved-resume-name')?.innerText || 'Jaswanth_Kumar_Resume_2026.pdf');
+          let user = {};
+          try { user = JSON.parse(localStorage.getItem('user') || '{}'); } catch (e) {}
 
+          const form = new FormData();
+          form.append('resume', resumeFile, resumeFile.name);
+          form.append('opportunityId', oppId || (targetOpp ? targetOpp.id : ''));
+          form.append('companyName', companyName);
+          form.append('companyId', targetOpp ? (targetOpp.companyId || '') : '');
+          form.append('jobTitle', roleTitle || (targetOpp ? targetOpp.title : ''));
+          form.append('studentName', fullName);
+          form.append('email', email);
+          form.append('phone', phone);
+          form.append('studentId', user.id || user.userId || email);
+          form.append('profile', JSON.stringify({
+            fullName, email, phone, skills,
+            candidateType: token ? 'student' : 'professional'
+          }));
+
+          let submitted = false;
           try {
-            const userStr = localStorage.getItem('user');
-            const user = userStr ? JSON.parse(userStr) : {};
-
-            const customApps = JSON.parse(localStorage.getItem('hc_custom_applications') || '[]');
-            const customOpps = JSON.parse(localStorage.getItem('hc_custom_opportunities') || '[]');
-            const opportunityId = oppId || (targetOpp ? targetOpp.id : 'j-1');
-
-            customApps.unshift({
-              id: 'app-' + Date.now(),
-              opportunityId: opportunityId,
-              companyId: targetOpp ? targetOpp.companyId : 'comp-1',
-              studentId: 'cand-1',
-              status: 'applied',
-              matchScore: 92,
-              appliedAt: new Date().toISOString(),
-              resumeUrl: `/resumes/${finalResumeName}`,
-              skillsMatch: {
-                matched: ['React', 'TypeScript', 'Python', 'SQL'],
-                missing: ['Kubernetes']
-              }
-            });
-            localStorage.setItem('hc_custom_applications', JSON.stringify(customApps));
-
-            if (targetOpp) {
-              targetOpp.applicantsCount = (targetOpp.applicantsCount || 0) + 1;
-              localStorage.setItem('hc_custom_opportunities', JSON.stringify(customOpps));
+            const res = await fetch('/api/opportunities/apply-with-resume', { method: 'POST', body: form });
+            const json = await res.json().catch(() => null);
+            if (!res.ok || !json || !json.success) {
+              throw new Error((json && json.error) || 'The application could not be submitted.');
             }
+            submitted = true;
+          } catch (err) {
+            if (submitBtn) {
+              submitBtn.innerHTML = `<i class="fa-solid fa-paper-plane" style="margin-right: 6px;"></i> Confirm & Submit Application`;
+              submitBtn.disabled = false;
+            }
+            return setApplyError(err.message || 'The application could not be submitted. Try again.');
+          }
 
-            const appPayload = {
-              opportunityId: opportunityId,
-              companyName: companyName,
-              studentName: user.name || 'Jaswanth Kumar',
-              email: user.email || 'jaswanth@hiero.ai',
-              matchScore: 92,
-              resumeUrl: `/resumes/${finalResumeName}`
-            };
-
-            // Sync with Python Backend (port 5050)
-            try {
-              fetch('http://localhost:5050/api/opportunities/apply', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(appPayload)
-              });
-            } catch (err) {}
-
-            // Sync with Gateway (port 2816)
-            try {
-              fetch('/api/opportunities/apply', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(appPayload)
-              });
-            } catch (err) {}
-
-            const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
+          // Best effort: the confirmation mail to the applicant. A failure
+          // here must not make a submitted application look failed.
+          try {
             await fetch('/api/resume/apply-company', {
               method: 'POST',
               headers: {
@@ -4109,17 +4190,14 @@
               },
               body: JSON.stringify({
                 companyName: companyName,
-                jobRole: targetOpp ? targetOpp.title : 'Software Development Engineer',
-                matchScore: '92%',
-                userId: user.id || user.userId || user.email || 'user_123',
-                email: user.email || 'jaswanth@hiero.ai',
-                fullName: user.name || 'Jaswanth Kumar',
-                resumeName: finalResumeName
+                jobRole: roleTitle || (targetOpp ? targetOpp.title : ''),
+                userId: user.id || user.userId || email,
+                email: email,
+                fullName: fullName,
+                resumeName: resumeFile.name
               })
             });
-          } catch (err) {
-            console.warn('Application submit error:', err);
-          }
+          } catch (err) {}
 
           closeApplyResumeModal();
 
@@ -4128,9 +4206,14 @@
             btn.classList.add('applied');
           }
 
-          const roleTitle = targetOpp ? targetOpp.title : 'Software Development Engineer';
+          if (submitBtn) {
+            submitBtn.innerHTML = `<i class="fa-solid fa-paper-plane" style="margin-right: 6px;"></i> Confirm & Submit Application`;
+            submitBtn.disabled = false;
+          }
+
+          const finalRole = roleTitle || (targetOpp ? targetOpp.title : 'this role');
           setTimeout(() => {
-            window.location.href = `job_success.html?company=${encodeURIComponent(companyName)}&role=${encodeURIComponent(roleTitle)}&score=92%25`;
+            window.location.href = `job_success.html?company=${encodeURIComponent(companyName)}&role=${encodeURIComponent(finalRole)}`;
           }, 350);
         }
 

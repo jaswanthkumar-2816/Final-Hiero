@@ -73,6 +73,10 @@ const allowedOrigins = [
     'http://127.0.0.1:4040',
     'https://85692af7a6b1.ngrok-free.app',
     'https://connect-portal-swart.vercel.app',
+    // The Connect portal's own subdomain, and the gateway's own origin.
+    'https://connect.hiero.in',
+    'https://hiero.in',
+    'https://www.hiero.in',
     originOf(PUBLIC_URL),
     ...(process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',').map(s => s.trim()) : [])
 ].filter(Boolean);
@@ -118,6 +122,19 @@ app.use('/', authObj.router);
 // ======================
 // PROXIES & INTEGRATED ROUTES
 // ======================
+
+// One page, one file.
+//
+// solve.html exists in BOTH the repo root and the public dir. The dashboard
+// links to it relatively ("solve.html"), so clicking Solve lands on
+// /dashboard/solve.html -- the public copy -- while /solve serves the root
+// one. They drifted, and a fix applied to the root file simply did not appear
+// for anyone who clicked through the app.
+//
+// This must stay ABOVE the express.static mounts below: Express matches in
+// registration order, so a route declared after them never runs.
+app.get('/dashboard/solve.html', (req, res) =>
+    res.sendFile(path.join(__dirname, 'solve.html')));
 
 // Dashboard Static Serving (Replaces non-functional localhost proxy)
 // This ensures that links like /dashboard/styles.css work correctly.
@@ -235,6 +252,7 @@ app.use('/api/reel', lazyRouter('./routes/reel'));
 app.use('/api/run', lazyRouter('./routes/run'));
 app.use('/api/visualize', lazyRouter('./routes/visualize'));
 app.use('/api/mastery', lazyRouter('./routes/mastery'));
+app.use('/api/comprehension', lazyRouter('./routes/comprehension'));
 app.use('/api/eval', lazyRouter('./routes/eval'));
 app.use('/api/learning', lazyRouter('./routes/learning'));
 app.use('/api', lazyRouter('./routes/ai-photo'));
@@ -357,6 +375,7 @@ app.get(['/adaptive-test', '/adaptive-test.html'], (req, res) => {
     res.sendFile(path.join(resumeBuilderPath, 'adaptive-test.html'));
 });
 app.get(['/solve', '/solve.html'], (req, res) => res.sendFile(path.join(__dirname, 'solve.html')));
+app.get(['/comprehension', '/comprehension.html'], (req, res) => res.sendFile(path.join(__dirname, 'comprehension.html')));
 app.get(['/visualize', '/visualize.html'], (req, res) => {
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     res.sendFile(path.join(__dirname, 'visualize.html'));
@@ -463,6 +482,10 @@ app.use('/api', lazyRouter('./routes/analysis'));
 
 app.use('/api/problems', lazyRouter('./routes/problems'));
 app.use('/api/opportunities', lazyRouter('./routes/opportunities'));
+// Connect portal recruiter sign-in (company-side accounts, invite-only).
+app.use('/api/connect/auth', lazyRouter('./routes/connectAuth'));
+// Interview / selection mail sent by a signed-in recruiter.
+app.use('/api/connect/mail', lazyRouter('./routes/connectMail'));
 app.use('/api/adaptive', lazyRouter('./routes/adaptive-mastery'));
 app.use('/api/roadmap', lazyRouter('./routes/roadmap'));
 
