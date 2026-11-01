@@ -62,13 +62,19 @@ async function sendMail(to, subject, text) {
     const transport = connectMail.mailer();
     if (!transport) return { sent: false, reason: 'Mail is not configured on this gateway.' };
     try {
-        await transport.sendMail({
+        const info = await transport.sendMail({
             from: `"HIERO Connect" <${connectMail.fromAddress()}>`,
             to,
             subject,
             text
         });
-        return { sent: true };
+        // Accepted by the mail server is not the same as delivered. Log what
+        // it gave back so a message that never arrives can be traced to a
+        // send that did happen.
+        console.log(`📧 [Connect Access] queued to ${to} (${info.messageId || 'no id'}) — accepted:`,
+            (info.accepted || []).join(', ') || 'none',
+            (info.rejected || []).length ? `rejected: ${info.rejected.join(', ')}` : '');
+        return { sent: true, messageId: info.messageId || null, rejected: info.rejected || [] };
     } catch (e) {
         console.error('[Connect Access] mail failed:', e.message);
         return { sent: false, reason: e.message };
@@ -211,6 +217,64 @@ and invite candidates to an interview.
     } catch (e) {
         console.error('[Connect Access] approve failed:', e.message);
         res.status(500).json({ success: false, error: 'Could not approve this request.' });
+    }
+});
+
+// ------------------------------------------------------------
+// POST /api/connect/access/requests/:id/resend
+// ------------------------------------------------------------
+// Approval emails a password, and email is not guaranteed to arrive — it
+// lands in spam, or the address turns out not to exist. Approving again is
+// refused because the request is no longer pending, which left a company
+// approved, with an account, and no way to get into it.
+//
+// This issues a fresh password and sends it again. The old one stops working,
+// so a copy sitting in a stranger's inbox is not left valid either.
+router.post('/requests/:id/resend', requireAdmin, async (req, res) => {
+    try {
+        const request = await AccessRequest.findById(req.params.id);
+        if (!request) return res.status(404).json({ success: false, error: 'No such request.' });
+        if (request.status !== 'approved') {
+            return res.status(409).json({ success: false, error: 'Only an approved request has credentials to send.' });
+        }
+
+        const account = await RecruiterAccount.findOne({ email: request.email });
+        if (!account) {
+            return res.status(404).json({ success: false, error: 'That account no longer exists.' });
+        }
+
+        const password = temporaryPassword();
+        account.passwordHash = await bcrypt.hash(password, 12);
+        account.mustChangePassword = true;
+        account.status = 'active';
+        await account.save();
+
+        const mail = await sendMail(
+            request.email,
+            `Your HIERO Connect account for ${request.companyName}`,
+            `Hello,
+
+Here are your HIERO Connect sign-in details again. The password below replaces any earlier one.
+
+Sign in:   ${PORTAL_URL}
+Email:     ${request.email}
+Password:  ${password}
+
+You will be asked to choose your own password the first time you sign in.
+
+— HIERO Connect`
+        );
+
+        console.log(`🔁 [Connect Access] credentials resent for ${request.email} by ${req.recruiter.email}`);
+        res.json({
+            success: true,
+            emailed: mail.sent,
+            emailError: mail.sent ? undefined : mail.reason,
+            temporaryPassword: mail.sent ? undefined : password
+        });
+    } catch (e) {
+        console.error('[Connect Access] resend failed:', e.message);
+        res.status(500).json({ success: false, error: 'Could not resend the credentials.' });
     }
 });
 
