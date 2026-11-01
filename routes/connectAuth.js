@@ -13,6 +13,7 @@
 
 const express = require('express');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 
@@ -182,6 +183,122 @@ router.post('/change-password', requireRecruiter, async (req, res) => {
     } catch (e) {
         console.error('[Connect Auth] change-password failed:', e.message);
         res.status(500).json({ success: false, error: 'Could not change the password.' });
+    }
+});
+
+// ============================================================
+// Admin sign-in by PIN
+// ============================================================
+// The HIERO admin types one PIN, no email and no password. There is exactly
+// one admin area and one person who opens it, so a username was a field that
+// only ever held the same value.
+//
+// What that costs, stated plainly: a short PIN is guessable by brute force in
+// a way a password is not — 2816 is one of ten thousand. The lockout below is
+// what makes it survivable, so treat it as load-bearing rather than as
+// boilerplate, and raise ADMIN_PIN to something longer if this area ever
+// decides more than who gets a Connect account.
+
+const ADMIN_PIN = String(process.env.ADMIN_PIN || '2816');
+
+// Deliberately tighter than the password throttle: five tries, then half an
+// hour of nothing, keyed on the caller's address. At that rate ten thousand
+// PINs take about a year.
+const PIN_MAX_ATTEMPTS = 5;
+const PIN_LOCKOUT_MS = 30 * 60 * 1000;
+const pinAttempts = new Map();
+
+function callerKey(req) {
+    const forwarded = String(req.headers['x-forwarded-for'] || '').split(',')[0].trim();
+    return forwarded || req.ip || req.connection?.remoteAddress || 'unknown';
+}
+
+function pinLockedUntil(key) {
+    const entry = pinAttempts.get(key);
+    if (!entry) return 0;
+    if (Date.now() - entry.first > PIN_LOCKOUT_MS) {
+        pinAttempts.delete(key);
+        return 0;
+    }
+    if (entry.count < PIN_MAX_ATTEMPTS) return 0;
+    return entry.first + PIN_LOCKOUT_MS;
+}
+
+function recordPinFailure(key) {
+    const now = Date.now();
+    const entry = pinAttempts.get(key);
+    if (!entry || now - entry.first > PIN_LOCKOUT_MS) pinAttempts.set(key, { first: now, count: 1 });
+    else entry.count += 1;
+}
+
+// Constant time, so the server does not leak how much of the PIN was right
+// by how fast it said no.
+function pinMatches(given) {
+    const a = Buffer.from(String(given));
+    const b = Buffer.from(ADMIN_PIN);
+    if (a.length !== b.length) return false;
+    return crypto.timingSafeEqual(a, b);
+}
+
+router.post('/admin-pin', async (req, res) => {
+    try {
+        const pin = String((req.body && req.body.pin) || '').trim();
+        const key = callerKey(req);
+
+        const lockedUntil = pinLockedUntil(key);
+        if (lockedUntil) {
+            const minutes = Math.max(1, Math.ceil((lockedUntil - Date.now()) / 60000));
+            return res.status(429).json({
+                success: false,
+                error: `Too many wrong PINs. Try again in ${minutes} minute${minutes === 1 ? '' : 's'}.`
+            });
+        }
+
+        if (!pin) {
+            return res.status(400).json({ success: false, error: 'Enter the PIN.' });
+        }
+
+        if (!pinMatches(pin)) {
+            recordPinFailure(key);
+            const left = PIN_MAX_ATTEMPTS - (pinAttempts.get(key)?.count || 0);
+            return res.status(401).json({
+                success: false,
+                error: left > 0 ? `That PIN is not right. ${left} ${left === 1 ? 'try' : 'tries'} left.` : 'That PIN is not right.'
+            });
+        }
+
+        if (mongoose.connection.readyState !== 1) {
+            return res.status(503).json({ success: false, error: 'Sign-in is unavailable right now. Try again shortly.' });
+        }
+
+        // The PIN proves who is at the keyboard; the account still comes from
+        // the database, so the token carries a real identity and every admin
+        // action remains attributable to it.
+        const wanted = String(process.env.ADMIN_EMAIL || '').trim().toLowerCase();
+        const account = wanted
+            ? await RecruiterAccount.findOne({ email: wanted, role: 'admin', status: 'active' })
+            : await RecruiterAccount.findOne({ role: 'admin', status: 'active' }).sort({ createdAt: 1 });
+
+        if (!account) {
+            return res.status(500).json({ success: false, error: 'No admin account is set up yet.' });
+        }
+
+        pinAttempts.delete(key);
+        account.lastLoginAt = new Date();
+        await account.save();
+
+        // mustChangePassword is about the emailed temporary password. Someone
+        // signing in by PIN never typed one, so holding them at a change-password
+        // screen would lock the admin area behind a password they do not have.
+        const user = account.toSafeJSON();
+        res.json({
+            success: true,
+            token: issueRecruiterToken(account),
+            user: { ...user, mustChangePassword: false }
+        });
+    } catch (e) {
+        console.error('[Connect Auth] admin pin sign-in failed:', e.message);
+        res.status(500).json({ success: false, error: 'Sign-in failed. Try again.' });
     }
 });
 
