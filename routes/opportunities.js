@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 const router = express.Router();
+const notify = require('./notify');
 
 const DATA_DIR = path.join(__dirname, '..', 'data');
 const OPPS_FILE = path.join(DATA_DIR, 'opportunities.json');
@@ -388,7 +389,11 @@ function recordApplication(body, resumeUrl) {
 // POST /api/opportunities/apply - Candidate applies to an opportunity
 router.post('/apply', (req, res) => {
     try {
-        res.status(201).json({ success: true, application: recordApplication(req.body || {}, '') });
+        const application = recordApplication(req.body || {}, '');
+        res.status(201).json({ success: true, application });
+        // After the response. The applicant should not wait on SMTP to find
+        // out whether their application went through.
+        notify.newApplication(application);
     } catch (e) {
         console.error('Error submitting application:', e);
         res.status(500).json({ success: false, error: e.message });
@@ -413,7 +418,9 @@ router.post('/apply-with-resume', (req, res) => {
                 : body.resumeUrl;
             if (req.file) body.resumeName = req.file.originalname || req.file.filename;
 
-            res.status(201).json({ success: true, application: recordApplication(body, resumeUrl) });
+            const application = recordApplication(body, resumeUrl);
+            res.status(201).json({ success: true, application });
+            notify.newApplication(application);
         } catch (e) {
             console.error('Error submitting application:', e);
             res.status(500).json({ success: false, error: e.message });

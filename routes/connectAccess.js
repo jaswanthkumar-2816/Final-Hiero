@@ -20,6 +20,7 @@ const { requireRecruiter } = require('./connectAuth');
 const AccessRequest = require('../models/AccessRequest');
 const RecruiterAccount = require('../models/RecruiterAccount');
 const connectMail = require('./connectMail');
+const notify = require('./notify');
 
 const PORTAL_URL = process.env.CONNECT_PORTAL_URL || 'https://connect.hiero.in';
 
@@ -100,6 +101,11 @@ router.post('/request', async (req, res) => {
         const existingAccount = await RecruiterAccount.findOne({ email });
         const existing = await AccessRequest.findOne({ email, status: 'pending' });
 
+        // Only a genuinely new row is worth an email. Someone resubmitting
+        // the form, or an address that already has an account, should not
+        // ring the bell again.
+        let waiting = null;
+
         if (existing) {
             existing.companyName = companyName;
             existing.lastRequestedAt = new Date();
@@ -108,7 +114,7 @@ router.post('/request', async (req, res) => {
             if (body.industry) existing.industry = String(body.industry).trim();
             await existing.save();
         } else if (!existingAccount) {
-            await AccessRequest.create({
+            waiting = await AccessRequest.create({
                 companyName,
                 email,
                 industry: String(body.industry || 'general').trim(),
@@ -124,6 +130,11 @@ router.post('/request', async (req, res) => {
             success: true,
             message: 'Thanks — your request is with the HIERO team. You will get an email when your account is ready.'
         });
+
+        // After the response, and never awaited: a company asking to join
+        // should not wait on our mail server, and a mail failure must not
+        // lose their request.
+        if (waiting) notify.newAccessRequest(waiting);
     } catch (e) {
         console.error('[Connect Access] request failed:', e.message);
         res.status(500).json({ success: false, error: 'Could not record your request. Try again shortly.' });
