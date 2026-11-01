@@ -1228,6 +1228,25 @@ function retrieveAndRankQuestions({
                 return false; // Reject semantic duplicate
             }
         }
+
+        // 3. Relevance. This bank is entirely software questions, and it was
+        // filtered only for duplicates — so whatever ranked highest was
+        // offered to the model as a template no matter what the job was. A
+        // salon manager was asked, at question seven, how FastAPI's async
+        // event loop achieves concurrency.
+        //
+        // A banked question is only a candidate if the job or the candidate
+        // actually involves one of its skills. For a trade the bank knows
+        // nothing about the pool comes back empty, and the interviewer works
+        // from the job description instead, which is what it should have been
+        // doing for that role all along.
+        const questionSkills = (q.skills || []).map(skill => String(skill).toLowerCase());
+        if (questionSkills.length) {
+            const relevant = questionSkills.some(skill =>
+                allRequiredSkills.has(skill) || allCandidateSkills.has(skill));
+            if (!relevant) return false;
+        }
+
         return true;
     });
 
@@ -1416,22 +1435,22 @@ async function generateAdaptiveQuestion({
     const resumeTextSummary = `
 - Candidate Name: ${resumeSnapshot?.fullName || 'Candidate'}
 - Target Role: ${resumeSnapshot?.professionalTitle || jobRole}
-- Verified Skills on Resume: ${resumeSkills.join(', ') || 'General Engineering'}
+- Verified Skills on Resume: ${resumeSkills.join(', ') || 'Not provided — work from the job description'}
 - Actual Projects on Resume: ${resumeProjects.map(p => typeof p === 'string' ? p : `${p.name || p.title}: ${p.description || p.tech || ''}`).join(' | ') || 'None provided'}
-- Summary: ${resumeSnapshot?.summary || 'Standard Software Engineer Profile'}
+- Summary: ${resumeSnapshot?.summary || 'Not provided'}
 `.trim();
 
     const jdTextSummary = `
 - Company: ${companyName}
 - Position: ${jobRole}
-- Required Technologies / Focus: ${jdSkills.join(', ') || 'Software Engineering'}
-- Job Description Context: ${jobDescriptionSnapshot?.fullText?.substring(0, 500) || 'Scalable Software Engineering'}
+- Required Skills / Focus: ${jdSkills.join(', ') || 'See the job description below'}
+- Job Description Context: ${jobDescriptionSnapshot?.fullText?.substring(0, 500) || 'Not provided'}
 `.trim();
 
     const companyBlueprintSummary = `
 - Company: ${companyName}
 - Hiring Bar: ${blueprintSnapshot?.hiringBar || '9.0 / 10'}
-- Core Engineering Focus: ${blueprintSnapshot?.culture || 'High-throughput scalable systems'}
+- Core Focus: ${blueprintSnapshot?.culture || 'As described in the job description'}
 `.trim();
 
     // Prompt size is capped so generation time stays flat across the interview.
