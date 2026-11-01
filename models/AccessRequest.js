@@ -13,6 +13,7 @@ const accessRequestSchema = new mongoose.Schema({
     companyName: { type: String, required: true, trim: true },
     email: { type: String, required: true, lowercase: true, trim: true, index: true },
     contactName: { type: String, default: '' },
+    industry: { type: String, default: 'general' },
     phone: { type: String, default: '' },
 
     status: {
@@ -41,6 +42,7 @@ accessRequestSchema.methods.toSafeJSON = function toSafeJSON() {
         companyName: this.companyName,
         email: this.email,
         contactName: this.contactName,
+        industry: this.industry || 'general',
         phone: this.phone,
         status: this.status,
         note: this.note,

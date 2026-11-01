@@ -36,6 +36,7 @@ function issueRecruiterToken(account) {
             name: account.name,
             companyId: account.companyId,
             companyName: account.companyName,
+            industry: account.industry || 'general',
             role: account.role
         },
         JWT_SECRET,

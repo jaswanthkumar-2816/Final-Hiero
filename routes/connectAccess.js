@@ -105,11 +105,13 @@ router.post('/request', async (req, res) => {
             existing.lastRequestedAt = new Date();
             if (body.contactName) existing.contactName = String(body.contactName).trim();
             if (body.phone) existing.phone = String(body.phone).trim();
+            if (body.industry) existing.industry = String(body.industry).trim();
             await existing.save();
         } else if (!existingAccount) {
             await AccessRequest.create({
                 companyName,
                 email,
+                industry: String(body.industry || 'general').trim(),
                 contactName: String(body.contactName || '').trim(),
                 phone: String(body.phone || '').trim()
             });
@@ -175,6 +177,7 @@ router.post('/requests/:id/approve', requireAdmin, async (req, res) => {
                 phone: request.phone || '',
                 companyId: companyIdFrom(request.companyName),
                 companyName: request.companyName,
+                industry: request.industry || 'general',
                 role: 'recruiter',
                 mustChangePassword: true
             });

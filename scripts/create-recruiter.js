@@ -12,6 +12,8 @@
 //   --company   (required) company name, shown in the portal
 //   --name      the person's name           (default: derived from the email)
 //   --role      recruiter | admin           (default: recruiter)
+//   --industry  salon | retail | hospitality | healthcare | education |
+//              manufacturing | technology | general   (default: general)
 //   --password  set one explicitly          (default: a random temporary one)
 //   --reset     update the password of an account that already exists
 //
@@ -118,6 +120,7 @@ async function main() {
             existing.companyName = company;
             existing.companyId = companyIdFrom(company);
         }
+        if (args.industry) existing.industry = String(args.industry);
         account = await existing.save();
     } else {
         account = await RecruiterAccount.create({
@@ -126,6 +129,7 @@ async function main() {
             name: String(args.name || nameFromEmail(email)),
             companyId: companyIdFrom(company),
             companyName: company,
+            industry: String(args.industry || 'general'),
             role: String(args.role || 'recruiter'),
             status: 'active',
             mustChangePassword: generated

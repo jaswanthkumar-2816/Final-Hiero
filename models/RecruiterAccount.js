@@ -30,6 +30,15 @@ const recruiterAccountSchema = new mongoose.Schema({
     companyId: { type: String, required: true, index: true },
     companyName: { type: String, required: true },
 
+    // What kind of business this is. Connect was built for campus hiring, so
+    // every company was offered internships and projects; a salon or a shop
+    // hires in different shapes and needs different examples.
+    industry: {
+        type: String,
+        enum: ['general', 'salon', 'retail', 'hospitality', 'healthcare', 'education', 'manufacturing', 'technology'],
+        default: 'general'
+    },
+
     role: { type: String, enum: ['recruiter', 'admin'], default: 'recruiter' },
     status: { type: String, enum: ['active', 'disabled'], default: 'active' },
 
@@ -51,6 +60,7 @@ recruiterAccountSchema.methods.toSafeJSON = function toSafeJSON() {
         phone: this.phone,
         companyId: this.companyId,
         companyName: this.companyName,
+        industry: this.industry || 'general',
         role: this.role,
         mustChangePassword: this.mustChangePassword
     };
