@@ -491,6 +491,8 @@ app.use('/api/connect/auth', lazyRouter('./routes/connectAuth'));
 app.use('/api/connect/mail', lazyRouter('./routes/connectMail'));
 // AI interview invites against a Connect application.
 app.use('/api/connect/interview', lazyRouter('./routes/connectInterview'));
+// Companies asking to join Connect, and the admin queue that decides.
+app.use('/api/connect/access', lazyRouter('./routes/connectAccess'));
 app.use('/api/adaptive', lazyRouter('./routes/adaptive-mastery'));
 app.use('/api/roadmap', lazyRouter('./routes/roadmap'));
 

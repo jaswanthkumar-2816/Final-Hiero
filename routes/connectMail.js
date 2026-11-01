@@ -148,3 +148,7 @@ router.get('/health', requireRecruiter, (req, res) => {
 });
 
 module.exports = router;
+// Shared so the access-request routes can send an account's first email
+// without standing up a second mail setup that can drift from this one.
+module.exports.mailer = mailer;
+module.exports.fromAddress = () => EMAIL_USER || null;
