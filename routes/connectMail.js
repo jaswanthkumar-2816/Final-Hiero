@@ -23,18 +23,13 @@ const APPS_FILE = path.join(__dirname, '..', 'data', 'applications.json');
 const EMAIL_USER = process.env.EMAIL_USER;
 const EMAIL_PASS = process.env.EMAIL_PASS;
 
-// Built once. Gmail is what the rest of the gateway already uses for signup
-// and verification mail, so there is no second mail setup to keep working.
-let transporter = null;
+// One transport for the whole gateway, chosen in routes/mailer.js: an HTTPS
+// API where one is configured, Gmail over SMTP otherwise. Render's free plan
+// blocks the SMTP ports, so on production the first is the only one that
+// works — and nothing here had to change to find that out.
+const mailTransport = require('./mailer');
 function mailer() {
-    if (!EMAIL_USER || !EMAIL_PASS) return null;
-    if (!transporter) {
-        transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: { user: EMAIL_USER, pass: EMAIL_PASS }
-        });
-    }
-    return transporter;
+    return mailTransport.transport();
 }
 
 function loadApps() {
@@ -144,11 +139,13 @@ router.post('/send', requireRecruiter, async (req, res) => {
 // GET /api/connect/mail/health — does this gateway have a mailbox at all?
 // The portal asks before offering a Send button it cannot honour.
 router.get('/health', requireRecruiter, (req, res) => {
-    res.json({ success: true, configured: Boolean(EMAIL_USER && EMAIL_PASS), from: EMAIL_USER || null });
+    // via says which road the mail takes out of here. On Render only 'https'
+    // actually delivers.
+    res.json({ success: true, ...mailTransport.describe() });
 });
 
 module.exports = router;
 // Shared so the access-request routes can send an account's first email
 // without standing up a second mail setup that can drift from this one.
 module.exports.mailer = mailer;
-module.exports.fromAddress = () => EMAIL_USER || null;
+module.exports.fromAddress = () => mailTransport.bareAddress();
