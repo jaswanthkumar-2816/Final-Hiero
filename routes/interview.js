@@ -603,10 +603,19 @@ router.post('/start', async (req, res) => {
             jdFullText = `Role: ${jobRole} at ${companyName}. Interview against the candidate's uploaded resume and this job.`;
         }
 
+        // Keyword extraction only knows software skills, so it finds nothing
+        // in a job description for a salon manager, a store manager or a
+        // ward sister. When the caller already knows the requirements —
+        // Connect does, because the recruiter typed them into the job post —
+        // use those and do not guess.
+        const providedSkills = Array.isArray(context?.skills)
+            ? context.skills.map(sk => String((sk && sk.name) || sk || '').trim()).filter(Boolean)
+            : [];
+
         const jdSnapshot = {
             title: jobRole,
             company: companyName,
-            requirements: extractSkillTokens(jdFullText),
+            requirements: providedSkills.length ? providedSkills : extractSkillTokens(jdFullText),
             fullText: jdFullText
         };
 
@@ -672,6 +681,7 @@ router.post('/start', async (req, res) => {
         const session = {
             sessionId,
             userId: user.userId,
+            userEmail: String(user.email || '').trim().toLowerCase(),
             resumeId: resumeId || null,
             companyId: normalizedCompanyId,
             jobId: jobId || 'software-engineer',

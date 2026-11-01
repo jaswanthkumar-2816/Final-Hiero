@@ -196,6 +196,44 @@ router.post('/', async (req, res) => {
 const APPS_FILE = path.join(DATA_DIR, 'applications.json');
 
 // ============================================================
+// Who is allowed to read an application
+// ============================================================
+// Applying is open — a candidate has no account and must not need one.
+// READING applications is not: they carry a named person's email, phone and
+// resume. This endpoint used to answer anyone, with the company to filter by
+// passed in the query string, which is a request, not proof. Every
+// application in the store came back to whoever asked.
+//
+// The company now comes from the recruiter's signed token and the filtering
+// happens here, so a caller cannot widen their own scope.
+const { requireRecruiter } = require('./connectAuth');
+
+function sameName(a, b) {
+    if (!a || !b) return false;
+    return String(a).trim().toLowerCase() === String(b).trim().toLowerCase();
+}
+
+// An application belongs to a company when it says so, or when the job it was
+// sent to belongs to them. Older records carry no companyId at all, which is
+// why the opportunity is checked as well.
+function applicationBelongsTo(app, companyId, companyName, oppsById) {
+    if (!app) return false;
+    if (companyId && app.companyId && String(app.companyId) === String(companyId)) return true;
+    if (sameName(app.companyName, companyName)) return true;
+    const opp = app.opportunityId ? oppsById.get(app.opportunityId) : null;
+    if (!opp) return false;
+    if (companyId && opp.companyId && String(opp.companyId) === String(companyId)) return true;
+    return sameName(opp.companyName, companyName);
+}
+
+function applicationsFor(recruiter) {
+    const opps = loadJSON(OPPS_FILE, opportunities);
+    const oppsById = new Map(opps.filter(o => o && o.id).map(o => [o.id, o]));
+    return loadJSON(APPS_FILE, [])
+        .filter(a => applicationBelongsTo(a, recruiter.companyId, recruiter.companyName, oppsById));
+}
+
+// ============================================================
 // Resume uploads
 // ============================================================
 // The apply modal used to send a made-up string (`/resumes/<filename>`) and
@@ -386,11 +424,20 @@ router.post('/apply-with-resume', (req, res) => {
 // GET /api/opportunities/resumes/:file — serve a stored resume to the
 // recruiter inbox. basename() keeps the path inside RESUME_DIR; without it a
 // crafted name could walk out of the folder.
-router.get('/resumes/:file', (req, res) => {
+router.get('/resumes/:file', requireRecruiter, (req, res) => {
     const name = path.basename(String(req.params.file || ''));
     const full = path.join(RESUME_DIR, name);
     if (!name || !full.startsWith(RESUME_DIR + path.sep) || !fs.existsSync(full)) {
         return res.status(404).json({ success: false, error: 'Resume not found.' });
+    }
+    // A resume is one person's CV handed to one employer. Knowing the
+    // filename is not authorisation: the recruiter asking must own the
+    // application it came in on.
+    const owns = applicationsFor(req.recruiter)
+        .some(a => String(a.resumeUrl || '').endsWith(encodeURIComponent(name))
+                || String(a.resumeUrl || '').endsWith(name));
+    if (!owns) {
+        return res.status(403).json({ success: false, error: 'This resume was not sent to your company.' });
     }
     if (path.extname(name).toLowerCase() === '.pdf') {
         res.setHeader('Content-Type', 'application/pdf');
@@ -400,21 +447,14 @@ router.get('/resumes/:file', (req, res) => {
 });
 
 // GET /api/opportunities/applications - Fetch applications for Connect-Portal HR Inbox
-router.get('/applications', (req, res) => {
+router.get('/applications', requireRecruiter, (req, res) => {
     try {
-        const { companyId, opportunityId, companyName } = req.query;
-        let apps = loadJSON(APPS_FILE, []);
+        // Scope first, from the token. A companyId in the query is ignored:
+        // it is the caller's claim about themselves.
+        let apps = applicationsFor(req.recruiter);
+        const { opportunityId } = req.query;
         if (opportunityId) {
             apps = apps.filter(a => a.opportunityId === opportunityId);
-        }
-        if (companyName) {
-            const q = String(companyName).toLowerCase();
-            apps = apps.filter(a => String(a.companyName || '').toLowerCase().includes(q));
-        }
-        if (companyId) {
-            const opps = loadJSON(OPPS_FILE, opportunities);
-            const ids = new Set(opps.filter(o => o.companyId === companyId).map(o => o.id));
-            apps = apps.filter(a => ids.has(a.opportunityId) || String(a.companyId || '') === companyId);
         }
         res.json({
             success: true,
@@ -426,7 +466,7 @@ router.get('/applications', (req, res) => {
 });
 
 // POST /api/opportunities/applications/status — recruiter shortlist / selection from Connect
-router.post('/applications/status', (req, res) => {
+router.post('/applications/status', requireRecruiter, (req, res) => {
     try {
         const body = req.body || {};
         const apps = loadJSON(APPS_FILE, []);

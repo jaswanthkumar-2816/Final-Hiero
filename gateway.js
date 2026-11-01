@@ -289,6 +289,9 @@ app.get('/get-started', (req, res) => {
 
 app.get(['/mock-interview', '/mock-interview.html'], (req, res) => res.sendFile(path.join(__dirname, 'mock-interview.html')));
 app.get(['/session', '/session.html'], (req, res) => res.sendFile(path.join(__dirname, 'mock_interview', 'session.html')));
+// A candidate's interview invitation. The token in the path is the whole
+// credential — there is no account to sign in to.
+app.get('/interview/:token', (req, res) => res.sendFile(path.join(__dirname, 'connect-interview.html')));
 app.get(['/companies', '/companies.html'], (req, res) => res.sendFile(path.join(__dirname, 'companies.html')));
 app.get(['/company', '/company.html'], (req, res) => res.sendFile(path.join(__dirname, 'company.html')));
 app.get(['/job_success', '/job_success.html'], (req, res) => res.sendFile(path.join(__dirname, 'job_success.html')));
@@ -486,6 +489,8 @@ app.use('/api/opportunities', lazyRouter('./routes/opportunities'));
 app.use('/api/connect/auth', lazyRouter('./routes/connectAuth'));
 // Interview / selection mail sent by a signed-in recruiter.
 app.use('/api/connect/mail', lazyRouter('./routes/connectMail'));
+// AI interview invites against a Connect application.
+app.use('/api/connect/interview', lazyRouter('./routes/connectInterview'));
 app.use('/api/adaptive', lazyRouter('./routes/adaptive-mastery'));
 app.use('/api/roadmap', lazyRouter('./routes/roadmap'));
 

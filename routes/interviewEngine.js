@@ -641,8 +641,19 @@ function extractSkillTokens(text = '') {
 
     const matched = new Set();
     for (const skill of knownSkills) {
-        const regex = new RegExp(`\\b${skill.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
-        if (regex.test(normalized) || normalized.includes(skill)) {
+        // The skill has to stand on its own. The old condition fell back to a
+        // plain substring match, defeating the boundary check it had just
+        // built: a salon manager's job description was read as a Go interview
+        // because "good" contains "go", and the candidate was asked to write
+        // goroutines.
+        //
+        // \b is not enough either — it sits between a word and a non-word
+        // character, so `\bc\+\+\b` never matches "c++" and the fix would
+        // have quietly dropped C++, k8s and ci/cd. Requiring a non-alphanumeric
+        // neighbour works for both shapes.
+        const escaped = skill.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(`(?<![a-z0-9])${escaped}(?![a-z0-9])`, 'i');
+        if (regex.test(normalized)) {
             matched.add(skill);
         }
     }
