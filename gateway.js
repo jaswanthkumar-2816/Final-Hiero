@@ -104,7 +104,12 @@ if (process.env.MONGODB_URI) {
     console.log(`[DB Debug] URI starts with: "${uri.substring(0, 5)}...", Total length: ${uri.length}`);
 
     mongoose.connect(process.env.MONGODB_URI)
-        .then(() => console.log('✅ MongoDB connected successfully'))
+        .then(() => {
+            console.log('✅ MongoDB connected successfully');
+            // Jobs, companies and applications live in Mongo now, not in
+            // data/*.json — those were restored from git on every deploy.
+            return require('./routes/store').hydrate();
+        })
         .catch(err => {
             console.error('❌ MongoDB connection error:', err.message);
             console.error('Check your MONGODB_URI environment variable on Render.');

@@ -14,7 +14,23 @@ if (!fs.existsSync(DATA_DIR)) {
     fs.mkdirSync(DATA_DIR, { recursive: true });
 }
 
+// These three lists used to be JSON files in this repository, which meant
+// every Render deploy restored them from git and destroyed every job and
+// application created since. They live in MongoDB now. The helpers keep
+// their old names and their old synchronous shape so the routes below did
+// not have to change.
+const store = require('./store');
+
+function keyFor(filePath) {
+    if (filePath === OPPS_FILE) return 'opportunities';
+    if (filePath === COMPS_FILE) return 'companies';
+    if (filePath === APPS_FILE) return 'applications';
+    return null;
+}
+
 function loadJSON(filePath, defaultValue = []) {
+    const key = keyFor(filePath);
+    if (key) return store.read(key);
     try {
         if (fs.existsSync(filePath)) {
             const raw = fs.readFileSync(filePath, 'utf8');
@@ -27,6 +43,8 @@ function loadJSON(filePath, defaultValue = []) {
 }
 
 function saveJSON(filePath, data) {
+    const key = keyFor(filePath);
+    if (key) { store.write(key, data); return; }
     try {
         fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf8');
     } catch (e) {
@@ -34,48 +52,11 @@ function saveJSON(filePath, data) {
     }
 }
 
-// Initial seed if empty
-let opportunities = loadJSON(OPPS_FILE, [
-    {
-        id: 'opp-demo-1',
-        companyId: 'comp-acme-tech',
-        companyName: 'Acme AI Systems',
-        type: 'internship',
-        title: 'Full Stack & AI Engineer Intern',
-        department: 'AI & Engineering',
-        description: 'Join Acme AI Systems to build scalable generative AI tools and full-stack web applications for enterprise clients.',
-        requiredSkills: [
-            { id: 'sk-1', name: 'Python', category: 'required' },
-            { id: 'sk-2', name: 'React', category: 'required' },
-            { id: 'sk-3', name: 'TypeScript', category: 'required' }
-        ],
-        preferredSkills: [
-            { id: 'sk-4', name: 'PyTorch', category: 'preferred' },
-            { id: 'sk-5', name: 'Docker', category: 'preferred' }
-        ],
-        eligibility: 'B.Tech / B.E / M.Tech in CS or related fields',
-        location: 'Bangalore, India (Hybrid)',
-        workMode: 'hybrid',
-        employmentType: 'Internship',
-        salary: '₹35,000 / month',
-        deadline: '2026-11-30',
-        status: 'active',
-        applicantsCount: 14,
-        shortlistedCount: 3,
-        createdAt: new Date().toISOString().split('T')[0]
-    }
-]);
-
-let companies = loadJSON(COMPS_FILE, [
-    {
-        id: 'comp-acme-tech',
-        name: 'Acme AI Systems',
-        logoUrl: '',
-        location: 'Bangalore, India',
-        description: 'Pioneering next-gen AI automation and intelligence engines.',
-        website: 'https://acme.ai'
-    }
-]);
+// No seed data. Everything on HIERO comes from a company posting it
+// through the Connect portal; the demo rows that used to live here were
+// indistinguishable from real ones on the public job pages.
+let opportunities = [];
+let companies = [];
 
 // GET /api/opportunities - Fetch all active opportunities & associated companies
 const axios = require('axios');
