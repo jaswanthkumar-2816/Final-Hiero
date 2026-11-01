@@ -325,4 +325,57 @@ If you think this is a mistake, reply to this email.
     }
 });
 
+// ------------------------------------------------------------
+// DELETE /api/connect/access/requests/:id
+// ------------------------------------------------------------
+// Takes a company off the list. The list had become a pile: the same salon
+// asked three times from three addresses, and every one of them stayed on
+// screen for ever with no way to clear it.
+//
+// Removing an approved company also closes the door behind it. Deleting only
+// the row would leave an account that still signs in and still reads its
+// applications, which is the opposite of what "remove this company" looks
+// like it did.
+//
+// The account is disabled, not deleted. Their applications and job posts
+// carry their companyId, and deleting the account would orphan all of it —
+// disabling stops the sign-in and keeps the record. Approving them again
+// later turns it back on.
+router.delete('/requests/:id', requireAdmin, async (req, res) => {
+    try {
+        const request = await AccessRequest.findById(req.params.id);
+        if (!request) return res.status(404).json({ success: false, error: 'No such request.' });
+
+        const email = request.email;
+        const companyName = request.companyName;
+
+        let accountDisabled = false;
+        if (request.status === 'approved') {
+            const account = await RecruiterAccount.findOne({ email });
+            // An admin removing their own row would lock themselves out of
+            // this page, and there is no second admin to undo it.
+            if (account && account.role === 'admin') {
+                return res.status(409).json({
+                    success: false,
+                    error: 'That is an admin account. Removing it would lock you out of this page.'
+                });
+            }
+            if (account && account.status === 'active') {
+                account.status = 'disabled';
+                await account.save();
+                accountDisabled = true;
+            }
+        }
+
+        await AccessRequest.deleteOne({ _id: request._id });
+        console.log(`[Connect Access] ${req.recruiter.email} removed ${companyName} <${email}>` +
+            (accountDisabled ? ' and disabled its sign-in' : ''));
+
+        res.json({ success: true, companyName, email, accountDisabled });
+    } catch (e) {
+        console.error('[Connect Access] remove failed:', e.message);
+        res.status(500).json({ success: false, error: 'Could not remove this company.' });
+    }
+});
+
 module.exports = router;
