@@ -66,18 +66,15 @@ const PYTHON_BACKEND_URL = process.env.PYTHON_BACKEND_URL || 'http://localhost:5
 router.get('/', async (req, res) => {
     try {
         const { companyId, type } = req.query;
-        let pyData = null;
-        try {
-            const pyRes = await axios.get(`${PYTHON_BACKEND_URL}/api/opportunities`, { timeout: 1500 });
-            if (pyRes.status === 200 && pyRes.data && pyRes.data.opportunities) {
-                pyData = pyRes.data;
-            }
-        } catch (pyErr) {
-            // fallback silently
-        }
 
-        let filtered = pyData ? pyData.opportunities : loadJSON(OPPS_FILE, opportunities);
-        let comps = pyData ? pyData.companies : loadJSON(COMPS_FILE, companies);
+        // There used to be a second source here: if a Python service answered
+        // on port 5050 its jobs were served instead of ours, silently. That
+        // made what HIERO showed depend on whether another process happened
+        // to be running, and it cost every visitor a 1.5s wait for a service
+        // that is not deployed. One source now — what companies posted
+        // through Connect.
+        let filtered = loadJSON(OPPS_FILE, opportunities);
+        let comps = loadJSON(COMPS_FILE, companies);
 
         if (companyId) {
             filtered = filtered.filter(o => o.companyId === companyId);
