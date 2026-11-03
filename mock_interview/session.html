@@ -3947,6 +3947,8 @@
       document.addEventListener('DOMContentLoaded', () => {
         const label = document.getElementById('session-kind-label');
         if (label) label.textContent = 'INTERVIEW';
+        // The tab title is in front of the candidate for the whole session.
+        document.title = 'Your interview — HIERO';
         // Observers are a study feature; a candidate being assessed for a job
         // should not be inviting an audience to it.
         const observers = document.getElementById('invite-observers');

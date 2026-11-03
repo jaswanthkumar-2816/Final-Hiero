@@ -620,6 +620,10 @@ router.post('/start', async (req, res) => {
         };
 
         // Resolve Authenticated User's Resume
+        // A Connect candidate was invited by a company for a real opening,
+        // so the warm-up should not read like a developer's practice run.
+        const isJobInterview = String((user && user.userId) || '').startsWith('connect-app-');
+
         let userResume = await resolveUserResume(user.userId);
         let resumeSnapshot = {
             fullName: user.name || 'Candidate',
@@ -663,13 +667,24 @@ router.post('/start', async (req, res) => {
             difficulty: "warm-up",
             source: "standard_warmup",
             questionType: "INTRO",
-            reason: "Initial warm-up to allow the candidate to introduce their background before timed technical questions begin.",
-            answerGuide: [
-                "Your educational background and core technical focus",
-                "Recent projects or key technologies you've worked with",
-                `What excites you about the ${jobRole} role at ${companyName}`
-            ],
-            expectedTopics: ["candidate background", "recent projects", "relevant technical experience"],
+            reason: "Initial warm-up to allow the candidate to introduce their background before the timed questions begin.",
+            // Degrees and technologies are the wrong things to prompt for when
+            // the opening is not a software one — this is what a salon manager
+            // was being asked to talk about.
+            answerGuide: isJobInterview
+                ? [
+                    "A little about yourself",
+                    "Where you have worked and what you did there",
+                    `What interests you about the ${jobRole} role at ${companyName}`
+                ]
+                : [
+                    "Your educational background and core technical focus",
+                    "Recent projects or key technologies you've worked with",
+                    `What excites you about the ${jobRole} role at ${companyName}`
+                ],
+            expectedTopics: isJobInterview
+                ? ["candidate background", "previous roles", "relevant experience"]
+                : ["candidate background", "recent projects", "relevant technical experience"],
             isFollowUp: false,
             followUpToQuestion: null,
             askedAt: new Date()
