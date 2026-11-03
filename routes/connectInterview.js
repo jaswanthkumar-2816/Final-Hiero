@@ -41,7 +41,21 @@ const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const CANDIDATE_TTL = '3h';
 const QUESTION_MINUTES = 10;
 
+// Same store as the job routes. These used to read data/*.json straight off
+// disk, so after those moved to MongoDB this file was looking at a different,
+// and on Render an empty, set of applications — an interview invite could not
+// find the application it was for.
+const store = require('./store');
+
+function keyFor(file) {
+    if (file === APPS_FILE) return 'applications';
+    if (file === OPPS_FILE) return 'opportunities';
+    return null;
+}
+
 function loadJSON(file, fallback = []) {
+    const key = keyFor(file);
+    if (key) return store.read(key);
     try {
         if (fs.existsSync(file)) return JSON.parse(fs.readFileSync(file, 'utf8'));
     } catch (e) {
@@ -51,6 +65,8 @@ function loadJSON(file, fallback = []) {
 }
 
 function saveJSON(file, data) {
+    const key = keyFor(file);
+    if (key) { store.write(key, data); return; }
     try {
         fs.writeFileSync(file, JSON.stringify(data, null, 2), 'utf8');
     } catch (e) {

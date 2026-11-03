@@ -278,13 +278,20 @@ function scoreAgainstOpportunity(opp, skills) {
 // One record shape for both apply routes. They differ only in how the resume
 // arrives — as an uploaded file or as a URL somebody already has.
 function recordApplication(body, resumeUrl) {
-    const opportunityId = body.opportunityId || body.jobId || 'opp-demo-1';
-    const companyName = body.companyName || 'Verified HR Partner';
+    const opportunityId = body.opportunityId || body.jobId || '';
+    const claimedName = body.companyName || '';
 
     const currentOpps = loadJSON(OPPS_FILE, opportunities);
     const currentApps = loadJSON(APPS_FILE, []);
 
-    const targetOpp = currentOpps.find(o => o.id === opportunityId || o.companyName === companyName);
+    const targetOpp = currentOpps.find(o => o.id === opportunityId || (claimedName && o.companyName === claimedName));
+
+    // The job knows who posted it. This used to settle the company name
+    // before looking the job up, so an application from the HIERO job page —
+    // which sends an id, not a company — was filed under "Verified HR
+    // Partner", and that is the name the salon saw in its own inbox and in
+    // the interview email it sent out.
+    const companyName = (targetOpp && targetOpp.companyName) || claimedName || 'Verified HR Partner';
     if (targetOpp) {
         targetOpp.applicantsCount = (targetOpp.applicantsCount || 0) + 1;
         saveJSON(OPPS_FILE, currentOpps);
@@ -296,7 +303,9 @@ function recordApplication(body, resumeUrl) {
         try { profileIn = JSON.parse(body.profile); } catch { profileIn = {}; }
     }
 
-    const studentName = body.studentName || body.fullName || profileIn.fullName || 'Candidate';
+    // `name` is what a plain form field is called, and an application whose
+    // candidate is filed as "Candidate" is one the salon cannot act on.
+    const studentName = body.studentName || body.fullName || body.name || profileIn.fullName || profileIn.name || 'Candidate';
     // Lowercased: this is the key that joins an application to the
     // student's practice sessions, so casing must not break it.
     const email = String(body.email || profileIn.email || 'candidate@hiero.in')

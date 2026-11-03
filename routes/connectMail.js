@@ -32,21 +32,17 @@ function mailer() {
     return mailTransport.transport();
 }
 
+// The same store the job routes use. Reading applications.json off disk here
+// meant this file saw a different set of applications once they moved to
+// MongoDB — and on Render, an empty one.
+const store = require('./store');
+
 function loadApps() {
-    try {
-        if (fs.existsSync(APPS_FILE)) return JSON.parse(fs.readFileSync(APPS_FILE, 'utf8'));
-    } catch (e) {
-        console.error('[Connect Mail] Could not read applications.json:', e.message);
-    }
-    return [];
+    return store.read('applications');
 }
 
 function saveApps(apps) {
-    try {
-        fs.writeFileSync(APPS_FILE, JSON.stringify(apps, null, 2), 'utf8');
-    } catch (e) {
-        console.error('[Connect Mail] Could not write applications.json:', e.message);
-    }
+    store.write('applications', apps);
 }
 
 // What a mail of each kind means for the application's state. The recruiter

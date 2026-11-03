@@ -968,6 +968,11 @@ router.post('/answer', async (req, res) => {
             session.evaluation = scorecard;
             await saveSessionToStore(session);
 
+            // If this was an interview a company sent out, tell them it is
+            // done. Not awaited: the candidate has just finished answering
+            // and should not wait on our mail server to see their own result.
+            require('./notify').interviewFinished(session);
+
             return res.json({
                 success: true,
                 isComplete: true,

@@ -166,4 +166,66 @@ async function newAccessRequest(request) {
     }
 }
 
-module.exports = { newApplication, newAccessRequest };
+
+// ------------------------------------------------------------
+// An interview finished
+// ------------------------------------------------------------
+// The scorecard existed only behind a button in the portal, so a recruiter
+// learned a candidate had been interviewed by going and looking — the same
+// problem the application alert fixes, one step further along.
+//
+// Scores and the recommendation only. The recording and the transcript stay
+// with the candidate: the company asked them questions, it did not buy the
+// tape.
+async function interviewFinished(session) {
+    try {
+        const userId = String((session && session.userId) || '');
+        if (!userId.startsWith('connect-app-')) return;          // not a Connect interview
+        const applicationId = userId.slice('connect-app-'.length);
+
+        const store = require('./store');
+        const app = store.read('applications').find(a => a.id === applicationId);
+        if (!app) return;
+
+        const accounts = await RecruiterAccount.find({ companyId: app.companyId, status: 'active' });
+        if (!accounts.length) return;
+
+        const card = session.scorecard || session.evaluation || {};
+        const scores = card.scores || {};
+        const scoreLines = Object.keys(scores)
+            .filter(k => typeof scores[k] === 'number')
+            .map(k => `  ${k.replace(/([A-Z])/g, ' $1').toLowerCase().trim()}: ${scores[k]}`);
+
+        const name = app.studentName || 'The candidate';
+        const role = app.jobTitle || 'your opening';
+
+        const lines = [
+            `${name} has finished the interview for ${role}.`,
+            '',
+            typeof card.overall === 'number' ? `Overall: ${card.overall} of 100` : null,
+            card.recommendation ? `Recommendation: ${card.recommendation}` : null,
+            scoreLines.length ? '' : null,
+            ...scoreLines,
+            card.summary ? '' : null,
+            card.summary || null,
+            '',
+            'A score supports your decision. It does not replace meeting them.',
+            '',
+            `See the full result:  ${PORTAL_URL}/industry/applications`,
+            '',
+            '— HIERO Connect'
+        ].filter(line => line !== null);
+
+        const to = accounts.map(a => a.email).join(', ');
+        const sent = await send({
+            to,
+            subject: `Interview finished — ${name} for ${role}`,
+            text: lines.join('\n')
+        });
+        if (sent) console.log(`[Notify] Told ${to} that ${name} finished the interview.`);
+    } catch (e) {
+        console.error('[Notify] interviewFinished failed:', e.message);
+    }
+}
+
+module.exports = { newApplication, newAccessRequest, interviewFinished };
