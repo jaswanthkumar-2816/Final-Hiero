@@ -1455,7 +1455,7 @@
         <img src="/logo-hiero.png" alt="Hiero Logo" onerror="this.onerror=null; this.src='logo-hiero.png';">
       </div>
       <span class="font-display font-black text-lg tracking-tight text-white">HIERO</span>
-      <span class="hidden md:inline text-[11px] font-mono font-bold tracking-[0.16em] text-slate-300 ml-1.5 pl-3 border-l border-white/15">MOCK INTERVIEW</span>
+      <span id="session-kind-label" class="hidden md:inline text-[11px] font-mono font-bold tracking-[0.16em] text-slate-300 ml-1.5 pl-3 border-l border-white/15">MOCK INTERVIEW</span>
     </div>
 
     <div class="hidden sm:flex items-center gap-3">
@@ -1942,7 +1942,7 @@
             <span>End session</span>
           </button>
         </div>
-        <button onclick="inviteObservers()" class="w-full py-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/12 text-slate-300 hover:text-white font-sans font-semibold text-xs flex items-center justify-center gap-2 transition-all">
+        <button id="invite-observers" onclick="inviteObservers()" class="w-full py-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/12 text-slate-300 hover:text-white font-sans font-semibold text-xs flex items-center justify-center gap-2 transition-all">
           <i class="fa-solid fa-share-nodes text-xs text-primary"></i>
           <span>Invite observers</span>
         </button>
@@ -3927,6 +3927,33 @@
     let currentInterviewState = InterviewState.INITIALIZING;
 
     // Single Authoritative Current Question Object (Source of Truth)
+    // A Connect candidate was invited by a company for a real opening. The
+    // page is otherwise the mock-interview product, and the parts that say so
+    // — the label, and prompts about degrees and technologies — are wrong in
+    // front of someone applying to run a salon.
+    const IS_JOB_INTERVIEW = (() => {
+      try {
+        const ctx = JSON.parse(sessionStorage.getItem('mockContext') || '{}');
+        return ctx.mode === 'job';
+      } catch (e) { return false; }
+    })();
+
+    const INTRO_HINTS = IS_JOB_INTERVIEW
+      ? ['A little about yourself', 'Where you have worked and what you did there']
+      : ['Your educational background and core technical focus',
+         "Recent projects or key technologies you've worked with"];
+
+    if (IS_JOB_INTERVIEW) {
+      document.addEventListener('DOMContentLoaded', () => {
+        const label = document.getElementById('session-kind-label');
+        if (label) label.textContent = 'INTERVIEW';
+        // Observers are a study feature; a candidate being assessed for a job
+        // should not be inviting an audience to it.
+        const observers = document.getElementById('invite-observers');
+        if (observers) observers.hidden = true;
+      });
+    }
+
     let currentQuestion = {
       sessionId: window.sessionId,
       questionNumber: 1,
@@ -3937,8 +3964,7 @@
       source: "standard_warmup",
       questionType: "INTRO",
       answerGuide: [
-        "Your educational background and core technical focus",
-        "Recent projects or key technologies you've worked with",
+        ...INTRO_HINTS,
         "What excites you about this role"
       ],
       candidateAnswer: ""
@@ -4717,8 +4743,7 @@
           source: serverQ.source || "standard_warmup",
           questionType: "INTRO",
           answerGuide: serverQ.answerGuide || [
-            "Your educational background and core technical focus",
-            "Recent projects or key technologies you've worked with",
+            ...INTRO_HINTS,
             `What excites you about the ${roleTitle} role at ${companyName}`
           ],
           candidateAnswer: ""

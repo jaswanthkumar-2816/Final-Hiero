@@ -114,6 +114,9 @@ function jdTextFor(opp, app) {
 // shape routes/interview.js already reads, so that page needs no changes.
 function interviewContext(app, opp) {
     return {
+        // This is a real opening at a real company, not a practice run. The
+        // interview page reads this to drop the mock-interview framing.
+        mode: 'job',
         candidateName: app.studentName || 'Candidate',
         company: app.companyName || (opp && opp.companyName) || 'the company',
         roleTitle: app.jobTitle || (opp && opp.title) || 'this role',

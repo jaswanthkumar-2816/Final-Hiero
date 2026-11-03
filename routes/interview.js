@@ -713,7 +713,12 @@ router.post('/start', async (req, res) => {
             voiceId: (req.body && VALID_VOICE_IDS.has(req.body.voiceId)) ? req.body.voiceId : INTERVIEW_VOICE,
             // Three interviewers, one per question, routed by the question's
             // category. Opt out with panel:false for the old single-voice run.
-            panel: (req.body && req.body.panel === false) ? [] : buildPanel(questionLimit),
+            // A Connect candidate was invited by a company for an actual
+            // opening, so the panel introduces itself as that company's
+            // people rather than as a software panel.
+            panel: (req.body && req.body.panel === false)
+                ? []
+                : buildPanel(questionLimit, { jobMode: String((user && user.userId) || '').startsWith('connect-app-') }),
             lastSpeakerId: '',
             speakersSeen: [],
             createdAt: new Date()

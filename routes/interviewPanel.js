@@ -93,7 +93,25 @@ function pick(list, seed) {
  * engineer's. That also matches how real screens work: you meet one or two
  * people in a short call, the full panel in a long one.
  */
-function buildPanel(questionLimit) {
+// The panel is written for a software mock interview, which is what it was
+// built for. A salon manager being interviewed for a real job by a "Senior
+// Software Engineer" and a "Principal Engineer" reads as a mistake, and it is
+// — the titles say nothing about the job they are hiring for. The same three
+// voices keep their routing and take titles that fit any trade.
+const JOB_TITLES = {
+    core:   { role: 'Hiring Manager',  domain: 'the work itself, day to day' },
+    design: { role: 'Operations Lead', domain: 'how you keep things running' },
+    people: { role: 'Team Lead',       domain: 'how you work with a team' }
+};
+
+function asJobPanel(panel) {
+    return panel.map(m => {
+        const titles = JOB_TITLES[m.id];
+        return titles ? { ...m, role: titles.role, domain: titles.domain } : { ...m };
+    });
+}
+
+function buildPanel(questionLimit, opts = {}) {
     const limit = Number(questionLimit) || 0;
     if (limit && limit <= 6) {
         const core = { ...PANEL[0] };
@@ -101,9 +119,11 @@ function buildPanel(questionLimit) {
         core.owns = [...new Set([...core.owns, ...design.owns])];
         core.prefersDifficulty = [];   // she takes the whole range on her own
         core.domain = 'the technical side, from fundamentals through to design';
-        return [core, { ...PANEL[2] }];
+        const pair = [core, { ...PANEL[2] }];
+        return opts.jobMode ? asJobPanel(pair) : pair;
     }
-    return PANEL.map(m => ({ ...m }));
+    const full = PANEL.map(m => ({ ...m }));
+    return opts.jobMode ? asJobPanel(full) : full;
 }
 
 /**
@@ -245,6 +265,7 @@ function publicPanel(panel) {
 
 module.exports = {
     PANEL,
+    asJobPanel,
     PANEL_BY_ID,
     buildPanel,
     memberForQuestion,
