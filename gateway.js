@@ -492,6 +492,7 @@ app.use('/api/problems', lazyRouter('./routes/problems'));
 app.use('/api/opportunities', lazyRouter('./routes/opportunities'));
 // Connect portal recruiter sign-in (company-side accounts, invite-only).
 app.use('/api/connect/auth', lazyRouter('./routes/connectAuth'));
+app.use('/api/connect/workforce', lazyRouter('./routes/connectWorkforce'));
 // Interview / selection mail sent by a signed-in recruiter.
 app.use('/api/connect/mail', lazyRouter('./routes/connectMail'));
 // AI interview invites against a Connect application.

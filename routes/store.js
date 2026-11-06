@@ -26,10 +26,10 @@ const schema = new mongoose.Schema({
 
 const Datastore = mongoose.models.Datastore || mongoose.model('Datastore', schema);
 
-const KEYS = ['opportunities', 'companies', 'applications'];
+const KEYS = ['opportunities', 'companies', 'applications', 'employees', 'attendance'];
 
 // Read from memory so callers stay synchronous; Mongo is the durable copy.
-const cache = { opportunities: [], companies: [], applications: [] };
+const cache = { opportunities: [], companies: [], applications: [], employees: [], attendance: [] };
 let ready = false;
 
 async function hydrate() {
